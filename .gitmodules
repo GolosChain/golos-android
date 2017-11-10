@@ -1,0 +1,3 @@
+[submodule "golosj"]
+	path = golosj
+	url = https://github.com/GolosChain/golosj.git

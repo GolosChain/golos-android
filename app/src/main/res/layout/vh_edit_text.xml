@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.AppCompatEditText xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/et"
+    style="@style/EditTextWithPinkCursor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:inputType="textMultiLine"
+    android:minLines="2"
+    android:paddingEnd="@dimen/margin_material"
+    android:paddingStart="@dimen/margin_material">
+
+</android.support.v7.widget.AppCompatEditText>

@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:collapsedTitleGravity="center_horizontal|top"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:elevation="1dp"
+                app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:paddingBottom="@dimen/margin_material_half"
+                android:paddingTop="12dp">
+
+                <com.makeramen.roundedimageview.RoundedImageView
+
+                    android:id="@+id/avatar_iv"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="@dimen/margin_material"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:riv_corner_radius="30dp" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_material_half"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/avatar_iv"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:textAllCaps="true" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/reblogged_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:drawablePadding="4dp"
+                    android:drawableStart="@drawable/ic_reblogged_black_20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintStart_toEndOf="@id/user_name"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/for_user_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_material_half"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/for_"
+                    android:textColor="@color/gray_1"
+                    android:textStyle="bold"
+                    android:visibility="invisible"
+                    app:layout_constraintStart_toEndOf="@id/avatar_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/blog_name_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_material_half"
+                    android:layout_marginTop="2dp"
+                    android:drawablePadding="4dp"
+                    android:drawableStart="@drawable/ic_bullet_blue"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold"
+                    android:visibility="invisible"
+                    app:layout_constraintStart_toEndOf="@id/for_user_tv"
+                    app:layout_constraintTop_toBottomOf="@+id/user_name" />
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/title_tv"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_material"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+                app:textAllCaps="true" />
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.wefika.flowlayout.FlowLayout
+                android:id="@+id/tags_lo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_material" />
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/vote_lo"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:visibility="gone">
+
+
+                <android.support.v7.widget.AppCompatButton
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/guide"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/guide"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:paddingStart="24dp"
+                    android:scaleType="centerCrop"
+                    android:src="@color/story_btn_green"
+
+                    app:layout_constraintEnd_toEndOf="@id/guide"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/upvote_btn"
+                    app:riv_corner_radius_bottom_left="24dp"
+                    app:riv_corner_radius_top_left="24dp" />
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:paddingEnd="24dp"
+                    android:scaleType="centerCrop"
+                    android:src="#e0f3e2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guide"
+                    app:layout_constraintTop_toTopOf="@id/upvote_btn"
+                    app:riv_corner_radius_bottom_right="24dp"
+                    app:riv_corner_radius_top_right="24dp" />
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/upvote_btn"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:drawableStart="@drawable/ic_keyboard_arrow_up_white_36dp"
+                    android:paddingRight="@dimen/story_vote_btns_distance"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/font_story_buttons"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/guide"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/votes_btn"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/story_vote_btns_distance"
+                    android:textAllCaps="false"
+                    android:textColor="@color/story_btn_green"
+                    android:textSize="@dimen/font_story_buttons"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="@+id/guide"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </android.support.constraint.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/comments_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_material"
+                android:layout_marginStart="@dimen/margin_material"
+                android:layout_marginTop="@dimen/material_huge"
+                android:drawableEnd="@drawable/ic_sort_red_24dp"
+                android:drawablePadding="@dimen/margin_material_half"
+                android:text="@string/comments"
+                android:textSize="@dimen/font_medium"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/comments_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_material"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/no_comments_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_material"
+                android:layout_marginStart="@dimen/margin_material"
+                android:layout_marginTop="@dimen/margin_material"
+                android:text="@string/no_comments"
+                android:textColor="@color/gray_1"
+                android:textSize="18sp"
+                android:layout_marginBottom="@dimen/material_huge"
+                android:visibility="gone" />
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:fabSize="normal"
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="io.golos.golos.screens.FabBeh"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_add_white_24dp" />
+</android.support.design.widget.CoordinatorLayout>

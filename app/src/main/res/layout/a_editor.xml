@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp"
+        app:title="Текст"
+        app:titleTextColor="@color/textColorP">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null">
+
+            <android.support.v7.widget.AppCompatButton
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/margin_material_half"
+                android:drawableEnd="@drawable/ic_send"
+                android:drawablePadding="@dimen/margin_material_half"
+                android:gravity="end|center_vertical"
+                android:text="@string/publish"
+                android:textAllCaps="false"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp" />
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+
+        android:background="@color/delimeter_color" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/bottom_lo" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_controls_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="@dimen/margin_material_half"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_users"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="center"
+                android:background="?selectableItemBackground"
+                android:text="\@"
+                android:textColor="@color/btn_pink_black_color"
+                android:textSize="20dp"
+                android:visibility="gone" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/btn_link"
+                style="@style/BottomButtonStyle"
+                android:src="@drawable/btn_pink_black_link" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/btn_insert_image"
+                style="@style/BottomButtonStyle"
+                android:src="@drawable/btn_pink_black_image" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</android.support.v7.widget.LinearLayoutCompat>

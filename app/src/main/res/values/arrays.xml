@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="header_spinner_items">
+        <item>@string/popular</item>
+        <item>@string/stripes_new</item>
+        <item>@string/actual</item>
+        <item>@string/promo</item>
+    </string-array>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/title_et"
+        style="@style/EditTextWithPinkCursor"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:hint="@string/enter_post_title"
+        android:inputType="textCapCharacters|textMultiLine"
+        android:maxLength="255"
+        android:paddingBottom="4dp"
+        android:paddingTop="@dimen/margin_material"
+        android:text=""
+        android:textSize="@dimen/text_big" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/subtitle_text"
+        style="@style/EditTextWithPinkCursor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:text=""
+        android:textColor="@color/rat"
+        android:visibility="gone" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginBottom="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material"
+        android:background="@color/delimeter_color" />
+</LinearLayout>

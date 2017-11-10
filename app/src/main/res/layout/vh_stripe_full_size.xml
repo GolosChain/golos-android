@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:layout_marginStart="@dimen/stripe_item_left_and_right_margin"
+    android:layout_marginTop="@dimen/stripe_item_left_and_right_margin"
+    android:background="@drawable/rect_round_corners_solid_white"
+    android:paddingBottom="@dimen/margin_material_half"
+
+    android:paddingTop="12dp">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/avatar_iv"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:scaleType="centerCrop"
+        android:layout_marginStart="@dimen/margin_material"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:riv_corner_radius="30dp" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toTopOf="parent"
+        app:textAllCaps="true" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/reblogged_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_reblogged_black_20dp"
+        app:layout_constraintStart_toEndOf="@id/user_name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/for_user_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="2dp"
+        android:text="@string/for_"
+        android:textColor="@color/gray_1"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/blog_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="2dp"
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_bullet_blue"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/for_user_tv"
+        app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:background="?selectableItemBackground"
+        app:layout_constraintEnd_toStartOf="@+id/additional_image"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
+        app:textAllCaps="true" />
+
+    <ru.noties.markwon.view.MarkwonViewCompat
+        android:id="@+id/text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="4dp"
+        android:ellipsize="marquee"
+        android:clickable="true"
+        android:maxLength="80"
+        android:textColor="#414548"
+        android:textSize="14sp"
+        android:background="?selectableItemBackground"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@+id/additional_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/additional_image"
+        android:layout_width="90dp"
+        android:clickable="true"
+        android:background="?selectableItemBackground"
+        android:layout_height="120dp"
+        android:layout_marginBottom="@dimen/margin_material_half"
+        android:paddingEnd="@dimen/margin_material"
+        android:scaleType="centerCrop"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/title"
+        app:riv_corner_radius="6dp" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/image_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_material"
+        android:cropToPadding="true"
+        android:clickable="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:visibility="visible"
+        android:minHeight="220dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="text, image_main " />
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="@dimen/margin_material"
+        android:gravity="center"
+        android:paddingEnd="@dimen/margin_material"
+        android:paddingStart="@dimen/margin_material"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier">
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/vote_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.33"
+            android:drawablePadding="-8dp"
+            android:drawableStart="@drawable/ic_upvote_green_24dp"
+
+            android:textColor="@color/upvote_green" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/vh_stripe_full_delimeter_margins"
+            android:layout_marginTop="@dimen/vh_stripe_full_delimeter_margins"
+            android:background="@color/gray_1" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/comments_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            android:drawablePadding="-12dp"
+            android:drawableStart="@drawable/ic_comment_black_24dp"
+            android:paddingLeft="24dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/vh_stripe_full_delimeter_margins"
+            android:layout_marginTop="@dimen/vh_stripe_full_delimeter_margins"
+            android:background="@color/gray_1" />
+
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/share_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            app:srcCompat="@drawable/ic_share_black_24dp" />
+    </android.support.v7.widget.LinearLayoutCompat>
+</android.support.constraint.ConstraintLayout>

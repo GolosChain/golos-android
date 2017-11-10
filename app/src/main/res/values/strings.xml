@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Golos</string>
+    <string name="add_max_five_tags">Добавить тэги (до 5 штук)</string>
+    <string name="enter_tag_name">Введите название тэгов, через пробел</string>
+    <string name="to_much_tags">Можно указать до пяти тэгов</string>
+    <string name="use_only_one_dash">в тэге может быть только один дефис</string>
+    <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тэги</string>
+    <string name="only_lowercase_characters">Используйте только символы нижнего регистра</string>
+    <string name="use_only_allowed_characters">Используйте только строчные буквы, цифры и одно тире</string>
+    <string name="first_char_must_be_a_letter">Должно начинаться с буквы</string>
+    <string name="publish">Опубликовать</string>
+    <string name="text">Текст</string>
+    <string name="comment">Комментарий</string>
+    <string name="GOLOS">ГОЛОС</string>
+    <string name="login">Логин</string>
+    <string name="posting_key">Постинг ключ</string>
+    <string name="scan">Сканировать</string>
+    <string name="active_key">Активный ключ</string>
+    <string name="cancel">Отмена</string>
+    <string name="exit">Войти</string>
+    <string name="enter_post_title">Введите заголовк поста</string>
+    <string name="tab_back_double_to_enter">Нажмите еще раз для выхода</string>
+    <string name="slow_internet_connection">Слишком медленное соединение. Попробйте еще раз</string>
+    <string name="no_internet_connection">Отсутствует связь с интернетом</string>
+    <string name="unknown_error">Произошла неизвестная ошибка, попробуйте позднее</string>
+    <string name="stripes_new">Новое</string>
+    <string name="actual">Актуальное</string>
+    <string name="popular">Популярное</string>
+    <string name="promo">Промо</string>
+    <string name="for_">для</string>
+    <string name="comments">Комментарии</string>
+    <string name="image">Изображение</string>
+    <string name="ago">назад</string>
+    <string name="no_comments">Пока нет комментариев. Будь первым!</string>
+    <string name="answer">Ответить</string>
+    <string name="enter_key">Ввести ключ</string>
+    <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">Больше о Golos.io</>]]></string>
+    <string name="do_not_registered_register">Вы еще не зарегестрированы? <![CDATA[<a href = "https://golos.io/create_account">Регистрация</>]]></string>
+    <string name="enter_login">Введите имя аккаунта</string>
+    <string name="enter_password">Введите пароль</string>
+    <string name="posting_or_active_key">Введите активный или постинг ключ</string>
+    <string name="wrong_args">Неправильный вызоп апи</string>
+    <string name="wrong_credentials">Неверные логин или пароль</string>
+    <string name="logout">Выход</string>
+    <string name="loading">Загружается...</string>
+</resources>

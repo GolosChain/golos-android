@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_lo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/margin_material">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/avatar_iv"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:riv_corner_radius="30dp" />
+
+    <TextView
+        android:id="@+id/username_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material"
+
+        android:textColor="#3f4646"
+        android:textSize="@dimen/font_medium"
+        app:layout_constraintLeft_toRightOf="@id/avatar_iv"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="@dimen/margin_material"
+        android:drawablePadding="6dp"
+        android:drawableStart="@drawable/ic_access_time_gray_24dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/gray_1"
+        app:layout_constraintBottom_toBottomOf="@id/username_tv"
+
+        app:layout_constraintLeft_toRightOf="@id/username_tv" />
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/content_lo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@+id/username_tv">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_material"
+            android:layout_marginStart="@dimen/margin_material"
+            android:layout_marginTop="6dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+
+            android:visibility="gone" />
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_material"
+            android:layout_marginStart="@dimen/margin_material"
+            android:layout_marginTop="6dp"
+            android:textSize="@dimen/font_medium"
+            android:visibility="gone">
+
+        </TextView>
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/upvote_ibtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="6dp"
+        android:backgroundTint="@color/upvote_green"
+        android:padding="0dp"
+        app:layout_constraintStart_toStartOf="@id/username_tv"
+        app:layout_constraintTop_toBottomOf="@+id/content_lo"
+
+        app:srcCompat="@drawable/ic_keyboard_arrow_up_white_36dp" />
+
+    <TextView
+        android:id="@+id/payout_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:gravity="center_vertical"
+        android:textColor="@color/upvote_green"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/upvote_ibtn"
+        app:layout_constraintStart_toEndOf="@id/upvote_ibtn"
+        app:layout_constraintTop_toTopOf="@id/upvote_ibtn" />
+
+    <Button
+        android:id="@+id/answer_btn"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rect_round_corners_outline_red"
+        android:clickable="true"
+        android:paddingEnd="24dp"
+        android:paddingStart="24dp"
+        android:text="@string/answer"
+        android:textAllCaps="false"
+        android:textColor="@color/corall_red"
+        android:textSize="@dimen/font_medium"
+        app:layout_constraintBottom_toBottomOf="@+id/upvote_ibtn"
+        app:layout_constraintStart_toEndOf="@+id/payout_tv"
+        app:layout_constraintTop_toBottomOf="@+id/content_lo" />
+</android.support.constraint.ConstraintLayout>

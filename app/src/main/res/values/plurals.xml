@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="votes">
+        <item quantity="few">Голоса</item>
+        <item quantity="many">Голосов</item>
+        <item quantity="one">Голос</item>
+        <item quantity="two">Голоса</item>
+        <item quantity="zero">Голосов</item>
+        <item quantity="other">Голосов</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="few">Дня</item>
+        <item quantity="many">Дней</item>
+        <item quantity="one">День</item>
+        <item quantity="two">Дня</item>
+        <item quantity="zero">Дней</item>
+        <item quantity="other">Дней</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="few">Часа</item>
+        <item quantity="many">Часов</item>
+        <item quantity="one">Час</item>
+        <item quantity="two">Часа</item>
+        <item quantity="zero">Часов</item>
+        <item quantity="other">Час</item>
+    </plurals>
+</resources>

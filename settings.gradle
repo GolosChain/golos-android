@@ -1,0 +1,2 @@
+include ':app', ':golos4j'
+project(':golos4j').projectDir = new File('./golosj/core')

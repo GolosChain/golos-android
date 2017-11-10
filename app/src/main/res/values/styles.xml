@@ -1,0 +1,93 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/textColorP</item>
+        <item name="android:textColor">@color/textColorP</item>
+
+    </style>
+
+    <style name="BottomButtonStyle">
+        <item name="android:layout_width">@dimen/standart_size_button</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">?selectableItemBackground</item>
+        <item name="android:layout_height">@dimen/standart_size_button</item>
+    </style>
+
+    <style name="EditTextWithPinkCursor">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@null</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_pink</item>
+    </style>
+
+    <style name="LoginEditTextStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">14sp</item>
+        <item name="android:layout_marginStart">14sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:textSize">16sp</item>
+
+        <item name="android:textCursorDrawable">@drawable/cursor_pink</item>
+    </style>
+
+    <style name="BarcodeImage">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp
+        </item>
+    </style>
+
+    <style name="BarcodeTextStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@null</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textColor">@color/delimeter_color</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="BarcodeLayoutStyle">
+
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_marginEnd">@dimen/margin_material</item>
+        <item name="android:layout_marginStart">@dimen/margin_material</item>
+        <item name="android:layout_marginTop">@dimen/material_big</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="LoginBottomButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingStart">@dimen/material_huge</item>
+        <item name="android:paddingEnd">@dimen/material_huge</item>
+        <item name="android:paddingTop">@dimen/margin_material</item>
+        <item name="android:paddingBottom">@dimen/margin_material</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="BarcodeButton">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/delimeter_color</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/delimeter_color</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+</resources>

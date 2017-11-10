@@ -1,0 +1,1874 @@
+{
+  "id": 36,
+  "result": {
+    "current_route": "ru--statistika/@arcange/ezhednevnyi-otchet-20171106",
+    "props": {
+      "id": 0,
+      "head_block_number": 11068207,
+      "head_block_id": "00a8e32f2a115c0ba1cd7eee92e47594a89592c0",
+      "time": "2017-11-08T01:43:30",
+      "current_witness": "itsmine-65",
+      "total_pow": 541074,
+      "num_pow_witnesses": 172,
+      "virtual_supply": "131781433.608 GOLOS",
+      "current_supply": "128974197.326 GOLOS",
+      "confidential_supply": "0.000 GOLOS",
+      "current_sbd_supply": "8006237.879 GBG",
+      "confidential_sbd_supply": "0.000 GBG",
+      "total_vesting_fund_steem": "87076922.517 GOLOS",
+      "total_vesting_shares": "325579845931.218317 GESTS",
+      "total_reward_fund_steem": "71078.826 GOLOS",
+      "total_reward_shares2": "2029064726212728349228684904131",
+      "sbd_interest_rate": 1000,
+      "sbd_print_rate": 9566,
+      "average_block_size": 473,
+      "maximum_block_size": 65536,
+      "current_aslot": 11105670,
+      "recent_slots_filled": "340282366920938463463374607431768211455",
+      "participation_count": 128,
+      "last_irreversible_block_num": 11068187,
+      "max_virtual_bandwidth": "5986734968066277376",
+      "current_reserve_ratio": 20000,
+      "vote_regeneration_per_day": 40
+    },
+    "category_idx": {
+      "active": [],
+      "recent": [],
+      "best": []
+    },
+    "tag_idx": {
+      "trending": [
+        "",
+        "vox-populi",
+        "ru--golos",
+        "psk",
+        "ru--zhiznx",
+        "u0433u043eu043bu043eu0441u0444u0",
+        "u043au0430u0431u0431u0430u043bu0",
+        "ru--obrazovanie",
+        "ru--mysli",
+        "vpnews",
+        "golos",
+        "ru--apvot50-50",
+        "vp-cosmos",
+        "ru--istoriya",
+        "u0434u0435u0432u0443u0448u043au0",
+        "ru--znakomstvo",
+        "u043cu0435u0440u043eu043fu0440u0",
+        "ru--fotografiya",
+        "vp-liganovi4kov",
+        "lesnik-случайнаявст",
+        "mapala",
+        "Десятьфактовобом",
+        "ru--blokcheijn",
+        "ru--kosmos",
+        "ru--tvorchestvo",
+        "ru--konferencziya",
+        "ru--puteshestviya",
+        "ru--konkurs",
+        "ru--biologiya",
+        "Белгород-Днестро",
+        "голос",
+        "делегат",
+        "ru--otkrytyij-kod",
+        "ru--iskusstvo",
+        "каменск-уральски",
+        "ru--chelovek",
+        "ru--foto",
+        "u75",
+        "ru--nauka",
+        "ru--soobshchestva",
+        "russian federation",
+        "u044fu0438u0434u0443u043du0430u0",
+        "ru--unsorted",
+        "vp-painting",
+        "ru--mesta",
+        "ru--razrabotka",
+        "Каменец-Подольск",
+        "ru--biznes",
+        "ru--blogi",
+        "ru--politika"
+      ]
+    },
+    "categories": {},
+    "tags": {},
+    "content": {
+      "arcange/ezhednevnyi-otchet-20171106": {
+        "id": 2448762,
+        "author": "arcange",
+        "permlink": "ezhednevnyi-otchet-20171106",
+        "category": "ru--statistika",
+        "parent_author": "",
+        "parent_permlink": "ru--statistika",
+        "title": "Ежедневный отчет – 2017.11.06",
+        "body": "<center>https://i.imgsafe.org/89e23bed21.jpg</center>\nПриветствую вас в своем ежедневном отчете по статистике Голоса.\n\nВся информация, представленная в данном отчете, основаны на данных, собранных из блокчейна до 06-11-2017 полуночи UTC. Цель этого доклада-предоставить вам четкое представление о том, что происходит каждый день на Голоса.\n\n### 1. Новые пользователи\nhttps://arcange.eu/golos-images/2017-11-06-AccountsNew.png \n\nЭтот график показывает количество новых пользователей, зарегистрированных на Голосе и сколько из них стали активными. Мы видим, что многие пользователи зарегистрировали аккаунты, но они никогда не используются.\n\nВнимание: этот график является динамическим! Пользователь может зарегистрироваться в один день и стать активным несколько дней спустя. Таким образом, количество активных пользователей за конкретные даты может измениться со дня на день.\n\nhttps://arcange.eu/golos-images/2017-11-06-Accounts.png \n\nВ этом графике оранжевая линия показывает общее количество зарегистрированных пользователей.\nЗеленая линия показывает, сколько пользователей были активны, по крайней мере, один раз (\"активный пользователь\", означает, что он написал по крайней мере одно сообщение, комментарий или проголосовал). Активный пользователь включается в график, даже если позже он становится неактивным.\n\n### 2. Активные пользователи\nhttps://arcange.eu/golos-images/2017-11-06-Actives30.png \n\nhttps://arcange.eu/golos-images/2017-11-06-Actives.png \n\nhttps://arcange.eu/golos-images/2017-11-06-ActivesMonth.png \n\nЭти графики показывают активность пользователей. Для тех, кто хочет понять, что произошло между февралем и апрелем, я рекомендую читать этот [пост](https://golos.io/ru--statistika/@arcange/vliyanie-bm-golos-ne-umirayut).\n\nПоследний график-это краткое изложение ежемесячно активных пользователей. Это позволяет сравнивать данные Голоса с теми, которые, как правило, опубликованные в других социальных сетях.\n\n### 3. Посты и комментарии\nhttps://arcange.eu/golos-images/2017-11-06-Posts30.png \n\nhttps://arcange.eu/golos-images/2017-11-06-Posts.png \n\nЭти графики показывают изменения количества постов и комментариев, с момента создания и в течение последних 30 дней.\n\n### 4. Голосa\nhttps://arcange.eu/golos-images/2017-11-06-Votes30.png \n\nhttps://arcange.eu/golos-images/2017-11-06-Votes.png \n\nЭти графики показывают изменения количества голосов, с момента создания и в течение последних 30 дней.\n\n### 5. Ежедневные транзакции\nhttps://arcange.eu/golos-images/2017-11-06-Transactions.png \n\nЭтот график показывает количество ежедневных транзакции .Это дает представление о всей деятельности на блокчейн.\n\n### 6. Категории\nhttps://arcange.eu/golos-images/2017-11-06-Categories.png \n\nЭтот график показывает категории, которые были использованы для публикации постов с момента создания.\n\nhttps://arcange.eu/golos-images/2017-11-06-CategoriesPayout.png \n\nЭтот график показывает категории, которые генерируют больше всего доходов для публикации постов с момента создания.\n\n### 7. Распределение\nhttps://arcange.eu/golos-images/2017-11-06-Levels.png \n\nЭтот график показывает количество пользователей в зависимости от их ранга. Он включает также неактивных пользователей, как они определены [здесь](https://golos.io/ru--doska-pocheta/@golosboard/doska-pocheta-obnovlenie-7-novyi-vid).\n\nhttps://arcange.eu/golos-images/2017-11-06-LevelShares.png \n\nЭтот график показывает совокупное распределение силы голоса. Он позволяет видеть всю силу голоса каждого ранга.\n\nhttps://arcange.eu/golos-images/2017-11-06-Reputation.png \n\nЭтот график показывает распределение репутации среди пользователей. Пользователи с репутацией ниже 25 были удалены, чтобы график был читаемым. Для получения дополнительных сведений о репутации, вы можете прочитать этот [пост](https://golos.io/ru--golos/@arcange/chto-takoe-reputaciya-na-golose-i-kak-ona-rabotaet).\n\n### 8. Эволюция выплат\nhttps://arcange.eu/golos-images/2017-11-06-PayoutTotal.png \n\nЭтот график показывает ежедневную сумму выплат для всех постов и комментариев.\n\nhttps://arcange.eu/golos-images/2017-11-06-PayoutMax.png \n\nЭти графики показывают максимум выплат за пост (или комментарий) за каждый день.\n\nhttps://arcange.eu/golos-images/2017-11-06-PayoutAVG.png \n\nhttps://arcange.eu/golos-images/2017-11-06-PayoutMedianPosts.png \n\nЭти графики показывают медианное значение и среднюю выплату.\nМедиана показывает, что если вчера вы получили платеж, который соответствует последнему значению отображаемому на карте, и вы можете быть счастливы. В самом деле, есть же ряд людей, которые получили больше, чем те, которые зарабатывают меньше, чем вы.\n\nСпасибо за чтение!\n\n---\n<center>[![](https://imgp.golos.io/50x60t0/http://golosboard.com/@arcange/votes.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/58x70t0/http://golosboard.com/@arcange/commented.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/67x80t0/http://golosboard.com/@arcange/posts.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/100x100t600/http://golosboard.com/@arcange/level.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/67x80t0/http://golosboard.com/@arcange/comments.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/58x70t0/http://golosboard.com/@arcange/voted.png)](http://golosboard.com/@arcange)[![](https://imgp.golos.io/50x60t0/http://golosboard.com/@arcange/payout.png)](http://golosboard.com/@arcange)</center>\n##### <center>Поддержите мою работу в качестве делегата. Каждый голос важен. Спасибо !</center> \n<center>Для этого нажмите [__здесь__](https://golos.io/~witnesses) и сделайте следующее.</center>\n<center>[![](http://i.cubeupload.com/EUl6v7.png)](https://golos.io/~witnesses)</center>\n\n---\nЕсли Вам понравился этот пост, не забудьте ![](https://s22.postimg.org/n01rpphmp/pointing_fingers.gif) **проголосовать** или **[подписаться на меня](https://golos.io/@arcange)**",
+        "json_metadata": "{\"tags\":[\"ru--golos\"],\"image\":[\"https://i.imgsafe.org/89e23bed21.jpg\"]}",
+        "last_update": "2017-11-07T16:00:00",
+        "created": "2017-11-07T15:59:57",
+        "active": "2017-11-07T20:47:06",
+        "last_payout": "1970-01-01T00:00:00",
+        "depth": 0,
+        "children": 3,
+        "children_rshares2": "11549683353972635127369530625",
+        "net_rshares": "105488061448575",
+        "abs_rshares": "105513144230167",
+        "vote_rshares": "105500602839371",
+        "children_abs_rshares": "105513144230167",
+        "cashout_time": "2017-11-08T16:25:53",
+        "max_cashout_time": "2017-11-21T16:00:00",
+        "total_vote_weight": "17772894118718180006",
+        "reward_weight": 10000,
+        "total_payout_value": "0.000 GBG",
+        "curator_payout_value": "0.000 GBG",
+        "author_rewards": 0,
+        "net_votes": 153,
+        "root_comment": 2448762,
+        "mode": "first_payout",
+        "max_accepted_payout": "1000000.000 GBG",
+        "percent_steem_dollars": 10000,
+        "allow_replies": true,
+        "allow_votes": true,
+        "allow_curation_rewards": true,
+        "url": "/ru--statistika/@arcange/ezhednevnyi-otchet-20171106",
+        "root_title": "Ежедневный отчет – 2017.11.06",
+        "pending_payout_value": "1153.888 GBG",
+        "total_pending_payout_value": "1153.888 GBG",
+        "active_votes": [
+          {
+            "voter": "proctologic",
+            "weight": "8471336617580",
+            "rshares": 1242592050,
+            "percent": 100,
+            "reputation": "2018118736553",
+            "time": "2017-11-07T16:27:09"
+          },
+          {
+            "voter": "yefet",
+            "weight": "550445796826442",
+            "rshares": "91199236961",
+            "percent": 10000,
+            "reputation": "2661421874950",
+            "time": "2017-11-07T16:24:00"
+          },
+          {
+            "voter": "alenevaa",
+            "weight": "1217898999297184",
+            "rshares": "228875220682",
+            "percent": 10000,
+            "reputation": "8392427075491",
+            "time": "2017-11-07T16:21:03"
+          },
+          {
+            "voter": "fyrstikken",
+            "weight": "322759575068874",
+            "rshares": "60403473621",
+            "percent": 10000,
+            "reputation": "31265765732232",
+            "time": "2017-11-07T16:21:12"
+          },
+          {
+            "voter": "konstantin",
+            "weight": "40473133445582604",
+            "rshares": "188306598507",
+            "percent": 10000,
+            "reputation": "125544199444837",
+            "time": "2017-11-07T16:10:03"
+          },
+          {
+            "voter": "bitshares101",
+            "weight": "9470676936486",
+            "rshares": 1483919727,
+            "percent": 10000,
+            "reputation": 337793648,
+            "time": "2017-11-07T18:43:18"
+          },
+          {
+            "voter": "arcange",
+            "weight": "43128120826516180",
+            "rshares": "6227312592345",
+            "percent": 10000,
+            "reputation": "1095655280218800",
+            "time": "2017-11-07T16:30:06"
+          },
+          {
+            "voter": "kaykunoichi",
+            "weight": "20730042024818",
+            "rshares": 3247958384,
+            "percent": 10000,
+            "reputation": "72958210880",
+            "time": "2017-11-07T18:42:00"
+          },
+          {
+            "voter": "spinner",
+            "weight": "261319178933137976",
+            "rshares": "1117294694289",
+            "percent": 10000,
+            "reputation": "438371729925781",
+            "time": "2017-11-07T16:09:09"
+          },
+          {
+            "voter": "t3ran13",
+            "weight": "3695860302539616",
+            "rshares": "583721820099",
+            "percent": 2300,
+            "reputation": "663229401265355",
+            "time": "2017-11-07T20:13:51"
+          },
+          {
+            "voter": "erikkartmen",
+            "weight": "309832015171313",
+            "rshares": "41002073005",
+            "percent": 1000,
+            "reputation": "155297721257043",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "xanoxt",
+            "weight": "4621756411442392",
+            "rshares": "745851811397",
+            "percent": 10000,
+            "reputation": "30598624600919",
+            "time": "2017-11-08T00:47:27"
+          },
+          {
+            "voter": "slamm",
+            "weight": "451583910643786260",
+            "rshares": "2582950275802",
+            "percent": 9400,
+            "reputation": "10282983124022",
+            "time": "2017-11-07T16:15:00"
+          },
+          {
+            "voter": "alien",
+            "weight": "77150980654676",
+            "rshares": "12025228224",
+            "percent": 10000,
+            "reputation": "503710041456",
+            "time": "2017-11-07T17:13:54"
+          },
+          {
+            "voter": "blackmoon",
+            "weight": "1377538063743369",
+            "rshares": "243584353308",
+            "percent": 10000,
+            "reputation": "154527041661268",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "myrussia",
+            "weight": "425794837556008",
+            "rshares": "66475785287",
+            "percent": 10000,
+            "reputation": "58836021800042",
+            "time": "2017-11-07T17:14:00"
+          },
+          {
+            "voter": "beep",
+            "weight": "47508296730929",
+            "rshares": "7403595015",
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T17:13:51"
+          },
+          {
+            "voter": "bfg9000",
+            "weight": "30904507844879",
+            "rshares": "4815546012",
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T17:13:39"
+          },
+          {
+            "voter": "big.brother",
+            "weight": "20311663257028",
+            "rshares": 3164731503,
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T17:13:27"
+          },
+          {
+            "voter": "bigler",
+            "weight": "17340445309393",
+            "rshares": 2688128701,
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T17:13:24"
+          },
+          {
+            "voter": "dinamo",
+            "weight": "95414526097319",
+            "rshares": "14788813631",
+            "percent": 10000,
+            "reputation": "12290121432219",
+            "time": "2017-11-07T17:13:21"
+          },
+          {
+            "voter": "commodore",
+            "weight": "43962379273769738",
+            "rshares": "247942012357",
+            "percent": 10000,
+            "reputation": "21324006638",
+            "time": "2017-11-07T16:19:00"
+          },
+          {
+            "voter": "bitcoinfo",
+            "weight": "311637871664577",
+            "rshares": "48601264355",
+            "percent": 10000,
+            "reputation": "19783614185169",
+            "time": "2017-11-07T17:13:57"
+          },
+          {
+            "voter": "mira",
+            "weight": "786859326485958",
+            "rshares": "123432845010",
+            "percent": 10000,
+            "reputation": "766506157282",
+            "time": "2017-11-07T18:50:12"
+          },
+          {
+            "voter": "anela",
+            "weight": "1087633162458970916",
+            "rshares": "3220278187586",
+            "percent": 10000,
+            "reputation": "481769928475069",
+            "time": "2017-11-07T16:07:42"
+          },
+          {
+            "voter": "gildar",
+            "weight": "4219154908864560",
+            "rshares": "569011304208",
+            "percent": 10000,
+            "reputation": "450910018977521",
+            "time": "2017-11-07T16:30:00"
+          },
+          {
+            "voter": "sergey.khegay",
+            "weight": "13142820795866",
+            "rshares": 2204655471,
+            "percent": 10000,
+            "reputation": "765764303245",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "igor1966",
+            "weight": "15868345522246683",
+            "rshares": "37831886917",
+            "percent": 10000,
+            "reputation": "3944005343553",
+            "time": "2017-11-07T16:04:33"
+          },
+          {
+            "voter": "max-max",
+            "weight": "1727651437939742",
+            "rshares": "268500915965",
+            "percent": 3000,
+            "reputation": "2460852313593",
+            "time": "2017-11-07T17:13:24"
+          },
+          {
+            "voter": "tymba",
+            "weight": "662833984277112",
+            "rshares": "90022490683",
+            "percent": 10000,
+            "reputation": "44538385455",
+            "time": "2017-11-07T16:30:00"
+          },
+          {
+            "voter": "korzhimanov",
+            "weight": "1205351926598107",
+            "rshares": "5450377462",
+            "percent": 10000,
+            "reputation": "3995448387966",
+            "time": "2017-11-07T16:09:42"
+          },
+          {
+            "voter": "onixred",
+            "weight": "11922798868279585",
+            "rshares": "77423620729",
+            "percent": 10000,
+            "reputation": "18712644044803",
+            "time": "2017-11-07T16:15:57"
+          },
+          {
+            "voter": "veter",
+            "weight": "5227735078621",
+            "rshares": 809096081,
+            "percent": 10000,
+            "reputation": "7947865019879",
+            "time": "2017-11-07T16:59:27"
+          },
+          {
+            "voter": "larissa",
+            "weight": "10378568873948",
+            "rshares": 1717591054,
+            "percent": 10000,
+            "reputation": "632984965313",
+            "time": "2017-11-07T16:24:03"
+          },
+          {
+            "voter": "galina1",
+            "weight": "33554153941393308",
+            "rshares": "150908894344",
+            "percent": 10000,
+            "reputation": "62750691137030",
+            "time": "2017-11-07T16:09:54"
+          },
+          {
+            "voter": "stepanov",
+            "weight": "591297108058024861",
+            "rshares": "2471177545421",
+            "percent": 10000,
+            "reputation": "215597897164694",
+            "time": "2017-11-07T16:14:00"
+          },
+          {
+            "voter": "mirta",
+            "weight": "607137968580627",
+            "rshares": "94965460869",
+            "percent": 10000,
+            "reputation": "55790526105177",
+            "time": "2017-11-07T17:22:54"
+          },
+          {
+            "voter": "ohlamoon",
+            "weight": "460996997637666",
+            "rshares": "62719638355",
+            "percent": 5500,
+            "reputation": "125366109241606",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "avlion",
+            "weight": "825209641226906",
+            "rshares": "123964779880",
+            "percent": 10000,
+            "reputation": "48690392395375",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "zlody",
+            "weight": "525245526175329",
+            "rshares": "74143948765",
+            "percent": 10000,
+            "reputation": "23149399732237",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "antonkostroma",
+            "weight": 0,
+            "rshares": -12541390796,
+            "percent": -100,
+            "reputation": "479636249799389",
+            "time": "2017-11-07T19:22:57"
+          },
+          {
+            "voter": "vasilisapor2",
+            "weight": "77782920902150",
+            "rshares": "10551220705",
+            "percent": 2500,
+            "reputation": "33651997152817",
+            "time": "2017-11-07T16:30:00"
+          },
+          {
+            "voter": "nefer",
+            "weight": "1600980219699806",
+            "rshares": "255157941666",
+            "percent": 10000,
+            "reputation": "154409243313602",
+            "time": "2017-11-07T22:26:03"
+          },
+          {
+            "voter": "celeste",
+            "weight": "21673911455901",
+            "rshares": 3331014686,
+            "percent": 10000,
+            "reputation": "1653580931426",
+            "time": "2017-11-07T16:31:12"
+          },
+          {
+            "voter": "evildeathcore",
+            "weight": "376122919353446",
+            "rshares": "57893699970",
+            "percent": 10000,
+            "reputation": "162392433589122",
+            "time": "2017-11-07T16:32:27"
+          },
+          {
+            "voter": "borodaus",
+            "weight": "16471484354919",
+            "rshares": 2539713428,
+            "percent": 10000,
+            "reputation": "5830050634599",
+            "time": "2017-11-07T16:55:51"
+          },
+          {
+            "voter": "markvial",
+            "weight": "125287593565739",
+            "rshares": "19575969206",
+            "percent": 10000,
+            "reputation": "24073761355910",
+            "time": "2017-11-07T17:21:03"
+          },
+          {
+            "voter": "sonic1991",
+            "weight": "116410008415919",
+            "rshares": "18229906485",
+            "percent": 10000,
+            "reputation": "22627263866370",
+            "time": "2017-11-07T17:45:48"
+          },
+          {
+            "voter": "semasping",
+            "weight": "18001442931050927",
+            "rshares": "81947340088",
+            "percent": 10000,
+            "reputation": "30491867903742",
+            "time": "2017-11-07T16:10:00"
+          },
+          {
+            "voter": "tuner",
+            "weight": "81162144962347",
+            "rshares": "10587490627",
+            "percent": 10000,
+            "reputation": "98020085274",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "php-node-client",
+            "weight": "189911739683131",
+            "rshares": "30165568198",
+            "percent": 2300,
+            "reputation": "27786680518290",
+            "time": "2017-11-07T20:13:54"
+          },
+          {
+            "voter": "kotturinn",
+            "weight": "820528312224033",
+            "rshares": "116848639922",
+            "percent": 10000,
+            "reputation": "25382210581079",
+            "time": "2017-11-07T16:28:00"
+          },
+          {
+            "voter": "arystarch",
+            "weight": "233090730666911",
+            "rshares": "44239299071",
+            "percent": 10000,
+            "reputation": "21437458592815",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "sharps",
+            "weight": "4399961849350784",
+            "rshares": "9642905400",
+            "percent": 9000,
+            "reputation": "19507995911113",
+            "time": "2017-11-07T16:05:00"
+          },
+          {
+            "voter": "journalist",
+            "weight": "5506380973045423",
+            "rshares": "1029028847387",
+            "percent": 10000,
+            "reputation": "6678029407155",
+            "time": "2017-11-07T16:20:36"
+          },
+          {
+            "voter": "olgavdovskikh",
+            "weight": "46478545842046",
+            "rshares": "8677898395",
+            "percent": 10000,
+            "reputation": "7249617475195",
+            "time": "2017-11-07T16:20:24"
+          },
+          {
+            "voter": "marcosorte",
+            "weight": "113112096492509",
+            "rshares": "21037521788",
+            "percent": 10000,
+            "reputation": "23229067127780",
+            "time": "2017-11-07T16:21:21"
+          },
+          {
+            "voter": "rikimaru",
+            "weight": "420732649518602",
+            "rshares": "79401718690",
+            "percent": 10000,
+            "reputation": "16594957850942",
+            "time": "2017-11-07T16:20:00"
+          },
+          {
+            "voter": "exan",
+            "weight": "4975501910433",
+            "rshares": 676358004,
+            "percent": 300,
+            "reputation": "4011775203014",
+            "time": "2017-11-07T16:30:03"
+          },
+          {
+            "voter": "darkerdim",
+            "weight": "5162471593733193",
+            "rshares": "32141458602",
+            "percent": 10000,
+            "reputation": "6087543727851",
+            "time": "2017-11-07T16:16:51"
+          },
+          {
+            "voter": "vnukkarpov",
+            "weight": "214309300059959",
+            "rshares": "31033701327",
+            "percent": 10000,
+            "reputation": "13748764736534",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "vika-teplo",
+            "weight": "4744510124621",
+            "rshares": 455130394,
+            "percent": 300,
+            "reputation": "10355663269728",
+            "time": "2017-11-07T16:00:03"
+          },
+          {
+            "voter": "madrid",
+            "weight": "3306752236871774",
+            "rshares": "8838697183",
+            "percent": 10000,
+            "reputation": "1790779231555",
+            "time": "2017-11-07T16:04:00"
+          },
+          {
+            "voter": "virt",
+            "weight": "37585481025428",
+            "rshares": "5099252398",
+            "percent": 9000,
+            "reputation": "4324817722040",
+            "time": "2017-11-07T16:30:00"
+          },
+          {
+            "voter": "arcange-stats",
+            "weight": "169749827269191",
+            "rshares": "26081263573",
+            "percent": 10000,
+            "reputation": "49040407527708",
+            "time": "2017-11-07T16:31:09"
+          },
+          {
+            "voter": "elena.mihajlovna",
+            "weight": "52950130034704",
+            "rshares": "7147579643",
+            "percent": 10000,
+            "reputation": "4801806690224",
+            "time": "2017-11-07T16:29:45"
+          },
+          {
+            "voter": "felicita",
+            "weight": "98978524213460",
+            "rshares": "15731046293",
+            "percent": 7400,
+            "reputation": "14496548270004",
+            "time": "2017-11-07T20:34:39"
+          },
+          {
+            "voter": "optimist",
+            "weight": "322190569316612",
+            "rshares": "49541329117",
+            "percent": 3000,
+            "reputation": "47386018775682",
+            "time": "2017-11-07T16:31:54"
+          },
+          {
+            "voter": "taxibloger",
+            "weight": "33251537381577",
+            "rshares": "4450221901",
+            "percent": 8500,
+            "reputation": "13312143712136",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "aurus",
+            "weight": "68468024924744",
+            "rshares": "11360205917",
+            "percent": 10000,
+            "reputation": "13913892507924",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "tatyanamishenko",
+            "weight": "5735779825081400",
+            "rshares": "39267505602",
+            "percent": 7000,
+            "reputation": "20051992317346",
+            "time": "2017-11-07T16:15:00"
+          },
+          {
+            "voter": "evrey4ik",
+            "weight": "896105953423918",
+            "rshares": "143588066122",
+            "percent": 10000,
+            "reputation": "91784521080001",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "arc",
+            "weight": "7518544957378",
+            "rshares": 69169674,
+            "percent": 10000,
+            "reputation": "5911901384",
+            "time": "2017-11-07T16:01:00"
+          },
+          {
+            "voter": "talia",
+            "weight": "539067833455363",
+            "rshares": "82740600279",
+            "percent": 10000,
+            "reputation": "30433201469670",
+            "time": "2017-11-07T16:31:00"
+          },
+          {
+            "voter": "olgaborisova",
+            "weight": "40057184239669",
+            "rshares": "5435162568",
+            "percent": 10000,
+            "reputation": "3283321819688",
+            "time": "2017-11-07T16:30:00"
+          },
+          {
+            "voter": "wrong",
+            "weight": "12636152852159",
+            "rshares": 1984516810,
+            "percent": 10000,
+            "reputation": "881158261602",
+            "time": "2017-11-07T18:53:00"
+          },
+          {
+            "voter": "yury-efim-off",
+            "weight": "56402429997096",
+            "rshares": "8695689903",
+            "percent": 10000,
+            "reputation": "14144877453088",
+            "time": "2017-11-07T16:55:39"
+          },
+          {
+            "voter": "irinadob550",
+            "weight": "40056739370195105",
+            "rshares": "178266632546",
+            "percent": 10000,
+            "reputation": "44376175649496",
+            "time": "2017-11-07T16:02:12"
+          },
+          {
+            "voter": "dimk0",
+            "weight": "11653460155200",
+            "rshares": 1794737917,
+            "percent": 10000,
+            "reputation": "3188086071332",
+            "time": "2017-11-07T16:36:09"
+          },
+          {
+            "voter": "alexandr-11",
+            "weight": "47122216977071",
+            "rshares": "7298123979",
+            "percent": 10000,
+            "reputation": "4585098040526",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "kyzen",
+            "weight": "55610941431102",
+            "rshares": "7697240571",
+            "percent": 10000,
+            "reputation": "11082533980109",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "lokkie",
+            "weight": "657783848168632",
+            "rshares": "126864781517",
+            "percent": 10000,
+            "reputation": "84222249424477",
+            "time": "2017-11-07T16:19:27"
+          },
+          {
+            "voter": "tengri",
+            "weight": "7176637650639",
+            "rshares": 1047164056,
+            "percent": 10000,
+            "reputation": "415604144742",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "wind33",
+            "weight": "107808292862089",
+            "rshares": "18003964398",
+            "percent": 10000,
+            "reputation": "2493593932126",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "tanya135",
+            "weight": "28748973473436",
+            "rshares": "4515919586",
+            "percent": 10000,
+            "reputation": "5519368679189",
+            "time": "2017-11-07T19:32:15"
+          },
+          {
+            "voter": "smartell",
+            "weight": "290072091145703",
+            "rshares": "44698601144",
+            "percent": 10000,
+            "reputation": "16984705112985",
+            "time": "2017-11-07T16:49:39"
+          },
+          {
+            "voter": "imix",
+            "weight": "3131512378791",
+            "rshares": 489201951,
+            "percent": 10000,
+            "reputation": "139227516261",
+            "time": "2017-11-07T17:16:30"
+          },
+          {
+            "voter": "usias60",
+            "weight": "1113628255422",
+            "rshares": 171505627,
+            "percent": 10000,
+            "reputation": "57239527167",
+            "time": "2017-11-07T16:35:00"
+          },
+          {
+            "voter": "pizza-master",
+            "weight": "120335508206243",
+            "rshares": "22524819075",
+            "percent": 5500,
+            "reputation": "29886733919255",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "aleksandr313",
+            "weight": "41814868302014",
+            "rshares": "6567576584",
+            "percent": 10000,
+            "reputation": "32391356375",
+            "time": "2017-11-07T18:53:09"
+          },
+          {
+            "voter": "ieshua",
+            "weight": "1101372720933667",
+            "rshares": "176231555585",
+            "percent": 10000,
+            "reputation": "125325613422806",
+            "time": "2017-11-07T23:17:48"
+          },
+          {
+            "voter": "skiexpert",
+            "weight": "23924978880316",
+            "rshares": 3131685041,
+            "percent": 10000,
+            "reputation": "1563686251498",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "abloud",
+            "weight": "57369475997225293",
+            "rshares": "136904722816",
+            "percent": 10000,
+            "reputation": "49223792475393",
+            "time": "2017-11-07T16:06:00"
+          },
+          {
+            "voter": "btcvenom",
+            "weight": "705745480107302",
+            "rshares": "133405269246",
+            "percent": 10000,
+            "reputation": "919491738876",
+            "time": "2017-11-07T16:19:54"
+          },
+          {
+            "voter": "biorad",
+            "weight": "416477767224704",
+            "rshares": "64497617721",
+            "percent": 10000,
+            "reputation": "49515273766072",
+            "time": "2017-11-07T17:01:18"
+          },
+          {
+            "voter": "wedge",
+            "weight": "1430382658274908",
+            "rshares": "197660195177",
+            "percent": 10000,
+            "reputation": "10460924905736",
+            "time": "2017-11-07T16:29:00"
+          },
+          {
+            "voter": "coinbank",
+            "weight": "2391616713334702443",
+            "rshares": "79733730132150",
+            "percent": 10000,
+            "reputation": "10245188181530",
+            "time": "2017-11-07T16:19:09"
+          },
+          {
+            "voter": "dunsky",
+            "weight": "619820872928146",
+            "rshares": "88449504150",
+            "percent": 10000,
+            "reputation": "22082655113823",
+            "time": "2017-11-07T16:28:00"
+          },
+          {
+            "voter": "golos4j",
+            "weight": "6925712709027406",
+            "rshares": "45184924877",
+            "percent": 10000,
+            "reputation": "7919123009985",
+            "time": "2017-11-07T16:16:00"
+          },
+          {
+            "voter": "nett",
+            "weight": "13502795018569011",
+            "rshares": "47403446491",
+            "percent": 10000,
+            "reputation": "80290804552",
+            "time": "2017-11-07T16:03:00"
+          },
+          {
+            "voter": "vlad1m1r",
+            "weight": "20427573889792719",
+            "rshares": "45240203638",
+            "percent": 10000,
+            "reputation": "13423359776766",
+            "time": "2017-11-07T16:05:00"
+          },
+          {
+            "voter": "paulgreeneye",
+            "weight": "2330810975922023",
+            "rshares": "8094554149",
+            "percent": 10000,
+            "reputation": "98516039317",
+            "time": "2017-11-07T16:03:00"
+          },
+          {
+            "voter": "niita74",
+            "weight": "3849254080021339",
+            "rshares": "10327011451",
+            "percent": 10000,
+            "reputation": "2398857488751",
+            "time": "2017-11-07T16:04:00"
+          },
+          {
+            "voter": "pgs",
+            "weight": "7540279156199625",
+            "rshares": "16800113715",
+            "percent": 9000,
+            "reputation": "27156170855602",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "gameleap",
+            "weight": "49104892319420",
+            "rshares": 214969371,
+            "percent": 1000,
+            "reputation": "1296283867172",
+            "time": "2017-11-07T16:02:21"
+          },
+          {
+            "voter": "karuseli777",
+            "weight": "956697126406865",
+            "rshares": 3370257670,
+            "percent": 10000,
+            "reputation": "3256185061298",
+            "time": "2017-11-07T16:02:57"
+          },
+          {
+            "voter": "serfis",
+            "weight": "2297975675480",
+            "rshares": 448365603,
+            "percent": 100,
+            "reputation": "10926317847850",
+            "time": "2017-11-07T16:19:12"
+          },
+          {
+            "voter": "weightedpeople",
+            "weight": "4846718772679919",
+            "rshares": "10742557415",
+            "percent": 9000,
+            "reputation": "22247493364373",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "alina12",
+            "weight": "14760307502703",
+            "rshares": 2312004261,
+            "percent": 2400,
+            "reputation": "5990008627859",
+            "time": "2017-11-07T17:50:00"
+          },
+          {
+            "voter": "boleslav",
+            "weight": "35664177630286",
+            "rshares": "5526733822",
+            "percent": 10000,
+            "reputation": "2526806039816",
+            "time": "2017-11-07T17:04:45"
+          },
+          {
+            "voter": "istfak-gp",
+            "weight": "139444837108575983",
+            "rshares": "331177894269",
+            "percent": 9000,
+            "reputation": "18668870954",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "amelia72",
+            "weight": "12732790855290",
+            "rshares": 1994341075,
+            "percent": 10000,
+            "reputation": "2438693759772",
+            "time": "2017-11-07T17:49:30"
+          },
+          {
+            "voter": "hory",
+            "weight": "495910726358",
+            "rshares": 94558848,
+            "percent": 10000,
+            "reputation": 1235489694,
+            "time": "2017-11-07T16:19:42"
+          },
+          {
+            "voter": "ljpromo",
+            "weight": "1238262258888505",
+            "rshares": "8502690436",
+            "percent": 10000,
+            "reputation": "16600121593002",
+            "time": "2017-11-07T16:15:00"
+          },
+          {
+            "voter": "vp-handmade",
+            "weight": "1289736333233355",
+            "rshares": "199238706091",
+            "percent": 10000,
+            "reputation": "160956140073486",
+            "time": "2017-11-07T16:56:09"
+          },
+          {
+            "voter": "solips",
+            "weight": "6917255800193170",
+            "rshares": "30738071229",
+            "percent": 10000,
+            "reputation": "9615016599382",
+            "time": "2017-11-07T16:02:18"
+          },
+          {
+            "voter": "vibelita",
+            "weight": "30569666175622",
+            "rshares": "4967344733",
+            "percent": 8000,
+            "reputation": "24610034397991",
+            "time": "2017-11-08T01:36:57"
+          },
+          {
+            "voter": "cryptovisitor",
+            "weight": "478500796685277",
+            "rshares": "6566840867",
+            "percent": 10000,
+            "reputation": "1219568917529",
+            "time": "2017-11-07T16:00:39"
+          },
+          {
+            "voter": "vp-bodyform",
+            "weight": "39332284784536526",
+            "rshares": "106364300949",
+            "percent": 9000,
+            "reputation": "143117650235324",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "pepsirashka",
+            "weight": "19646213831272",
+            "rshares": 3765960602,
+            "percent": 7500,
+            "reputation": "6924727209842",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "vp-bodyform-gp",
+            "weight": "56034878015790214",
+            "rshares": "145050518568",
+            "percent": 9000,
+            "reputation": 0,
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "rzdfreeseatbot",
+            "weight": "177873635587281",
+            "rshares": 1157141688,
+            "percent": 10000,
+            "reputation": "5139410906527",
+            "time": "2017-11-07T16:16:00"
+          },
+          {
+            "voter": "butor777",
+            "weight": "46061994193150",
+            "rshares": "7211640439",
+            "percent": 10000,
+            "reputation": "7494038408764",
+            "time": "2017-11-07T17:41:15"
+          },
+          {
+            "voter": "randowhale",
+            "weight": "609226296370578",
+            "rshares": "113816498691",
+            "percent": 10000,
+            "reputation": "1102266700886",
+            "time": "2017-11-07T16:20:51"
+          },
+          {
+            "voter": "alexko",
+            "weight": "3143258840454813",
+            "rshares": "587216704247",
+            "percent": 8000,
+            "reputation": "3017436249790",
+            "time": "2017-11-07T16:21:00"
+          },
+          {
+            "voter": "litovets",
+            "weight": "92370054567714",
+            "rshares": "15101304231",
+            "percent": 10000,
+            "reputation": "1862861568682",
+            "time": "2017-11-07T16:24:21"
+          },
+          {
+            "voter": "fazatroff",
+            "weight": "589390810669",
+            "rshares": 92342184,
+            "percent": 10000,
+            "reputation": 6854028,
+            "time": "2017-11-07T18:16:06"
+          },
+          {
+            "voter": "golos-top-newbie",
+            "weight": "57144659363860",
+            "rshares": "9080144850",
+            "percent": 2300,
+            "reputation": 0,
+            "time": "2017-11-07T20:13:54"
+          },
+          {
+            "voter": "feyacvetov",
+            "weight": "1775495611920194",
+            "rshares": "8151442277",
+            "percent": 10000,
+            "reputation": "3991828998637",
+            "time": "2017-11-07T16:10:00"
+          },
+          {
+            "voter": "funt33",
+            "weight": "93840105643014",
+            "rshares": "14918637038",
+            "percent": 10000,
+            "reputation": "112361674971",
+            "time": "2017-11-07T20:46:24"
+          },
+          {
+            "voter": "irinacalish",
+            "weight": "945498298475378",
+            "rshares": "10126982609",
+            "percent": 10000,
+            "reputation": "3004933224058",
+            "time": "2017-11-07T16:00:51"
+          },
+          {
+            "voter": "vp-postroi-ka",
+            "weight": "4828673470278252",
+            "rshares": "13328750704",
+            "percent": 9000,
+            "reputation": "22985242087420",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "curiositybot",
+            "weight": "2077401134434248",
+            "rshares": "392013747073",
+            "percent": 10000,
+            "reputation": "895564219702",
+            "time": "2017-11-07T16:20:06"
+          },
+          {
+            "voter": "vp-svoj-dom",
+            "weight": "19398935234447432",
+            "rshares": "45113493882",
+            "percent": 10000,
+            "reputation": "41783699904753",
+            "time": "2017-11-07T16:06:21"
+          },
+          {
+            "voter": "marina-nilova",
+            "weight": "17204458570975",
+            "rshares": 2757446452,
+            "percent": 300,
+            "reputation": "12224975839913",
+            "time": "2017-11-08T00:41:15"
+          },
+          {
+            "voter": "roman-ta",
+            "weight": "624127437968",
+            "rshares": 96215204,
+            "percent": 10000,
+            "reputation": "97355944348",
+            "time": "2017-11-07T16:53:03"
+          },
+          {
+            "voter": "irvet200",
+            "weight": "3678327564510500",
+            "rshares": "13135012870",
+            "percent": 10000,
+            "reputation": "3281388781079",
+            "time": "2017-11-07T16:02:54"
+          },
+          {
+            "voter": "alessandro",
+            "weight": "6985012691267",
+            "rshares": 1074554387,
+            "percent": 10000,
+            "reputation": "2011422382900",
+            "time": "2017-11-07T16:32:24"
+          },
+          {
+            "voter": "mister-omortson",
+            "weight": "41819789791475",
+            "rshares": "6441122220",
+            "percent": 10000,
+            "reputation": "5469316127781",
+            "time": "2017-11-07T16:48:48"
+          },
+          {
+            "voter": "alexandr36",
+            "weight": "613228035535",
+            "rshares": 97504099,
+            "percent": 10000,
+            "reputation": "93143294102",
+            "time": "2017-11-07T20:58:36"
+          },
+          {
+            "voter": "prettykaty",
+            "weight": "301095508306115",
+            "rshares": "56743338850",
+            "percent": 9000,
+            "reputation": "46762563399",
+            "time": "2017-11-07T16:20:00"
+          },
+          {
+            "voter": "alexeyfertvg",
+            "weight": "594124263439",
+            "rshares": 90472312,
+            "percent": 10000,
+            "reputation": "5116662491",
+            "time": "2017-11-07T16:26:09"
+          },
+          {
+            "voter": "chupatiy",
+            "weight": "411687457685",
+            "rshares": 64665461,
+            "percent": 10000,
+            "reputation": -261300655906,
+            "time": "2017-11-07T19:03:36"
+          },
+          {
+            "voter": "alinafrost",
+            "weight": "257529387024",
+            "rshares": 37586485,
+            "percent": 10000,
+            "reputation": "33834364778",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "hobbykonditor",
+            "weight": "503425077383",
+            "rshares": 79075176,
+            "percent": 10000,
+            "reputation": "140028290283",
+            "time": "2017-11-07T19:11:00"
+          },
+          {
+            "voter": "paladin19ua",
+            "weight": "1040746405666",
+            "rshares": 166801257,
+            "percent": 10000,
+            "reputation": "1176930619290",
+            "time": "2017-11-08T00:15:18"
+          },
+          {
+            "voter": "vitaliidankov",
+            "weight": "287370980973",
+            "rshares": 45679734,
+            "percent": 10000,
+            "reputation": "4646877730110",
+            "time": "2017-11-07T20:42:36"
+          },
+          {
+            "voter": "findme05",
+            "weight": "5291687926690",
+            "rshares": 760526634,
+            "percent": 10000,
+            "reputation": "78734300574",
+            "time": "2017-11-07T16:00:00"
+          },
+          {
+            "voter": "poradom",
+            "weight": "18344263492772",
+            "rshares": 41002333,
+            "percent": 10000,
+            "reputation": "10090820731",
+            "time": "2017-11-07T16:05:03"
+          },
+          {
+            "voter": "devo4ka",
+            "weight": "5264468152183065",
+            "rshares": "29188580097",
+            "percent": 9000,
+            "reputation": "10222707811",
+            "time": "2017-11-07T16:19:00"
+          },
+          {
+            "voter": "cuzea35",
+            "weight": "14445647294154",
+            "rshares": 86045543,
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T16:17:39"
+          },
+          {
+            "voter": "olesa",
+            "weight": "2819889996493",
+            "rshares": 442929760,
+            "percent": 10000,
+            "reputation": "881069378256",
+            "time": "2017-11-07T18:53:12"
+          },
+          {
+            "voter": "ultraviolet",
+            "weight": "73576246511144",
+            "rshares": "11526235209",
+            "percent": 10000,
+            "reputation": "571555196457",
+            "time": "2017-11-07T18:08:39"
+          },
+          {
+            "voter": "bonopord",
+            "weight": "588355374606",
+            "rshares": 93523300,
+            "percent": 10000,
+            "reputation": 0,
+            "time": "2017-11-07T20:42:06"
+          },
+          {
+            "voter": "silvianna",
+            "weight": "573007991310",
+            "rshares": 89756024,
+            "percent": 10000,
+            "reputation": "5960434893",
+            "time": "2017-11-07T17:50:27"
+          }
+        ],
+        "replies": [
+          "roman-ta/re-arcange-ezhednevnyi-otchet-20171106-20171107t165910024z",
+          "silvianna/re-arcange-ezhednevnyi-otchet-20171106-20171107t175144551z"
+        ],
+        "author_reputation": "1095655280218800",
+        "promoted": "0.000 GBG",
+        "body_length": 0,
+        "reblogged_by": []
+      },
+      "arcange/re-roman-ta-re-arcange-ezhednevnyi-otchet-20171106-20171107t204704152z": {
+        "id": 2452664,
+        "author": "arcange",
+        "permlink": "re-roman-ta-re-arcange-ezhednevnyi-otchet-20171106-20171107t204704152z",
+        "category": "ru--statistika",
+        "parent_author": "roman-ta",
+        "parent_permlink": "re-arcange-ezhednevnyi-otchet-20171106-20171107t165910024z",
+        "title": "",
+        "body": "Спасибо",
+        "json_metadata": "{\"tags\":[\"ru--statistika\"],\"app\":\"golos.io/0.1\"}",
+        "last_update": "2017-11-07T20:47:06",
+        "created": "2017-11-07T20:47:06",
+        "active": "2017-11-07T20:47:06",
+        "last_payout": "1970-01-01T00:00:00",
+        "depth": 2,
+        "children": 0,
+        "children_rshares2": "0",
+        "net_rshares": 0,
+        "abs_rshares": 0,
+        "vote_rshares": 0,
+        "children_abs_rshares": 0,
+        "cashout_time": "2017-11-08T16:25:53",
+        "max_cashout_time": "1969-12-31T23:59:59",
+        "total_vote_weight": 0,
+        "reward_weight": 10000,
+        "total_payout_value": "0.000 GBG",
+        "curator_payout_value": "0.000 GBG",
+        "author_rewards": 0,
+        "net_votes": 0,
+        "root_comment": 2448762,
+        "mode": "first_payout",
+        "max_accepted_payout": "1000000.000 GBG",
+        "percent_steem_dollars": 10000,
+        "allow_replies": true,
+        "allow_votes": true,
+        "allow_curation_rewards": true,
+        "url": "/ru--statistika/@arcange/ezhednevnyi-otchet-20171106#@arcange/re-roman-ta-re-arcange-ezhednevnyi-otchet-20171106-20171107t204704152z",
+        "root_title": "Ежедневный отчет – 2017.11.06",
+        "pending_payout_value": "0.000 GBG",
+        "total_pending_payout_value": "0.000 GBG",
+        "active_votes": [],
+        "replies": [],
+        "author_reputation": "1095655280218800",
+        "promoted": "0.000 GBG",
+        "body_length": 0,
+        "reblogged_by": []
+      },
+      "roman-ta/re-arcange-ezhednevnyi-otchet-20171106-20171107t165910024z": {
+        "id": 2449466,
+        "author": "roman-ta",
+        "permlink": "re-arcange-ezhednevnyi-otchet-20171106-20171107t165910024z",
+        "category": "ru--statistika",
+        "parent_author": "arcange",
+        "parent_permlink": "ezhednevnyi-otchet-20171106",
+        "title": "",
+        "body": "интересная статистика, особенно про категории.",
+        "json_metadata": "{\"tags\":[\"ru--statistika\"],\"app\":\"golos.io/0.1\"}",
+        "last_update": "2017-11-07T16:56:03",
+        "created": "2017-11-07T16:56:03",
+        "active": "2017-11-07T20:47:06",
+        "last_payout": "1970-01-01T00:00:00",
+        "depth": 1,
+        "children": 1,
+        "children_rshares2": "0",
+        "net_rshares": 0,
+        "abs_rshares": 0,
+        "vote_rshares": 0,
+        "children_abs_rshares": 0,
+        "cashout_time": "2017-11-08T16:25:53",
+        "max_cashout_time": "1969-12-31T23:59:59",
+        "total_vote_weight": 0,
+        "reward_weight": 10000,
+        "total_payout_value": "0.000 GBG",
+        "curator_payout_value": "0.000 GBG",
+        "author_rewards": 0,
+        "net_votes": 0,
+        "root_comment": 2448762,
+        "mode": "first_payout",
+        "max_accepted_payout": "1000000.000 GBG",
+        "percent_steem_dollars": 10000,
+        "allow_replies": true,
+        "allow_votes": true,
+        "allow_curation_rewards": true,
+        "url": "/ru--statistika/@arcange/ezhednevnyi-otchet-20171106#@roman-ta/re-arcange-ezhednevnyi-otchet-20171106-20171107t165910024z",
+        "root_title": "Ежедневный отчет – 2017.11.06",
+        "pending_payout_value": "0.000 GBG",
+        "total_pending_payout_value": "0.000 GBG",
+        "active_votes": [],
+        "replies": [
+          "arcange/re-roman-ta-re-arcange-ezhednevnyi-otchet-20171106-20171107t204704152z"
+        ],
+        "author_reputation": "97355944348",
+        "promoted": "0.000 GBG",
+        "body_length": 0,
+        "reblogged_by": []
+      },
+      "silvianna/re-arcange-ezhednevnyi-otchet-20171106-20171107t175144551z": {
+        "id": 2450219,
+        "author": "silvianna",
+        "permlink": "re-arcange-ezhednevnyi-otchet-20171106-20171107t175144551z",
+        "category": "ru--statistika",
+        "parent_author": "arcange",
+        "parent_permlink": "ezhednevnyi-otchet-20171106",
+        "title": "",
+        "body": "Полезная информация",
+        "json_metadata": "{\"tags\":[\"ru--statistika\"],\"app\":\"golos.io/0.1\"}",
+        "last_update": "2017-11-07T17:51:48",
+        "created": "2017-11-07T17:51:48",
+        "active": "2017-11-07T17:51:48",
+        "last_payout": "1970-01-01T00:00:00",
+        "depth": 1,
+        "children": 0,
+        "children_rshares2": "0",
+        "net_rshares": 0,
+        "abs_rshares": 0,
+        "vote_rshares": 0,
+        "children_abs_rshares": 0,
+        "cashout_time": "2017-11-08T16:25:53",
+        "max_cashout_time": "1969-12-31T23:59:59",
+        "total_vote_weight": 0,
+        "reward_weight": 10000,
+        "total_payout_value": "0.000 GBG",
+        "curator_payout_value": "0.000 GBG",
+        "author_rewards": 0,
+        "net_votes": 0,
+        "root_comment": 2448762,
+        "mode": "first_payout",
+        "max_accepted_payout": "1000000.000 GBG",
+        "percent_steem_dollars": 10000,
+        "allow_replies": true,
+        "allow_votes": true,
+        "allow_curation_rewards": true,
+        "url": "/ru--statistika/@arcange/ezhednevnyi-otchet-20171106#@silvianna/re-arcange-ezhednevnyi-otchet-20171106-20171107t175144551z",
+        "root_title": "Ежедневный отчет – 2017.11.06",
+        "pending_payout_value": "0.000 GBG",
+        "total_pending_payout_value": "0.000 GBG",
+        "active_votes": [],
+        "replies": [],
+        "author_reputation": "5960434893",
+        "promoted": "0.000 GBG",
+        "body_length": 0,
+        "reblogged_by": []
+      }
+    },
+    "accounts": {
+      "arcange": {
+        "id": 4283,
+        "name": "arcange",
+        "owner": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS7VeCSYUvrKkXz2uDgEHjgUvq32HwP4kZ9p4eGJqK2yHKaJzTXF",
+              1
+            ]
+          ]
+        },
+        "active": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS73LpidmG3uqwBpT8v6hDAkHKae7h9WnoMt6v46qah1FEyvtXya",
+              1
+            ]
+          ]
+        },
+        "posting": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS7xNZ9ap9mVvFSmXcbFCwPfWD7Mf6qijCQzqEEcfDbkwxJjfSKb",
+              1
+            ]
+          ]
+        },
+        "memo_key": "GLS8jnKy7u89PZwR82va1f71wKk8SKSeenpMYbKS4fENdgSv4Usag",
+        "json_metadata": "{\"created_at\":\"GENESIS\",\"ico_address\":\"1MzyobhWCwgywkjHACS7XEUyhWTVyWXV7n\",\"profile\":{\"profile_image\":\"http://i.cubeupload.com/aCpO3L.png\",\"about\":\"Делегат - Разработчик Доска Почета, GolosSQL и Golos.NET\",\"cover_image\":\"http://i.cubeupload.com/D7ZEm7.jpg\"}}",
+        "proxy": "",
+        "last_owner_update": "1970-01-01T00:00:00",
+        "last_account_update": "2017-09-26T11:19:48",
+        "created": "1970-01-01T00:00:00",
+        "mined": true,
+        "owner_challenged": false,
+        "active_challenged": false,
+        "last_owner_proved": "1970-01-01T00:00:00",
+        "last_active_proved": "1970-01-01T00:00:00",
+        "recovery_account": "cyberfounder",
+        "last_account_recovery": "1970-01-01T00:00:00",
+        "reset_account": "null",
+        "comment_count": 0,
+        "lifetime_vote_count": 0,
+        "post_count": 14394,
+        "can_vote": true,
+        "voting_power": 6449,
+        "last_vote_time": "2017-11-08T01:09:57",
+        "balance": "0.003 GOLOS",
+        "savings_balance": "0.000 GOLOS",
+        "sbd_balance": "11.904 GBG",
+        "sbd_seconds": "13929575474223",
+        "sbd_seconds_last_update": "2017-11-08T00:31:36",
+        "sbd_last_interest_payment": "2017-10-14T06:09:12",
+        "savings_sbd_balance": "0.000 GBG",
+        "savings_sbd_seconds": "10553394162",
+        "savings_sbd_seconds_last_update": "2017-08-26T14:04:54",
+        "savings_sbd_last_interest_payment": "2017-08-26T09:55:03",
+        "savings_withdraw_requests": 0,
+        "vesting_shares": "1887805768.969791 GESTS",
+        "vesting_withdraw_rate": "144362726.737286 GESTS",
+        "next_vesting_withdrawal": "2017-11-12T07:04:15",
+        "withdrawn": "433088180211858",
+        "to_withdraw": "1876715447584721",
+        "withdraw_routes": 0,
+        "curation_rewards": 28852555,
+        "posting_rewards": 402042357,
+        "proxied_vsf_votes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "witnesses_voted_for": 27,
+        "average_bandwidth": 293638029,
+        "lifetime_bandwidth": "23314672000000",
+        "last_bandwidth_update": "2017-11-08T01:09:57",
+        "average_market_bandwidth": 128831320,
+        "last_market_bandwidth_update": "2017-11-07T23:38:45",
+        "last_post": "2017-11-07T20:47:06",
+        "last_root_post": "2017-11-07T15:59:57",
+        "post_bandwidth": 30815,
+        "new_average_bandwidth": "615544083906",
+        "new_average_market_bandwidth": "13183796636",
+        "vesting_balance": "0.000 GOLOS",
+        "reputation": "1095655280218800",
+        "transfer_history": [],
+        "market_history": [],
+        "post_history": [],
+        "vote_history": [],
+        "other_history": [],
+        "witness_votes": [],
+        "tags_usage": [],
+        "guest_bloggers": [],
+        "blog_category": {}
+      },
+      "roman-ta": {
+        "id": 82226,
+        "name": "roman-ta",
+        "owner": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS6P2jNRtvTCQFsLkDmeid3CxjdYedbtfGvCt4N2wLjnyDxmeh5k",
+              1
+            ]
+          ]
+        },
+        "active": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS5vF2w5FAWonMZzVx1Q97TTHp3NzYn3UQAYMZxxFXPvtzTdrszC",
+              1
+            ]
+          ]
+        },
+        "posting": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS5bHooobyMvuJX3MJTVBerQDUib59XzqayhCqKmPCJrmcKYg88x",
+              1
+            ]
+          ]
+        },
+        "memo_key": "GLS6dYwuayD1u9Ud9JSqNGDdD15xQMj6cr9Fj9aqsnFkpdrmFiKG9",
+        "json_metadata": "{\"profile\":{\"select_tags\":[]}}",
+        "proxy": "",
+        "last_owner_update": "1970-01-01T00:00:00",
+        "last_account_update": "2017-10-15T12:46:48",
+        "created": "2017-10-12T17:29:15",
+        "mined": false,
+        "owner_challenged": false,
+        "active_challenged": false,
+        "last_owner_proved": "1970-01-01T00:00:00",
+        "last_active_proved": "1970-01-01T00:00:00",
+        "recovery_account": "golosio",
+        "last_account_recovery": "1970-01-01T00:00:00",
+        "reset_account": "null",
+        "comment_count": 0,
+        "lifetime_vote_count": 0,
+        "post_count": 33,
+        "can_vote": true,
+        "voting_power": 9820,
+        "last_vote_time": "2017-11-07T20:57:51",
+        "balance": "0.040 GOLOS",
+        "savings_balance": "0.000 GOLOS",
+        "sbd_balance": "0.274 GBG",
+        "sbd_seconds": "18502230",
+        "sbd_seconds_last_update": "2017-10-20T00:40:09",
+        "sbd_last_interest_payment": "2017-10-15T14:23:54",
+        "savings_sbd_balance": "0.000 GBG",
+        "savings_sbd_seconds": "0",
+        "savings_sbd_seconds_last_update": "1970-01-01T00:00:00",
+        "savings_sbd_last_interest_payment": "1970-01-01T00:00:00",
+        "savings_withdraw_requests": 0,
+        "vesting_shares": "19243.040967 GESTS",
+        "vesting_withdraw_rate": "0.000000 GESTS",
+        "next_vesting_withdrawal": "1969-12-31T23:59:59",
+        "withdrawn": 0,
+        "to_withdraw": 0,
+        "withdraw_routes": 0,
+        "curation_rewards": 0,
+        "posting_rewards": 247,
+        "proxied_vsf_votes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "witnesses_voted_for": 0,
+        "average_bandwidth": 430720578,
+        "lifetime_bandwidth": "200930000000",
+        "last_bandwidth_update": "2017-11-07T20:57:51",
+        "average_market_bandwidth": 0,
+        "last_market_bandwidth_update": "1970-01-01T00:00:00",
+        "last_post": "2017-11-07T20:33:15",
+        "last_root_post": "2017-11-07T18:29:21",
+        "post_bandwidth": 16991,
+        "new_average_bandwidth": "36113475649",
+        "new_average_market_bandwidth": 0,
+        "vesting_balance": "0.000 GOLOS",
+        "reputation": "97355944348",
+        "transfer_history": [],
+        "market_history": [],
+        "post_history": [],
+        "vote_history": [],
+        "other_history": [],
+        "witness_votes": [],
+        "tags_usage": [],
+        "guest_bloggers": [],
+        "blog_category": {}
+      },
+      "silvianna": {
+        "id": 85572,
+        "name": "silvianna",
+        "owner": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS7oZCdC55i8T4kVcYAmgsNzqFJGRggJvqkPXVwJVkZefpiTabXB",
+              1
+            ]
+          ]
+        },
+        "active": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS5iKzcGiaRgJwbRaDE8gKC98Trwc5JfbuXiZoeoHidYbNp2LKmp",
+              1
+            ]
+          ]
+        },
+        "posting": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "GLS7uh4b3VpVDHUV3bNhcbpD7U95qeTPV5cWfxXWzE5tcYDFFgp2D",
+              1
+            ]
+          ]
+        },
+        "memo_key": "GLS7ptnw3ifkrALwmTXhC6RUy7tc81rKSNPazN281SUcdTKJ6drT3",
+        "json_metadata": "{\"profile\":{\"gender\":\"female\",\"location\":\"Украина\",\"profile_image\":\"https://i.imgur.com/uE2AJ3S.jpg\",\"name\":\"Светлана Чудинова\",\"about\":\"Криптотрейдер инвестор бизнестренер\"}}",
+        "proxy": "",
+        "last_owner_update": "1970-01-01T00:00:00",
+        "last_account_update": "2017-11-07T09:06:30",
+        "created": "2017-11-06T16:36:36",
+        "mined": false,
+        "owner_challenged": false,
+        "active_challenged": false,
+        "last_owner_proved": "1970-01-01T00:00:00",
+        "last_active_proved": "1970-01-01T00:00:00",
+        "recovery_account": "golosio",
+        "last_account_recovery": "1970-01-01T00:00:00",
+        "reset_account": "null",
+        "comment_count": 0,
+        "lifetime_vote_count": 0,
+        "post_count": 10,
+        "can_vote": true,
+        "voting_power": 9349,
+        "last_vote_time": "2017-11-07T19:20:54",
+        "balance": "0.003 GOLOS",
+        "savings_balance": "0.000 GOLOS",
+        "sbd_balance": "0.022 GBG",
+        "sbd_seconds": "70371",
+        "sbd_seconds_last_update": "2017-11-07T18:20:00",
+        "sbd_last_interest_payment": "2017-11-07T17:24:09",
+        "savings_sbd_balance": "0.000 GBG",
+        "savings_sbd_seconds": "0",
+        "savings_sbd_seconds_last_update": "1970-01-01T00:00:00",
+        "savings_sbd_last_interest_payment": "1970-01-01T00:00:00",
+        "savings_withdraw_requests": 0,
+        "vesting_shares": "18699.171752 GESTS",
+        "vesting_withdraw_rate": "0.000000 GESTS",
+        "next_vesting_withdrawal": "1969-12-31T23:59:59",
+        "withdrawn": 0,
+        "to_withdraw": 0,
+        "withdraw_routes": 0,
+        "curation_rewards": 0,
+        "posting_rewards": 0,
+        "proxied_vsf_votes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "witnesses_voted_for": 0,
+        "average_bandwidth": 158200626,
+        "lifetime_bandwidth": "12069000000",
+        "last_bandwidth_update": "2017-11-07T19:20:54",
+        "average_market_bandwidth": 0,
+        "last_market_bandwidth_update": "1970-01-01T00:00:00",
+        "last_post": "2017-11-07T18:05:57",
+        "last_root_post": "2017-11-07T10:12:30",
+        "post_bandwidth": 10000,
+        "new_average_bandwidth": "11135521676",
+        "new_average_market_bandwidth": 0,
+        "vesting_balance": "0.000 GOLOS",
+        "reputation": "5960434893",
+        "transfer_history": [],
+        "market_history": [],
+        "post_history": [],
+        "vote_history": [],
+        "other_history": [],
+        "witness_votes": [],
+        "tags_usage": [],
+        "guest_bloggers": [],
+        "blog_category": {}
+      }
+    },
+    "pow_queue": [],
+    "witnesses": {},
+    "discussion_idx": {},
+    "witness_schedule": {
+      "id": 0,
+      "current_virtual_time": "2553580233604561900321480782",
+      "next_shuffle_block_num": 11068218,
+      "current_shuffled_witnesses": "7068656e6f6d000000000000000000007072696d757300000000000000000000646d696c617368000000000000000000676f6f642d6b61726d61000000000000766974616c792d6c766f760000000000617263616e67650000000000000000006c697476696e7465636800000000000076696b00000000000000000000000000726f656c616e647000000000000000006974736d696e652d36350000000000006f6e3178000000000000000000000000616e79780000000000000000000000006f6e30746f6c65000000000000000000746573747a000000000000000000000063726561746f72000000000000000000736d61696c657200000000000000000064723230373300000000000000000000787461720000000000000000000000006461726b2e73756e0000000000000000626c6f636b636861696e6564000000006c656861726400000000000000000000",
+      "num_scheduled_witnesses": 21,
+      "top19_weight": 1,
+      "timeshare_weight": 5,
+      "miner_weight": 1,
+      "witness_pay_normalization_factor": 25,
+      "median_props": {
+        "account_creation_fee": "3.000 GOLOS",
+        "maximum_block_size": 65536,
+        "sbd_interest_rate": 1000
+      },
+      "majority_version": "0.16.3"
+    },
+    "feed_price": {
+      "base": "2.852 GBG",
+      "quote": "1.000 GOLOS"
+    },
+    "error": ""
+  }
+}
