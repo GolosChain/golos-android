@@ -7,7 +7,7 @@ import eu.bittrade.libs.steemj.base.models.Story
 /**
  * Created by yuri on 06.11.17.
  */
-class StoryTreeBuilder(story: Story) {
+class StoryTree(story: Story) {
     var rootStory: RootStory? = null
     val comments: List<Comment>
 

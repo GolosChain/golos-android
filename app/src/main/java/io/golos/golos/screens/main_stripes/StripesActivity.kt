@@ -59,7 +59,7 @@ class StripesActivity : GolosActivity() {
                             .commit()
                 }
             } else if (it?.isLoggedIn == false) {
-                mFab.visibility = View.INVISIBLE
+                mFab.visibility = View.GONE
                 if (supportFragmentManager.findFragmentByTag(mNotLoggedFTag) == null) {
                     supportFragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.fade_in, 0)

@@ -1,21 +1,21 @@
 package io.golos.golos
 
-import android.app.Application
 import android.content.Context
-
+import android.support.multidex.MultiDexApplication
+import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import io.golos.golos.repository.persistence.Persister
 import timber.log.Timber
-import java.util.concurrent.Executors
 
 /**
  * Created by yuri on 30.10.17.
  */
-class App : Application() {
+class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
-        //   MultiDex.install(this)
         context = this
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+
         }
     }
 

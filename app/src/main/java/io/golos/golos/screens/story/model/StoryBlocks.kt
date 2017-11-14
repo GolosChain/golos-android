@@ -1,19 +1,18 @@
 package io.golos.golos.screens.story.model
 
-import io.golos.golos.screens.main_stripes.model.Format
 import io.golos.golos.utils.ImageVisitor
 import io.golos.golos.utils.TextVisitor
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
-import org.jsoup.nodes.TextNode
+import org.jsoup.nodes.Element
 
 /**
  * Created by yuri on 08.11.17.
  */
-data class StoryTextPart(val text: String) : Row()
+data class TextRow(val text: String) : Row()
 
-data class StoryImagePart(val src: String) : Row()
+data class ImageRow(val src: String) : Row()
 
 sealed class Row
 
@@ -23,6 +22,7 @@ class StoryParserToRows {
     private val imgRegexp = Regex("<img.*>")
     private val markdownChecker = Regex("\\[[^]]+\\]\\(https?:\\/\\/\\S+\\)")
     private val trashTags = Regex("<p>|</p>|<b>|</b>|\\n|<br>|</br>|&nbsp;")
+    private var list: List<Element>? = null
     fun parse(story: Comment): List<Row> {
 
         val out = ArrayList<Row>()
@@ -37,9 +37,14 @@ class StoryParserToRows {
         try {
             val doc = Jsoup.parse(str)
             var ets = doc.body().children()
+
             var body = doc.body()
+            list = listLastChildren(body)
             if (ets.size == 1 && ets[0].children().html().isNotEmpty()) {
+                if (ets[0].ownText().isNotEmpty()) out.add(TextRow(ets[0].ownText()))
                 ets = ets[0].children()
+
+
             }
             if (ets.size == 0) {
                 ets = doc.body().children()
@@ -48,32 +53,64 @@ class StoryParserToRows {
                 val nodes = doc.body().childNodes()
                 if (nodes.size != 0) {
                     nodes.forEach({
-                        out.add(StoryTextPart(it.toString()))
+                        out.add(TextRow(it.toString()))
                     })
                     return out
                 }
             }
             if (ets.size == 0) {
                 println("parser fail on $story")
-                out.add(StoryTextPart(str))
+                out.add(TextRow(str))
                 return out
             }
-            ets!!.forEach {
-                if (!(it is TextNode && it.text().isEmpty()) && !it.html().replace(trashTags, "").isEmpty()) {
+            if (list!!.size > 0) {
+                list!!.forEach {
                     if (it.hasAttr("src")) {
-                        out.add(StoryImagePart(it.attr("src")))
+                        out.add(ImageRow(it.attr("src")))
                     } else if (it.children().hasAttr("src")) {
-                        out.add(StoryImagePart(it.children().attr("src")))
-                    } else {
-                        out.add(StoryTextPart(it.html()))
+                        out.add(ImageRow(it.children().attr("src")))
+                    } else if (it.html().contains(anyImageLink)) {
+                        out.add(ImageRow(it.html()))
+                    } else if (it.html().isNotEmpty()) {
+                        out.add(TextRow(it.html()))
                     }
                 }
-
+            } else {
+                ets!!.forEach {
+                    if (!it.html().replace(trashTags, "").isEmpty()) {
+                        if (it.hasAttr("src")) {
+                            out.add(ImageRow(it.attr("src")))
+                        } else if (it.children().hasAttr("src")) {
+                            out.add(ImageRow(it.children().attr("src")))
+                        } else if (it.html().isNotEmpty()) {
+                            out.add(TextRow(it.html()))
+                        }
+                    }
+                }
             }
+
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        return out
+    }
+
+    private fun listChildren(element: Element): List<Element> {
+        if (element.children().count() == 0) return ArrayList()
+        val out = ArrayList<Element>()
+        out.addAll(element.children().flatMap { listOf(it) + listChildren(it) })
+        return out
+    }
+
+    private fun listLastChildren(element: Element): List<Element> {
+        //   val ownText = element.ownText()
+
+        if (element.children().count() == 0) return listOf(element)
+        // if (element.children().count() == 1) return listOf(element.child(0))
+
+        val out = ArrayList<Element>()
+        out.addAll(element.children().flatMap { listLastChildren(it) })
         return out
     }
 }

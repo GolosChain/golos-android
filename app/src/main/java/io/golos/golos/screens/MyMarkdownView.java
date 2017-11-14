@@ -90,7 +90,7 @@ public class MyMarkdownView extends MarkdownView {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 try {
-                    Uri uri = Uri.parse("url");
+                    Uri uri = Uri.getLocalizedError("url");
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     getContext().startActivity(intent);
                 } catch (Exception e) {

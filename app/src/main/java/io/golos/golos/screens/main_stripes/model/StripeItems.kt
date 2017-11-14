@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.steemj.base.models.Discussion
+import io.golos.golos.screens.story.model.*
 import org.commonmark.node.*
 import org.commonmark.parser.Parser
-import org.json.JSONException
-import org.json.JSONObject
 import org.jsoup.Jsoup
+import timber.log.Timber
 
 
 data class StripeItem(val discussion: Discussion) {
@@ -35,7 +35,7 @@ data class StripeItem(val discussion: Discussion) {
     @JsonProperty("gbgAmount")
     val gbgAmount: Double
     @JsonProperty("body")
-    val body: String
+    var body: String
     @JsonProperty("author")
     val author: String
     @JsonProperty("firstRebloggedBy")
@@ -43,115 +43,84 @@ data class StripeItem(val discussion: Discussion) {
     @JsonProperty("format")
     var format: Format = Format.HTML
     @JsonProperty("type")
-    var type: StripeItemType = StripeItemType.PLAIN
+    var type: ItemType = ItemType.PLAIN
     @JsonProperty("avatarPath")
     var avatarPath: String? = null
     val reputation: Long
 
     init {
+        val comment = Comment(discussion, null)
+        this.url = comment.url
+        this.id = comment.id
+        this.title = comment.title
+        this.payoutInDollats = comment.payoutInDollats
+        this.categoryName = comment.categoryName
+        this.votesNum = comment.votesNum
+        this.commentsCount = comment.commentsCount
+        this.permlink = comment.permlink
+        this.gbgAmount = comment.gbgAmount
+        this.reputation = comment.reputation
+        this.author = comment.author
+        this.firstRebloggedBy = discussion.firstRebloggedBy?.name ?: ""
+        var body = discussion.body
+        this.format = comment.format
+        this.images.addAll(comment.images)
+        this.links.addAll(comment.links)
+        val toRowsParser = StoryParserToRows()
+        val out = toRowsParser.parse(comment)
 
-        id = discussion.id
-        url = discussion.url ?: ""
-        title = discussion.title ?: ""
-        categoryName = discussion.category ?: ""
-        votesNum = discussion.netVotes
-        commentsCount = discussion.children
-        permlink = discussion.permlink?.link ?: ""
-        reputation = discussion.authorReputation
-        val tagsString = discussion.jsonMetadata
-        var json: JSONObject? = null
-        try {
-            if (tagsString != null && tagsString.isNotEmpty()) {
-                json = JSONObject(tagsString)
-                if (json.has("tags")) {
-                    val tagsArray = json.getJSONArray("tags")
-                    if (tagsArray.length() > 0) {
-                        (0 until tagsArray.length()).mapTo(tags) { tagsArray[it].toString() }
+        if (out.isEmpty()) {
+            Timber.e("parserFail")
+            if (format == Format.HTML) {
+                try {
+                    parseAsHtml(body)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                if (type == ItemType.PLAIN && images.isNotEmpty()) type = ItemType.PLAIN_WITH_IMAGE
+            } else if (format == Format.MARKDOWN) {
+                if (body.contains(htmlImageRegexp)) {
+                    format = Format.HTML
+                    parseAsHtml(body)
+                } else {
+                    body = body.replace(allHtml, "").replace("_", "")
+                    try {
+                        val document = parser.parse(body)
+                        if (document.firstChild != null && checkNodeIsImage(document.firstChild)) {
+                            type = ItemType.IMAGE_FIRST
+                        } else if (images.isNotEmpty()) type = ItemType.PLAIN_WITH_IMAGE
+                        else type = ItemType.PLAIN
+                    } catch (e: ExceptionInInitializerError) {
+                        e.printStackTrace()
+                        Timber.e("fail on getLocalizedError $body")
                     }
                 }
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-        if (json != null) {
-            try {
-                if (json.has("format")) {
-                    val format = json.getString("format")
-                    this.format = if (format.equals("markdown", true)) Format.MARKDOWN else Format.HTML
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        if (json != null) {
-            try {
-                if (json.has("image")) {
-                    val imageArray = json.getJSONArray("image")
-                    if (imageArray.length() > 0) {
-                        (0 until imageArray.length()).mapTo(images) {
-                            var image = imageArray[it].toString()
-                            if (image.endsWith("/")) image = image.removeSuffix("/")
-                            image
-                        }
-                    }
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        if (json != null) {
-            try {
-                if (json.has("links")) {
-                    val linksArray = json.getJSONArray("links")
-                    if (linksArray.length() > 0) {
-                        (0 until linksArray.length()).mapTo(links) { linksArray[it].toString() }
-                    }
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
-        payoutInDollats = String.format("$%.2f", (gbgAmount * 0.04106528))
-        var body = discussion.body ?: ""
-        author = discussion.author?.name ?: ""
 
-        firstRebloggedBy = discussion.firstRebloggedBy?.name ?: ""
 
-        if (format == Format.HTML) {
-            try {
-                parseAsHtml(body)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            if (type == StripeItemType.PLAIN && images.isNotEmpty()) type = StripeItemType.PLAIN_WITH_IMAGE
-        } else if (format == Format.MARKDOWN) {
-            if (body.contains(htmlImageRegexp)) {
-                format = Format.HTML
-                parseAsHtml(body)
+            } else if (images.isNotEmpty()) type = ItemType.PLAIN_WITH_IMAGE
+            else type = ItemType.PLAIN
+
+            if (type == ItemType.PLAIN_WITH_IMAGE) {
+                if (format == Format.HTML) this.body = body.replace(htmlImageRegexp, "").replace(anyImageLink, "")
+                else this.body = body
+                        .replace(markdownImageRegexp, "")
+                        .replace(anyImageLink, "")
+                        .replace(Regex("(\\*)"), "*")
+            } else if (type == ItemType.IMAGE_FIRST) {
+                this.body = ""
             } else {
-                body = body.replace(allHtml, "").replace("_", "")
-                val document = parser.parse(body)
-                if (document.firstChild != null && checkNodeIsImage(document.firstChild)) {
-                    type = StripeItemType.IMAGE_FIRST
-                } else if (images.isNotEmpty()) type = StripeItemType.PLAIN_WITH_IMAGE
-                else type = StripeItemType.PLAIN
+                this.body = body
             }
-
-
-        } else if (images.isNotEmpty()) type = StripeItemType.PLAIN_WITH_IMAGE
-        else type = StripeItemType.PLAIN
-
-        if (type == StripeItemType.PLAIN_WITH_IMAGE) {
-            if (format == Format.HTML) this.body = body.replace(htmlImageRegexp, "").replace(anyImageLink, "")
-            else this.body = body
-                    .replace(markdownImageRegexp, "")
-                    .replace(anyImageLink, "")
-                    .replace(Regex("(\\*)"), "*")
-        } else if (type == StripeItemType.IMAGE_FIRST) {
-            this.body = ""
         } else {
-            this.body = body
+            if (out[0] is ImageRow) {
+                type = ItemType.IMAGE_FIRST
+            } else {
+                if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
+            }
+            this.body = out.joinToString("\n") {
+                if (it is TextRow) it.text
+                else ""
+            }
         }
     }
 
@@ -181,7 +150,7 @@ data class StripeItem(val discussion: Discussion) {
                 val elements = ets.childNodes()
                 val str = elements[0].toString()
                 if (str.contains(markdownImageRegexpAndContents) || str.contains(htmlImageRegexp)) {
-                    type = StripeItemType.IMAGE_FIRST
+                    type = ItemType.IMAGE_FIRST
                 }
 
             }
@@ -189,7 +158,7 @@ data class StripeItem(val discussion: Discussion) {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        if (type == StripeItemType.PLAIN && images.isNotEmpty()) type = StripeItemType.PLAIN_WITH_IMAGE
+        if (type == ItemType.PLAIN && images.isNotEmpty()) type = ItemType.PLAIN_WITH_IMAGE
 
     }
 
@@ -269,11 +238,4 @@ data class StripeItem(val discussion: Discussion) {
     }
 }
 
-enum class Format {
-    HTML, MARKDOWN
-}
-
-enum class StripeItemType {
-    PLAIN, PLAIN_WITH_IMAGE, IMAGE_FIRST
-}
 

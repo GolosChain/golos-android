@@ -4,23 +4,24 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import io.golos.golos.R
+import io.golos.golos.screens.OnVoteSubmit
+import io.golos.golos.screens.VoteDialog
 import io.golos.golos.screens.main_stripes.adapters.StripeAdapter
 import io.golos.golos.screens.main_stripes.model.StripeType
 import io.golos.golos.screens.main_stripes.viewmodel.*
 import io.golos.golos.utils.ErrorCodes
+import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 
 
 /**
@@ -52,8 +53,39 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mAdapter = StripeAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
                 onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
-                onShareClick = { mViewModel?.onShareClick(it, activity) }
+                onShareClick = { mViewModel?.onShareClick(it, activity) },
+                onUpvoteClick = {
+                    if (it.isUserUpvotedOnThis) {
+                        mViewModel?.downVote(it)
+                    } else {
+                        val dialog = VoteDialog.getInstance()
+                        dialog.selectPowerListener = object : OnVoteSubmit {
+                            override fun submitVote(vote: Int) {
+                                Timber.e(it.title)
+                                mViewModel?.vote(it, vote)
+                            }
+                        }
+                        dialog.show(activity.fragmentManager, null)
+                    }
+                }
         )
+        mRecycler?.adapter = mAdapter
+        (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val position = manager.findLastCompletelyVisibleItemPosition()
+                if (position + 10 > mAdapter.itemCount) {
+                    mViewModel?.onScrollToTheEnd()
+                }
+            }
+        })
+        return view
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
         mViewModel?.stripeLiveData?.observe(this, Observer {
             if (it?.isLoading == true) {
                 mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
@@ -79,24 +111,14 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 } else if (it == ErrorCodes.ERROR_NO_CONNECTION) {
                     message = R.string.no_internet_connection
                 }
-                Snackbar.make(getView()!!,
-                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
-                        Toast.LENGTH_SHORT).show()
+                getView()?.showSnackbar(message)
             }
-        })
-        mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
-        mRecycler?.adapter = mAdapter
-        (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val position = manager.findLastCompletelyVisibleItemPosition()
-                if (position + 10 > mAdapter.itemCount) {
-                    mViewModel?.onScrollToTheEnd()
-                }
+            it?.messageLocalized?.let {
+                getView()?.showSnackbar(it)
             }
+            it?.message?.let { getView()?.showSnackbar(it) }
         })
-        return view
+
     }
 
     companion object {

@@ -12,6 +12,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.utils.ErrorCodes
+import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.security.InvalidParameterException
 
@@ -44,8 +45,13 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private val mHandler = Handler(Looper.getMainLooper())
 
     init {
-        userProfileState.value = UserProfileState(isLoggedIn = false, isScanMenuVisible = false)
-        userAuthState.value = AuthState(isLoggedIn = false)
+        val userData = mRepository.getCurrentUserData()
+        if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
+            initUser()
+        } else {
+            userProfileState.value = UserProfileState(isLoggedIn = false, isScanMenuVisible = false)
+            userAuthState.value = AuthState(isLoggedIn = false)
+        }
     }
 
     fun onUserInput(input: AuthUserInput) {
@@ -65,9 +71,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun onLoginClick() {
-        Timber.e(mLastUserInput.toString())
         if (mLastUserInput.login.isEmpty()) {
-            Timber.e("curremt input")
             userProfileState.value = createStateCopyMutatingValue(error = Pair(ErrorCodes.ERROR_AUTH, R.string.enter_login))
         } else if (userProfileState.value?.isScanMenuVisible == false) {
             if (mLastUserInput.masterKey.isEmpty()) {
@@ -98,7 +102,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                             mLastUserInput.login, isScanMenuVisible = true)
                 })
                 postWithCatch {
-                    val resp = mRepository.authWithPostingWif(mLastUserInput.login, mLastUserInput.activeWif)
+                    val resp = mRepository.authWithPostingWif(mLastUserInput.login, mLastUserInput.postingWif)
                     proceedAuthResponse(resp)
                 }
             }
@@ -112,15 +116,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                         isLoading = false,
                         error = Pair(ErrorCodes.ERROR_AUTH, R.string.wrong_credentials))
             } else {
-                userProfileState.value = createStateCopyMutatingValue(isLoggedIn = true,
-                        isLoading = false,
-                        error = null,
-                        userName = resp.userName,
-                        avatarPath = resp.avatarPath,
-                        userMoney = resp.golosBalance,
-                        userCommentsCount = resp.postsCount)
-                userAuthState.value = AuthState(true, resp.userName ?: "",
-                        resp.postingAuth?.second, resp.activeAuth?.second)
+                initUser()
             }
         })
     }
@@ -148,7 +144,13 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         mExecutor.execute({
             try {
                 action.invoke()
-            } catch (e: SteemTimeoutException) {
+            } catch (e: AddressFormatException) {
+                mHandler.post({
+                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
+                            error = Pair(ErrorCodes.UNKNOWN, R.string.unknown_error))
+                })
+            }
+            catch (e: SteemTimeoutException) {
                 mHandler.post({
                     userProfileState.value = createStateCopyMutatingValue(isLoading = false,
                             error = Pair(ErrorCodes.ERROR_SLOW_CONNECTION, R.string.slow_internet_connection))
@@ -180,7 +182,26 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         })
     }
 
+    private fun initUser() {
+        Timber.e("initUser")
+        Timber.e("userData = "+ mRepository.getCurrentUserData())
+        val userData = mRepository.getCurrentUserData()
+        if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
+            userProfileState.value = UserProfileState(isLoggedIn = true, userName = userData.userName, avatarPath = userData.avatarPath)
+            userAuthState.value = AuthState(isLoggedIn = true)
+            mRepository.setUserAccount(userData.userName, userData.privateActiveWif, userData.privatePostingWif)
+            postWithCatch {
+                val data = mRepository.getAccountData(userData.userName)
+                mHandler.post({
+                    userProfileState.value = UserProfileState(isLoggedIn = true, isLoading = false, userName = data.userName,
+                            avatarPath = data.avatarPath, userMoney = data.golosCount, userPostsCount = data.postsCount)
+                })
+            }
+        }
+    }
+
     fun onLogoutClick() {
+        mRepository.deleteUserdata()
         userProfileState.value = UserProfileState(false)
         userAuthState.value = AuthState(false)
     }

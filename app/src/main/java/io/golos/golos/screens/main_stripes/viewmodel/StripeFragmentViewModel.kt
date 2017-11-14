@@ -6,31 +6,28 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import eu.bittrade.libs.steemj.exceptions.SteemCommunicationException
-import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
-import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
+import eu.bittrade.libs.steemj.exceptions.*
+import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.screens.main_stripes.model.StripeItem
 import io.golos.golos.screens.main_stripes.model.StripeType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.model.RootStory
 import io.golos.golos.utils.ErrorCodes
+import io.golos.golos.utils.SteemErrorParser
 import timber.log.Timber
 import java.security.InvalidParameterException
-import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.ArrayList
 
 
 /**
  * Created by yuri on 01.11.17.
  */
 data class StripeViewState(val isLoading: Boolean,
-                           val items: List<StripeItem> = ArrayList(),
-                           val error: ErrorCodes? = null)
+                           val items: List<RootStory> = ArrayList(),
+                           val error: ErrorCodes? = null,
+                           val messageLocalized: Int? = null,
+                           val message: String? = null)
 
 class NewViewModel : StripeFragmentViewModel() {
     override val stripeType = StripeType.NEW
@@ -52,21 +49,12 @@ class PromoViewModel : StripeFragmentViewModel() {
 abstract class StripeFragmentViewModel : ViewModel() {
     abstract val stripeType: StripeType
     val stripeLiveData = MutableLiveData<StripeViewState>()
-    private val repository = Repository.get
+    private val mRepository = Repository.get
     private val isUpdating = AtomicBoolean(false)
-    private var mTruncateSize = 560
+    private var mTruncateSize = 1024
     private var mLatch = CountDownLatch(1)
 
     companion object {
-        private val mStripesExecutor: ThreadPoolExecutor by lazy {
-            val queu = PriorityBlockingQueue<Runnable>(15, Comparator<Runnable> { o1, o2 ->
-                if (o1 is ImageLoadRunnable) Int.MAX_VALUE
-                else if (o1 is Runnable) Int.MIN_VALUE
-                else 0
-            })
-            ThreadPoolExecutor(1, 1,
-                    Long.MAX_VALUE, TimeUnit.MILLISECONDS, queu)
-        }
         private val mHandler = Handler(Looper.getMainLooper())
     }
 
@@ -75,11 +63,10 @@ abstract class StripeFragmentViewModel : ViewModel() {
     }
 
     fun onSwipeToRefresh() {
-        Timber.e("onSwipeToRefresh")
         if (isUpdating.get()) return
         isUpdating.set(true)
         postWithCatch {
-            val item = repository.getStripeItems(limit = 20, type = stripeType, truncateBody = mTruncateSize)
+            val item = mRepository.getStripeItems(limit = 20, type = stripeType, truncateBody = mTruncateSize)
             mLatch = CountDownLatch(1)
             mHandler.post({
                 stripeLiveData.value = StripeViewState(false, item)
@@ -94,12 +81,13 @@ abstract class StripeFragmentViewModel : ViewModel() {
     fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         if (visibleToUser) {
             if (stripeLiveData.value?.items?.isEmpty() == true && !isUpdating.get()) {
+                isUpdating.set(true)
                 stripeLiveData.value = StripeViewState(true, ArrayList())
                 postWithCatch({
                     val size = stripeLiveData.value?.items?.size
                     if (size == 0) {
                         mHandler.post({ stripeLiveData.value = StripeViewState(true, ArrayList()) })
-                        val items = ArrayList(repository.getStripeItems(limit = 20, type = stripeType, truncateBody = mTruncateSize))
+                        val items = ArrayList(mRepository.getStripeItems(limit = 20, type = stripeType, truncateBody = mTruncateSize))
                         mHandler.post({
                             stripeLiveData.value = StripeViewState(false, items)
                             mLatch.countDown()
@@ -107,11 +95,10 @@ abstract class StripeFragmentViewModel : ViewModel() {
                         mLatch = CountDownLatch(1)
                         mLatch.await()
                         startLoadingAbscentAvatars()
+                        isUpdating.set(false)
                     }
                 })
             }
-        } else {
-
         }
     }
 
@@ -120,7 +107,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
         isUpdating.set(true)
         postWithCatch({
             mHandler.post({ stripeLiveData.value = StripeViewState(true, stripeLiveData.value?.items ?: ArrayList()) })
-            val newItems = repository.getStripeItems(limit = 20,
+            val newItems = mRepository.getStripeItems(limit = 20,
                     type = stripeType,
                     truncateBody = mTruncateSize,
                     startAuthor = stripeLiveData.value?.items?.last()?.author,
@@ -143,12 +130,13 @@ abstract class StripeFragmentViewModel : ViewModel() {
         if (actualItems == null || actualItems.isEmpty()) return
         actualItems.forEach {
             if (it.avatarPath == null) {
-                mStripesExecutor.execute(object : ImageLoadRunnable {
+                Repository.sharedExecutor.execute(object : ImageLoadRunnable {
                     override fun run() {
                         try {
                             if (it.avatarPath != null) return
-                            val actualItems = ArrayList(stripeLiveData.value!!.items)
-                            val avatar = repository.getUserAvatar(it.author, it.permlink, it.categoryName)
+                            val actualItems = ArrayList<RootStory>(stripeLiveData.value!!.items.size)
+                            stripeLiveData.value!!.items.forEach { actualItems.add(it.clone() as RootStory) }
+                            val avatar = mRepository.getUserAvatar(it.author, it.permlink, it.categoryName)
                             val newItems = actualItems.filter { item -> it.author == item.author }
                             if (newItems.isEmpty()) return
                             newItems.forEach { it.avatarPath = avatar }
@@ -170,10 +158,26 @@ abstract class StripeFragmentViewModel : ViewModel() {
 
 
     private fun postWithCatch(action: () -> Unit) {
-        mStripesExecutor.execute({
+        Repository.sharedExecutor.execute({
             try {
                 action.invoke()
                 isUpdating.set(false)
+            } catch (e: SteemResponseError) {
+                Timber.e(e.error.steemErrorDetails.message)
+                e.printStackTrace()
+                mHandler.post({
+                    stripeLiveData.value = StripeViewState(false,
+                            stripeLiveData.value?.items ?: ArrayList(),
+                            null,
+                            SteemErrorParser.getLocalizedError(e))
+                })
+            } catch (e: SteemInvalidTransactionException) {
+                e.printStackTrace()
+                mHandler.post({
+                    stripeLiveData.value = StripeViewState(false,
+                            stripeLiveData.value?.items ?: ArrayList(),
+                            message = e.message)
+                })
             } catch (e: SteemTimeoutException) {
                 mHandler.post({
                     stripeLiveData.value = StripeViewState(false,
@@ -212,8 +216,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
         })
     }
 
-    fun onCardClick(it: StripeItem, context: Context?) {
-        Timber.e("onCardClick $it")
+    fun onCardClick(it: RootStory, context: Context?) {
         if (context == null) return
         StoryActivity.start(context, author = it.author,
                 permlink = it.permlink,
@@ -221,8 +224,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
                 title = it.title)
     }
 
-    fun onCommentsClick(it: StripeItem, context: Context?) {
-        Timber.e("onCommentsClick $it")
+    fun onCommentsClick(it: RootStory, context: Context?) {
         if (context == null) return
         StoryActivity.start(context, author = it.author,
                 permlink = it.permlink,
@@ -230,14 +232,64 @@ abstract class StripeFragmentViewModel : ViewModel() {
                 title = it.title)
     }
 
-    fun onShareClick(it: StripeItem, context: Context?) {
-        val link = "https://golos.io/${it.categoryName}/@${it.author}/${it.permlink}"
+    fun onShareClick(it: RootStory, context: Context?) {
+        val link = "https://golos.blog/${it.categoryName}/@${it.author}/${it.permlink}"
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
         sendIntent.type = "text/plain"
         context?.startActivity(sendIntent)
     }
+
+    fun vote(it: RootStory, vote: Int) {
+        if (mRepository.getCurrentUserData() == null) {
+            mHandler.post({
+                stripeLiveData.value = StripeViewState(false,
+                        stripeLiveData.value?.items ?: ArrayList(),
+                        null,
+                      messageLocalized = R.string.login_to_vote)
+            })
+            return
+        }
+        Timber.e("vote, it = ${it.title}")
+        postWithCatch {
+            val story = mRepository.upvote(it.author, it.permlink, vote.toShort())
+            Timber.e("upvoted!")
+            mHandler.post({
+                val state = stripeLiveData.value?.items
+                if (state != null) {
+                    var copy = ArrayList<RootStory>(state.size)
+                    state.forEach { copy.add(it.clone() as RootStory) }
+                    state.filter { it.id == story.id }.forEachIndexed { index, item -> copy[index] = story }
+                    stripeLiveData.value = StripeViewState(stripeLiveData.value?.isLoading == true,
+                            copy, null, R.string.upvoted)
+                }
+            })
+        }
+    }
+
+    fun downVote(it: RootStory) {
+        Timber.e("downVote, it = ${it.title}")
+        postWithCatch {
+            val story = mRepository.downVote(it.author, it.permlink)
+            Timber.e("downvoted!")
+            mHandler.post({
+                val state = stripeLiveData.value?.items
+                Timber.e("state = $state")
+                if (state != null) {
+                    var copy = ArrayList(state)
+                    Timber.e("copy = $copy")
+                    state.filter { it.id == story.id }.forEachIndexed { index, item -> copy[index] = story }
+                    Timber.e("state = $state")
+                    Timber.e("copy = $copy")
+                    stripeLiveData.value = StripeViewState(stripeLiveData.value?.isLoading == true,
+                            copy, null,
+                            R.string.vote_canceled)
+                }
+            })
+        }
+    }
+
 }
 
 interface ImageLoadRunnable : Runnable

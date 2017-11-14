@@ -1,4 +1,4 @@
-package io.golos.golos.persistence.model
+package io.golos.golos.repository.persistence.model
 
 /**
  * Created by yuri on 06.11.17.

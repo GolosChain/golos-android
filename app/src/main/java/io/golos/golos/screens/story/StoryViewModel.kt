@@ -23,7 +23,6 @@ class StoryViewModel : ViewModel() {
     private val mHandler = Handler(Looper.getMainLooper())
 
     fun onCreate(blogName: String, author: String, permlink: String) {
-        Timber.e("on create $blogName $author $permlink")
         if (liveData.value?.storyTree?.rootStory?.body?.isEmpty() != false) {
             liveData.value = StoryViewState(isLoading = true)
             postWithCatch {

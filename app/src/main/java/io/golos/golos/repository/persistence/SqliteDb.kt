@@ -1,4 +1,4 @@
-package io.golos.golos.persistence
+package io.golos.golos.repository.persistence
 
 import android.content.ContentValues
 import android.content.Context
@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import io.golos.golos.utils.getLong
 import io.golos.golos.utils.getString
-import io.golos.golos.persistence.model.UserAvatar
+import io.golos.golos.repository.persistence.model.UserAvatar
 
 /**
  * Created by yuri on 06.11.17.

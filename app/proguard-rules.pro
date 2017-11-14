@@ -46,25 +46,27 @@ public static ** valueOf(java.lang.String);
 -keepattributes *Annotation*
 
 
--keep class org.jetbrains.** { *; }
+#-keep class org.jetbrains.** { *; }
 -keep,includedescriptorclasses class javax.lang.model.type.** { *; }
 -keep,includedescriptorclasses class io.golos.** { *; }
 -keep,includedescriptorclasses class eu.bittrade.libs.steemj.base.models.** { *; }
 -keep,includedescriptorclasses class kotlin.reflect.jvm.** { *; }
 
--keep,includedescriptorclasses class ru.noties.markwon.spans.** { *; }
-#-keep,includedescriptorclasses class org.commonmark.node.** { *; }
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }
+-keep,includedescriptorclasses class org.commonmark.** { *; }
+
+
 -keep class com.fasterxml.jackson.annotation.** { *; }
 -keepattributes Signature,InnerClasses,*Annotation*
 -keep,includedescriptorclasses  class org.glassfish.tyrus.** {  *; }
 -keep,includedescriptorclasses  class org.glassfish.grizzly.** { *; }
+
 -keep,includedescriptorclasses  class android.arch.lifecycle.** { *; }
 -keep,includedescriptorclasses  class com.caverock.androidsvg.** { *; }
 -keep,includedescriptorclasses  class javax.websocket.** { *; }
 
--keep,includedescriptorclasses  class org.jsoup.** { *; }
-#-keeppackagenames org.jsoup.nodes
+#-keep,includedescriptorclasses  class org.jsoup.** { *; }
+-keeppackagenames org.jsoup.nodes
 -keep,includedescriptorclasses  class android.support.v7.util.** { *; }
 -keep,includedescriptorclasses  class android.support.design.widget.FloatingActionButton.** { *; }
 

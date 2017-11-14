@@ -6,13 +6,15 @@ import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.database.Cursor
 import android.graphics.PorterDuff
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.text.Html
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.Toast
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
@@ -80,3 +82,13 @@ val Account.avatarPath: String?
         }
         return avatarPath
     }
+fun View.showSnackbar(message: Int){
+        Snackbar.make(this,
+                Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
+                Toast.LENGTH_SHORT).show()
+}
+fun View.showSnackbar(message: String){
+    Snackbar.make(this,
+            Html.fromHtml("<font color=\"#ffffff\">${message}</font>"),
+            Toast.LENGTH_SHORT).show()
+}

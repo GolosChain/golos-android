@@ -15,8 +15,8 @@
         android:id="@+id/avatar_iv"
         android:layout_width="44dp"
         android:layout_height="44dp"
-        android:scaleType="centerCrop"
         android:layout_marginStart="@dimen/margin_material"
+        android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:riv_corner_radius="30dp" />
@@ -74,10 +74,10 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_half"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
         android:textSize="15sp"
         android:textStyle="bold"
-        android:clickable="true"
-        android:background="?selectableItemBackground"
         app:layout_constraintEnd_toStartOf="@+id/additional_image"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -91,12 +91,12 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="4dp"
-        android:ellipsize="marquee"
+        android:background="?selectableItemBackground"
         android:clickable="true"
+        android:ellipsize="marquee"
         android:maxLength="80"
         android:textColor="#414548"
         android:textSize="14sp"
-        android:background="?selectableItemBackground"
         android:visibility="visible"
         app:layout_constraintEnd_toStartOf="@+id/additional_image"
         app:layout_constraintStart_toStartOf="parent"
@@ -105,10 +105,10 @@
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/additional_image"
         android:layout_width="90dp"
-        android:clickable="true"
-        android:background="?selectableItemBackground"
         android:layout_height="120dp"
         android:layout_marginBottom="@dimen/margin_material_half"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
         android:paddingEnd="@dimen/margin_material"
         android:scaleType="centerCrop"
         android:visibility="visible"
@@ -122,13 +122,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_material"
-        android:cropToPadding="true"
-        android:clickable="true"
-        android:background="?selectableItemBackgroundBorderless"
         android:adjustViewBounds="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:cropToPadding="true"
+        android:minHeight="220dp"
         android:scaleType="fitCenter"
         android:visibility="visible"
-        android:minHeight="220dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
@@ -157,16 +157,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.33"
             android:drawablePadding="-8dp"
-            android:drawableStart="@drawable/ic_upvote_green_24dp"
-
-            android:textColor="@color/upvote_green" />
+            android:drawableStart="@drawable/ic_upvote_gray_24dp"
+            android:textColor="@color/gray_1" />
 
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/vh_stripe_full_delimeter_margins"
             android:layout_marginTop="@dimen/vh_stripe_full_delimeter_margins"
-            android:background="@color/gray_1" />
+            android:background="@color/upvote_gray" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/comments_btn"

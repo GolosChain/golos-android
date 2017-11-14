@@ -13,9 +13,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.story.GlideImageGetter
-import io.golos.golos.screens.story.model.StoryImagePart
+import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
-import io.golos.golos.screens.story.model.StoryTextPart
+import io.golos.golos.screens.story.model.TextRow
 
 /**
  * Created by yuri on 08.11.17.
@@ -39,8 +39,8 @@ class MainStoryAdapter(items: List<Row>) : RecyclerView.Adapter<RecyclerView.Vie
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
-            is TextBlockHolder -> holder.text = (items[position] as StoryTextPart).text
-            is ImageBlockHolder -> holder.imageSrc = (items[position] as StoryImagePart).src
+            is TextBlockHolder -> holder.text = (items[position] as TextRow).text
+            is ImageBlockHolder -> holder.imageSrc = (items[position] as ImageRow).src
         }
     }
 
@@ -49,7 +49,7 @@ class MainStoryAdapter(items: List<Row>) : RecyclerView.Adapter<RecyclerView.Vie
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (items[position] is StoryTextPart) return 0
+        if (items[position] is TextRow) return 0
         else return 1
     }
 }

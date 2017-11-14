@@ -43,4 +43,10 @@
     <string name="wrong_credentials">Неверные логин или пароль</string>
     <string name="logout">Выход</string>
     <string name="loading">Загружается...</string>
+    <string name="choose_vote_power">Выберите силу голоса</string>
+    <string name="user_used_max_comments_chances">Больше нельзя голосовать за это сообщение</string>
+    <string name="vote_canceled">Голос отменен</string>
+    <string name="upvoted">Проголосовано</string>
+    <string name="you_voted_same_way">Вы уже проголосовали за это сообщение</string>
+    <string name="login_to_vote">Зайдите или зарегестрируйтесь для голосования</string>
 </resources>

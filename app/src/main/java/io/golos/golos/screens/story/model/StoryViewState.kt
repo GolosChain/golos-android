@@ -10,5 +10,5 @@ data class StoryViewState(val isLoading: Boolean = false,
                           val storyTitle: String = "",
                           val errorCode: ErrorCodes? = null,
                           val tags: List<String> = emptyList(),
-                          val storyTree: StoryTreeBuilder = StoryTreeBuilder(story = Story())) {
+                          val storyTree: StoryTree = StoryTree(story = Story())) {
 }

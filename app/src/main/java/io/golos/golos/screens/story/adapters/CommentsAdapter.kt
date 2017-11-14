@@ -17,9 +17,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.story.model.Comment
-import io.golos.golos.screens.story.model.StoryImagePart
+import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.StoryTextPart
+import io.golos.golos.screens.story.model.TextRow
 import timber.log.Timber
 
 /**
@@ -115,11 +115,11 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mPayoutTv.text = "$ ${String.format("%.2f", comment.payoutValueInDollars)}"
                 val rows = ArrayList(StoryParserToRows().parse(comment))
                 Timber.e("comment part size is ${rows.size}")
-                var imagePart = rows.findLast { it is StoryImagePart }
+                var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
                     val error = mGlide.load(R.drawable.error)
-                    mGlide.load((imagePart as StoryImagePart).src)
+                    mGlide.load((imagePart as ImageRow).src)
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.error))
                             .into(mImage)
@@ -133,8 +133,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 } else {
                     mText.visibility = View.VISIBLE
                     val outText = rows.map {
-                        if (it is StoryTextPart) "${it.text}\n"
-                        else "<a href=\"${(it as StoryImagePart).src}\">${itemView.resources.getString(R.string.image)}</a>"
+                        if (it is TextRow) "${it.text}\n"
+                        else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>"
                     }.reduce { s1, s2 -> s1 + s2 }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         mText.text = Html.fromHtml(outText, Html.FROM_HTML_MODE_LEGACY, null, null)
