@@ -9,8 +9,7 @@ import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
 import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.story.model.StoryViewState
-import io.golos.golos.utils.ErrorCodes
-import timber.log.Timber
+import io.golos.golos.utils.ErrorCode
 import java.security.InvalidParameterException
 
 /**
@@ -46,31 +45,31 @@ class StoryViewModel : ViewModel() {
             } catch (e: SteemTimeoutException) {
                 mHandler.post({
                     liveData.value = StoryViewState(false,
-                            errorCode = ErrorCodes.ERROR_SLOW_CONNECTION)
+                            errorCode = ErrorCode.ERROR_SLOW_CONNECTION)
                 })
             } catch (e: SteemCommunicationException) {
                 e.printStackTrace()
                 mHandler.post({
                     liveData.value = StoryViewState(false,
-                            errorCode = ErrorCodes.ERROR_NO_CONNECTION)
+                            errorCode = ErrorCode.ERROR_NO_CONNECTION)
                 })
             } catch (e: InvalidParameterException) {
                 e.printStackTrace()
                 mHandler.post({
                     liveData.value = StoryViewState(false,
-                            errorCode = ErrorCodes.ERROR_WRONG_ARGUMENTS)
+                            errorCode = ErrorCode.ERROR_WRONG_ARGUMENTS)
                 })
             } catch (e: SteemConnectionException) {
                 e.printStackTrace()
                 mHandler.post({
                     liveData.value = StoryViewState(false,
-                            errorCode = ErrorCodes.ERROR_NO_CONNECTION)
+                            errorCode = ErrorCode.ERROR_NO_CONNECTION)
                 })
             } catch (e: Exception) {
                 e.printStackTrace()
                 mHandler.post({
                     liveData.value = StoryViewState(false,
-                            errorCode = ErrorCodes.UNKNOWN)
+                            errorCode = ErrorCode.UNKNOWN)
                 })
             }
         })

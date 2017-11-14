@@ -1,4 +1,4 @@
-package io.golos.golos.screens;
+package io.golos.golos.screens.widgets;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

@@ -12,7 +12,7 @@ import android.widget.EditText
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
-import io.golos.golos.screens.GolosViewHolder
+import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.editor.EditorAdapterFooter
 
 class EditorAdapterFooterViewHolder(@LayoutRes res: Int, parent: ViewGroup) : GolosViewHolder(res, parent), TextWatcher {

@@ -3,7 +3,6 @@ package io.golos.golos.screens.main_stripes
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -14,14 +13,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
-import io.golos.golos.screens.OnVoteSubmit
-import io.golos.golos.screens.VoteDialog
 import io.golos.golos.screens.main_stripes.adapters.StripeAdapter
-import io.golos.golos.screens.main_stripes.model.StripeType
+import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
+import io.golos.golos.screens.main_stripes.model.StripeFragmentType
 import io.golos.golos.screens.main_stripes.viewmodel.*
-import io.golos.golos.utils.ErrorCodes
+import io.golos.golos.screens.widgets.OnVoteSubmit
+import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.showSnackbar
-import timber.log.Timber
 
 
 /**
@@ -36,19 +34,26 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater!!.inflate(R.layout.fr_stripe, container, false)
+        bindViews(view)
+        setUp()
+        return view
+    }
+
+    private fun bindViews(view: View) {
         mRecycler = view.findViewById(R.id.recycler)
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
-        mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(container!!.context, R.color.colorPrimaryDark))
+        mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.colorPrimaryDark))
         mSwipeRefresh?.setOnRefreshListener(this)
-        val manager = LinearLayoutManager(container!!.context)
+        val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(this)
-        val type: StripeType = arguments.getSerializable(TYPE_TAG) as StripeType
+        val type: StripeFragmentType = arguments.getSerializable(TYPE_TAG) as StripeFragmentType
         mViewModel = when (type) {
-            StripeType.NEW -> provider.get(NewViewModel::class.java)
-            StripeType.ACTUAL -> provider.get(ActualViewModle::class.java)
-            StripeType.POPULAR -> provider.get(PopularViewModel::class.java)
-            StripeType.PROMO -> provider.get(PromoViewModel::class.java)
+            StripeFragmentType.NEW -> provider.get(NewViewModel::class.java)
+            StripeFragmentType.ACTUAL -> provider.get(ActualViewModle::class.java)
+            StripeFragmentType.POPULAR -> provider.get(PopularViewModel::class.java)
+            StripeFragmentType.PROMO -> provider.get(PromoViewModel::class.java)
+            StripeFragmentType.FEED -> provider.get(FeedViewModel::class.java)
         }
         mAdapter = StripeAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
@@ -61,7 +66,6 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         val dialog = VoteDialog.getInstance()
                         dialog.selectPowerListener = object : OnVoteSubmit {
                             override fun submitVote(vote: Int) {
-                                Timber.e(it.title)
                                 mViewModel?.vote(it, vote)
                             }
                         }
@@ -80,11 +84,10 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
         })
-        return view
+        mRecycler?.recycledViewPool = StripesPagerAdpater.sharedPool
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setUp() {
         mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
         mViewModel?.stripeLiveData?.observe(this, Observer {
             if (it?.isLoading == true) {
@@ -101,29 +104,20 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             }
             it?.error?.let {
-                if (getView() == null) {
-                    return@let
+                if (it.localizedMessage != null) getView()?.showSnackbar(it.localizedMessage)
+                else if (it.nativeMessage != null) getView()?.showSnackbar(it.nativeMessage)
+                else {
                 }
-                var message = R.string.unknown_error
-                if (it == ErrorCodes.ERROR_SLOW_CONNECTION) {
-                    message = R.string.slow_internet_connection
-
-                } else if (it == ErrorCodes.ERROR_NO_CONNECTION) {
-                    message = R.string.no_internet_connection
-                }
-                getView()?.showSnackbar(message)
             }
-            it?.messageLocalized?.let {
+            it?.popupMessage?.let {
                 getView()?.showSnackbar(it)
             }
-            it?.message?.let { getView()?.showSnackbar(it) }
         })
-
     }
 
     companion object {
-        private val TYPE_TAG = "TYPE_TAG"
-        fun getInstance(type: StripeType): StripeFragment {
+        val TYPE_TAG = "TYPE_TAG"
+        fun getInstance(type: StripeFragmentType): StripeFragment {
             val fr = StripeFragment()
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
@@ -134,7 +128,6 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         mViewModel?.onSwipeToRefresh()
-        Handler().postDelayed({ mSwipeRefresh?.isRefreshing = false }, 2000)
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {

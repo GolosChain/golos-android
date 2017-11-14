@@ -19,7 +19,7 @@
             android:name=".screens.editor.EditorActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".screens.BarcodeScannerActivity"
+            android:name=".screens.widgets.BarcodeScannerActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.story.StoryActivity"

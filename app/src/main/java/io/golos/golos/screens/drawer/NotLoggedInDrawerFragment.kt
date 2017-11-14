@@ -19,9 +19,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import io.golos.golos.R
-import io.golos.golos.screens.BarcodeScannerActivity
-import io.golos.golos.screens.LateTextWatcher
-import io.golos.golos.utils.ErrorCodes
+import io.golos.golos.screens.widgets.BarcodeScannerActivity
+import io.golos.golos.screens.widgets.LateTextWatcher
+import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.hideKeyboard
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showProgressDialog
@@ -126,7 +126,7 @@ class NotLoggedInDrawerFragment : Fragment() {
             if (it?.error != null) {
                 var message = R.string.unknown_error
                 when (it.error.first) {
-                    ErrorCodes.ERROR_AUTH -> message = it.error.second
+                    ErrorCode.ERROR_AUTH -> message = it.error.second
                 }
                 view?.findFocus()?.let { context?.hideKeyboard(it) }
 

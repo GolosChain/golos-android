@@ -7,10 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import io.golos.golos.R
-import io.golos.golos.screens.GolosViewHolder
+import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.editor.EditorAdapterTextPart
-import timber.log.Timber
-import timber.log.Timber.i
 
 class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) : GolosViewHolder(res, parent), TextWatcher, View.OnFocusChangeListener {
     private var mEditText: EditText = itemView.findViewById(R.id.et)

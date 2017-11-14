@@ -1,4 +1,4 @@
-package io.golos.golos.screens
+package io.golos.golos.screens.widgets
 
 import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
@@ -9,7 +9,7 @@ import android.view.ViewGroup
 /**
  * Created by yuri on 30.10.17.
  */
-abstract class GolosViewHolder(@LayoutRes res: Int, parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(res, parent)) {
+abstract class GolosViewHolder(@LayoutRes res: Int, parent: ViewGroup) : RecyclerView.ViewHolder(inflate(res, parent)) {
 
     companion object {
         fun inflate(@LayoutRes res: Int, parent: ViewGroup): View {

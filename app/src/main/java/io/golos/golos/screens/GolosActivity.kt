@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.widget.Toast
 import io.golos.golos.R
-import io.golos.golos.utils.ErrorCodes
+import io.golos.golos.utils.ErrorCode
 
 /**
  * Created by yuri yurivladdurain@gmail.com
@@ -34,12 +34,12 @@ abstract class GolosActivity : AppCompatActivity() {
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left)
     }
 
-    open fun showErrorMessage(code: ErrorCodes) {
+    open fun showErrorMessage(code: ErrorCode) {
         var message = R.string.unknown_error
 
         when (code) {
-            ErrorCodes.ERROR_SLOW_CONNECTION -> message = R.string.slow_internet_connection
-            ErrorCodes.ERROR_NO_CONNECTION -> message = R.string.slow_internet_connection
+            ErrorCode.ERROR_SLOW_CONNECTION -> message = R.string.slow_internet_connection
+            ErrorCode.ERROR_NO_CONNECTION -> message = R.string.slow_internet_connection
             else -> message = R.string.unknown_error
         }
         Snackbar.make(findViewById(android.R.id.content),

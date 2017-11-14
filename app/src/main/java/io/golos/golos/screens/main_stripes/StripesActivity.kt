@@ -3,16 +3,13 @@ package io.golos.golos.screens.main_stripes
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
-import android.text.Html
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.drawer.AuthViewModel
@@ -20,7 +17,7 @@ import io.golos.golos.screens.drawer.NotLoggedInDrawerFragment
 import io.golos.golos.screens.drawer.UserProfileDrawerFragment
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
-import io.golos.golos.screens.main_stripes.model.StripeType
+import io.golos.golos.utils.showSnackbar
 import java.util.*
 
 
@@ -37,12 +34,6 @@ class StripesActivity : GolosActivity() {
     lateinit private var mConnection: PagerAndSpinnerConnection
     private val mNotLoggedFTag = "mNotLoggedFTag"
     private val mUserProfileFTag = "mUserProfileFTag"
-    private val listOfSupportedStripes = listOf(
-            StripeType.POPULAR,
-            StripeType.NEW,
-            StripeType.ACTUAL,
-            StripeType.PROMO
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +49,8 @@ class StripesActivity : GolosActivity() {
                             .replace(mDrawerPaneLo.id, UserProfileDrawerFragment.getInstance(), mUserProfileFTag)
                             .commit()
                 }
+                (mPager.adapter as? StripesPagerAdpater)?.isFeedFragmentShown = true
+                mConnection.onLoggedIn(this)
             } else if (it?.isLoggedIn == false) {
                 mFab.visibility = View.GONE
                 if (supportFragmentManager.findFragmentByTag(mNotLoggedFTag) == null) {
@@ -66,13 +59,15 @@ class StripesActivity : GolosActivity() {
                             .replace(mDrawerPaneLo.id, NotLoggedInDrawerFragment.getInstance(), mNotLoggedFTag)
                             .commit()
                 }
+                (mPager.adapter as? StripesPagerAdpater)?.isFeedFragmentShown = false
+                mConnection.onLoggedOut(this)
             }
         })
         authModel.onCloseDrawerRequest.observe(this, android.arch.lifecycle.Observer { mDrawer.closeDrawer(Gravity.START) })
     }
 
     private fun setup() {
-        mFab = findViewById(R.id.fab);
+        mFab = findViewById(R.id.fab)
         mFab.setOnClickListener({ EditorActivity.startPostEditor(this, "") })
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -83,8 +78,8 @@ class StripesActivity : GolosActivity() {
         actionBarDrawerToggle.syncState()
         mDrawerPaneLo = findViewById(R.id.drawer_pane_container)
         mPager = findViewById(R.id.view_pager)
-        val adapter = StripesPagerAdpater(supportFragmentManager, listOfSupportedStripes)
-        mPager.offscreenPageLimit = 4
+        val adapter = StripesPagerAdpater(supportFragmentManager)
+        mPager.offscreenPageLimit = 5
         mPager.adapter = adapter
         mConnection = PagerAndSpinnerConnection(findViewById(R.id.spinner), mPager, adapter)
     }
@@ -99,9 +94,9 @@ class StripesActivity : GolosActivity() {
             }
             if (!mDoubleBack) {
                 mDoubleBack = true
-                Snackbar.make(findViewById(android.R.id.content),
-                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(R.string.tab_back_double_to_enter)}</font>"),
-                        Toast.LENGTH_SHORT).show()
+                findViewById<View>(android.R.id.content)?.let {
+                    it.showSnackbar(R.string.tab_back_double_to_enter)
+                }
             } else {
                 super.onBackPressed()
             }

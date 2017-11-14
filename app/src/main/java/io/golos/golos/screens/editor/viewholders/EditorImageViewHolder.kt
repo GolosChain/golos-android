@@ -2,7 +2,7 @@ package io.golos.golos.screens.editor.viewholders
 
 import android.support.annotation.LayoutRes
 import android.view.ViewGroup
-import io.golos.golos.screens.GolosViewHolder
+import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.editor.CancellableImage
 import io.golos.golos.screens.editor.CancellableImageState
 import io.golos.golos.screens.editor.EditorAdapterImagePart

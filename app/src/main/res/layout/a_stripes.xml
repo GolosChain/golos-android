@@ -69,7 +69,7 @@
             app:fabSize="normal"
             android:background="?attr/selectableItemBackground"
             app:layout_anchorGravity="bottom|right|end"
-            app:layout_behavior="io.golos.golos.screens.FabBeh"
+            app:layout_behavior="io.golos.golos.screens.widgets.FabBeh"
             app:srcCompat="@drawable/ic_add_white_24dp" />
     </android.support.design.widget.CoordinatorLayout>
 

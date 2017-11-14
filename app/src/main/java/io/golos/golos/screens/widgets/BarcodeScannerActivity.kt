@@ -1,4 +1,4 @@
-package io.golos.golos.screens
+package io.golos.golos.screens.widgets
 
 import android.app.Activity
 import android.content.Intent

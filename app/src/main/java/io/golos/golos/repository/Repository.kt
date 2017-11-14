@@ -13,18 +13,20 @@ import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
-import io.golos.golos.screens.main_stripes.model.StripeType
+import io.golos.golos.screens.main_stripes.model.StripeFragmentType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
 import io.golos.golos.screens.story.model.RootStory
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.avatarPath
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.bitcoinj.core.AddressFormatException
+import timber.log.Timber
 import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 /**
@@ -52,7 +54,7 @@ abstract class Repository {
     }
 
     @WorkerThread
-    abstract fun getStripeItems(limit: Int, type: StripeType, truncateBody: Int,
+    abstract fun getStripeItems(limit: Int, type: StripeFragmentType, truncateBody: Int,
                                 startAuthor: String? = null, startPermlink: String? = null): List<RootStory>
 
     @WorkerThread
@@ -83,20 +85,23 @@ abstract class Repository {
     abstract fun setUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
     @WorkerThread
     abstract fun downVote(author: String, permlink: String): RootStory
+
+    abstract fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory>
 }
 
 private class RepositoryImpl(private val mPersister: Persister,
                              private val mGolosApi: Golos4J) : Repository() {
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
 
-    override fun getStripeItems(limit: Int, type: StripeType, truncateBody: Int,
+    override fun getStripeItems(limit: Int, type: StripeFragmentType, truncateBody: Int,
                                 startAuthor: String?, startPermlink: String?): List<RootStory> {
         var discussionSortType =
                 when (type) {
-                    StripeType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
-                    StripeType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
-                    StripeType.NEW -> DiscussionSortType.GET_DISCUSSIONS_BY_CREATED
-                    StripeType.PROMO -> DiscussionSortType.GET_DISCUSSIONS_BY_PROMOTED
+                    StripeFragmentType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
+                    StripeFragmentType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
+                    StripeFragmentType.NEW -> DiscussionSortType.GET_DISCUSSIONS_BY_CREATED
+                    StripeFragmentType.PROMO -> DiscussionSortType.GET_DISCUSSIONS_BY_PROMOTED
+                    StripeFragmentType.FEED -> return getUserFeed(mPersister.getCurrentUserName()!!, limit, truncateBody, startAuthor, startPermlink)
                 }
         val query = DiscussionQuery()
         query.limit = limit
@@ -160,6 +165,11 @@ private class RepositoryImpl(private val mPersister: Persister,
     override fun downVote(author: String, permlink: String): RootStory {
         mGolosApi.simplifiedOperations.cancelVote(AccountName(author), Permlink(permlink))
         return getRootStoryWithoutComments(author, permlink)
+    }
+
+    override fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory> {
+        return mGolosApi.databaseMethods.getUserFeed(AccountName(userName)).map { RootStory(it, null) }
+
     }
 
     override fun getAccountData(of: String): AccountInfo {
@@ -294,12 +304,15 @@ private class RepositoryImpl(private val mPersister: Persister,
         if (currentUser != null) {
             if (story.activeVotes.filter { it.first == currentUser && it.second > 0 }.count() != 0) story.isUserUpvotedOnThis = true
         }
+        story.avatarPath = mPersister.getAvatarForUser(story.author)?.first
         return story
     }
 }
 
+
 private class MockRepoImpl : Repository() {
-    override fun getStripeItems(limit: Int, type: StripeType, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory> {
+
+    override fun getStripeItems(limit: Int, type: StripeFragmentType, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory> {
         val mapper = CommunicationHandler.getObjectMapper()
         val context = App.get.context
         val ins = context.resources.openRawResource(context.resources.getIdentifier("stripe",
@@ -323,6 +336,9 @@ private class MockRepoImpl : Repository() {
 
     }
 
+    override fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory> {
+        return Golos4J.getInstance().databaseMethods.getUserFeed(AccountName("cepera")).map { RootStory(it, null) }
+    }
 
     override fun getAccountData(of: String): AccountInfo {
         return AccountInfo(of, null, 0.0, 0)
@@ -352,8 +368,11 @@ private class MockRepoImpl : Repository() {
     }
 
     override fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
-        val response = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("golos.loto")))
+        val response = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("cepera")))
         val acc = response[0]
+        isIserLoggedIn = true
+        Timber.e("authWithMasterKey")
+        Timber.e("isIserLoggedIn = " + isIserLoggedIn)
         return UserAuthResponse(true, acc.name.name,
                 Pair((acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "posting-key-stub"),
                 Pair((acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "active-key-stub"),
@@ -372,10 +391,15 @@ private class MockRepoImpl : Repository() {
     }
 
     override fun getCurrentUserData(): UserData? {
-        return null
+        if (!isIserLoggedIn) return null
+        return UserData(null, "cepera", "mockActiveWif", "mockPostingWif")
     }
 
     override fun deleteUserdata() {
 
+    }
+
+    companion object {
+        private var isIserLoggedIn = false
     }
 }

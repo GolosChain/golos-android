@@ -1,12 +1,13 @@
 package io.golos.golos.screens.main_stripes
 
-import android.support.design.widget.CoordinatorLayout
+import android.content.Context
 import android.support.v4.view.ViewPager
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Spinner
+import io.golos.golos.R
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
-import timber.log.Timber
 
 /**
  * Created by yuri on 02.11.17.
@@ -37,9 +38,21 @@ class PagerAndSpinnerConnection(private val spinner: Spinner,
     }
 
     override fun onPageSelected(position: Int) {
-        adapter.onPageSelected(position)
         if (spinner.selectedItemPosition != position) {
             spinner.setSelection(position)
         }
+    }
+
+    fun onLoggedIn(context: Context) {
+        spinner.adapter = ArrayAdapter<String>(context,
+                android.R.layout.simple_list_item_1,
+                context.resources.getStringArray(R.array.header_spinner_items_full))
+    }
+
+    fun onLoggedOut(context: Context) {
+        spinner.adapter = ArrayAdapter<String>(context,
+                android.R.layout.simple_list_item_1,
+                context.resources.getStringArray(R.array.header_spinner_items))
+
     }
 }

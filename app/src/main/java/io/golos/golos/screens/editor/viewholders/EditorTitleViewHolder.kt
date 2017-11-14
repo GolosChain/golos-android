@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import io.golos.golos.R
-import io.golos.golos.screens.GolosViewHolder
+import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.editor.EditorAdapterHeader
 
 class EditorTitleViewHolder(@LayoutRes res: Int, parent: ViewGroup) : GolosViewHolder(res, parent), TextWatcher {

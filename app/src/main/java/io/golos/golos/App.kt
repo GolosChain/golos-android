@@ -21,6 +21,6 @@ class App : MultiDexApplication() {
 
     companion object get {
         lateinit var context: Context
-        val isMocked = false
+        val isMocked = true
     }
 }
