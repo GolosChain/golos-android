@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
+import io.golos.golos.screens.androidviewmodel.AuthViewModel
 import io.golos.golos.screens.drawer.adapters.MenuAdapter
 import io.golos.golos.screens.drawer.adapters.MenuItem
 
@@ -37,7 +38,7 @@ class UserProfileDrawerFragment : Fragment() {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity).get(AuthViewModel::class.java)
-        val adapter = MenuAdapter(listOf(MenuItem(getString(R.string.logout), R.drawable.ic_logout, 0)), { _ -> mViewModel.onLogoutClick() }, activity)
+        val adapter = MenuAdapter(listOf(MenuItem(getString(R.string.logout), R.drawable.ic_logout_40dp_gray, 0)), { _ -> mViewModel.onLogoutClick() }, activity)
         mMenuList.adapter = adapter
         mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
             mUserName.text = it?.userName

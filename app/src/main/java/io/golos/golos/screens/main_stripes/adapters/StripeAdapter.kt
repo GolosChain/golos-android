@@ -21,7 +21,6 @@ import io.golos.golos.screens.story.model.ItemType
 import io.golos.golos.screens.story.model.RootStory
 import io.golos.golos.utils.Translit
 import ru.noties.markwon.view.MarkwonViewCompat
-import timber.log.Timber
 
 
 data class StripeWrapper(val stripe: RootStory,
@@ -119,7 +118,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mBlogNameTv.text = wrapper.stripe.categoryName
                 }
                 mTitleTv.text = wrapper.stripe.title
-                mUpvoteBtn.text = wrapper.stripe.payoutInDollats
+                mUpvoteBtn.text = "$ ${String.format("%.2f", wrapper.stripe.payoutInDollars)}"
                 mCommentsButton.text = wrapper.stripe.commentsCount.toString()
                 if (wrapper.stripe.avatarPath != null) mGlide
                         .load(wrapper.stripe.avatarPath)

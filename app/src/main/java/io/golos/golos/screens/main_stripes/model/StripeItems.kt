@@ -16,7 +16,7 @@ data class StripeItem(val discussion: Discussion) {
     val url: String
     val id: Long
     val title: String
-    @JsonProperty("payoutInDollats")
+    @JsonProperty("payoutInDollars")
     val payoutInDollats: String
     @JsonProperty("categoryName")
     val categoryName: String
@@ -53,7 +53,7 @@ data class StripeItem(val discussion: Discussion) {
         this.url = comment.url
         this.id = comment.id
         this.title = comment.title
-        this.payoutInDollats = comment.payoutInDollats
+        this.payoutInDollats = comment.payoutInDollars.toString()
         this.categoryName = comment.categoryName
         this.votesNum = comment.votesNum
         this.commentsCount = comment.commentsCount

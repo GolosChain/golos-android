@@ -15,6 +15,7 @@ import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.main_stripes.model.StripeFragmentType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
+import io.golos.golos.screens.story.model.Comment
 import io.golos.golos.screens.story.model.RootStory
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.avatarPath
@@ -58,7 +59,7 @@ abstract class Repository {
                                 startAuthor: String? = null, startPermlink: String? = null): List<RootStory>
 
     @WorkerThread
-    abstract fun upvote(userName: String, permlink: String, percents: Short): RootStory
+    abstract fun upVote(author: String, permlink: String, percents: Short): Comment
 
     @WorkerThread
     abstract fun getUserAvatar(username: String, permlink: String? = null, blog: String? = null): String?
@@ -84,7 +85,7 @@ abstract class Repository {
     abstract fun deleteUserdata()
     abstract fun setUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
     @WorkerThread
-    abstract fun downVote(author: String, permlink: String): RootStory
+    abstract fun downVote(author: String, permlink: String): Comment
 
     abstract fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory>
 }
@@ -162,7 +163,7 @@ private class RepositoryImpl(private val mPersister: Persister,
         return auth(login, null, null, postingWif)
     }
 
-    override fun downVote(author: String, permlink: String): RootStory {
+    override fun downVote(author: String, permlink: String): Comment {
         mGolosApi.simplifiedOperations.cancelVote(AccountName(author), Permlink(permlink))
         return getRootStoryWithoutComments(author, permlink)
     }
@@ -283,7 +284,7 @@ private class RepositoryImpl(private val mPersister: Persister,
         mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, null), Pair(PrivateKeyType.POSTING, null)))
     }
 
-    override fun upvote(author: String, permlink: String, percents: Short): RootStory {
+    override fun upVote(author: String, permlink: String, percents: Short): Comment {
         mGolosApi.simplifiedOperations.vote(AccountName(author), Permlink(permlink), percents)
         return getRootStoryWithoutComments(author, permlink)
     }
@@ -297,8 +298,8 @@ private class RepositoryImpl(private val mPersister: Persister,
         }
     }
 
-    private fun getRootStoryWithoutComments(author: String, permlink: String): RootStory {
-        val story = RootStory(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
+    private fun getRootStoryWithoutComments(author: String, permlink: String): Comment {
+        val story = Comment(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
 
         var currentUser = mPersister.getCurrentUserName()
         if (currentUser != null) {
@@ -348,7 +349,7 @@ private class MockRepoImpl : Repository() {
         return "https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg"
     }
 
-    override fun upvote(userName: String, permlink: String, percents: Short): RootStory {
+    override fun upVote(userName: String, permlink: String, percents: Short): Comment {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

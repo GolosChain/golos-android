@@ -19,13 +19,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import io.golos.golos.R
+import io.golos.golos.screens.androidviewmodel.AuthUserInput
+import io.golos.golos.screens.androidviewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.hideKeyboard
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showProgressDialog
-import timber.log.Timber
 
 /**
  * Created by yuri on 30.10.17.
@@ -104,7 +105,6 @@ class NotLoggedInDrawerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity).get(AuthViewModel::class.java)
         mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
-            Timber.e(it.toString())
             if (it?.isScanMenuVisible == true) {
                 mKeyEt.visibility = View.GONE
                 mPostingKeyMenu.visibility = View.VISIBLE

@@ -144,7 +144,7 @@
             <ImageButton
                 android:id="@+id/scan_posting"
                 style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode" />
+                app:srcCompat="@drawable/ic_barcode_32dp_black" />
 
             <View
                 android:layout_width="match_parent"
@@ -174,7 +174,7 @@
             <ImageButton
                 android:id="@+id/scan_active"
                 style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode" />
+                app:srcCompat="@drawable/ic_barcode_32dp_black" />
 
             <View
                 android:layout_width="match_parent"

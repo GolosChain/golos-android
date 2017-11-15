@@ -1,6 +1,7 @@
 package io.golos.golos.screens.story.adapters
 
 import android.os.Build
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -21,16 +22,22 @@ import io.golos.golos.screens.story.model.TextRow
  * Created by yuri on 08.11.17.
  */
 
-class MainStoryAdapter(items: List<Row>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MainStoryAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var items = ArrayList<Row>()
         set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return field[oldItemPosition] == value[newItemPosition]
+                }
 
-    init {
-        this.items = ArrayList(items)
-    }
+                override fun getOldListSize() = field.size
+                override fun getNewListSize() = value.size
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return field[oldItemPosition] == value[newItemPosition]
+                }
+            }).dispatchUpdatesTo(this)
+            field = value
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == 0) return TextBlockHolder(parent!!)
@@ -82,6 +89,7 @@ class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(
     init {
         mText.movementMethod = LinkMovementMethod.getInstance()
     }
+
     var text: String = ""
         set(value) {
             val width = itemView.resources.displayMetrics.widthPixels - 2 * (itemView.resources.getDimension(R.dimen.margin_material)).toInt()

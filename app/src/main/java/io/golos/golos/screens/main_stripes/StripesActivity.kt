@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.drawer.AuthViewModel
+import io.golos.golos.screens.androidviewmodel.AuthViewModel
 import io.golos.golos.screens.drawer.NotLoggedInDrawerFragment
 import io.golos.golos.screens.drawer.UserProfileDrawerFragment
 import io.golos.golos.screens.editor.EditorActivity

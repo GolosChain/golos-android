@@ -2,6 +2,7 @@ package io.golos.golos.screens.story.adapters
 
 import android.os.Build
 import android.support.constraint.ConstraintLayout
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
 import android.text.Html
@@ -10,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -20,7 +20,6 @@ import io.golos.golos.screens.story.model.Comment
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
-import timber.log.Timber
 
 /**
  * Created by yuri on 08.11.17.
@@ -34,8 +33,18 @@ class CommentsAdapter(var onUpvoteClick: (Comment) -> Unit = { print(it) },
 
     var items = ArrayList<Comment>()
         set(value) {
-            field = ArrayList(value)
-            notifyDataSetChanged()
+            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return field[oldItemPosition] == value[newItemPosition]
+                }
+
+                override fun getOldListSize() = field.size
+                override fun getNewListSize() = value.size
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return field[oldItemPosition] == value[newItemPosition]
+                }
+            }).dispatchUpdatesTo(this)
+            field = value
         }
 
     override fun getItemCount(): Int {
@@ -57,12 +66,11 @@ class CommentsAdapter(var onUpvoteClick: (Comment) -> Unit = { print(it) },
 class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
     private val mGlide = Glide.with(itemView)
     private val mText: TextView = itemView.findViewById(R.id.text)
-    private val mAnswerButton: Button = itemView.findViewById(R.id.answer_btn)
     private val mUsernameTv: TextView = itemView.findViewById(R.id.username_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
-    private val mPayoutTv: TextView = itemView.findViewById(R.id.payout_tv)
+    private val mUpvoteBtn: Button = itemView.findViewById(R.id.upvote_btn)
     private val mImage: ImageView = itemView.findViewById(R.id.image)
-    private val mUpvoteIbtn: ImageButton = itemView.findViewById(R.id.upvote_ibtn)
+    private val mAnswerIbtn: Button = itemView.findViewById(R.id.answer_btn)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mLayout: LinearLayoutCompat = itemView.findViewById(R.id.content_lo)
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
@@ -75,12 +83,12 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
         set(value) {
             field = value
             if (field == null) {
-                mUpvoteIbtn.setOnClickListener(null)
-                mAnswerButton.setOnClickListener(null)
+                mAnswerIbtn.setOnClickListener(null)
+                mUpvoteBtn.setOnClickListener(null)
                 mText.text = ""
                 mUsernameTv.text = ""
                 mTimeTv.text = ""
-                mPayoutTv.text = ""
+                mUpvoteBtn.text = "$ "
                 mImage.setImageBitmap(null)
                 mAvatar.setImageBitmap(null)
                 mRootLo.setPadding(0, 0, 0, 0)
@@ -90,8 +98,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 var level = comment.level
                 if (level > 6) level = 6
                 mRootLo.setPadding((level * itemView.resources.getDimension(R.dimen.margin_material)).toInt(), 0, 0, 0)
-                mUpvoteIbtn.setOnClickListener({ state?.onUpvoteClick?.invoke(this) })
-                mAnswerButton.setOnClickListener({ state?.onAnswerClick?.invoke(this) })
+                mUpvoteBtn.setOnClickListener({ state?.onUpvoteClick?.invoke(this) })
+                mAnswerIbtn.setOnClickListener({ state?.onAnswerClick?.invoke(this) })
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
@@ -112,9 +120,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     val daysAgo = hoursAgo / 24
                     mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 }
-                mPayoutTv.text = "$ ${String.format("%.2f", comment.payoutValueInDollars)}"
+                mUpvoteBtn.text = "$ ${String.format("%.2f", comment.payoutInDollars)}"
                 val rows = ArrayList(StoryParserToRows().parse(comment))
-                Timber.e("comment part size is ${rows.size}")
                 var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
@@ -134,7 +141,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mText.visibility = View.VISIBLE
                     val outText = rows.map {
                         if (it is TextRow) "${it.text}\n"
-                        else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>"
+                        else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
                     }.reduce { s1, s2 -> s1 + s2 }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         mText.text = Html.fromHtml(outText, Html.FROM_HTML_MODE_LEGACY, null, null)

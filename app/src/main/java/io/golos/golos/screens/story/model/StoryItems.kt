@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import io.golos.golos.utils.Regexps
-import org.apache.commons.lang3.tuple.ImmutablePair
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -21,25 +20,15 @@ val mapper by lazy {
     mapper
 }
 
-class RootStory(discussion: Discussion, account: ExtendedAccount?) : Comment(discussion, account) {
-    val firstRebloggedBy: String
-    var type: ItemType = ItemType.PLAIN
+class RootStory : Comment {
+    constructor(url: String, id: Long, title: String, categoryName: String, tags: ArrayList<String>, images: ArrayList<String>, links: ArrayList<String>, votesNum: Int, commentsCount: Int, permlink: String, gbgAmount: Double, body: String, author: String, format: Format, avatarPath: String?, children: List<Comment>, parentPermlink: String, childrenCount: Int, level: Int, gbgCostInDollars: Double, reputation: Long, lastUpdated: Long, created: Long, isUserUpvotedOnThis: Boolean, activeVotes: ArrayList<Pair<String, Int>>, type: ItemType, firstRebloggedBy: String) : super(url, id, title, categoryName, tags, images, links, votesNum, commentsCount, permlink, gbgAmount, body, author, format, avatarPath, children, parentPermlink, childrenCount, level, gbgCostInDollars, reputation, lastUpdated, created, isUserUpvotedOnThis, activeVotes, type, firstRebloggedBy)
+    constructor(discussion: Discussion, account: ExtendedAccount?) : super(discussion, account)
+    constructor(comment: Comment) : super(comment.url, comment.id, comment.title, comment.categoryName, comment.tags, comment.images,
+            comment.links, comment.votesNum, comment.commentsCount, comment.permlink, comment.gbgAmount, comment.body, comment.author,
+            comment.format, comment.avatarPath, comment.children, comment.parentPermlink, comment.childrenCount, 0, comment.gbgCostInDollars
+            , comment.reputation, comment.lastUpdated, comment.created, comment.isUserUpvotedOnThis, comment.activeVotes,
+            comment.type, comment.firstRebloggedBy)
 
-    init {
-        firstRebloggedBy = discussion.firstRebloggedBy?.name ?: ""
-        val toRowsParser = StoryParserToRows()
-        val out = toRowsParser.parse(this)
-        if (out.size == 0) {
-            Timber.e("fail on story id is ${id}\n body =  ${body}")
-        } else {
-            if (out[0] is ImageRow) {
-                type = ItemType.IMAGE_FIRST
-            } else {
-                if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
-            }
-        }
-
-    }
     override public fun clone(): Any {
         return super.clone()
     }
@@ -71,54 +60,57 @@ class RootStory(discussion: Discussion, account: ExtendedAccount?) : Comment(dis
 
 }
 
-open class Comment(discussion: Discussion, account: ExtendedAccount?): Cloneable {
-    val url: String
-    val id: Long
-    val title: String
-    val payoutInDollats: String
-    val categoryName: String
-    val tags: ArrayList<String> = ArrayList()
-    val images = ArrayList<String>()
-    val links = ArrayList<String>()
-    val votesNum: Int
-    val commentsCount: Int
-    val permlink: String
-    val gbgAmount: Double
-    val body: String
-    val author: String
-    var format: Format = Format.HTML
-    var avatarPath: String? = null
-    var children = ArrayList<Comment>()
-    var parentPermlink: String
-    var childrenCount: Int
-    var level = 0
-    var gbgCostInDollars = 0.04106528
-    val reputation: Long
-    val lastUpdated: Long
-    val created: Long
-    var isUserUpvotedOnThis: Boolean = false
-    val activeVotes: ArrayList<Pair<String, Int>> = ArrayList()
-    val payoutValueInDollars: Double
+open class Comment(val url: String,
+                   val id: Long,
+                   val title: String,
+                   val categoryName: String,
+                   val tags: ArrayList<String> = ArrayList(),
+                   val images: ArrayList<String> = ArrayList(),
+                   val links: ArrayList<String> = ArrayList(),
+                   val votesNum: Int,
+                   val commentsCount: Int,
+                   val permlink: String,
+                   val gbgAmount: Double,
+                   var body: String,
+                   val author: String,
+                   var format: Format = Format.HTML,
+                   var avatarPath: String? = null,
+                   var children: List<Comment> = ArrayList<Comment>(),
+                   var parentPermlink: String,
+                   var childrenCount: Int,
+                   var level: Int = 0,
+                   var gbgCostInDollars: Double = 0.04106528,
+                   val reputation: Long,
+                   val lastUpdated: Long,
+                   val created: Long,
+                   var isUserUpvotedOnThis: Boolean = false,
+                   val activeVotes: ArrayList<Pair<String, Int>> = ArrayList(),
+                   var type: ItemType = ItemType.PLAIN,
+                   val firstRebloggedBy: String) : Cloneable {
+
+    val payoutInDollars: Double
         get() = gbgAmount * gbgCostInDollars
 
-    override public fun clone(): Any {
-        return super.clone()
-    }
 
-    init {
-        id = discussion.id
-        url = discussion.url ?: ""
-        title = discussion.title ?: ""
-        categoryName = discussion.category ?: ""
-        votesNum = discussion.netVotes
-        commentsCount = discussion.children
-        permlink = discussion.permlink?.link ?: ""
-        childrenCount = discussion.children
+    constructor(discussion: Discussion, account: ExtendedAccount?) : this(
+            url = discussion.url ?: "",
+            id = discussion.id,
+            title = discussion.title ?: "",
+            categoryName = discussion.category ?: "",
+            votesNum = discussion.netVotes,
+            commentsCount = discussion.children,
+            permlink = discussion.permlink?.link ?: "",
+            childrenCount = discussion.children,
+            reputation = discussion.authorReputation,
+            lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0,
+            created = discussion.created?.dateTimeAsTimestamp ?: 0,
+            parentPermlink = discussion.parentPermlink.link ?: "",
+            firstRebloggedBy = discussion.firstRebloggedBy?.name ?: "",
+            gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
+            body = discussion.body ?: "",
+            author = discussion.author?.name ?: "") {
+
         val tagsString = discussion.jsonMetadata
-        reputation = discussion.authorReputation
-        lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0
-        created = discussion.created?.dateTimeAsTimestamp ?: 0
-        parentPermlink = discussion.parentPermlink.link ?: ""
         discussion.activeVotes?.forEach {
             activeVotes.add(Pair(it.voter.name, it.percent / 100))
         }
@@ -169,11 +161,7 @@ open class Comment(discussion: Discussion, account: ExtendedAccount?): Cloneable
                 e.printStackTrace()
             }
         }
-        gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
-        payoutInDollats = String.format("$%.2f", (gbgAmount * 0.04106528))
         body = discussion.body ?: ""
-        author = discussion.author?.name ?: ""
-
         if (account != null) {
             try {
                 val node: JsonNode? = mapper.readTree(account?.jsonMetadata)
@@ -183,8 +171,22 @@ open class Comment(discussion: Discussion, account: ExtendedAccount?): Cloneable
                 e.printStackTrace()
             }
         }
+        val toRowsParser = StoryParserToRows()
+        val out = toRowsParser.parse(this)
+        if (out.size == 0) {
+            Timber.e("fail on story id is ${id}\n body =  ${body}")
+        } else {
+            if (out[0] is ImageRow) {
+                type = ItemType.IMAGE_FIRST
+            } else {
+                if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
+            }
+        }
     }
 
+    override public fun clone(): Any {
+        return super.clone()
+    }
 
     override fun toString(): String {
         return "Comment(id=$id, title='$title', permlink='$permlink')"
@@ -197,7 +199,6 @@ open class Comment(discussion: Discussion, account: ExtendedAccount?): Cloneable
         if (url != other.url) return false
         if (id != other.id) return false
         if (title != other.title) return false
-        if (payoutInDollats != other.payoutInDollats) return false
         if (categoryName != other.categoryName) return false
         if (votesNum != other.votesNum) return false
         if (commentsCount != other.commentsCount) return false
@@ -223,7 +224,6 @@ open class Comment(discussion: Discussion, account: ExtendedAccount?): Cloneable
         var result = url.hashCode()
         result = 31 * result + id.hashCode()
         result = 31 * result + title.hashCode()
-        result = 31 * result + payoutInDollats.hashCode()
         result = 31 * result + categoryName.hashCode()
         result = 31 * result + votesNum
         result = 31 * result + commentsCount

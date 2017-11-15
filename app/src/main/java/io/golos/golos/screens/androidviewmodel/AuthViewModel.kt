@@ -1,4 +1,4 @@
-package io.golos.golos.screens.drawer
+package io.golos.golos.screens.androidviewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel

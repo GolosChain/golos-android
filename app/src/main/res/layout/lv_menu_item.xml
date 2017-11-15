@@ -14,7 +14,7 @@
         android:id="@+id/image"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        app:srcCompat="@drawable/ic_logout" />
+        app:srcCompat="@drawable/ic_logout_40dp_gray" />
 
     <TextView
         android:id="@+id/text"

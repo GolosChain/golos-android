@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/tag_buttons_height"
     android:layout_marginTop="@dimen/margin_material_small"
-    android:background="@drawable/rect_round_corners_solid_gray"
+    android:background="@drawable/back_rect"
     android:ellipsize="end"
     android:textAllCaps="false"
     android:maxLength="120"

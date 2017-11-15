@@ -73,7 +73,6 @@ class PromoViewModel : StripeFragmentViewModel() {
 
 
 abstract class StripeFragmentViewModel : ViewModel() {
-    //abstract val stripeType: StripeType
     abstract val router: StoriesRequestRouter
     val stripeLiveData = MutableLiveData<StripeViewState>()
     protected val mRepository = Repository.get
@@ -116,7 +115,8 @@ abstract class StripeFragmentViewModel : ViewModel() {
                         mHandler.post({ stripeLiveData.value = StripeViewState(true, ArrayList()) })
                         val items = ArrayList(router.getStories(limit = 20, truncateBody = mTruncateSize))
                         mHandler.post({
-                            stripeLiveData.value = StripeViewState(false, items)
+                            stripeLiveData.value = StripeViewState(false, items,
+                                    fullscreenMessage = if (items.count() == 0) R.string.nothing_here else null)
                             mLatch.countDown()
                         })
                         mLatch = CountDownLatch(1)
@@ -275,7 +275,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
             return
         }
         postWithCatch {
-            val story = mRepository.upvote(it.author, it.permlink, vote.toShort())
+            val story = mRepository.upVote(it.author, it.permlink, vote.toShort())
             mHandler.post({
                 val state = stripeLiveData.value?.items
                 if (state != null) {
@@ -284,7 +284,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
 
                     state.forEachIndexed { index, item ->
                         if (item.id == story.id)
-                            copy.set(index, story)
+                            copy.set(index, RootStory(story))
                     }
                     stripeLiveData.value = StripeViewState(stripeLiveData.value?.isLoading == true,
                             copy, null, R.string.upvoted)
@@ -302,7 +302,7 @@ abstract class StripeFragmentViewModel : ViewModel() {
                     var copy = ArrayList(state)
                     state.forEachIndexed { index, item ->
                         if (item.id == story.id)
-                            copy.set(index, story)
+                            copy.set(index,  RootStory(story))
                     }
                     stripeLiveData.value = StripeViewState(stripeLiveData.value?.isLoading == true,
                             copy, null,

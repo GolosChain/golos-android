@@ -44,7 +44,7 @@ class EditorAdapterFooterViewHolder(@LayoutRes res: Int, parent: ViewGroup) : Go
             value.tags.forEachIndexed { index, s ->
                 if (s.isNotEmpty()) {
                     if (index > mTagsLayout.childCount - 1) {
-                        val btn = LayoutInflater.from(itemView.context).inflate(R.layout.v_tag_button, mTagsLayout, false) as Button
+                        val btn = LayoutInflater.from(itemView.context).inflate(R.layout.v_editor_tag_button, mTagsLayout, false) as Button
                         btn.text = s
                         mTagsLayout.addView(btn)
                     } else {

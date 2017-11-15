@@ -61,7 +61,7 @@
         android:layout_marginStart="@dimen/margin_material_half"
         android:layout_marginTop="2dp"
         android:drawablePadding="4dp"
-        android:drawableStart="@drawable/ic_bullet_blue"
+        android:drawableStart="@drawable/ic_bullet_accent_20dp"
         android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/for_user_tv"

@@ -10,7 +10,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -43,8 +43,10 @@ class StoryActivity : GolosActivity() {
     private lateinit var mStoryRecycler: RecyclerView
     private lateinit var mCommentsRecycler: RecyclerView
     private lateinit var mFlow: FlowLayout
-    private lateinit var mPayoutBtn: Button
-    private lateinit var mVotesCountBtn: Button
+    private lateinit var mPayoutIv: TextView
+    private lateinit var mVotesCountTv: TextView
+    private lateinit var mVoteBtn: ImageButton
+    private lateinit var mCommentsTv: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,41 +70,43 @@ class StoryActivity : GolosActivity() {
                 val story = it.storyTree.rootStory!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE
-
-                mStoryRecycler.adapter = MainStoryAdapter(ets)
                 if (ets.size == 1) {
                     Timber.e("parser fail!!!!! on ${it.storyTree.rootStory}")
                 }
-
-                mAvatar.visibility = View.VISIBLE
-                if (story.avatarPath != null) Glide.with(this)
-                        .load(story.avatarPath)
-                        .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
-                        .apply(RequestOptions.placeholderOf(R.drawable.ic_person_gray_24dp))
-                        .into(mAvatar)
-                else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
-                mUserName.text = story.author
-                mForTV.visibility = View.VISIBLE
-                mBlogNameTv.visibility = View.VISIBLE
-
+                (mStoryRecycler.adapter as MainStoryAdapter).items = ArrayList(ets)
+                if (mAvatar.drawable == null) {
+                    mAvatar.visibility = View.VISIBLE
+                    if (story.avatarPath != null) Glide.with(this)
+                            .load(story.avatarPath)
+                            .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
+                            .apply(RequestOptions.placeholderOf(R.drawable.ic_person_gray_24dp))
+                            .into(mAvatar)
+                    else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+                    mUserName.text = story.author
+                    mForTV.visibility = View.VISIBLE
+                    mBlogNameTv.visibility = View.VISIBLE
+                }
                 if (story.categoryName.contains("ru--")) {
                     mBlogNameTv.text = Translit.lat2Ru(story.categoryName.substring(4))
                 } else {
                     mBlogNameTv.text = story.categoryName
                 }
                 if (it.errorCode != null) showErrorMessage(it.errorCode)
-                story.tags.forEach {
-                    val view = layoutInflater.inflate(R.layout.v_story_tag_button, mFlow, false) as TextView
-                    var text = it
-                    if (text.contains("ru--")) text = Translit.lat2Ru(it.substring(4))
-                    view.text = text
-                    mFlow.addView(view)
+                mVotesCountTv.text = it.storyTree.rootStory?.activeVotes?.toString()
+                mCommentsTv.text = it.storyTree.rootStory?.commentsCount?.toString()
+                if (mFlow.childCount != story.tags.count()) {
+                    story.tags.forEach {
+                        val view = layoutInflater.inflate(R.layout.v_story_tag_button, mFlow, false) as TextView
+                        var text = it
+                        if (text.contains("ru--")) text = Translit.lat2Ru(it.substring(4))
+                        view.text = text
+                        mFlow.addView(view)
+                    }
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
                 findViewById<View>(R.id.comments_tv).visibility = View.VISIBLE
-                mPayoutBtn.text = String.format("$ %.2f", story.payoutValueInDollars)
-                mVotesCountBtn.text = "${story.votesNum} ${resources.getQuantityString(R.plurals.votes, story.votesNum)}"
-                mCommentsRecycler.adapter = CommentsAdapter()
+                mPayoutIv.text = String.format("$ %.2f", story.payoutInDollars)
+                mVotesCountTv.text = "${story.votesNum}"
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
                 if (it.storyTree.comments.isEmpty()) {
                     mCommentsRecycler.visibility = View.GONE
@@ -130,13 +134,17 @@ class StoryActivity : GolosActivity() {
         mNoCommentsTv = findViewById(R.id.no_comments_tv)
         mStoryRecycler = findViewById(R.id.recycler)
         mCommentsRecycler = findViewById(R.id.comments_recycler)
+        mVotesCountTv = findViewById(R.id.votes_btn)
         mFlow = findViewById(R.id.tags_lo)
-        mPayoutBtn = findViewById(R.id.upvote_btn)
-        mVotesCountBtn = findViewById(R.id.votes_btn)
+        mPayoutIv = findViewById(R.id.money_label)
+        mVoteBtn = findViewById(R.id.upvote_btn)
+        mCommentsTv = findViewById(R.id.comments_btn)
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
+        mCommentsRecycler.adapter = CommentsAdapter()
+        mStoryRecycler.adapter = MainStoryAdapter()
     }
 
     companion object {

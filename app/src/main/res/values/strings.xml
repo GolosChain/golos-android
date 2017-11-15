@@ -51,4 +51,5 @@
     <string name="you_voted_same_way">Вы уже проголосовали за это сообщение</string>
     <string name="login_to_vote">Зайдите или зарегестрируйтесь для голосования</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
+    <string name="nothing_here">Пока ничего нет</string>
 </resources>

@@ -12,6 +12,7 @@ import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.screens.main_stripes.adapters.StripeAdapter
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
@@ -30,6 +31,7 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StripeFragmentViewModel? = null
     private lateinit var mAdapter: StripeAdapter
+    private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking = false
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -44,6 +46,7 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.colorPrimaryDark))
         mSwipeRefresh?.setOnRefreshListener(this)
+        mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(this)
@@ -101,7 +104,6 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             if (it?.items != null) {
                 mRecycler?.post { mAdapter.setStripesCustom(it.items) }
-
             }
             it?.error?.let {
                 if (it.localizedMessage != null) getView()?.showSnackbar(it.localizedMessage)
@@ -111,6 +113,15 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
             it?.popupMessage?.let {
                 getView()?.showSnackbar(it)
+            }
+            it?.fullscreenMessage?.let {
+                mRecycler?.visibility = View.GONE
+                mFullscreenMessageLabel.visibility = View.VISIBLE
+                mFullscreenMessageLabel.setText(it)
+            }
+            if (it?.fullscreenMessage == null) {
+                mRecycler?.visibility = View.VISIBLE
+                mFullscreenMessageLabel.visibility = View.GONE
             }
         })
     }
