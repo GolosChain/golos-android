@@ -8,19 +8,13 @@ import android.os.Looper
 import eu.bittrade.libs.steemj.exceptions.*
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.screens.main_stripes.viewmodel.StripeFragmentViewModel
+import io.golos.golos.repository.model.UpdatingState
+import io.golos.golos.screens.main_stripes.viewmodel.StoriesViewModel
 import io.golos.golos.screens.story.model.Comment
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.SteemErrorParser
+import io.golos.golos.utils.GolosErrorParser
 import java.security.InvalidParameterException
-
-/**
- * Created by yuri on 15.11.17.
- */
-enum class UpdatingState {
-    UPDATING, DONE, FAILED
-}
 
 data class CommentUpdatingStatus(val updatedComment: Comment,
                                  val status: UpdatingState,
@@ -36,7 +30,7 @@ class VoteViewModel(app: Application) : AndroidViewModel(app) {
 
     fun upVote(comment: Comment, power: Short, id: Long) {
         if (mRepository.getCurrentUserData() == null) {
-            StripeFragmentViewModel.mHandler.post({
+            StoriesViewModel.mHandler.post({
                 voteLiveData.value = VoteState(CommentUpdatingStatus(comment, UpdatingState.FAILED, id),
                         error =
                         GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
@@ -70,7 +64,7 @@ class VoteViewModel(app: Application) : AndroidViewModel(app) {
                 e.printStackTrace()
                 mHandler.post({
                     voteLiveData.value = VoteState(CommentUpdatingStatus(comment, UpdatingState.FAILED, id),
-                            GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, SteemErrorParser.getLocalizedError(e)))
+                            GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, GolosErrorParser.getLocalizedError(e)))
                 })
             } catch (e: SteemInvalidTransactionException) {
                 e.printStackTrace()

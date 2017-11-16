@@ -21,8 +21,9 @@ import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
-import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Translit
+import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
 
 /**
@@ -58,11 +59,13 @@ class StoryActivity : GolosActivity() {
     private fun setUpViewModel() {
         val provider = ViewModelProviders.of(this)
         mViewModel = provider.get(StoryViewModel::class.java)
-        mViewModel.onCreate(blogName = intent.getStringExtra(BLOG_TAG) ?: "",
-                author = intent.getStringExtra(AUTHOR_TAG) ?: "",
-                permlink = intent.getStringExtra(PERMLINK_TAG) ?: "")
-        mtitileTv.text = intent.getStringExtra(TITLE_TAG)
-
+        val extra = intent.getStringExtra(COMMENT_TAG)
+        if (extra == null) {
+            Timber.e(" no comment set to activity")
+            finish()
+            return
+        }
+        mViewModel.onCreate(mapper.readValue<Comment>(extra, Comment::class.java))
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory != null) {
@@ -91,7 +94,15 @@ class StoryActivity : GolosActivity() {
                 } else {
                     mBlogNameTv.text = story.categoryName
                 }
-                if (it.errorCode != null) showErrorMessage(it.errorCode)
+                if (it.errorCode != null) {
+                    if (it.errorCode.localizedMessage != null) it.errorCode.localizedMessage.let {
+                        findViewById<View>(android.R.id.content).showSnackbar(it)
+                    } else {
+                        it.errorCode.nativeMessage?.let {
+                            findViewById<View>(android.R.id.content).showSnackbar(it)
+                        }
+                    }
+                }
                 mVotesCountTv.text = it.storyTree.rootStory?.activeVotes?.toString()
                 mCommentsTv.text = it.storyTree.rootStory?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
@@ -145,24 +156,20 @@ class StoryActivity : GolosActivity() {
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.adapter = CommentsAdapter()
         mStoryRecycler.adapter = MainStoryAdapter()
+
+        (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
+            if (row is TextRow) mViewModel.onMainStoryTextClick(this,row.text)
+            else if (row is ImageRow) mViewModel.onMainStoryImageClick(this,row.src, iv)
+        }
     }
 
     companion object {
-        private val AUTHOR_TAG = "AUTHOR_TAG"
-        private val PERMLINK_TAG = "PERMLINK_TAG"
-        private val BLOG_TAG = "BLOG_TAG"
-        private val TITLE_TAG = "TITLE_TAG"
+        private val COMMENT_TAG = "COMMENT_TAG"
         fun start(ctx: Context,
-                  author: String,
-                  permlink: String,
-                  blog: String,
-                  title: String = "") {
+                  comment: Comment) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
-            intent.putExtra(AUTHOR_TAG, author)
-            intent.putExtra(PERMLINK_TAG, permlink)
-            intent.putExtra(BLOG_TAG, blog)
-            intent.putExtra(TITLE_TAG, title)
+            intent.putExtra(COMMENT_TAG, mapper.writeValueAsString(comment))
             ctx.startActivity(intent)
         }
     }

@@ -16,7 +16,7 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.screens.main_stripes.adapters.StripeAdapter
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
-import io.golos.golos.screens.main_stripes.model.StripeFragmentType
+import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
@@ -29,7 +29,7 @@ import io.golos.golos.utils.showSnackbar
 class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
-    private var mViewModel: StripeFragmentViewModel? = null
+    private var mViewModel: StoriesViewModel? = null
     private lateinit var mAdapter: StripeAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking = false
@@ -50,29 +50,31 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(this)
-        val type: StripeFragmentType = arguments.getSerializable(TYPE_TAG) as StripeFragmentType
+        val type: FeedType = arguments.getSerializable(TYPE_TAG) as FeedType
         mViewModel = when (type) {
-            StripeFragmentType.NEW -> provider.get(NewViewModel::class.java)
-            StripeFragmentType.ACTUAL -> provider.get(ActualViewModle::class.java)
-            StripeFragmentType.POPULAR -> provider.get(PopularViewModel::class.java)
-            StripeFragmentType.PROMO -> provider.get(PromoViewModel::class.java)
-            StripeFragmentType.FEED -> provider.get(FeedViewModel::class.java)
+            FeedType.NEW -> provider.get(NewViewModel::class.java)
+            FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
+            FeedType.POPULAR -> provider.get(PopularViewModel::class.java)
+            FeedType.PROMO -> provider.get(PromoViewModel::class.java)
+            FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
         }
         mAdapter = StripeAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
                 onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
                 onShareClick = { mViewModel?.onShareClick(it, activity) },
                 onUpvoteClick = {
-                    if (it.isUserUpvotedOnThis) {
-                        mViewModel?.downVote(it)
-                    } else {
-                        val dialog = VoteDialog.getInstance()
-                        dialog.selectPowerListener = object : OnVoteSubmit {
-                            override fun submitVote(vote: Int) {
-                                mViewModel?.vote(it, vote)
+                    if (mViewModel?.canVote == true) {
+                        if (it.isUserUpvotedOnThis) {
+                            mViewModel?.downVote(it)
+                        } else {
+                            val dialog = VoteDialog.getInstance()
+                            dialog.selectPowerListener = object : OnVoteSubmit {
+                                override fun submitVote(vote: Int) {
+                                    mViewModel?.vote(it, vote)
+                                }
                             }
+                            dialog.show(activity.fragmentManager, null)
                         }
-                        dialog.show(activity.fragmentManager, null)
                     }
                 }
         )
@@ -92,7 +94,7 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setUp() {
         mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
-        mViewModel?.stripeLiveData?.observe(this, Observer {
+        mViewModel?.storiesLiveData?.observe(this, Observer {
             if (it?.isLoading == true) {
                 mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
                 mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
@@ -128,7 +130,7 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     companion object {
         val TYPE_TAG = "TYPE_TAG"
-        fun getInstance(type: StripeFragmentType): StripeFragment {
+        fun getInstance(type: FeedType): StripeFragment {
             val fr = StripeFragment()
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)

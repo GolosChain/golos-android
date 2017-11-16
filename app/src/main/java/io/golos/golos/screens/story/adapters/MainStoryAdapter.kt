@@ -18,11 +18,11 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
 
-/**
- * Created by yuri on 08.11.17.
- */
+class RowWrapper(val row: Row,
+                 val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
 
-class MainStoryAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MainStoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var onRowClick: ((Row, ImageView?) -> Unit)? = null
     var items = ArrayList<Row>()
         set(value) {
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -46,8 +46,12 @@ class MainStoryAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
-            is TextBlockHolder -> holder.text = (items[position] as TextRow).text
-            is ImageBlockHolder -> holder.imageSrc = (items[position] as ImageRow).src
+            is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
+                onRowClick?.invoke(items[vh.adapterPosition], null)
+            })
+            is ImageBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
+                onRowClick?.invoke(items[vh.adapterPosition], v as? ImageView)
+            })
         }
     }
 
@@ -65,17 +69,21 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mImage: ImageView = itemView.findViewById(R.id.image)
     private val mGlide = Glide.with(parent.context)
 
-    var imageSrc: String = ""
+    var state: RowWrapper? = null
         set(value) {
             field = value
-
-            if (field.isEmpty()) {
+            if (field == null) return
+            val imageRow = field!!.row as ImageRow
+            if (imageRow.src.isEmpty()) {
                 mGlide.load(R.drawable.error).apply(RequestOptions().fitCenter()).into(mImage)
             } else {
                 mImage.scaleType = ImageView.ScaleType.FIT_CENTER
                 val error = mGlide.load(R.drawable.error)
-                mGlide.load(field).error(error).apply(RequestOptions().fitCenter().placeholder(R.drawable.error)).into(mImage)
+                var src = imageRow.src
+                if (src.endsWith("\\")) src = src.substring(0..src.lastIndex)
+                mGlide.load(src).error(error).apply(RequestOptions().fitCenter().placeholder(R.drawable.error)).into(mImage)
             }
+            mImage.setOnClickListener({ field?.clickListener?.invoke(this, mImage) })
         }
 
     companion object {
@@ -90,15 +98,19 @@ class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(
         mText.movementMethod = LinkMovementMethod.getInstance()
     }
 
-    var text: String = ""
+    var state: RowWrapper? = null
         set(value) {
-            val width = itemView.resources.displayMetrics.widthPixels - 2 * (itemView.resources.getDimension(R.dimen.margin_material)).toInt()
             field = value
+            if (field == null) return
+            val textRow = field!!.row as TextRow
+            val width = itemView.resources.displayMetrics.widthPixels - 2 * (itemView.resources.getDimension(R.dimen.margin_material)).toInt()
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mText.text = Html.fromHtml(field, Html.FROM_HTML_MODE_LEGACY, GlideImageGetter(mText, width), null)
+                mText.text = Html.fromHtml(textRow.text, Html.FROM_HTML_MODE_LEGACY, GlideImageGetter(mText, width), null)
             } else {
-                mText.text = Html.fromHtml(field, GlideImageGetter(mText, width), null)
+                mText.text = Html.fromHtml(textRow.text, GlideImageGetter(mText, width), null)
             }
+            mText.setOnClickListener({ field?.clickListener?.invoke(this, mText) })
         }
 
     companion object {

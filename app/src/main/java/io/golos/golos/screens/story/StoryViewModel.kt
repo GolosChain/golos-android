@@ -1,77 +1,50 @@
 package io.golos.golos.screens.story
 
-import android.arch.lifecycle.MutableLiveData
+import android.app.Activity
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
-import android.os.Handler
-import android.os.Looper
-import eu.bittrade.libs.steemj.exceptions.SteemCommunicationException
-import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
-import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
+import android.widget.ImageView
 import io.golos.golos.repository.Repository
+import io.golos.golos.screens.story.model.Comment
+import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
-import io.golos.golos.utils.ErrorCode
-import java.security.InvalidParameterException
+import io.golos.golos.screens.widgets.PhotoActivity
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
  */
 class StoryViewModel : ViewModel() {
-    val liveData: MutableLiveData<StoryViewState> = MutableLiveData<StoryViewState>()
-    val repository = Repository.get
-    private val executor = Repository.sharedExecutor
-    private val mHandler = Handler(Looper.getMainLooper())
+    private val mLiveData = MediatorLiveData<StoryViewState>()
+    private val mRepository = Repository.get
 
-    fun onCreate(blogName: String, author: String, permlink: String) {
-        if (liveData.value?.storyTree?.rootStory?.body?.isEmpty() != false) {
-            liveData.value = StoryViewState(isLoading = true)
-            postWithCatch {
-                val story = repository.getStory(blogName, author, permlink)
-                story.rootStory?.avatarPath = repository.getUserAvatar(author, permlink, blogName)
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            story.rootStory?.title ?: "",
-                            null,
-                            storyTree = story,
-                            tags = story.rootStory?.tags ?: emptyList())
-                })
-            }
+    fun onCreate(comment: Comment) {
+        mLiveData.addSource(mRepository.getStory(comment)) {
+            mLiveData.value = StoryViewState(false,
+                    comment.title,
+                    it?.error,
+                    it?.treeState?.rootStory?.tags ?: ArrayList(),
+                    it?.treeState ?: StoryTree(null, ArrayList()))
         }
+        mRepository.requestStoryUpdate(comment)
     }
 
-    private fun postWithCatch(action: () -> Unit) {
-        executor.execute({
-            try {
-                action.invoke()
-            } catch (e: SteemTimeoutException) {
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            errorCode = ErrorCode.ERROR_SLOW_CONNECTION)
-                })
-            } catch (e: SteemCommunicationException) {
-                e.printStackTrace()
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            errorCode = ErrorCode.ERROR_NO_CONNECTION)
-                })
-            } catch (e: InvalidParameterException) {
-                e.printStackTrace()
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            errorCode = ErrorCode.ERROR_WRONG_ARGUMENTS)
-                })
-            } catch (e: SteemConnectionException) {
-                e.printStackTrace()
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            errorCode = ErrorCode.ERROR_NO_CONNECTION)
-                })
-            } catch (e: Exception) {
-                e.printStackTrace()
-                mHandler.post({
-                    liveData.value = StoryViewState(false,
-                            errorCode = ErrorCode.UNKNOWN)
-                })
-            }
-        })
+    val liveData: LiveData<StoryViewState>
+        get() {
+            return mLiveData
+        }
+
+    init {
+        Timber.e("oncreate")
+    }
+
+    fun onMainStoryTextClick(activity: Activity, text: String) {
+
+    }
+
+    fun onMainStoryImageClick(activity: Activity, src: String, iv: ImageView?) {
+        if (iv == null) PhotoActivity.startActivity(context = activity, imageSrc = src)
+        else PhotoActivity.startActivityUsingTransition(activity, iv, src)
     }
 }

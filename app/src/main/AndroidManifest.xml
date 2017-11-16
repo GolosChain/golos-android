@@ -25,6 +25,9 @@
             android:name=".screens.story.StoryActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".screens.widgets.PhotoActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".screens.main_stripes.StripesActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">

@@ -1,5 +1,6 @@
 package io.golos.golos.screens.story.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -60,7 +61,8 @@ class RootStory : Comment {
 
 }
 
-open class Comment(val url: String,
+@JsonIgnoreProperties(ignoreUnknown = true)
+open class Comment (val url: String,
                    val id: Long,
                    val title: String,
                    val categoryName: String,
@@ -70,7 +72,7 @@ open class Comment(val url: String,
                    val votesNum: Int,
                    val commentsCount: Int,
                    val permlink: String,
-                   val gbgAmount: Double,
+                   var gbgAmount: Double,
                    var body: String,
                    val author: String,
                    var format: Format = Format.HTML,
@@ -87,6 +89,7 @@ open class Comment(val url: String,
                    val activeVotes: ArrayList<Pair<String, Int>> = ArrayList(),
                    var type: ItemType = ItemType.PLAIN,
                    val firstRebloggedBy: String) : Cloneable {
+
 
     val payoutInDollars: Double
         get() = gbgAmount * gbgCostInDollars

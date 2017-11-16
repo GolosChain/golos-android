@@ -7,18 +7,18 @@ import android.support.v4.view.PagerAdapter
 import android.support.v7.widget.RecyclerView
 import io.golos.golos.screens.main_stripes.StripeFragment
 import io.golos.golos.screens.main_stripes.StripeFragment.Companion.TYPE_TAG
-import io.golos.golos.screens.main_stripes.model.StripeFragmentType
+import io.golos.golos.screens.main_stripes.model.FeedType
 
 class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manager) {
-    private val typesToPosition = HashMap<Int, StripeFragmentType>()
+    private val typesToPosition = HashMap<Int, FeedType>()
     private val mFragments = ArrayList<StripeFragment>()
 
     init {
-        typesToPosition.put(0, StripeFragmentType.FEED)
-        typesToPosition.put(1, StripeFragmentType.POPULAR)
-        typesToPosition.put(2, StripeFragmentType.ACTUAL)
-        typesToPosition.put(3, StripeFragmentType.PROMO)
-        typesToPosition.put(4, StripeFragmentType.NEW)
+        typesToPosition.put(0, FeedType.PERSONAL_FEED)
+        typesToPosition.put(1, FeedType.POPULAR)
+        typesToPosition.put(2, FeedType.ACTUAL)
+        typesToPosition.put(3, FeedType.PROMO)
+        typesToPosition.put(4, FeedType.NEW)
     }
 
     var isFeedFragmentShown: Boolean = false
@@ -47,7 +47,7 @@ class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manag
         return PagerAdapter.POSITION_NONE
     }
 
-    override fun getCount() = if (isFeedFragmentShown) StripeFragmentType.values().size else StripeFragmentType.values().size - 1
+    override fun getCount() = if (isFeedFragmentShown) FeedType.values().size else FeedType.values().size - 1
 
     companion object {
         var sharedPool = RecyclerView.RecycledViewPool()

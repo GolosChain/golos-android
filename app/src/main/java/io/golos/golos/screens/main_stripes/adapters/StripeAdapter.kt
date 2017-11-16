@@ -1,6 +1,8 @@
 package io.golos.golos.screens.main_stripes.adapters
 
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
@@ -21,6 +23,15 @@ import io.golos.golos.screens.story.model.ItemType
 import io.golos.golos.screens.story.model.RootStory
 import io.golos.golos.utils.Translit
 import ru.noties.markwon.view.MarkwonViewCompat
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+
+
+val adapterWorkerExecutor = Executors.newSingleThreadExecutor()
+val adapterMainThreadExecutor: Executor by lazy {
+    val handler = Handler(Looper.getMainLooper())
+    Executor { handler.post(it) }
+}
 
 
 data class StripeWrapper(val stripe: RootStory,
@@ -43,18 +54,23 @@ class StripeAdapter(private var onCardClick: (RootStory) -> Unit = { print(it.bo
             stripes = ArrayList(newItems).clone() as ArrayList<RootStory>
             notifyDataSetChanged()
         } else {
-            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return stripes[oldItemPosition].id == newItems[newItemPosition].id
-                }
+            adapterWorkerExecutor.execute {
+                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return stripes[oldItemPosition].id == newItems[newItemPosition].id
+                    }
 
-                override fun getOldListSize() = stripes.size
-                override fun getNewListSize() = newItems.size
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return stripes[oldItemPosition] == newItems[newItemPosition]
+                    override fun getOldListSize() = stripes.size
+                    override fun getNewListSize() = newItems.size
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return stripes[oldItemPosition] == newItems[newItemPosition]
+                    }
+                })
+                adapterMainThreadExecutor.execute {
+                    result.dispatchUpdatesTo(this)
+                    stripes = ArrayList(newItems)
                 }
-            }).dispatchUpdatesTo(this)
-            stripes = ArrayList(newItems)
+            }
         }
     }
 

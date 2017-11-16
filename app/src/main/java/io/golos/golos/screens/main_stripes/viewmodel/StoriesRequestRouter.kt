@@ -1,7 +1,7 @@
 package io.golos.golos.screens.main_stripes.viewmodel
 
 import io.golos.golos.repository.Repository
-import io.golos.golos.screens.main_stripes.model.StripeFragmentType
+import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.RootStory
 
 /**
@@ -12,7 +12,7 @@ interface StoriesRequestRouter {
                    startAuthor: String? = null, startPermlink: String? = null): List<RootStory>
 }
 
-class StripeRouter(private val repository: Repository, private val stripeType: StripeFragmentType) : StoriesRequestRouter {
+class StripeRouter(private val repository: Repository, private val stripeType: FeedType) : StoriesRequestRouter {
     override fun getStories(limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory> {
         return repository.getStripeItems(limit, stripeType, truncateBody, startAuthor, startPermlink)
     }

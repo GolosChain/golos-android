@@ -7,11 +7,12 @@ import eu.bittrade.libs.steemj.base.models.Story
 /**
  * Created by yuri on 06.11.17.
  */
-class StoryTree(story: Story) {
-    var rootStory: RootStory? = null
-    val comments: List<Comment>
+class StoryTree(rootStory: RootStory?,
+                comments: List<Comment>) {
+    var rootStory: RootStory? = rootStory
+    var comments: List<Comment> = comments
 
-    init {
+    constructor(story: Story) : this(null, ArrayList()) {
         if (story.discussions.isEmpty()) {
             comments = ArrayList()
         } else {
@@ -41,7 +42,7 @@ class StoryTree(story: Story) {
     private fun getChildrend(of: Comment): List<Comment> {
         if (of.children.isEmpty()) return ArrayList()
         val out = of.children
-        return  out.flatMap { listOf(it) + getChildrend(it) }
+        return out.flatMap { listOf(it) + getChildrend(it) }
     }
 
     private fun findAssociations(from: ArrayList<Comment>, to: Comment, level: Int): ArrayList<Comment> {
