@@ -140,18 +140,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_margin="@dimen/margin_material"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/upvote_btn"
                     style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="@drawable/circle_gray_stroke"
+                    android:background="@drawable/ripple_gray_circle"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_upvote_24_gray" />
+                    app:srcCompat="@drawable/ic_upvote_18_gray" />
+
+                <ProgressBar
+                    android:id="@+id/voting_progress"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/money_label"
@@ -240,7 +249,7 @@
         android:focusable="true"
         app:fabSize="normal"
         app:layout_anchorGravity="bottom|right|end"
-        app:layout_behavior="io.golos.golos.screens.widgets.FabBeh"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_white_24dp" />

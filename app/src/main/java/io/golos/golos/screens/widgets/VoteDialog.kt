@@ -64,7 +64,7 @@ class VoteDialog : DialogFragment() {
             }
         })
         voteBtn.setOnClickListener({
-            selectPowerListener?.submitVote(mSeeker.progress)
+            selectPowerListener?.submitVote(mSeeker.progress.toShort())
             dismiss()
         })
         return v
@@ -94,5 +94,5 @@ class VoteDialog : DialogFragment() {
 }
 
 interface OnVoteSubmit {
-    fun submitVote(vote: Int)
+    fun submitVote(vote: Short)
 }

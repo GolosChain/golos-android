@@ -1,6 +1,6 @@
 package io.golos.golos.screens.story.model
 
-import eu.bittrade.libs.steemj.base.models.Story
+import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
 import io.golos.golos.utils.GolosError
 
 /**
@@ -8,6 +8,7 @@ import io.golos.golos.utils.GolosError
  */
 data class StoryViewState(val isLoading: Boolean = false,
                           val storyTitle: String = "",
+                          val isStoryCommentButtonShown: Boolean = false,
                           val errorCode: GolosError? = null,
                           val tags: List<String> = emptyList(),
-                          val storyTree: StoryTree = StoryTree(story = Story()))
+                          val storyTree: StoryTree = StoryTree(discussionWithComments = DiscussionWithComments()))

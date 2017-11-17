@@ -49,7 +49,7 @@ data class StripeItem(val discussion: Discussion) {
     val reputation: Long
 
     init {
-        val comment = Comment(discussion, null)
+        val comment = GolosDiscussionItem(discussion, null)
         this.url = comment.url
         this.id = comment.id
         this.title = comment.title

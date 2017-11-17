@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -19,9 +20,12 @@ import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
+import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
 import io.golos.golos.screens.story.model.*
+import io.golos.golos.screens.widgets.OnVoteSubmit
+import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.Translit
 import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
@@ -44,10 +48,11 @@ class StoryActivity : GolosActivity() {
     private lateinit var mStoryRecycler: RecyclerView
     private lateinit var mCommentsRecycler: RecyclerView
     private lateinit var mFlow: FlowLayout
-    private lateinit var mPayoutIv: TextView
+    private lateinit var mPayoutTv: TextView
     private lateinit var mVotesCountTv: TextView
     private lateinit var mVoteBtn: ImageButton
     private lateinit var mCommentsTv: TextView
+    private lateinit var mVotingProgress: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,16 +70,16 @@ class StoryActivity : GolosActivity() {
             finish()
             return
         }
-        mViewModel.onCreate(mapper.readValue<Comment>(extra, Comment::class.java))
+        mViewModel.onCreate(mapper.readValue<StoryTree>(extra, StoryTree::class.java), intent.getSerializableExtra(FEED_TYPE) as FeedType)
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
-            if (it?.storyTree?.rootStory != null) {
+            if (it?.storyTree?.rootStory() != null) {
                 Timber.e("new story, titled ${it.storyTitle}")
-                val story = it.storyTree.rootStory!!
+                val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE
                 if (ets.size == 1) {
-                    Timber.e("parser fail!!!!! on ${it.storyTree.rootStory}")
+                    Timber.e("parser fail!!!!! on ${it.storyTree.rootStory()}")
                 }
                 (mStoryRecycler.adapter as MainStoryAdapter).items = ArrayList(ets)
                 if (mAvatar.drawable == null) {
@@ -89,6 +94,17 @@ class StoryActivity : GolosActivity() {
                     mForTV.visibility = View.VISIBLE
                     mBlogNameTv.visibility = View.VISIBLE
                 }
+                if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
+                    mVoteBtn.setImageResource(R.drawable.ic_upvote_active_18dp_green)
+                    mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_green_solid)
+                    mPayoutTv.setTextColor(ContextCompat.getColor(this,R.color.upvote_green))
+                } else {
+                    mVoteBtn.setImageResource(R.drawable.ic_upvote_18_gray)
+                    mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
+                    mPayoutTv.setTextColor(ContextCompat.getColor(this,R.color.textColorP))
+                }
+                if (it.isStoryCommentButtonShown) mFab.show()
+                else mFab.hide()
                 if (story.categoryName.contains("ru--")) {
                     mBlogNameTv.text = Translit.lat2Ru(story.categoryName.substring(4))
                 } else {
@@ -103,8 +119,8 @@ class StoryActivity : GolosActivity() {
                         }
                     }
                 }
-                mVotesCountTv.text = it.storyTree.rootStory?.activeVotes?.toString()
-                mCommentsTv.text = it.storyTree.rootStory?.commentsCount?.toString()
+                mVotesCountTv.text = it.storyTree.rootStory()?.activeVotes?.toString()
+                mCommentsTv.text = it.storyTree.rootStory()?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
                     story.tags.forEach {
                         val view = layoutInflater.inflate(R.layout.v_story_tag_button, mFlow, false) as TextView
@@ -116,10 +132,10 @@ class StoryActivity : GolosActivity() {
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
                 findViewById<View>(R.id.comments_tv).visibility = View.VISIBLE
-                mPayoutIv.text = String.format("$ %.2f", story.payoutInDollars)
+                mPayoutTv.text = String.format("$ %.2f", story.payoutInDollars)
                 mVotesCountTv.text = "${story.votesNum}"
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
-                if (it.storyTree.comments.isEmpty()) {
+                if (it.storyTree.comments().isEmpty()) {
                     mCommentsRecycler.visibility = View.GONE
                     mNoCommentsTv.visibility = View.VISIBLE
                 } else {
@@ -147,9 +163,10 @@ class StoryActivity : GolosActivity() {
         mCommentsRecycler = findViewById(R.id.comments_recycler)
         mVotesCountTv = findViewById(R.id.votes_btn)
         mFlow = findViewById(R.id.tags_lo)
-        mPayoutIv = findViewById(R.id.money_label)
+        mPayoutTv = findViewById(R.id.money_label)
         mVoteBtn = findViewById(R.id.upvote_btn)
         mCommentsTv = findViewById(R.id.comments_btn)
+        mVotingProgress = findViewById(R.id.voting_progress)
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
@@ -158,18 +175,35 @@ class StoryActivity : GolosActivity() {
         mStoryRecycler.adapter = MainStoryAdapter()
 
         (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
-            if (row is TextRow) mViewModel.onMainStoryTextClick(this,row.text)
-            else if (row is ImageRow) mViewModel.onMainStoryImageClick(this,row.src, iv)
+            if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
+            else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }
+        mVoteBtn.setOnClickListener({
+            if (mViewModel.showVoteDialog) {
+                if (mViewModel.canUserVoteOnThis) {
+                    val dialog = VoteDialog.getInstance()
+                    dialog.selectPowerListener = object : OnVoteSubmit {
+                        override fun submitVote(vote: Short) {
+                            mViewModel.onStoryVote(vote)
+                        }
+                    }
+                    dialog.show(fragmentManager, null)
+                } else mViewModel.onStoryVote(-1)
+            }
+        })
     }
 
     companion object {
         private val COMMENT_TAG = "COMMENT_TAG"
+        private val FEED_TYPE = "FEED_TYPE"
         fun start(ctx: Context,
-                  comment: Comment) {
+                  story: StoryTree,
+                  feedType: FeedType) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
-            intent.putExtra(COMMENT_TAG, mapper.writeValueAsString(comment))
+            val treeString = mapper.writeValueAsString(story)
+            intent.putExtra(COMMENT_TAG, treeString)
+            intent.putExtra(FEED_TYPE, feedType)
             ctx.startActivity(intent)
         }
     }

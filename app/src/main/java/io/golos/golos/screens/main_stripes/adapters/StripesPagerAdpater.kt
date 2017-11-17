@@ -5,13 +5,13 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.PagerAdapter
 import android.support.v7.widget.RecyclerView
-import io.golos.golos.screens.main_stripes.StripeFragment
-import io.golos.golos.screens.main_stripes.StripeFragment.Companion.TYPE_TAG
+import io.golos.golos.screens.main_stripes.StoriesFragment
+import io.golos.golos.screens.main_stripes.StoriesFragment.Companion.TYPE_TAG
 import io.golos.golos.screens.main_stripes.model.FeedType
 
 class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manager) {
     private val typesToPosition = HashMap<Int, FeedType>()
-    private val mFragments = ArrayList<StripeFragment>()
+    private val mFragments = ArrayList<StoriesFragment>()
 
     init {
         typesToPosition.put(0, FeedType.PERSONAL_FEED)
@@ -38,7 +38,7 @@ class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manag
     override fun getItem(position: Int): Fragment {
         var actualPosition = position
         if (!isFeedFragmentShown) actualPosition += 1
-        val fr = StripeFragment.getInstance(typesToPosition[actualPosition]!!)
+        val fr = StoriesFragment.getInstance(typesToPosition[actualPosition]!!)
         mFragments.add(position, fr)
         return fr
     }

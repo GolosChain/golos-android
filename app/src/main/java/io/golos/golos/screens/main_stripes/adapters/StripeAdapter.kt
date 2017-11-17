@@ -20,50 +20,51 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.story.model.ItemType
-import io.golos.golos.screens.story.model.RootStory
+import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.Translit
 import ru.noties.markwon.view.MarkwonViewCompat
+import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 
-val adapterWorkerExecutor = Executors.newSingleThreadExecutor()
-val adapterMainThreadExecutor: Executor by lazy {
+private val adapterWorkerExecutor = Executors.newSingleThreadExecutor()
+private val adapterMainThreadExecutor: Executor by lazy {
     val handler = Handler(Looper.getMainLooper())
     Executor { handler.post(it) }
 }
 
 
-data class StripeWrapper(val stripe: RootStory,
+data class StripeWrapper(val stripe: StoryTree,
                          val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                          val onCardClick: (RecyclerView.ViewHolder) -> Unit,
                          val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
                          val onShareClick: (RecyclerView.ViewHolder) -> Unit)
 
-class StripeAdapter(private var onCardClick: (RootStory) -> Unit = { print(it.body) },
-                    private var onCommentsClick: (RootStory) -> Unit = { print(it.body) },
-                    private var onShareClick: (RootStory) -> Unit = { print(it.body) },
-                    private var onUpvoteClick: (RootStory) -> Unit = { print(it.body) })
+class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
+                    private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
+                    private var onShareClick: (StoryTree) -> Unit = { print(it) },
+                    private var onUpvoteClick: (StoryTree) -> Unit = { print(it) })
     : RecyclerView.Adapter<StripeViewHolder>() {
 
 
-    private var stripes = ArrayList<RootStory>()
+    private var stripes = ArrayList<StoryTree>()
 
-    fun setStripesCustom(newItems: List<RootStory>) {
+    fun setStripesCustom(newItems: List<StoryTree>) {
         if (stripes.isEmpty()) {
-            stripes = ArrayList(newItems).clone() as ArrayList<RootStory>
+            stripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
             notifyDataSetChanged()
         } else {
             adapterWorkerExecutor.execute {
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition].id == newItems[newItemPosition].id
+                        return stripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
                     }
 
                     override fun getOldListSize() = stripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition] == newItems[newItemPosition]
+                        return stripes[oldItemPosition].rootStoryWrapper() == newItems[newItemPosition].rootStoryWrapper()
                     }
                 })
                 adapterMainThreadExecutor.execute {
@@ -110,40 +111,38 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
         set(value) {
             field = value
             if (field != null) {
-                val wrapper = field!!
+                val wrapper = field?.stripe?.rootStory() ?: return
                 views.forEach({
                     when (it) {
-                        mCommentsButton -> it.setOnClickListener({ wrapper.onCommentsClick(this) })
-                        mShareBtn -> it.setOnClickListener({ wrapper.onShareClick(this) })
-                        mUpvoteBtn -> it.setOnClickListener({ wrapper.onUpvoteClick(this) })
-                        else -> it.setOnClickListener({ wrapper.onCardClick(this) })
+                        mCommentsButton -> it.setOnClickListener({ field!!.onCommentsClick(this) })
+                        mShareBtn -> it.setOnClickListener({ field!!.onShareClick(this) })
+                        mUpvoteBtn -> it.setOnClickListener({ field!!.onUpvoteClick(this) })
+                        else -> it.setOnClickListener({ field!!.onCardClick(this) })
                     }
                 })
-                mUpvoteBtn.setOnClickListener({ wrapper.onUpvoteClick(this) })
-
-
-                mUserNameTv.text = wrapper.stripe.author
-                if (wrapper.stripe.firstRebloggedBy.isNotEmpty()) {
-                    mRebloggedByTv.text = wrapper.stripe.firstRebloggedBy
+                mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
+                mUserNameTv.text = wrapper.author
+                if (wrapper.firstRebloggedBy.isNotEmpty()) {
+                    mRebloggedByTv.text = wrapper.firstRebloggedBy
                 } else {
                     mRebloggedByTv.visibility = View.INVISIBLE
                 }
-                if (wrapper.stripe.categoryName.contains("ru--")) {
-                    mBlogNameTv.text = Translit.lat2Ru(wrapper.stripe.categoryName.substring(4))
+                if (wrapper.categoryName.contains("ru--")) {
+                    mBlogNameTv.text = Translit.lat2Ru(wrapper.categoryName.substring(4))
                 } else {
-                    mBlogNameTv.text = wrapper.stripe.categoryName
+                    mBlogNameTv.text = wrapper.categoryName
                 }
-                mTitleTv.text = wrapper.stripe.title
-                mUpvoteBtn.text = "$ ${String.format("%.2f", wrapper.stripe.payoutInDollars)}"
-                mCommentsButton.text = wrapper.stripe.commentsCount.toString()
-                if (wrapper.stripe.avatarPath != null) mGlide
-                        .load(wrapper.stripe.avatarPath)
+                mTitleTv.text = wrapper.title
+                mUpvoteBtn.text = "$ ${String.format("%.2f", wrapper.payoutInDollars)}"
+                mCommentsButton.text = wrapper.commentsCount.toString()
+                if (wrapper.avatarPath != null) mGlide
+                        .load(wrapper.avatarPath)
                         .error(mGlide.load(R.drawable.ic_person_gray_24dp))
                         .apply(RequestOptions.placeholderOf(R.drawable.ic_person_gray_24dp))
                         .into(mAvatar)
                 else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 val res = itemView.resources
-                if (wrapper.stripe.isUserUpvotedOnThis) {
+                if (wrapper.isUserUpvotedOnThis) {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(R.drawable.ic_upvote_green_24dp), null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
                 } else {
@@ -152,13 +151,13 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 }
 
                 when {
-                    wrapper.stripe.type == ItemType.PLAIN -> {
+                    wrapper.type == ItemType.PLAIN -> {
                         mMainImageBig.visibility = View.GONE
                         mSecondaryImage.visibility = View.GONE
                         mBodyTextMarkwon.visibility = View.VISIBLE
-                        mBodyTextMarkwon.markdown = wrapper.stripe.cleanedFromImages()
+                        mBodyTextMarkwon.markdown = wrapper.cleanedFromImages()
                     }
-                    wrapper.stripe.type == ItemType.PLAIN_WITH_IMAGE -> {
+                    wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
 
                         mMainImageBig.visibility = View.GONE
                         mSecondaryImage.visibility = View.VISIBLE
@@ -166,39 +165,39 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         val options = RequestOptions()
                         options.centerInside()
                         mSecondaryImage.setImageBitmap(null)
-                        if (wrapper.stripe.images.size > 0) {
+                        if (wrapper.images.size > 0) {
                             val error = mGlide.load(R.drawable.error)
-                            mGlide.load(wrapper.stripe.images[0])
+                            mGlide.load(wrapper.images[0])
                                     .apply(options)
                                     .error(error)
 
                                     .into(mSecondaryImage)
                         }
-                        if (wrapper.stripe.format == io.golos.golos.screens.story.model.Format.HTML) {
+                        if (wrapper.format == io.golos.golos.screens.story.model.Format.HTML) {
                             val result: Spanned
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                                result = Html.fromHtml(wrapper.stripe.body, Html.FROM_HTML_MODE_LEGACY)
+                                result = Html.fromHtml(wrapper.body, Html.FROM_HTML_MODE_LEGACY)
 
                             } else {
-                                result = Html.fromHtml(wrapper.stripe.body)
+                                result = Html.fromHtml(wrapper.body)
                             }
                             mBodyTextMarkwon.text = result
                         } else {
-                            mBodyTextMarkwon.markdown = wrapper.stripe.cleanedFromImages().replace("\n", "")
+                            mBodyTextMarkwon.markdown = wrapper.cleanedFromImages().replace("\n", "")
                         }
                     }
                     else -> {
                         val error = mGlide.load(R.drawable.error)
                         var nextImage: RequestBuilder<Drawable>? = null
-                        if (wrapper.stripe.images.size > 1) {
-                            nextImage = mGlide.load(wrapper.stripe.images[1]).error(error)
+                        if (wrapper.images.size > 1) {
+                            nextImage = mGlide.load(wrapper.images[1]).error(error)
                         }
                         mMainImageBig.scaleType = ImageView.ScaleType.FIT_CENTER
                         mMainImageBig.visibility = View.VISIBLE
                         mSecondaryImage.visibility = View.GONE
                         mBodyTextMarkwon.visibility = View.GONE
-                        if (wrapper.stripe.images.size > 0) {
-                            mGlide.load(wrapper.stripe.images[0])
+                        if (wrapper.images.size > 0) {
+                            mGlide.load(wrapper.images[0])
                                     .error(nextImage ?: error)
                                     .apply(RequestOptions.placeholderOf(R.drawable.error))
                                     .into(mMainImageBig)

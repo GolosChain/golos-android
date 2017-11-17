@@ -6,16 +6,14 @@ import android.os.Looper
 import android.support.annotation.WorkerThread
 import eu.bittrade.libs.steemj.Golos4J
 import io.golos.golos.App
-import io.golos.golos.repository.model.StoryItems
-import io.golos.golos.repository.model.StoryTreeState
+import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
-import io.golos.golos.screens.story.model.Comment
-import io.golos.golos.screens.story.model.RootStory
+import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import java.util.*
 import java.util.concurrent.Executor
@@ -59,26 +57,11 @@ abstract class Repository {
             }
     }
 
-    @WorkerThread
-    abstract fun getStripeItems(limit: Int, type: FeedType, truncateBody: Int,
-                                startAuthor: String? = null, startPermlink: String? = null): List<RootStory>
 
-    abstract fun getStories(type: FeedType): LiveData<StoryItems>
+    abstract fun getStories(type: FeedType): LiveData<StoryTreeItems>
 
-    abstract fun requestStoriesUpdate(limit: Int, type: FeedType,
-                                      startAuthor: String? = null, startPermlink: String? = null)
-
-    @WorkerThread
-    abstract fun upVote(author: String, permlink: String, percents: Short): Comment
-
-    abstract fun upVoteNoCallback(comment: Comment, percents: Short)
-
-    @WorkerThread
-    abstract fun getUserAvatar(username: String, permlink: String? = null, blog: String? = null): String?
-
-    @WorkerThread
-    abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
-
+    abstract fun requestStoriesListUpdate(limit: Int, type: FeedType,
+                                          startAuthor: String? = null, startPermlink: String? = null)
 
     @WorkerThread
     abstract fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse
@@ -94,19 +77,18 @@ abstract class Repository {
 
     abstract fun getCurrentUserData(): UserData?
 
+    abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData?>
+
     abstract fun deleteUserdata()
+
     abstract fun setUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
-    @WorkerThread
-    abstract fun downVote(author: String, permlink: String): Comment
 
-    abstract fun cancelVoteNoCallback(comment: Comment)
+    abstract fun upVote(comment: GolosDiscussionItem, percents: Short)
 
+    abstract fun cancelVote(comment: GolosDiscussionItem)
 
-    abstract fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<RootStory>
+    abstract fun requestStoryUpdate(story: StoryTree)
 
-    abstract fun requestStoryUpdate(comment: Comment)
-
-    abstract fun getStory(comment: Comment): LiveData<StoryTreeState>
 }
 
 

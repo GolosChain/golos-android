@@ -23,7 +23,7 @@ class StoryParserToRows {
     private val markdownChecker = Regex("\\[[^]]+\\]\\(https?:\\/\\/\\S+\\)")
     private val trashTags = Regex("<p>|</p>|<b>|</b>|\\n|<br>|</br>|&nbsp;")
     private var list: List<Element>? = null
-    fun parse(story: Comment): List<Row> {
+    fun parse(story: GolosDiscussionItem): List<Row> {
 
         val out = ArrayList<Row>()
         if (story.body.isEmpty()) return out

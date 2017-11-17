@@ -86,7 +86,7 @@
         android:layout_marginTop="6dp"
         android:background="?selectableItemBackgroundBorderless"
         android:drawablePadding="@dimen/margin_material_half"
-        android:drawableStart="@drawable/ic_upvote_24_gray"
+        android:drawableStart="@drawable/ic_upvote_18_gray"
         android:gravity="center_vertical"
         android:minWidth="40dp"
         android:padding="0dp"

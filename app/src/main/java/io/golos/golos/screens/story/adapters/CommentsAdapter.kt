@@ -16,7 +16,7 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.screens.story.model.Comment
+import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
@@ -24,14 +24,14 @@ import io.golos.golos.screens.story.model.TextRow
 /**
  * Created by yuri on 08.11.17.
  */
-data class CommentHolderState(val comment: Comment,
+data class CommentHolderState(val comment: GolosDiscussionItem,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit)
 
-class CommentsAdapter(var onUpvoteClick: (Comment) -> Unit = { print(it) },
-                      var onAnswerClick: (Comment) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+class CommentsAdapter(var onUpvoteClick: (GolosDiscussionItem) -> Unit = { print(it) },
+                      var onAnswerClick: (GolosDiscussionItem) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
-    var items = ArrayList<Comment>()
+    var items = ArrayList<GolosDiscussionItem>()
         set(value) {
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

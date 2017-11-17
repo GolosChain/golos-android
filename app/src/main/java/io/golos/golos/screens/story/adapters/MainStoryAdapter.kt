@@ -80,7 +80,7 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 mImage.scaleType = ImageView.ScaleType.FIT_CENTER
                 val error = mGlide.load(R.drawable.error)
                 var src = imageRow.src
-                if (src.endsWith("\\")) src = src.substring(0..src.lastIndex)
+                if (src.endsWith("/")) src = src.substring(0..src.lastIndex - 1)
                 mGlide.load(src).error(error).apply(RequestOptions().fitCenter().placeholder(R.drawable.error)).into(mImage)
             }
             mImage.setOnClickListener({ field?.clickListener?.invoke(this, mImage) })

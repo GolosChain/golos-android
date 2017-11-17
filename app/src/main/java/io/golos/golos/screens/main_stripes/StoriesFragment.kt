@@ -26,7 +26,7 @@ import io.golos.golos.utils.showSnackbar
 /**
  * Created by yuri on 31.10.17.
  */
-class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
@@ -64,12 +64,12 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 onShareClick = { mViewModel?.onShareClick(it, activity) },
                 onUpvoteClick = {
                     if (mViewModel?.canVote == true) {
-                        if (it.isUserUpvotedOnThis) {
+                        if (it.rootStory()?.isUserUpvotedOnThis == true) {
                             mViewModel?.downVote(it)
                         } else {
                             val dialog = VoteDialog.getInstance()
                             dialog.selectPowerListener = object : OnVoteSubmit {
-                                override fun submitVote(vote: Int) {
+                                override fun submitVote(vote: Short) {
                                     mViewModel?.vote(it, vote)
                                 }
                             }
@@ -108,13 +108,13 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 mRecycler?.post { mAdapter.setStripesCustom(it.items) }
             }
             it?.error?.let {
-                if (it.localizedMessage != null) getView()?.showSnackbar(it.localizedMessage)
-                else if (it.nativeMessage != null) getView()?.showSnackbar(it.nativeMessage)
+                if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
+                else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
                 else {
                 }
             }
             it?.popupMessage?.let {
-                getView()?.showSnackbar(it)
+                view?.showSnackbar(it)
             }
             it?.fullscreenMessage?.let {
                 mRecycler?.visibility = View.GONE
@@ -130,8 +130,8 @@ class StripeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     companion object {
         val TYPE_TAG = "TYPE_TAG"
-        fun getInstance(type: FeedType): StripeFragment {
-            val fr = StripeFragment()
+        fun getInstance(type: FeedType): StoriesFragment {
+            val fr = StoriesFragment()
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
             fr.arguments = bundle

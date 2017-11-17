@@ -12,7 +12,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
-import io.golos.golos.screens.story.model.RootStory
+import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
 import timber.log.Timber
 import java.util.concurrent.CountDownLatch
@@ -23,13 +23,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Created by yuri on 01.11.17.
  */
 data class StoriesViewState(val isLoading: Boolean,
-                            val items: List<RootStory> = ArrayList(),
+                            val items: List<StoryTree> = ArrayList(),
                             val error: GolosError? = null,
                             val fullscreenMessage: Int? = null,
                             val popupMessage: Int? = null)
 
 class FeedViewModel : StoriesViewModel() {
-    override val router = FeedRouter(Repository.get, Repository.get.getCurrentUserData()?.userName ?: "")
     override val type: FeedType
         get() = FeedType.PERSONAL_FEED
 
@@ -56,32 +55,27 @@ class FeedViewModel : StoriesViewModel() {
 }
 
 class NewViewModel : StoriesViewModel() {
-    override val router = StripeRouter(Repository.get, FeedType.NEW)
     override val type: FeedType
         get() = FeedType.NEW
 }
 
 class ActualViewModle : StoriesViewModel() {
-    override val router = StripeRouter(Repository.get, FeedType.ACTUAL)
     override val type: FeedType
         get() = FeedType.ACTUAL
 }
 
 class PopularViewModel : StoriesViewModel() {
-    override val router = StripeRouter(Repository.get, FeedType.POPULAR)
     override val type: FeedType
         get() = FeedType.POPULAR
 }
 
 class PromoViewModel : StoriesViewModel() {
-    override val router = StripeRouter(Repository.get, FeedType.PROMO)
     override val type: FeedType
         get() = FeedType.PROMO
 }
 
 
 abstract class StoriesViewModel : ViewModel() {
-    protected abstract val router: StoriesRequestRouter
     protected abstract val type: FeedType
     protected val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
     protected val mRepository = Repository.get
@@ -99,15 +93,16 @@ abstract class StoriesViewModel : ViewModel() {
 
     init {
         mStoriesLiveData.addSource(mRepository.getStories(type)) {
-          //  Timber.e("on stories $type size is ${it?.items?.size} ad viewmodel type is ${this.type}")
-            mStoriesLiveData.value = StoriesViewState(false, it?.items?.map { RootStory(it.comment) } ?: ArrayList(), it?.error)
+           /* Timber.e("on data, size is ${it?.items?.size} and type is ${it?.type}")
+            Timber.e("are items the same? ${mStoriesLiveData.value?.items == it?.items}")*/
+            mStoriesLiveData.value = StoriesViewState(false, it?.items ?: ArrayList(), it?.error)
         }
     }
 
     open fun onSwipeToRefresh() {
         if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
-            mRepository.requestStoriesUpdate(20, type, null, null)
+            mRepository.requestStoriesListUpdate(20, type, null, null)
             isUpdating.set(true)
         }
     }
@@ -119,28 +114,31 @@ abstract class StoriesViewModel : ViewModel() {
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
                 if (isUpdating.get()) return
                 mStoriesLiveData.value = StoriesViewState(true)
-                mRepository.requestStoriesUpdate(20, type, null, null)
+                mRepository.requestStoriesListUpdate(20, type, null, null)
                 isUpdating.set(true)
             }
         }
     }
 
     open fun onScrollToTheEnd() {
-        mRepository.requestStoriesUpdate(20, type, mStoriesLiveData.value?.items?.last()?.author, mStoriesLiveData.value?.items?.last()?.permlink)
+        mRepository.requestStoriesListUpdate(20,
+                type,
+                mStoriesLiveData.value?.items?.last()?.rootStory()?.author,
+                mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink)
     }
 
-    open fun onCardClick(it: RootStory, context: Context?) {
+    open fun onCardClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it)
+        StoryActivity.start(context, it, type)
     }
 
-    open fun onCommentsClick(it: RootStory, context: Context?) {
+    open fun onCommentsClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it)
+        StoryActivity.start(context, it, type)
     }
 
-    open fun onShareClick(it: RootStory, context: Context?) {
-        val link = "https://golos.blog/${it.categoryName}/@${it.author}/${it.permlink}"
+    open fun onShareClick(it: StoryTree, context: Context?) {
+        val link = "https://golos.blog/${it.rootStory()?.categoryName}/@${it.rootStory()?.author}/${it.rootStory()?.permlink}"
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
@@ -148,18 +146,20 @@ abstract class StoriesViewModel : ViewModel() {
         context?.startActivity(sendIntent)
     }
 
-    open fun vote(it: RootStory, vote: Int) {
+    open fun vote(it: StoryTree, vote: Short) {
         if (mRepository.getCurrentUserData() == null) {
             return
         }
-        mRepository.upVoteNoCallback(it, vote.toShort())
+        val story = it.rootStory() ?: return
+        mRepository.upVote(story, vote)
     }
 
-    open fun downVote(it: RootStory) {
+    open fun downVote(it: StoryTree) {
         if (mRepository.getCurrentUserData() == null) {
             return
         }
-        mRepository.cancelVoteNoCallback(it)
+        val story = it.rootStory() ?: return
+        mRepository.cancelVote(story)
     }
 
     open var canVote = mRepository.getCurrentUserData()?.userName != null

@@ -11,11 +11,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import eu.bittrade.libs.steemj.base.models.Discussion;
-import eu.bittrade.libs.steemj.base.models.Story;
+import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.screens.main_stripes.model.StripeItem;
-import io.golos.golos.screens.story.model.Comment;
+import io.golos.golos.screens.story.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.ItemType;
 import io.golos.golos.screens.story.model.RootStory;
 import io.golos.golos.screens.story.model.Row;
@@ -191,8 +191,8 @@ public class ParseTest {
         ObjectMapper mapper = CommunicationHandler.getObjectMapper();
         File f = new File(this.getClass().getClassLoader().getResource(fileNameWithExtension).getPath());
         ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Story.class);
-        List<Story> stories = mapper.convertValue(wrapperDTO.getResult(), type);
+        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, DiscussionWithComments.class);
+        List<DiscussionWithComments> stories = mapper.convertValue(wrapperDTO.getResult(), type);
         return new StoryTree(stories.get(0));
     }
 
@@ -200,20 +200,20 @@ public class ParseTest {
     public void testTree() throws Exception {
         StoryTree tree = readStoryFromResourse("story.json");
 
-        List<Comment> comts = tree.getFlataned();
-        Comment cmt = comts.stream().filter(new Predicate<Comment>() {
+        List<GolosDiscussionItem> comts = tree.getFlataned();
+        GolosDiscussionItem cmt = comts.stream().filter(new Predicate<GolosDiscussionItem>() {
             @Override
-            public boolean test(Comment comment) {
+            public boolean test(GolosDiscussionItem comment) {
                 return comment.getId() == 2467386L;//10^2+10^2=200, 20^2=400, смысл есть. И такое новшество без введения линейности не приведет к добру
             }
         }).findFirst().get();
         int position = comts.indexOf(cmt);
         assertEquals(2467489L/*за пост награда считается как (а+в+с...)^2*/, comts.get(position + 1).getId());
 
-        cmt = comts.stream().filter(new Predicate<Comment>() {
+        cmt = comts.stream().filter(new Predicate<GolosDiscussionItem>() {
             @Override
-            public boolean test(Comment comment) {
-                return comment.getId() == 2459992;//нет никакой нужды собирать все слагаемые в одном акке
+            public boolean test(GolosDiscussionItem golosDiscussionItem) {
+                return golosDiscussionItem.getId() == 2459992;//нет никакой нужды собирать все слагаемые в одном акке
             }
         }).findFirst().get();
         position = comts.indexOf(cmt);
@@ -225,7 +225,7 @@ public class ParseTest {
     @Test
     public void testTreeTwo() throws Exception {
         StoryTree tree = readStoryFromResourse("story2.json");
-        List<Comment> comts = tree.getFlataned();
+        List<GolosDiscussionItem> comts = tree.getFlataned();
         System.out.println(comts);
     }
 
@@ -235,10 +235,10 @@ public class ParseTest {
         final StoryParserToRows parser = new StoryParserToRows();
         List<Row> rows = parser.parse(tree.getRootStory());
         System.out.println(rows);
-        tree.getFlataned().forEach(new Consumer<Comment>() {
+        tree.getFlataned().forEach(new Consumer<GolosDiscussionItem>() {
             @Override
-            public void accept(Comment comment) {
-                List<Row> rows = parser.parse(comment);
+            public void accept(GolosDiscussionItem golosDiscussionItem) {
+                List<Row> rows = parser.parse(golosDiscussionItem);
                 System.out.println(rows);
             }
         });
