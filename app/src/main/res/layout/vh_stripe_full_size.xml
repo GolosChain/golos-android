@@ -155,10 +155,23 @@
             style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="88dp"
             android:layout_weight="0.33"
             android:drawablePadding="-8dp"
+
             android:drawableStart="@drawable/ic_upvote_gray_24dp"
-            android:textColor="@color/gray_1" />
+            android:textColor="@color/gray_1"
+            android:visibility="visible" />
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:padding="8dp"
+            android:id="@+id/progress"
+
+            android:visibility="gone"
+            android:minWidth="72dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.33" />
 
         <View
             android:layout_width="1dp"

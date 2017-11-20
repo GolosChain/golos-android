@@ -15,20 +15,12 @@ class StorySearcherAndReplacer {
             (0..inList.lastIndex)
                     .filter { inList[it].rootStory()?.id == replacer.story.id }
                     .forEach {
-                        inList[it] = StoryTree(replacer, inList[it].commentsWithState)
+                        inList[it] = StoryTree(replacer, inList[it].commentsWithState())
                     }
 
         }
         inList.forEach {
-            if (it.comments().any { it.id == replacer.story.id }) {
-                val currentTree = it
-                isChanged = true
-                (0..currentTree.commentsWithState.lastIndex)
-                        .filter { inList[it].rootStory()?.id == replacer.story.id }
-                        .forEach {
-                            currentTree.commentsWithState[it] = replacer
-                        }
-            }
+            isChanged = it.replaceComment(replacer) || isChanged
         }
         return isChanged
     }

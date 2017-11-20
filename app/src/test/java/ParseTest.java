@@ -16,11 +16,13 @@ import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.screens.main_stripes.model.StripeItem;
 import io.golos.golos.screens.story.model.GolosDiscussionItem;
+import io.golos.golos.screens.story.model.ImageRow;
 import io.golos.golos.screens.story.model.ItemType;
-import io.golos.golos.screens.story.model.RootStory;
 import io.golos.golos.screens.story.model.Row;
 import io.golos.golos.screens.story.model.StoryParserToRows;
 import io.golos.golos.screens.story.model.StoryTree;
+import io.golos.golos.screens.story.model.StoryWrapper;
+import io.golos.golos.utils.UpdatingState;
 import kotlin.text.Regex;
 
 import static junit.framework.Assert.assertEquals;
@@ -45,11 +47,12 @@ public class ParseTest {
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
 
-        List<StripeItem> items = new ArrayList<>();
-        for (Discussion d : discussions) {
-            items.add(new StripeItem(d));
-        }
+        List<GolosDiscussionItem> items = new ArrayList<>();
 
+        for (Discussion d : discussions) {
+            items.add(new GolosDiscussionItem(d, null));
+        }
+        HashMap<Long, Discussion> map = sort(discussions);
         assertTrue(items.get(0).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(1).getType() == ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(2).getType() == ItemType.PLAIN_WITH_IMAGE);
@@ -91,7 +94,6 @@ public class ParseTest {
         assertTrue(items.get(38).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(39).getType() == ItemType.IMAGE_FIRST);
 
-        HashMap<Long, Discussion> map = sort(discussions);
         StripeItem item = new StripeItem(map.get(2339567L));
         assertTrue(item.getBody().contains("Задание фотолаборатории оказалось для меня легким и в тоже время сложным для выбора фотографий"));
         item = new StripeItem(map.get(2337481L));
@@ -141,7 +143,7 @@ public class ParseTest {
         assertTrue(new StripeItem(map.get(2418408L)).getType() == ItemType.IMAGE_FIRST);
     }
 
-    @Test//2415858
+ /*   @Test//2415858
     public void testFifth() throws Exception {
         ObjectMapper mapper = CommunicationHandler.getObjectMapper();
         File f = new File(this.getClass().getClassLoader().getResource("stripe5.json").getPath());
@@ -149,14 +151,14 @@ public class ParseTest {
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
         HashMap<Long, Discussion> map = sort(discussions);
-        List<RootStory> stories = new ArrayList<RootStory>();
+        List<StoryTree> stories = new ArrayList<StoryTree>();
 
-        RootStory story = new RootStory(map.get(2516636L), null);
+        StoryTree story = new StoryTree(map.get(2516636L),null);
       //  assertTrue(new story.getType() == ItemType.IMAGE_FIRST);
         //2516636
         System.out.println(story);
     }
-
+*/
 
     @Test
     public void copyTest() throws Exception {
@@ -187,37 +189,56 @@ public class ParseTest {
         System.out.println(s.split("!\\[.*]\\(.*\\)|^(?:([^:/?#]+):)?(?:([^/?#]*))?([^?#]*\\.(?:jpg|gif|png))(?:\\?([^#]*))?(?:#(.*))?").length);
     }
 
-    private StoryTree readStoryFromResourse(String fileNameWithExtension) throws Exception {
+    public static StoryTree readStoryFromResourse(String fileNameWithExtension) throws Exception {
         ObjectMapper mapper = CommunicationHandler.getObjectMapper();
-        File f = new File(this.getClass().getClassLoader().getResource(fileNameWithExtension).getPath());
+        File f = new File(ParseTest.class.getClassLoader().getResource(fileNameWithExtension).getPath());
         ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, DiscussionWithComments.class);
         List<DiscussionWithComments> stories = mapper.convertValue(wrapperDTO.getResult(), type);
         return new StoryTree(stories.get(0));
     }
 
+    public static List<StoryTree> readStoriesFromResourse(String fileNameWithExtension) throws Exception {
+
+        ObjectMapper mapper = CommunicationHandler.getObjectMapper();
+        File f = new File(ParseTest.class.getClassLoader().getResource(fileNameWithExtension).getPath());
+        ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
+        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
+        List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
+        final List<StoryTree> stories = new ArrayList();
+        discussions.forEach(new Consumer<Discussion>() {
+            @Override
+            public void accept(Discussion discussion) {
+                stories.add(new StoryTree(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
+                        new ArrayList()));
+
+            }
+        });
+        return stories;
+    }
+
     @Test
     public void testTree() throws Exception {
         StoryTree tree = readStoryFromResourse("story.json");
 
-        List<GolosDiscussionItem> comts = tree.getFlataned();
-        GolosDiscussionItem cmt = comts.stream().filter(new Predicate<GolosDiscussionItem>() {
+        List<StoryWrapper> comts = tree.getFlataned();
+        StoryWrapper cmt = comts.stream().filter(new Predicate<StoryWrapper>() {
             @Override
-            public boolean test(GolosDiscussionItem comment) {
-                return comment.getId() == 2467386L;//10^2+10^2=200, 20^2=400, смысл есть. И такое новшество без введения линейности не приведет к добру
+            public boolean test(StoryWrapper comment) {
+                return comment.getStory().getId() == 2467386L;//10^2+10^2=200, 20^2=400, смысл есть. И такое новшество без введения линейности не приведет к добру
             }
         }).findFirst().get();
         int position = comts.indexOf(cmt);
-        assertEquals(2467489L/*за пост награда считается как (а+в+с...)^2*/, comts.get(position + 1).getId());
+        assertEquals(2467489L/*за пост награда считается как (а+в+с...)^2*/, comts.get(position + 1).getStory().getId());
 
-        cmt = comts.stream().filter(new Predicate<GolosDiscussionItem>() {
+        cmt = comts.stream().filter(new Predicate<StoryWrapper>() {
             @Override
-            public boolean test(GolosDiscussionItem golosDiscussionItem) {
-                return golosDiscussionItem.getId() == 2459992;//нет никакой нужды собирать все слагаемые в одном акке
+            public boolean test(StoryWrapper golosDiscussionItem) {
+                return golosDiscussionItem.getStory().getId() == 2459992;//нет никакой нужды собирать все слагаемые в одном акке
             }
         }).findFirst().get();
         position = comts.indexOf(cmt);
-        assertEquals(2460229/*а, понял, этот вопрос пока не изучал*/, comts.get(position + 1).getId());
+        assertEquals(2460229/*а, понял, этот вопрос пока не изучал*/, comts.get(position + 1).getStory().getId());
 
 
     }
@@ -225,25 +246,16 @@ public class ParseTest {
     @Test
     public void testTreeTwo() throws Exception {
         StoryTree tree = readStoryFromResourse("story2.json");
-        List<GolosDiscussionItem> comts = tree.getFlataned();
+        List<StoryWrapper> comts = tree.getFlataned();
         System.out.println(comts);
     }
 
     @Test
-    public void storypatserTest() throws Exception {
+    public void storyParserTest() throws Exception {
         final StoryTree tree = readStoryFromResourse("story4.json");
         final StoryParserToRows parser = new StoryParserToRows();
-        List<Row> rows = parser.parse(tree.getRootStory());
-        System.out.println(rows);
-        tree.getFlataned().forEach(new Consumer<GolosDiscussionItem>() {
-            @Override
-            public void accept(GolosDiscussionItem golosDiscussionItem) {
-                List<Row> rows = parser.parse(golosDiscussionItem);
-                System.out.println(rows);
-            }
-        });
-        System.out.println(rows);
+        List<Row> rows = parser.parse(tree.rootStory());
+        assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg/"), rows.get(0));
+        assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(3));
     }
-
-
 }

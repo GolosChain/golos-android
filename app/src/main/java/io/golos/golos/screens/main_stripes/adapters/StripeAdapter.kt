@@ -11,10 +11,7 @@ import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
@@ -22,8 +19,8 @@ import io.golos.golos.R
 import io.golos.golos.screens.story.model.ItemType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.Translit
+import io.golos.golos.utils.UpdatingState
 import ru.noties.markwon.view.MarkwonViewCompat
-import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -64,7 +61,7 @@ class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) }
                     override fun getOldListSize() = stripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition].rootStoryWrapper() == newItems[newItemPosition].rootStoryWrapper()
+                        return stripes[oldItemPosition].storyWithState() == newItems[newItemPosition].storyWithState()
                     }
                 })
                 adapterMainThreadExecutor.execute {
@@ -100,6 +97,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mSecondaryImage: ImageView = itemView.findViewById(R.id.additional_image)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
     private val mUpvoteBtn: Button = itemView.findViewById(R.id.vote_btn)
+    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mCommentsButton: Button = itemView.findViewById(R.id.comments_btn)
     private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
     private val views = listOf<View>(mAvatar, mUserNameTv, mRebloggedByTv,
@@ -149,7 +147,13 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(R.drawable.ic_upvote_gray_24dp), null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray_1))
                 }
-
+                if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+                    mVotingProgress.visibility = View.VISIBLE
+                    mUpvoteBtn.visibility = View.GONE
+                } else {
+                    mVotingProgress.visibility = View.GONE
+                    mUpvoteBtn.visibility = View.VISIBLE
+                }
                 when {
                     wrapper.type == ItemType.PLAIN -> {
                         mMainImageBig.visibility = View.GONE
@@ -158,7 +162,6 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         mBodyTextMarkwon.markdown = wrapper.cleanedFromImages()
                     }
                     wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
-
                         mMainImageBig.visibility = View.GONE
                         mSecondaryImage.visibility = View.VISIBLE
                         mBodyTextMarkwon.visibility = View.VISIBLE

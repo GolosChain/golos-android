@@ -7,9 +7,9 @@ import android.arch.lifecycle.ViewModel
 import android.widget.ImageView
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.PhotoActivity
 
 /**
@@ -22,6 +22,7 @@ class StoryViewModel : ViewModel() {
 
     fun onCreate(story: StoryTree, feedType: FeedType) {
         mStory = story
+        mLiveData.removeSource(mRepository.getStories(feedType))
         mLiveData.addSource(mRepository.getStories(feedType)) {
             val storyItems = it
             it?.
@@ -67,14 +68,13 @@ class StoryViewModel : ViewModel() {
             return mRepository.getCurrentUserData() != null && mRepository.getCurrentUserData()?.userName != null
 
         }
-    val canUserVoteOnThis: Boolean
-        get() {
-            return mLiveData.value?.storyTree?.rootStory()?.isUserUpvotedOnThis == false
-        }
 
-    fun onStoryVote(percent: Short) {
-        val story = mStory.rootStory() as? GolosDiscussionItem ?: return
-        if (canUserVoteOnThis) mRepository.upVote(story, percent)
-        else mRepository.cancelVote(story)
+    fun canUserVoteOnThis(story: StoryWrapper): Boolean {
+        return !story.story.isUserUpvotedOnThis
+    }
+
+    fun onStoryVote(story: StoryWrapper, percent: Short) {
+        if (canUserVoteOnThis(story)) mRepository.upVote(story.story, percent)
+        else mRepository.cancelVote(story.story)
     }
 }

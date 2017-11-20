@@ -2,6 +2,7 @@ package io.golos.golos.screens.story.adapters
 
 import android.os.Build
 import android.support.constraint.ConstraintLayout
+import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
@@ -12,30 +13,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.utils.UpdatingState
+import timber.log.Timber
 
 /**
  * Created by yuri on 08.11.17.
  */
-data class CommentHolderState(val comment: GolosDiscussionItem,
+data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit)
 
-class CommentsAdapter(var onUpvoteClick: (GolosDiscussionItem) -> Unit = { print(it) },
-                      var onAnswerClick: (GolosDiscussionItem) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onAnswerClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
-    var items = ArrayList<GolosDiscussionItem>()
+    var items = ArrayList<StoryWrapper>()
         set(value) {
+            Timber.e("on new values")
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
+                    return field[oldItemPosition].story.id == value[newItemPosition].story.id
                 }
 
                 override fun getOldListSize() = field.size
@@ -74,6 +79,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mLayout: LinearLayoutCompat = itemView.findViewById(R.id.content_lo)
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
+    private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
 
     init {
         mText.movementMethod = LinkMovementMethod.getInstance()
@@ -91,10 +97,11 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mUpvoteBtn.text = "$ "
                 mImage.setImageBitmap(null)
                 mAvatar.setImageBitmap(null)
+                mProgress.visibility = View.GONE
                 mRootLo.setPadding(0, 0, 0, 0)
             } else {
 
-                val comment = state!!.comment
+                val comment = state!!.comment.story
                 var level = comment.level
                 if (level > 6) level = 6
                 mRootLo.setPadding((level * itemView.resources.getDimension(R.dimen.margin_material)).toInt(), 0, 0, 0)
@@ -115,12 +122,28 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 val hour = 1000 * 60 * 60
                 val hoursAgo = dif / hour
                 if (hoursAgo < 24) {
-                    mTimeTv.text = "$hour ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
+                    mTimeTv.text = "$hoursAgo ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 } else {
                     val daysAgo = hoursAgo / 24
                     mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 }
                 mUpvoteBtn.text = "$ ${String.format("%.2f", comment.payoutInDollars)}"
+                if (comment.isUserUpvotedOnThis) {
+                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_green,0,0,0)
+                } else {
+                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_gray,0,0,0)
+                }
+                if (field!!.comment.updatingState == UpdatingState.UPDATING) {
+                    mUpvoteBtn.visibility = View.INVISIBLE
+                    mUpvoteBtn.isClickable = false
+                    mProgress.visibility = View.VISIBLE
+                } else {
+                    mUpvoteBtn.visibility = View.VISIBLE
+                    mUpvoteBtn.isClickable = true
+                    mProgress.visibility = View.GONE
+                }
                 val rows = ArrayList(StoryParserToRows().parse(comment))
                 var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {

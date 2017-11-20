@@ -107,7 +107,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         if (name != null) {
             if (story.rootStory()?.activeVotes?.filter { it.first == name && it.second > 0 }?.count() != 0) story.rootStory()?.isUserUpvotedOnThis = true
             story.getFlataned().forEach({
-                if (it.activeVotes.filter { it.first == name && it.second > 0 }.count() != 0) it.isUserUpvotedOnThis = true
+                if (it.story.activeVotes.filter { it.first == name && it.second > 0 }.count() != 0) it.story.isUserUpvotedOnThis = true
             })
         }
         return story
@@ -248,7 +248,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, null), Pair(PrivateKeyType.POSTING, null)))
     }
 
-    fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
+   private fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
         mGolosApi.simplifiedOperations.vote(AccountName(author), Permlink(permlink), percents)
         return getRootStoryWithoutComments(author, permlink)
     }
@@ -369,11 +369,11 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     mMainThreadExecutor.execute {
                         if (result) {
                             it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
-                            //todo updating status may arrive after vote done status, mb add latch?
                         }
                     }
                     val currentStory = upVote(discussionItem.author, discussionItem.permlink, percents)
                     replacer.findAndReplace(StoryWrapper(currentStory, UpdatingState.DONE), storiesAll)
+                    currentWorkingitem.avatarPath = getUserAvatarFromDb(currentStory.author)
                     mMainThreadExecutor.execute {
                         it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
                     }
@@ -402,11 +402,11 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     mMainThreadExecutor.execute {
                         if (result) {
                             it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
-                            //todo updating status may arrive after vote done status, mb add latch?
                         }
                     }
                     val currentStory = downVote(discussionItem.author, discussionItem.permlink)
                     replacer.findAndReplace(StoryWrapper(currentStory, UpdatingState.DONE), storiesAll)
+                    currentStory.avatarPath = getUserAvatarFromDb(currentStory.author)
                     mMainThreadExecutor.execute {
                         it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
                     }
@@ -417,7 +417,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun requestStoryUpdate(story: StoryTree) {
         mWorkerExecutor.execute {
-            Thread.sleep(3000)
             val story = getStory(story.rootStory()?.categoryName ?: "",
                     story.rootStory()?.author ?: "",
                     story.rootStory()?.permlink ?: "")

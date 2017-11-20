@@ -22,7 +22,7 @@ val mapper by lazy {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class GolosDiscussionItem(val url: String,
+data class  GolosDiscussionItem(val url: String,
                                val id: Long,
                                val title: String,
                                val categoryName: String,
@@ -37,7 +37,7 @@ class GolosDiscussionItem(val url: String,
                                val author: String,
                                var format: Format = Format.HTML,
                                var avatarPath: String? = null,
-                               var children: List<GolosDiscussionItem> = ArrayList(),
+                               var children: ArrayList<StoryWrapper> = ArrayList(),
                                var parentPermlink: String,
                                var childrenCount: Int,
                                var level: Int = 0,
@@ -75,6 +75,8 @@ class GolosDiscussionItem(val url: String,
             gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
             body = discussion.body ?: "",
             author = discussion.author?.name ?: "") {
+
+
 
         val tagsString = discussion.jsonMetadata
         discussion.activeVotes?.forEach {
@@ -128,15 +130,6 @@ class GolosDiscussionItem(val url: String,
             }
         }
         body = discussion.body ?: ""
-        if (account != null) {
-            try {
-                val node: JsonNode? = mapper.readTree(account?.jsonMetadata)
-                avatarPath = node?.get("profile")?.get("profile_image")?.asText()
-            } catch (e: Exception) {
-                Timber.e("error parsing string ${account?.jsonMetadata}")
-                e.printStackTrace()
-            }
-        }
         val toRowsParser = StoryParserToRows()
         val out = toRowsParser.parse(this)
         if (out.size == 0) {
@@ -148,6 +141,16 @@ class GolosDiscussionItem(val url: String,
                 if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
             }
         }
+        if (account != null) {
+            try {
+                val node: JsonNode? = mapper.readTree(account?.jsonMetadata)
+                avatarPath = node?.get("profile")?.get("profile_image")?.asText()
+            } catch (e: Exception) {
+                Timber.e("error parsing string ${account?.jsonMetadata}")
+                e.printStackTrace()
+            }
+        }
+
     }
 
     override public fun clone(): Any {

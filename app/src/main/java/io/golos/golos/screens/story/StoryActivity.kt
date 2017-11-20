@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.view.View
 import android.widget.ImageButton
@@ -27,6 +28,7 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.Translit
+import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
 
@@ -74,7 +76,7 @@ class StoryActivity : GolosActivity() {
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
-                Timber.e("new story, titled ${it.storyTitle}")
+                Timber.e("on new story")
                 val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE
@@ -96,12 +98,12 @@ class StoryActivity : GolosActivity() {
                 }
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
                     mVoteBtn.setImageResource(R.drawable.ic_upvote_active_18dp_green)
-                    mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_green_solid)
-                    mPayoutTv.setTextColor(ContextCompat.getColor(this,R.color.upvote_green))
+                    mVoteBtn.background = ContextCompat.getDrawable(this, R.drawable.ripple_green_solid)
+                    mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
                     mVoteBtn.setImageResource(R.drawable.ic_upvote_18_gray)
-                    mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
-                    mPayoutTv.setTextColor(ContextCompat.getColor(this,R.color.textColorP))
+                    mVoteBtn.background = ContextCompat.getDrawable(this, R.drawable.ripple_gray_circle)
+                    mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
                 else mFab.hide()
@@ -130,11 +132,22 @@ class StoryActivity : GolosActivity() {
                         mFlow.addView(view)
                     }
                 }
+                if (it.storyTree.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+                    mVotingProgress.visibility = View.VISIBLE
+                    mPayoutTv.visibility = View.GONE
+                    mVoteBtn.visibility = View.GONE
+                } else {
+                    mVotingProgress.visibility = View.GONE
+                    mVoteBtn.visibility = View.VISIBLE
+                    mPayoutTv.visibility = View.VISIBLE
+                }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
                 findViewById<View>(R.id.comments_tv).visibility = View.VISIBLE
                 mPayoutTv.text = String.format("$ %.2f", story.payoutInDollars)
                 mVotesCountTv.text = "${story.votesNum}"
+
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
+
                 if (it.storyTree.comments().isEmpty()) {
                     mCommentsRecycler.visibility = View.GONE
                     mNoCommentsTv.visibility = View.VISIBLE
@@ -173,24 +186,39 @@ class StoryActivity : GolosActivity() {
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.adapter = CommentsAdapter()
         mStoryRecycler.adapter = MainStoryAdapter()
-
+        (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }
         mVoteBtn.setOnClickListener({
             if (mViewModel.showVoteDialog) {
-                if (mViewModel.canUserVoteOnThis) {
+                val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
+                if (mViewModel.canUserVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
                     dialog.selectPowerListener = object : OnVoteSubmit {
                         override fun submitVote(vote: Short) {
-                            mViewModel.onStoryVote(vote)
+                            mViewModel.onStoryVote(story, vote)
                         }
                     }
                     dialog.show(fragmentManager, null)
-                } else mViewModel.onStoryVote(-1)
+                } else mViewModel.onStoryVote(story, -1)
             }
         })
+        (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
+            if (mViewModel.showVoteDialog) {
+                if (mViewModel.canUserVoteOnThis(it)) {
+                    val dialog = VoteDialog.getInstance()
+                    dialog.selectPowerListener = object : OnVoteSubmit {
+                        override fun submitVote(vote: Short) {
+                            mViewModel.onStoryVote(it, vote)
+                        }
+                    }
+                    dialog.show(fragmentManager, null)
+                } else mViewModel.onStoryVote(it, -1)
+            }
+        }
     }
 
     companion object {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_lo"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -94,8 +95,29 @@
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="@id/username_tv"
         app:layout_constraintTop_toBottomOf="@+id/content_lo"
-
         app:srcCompat="@drawable/ic_keyboard_arrow_up_white_36dp" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="6dp"
+        android:drawablePadding="@dimen/margin_material_half"
+        android:drawableStart="@drawable/ic_upvote_18_gray"
+        android:gravity="center_vertical"
+        android:minWidth="40dp"
+        android:padding="0dp"
+        app:layout_constraintStart_toStartOf="@id/username_tv"
+        app:layout_constraintTop_toBottomOf="@+id/content_lo" />
+
+    <android.support.constraint.Barrier
+        android:layout_width="0dp"
+        android:id="@+id/barrier"
+        android:layout_height="0dp"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="progress,upvote_btn"
+        />
 
     <Button
         android:id="@+id/answer_btn"
@@ -112,7 +134,7 @@
         android:textAllCaps="false"
         android:textColor="@color/corall_red"
         android:textSize="@dimen/font_regular"
-        app:layout_constraintBottom_toBottomOf="@+id/upvote_btn"
+        app:layout_constraintBottom_toBottomOf="@+id/barrier"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toEndOf="@+id/upvote_btn"
         app:layout_constraintTop_toTopOf="@+id/upvote_btn" />

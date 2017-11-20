@@ -1,15 +1,13 @@
 package io.golos.golos.screens.story.model
 
 import io.golos.golos.utils.ImageVisitor
+import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.TextVisitor
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
-/**
- * Created by yuri on 08.11.17.
- */
 data class TextRow(val text: String) : Row()
 
 data class ImageRow(val src: String) : Row()
@@ -29,23 +27,45 @@ class StoryParserToRows {
         if (story.body.isEmpty()) return out
         var str = story.body
         if (story.format == Format.MARKDOWN || str.contains(markdownChecker)) {
+            str = str.replace(Regexps.imageWithWhitespace) {
+                "![](${it.value.trim()})"
+            }
+            str = str.replace(Regexps.linkWithWhiteSpace) {
+                "[](${it.value.trim()})"
+            }
             var node = Parser.builder().build().parse(str)
             node?.accept(ImageVisitor())
             node?.accept(TextVisitor())
             str = HtmlRenderer.builder().build().render(node)
         }
         try {
+            str = str.replace("\\s@[a-zA-Z]{5,16}[0-9]{0,6}".toRegex()) {
+                "<a href = \"https://golos.blog/${it.value.trim()}\"> ${it.value.trim()}</a>"
+            }
+            str = str.replace(Regexps.imageWithWhitespace) {
+                "<img src = \"${it.value.trim()}\">"
+            }
+            str = str.replace(Regexps.imageWithCenterTage) {
+                "<img src = \"${it.value
+                        .trim()
+                        .replace("<center>", "")
+                        .replace("</center>", "")}\">"
+            }
+            str = str.replace(Regexps.linkWithWhiteSpace) {
+                "<a href = \"${it.value.trim()}\"> ${it.value.trim()}</a>"
+            }
             val doc = Jsoup.parse(str)
             var ets = doc.body().children()
 
             var body = doc.body()
-            list = listLastChildren(body)
+            list = listChildren(body)
             if (ets.size == 1 && ets[0].children().html().isNotEmpty()) {
                 if (ets[0].ownText().isNotEmpty()) out.add(TextRow(ets[0].ownText()))
                 ets = ets[0].children()
 
 
             }
+
             if (ets.size == 0) {
                 ets = doc.body().children()
             }
@@ -63,8 +83,8 @@ class StoryParserToRows {
                 out.add(TextRow(str))
                 return out
             }
-            if (list!!.size > 0) {
-                list!!.forEach {
+            if (ets!!.size > 0) {
+                ets!!.forEach {
                     if (it.hasAttr("src")) {
                         out.add(ImageRow(it.attr("src")))
                     } else if (it.children().hasAttr("src")) {
@@ -76,7 +96,7 @@ class StoryParserToRows {
                     }
                 }
             } else {
-                ets!!.forEach {
+                list!!.forEach {
                     if (!it.html().replace(trashTags, "").isEmpty()) {
                         if (it.hasAttr("src")) {
                             out.add(ImageRow(it.attr("src")))

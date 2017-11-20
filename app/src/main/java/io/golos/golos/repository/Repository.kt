@@ -6,6 +6,7 @@ import android.os.Looper
 import android.support.annotation.WorkerThread
 import eu.bittrade.libs.steemj.Golos4J
 import io.golos.golos.App
+import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
@@ -16,10 +17,7 @@ import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import java.util.*
-import java.util.concurrent.Executor
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 
 abstract class Repository {
@@ -30,7 +28,9 @@ abstract class Repository {
             @Synchronized
             get() {
                 if (App.isMocked) {
-                    if (instance == null) instance = MockRepoImpl()
+                    if (instance == null) instance = MockRepoImpl(GolosApi.get,
+                            Executors.newSingleThreadExecutor(),
+                            mMainThreadExecutor)
                     return instance!!
                 } else {
                     if (instance == null) instance = RepositoryImpl(

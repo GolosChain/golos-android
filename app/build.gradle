@@ -14,13 +14,13 @@ android {
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
     }
-   buildTypes {
+    buildTypes {
         release {
             minifyEnabled true
             useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug  {
+        debug {
             minifyEnabled true
             useProguard false
             debuggable true
@@ -64,6 +64,10 @@ dependencies {
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
     compile 'android.arch.lifecycle:extensions:1.0.0'
+    testCompile 'android.arch.lifecycle:extensions:1.0.0'
+    testCompile group: 'com.nhaarman', name: 'mockito-kotlin-kt1.1', version: '1.5.0'
+    testImplementation 'android.arch.core:core-testing:1.0.0'
+
     testCompile 'junit:junit:4.12'
     testCompile 'org.json:json:20160810'
     testCompile 'ru.noties:markwon:1.0.0'
@@ -78,7 +82,7 @@ dependencies {
     compile 'ru.noties:markwon-view:1.0.0'
     compile 'com.makeramen:roundedimageview:2.3.0'
     compile 'com.github.chrisbanes:PhotoView:+'
-    compile ('com.wefika:flowlayout:+') {
+    compile('com.wefika:flowlayout:+') {
         exclude group: 'com.intellij'
     }
     compile 'com.android.support:multidex:1.0.2'

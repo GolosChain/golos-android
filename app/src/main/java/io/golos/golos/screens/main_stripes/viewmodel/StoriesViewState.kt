@@ -14,7 +14,6 @@ import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -93,8 +92,6 @@ abstract class StoriesViewModel : ViewModel() {
 
     init {
         mStoriesLiveData.addSource(mRepository.getStories(type)) {
-           /* Timber.e("on data, size is ${it?.items?.size} and type is ${it?.type}")
-            Timber.e("are items the same? ${mStoriesLiveData.value?.items == it?.items}")*/
             mStoriesLiveData.value = StoriesViewState(false, it?.items ?: ArrayList(), it?.error)
         }
     }
