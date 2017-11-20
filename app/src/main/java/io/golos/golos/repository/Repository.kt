@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.WorkerThread
-import eu.bittrade.libs.steemj.Golos4J
 import io.golos.golos.App
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.StoryTreeItems
@@ -37,7 +36,7 @@ abstract class Repository {
                             sharedExecutor,
                             mMainThreadExecutor,
                             Persister.get,
-                            Golos4J.getInstance())
+                            GolosApi.get)
                     return instance!!
                 }
             }

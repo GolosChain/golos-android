@@ -51,7 +51,7 @@ internal class MockRepoImpl(
 
     override fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
         isIserLoggedIn = true
-        val out = api.authWithMasterKey(userName, masterKey)
+        val out = api.auth(userName, masterKey, null, null)
         mMainThreadExecutor.execute {
             mAuthLiveData.value = UserData(out.avatarPath, out.userName, out.postingAuth?.second, out.activeAuth?.second)
         }

@@ -63,10 +63,10 @@ class StoryTree(rootStory: StoryWrapper?,
     }
 
     fun replaceComment(replaceWith: StoryWrapper): Boolean {
-      return  replaceComment(replaceWith, mCommentsWithState)
+        return replaceComment(replaceWith, mCommentsWithState)
     }
 
-    private fun replaceComment(replaceWith: StoryWrapper, src: ArrayList<StoryWrapper>):Boolean {
+    private fun replaceComment(replaceWith: StoryWrapper, src: ArrayList<StoryWrapper>): Boolean {
         var changes = false
         (0..src.lastIndex)
                 .forEach {
@@ -77,6 +77,7 @@ class StoryTree(rootStory: StoryWrapper?,
                         val replacingItem = src[it].story
                         src[it] = replaceWith
                         src[it].story.children = replacingItem.children
+                        src[it].story.level = replacingItem.level
                         changes = true
                     }
                 }

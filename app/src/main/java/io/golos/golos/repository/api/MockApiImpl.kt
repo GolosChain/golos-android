@@ -9,6 +9,7 @@ import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO
 import io.golos.golos.App
 import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
@@ -44,7 +45,7 @@ internal class MockApiImpl : GolosApi() {
         return StoryTree(stoeryes[0])
     }
 
-    override fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
+    fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
         val response = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("cepera")))
         val acc = response[0]
         val out = UserAuthResponse(true, acc.name.name,
@@ -71,5 +72,21 @@ internal class MockApiImpl : GolosApi() {
             out.add(story)
         }
         return out
+    }
+
+    override fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
+        return authWithMasterKey(userName, masterKey ?: "")
+    }
+
+    override fun getAccountData(of: String): AccountInfo {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

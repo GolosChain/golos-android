@@ -1,7 +1,10 @@
 package io.golos.golos.repository.api
 
+import io.golos.golos.App
 import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 
 /**
@@ -14,7 +17,10 @@ abstract class GolosApi {
         val get: GolosApi
             @Synchronized
             get() {
-                if (instance == null) instance = MockApiImpl()
+                if (instance == null) {
+                    if (App.isMocked)instance = MockApiImpl()
+                    else instance = ApiImpl()
+                }
                 return instance!!
             }
     }
@@ -25,8 +31,14 @@ abstract class GolosApi {
 
     abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
 
-    abstract fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse
-
-    abstract fun  getStories(limit: Int, type: FeedType, truncateBody: Int,
+    abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
                             startAuthor: String?, startPermlink: String?): List<StoryTree>
+
+    abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
+
+    abstract fun getAccountData(of: String): AccountInfo
+
+    abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
+
+    abstract fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem
 }

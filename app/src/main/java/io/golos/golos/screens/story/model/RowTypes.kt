@@ -34,8 +34,6 @@ class StoryParserToRows {
                 "[](${it.value.trim()})"
             }
             var node = Parser.builder().build().parse(str)
-            node?.accept(ImageVisitor())
-            node?.accept(TextVisitor())
             str = HtmlRenderer.builder().build().render(node)
         }
         try {
