@@ -6,6 +6,7 @@ import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
+import java.io.File
 
 /**
  * Created by yuri on 20.11.17.
@@ -18,7 +19,7 @@ abstract class GolosApi {
             @Synchronized
             get() {
                 if (instance == null) {
-                    if (App.isMocked)instance = MockApiImpl()
+                    if (App.isMocked) instance = MockApiImpl()
                     else instance = ApiImpl()
                 }
                 return instance!!
@@ -41,4 +42,9 @@ abstract class GolosApi {
     abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
 
     abstract fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem
+
+    abstract fun uploadImage(sendFromAccount: String, file: File): String
+
+    abstract fun sendPost(sendFromAccount: String, title: String, content: String,
+                          tags: Array<String>)
 }

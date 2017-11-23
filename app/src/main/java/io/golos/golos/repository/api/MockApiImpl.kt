@@ -16,6 +16,8 @@ import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.avatarPath
+import java.io.File
+import java.util.*
 
 /**
  * Created by yuri on 20.11.17.
@@ -87,6 +89,15 @@ internal class MockApiImpl : GolosApi() {
     }
 
     override fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun uploadImage(sendFromAccount: String, file: File): String {
+       Thread.sleep(500)
+        return "mock_image_url_${UUID.randomUUID()}"
+    }
+
+    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

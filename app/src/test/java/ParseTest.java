@@ -7,13 +7,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import eu.bittrade.libs.steemj.base.models.Discussion;
-import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
+import io.golos.golos.Utils;
 import io.golos.golos.screens.main_stripes.model.StripeItem;
 import io.golos.golos.screens.story.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.ImageRow;
@@ -22,7 +21,6 @@ import io.golos.golos.screens.story.model.Row;
 import io.golos.golos.screens.story.model.StoryParserToRows;
 import io.golos.golos.screens.story.model.StoryTree;
 import io.golos.golos.screens.story.model.StoryWrapper;
-import io.golos.golos.utils.UpdatingState;
 import kotlin.text.Regex;
 
 import static junit.framework.Assert.assertEquals;
@@ -189,37 +187,9 @@ public class ParseTest {
         System.out.println(s.split("!\\[.*]\\(.*\\)|^(?:([^:/?#]+):)?(?:([^/?#]*))?([^?#]*\\.(?:jpg|gif|png))(?:\\?([^#]*))?(?:#(.*))?").length);
     }
 
-    public static StoryTree readStoryFromResourse(String fileNameWithExtension) throws Exception {
-        ObjectMapper mapper = CommunicationHandler.getObjectMapper();
-        File f = new File(ParseTest.class.getClassLoader().getResource(fileNameWithExtension).getPath());
-        ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, DiscussionWithComments.class);
-        List<DiscussionWithComments> stories = mapper.convertValue(wrapperDTO.getResult(), type);
-        return new StoryTree(stories.get(0));
-    }
-
-    public static List<StoryTree> readStoriesFromResourse(String fileNameWithExtension) throws Exception {
-
-        ObjectMapper mapper = CommunicationHandler.getObjectMapper();
-        File f = new File(ParseTest.class.getClassLoader().getResource(fileNameWithExtension).getPath());
-        ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
-        List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
-        final List<StoryTree> stories = new ArrayList();
-        discussions.forEach(new Consumer<Discussion>() {
-            @Override
-            public void accept(Discussion discussion) {
-                stories.add(new StoryTree(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
-                        new ArrayList()));
-
-            }
-        });
-        return stories;
-    }
-
     @Test
     public void testTree() throws Exception {
-        StoryTree tree = readStoryFromResourse("story.json");
+        StoryTree tree = Utils.readStoryFromResourse("story.json");
 
         List<StoryWrapper> comts = tree.getFlataned();
         StoryWrapper cmt = comts.stream().filter(new Predicate<StoryWrapper>() {
@@ -245,14 +215,14 @@ public class ParseTest {
 
     @Test
     public void testTreeTwo() throws Exception {
-        StoryTree tree = readStoryFromResourse("story2.json");
+        StoryTree tree = Utils.readStoryFromResourse("story2.json");
         List<StoryWrapper> comts = tree.getFlataned();
         System.out.println(comts);
     }
 
     @Test
     public void storyParserTest() throws Exception {
-        final StoryTree tree = readStoryFromResourse("story4.json");
+        final StoryTree tree = Utils.readStoryFromResourse("story4.json");
         final StoryParserToRows parser = new StoryParserToRows();
         List<Row> rows = parser.parse(tree.rootStory());
         assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg/"), rows.get(0));

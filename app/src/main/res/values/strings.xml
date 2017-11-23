@@ -52,4 +52,12 @@
     <string name="login_to_vote">Зайдите или зарегестрируйтесь для голосования</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
     <string name="nothing_here">Пока ничего нет</string>
+    <string name="wrong_image">Что-то не так с изображением, попробуйте другое.</string>
+    <string name="link_name">Название ссылки</string>
+    <string name="link_address">Адрес ссылки</string>
+    <string name="you_can_post_only_every_five_minutes">Вы можете отправлять пост или комментарий не чаще раза в 5 минут</string>
+    <string name="at_least_one_tag">Для создания поста нужен как минимум 1 тэг</string>
+    <string name="must_be_not_empty">Текст поста не может быть пустым</string>
+    <string name="enter_title">Заголовок поста не может быть пустым</string>
+    <string name="send_success">Пост успешно опубликован</string>
 </resources>

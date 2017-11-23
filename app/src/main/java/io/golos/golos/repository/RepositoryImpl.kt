@@ -10,15 +10,20 @@ import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.screens.editor.EditorImagePart
+import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.GolosErrorParser
+import io.golos.golos.utils.Translit
 import io.golos.golos.utils.UpdatingState
 import org.apache.commons.lang3.tuple.ImmutablePair
 import timber.log.Timber
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
@@ -333,5 +338,40 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun getCurrentUserDataAsLiveData(): LiveData<UserData?> {
         return mAuthLiveData
+    }
+
+    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit) {
+        if (mPersister.getCurrentUserName() == null) return
+        val tags = ArrayList(tags)
+        val content = ArrayList(content)
+        mWorkerExecutor.execute {
+            try {
+                (0 until tags.size)
+                        .forEach {
+                            if (tags[it].contains(Regex("[а-яА-Я]"))) {
+                                tags[it] = "ru--${Translit.ru2lat(tags[it])}"
+                            }
+                        }
+                (0 until content.size)
+                        .forEach {
+                            val part = content[it]
+                            if (part is EditorImagePart) {
+                                val newUrl = mGolosApi.uploadImage(mPersister.getCurrentUserName()!!, File(part.imageUrl))
+                                content[it] = EditorImagePart(part.id, part.imageName, newUrl, pointerPosition = part.pointerPosition)
+                            }
+                        }
+                val content = content.joinToString(separator = "\n") { it.markdownRepresentation }
+                println("content = $content \ntags = $tags")
+                mGolosApi.sendPost(mPersister.getCurrentUserName()!!, title, content, tags.toArray(Array(tags.size, { "" })))
+                mMainThreadExecutor.execute {
+                    resultListener.invoke(Unit, null)
+                }
+
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    resultListener(Unit, GolosErrorParser.parse(e))
+                }
+            }
+        }
     }
 }

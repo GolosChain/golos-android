@@ -11,10 +11,12 @@ import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.utils.GolosError
 import java.util.*
 import java.util.concurrent.*
 
@@ -87,6 +89,8 @@ abstract class Repository {
     abstract fun cancelVote(comment: GolosDiscussionItem)
 
     abstract fun requestStoryUpdate(story: StoryTree)
+
+    abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit)
 
 }
 

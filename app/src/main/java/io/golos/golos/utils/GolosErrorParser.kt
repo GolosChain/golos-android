@@ -25,6 +25,8 @@ object GolosErrorParser {
             return R.string.user_used_max_comments_chances
         if (error.error.steemErrorDetails.data.toString().contains(" You have already voted in a similar way"))
             return R.string.you_voted_same_way
+        else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes"))  return R.string.you_can_post_only_every_five_minutes
         else return R.string.unknown_error
+
     }
 }

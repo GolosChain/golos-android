@@ -17,6 +17,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".screens.editor.EditorActivity"
+            android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"

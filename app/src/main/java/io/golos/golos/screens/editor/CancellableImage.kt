@@ -1,8 +1,6 @@
 package io.golos.golos.screens.editor
 
 import android.content.Context
-import android.content.res.ColorStateList
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -11,7 +9,9 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
+import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 24/10/2017.
@@ -29,6 +29,7 @@ class CancellableImage @JvmOverloads constructor(
     var state: CancellableImageState? = null
         get
         set(value) {
+            field = value
             if (value == null) {
                 mImage.setImageBitmap(null)
                 mImage.visibility = View.GONE
@@ -36,19 +37,16 @@ class CancellableImage @JvmOverloads constructor(
                 mCancelButton.visibility = View.GONE
             } else {
                 mImage.visibility = View.VISIBLE
-                Glide.with(context).load(value.imageSrc).into(mImage)
-                if (value.isLoading) {
-                    mProgressBar.visibility = View.VISIBLE
-                    mImage.supportImageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
-                } else {
-                    mProgressBar.visibility = View.GONE
-                    mImage.supportBackgroundTintList = null
-                }
+                mCancelButton.visibility = View.VISIBLE
+                Glide.with(context)
+                        .load(field?.imageSrc ?: "")
+                        .apply(RequestOptions().fitCenter())
+                        .into(mImage)
             }
         }
 
     init {
-        addView(LayoutInflater.from(context).inflate(R.layout.vh_imagewrapper, this, true))
+        LayoutInflater.from(context).inflate(R.layout.v_cancellable_image, this, true)
         mImage = findViewById(R.id.image)
         mProgressBar = findViewById(R.id.progress)
         mCancelButton = findViewById(R.id.btn_remove)

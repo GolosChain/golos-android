@@ -9,31 +9,51 @@ import java.util.regex.Pattern
  */
 
 
-abstract class Part {
+abstract class EditorPart(open val id: String = UUID.randomUUID().toString()) {
     abstract val markdownRepresentation: CharSequence
-    abstract val pointerPosition: Int?
-    abstract fun clearCursor(): Part
+    abstract var pointerPosition: Int?
+    abstract fun clearCursor(): EditorPart
     fun isFocused() = pointerPosition != null
-    abstract fun setCursor(position: Int?): Part
-    val id = UUID.randomUUID().toString()
+    abstract fun setCursor(position: Int?): EditorPart
 
     companion object {
         val CURSOR_POINTER_BEGIN = 0
     }
 }
 
-data class EditorImagePart(val imageName: String,
+data class EditorImagePart(override val id: String = UUID.randomUUID().toString(),
+                           val imageName: String,
                            val imageUrl: String,
-                           override val pointerPosition: Int?) : Part() {
+                           override var pointerPosition: Int?) : EditorPart(id) {
     override val markdownRepresentation
-        get() = "![$imageName]($imageUrl)"
+        get() = "<center>![$imageName]($imageUrl)</center>"
 
-    override fun clearCursor() = EditorImagePart(imageName, imageUrl, null)
-    override fun setCursor(position: Int?): Part = EditorImagePart(imageName, imageUrl, null)
+    override fun clearCursor() = EditorImagePart(id, imageName, imageUrl, null)
+    override fun setCursor(position: Int?): EditorPart = EditorImagePart(id, imageName, imageUrl, null)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is EditorImagePart) return false
+
+        if (imageName != other.imageName) return false
+        if (imageUrl != other.imageUrl) return false
+        if (pointerPosition != other.pointerPosition) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = imageName.hashCode()
+        result = 31 * result + imageUrl.hashCode()
+        result = 31 * result + (pointerPosition ?: 0)
+        return result
+    }
+
+
 }
 
-data class EditorTextPart(val text: String,
-                          override val pointerPosition: Int?) : Part() {
+data class EditorTextPart(override val id: String = UUID.randomUUID().toString(),
+                          var text: String,
+                          override var pointerPosition: Int?) : EditorPart(id) {
 
     override val markdownRepresentation: CharSequence
         get() {
@@ -59,6 +79,6 @@ data class EditorTextPart(val text: String,
             return out
         }
 
-    override fun clearCursor() = EditorTextPart(text, null)
-    override fun setCursor(position: Int?): Part = EditorTextPart(text, position)
+    override fun clearCursor() = EditorTextPart(id = this.id, text = text, pointerPosition = null)
+    override fun setCursor(position: Int?): EditorPart = EditorTextPart(id, text, position)
 }

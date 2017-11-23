@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+
+    android:paddingBottom="@dimen/material_big"
+    android:paddingEnd="@dimen/margin_material"
+    android:paddingStart="@dimen/margin_material"
+    android:paddingTop="@dimen/material_huge">
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/link_name" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/link_address" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/ok_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:backgroundTint="@color/colorAccent"
+        android:text="OK"
+        android:textColor="@android:color/white" />
+</LinearLayout>

@@ -1,6 +1,7 @@
 package io.golos.golos.utils
 
 import android.animation.LayoutTransition
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
@@ -49,6 +50,16 @@ fun Fragment.showProgressDialog(): ProgressDialog {
     dialog.setTitle(R.string.loading)
     return dialog
 }
+fun Activity.showProgressDialog(): ProgressDialog {
+    val dialog = ProgressDialog(this, R.style.AppCompatAlertDialogStyle)
+    dialog.isIndeterminate = true
+    dialog.setCancelable(false)
+    dialog.show()
+    val progress = dialog.findViewById<View>(android.R.id.progress) as ProgressBar
+    progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), PorterDuff.Mode.MULTIPLY)
+    dialog.setTitle(R.string.loading)
+    return dialog
+}
 
 fun ViewGroup.setFullAnimationToViewGroup() {
     val layoutTransition = LayoutTransition()
@@ -82,13 +93,27 @@ val Account.avatarPath: String?
         }
         return avatarPath
     }
-fun View.showSnackbar(message: Int){
-        Snackbar.make(this,
-                Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
-                Toast.LENGTH_SHORT).show()
+
+fun View.showSnackbar(message: Int) {
+    Snackbar.make(this,
+            Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
+            Toast.LENGTH_SHORT).show()
 }
-fun View.showSnackbar(message: String){
+
+fun View.showSnackbar(message: String) {
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${message}</font>"),
             Toast.LENGTH_SHORT).show()
+}
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(
+            Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(this.windowToken, 0)
+}
+
+fun View.showKeyboard() {
+    requestFocus()
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
 }

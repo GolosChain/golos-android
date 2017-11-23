@@ -1,25 +1,28 @@
 package io.golos.golos.screens.editor
 
+import timber.log.Timber
+
 /**
  * Created by yuri yurivladdurain@gmail.com on 26/10/2017.
  */
 class TextProcessor {
 
-    fun processInput(previousState: List<Part>, action: EditorInputAction): List<Part> {
+    fun processInput(previousState: List<EditorPart>, action: EditorInputAction): List<EditorPart> {
+        Timber.e("process input $previousState")
         val parts = previousState
         val selectedPart = parts.findLast { it.isFocused() }
 
         val cursorPosition: Int? = selectedPart?.pointerPosition
-        val out = ArrayList<Part>()
+        val out = ArrayList<EditorPart>()
         if (selectedPart == null || cursorPosition == null) {
             out.addAll(previousState)
             if (action is EditorInputAction.InsertAction) {
                 appendPartToTheEnd(action.part, out)
             } else if (action is EditorInputAction.DeleteAction) {
-                if (out.isEmpty()) out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+                if (out.isEmpty()) out.add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
             }
         } else if (parts.isEmpty()) {
-            out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+            out.add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
         } else if (parts.size == 1) {
             when (action) {
                 is EditorInputAction.InsertAction -> {
@@ -37,22 +40,23 @@ class TextProcessor {
                 }
                 is EditorInputAction.DeleteAction -> {
                     if (parts[0] is EditorImagePart) {
-                        out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+                        out.add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
                     } else if (parts[0] is EditorTextPart) {
                         val textPart = parts[0] as EditorTextPart
                         if (action.fastDelete != null) {
-                            out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+                            out.add(EditorTextPart(textPart.id, "", EditorPart.CURSOR_POINTER_BEGIN))
                         } else {
                             val currentText = textPart.text
                             if (cursorPosition == 0) {
                                 out.add(textPart)
                             } else if (cursorPosition == currentText.length) {
-                                out.add(EditorTextPart(currentText.substring(0, currentText.length - 1), textPart.text.length - 1))
+                                out.add(EditorTextPart(textPart.id, currentText.substring(0, currentText.length - 1), textPart.text.length - 1))
                             } else {
                                 if (currentText.length > 1) {
-                                    out.add(EditorTextPart(currentText.substring(0, cursorPosition - 1) + currentText.substring(cursorPosition + 1, currentText.length), cursorPosition - 1))
+                                    out.add(EditorTextPart(textPart.id, currentText.substring(0, cursorPosition - 1) + currentText.substring(cursorPosition + 1, currentText.length),
+                                            cursorPosition - 1))
                                 } else {
-                                    out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+                                    out.add(EditorTextPart(textPart.id, "", EditorPart.CURSOR_POINTER_BEGIN))
                                 }
                             }
                         }
@@ -104,13 +108,17 @@ class TextProcessor {
                                 out.addAll(parts)
                             } else if (cursorPosition == currentText.length) {
                                 out.addAll(copyClearingCursor(parts))
-                                out[position] = EditorTextPart(currentText.substring(0, currentText.length - 1), currentText.length - 1)
+
+                                out[position] = EditorTextPart(selectedPart.id, currentText.substring(0, currentText.length - 1), currentText.length - 1)
                             } else {
                                 if (currentText.length > 1) {
                                     out.addAll(copyClearingCursor(parts))
-                                    out[position] = (EditorTextPart(currentText.substring(0, cursorPosition - 1) + currentText.substring(cursorPosition + 1, currentText.length), cursorPosition - 1))
+                                    var part = out[position] as EditorTextPart
+                                    out[position] = (EditorTextPart(part.id,
+                                            currentText.substring(0, cursorPosition - 1) + currentText.substring(cursorPosition + 1,
+                                                    currentText.length), cursorPosition - 1))
                                 } else {
-                                    out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+                                    out.add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
                                 }
                             }
                         }
@@ -125,8 +133,8 @@ class TextProcessor {
         return out
     }
 
-    private fun deletePosition(position: Int, from: List<Part>): ArrayList<Part> {
-        val out = ArrayList<Part>()
+    private fun deletePosition(position: Int, from: List<EditorPart>): ArrayList<EditorPart> {
+        val out = ArrayList<EditorPart>()
         if (position == 0) {
             out.addAll(from.subList(1, from.size))
         } else if (position == from.lastIndex) {
@@ -138,41 +146,41 @@ class TextProcessor {
         return out
     }
 
-    private fun addEditTextDelimeters(to: ArrayList<Part>) {
-        if (to[0] is EditorImagePart) to.add(0, EditorTextPart("", null))
-        if (to.last() is EditorImagePart) to.add(EditorTextPart("", null))
+    private fun addEditTextDelimeters(to: ArrayList<EditorPart>) {
+        if (to[0] is EditorImagePart) to.add(0, EditorTextPart(text = "", pointerPosition = null))
+        if (to.last() is EditorImagePart) to.add(EditorTextPart(text = "", pointerPosition = null))
         val iter = to.listIterator()
         while (iter.hasNext()) {
             val part = iter.next()
             if (part is EditorImagePart) {
                 if (to[iter.nextIndex()] !is EditorTextPart) {
-                    iter.add(EditorTextPart("", null))
+                    iter.add(EditorTextPart(text = "", pointerPosition = null))
                 }
             }
         }
     }
 
-    private fun removeDoublingTextBlocks(from: ArrayList<Part>) {
+    private fun removeDoublingTextBlocks(from: ArrayList<EditorPart>) {
         if (from.size < 1) return
         val iter = from.listIterator()
         var deleteNext = false
         while (iter.hasNext()) {
             val currentPart = iter.next()
+            if (deleteNext) {
+                iter.remove()
+                deleteNext = false
+            }
             if (iter.hasNext()) {
                 val next = from[iter.nextIndex()]
-                if (deleteNext) {
-                    iter.remove()
-                    deleteNext = false
-                }
                 if (currentPart is EditorTextPart && next is EditorTextPart) {
                     var focus: Int? = null
-                    val outText = currentPart.text + next.text
+                    val outText = (currentPart.text + "\n" + next.text).trim()
                     if (currentPart.isFocused()) {
                         focus = currentPart.pointerPosition
                     } else if (next.isFocused()) {
                         focus = currentPart.text.length + next.pointerPosition!!
                     }
-                    iter.set(EditorTextPart(outText, focus))
+                    iter.set(EditorTextPart(currentPart.id, outText, focus))
                     deleteNext = true
                 }
             }
@@ -180,59 +188,62 @@ class TextProcessor {
     }
 
 
-    private fun appendImagePartToTheEnd(name: String, url: String, to: ArrayList<Part>) = to.apply {
-        add(EditorImagePart(name, url, null))
-        add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+    private fun appendImagePartToTheEnd(part: EditorImagePart, to: ArrayList<EditorPart>) = to.apply {
+        add(EditorImagePart(part.id, part.imageName, part.imageUrl, null))
+        add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
     }
 
-    private fun appendTextPartToTheEnd(text: String, to: ArrayList<Part>) = to.apply {
+    private fun appendTextPartToTheEnd(part: EditorTextPart, to: ArrayList<EditorPart>) = to.apply {
         if (!to.isEmpty() && to.last() is EditorTextPart) {
-            val outText = (to[lastIndex] as EditorTextPart).text + text
-            to[lastIndex] = EditorTextPart(outText, outText.length)
+            val last = to.last() as EditorTextPart
+            val outText = last.text + part.text
+            to[lastIndex] = EditorTextPart(last.id, outText, outText.length)
         } else {
-            to.add(EditorTextPart(text, text.length))
+            to.add(EditorTextPart(part.id, text = part.text, pointerPosition = part.text.length))
         }
     }
 
-    private fun appendPartToTheEnd(part: Part, to: ArrayList<Part>) {
+    private fun appendPartToTheEnd(part: EditorPart, to: ArrayList<EditorPart>) {
         if (part is EditorTextPart) {
-            appendTextPartToTheEnd(part.text, to)
+            appendTextPartToTheEnd(part, to)
             if (to.size > 2) {
                 if (to.last() is EditorTextPart && to[to.lastIndex - 1] is EditorTextPart) {
+                    val pre = (to[to.lastIndex - 1] as EditorTextPart)
                     val last = (to.last() as EditorTextPart).text
                     val preLast = (to[to.lastIndex - 1] as EditorTextPart).text
-                    to[to.lastIndex - 1] = EditorTextPart(preLast + last, (preLast + last).length)
+                    to[to.lastIndex - 1] = EditorTextPart(pre.id, preLast + last, (preLast + last).length)
                     to.removeAt(to.lastIndex)
                 }
             }
         } else if (part is EditorImagePart) {
-            appendImagePartToTheEnd(part.imageName, part.imageUrl, to)
+            appendImagePartToTheEnd(part, to)
         }
     }
 
-    private fun prependPart(part: Part, to: ArrayList<Part>) {
+    private fun prependPart(part: EditorPart, to: ArrayList<EditorPart>) {
         if (part is EditorTextPart) {
             prependText(part.text, to)
         } else if (part is EditorImagePart) {
-            prependImage(part.imageName, part.imageUrl, to)
+            prependImage(part, to)
         }
     }
 
-    private fun prependText(text: String, to: ArrayList<Part>) {
+    private fun prependText(text: String, to: ArrayList<EditorPart>) {
         if (!to.isEmpty() && to.first() is EditorTextPart) {
-            val outText = (to.first() as EditorTextPart).text + text
-            to[0] = EditorTextPart(outText, text.length)
+            val first = to.first() as EditorTextPart
+            val outText = first.text + text
+            to[0] = EditorTextPart(first.id, outText, text.length)
         } else {
-            to.add(0, EditorTextPart(text, text.length))
+            to.add(0, EditorTextPart(text = text, pointerPosition = text.length))
         }
     }
 
-    private fun prependImage(name: String, url: String, to: ArrayList<Part>) {
-        to.add(0, EditorImagePart(name, url, null))
+    private fun prependImage(part: EditorImagePart, to: ArrayList<EditorPart>) {
+        to.add(0, EditorImagePart(part.id, part.imageName, part.imageUrl, null))
     }
 
-    private fun insertPartIntoOtherPart(partToInsert: Part, into: Part, position: Int): List<Part> {
-        val out = ArrayList<Part>()
+    private fun insertPartIntoOtherPart(partToInsert: EditorPart, into: EditorPart, position: Int): List<EditorPart> {
+        val out = ArrayList<EditorPart>()
         if (position == 0) {//first
             out.add(into)
             prependPart(partToInsert, out)
@@ -240,7 +251,7 @@ class TextProcessor {
             out.add(into.clearCursor())
             appendPartToTheEnd(partToInsert, out)
             if (partToInsert is EditorImagePart) {
-                out[out.lastIndex] = EditorTextPart("", Part.CURSOR_POINTER_BEGIN)
+                out[out.lastIndex] = EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN)
             }
         } else {
             if (into is EditorTextPart) {
@@ -248,12 +259,12 @@ class TextProcessor {
                     var textPart = into.text.take(position) + partToInsert.text
                     val cursor = textPart.length
                     textPart += into.text.substring(position)
-                    out.add(EditorTextPart(textPart, cursor))
+                    out.add(EditorTextPart(into.id, textPart, cursor))
                 } else if (partToInsert is EditorImagePart) {
                     val textPart1 = into.text.take(position)
-                    out.add(EditorTextPart(textPart1, null))
-                    out.add(EditorImagePart(partToInsert.imageName, partToInsert.imageUrl, null))
-                    out.add(EditorTextPart(into.text.substring(position), 0))
+                    out.add(EditorTextPart(into.id, textPart1, null))
+                    out.add(partToInsert)
+                    out.add(EditorTextPart(text = into.text.substring(position), pointerPosition = 0))
                 }
             } else if (into is EditorImagePart) {
                 out.add(into.clearCursor())
@@ -263,27 +274,27 @@ class TextProcessor {
         if (partToInsert is EditorTextPart && into is EditorTextPart) {
             out[out.lastIndex] = out[out.lastIndex].setCursor(position + partToInsert.text.length)
         } else if (into is EditorTextPart && partToInsert is EditorImagePart) {
-            out[out.lastIndex] = out[out.lastIndex].setCursor(Part.CURSOR_POINTER_BEGIN)
+            out[out.lastIndex] = out[out.lastIndex].setCursor(EditorPart.CURSOR_POINTER_BEGIN)
         } else if (partToInsert is EditorImagePart) {
             out[out.indexOf(partToInsert)] = partToInsert.setCursor(null)
         }
         return out
     }
 
-    private fun copyClearingCursor(from: List<Part>): List<Part> {
-        val out = ArrayList<Part>(from.size)
+    private fun copyClearingCursor(from: List<EditorPart>): List<EditorPart> {
+        val out = ArrayList<EditorPart>(from.size)
         from.forEach { out.add(it.clearCursor()) }
         return out
     }
 
-    fun getInitialState(): List<Part> {
-        val out = ArrayList<Part>()
-        out.add(EditorTextPart("", Part.CURSOR_POINTER_BEGIN))
+    fun getInitialState(): List<EditorPart> {
+        val out = ArrayList<EditorPart>()
+        out.add(EditorTextPart(text = "", pointerPosition = EditorPart.CURSOR_POINTER_BEGIN))
         return out
     }
 }
 
 sealed class EditorInputAction {
-    class InsertAction(val part: Part) : EditorInputAction()
+    class InsertAction(val part: EditorPart) : EditorInputAction()
     class DeleteAction(val fastDelete: Int?) : EditorInputAction()
 }

@@ -1,5 +1,6 @@
 package io.golos.golos.repository.api
 
+import android.support.annotation.VisibleForTesting
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.base.models.DiscussionQuery
@@ -7,6 +8,7 @@ import eu.bittrade.libs.steemj.base.models.Permlink
 import eu.bittrade.libs.steemj.base.models.PublicKey
 import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
@@ -16,12 +18,16 @@ import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.avatarPath
+import org.apache.commons.lang3.tuple.ImmutablePair
 import org.bitcoinj.core.AddressFormatException
+import timber.log.Timber
+import java.io.File
 
 /**
  * Created by yuri on 20.11.17.
  */
-internal class ApiImpl : GolosApi() {
+@VisibleForTesting
+class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
     override fun getUserAvatar(username: String, permlink: String?, blog: String?): String? {
         return if (permlink != null && blog != null) mGolosApi.databaseMethods.getAccountAvatar(blog, AccountName(username), Permlink(permlink))
@@ -79,26 +85,34 @@ internal class ApiImpl : GolosApi() {
             return if (postingPublicOuter == keys[PrivateKeyType.POSTING] || activePublicOuter == keys[PrivateKeyType.ACTIVE]) {
 
                 val privateKeys = AuthUtils.generatePrivateWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
-                UserAuthResponse(true, acc.name.name,
+                val resp = UserAuthResponse(true, acc.name.name,
                         Pair(postingPublicOuter, privateKeys[PrivateKeyType.POSTING]),
                         Pair(activePublicOuter, privateKeys[PrivateKeyType.ACTIVE]),
                         acc.avatarPath,
                         acc.postCount,
                         acc.balance.amount)
+                if (resp.isKeyValid) {
+                    mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
+                            ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
+                }
+                resp
             } else {
                 UserAuthResponse(false, acc.name.name, null,
                         null, null, 0, 0.0)
             }
         } else if (activeWif != null && postingWif != null) {
             return try {
-                AuthUtils.isWiFsValid(activeWif, activePublicOuter)
-                AuthUtils.isWiFsValid(postingWif, activePublicOuter)
-                UserAuthResponse(true, acc.name.name,
+                val resp = UserAuthResponse(AuthUtils.isWiFsValid(activeWif, activePublicOuter) && AuthUtils.isWiFsValid(postingWif, postingPublicOuter), acc.name.name,
                         Pair(postingPublicOuter, postingWif),
                         Pair(activePublicOuter, activeWif),
                         acc.avatarPath,
                         acc.postCount,
-                        acc.balance.amount / 1000)
+                        acc.balance.amount)
+                if (resp.isKeyValid) {
+                    mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
+                            ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
+                }
+                resp
             } catch (e: java.lang.IllegalArgumentException) {
                 UserAuthResponse(false, acc.name.name, null,
                         null, null, 0, 0.0)
@@ -108,13 +122,17 @@ internal class ApiImpl : GolosApi() {
             }
         } else if (activeWif != null) {
             return try {
-                AuthUtils.isWiFsValid(activeWif, activePublicOuter)
-                UserAuthResponse(true, acc.name.name,
+                val resp = UserAuthResponse(AuthUtils.isWiFsValid(activeWif, activePublicOuter),
+                        acc.name.name,
                         Pair(postingPublicOuter, null),
                         Pair(activePublicOuter, activeWif),
                         acc.avatarPath,
                         acc.postCount,
-                        acc.balance.amount / 1000)
+                        acc.balance.amount)
+                if (resp.isKeyValid) {
+                    mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!))
+                }
+                resp
             } catch (e: java.lang.IllegalArgumentException) {
                 UserAuthResponse(false, acc.name.name, null,
                         null, null, 0, 0.0)
@@ -125,13 +143,16 @@ internal class ApiImpl : GolosApi() {
 
         } else {
             return try {
-                AuthUtils.isWiFsValid(postingWif!!, activePublicOuter)
-                UserAuthResponse(true, acc.name.name,
+                val resp = UserAuthResponse(AuthUtils.isWiFsValid(postingWif!!, postingPublicOuter), acc.name.name,
                         Pair(postingPublicOuter, postingWif),
                         Pair(activePublicOuter, null),
                         acc.avatarPath,
                         acc.postCount,
-                        acc.balance.amount / 1000)
+                        acc.balance.amount)
+                if (resp.isKeyValid) {
+                    mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!))
+                }
+                resp
             } catch (e: java.lang.IllegalArgumentException) {
                 UserAuthResponse(false, acc.name.name, null,
                         null, null, 0, 0.0)
@@ -164,5 +185,21 @@ internal class ApiImpl : GolosApi() {
     override fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
         mGolosApi.simplifiedOperations.vote(AccountName(author), Permlink(permlink), percents)
         return getRootStoryWithoutComments(author, permlink)
+    }
+
+    override fun uploadImage(sendFromAccount: String, file: File): String {
+        var fileLocal = file
+        Timber.e(fileLocal.absolutePath)
+        if (fileLocal.absolutePath.matches(Regex("^/file:.*"))) {
+            fileLocal = File(fileLocal.absolutePath.removePrefix("/file:"))
+        }
+        val response = mGolosApi.golosIoSpecificMethods.uploadFile(AccountName(sendFromAccount), fileLocal)
+
+        if (response.error != null) throw SteemResponseError(response.error, null)
+        return response.urlString ?: "error"
+    }
+
+    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
+        mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
     }
 }

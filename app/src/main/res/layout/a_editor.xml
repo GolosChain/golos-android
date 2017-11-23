@@ -1,60 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp"
-        app:title="Текст"
-        app:titleTextColor="@color/textColorP">
+        android:layout_height="wrap_content">
 
-        <RelativeLayout
+
+        <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null">
+            android:fitsSystemWindows="true"
+            app:collapsedTitleGravity="center_horizontal|top"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
-            <android.support.v7.widget.AppCompatButton
-                style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="@dimen/margin_material_half"
-                android:drawableEnd="@drawable/ic_send"
-                android:drawablePadding="@dimen/margin_material_half"
-                android:gravity="end|center_vertical"
-                android:text="@string/publish"
-                android:textAllCaps="false"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="18sp" />
-        </RelativeLayout>
+                android:visibility="visible"
+                app:elevation="1dp"
+                app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp"
+                app:title="Текст"
+                app:titleTextColor="@color/textColorP">
 
-    </android.support.v7.widget.Toolbar>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/submit_btn"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="@dimen/margin_material_half"
+                        android:drawableEnd="@drawable/ic_send"
+                        android:drawablePadding="@dimen/margin_material_half"
+                        android:gravity="end|center_vertical"
+                        android:text="@string/publish"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="18sp" />
+                </RelativeLayout>
 
-        android:background="@color/delimeter_color" />
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_lo" />
+            android:layout_above="@+id/bottom_lo"
+            android:layout_alignParentTop="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <io.golos.golos.screens.editor.EditorTitle
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp" />
+
+                <io.golos.golos.screens.editor.EditorFooter
+                    android:id="@+id/footer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
+
 
         <LinearLayout
+            android:id="@+id/bottom_lo"
             android:layout_width="match_parent"
             android:layout_height="@dimen/bottom_controls_height"
             android:layout_alignParentBottom="true"
@@ -85,4 +124,4 @@
         </LinearLayout>
     </RelativeLayout>
 
-</android.support.v7.widget.LinearLayoutCompat>
+</android.support.design.widget.CoordinatorLayout>

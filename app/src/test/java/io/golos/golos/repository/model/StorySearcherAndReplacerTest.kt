@@ -1,6 +1,6 @@
 package io.golos.golos.repository.model
 
-import ParseTest
+import io.golos.golos.Utils
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
 import junit.framework.Assert.assertEquals
@@ -13,7 +13,7 @@ import org.junit.Test
 class StorySearcherAndReplacerTest {
     @Test
     fun findAndReplace() {
-        val tree = ParseTest.readStoryFromResourse("story.json")
+        val tree = Utils.readStoryFromResourse("story.json")
         var comment = tree.commentsWithState()[1].copy()
         comment = StoryWrapper(comment.story, UpdatingState.UPDATING)
         comment.story.body = "replaced body"
@@ -34,7 +34,7 @@ class StorySearcherAndReplacerTest {
         assertTrue(tree.commentsWithState()[3].story.children[0].story.childrenCount == 1)
         assertTrue(tree.commentsWithState()[3].story.children[0].story.children.size == 1)
 
-        comment = ParseTest.readStoryFromResourse("story4.json").storyWithState()!!
+        comment = Utils.readStoryFromResourse("story4.json").storyWithState()!!
         result = tree.replaceComment(comment)
         assertEquals(false, result)
     }

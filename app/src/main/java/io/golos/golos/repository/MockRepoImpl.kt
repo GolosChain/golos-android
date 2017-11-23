@@ -6,10 +6,12 @@ import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.GolosErrorParser
 import io.golos.golos.utils.UpdatingState
 import timber.log.Timber
@@ -257,5 +259,9 @@ internal class MockRepoImpl(
 
     override fun getCurrentUserDataAsLiveData(): LiveData<UserData?> {
         return mAuthLiveData
+    }
+
+    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener:  (Unit, GolosError?) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

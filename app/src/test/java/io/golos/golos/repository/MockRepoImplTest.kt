@@ -1,9 +1,9 @@
 package io.golos.golos.repository
 
-import ParseTest
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
+import io.golos.golos.Utils
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
@@ -29,10 +29,10 @@ public class MockRepoImplTest {
         val golosApi = mock<GolosApi> {
             on {
                 getStories(20, FeedType.POPULAR, 1024, null, null)
-            } doReturn ArrayList(ParseTest.readStoriesFromResourse("stripes_6.json")) as List<StoryTree>
+            } doReturn ArrayList(Utils.readStoriesFromResourse("stripes_6.json")) as List<StoryTree>
             on {
                 getStory("ru--apvot50-50", "lokkie", "golos-gajd-finalnyj-post-obshchie-sovety-dlya-vseh-i-kazhdogo-5050-11-19-2")
-            } doReturn ParseTest.readStoryFromResourse("story_6.json")
+            } doReturn Utils.readStoryFromResourse("story_6.json")
 
         }
         val mockRepoImpl = MockRepoImpl(golosApi, executor, executor)
