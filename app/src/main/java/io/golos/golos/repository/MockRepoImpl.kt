@@ -8,7 +8,7 @@ import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.story.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.GolosError
@@ -40,9 +40,9 @@ internal class MockRepoImpl(
     private val mMainThreadExecutor = mainThreadExecutor
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
 
-    override fun setUserAccount(userName: String,
-                                privateActiveWif: String?,
-                                privatePostingWif: String?) {
+    override fun setActiveUserAccount(userName: String,
+                                      privateActiveWif: String?,
+                                      privatePostingWif: String?) {
 
     }
 
@@ -69,7 +69,7 @@ internal class MockRepoImpl(
         return authWithMasterKey(login, postingWif)
     }
 
-    override fun getCurrentUserData(): UserData? {
+    override fun getSavedActiveUserData(): UserData? {
         //  if (!isIserLoggedIn) return null
         return UserData(null, "cepera", "mockActiveWif", "mockPostingWif")
     }
@@ -96,14 +96,13 @@ internal class MockRepoImpl(
         mExecutor.execute() {
             try {
                 var out: List<StoryTree>
-                if (feedtype == FeedType.PERSONAL_FEED) out = api.getUserFeed(getCurrentUserData()!!.userName,
+                if (feedtype == FeedType.PERSONAL_FEED) out = api.getUserFeed(getSavedActiveUserData()!!.userName,
                         20, 1024, startAuthor, startPermlink)
                 else out = api.getStories(limit, feedtype, 1024, startAuthor, startPermlink)
-                var name = getCurrentUserData()?.userName
+                var name = getSavedActiveUserData()?.userName
                 out.forEach {
                     if (name != null) {
-                        if (it.rootStory()?.activeVotes?.filter { it.first == name }?.count() ?: 0 > 0)
-                            it.rootStory()?.isUserUpvotedOnThis = true
+                        it.rootStory()?.isUserUpvotedOnThis = it.isUserVotedOnThis(name)
                     }
                 }
                 mMainThreadExecutor.execute {
@@ -188,7 +187,7 @@ internal class MockRepoImpl(
             Thread.sleep(1500)
 
             currentWorkingitem = discussionItem.clone() as GolosDiscussionItem
-            currentWorkingitem.activeVotes + Pair(getCurrentUserData()?.userName ?: "", 100_00)
+            currentWorkingitem.activeVotes + Pair(getSavedActiveUserData()?.userName ?: "", 100_00)
             currentWorkingitem.gbgAmount = discussionItem.gbgAmount + 50
             currentWorkingitem.isUserUpvotedOnThis = true
             listOfList.forEach {
@@ -224,7 +223,7 @@ internal class MockRepoImpl(
             Thread.sleep(1500)
 
             currentWorkingitem = discussionItem.clone() as GolosDiscussionItem
-            currentWorkingitem.activeVotes - Pair(getCurrentUserData()?.userName ?: "", 100_00)
+            currentWorkingitem.activeVotes - Pair(getSavedActiveUserData()?.userName ?: "", 100_00)
             currentWorkingitem.gbgAmount = discussionItem.gbgAmount - 50
             currentWorkingitem.isUserUpvotedOnThis = false
             listOfList.forEach {
@@ -261,7 +260,11 @@ internal class MockRepoImpl(
         return mAuthLiveData
     }
 
-    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener:  (Unit, GolosError?) -> Unit) {
+    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

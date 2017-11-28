@@ -14,7 +14,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
-import io.golos.golos.screens.story.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
 import java.util.*
@@ -76,13 +76,13 @@ abstract class Repository {
     @WorkerThread
     abstract fun getAccountData(of: String): AccountInfo
 
-    abstract fun getCurrentUserData(): UserData?
+    abstract fun getSavedActiveUserData(): UserData?
 
     abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData?>
 
     abstract fun deleteUserdata()
 
-    abstract fun setUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
+    abstract fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
 
     abstract fun upVote(comment: GolosDiscussionItem, percents: Short)
 
@@ -91,6 +91,8 @@ abstract class Repository {
     abstract fun requestStoryUpdate(story: StoryTree)
 
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit)
+
+    abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit)
 
 }
 

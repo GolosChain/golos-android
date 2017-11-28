@@ -53,15 +53,14 @@
             app:riv_oval="true" />
 
 
-        <com.makeramen.roundedimageview.RoundedImageView
+        <ImageView
             android:id="@+id/avatar_iv"
-            android:layout_width="92dp"
-            android:layout_height="92dp"
-            android:layout_marginBottom="12dp"
-            android:layout_marginEnd="14dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:src="@drawable/im_logo_white"
+            android:layout_marginStart="4dp"
+            app:srcCompat="@drawable/im_logo_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -135,9 +134,9 @@
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/posting_key_et"
                 style="@style/BarcodeTextStyle"
+                android:layout_toLeftOf="@id/scan_posting"
                 android:hint="@string/posting_key"
                 android:imeOptions="actionDone"
-                android:layout_toLeftOf="@id/scan_posting"
 
                 android:inputType="textVisiblePassword" />
 
@@ -166,8 +165,8 @@
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/barcode_active_key_et"
                 style="@style/BarcodeTextStyle"
-                android:hint="@string/active_key"
                 android:layout_toLeftOf="@id/scan_active"
+                android:hint="@string/active_key"
                 android:imeOptions="actionDone"
                 android:inputType="textVisiblePassword" />
 

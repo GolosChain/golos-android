@@ -32,7 +32,7 @@ class FeedViewModel : StoriesViewModel() {
         get() = FeedType.PERSONAL_FEED
 
     override fun onChangeVisibilityToUser(visibleToUser: Boolean) {
-        var userData = mRepository.getCurrentUserData()
+        var userData = mRepository.getSavedActiveUserData()
         if (userData == null && visibleToUser) {
             mHandler.post {
                 mStoriesLiveData.value = StoriesViewState(false,
@@ -43,12 +43,12 @@ class FeedViewModel : StoriesViewModel() {
     }
 
     override fun onSwipeToRefresh() {
-        var userData: UserData? = mRepository.getCurrentUserData() ?: return
+        var userData: UserData? = mRepository.getSavedActiveUserData() ?: return
         super.onSwipeToRefresh()
     }
 
     override fun onScrollToTheEnd() {
-        var userData: UserData? = mRepository.getCurrentUserData() ?: return
+        var userData: UserData? = mRepository.getSavedActiveUserData() ?: return
         super.onScrollToTheEnd()
     }
 }
@@ -118,6 +118,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun onScrollToTheEnd() {
+        if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         mRepository.requestStoriesListUpdate(20,
                 type,
                 mStoriesLiveData.value?.items?.last()?.rootStory()?.author,
@@ -144,7 +145,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun vote(it: StoryTree, vote: Short) {
-        if (mRepository.getCurrentUserData() == null) {
+        if (mRepository.getSavedActiveUserData() == null) {
             return
         }
         val story = it.rootStory() ?: return
@@ -152,14 +153,14 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun downVote(it: StoryTree) {
-        if (mRepository.getCurrentUserData() == null) {
+        if (mRepository.getSavedActiveUserData() == null) {
             return
         }
         val story = it.rootStory() ?: return
         mRepository.cancelVote(story)
     }
 
-    open var canVote = mRepository.getCurrentUserData()?.userName != null
+    open var canVote = mRepository.getSavedActiveUserData()?.userName != null
 }
 
 interface ImageLoadRunnable : Runnable

@@ -26,7 +26,7 @@ class UserProfileDrawerFragment : Fragment() {
     private lateinit var mMenuList: ListView
     private lateinit var mViewModel: AuthViewModel
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater!!.inflate(R.layout.fr_user_logged_in, container, false)
         mUserAvatar = v.findViewById(R.id.avatar_iv)
         mUserName = v.findViewById(R.id.username_tv)
@@ -35,10 +35,10 @@ class UserProfileDrawerFragment : Fragment() {
         return v
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel = ViewModelProviders.of(activity).get(AuthViewModel::class.java)
-        val adapter = MenuAdapter(listOf(MenuItem(getString(R.string.logout), R.drawable.ic_logout_40dp_gray, 0)), { _ -> mViewModel.onLogoutClick() }, activity)
+        mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
+        val adapter = MenuAdapter(listOf(MenuItem(getString(R.string.logout), R.drawable.ic_logout_40dp_gray, 0)), { _ -> mViewModel.onLogoutClick() }, activity!!)
         mMenuList.adapter = adapter
         mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
             mUserName.text = it?.userName

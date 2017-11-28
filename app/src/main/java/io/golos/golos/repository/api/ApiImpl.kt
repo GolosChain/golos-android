@@ -10,10 +10,11 @@ import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
+import io.golos.golos.repository.model.DiscussionItemFactory
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
@@ -37,8 +38,8 @@ class ApiImpl : GolosApi() {
     override fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
         return mGolosApi
                 .databaseMethods
-                .getUserFeed(AccountName(userName))
-                .map { StoryTree(StoryWrapper(GolosDiscussionItem(it, null), UpdatingState.DONE), ArrayList()) }
+                .getUserFeedLight(AccountName(userName))
+                .map { StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList()) }
     }
 
     override fun getStory(blog: String, author: String, permlink: String): StoryTree {
@@ -62,10 +63,10 @@ class ApiImpl : GolosApi() {
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
         query.truncateBody = truncateBody.toLong()
 
-        val discussions = mGolosApi.databaseMethods.getDiscussionsBy(query, discussionSortType)
+        val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryTree>()
         discussions.forEach {
-            val story = StoryTree(StoryWrapper(GolosDiscussionItem(it, null), UpdatingState.DONE), ArrayList())
+            val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
             out.add(story)
         }
         return out
@@ -201,5 +202,17 @@ class ApiImpl : GolosApi() {
 
     override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
         mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
+    }
+
+    override fun sendComment(sendFromAccount: String,
+                             authorOfItemToReply: String,
+                             permlinkOfItemToReply: String,
+                             content: String,
+                             categoryName: String) {
+        mGolosApi.simplifiedOperations.createComment(AccountName(authorOfItemToReply),
+                Permlink(permlinkOfItemToReply),
+                AccountName(sendFromAccount),
+                content,
+                Array(1, { categoryName }))
     }
 }

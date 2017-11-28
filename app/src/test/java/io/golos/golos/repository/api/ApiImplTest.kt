@@ -9,6 +9,7 @@ import io.golos.golos.repository.model.UserAuthResponse
 import junit.framework.Assert.*
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.junit.Test
+import java.util.*
 
 /**
  * Created by yuri on 23.11.17.
@@ -16,7 +17,7 @@ import org.junit.Test
 class ApiImplTest {
     val publicActive = "GLS7feysP2A87x4uNwn68q13rF3bchD6AKhJWf4CmPWjqQF8vCb5G"
     val privateActive = "5K7YbhJZqGnw3hYzsmH5HbDixWP5ByCBdnJxM5uoe9LuMX5rcZV"
-    val publicPosting ="GLS75PefYywHJtG1cDtd4JoF7NRMT7tJig69zn1YytFdbsDHatLju"
+    val publicPosting = "GLS75PefYywHJtG1cDtd4JoF7NRMT7tJig69zn1YytFdbsDHatLju"
     val privatePosting = "5JeKh4taphREBdqfKzfapu6ar3gCNPPKgG5QbUzEwmuasSAQFs3"
     val accname = "yuri-vlad-second"
     val masterPassword = "234sfdgkh1ezedsiU234wewe235ym8jhlq1unA0tlkJKfdhyn"
@@ -43,7 +44,7 @@ class ApiImplTest {
     fun authTest() {
 
         assertTrue(AuthUtils.isWiFsValid(privateActive, publicActive))
-        assertTrue(AuthUtils.isWiFsValid(privatePosting, publicPosting ))
+        assertTrue(AuthUtils.isWiFsValid(privatePosting, publicPosting))
 
 
         var resp = service.auth(accname, masterPassword, null, null)
@@ -110,4 +111,35 @@ class ApiImplTest {
                 0.0)
         assertEquals(neededResp, resp)
     }
+
+    @Test
+    fun postFirstLevelCommentTest() {
+        Golos4J.getInstance().addKeysToAccount(AccountName(accname), ImmutablePair(PrivateKeyType.POSTING, privatePosting))
+        val storyTree = service.getStory("ase", "yuri-vlad-second", "123")
+        assertNotNull(storyTree)
+        service.sendComment("yuri-vlad-second",
+                storyTree.rootStory()!!.author,
+                storyTree.rootStory()!!.permlink,
+                "test first level reply ${UUID.randomUUID()}",
+                storyTree.rootStory()!!.categoryName)
+        val updatedStoryTree = service.getStory("ase", "yuri-vlad-second", "123")
+        assertEquals(storyTree.commentsWithState().size + 1, updatedStoryTree.comments().size)
+
+    }
+
+    @Test
+    fun postSecondLevelTest() {
+        Golos4J.getInstance().addKeysToAccount(AccountName(accname), ImmutablePair(PrivateKeyType.POSTING, privatePosting))
+        val storyTree = service.getStory("ase", "yuri-vlad-second", "123")
+        assertNotNull(storyTree)
+        service.sendComment("yuri-vlad-second",
+                storyTree.comments().first().author,
+                storyTree.comments().first().permlink,
+                "test second level reply ${UUID.randomUUID()}",
+                storyTree.rootStory()!!.categoryName)
+        val updatedStoryTreeWithSecondLevel = service.getStory("ase", "yuri-vlad-second", "123")
+        assertEquals(storyTree.comments().first().childrenCount + 1, updatedStoryTreeWithSecondLevel.comments().first().childrenCount)
+    }
+
+
 }

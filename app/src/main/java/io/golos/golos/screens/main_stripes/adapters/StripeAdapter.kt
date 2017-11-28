@@ -6,8 +6,6 @@ import android.os.Looper
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
-import android.text.Html
-import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,10 +14,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.screens.story.model.ItemType
+import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.Translit
 import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.getVectorDrawable
+import io.golos.golos.utils.toHtml
 import ru.noties.markwon.view.MarkwonViewCompat
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -104,6 +104,16 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
             mBlogNameTv, mTitleTv, mBodyTextMarkwon, mSecondaryImage, mMainImageBig, mUpvoteBtn, mCommentsButton, mShareBtn, itemView)
     private val mGlide = Glide.with(parent.context)
 
+    init {
+        mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
+        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_accent_20dp), null, null, null)
+        mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_gray_24dp), null, null, null)
+        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_comment_black_24dp), null, null, null)
+        noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_24dp)
+        userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_gray_24dp)
+        userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_green_24dp)
+        errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
+    }
 
     var state: StripeWrapper? = null
         set(value) {
@@ -135,16 +145,16 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 mCommentsButton.text = wrapper.commentsCount.toString()
                 if (wrapper.avatarPath != null) mGlide
                         .load(wrapper.avatarPath)
-                        .error(mGlide.load(R.drawable.ic_person_gray_24dp))
-                        .apply(RequestOptions.placeholderOf(R.drawable.ic_person_gray_24dp))
+                        .error(mGlide.load(noAvatarDrawable))
+                        .apply(RequestOptions.placeholderOf(noAvatarDrawable))
                         .into(mAvatar)
-                else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+                else mAvatar.setImageDrawable(noAvatarDrawable)
                 val res = itemView.resources
                 if (wrapper.isUserUpvotedOnThis) {
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(R.drawable.ic_upvote_green_24dp), null, null, null)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
                 } else {
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(res.getDrawable(R.drawable.ic_upvote_gray_24dp), null, null, null)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userNotvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray_1))
                 }
                 if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
@@ -159,7 +169,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         mMainImageBig.visibility = View.GONE
                         mSecondaryImage.visibility = View.GONE
                         mBodyTextMarkwon.visibility = View.VISIBLE
-                        mBodyTextMarkwon.markdown = wrapper.cleanedFromImages()
+                        mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
                     }
                     wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
                         mMainImageBig.visibility = View.GONE
@@ -169,28 +179,16 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         options.centerInside()
                         mSecondaryImage.setImageBitmap(null)
                         if (wrapper.images.size > 0) {
-                            val error = mGlide.load(R.drawable.error)
                             mGlide.load(wrapper.images[0])
                                     .apply(options)
-                                    .error(error)
-
+                                    .error(mGlide.load(errorDrawable))
                                     .into(mSecondaryImage)
                         }
-                        if (wrapper.format == io.golos.golos.screens.story.model.Format.HTML) {
-                            val result: Spanned
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                                result = Html.fromHtml(wrapper.body, Html.FROM_HTML_MODE_LEGACY)
-
-                            } else {
-                                result = Html.fromHtml(wrapper.body)
-                            }
-                            mBodyTextMarkwon.text = result
-                        } else {
-                            mBodyTextMarkwon.markdown = wrapper.cleanedFromImages().replace("\n", "")
-                        }
+                        mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
                     }
                     else -> {
-                        val error = mGlide.load(R.drawable.error)
+                        val error = mGlide.load(errorDrawable)
+                        mBodyTextMarkwon.text = ""
                         var nextImage: RequestBuilder<Drawable>? = null
                         if (wrapper.images.size > 1) {
                             nextImage = mGlide.load(wrapper.images[1]).error(error)
@@ -202,7 +200,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         if (wrapper.images.size > 0) {
                             mGlide.load(wrapper.images[0])
                                     .error(nextImage ?: error)
-                                    .apply(RequestOptions.placeholderOf(R.drawable.error))
+                                    .apply(RequestOptions.placeholderOf(errorDrawable))
                                     .into(mMainImageBig)
                         }
                     }
@@ -217,6 +215,15 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
         }
 
     companion object {
+        init {
+
+        }
+
         fun inflate(parent: ViewGroup): View = LayoutInflater.from(parent.context).inflate(R.layout.vh_stripe_full_size, parent, false)
+        @JvmStatic
+        lateinit var noAvatarDrawable: Drawable
+        lateinit var userNotvotedDrarawble: Drawable
+        lateinit var userVotedvotedDrarawble: Drawable
+        lateinit var errorDrawable: Drawable
     }
 }

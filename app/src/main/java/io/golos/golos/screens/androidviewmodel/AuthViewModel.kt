@@ -13,7 +13,6 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.utils.ErrorCode
 import org.bitcoinj.core.AddressFormatException
-import timber.log.Timber
 import java.security.InvalidParameterException
 
 data class UserProfileState(val isLoggedIn: Boolean,
@@ -45,7 +44,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private val mHandler = Handler(Looper.getMainLooper())
 
     init {
-        val userData = mRepository.getCurrentUserData()
+        val userData = mRepository.getSavedActiveUserData()
         if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
             initUser()
         } else {
@@ -94,7 +93,13 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 })
                 postWithCatch {
                     val resp = mRepository.authWithActiveWif(mLastUserInput.login, mLastUserInput.activeWif)
-                    proceedAuthResponse(resp)
+                    mHandler.post {
+                        userProfileState.value = UserProfileState(isLoggedIn = true,
+                                userName = resp.userName ?: "",
+                                avatarPath = resp.avatarPath)
+                        userAuthState.value = AuthState(isLoggedIn = true)
+                    }
+
                 }
             } else if (mLastUserInput.postingWif.isNotEmpty()) {
                 mHandler.post({
@@ -103,7 +108,12 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 })
                 postWithCatch {
                     val resp = mRepository.authWithPostingWif(mLastUserInput.login, mLastUserInput.postingWif)
-                    proceedAuthResponse(resp)
+                    mHandler.post {
+                        userProfileState.value = UserProfileState(isLoggedIn = true,
+                                userName = resp.userName ?: "",
+                                avatarPath = resp.avatarPath)
+                        userAuthState.value = AuthState(isLoggedIn = true)
+                    }
                 }
             }
         }
@@ -182,13 +192,11 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun initUser() {
-        Timber.e("initUser")
-        Timber.e("userData = " + mRepository.getCurrentUserData())
-        val userData = mRepository.getCurrentUserData()
+        val userData = mRepository.getSavedActiveUserData()
         if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
             userProfileState.value = UserProfileState(isLoggedIn = true, userName = userData.userName, avatarPath = userData.avatarPath)
             userAuthState.value = AuthState(isLoggedIn = true)
-            mRepository.setUserAccount(userData.userName, userData.privateActiveWif, userData.privatePostingWif)
+            mRepository.setActiveUserAccount(userData.userName, userData.privateActiveWif, userData.privatePostingWif)
             postWithCatch {
                 val data = mRepository.getAccountData(userData.userName)
                 mHandler.post({

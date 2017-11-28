@@ -18,7 +18,7 @@ import timber.log.Timber
 class SendLinkFragment : DialogFragment() {
     var listener: OnLinkSubmit? = null
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater!!.inflate(R.layout.fr_link, container, false)
         var linkName = v.findViewById<EditText>(R.id.name)
         var address = v.findViewById<EditText>(R.id.address)

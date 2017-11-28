@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -38,7 +39,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:drawablePadding="4dp"
-        android:drawableStart="@drawable/ic_reblogged_black_20dp"
         app:layout_constraintStart_toEndOf="@id/user_name"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -61,7 +61,6 @@
         android:layout_marginStart="@dimen/margin_material_half"
         android:layout_marginTop="2dp"
         android:drawablePadding="4dp"
-        android:drawableStart="@drawable/ic_bullet_accent_20dp"
         android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/for_user_tv"
@@ -153,23 +152,19 @@
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/vote_btn"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:minWidth="88dp"
             android:layout_weight="0.33"
-            android:drawablePadding="-8dp"
-
-            android:drawableStart="@drawable/ic_upvote_gray_24dp"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:textColor="@color/gray_1"
             android:visibility="visible" />
 
         <ProgressBar
-            android:layout_width="wrap_content"
-            android:padding="8dp"
+            android:layout_width="0dp"
             android:id="@+id/progress"
-
             android:visibility="gone"
-            android:minWidth="72dp"
+            android:layout_gravity="center"
             android:layout_height="wrap_content"
             android:layout_weight="0.33" />
 
@@ -183,12 +178,12 @@
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/comments_btn"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
-            android:drawablePadding="-12dp"
-            android:drawableStart="@drawable/ic_comment_black_24dp"
-            android:paddingLeft="24dp" />
+            />
 
         <View
             android:layout_width="1dp"
@@ -200,7 +195,7 @@
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/share_btn"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
             app:srcCompat="@drawable/ic_share_black_24dp" />

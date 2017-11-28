@@ -2,8 +2,7 @@ package io.golos.golos
 
 import android.content.Context
 import android.support.multidex.MultiDexApplication
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
-import io.golos.golos.repository.persistence.Persister
+import android.support.v7.app.AppCompatDelegate
 import timber.log.Timber
 
 /**
@@ -12,6 +11,7 @@ import timber.log.Timber
 class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         context = this
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

@@ -34,7 +34,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking = false
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater!!.inflate(R.layout.fr_stripe, container, false)
         bindViews(view)
         setUp()
@@ -50,7 +50,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(this)
-        val type: FeedType = arguments.getSerializable(TYPE_TAG) as FeedType
+        val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
         mViewModel = when (type) {
             FeedType.NEW -> provider.get(NewViewModel::class.java)
             FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
@@ -73,7 +73,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                     mViewModel?.vote(it, vote)
                                 }
                             }
-                            dialog.show(activity.fragmentManager, null)
+                            dialog.show(activity!!.fragmentManager, null)
                         }
                     }
                 }

@@ -130,10 +130,10 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mUpvoteBtn.text = "$ ${String.format("%.2f", comment.payoutInDollars)}"
                 if (comment.isUserUpvotedOnThis) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_green,0,0,0)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_green, 0, 0, 0)
                 } else {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_gray,0,0,0)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_gray, 0, 0, 0)
                 }
                 if (field!!.comment.updatingState == UpdatingState.UPDATING) {
                     mUpvoteBtn.visibility = View.INVISIBLE
@@ -179,5 +179,6 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
 
     companion object {
         fun inflate(parent: ViewGroup): View = LayoutInflater.from(parent.context).inflate(R.layout.vh_story_comment, parent, false)
+
     }
 }

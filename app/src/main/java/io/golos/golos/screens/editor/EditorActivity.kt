@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
@@ -34,7 +36,11 @@ import java.io.FileOutputStream
 /**
  *
  * **/
-data class EditorMode(val title: String = "", val subtitle: String = "", val isPostEditor: Boolean = true)
+data class EditorMode(val title: String = "",
+                      val subtitle: String = "",
+                      val isPostEditor: Boolean,
+                      val rootStory: StoryTree? = null,
+                      val commentToAnswerOn: GolosDiscussionItem? = null)
 
 class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener {
 
@@ -45,7 +51,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     private lateinit var mFooter: EditorFooter
     private lateinit var mRequestImageButton: View
     private lateinit var mViewModel: EditorViewModel
-    private var mMode: EditorMode = EditorMode()
+    private var mMode: EditorMode? = null
     private val PICK_IMAGE_ID = nextInt()
     private val READ_EXTERNAL_PERMISSION = nextInt()
     private var mProgressDialog: Dialog? = null
@@ -91,10 +97,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 }, 3000)
             }
         })
-        mTitle.state = EditorTitleState(mMode.title, mMode.isPostEditor, {
+        mTitle.state = EditorTitleState(mMode?.title ?: "", mMode?.isPostEditor ?: false, {
             mViewModel.onTitileChanges(it)
-        }, mMode.subtitle)
-        mFooter.state = EditorFooterState(mMode.isPostEditor,
+        }, mMode?.subtitle ?: "")
+        mFooter.state = EditorFooterState(mMode?.isPostEditor == true,
                 TagsStringValidator(object : StringSupplier {
                     override fun get(id: Int): String {
                         return getString(id)
@@ -102,7 +108,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 }),
                 ArrayList(),
                 this)
-        mToolbar.title = if (mMode.isPostEditor) resources.getString(R.string.text) else resources.getString(R.string.comment)
+        mToolbar.title = if (mMode?.isPostEditor == true) resources.getString(R.string.text) else resources.getString(R.string.comment)
         mRequestImageButton = findViewById(R.id.btn_insert_image)
         mRequestImageButton.setOnClickListener({
             val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
@@ -177,11 +183,30 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
     companion object {
         val MODE_TAG = "MODE_TAG"
-        fun startCommentEditor(ctx: Context, title: String, subtitle: String) {
+        fun startRootCommentEditor(ctx: Context,
+                                   rootStory: StoryTree) {
             val mapper = ObjectMapper()
             mapper.registerModule(KotlinModule())
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(title, subtitle, false)))
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
+                    rootStory.rootStory()!!.author,
+                    false,
+                    rootStory,
+                    rootStory.rootStory()!!)))
+            ctx.startActivity(intent)
+        }
+
+        fun startAnswerOnCommentEditor(ctx: Context,
+                                       rootStory: StoryTree,
+                                       commentToAnswer: GolosDiscussionItem) {
+            val mapper = ObjectMapper()
+            mapper.registerModule(KotlinModule())
+            val intent = Intent(ctx, EditorActivity::class.java)
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
+                    rootStory.rootStory()!!.author,
+                    false,
+                    rootStory,
+                    commentToAnswer)))
             ctx.startActivity(intent)
         }
 

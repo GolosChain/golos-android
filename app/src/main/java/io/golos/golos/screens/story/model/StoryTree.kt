@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.mapper
 import io.golos.golos.utils.UpdatingState
 
 /**
@@ -27,6 +29,11 @@ class StoryTree(rootStory: StoryWrapper?,
 
     fun rootStory(): GolosDiscussionItem? {
         return mRootStoryWrapper?.story
+    }
+
+    fun isUserVotedOnThis(userName: String): Boolean {
+        return rootStory()?.activeVotes?.contains(userName) ?: false
+                && (rootStory()?.activeVotes?.get(userName) ?: 0) > 0
     }
 
     fun comments(): List<GolosDiscussionItem> {
@@ -120,7 +127,7 @@ class StoryTree(rootStory: StoryWrapper?,
                 " comments = ${comments()}"
     }
 
-    override fun clone(): Any {
+    override public fun clone(): Any {
         return super.clone()
 
     }

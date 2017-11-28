@@ -4,7 +4,7 @@ import io.golos.golos.App
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.story.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import java.io.File
 
@@ -47,4 +47,10 @@ abstract class GolosApi {
 
     abstract fun sendPost(sendFromAccount: String, title: String, content: String,
                           tags: Array<String>)
+
+    abstract fun sendComment(sendFromAccount: String,
+                             authorOfItemToReply: String,
+                             permlinkOfItemToReply: String,
+                             content: String,
+                             categoryName: String)
 }

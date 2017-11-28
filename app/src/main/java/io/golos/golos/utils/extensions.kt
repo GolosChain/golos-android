@@ -7,10 +7,14 @@ import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.database.Cursor
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
+import android.support.annotation.DrawableRes
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v7.content.res.AppCompatResources
 import android.text.Html
+import android.text.Spanned
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -46,10 +50,11 @@ fun Fragment.showProgressDialog(): ProgressDialog {
     dialog.setCancelable(false)
     dialog.show()
     val progress = dialog.findViewById<View>(android.R.id.progress) as ProgressBar
-    progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(context, R.color.colorAccent), PorterDuff.Mode.MULTIPLY)
+    progress.indeterminateDrawable.setColorFilter(ContextCompat.getColor(context!!, R.color.colorAccent), PorterDuff.Mode.MULTIPLY)
     dialog.setTitle(R.string.loading)
     return dialog
 }
+
 fun Activity.showProgressDialog(): ProgressDialog {
     val dialog = ProgressDialog(this, R.style.AppCompatAlertDialogStyle)
     dialog.isIndeterminate = true
@@ -94,6 +99,15 @@ val Account.avatarPath: String?
         return avatarPath
     }
 
+fun String.toHtml(): Spanned {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        return Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
+
+    } else {
+        return Html.fromHtml(this)
+    }
+}
+
 fun View.showSnackbar(message: Int) {
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
@@ -116,4 +130,12 @@ fun View.showKeyboard() {
     requestFocus()
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+}
+
+fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {
+    return AppCompatResources.getDrawable(this, resId)!!
+}
+
+fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
+    return AppCompatResources.getDrawable(context, resId)!!
 }

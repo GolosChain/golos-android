@@ -17,8 +17,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".screens.editor.EditorActivity"
-            android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
             android:screenOrientation="portrait" />
@@ -38,6 +38,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+       <!-- <activity
+            android:name=".MainTestActivity"
+            android:label="@string/title_activity_main_test"
+            android:theme="@style/AppTheme">
+
+        </activity>-->
     </application>
 
 </manifest>

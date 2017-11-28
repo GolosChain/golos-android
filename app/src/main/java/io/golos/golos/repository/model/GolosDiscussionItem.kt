@@ -1,11 +1,16 @@
-package io.golos.golos.screens.story.model
+package io.golos.golos.repository.model
 
+import android.support.v4.util.ArrayMap
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import io.golos.golos.screens.story.model.ImageRow
+import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,7 +27,7 @@ val mapper by lazy {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class  GolosDiscussionItem(val url: String,
+data class GolosDiscussionItem(val url: String,
                                val id: Long,
                                val title: String,
                                val categoryName: String,
@@ -46,9 +51,10 @@ data class  GolosDiscussionItem(val url: String,
                                val lastUpdated: Long,
                                val created: Long,
                                var isUserUpvotedOnThis: Boolean = false,
-                               val activeVotes: ArrayList<Pair<String, Int>> = ArrayList(),
+                               val activeVotes: ArrayMap<String, Int> = ArrayMap(),
                                var type: ItemType = ItemType.PLAIN,
-                               val firstRebloggedBy: String) : Cloneable {
+                               val firstRebloggedBy: String,
+                               var cleanedFromImages: String) : Cloneable {
 
 
     val payoutInDollars: Double
@@ -74,13 +80,13 @@ data class  GolosDiscussionItem(val url: String,
             firstRebloggedBy = discussion.firstRebloggedBy?.name ?: "",
             gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
             body = discussion.body ?: "",
-            author = discussion.author?.name ?: "") {
-
+            author = discussion.author?.name ?: "",
+            cleanedFromImages = "") {
 
 
         val tagsString = discussion.jsonMetadata
         discussion.activeVotes?.forEach {
-            activeVotes.add(Pair(it.voter.name, it.percent / 100))
+            activeVotes.put(it.voter.name, it.percent / 100)
         }
         var json: JSONObject? = null
         try {
@@ -141,6 +147,17 @@ data class  GolosDiscussionItem(val url: String,
                 if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
             }
         }
+        cleanedFromImages = if (out.size == 0)
+            body.replace(Regexps.markdownImageRegexp, "")
+                    .replace(Regexps.anyImageLink, "")
+                    .replace(Regex("(\\*)"), "*")
+        else {
+            out.joinToString("\n") {
+                if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
+                        .replace(Regex("(\\*)"), "*")
+                else ""
+            }
+        }
         if (account != null) {
             try {
                 val node: JsonNode? = mapper.readTree(account?.jsonMetadata)
@@ -161,22 +178,22 @@ data class  GolosDiscussionItem(val url: String,
         return "Comment(id=$id, title='$title', permlink='$permlink')"
     }
 
-    fun cleanedFromImages(): String {
-        val toRowsParser = StoryParserToRows()
-        val out = toRowsParser.parse(this)
-        if (out.size == 0)
-            return body.replace(Regexps.markdownImageRegexp, "")
-                    .replace(Regexps.anyImageLink, "")
-                    .replace(Regex("(\\*)"), "*")
-        else {
-            return out.joinToString("\n") {
-                if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
-                        .replace(Regexps.anyImageLink, "")
-                        .replace(Regex("(\\*)"), "*")
-                else ""
-            }
-        }
-    }
+    /*  fun cleanedFromImages(): String {
+          val toRowsParser = StoryParserToRows()
+          val out = toRowsParser.parse(this)
+          if (out.size == 0)
+              return body.replace(Regexps.markdownImageRegexp, "")
+                      .replace(Regexps.anyImageLink, "")
+                      .replace(Regex("(\\*)"), "*")
+          else {
+              return out.joinToString("\n") {
+                  if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
+                          .replace(Regexps.anyImageLink, "")
+                          .replace(Regex("(\\*)"), "*")
+                  else ""
+              }
+          }
+      }*/
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

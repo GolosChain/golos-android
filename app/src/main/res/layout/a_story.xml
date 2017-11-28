@@ -15,31 +15,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
-            app:collapsedTitleGravity="center_horizontal|top"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+
+            app:layout_scrollFlags="scroll|enterAlways">
 
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="60dp"
                 app:elevation="1dp"
                 app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="?attr/actionBarSize"
-                android:paddingBottom="@dimen/margin_material_half"
-                android:paddingTop="12dp">
+                android:layout_height="match_parent"
+                android:layout_marginStart="56dp">
 
                 <com.makeramen.roundedimageview.RoundedImageView
-
                     android:id="@+id/avatar_iv"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:layout_marginStart="@dimen/margin_material"
+                    android:layout_marginTop="@dimen/margin_material_half"
                     android:scaleType="centerCrop"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -53,7 +50,7 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/avatar_iv"
                     app:textAllCaps="true" />
 
                 <android.support.v7.widget.AppCompatTextView
@@ -62,7 +59,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:drawablePadding="4dp"
-                    android:drawableStart="@drawable/ic_reblogged_black_20dp"
                     android:visibility="invisible"
                     app:layout_constraintStart_toEndOf="@id/user_name"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -87,14 +83,12 @@
                     android:layout_marginStart="@dimen/margin_material_half"
                     android:layout_marginTop="2dp"
                     android:drawablePadding="4dp"
-                    android:drawableStart="@drawable/ic_bullet_accent_20dp"
                     android:textColor="@color/colorPrimaryDark"
                     android:textStyle="bold"
                     android:visibility="invisible"
                     app:layout_constraintStart_toEndOf="@id/for_user_tv"
                     app:layout_constraintTop_toBottomOf="@+id/user_name" />
             </android.support.constraint.ConstraintLayout>
-
         </android.support.design.widget.CollapsingToolbarLayout>
 
 
@@ -102,7 +96,7 @@
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -112,13 +106,11 @@
 
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/title_tv"
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_material"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 app:textAllCaps="true" />
 
 
@@ -147,7 +139,7 @@
                     style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="@drawable/ripple_gray_circle"
+
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -157,8 +149,8 @@
                     android:id="@+id/voting_progress"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:visibility="gone"
                     android:layout_marginLeft="@dimen/margin_material"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -179,8 +171,6 @@
                     android:id="@+id/votes_btn"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons"
                     android:layout_marginEnd="@dimen/material_huge"
-
-                    android:drawableStart="@drawable/ic_voices_20dp_gray"
                     app:layout_constraintRight_toLeftOf="@+id/comments_btn"
                     app:layout_constraintTop_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -188,7 +178,6 @@
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/comments_btn"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons"
-                    android:drawableLeft="@drawable/ic_comments_wth_dots_24dp_gray"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -201,7 +190,6 @@
                 android:layout_marginEnd="@dimen/margin_material"
                 android:layout_marginStart="@dimen/margin_material"
                 android:layout_marginTop="@dimen/material_huge"
-                android:drawableEnd="@drawable/ic_sort_red_24dp"
                 android:drawablePadding="@dimen/margin_material_half"
                 android:text="@string/comments"
                 android:textSize="@dimen/font_medium"
@@ -212,6 +200,7 @@
                 android:id="@+id/comments_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/material_big"
                 android:visibility="gone" />
 
             <TextView

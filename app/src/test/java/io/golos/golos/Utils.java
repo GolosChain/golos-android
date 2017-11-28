@@ -12,7 +12,7 @@ import eu.bittrade.libs.steemj.base.models.Discussion;
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
-import io.golos.golos.screens.story.model.GolosDiscussionItem;
+import io.golos.golos.repository.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.StoryTree;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import io.golos.golos.utils.UpdatingState;

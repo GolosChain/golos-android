@@ -60,7 +60,7 @@ class EditorViewModel : ViewModel() {
                     (editorLiveData.value?.parts?.size == 1
                             && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.must_be_not_empty))
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.post_body_must_be_not_empty))
                 return
             }
             if (mTags.size < 1) {
@@ -70,6 +70,23 @@ class EditorViewModel : ViewModel() {
             }
             editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
             mRepository.createPost(mTitleText, editorLiveData.value?.parts ?: ArrayList(), mTags, { result, error ->
+                editorLiveData.value = EditorState(error = error,
+                        isLoading = false,
+                        parts = editorLiveData.value?.parts ?: ArrayList(),
+                        completeMessage = if (error == null) R.string.send_success else null)
+            })
+        } else {
+            if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
+                    (editorLiveData.value?.parts?.size == 1
+                            && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
+                editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.comment_body_must_be_not_empty))
+                return
+            }
+            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
+            mRepository.createComment(mode!!.rootStory!!,
+                    mode!!.commentToAnswerOn!!,
+                    editorLiveData.value?.parts ?: ArrayList(), { result, error ->
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),

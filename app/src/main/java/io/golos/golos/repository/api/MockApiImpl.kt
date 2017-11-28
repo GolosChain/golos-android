@@ -11,7 +11,7 @@ import io.golos.golos.App
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.story.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
@@ -98,6 +98,10 @@ internal class MockApiImpl : GolosApi() {
     }
 
     override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun sendComment(sendFromAccount: String, authorOfItemToReply: String, permlinkOfItemToReply: String, content: String, categoryName: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

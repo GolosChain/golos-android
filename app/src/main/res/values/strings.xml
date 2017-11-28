@@ -44,7 +44,7 @@
     <string name="wrong_credentials">Неверные логин или пароль</string>
     <string name="logout">Выход</string>
     <string name="loading">Загружается...</string>
-    <string name="choose_vote_power">Выберите силу голоса</string>
+    <string name="choose_vote_power">Выберите мощность голоса</string>
     <string name="user_used_max_comments_chances">Больше нельзя голосовать за это сообщение</string>
     <string name="vote_canceled">Голос отменен</string>
     <string name="upvoted">Проголосовано</string>
@@ -57,7 +57,9 @@
     <string name="link_address">Адрес ссылки</string>
     <string name="you_can_post_only_every_five_minutes">Вы можете отправлять пост или комментарий не чаще раза в 5 минут</string>
     <string name="at_least_one_tag">Для создания поста нужен как минимум 1 тэг</string>
-    <string name="must_be_not_empty">Текст поста не может быть пустым</string>
+    <string name="post_body_must_be_not_empty">Пост не может быть пустым</string>
+    <string name="comment_body_must_be_not_empty">Комментарий не может быть пустым</string>
     <string name="enter_title">Заголовок поста не может быть пустым</string>
     <string name="send_success">Пост успешно опубликован</string>
+    <string name="title_activity_main_test">MainTestActivity</string>
 </resources>

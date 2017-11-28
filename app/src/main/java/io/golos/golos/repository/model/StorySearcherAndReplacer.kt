@@ -1,6 +1,5 @@
 package io.golos.golos.repository.model
 
-import io.golos.golos.screens.story.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 

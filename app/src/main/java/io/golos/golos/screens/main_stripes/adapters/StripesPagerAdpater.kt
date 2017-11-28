@@ -29,7 +29,7 @@ class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manag
                 mFragments.forEachIndexed({ i, f ->
                     var actual = i
                     if (!isFeedFragmentShown) actual += 1
-                    f.arguments.putSerializable(TYPE_TAG, typesToPosition[actual])
+                    f.arguments!!.putSerializable(TYPE_TAG, typesToPosition[actual])
                 })
                 notifyDataSetChanged()
             }
@@ -43,7 +43,7 @@ class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manag
         return fr
     }
 
-    override fun getItemPosition(`object`: Any?): Int {
+    override fun getItemPosition(`object`: Any): Int {
         return PagerAdapter.POSITION_NONE
     }
 

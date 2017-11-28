@@ -20,7 +20,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
+import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
+import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
@@ -29,6 +31,7 @@ import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.Translit
 import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
 
@@ -53,8 +56,9 @@ class StoryActivity : GolosActivity() {
     private lateinit var mPayoutTv: TextView
     private lateinit var mVotesCountTv: TextView
     private lateinit var mVoteBtn: ImageButton
-    private lateinit var mCommentsTv: TextView
+    private lateinit var mCommentsCountTv: TextView
     private lateinit var mVotingProgress: ProgressBar
+    private lateinit var mCommentsTv: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,7 +126,7 @@ class StoryActivity : GolosActivity() {
                     }
                 }
                 mVotesCountTv.text = it.storyTree.rootStory()?.activeVotes?.toString()
-                mCommentsTv.text = it.storyTree.rootStory()?.commentsCount?.toString()
+                mCommentsCountTv.text = it.storyTree.rootStory()?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
                     story.tags.forEach {
                         val view = layoutInflater.inflate(R.layout.v_story_tag_button, mFlow, false) as TextView
@@ -177,8 +181,9 @@ class StoryActivity : GolosActivity() {
         mVotesCountTv = findViewById(R.id.votes_btn)
         mFlow = findViewById(R.id.tags_lo)
         mPayoutTv = findViewById(R.id.money_label)
+        mCommentsTv = findViewById(R.id.comments_tv)
         mVoteBtn = findViewById(R.id.upvote_btn)
-        mCommentsTv = findViewById(R.id.comments_btn)
+        mCommentsCountTv = findViewById(R.id.comments_btn)
         mVotingProgress = findViewById(R.id.voting_progress)
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
@@ -186,6 +191,12 @@ class StoryActivity : GolosActivity() {
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.adapter = CommentsAdapter()
         mStoryRecycler.adapter = MainStoryAdapter()
+        mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
+        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_accent_20dp), null, null, null)
+        mVotesCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_voices_20dp_gray), null, null, null)
+        mCommentsCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_comments_wth_dots_24dp_gray), null, null, null)
+        mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
+       // mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
@@ -219,6 +230,21 @@ class StoryActivity : GolosActivity() {
                 } else mViewModel.onStoryVote(it, -1)
             }
         }
+        (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
+            val story = mViewModel.liveData.value?.storyTree
+            if (mViewModel.canUserWriteComments() && story?.rootStory() != null) {
+                EditorActivity.startAnswerOnCommentEditor(this,
+                        story,
+                        it.story)
+            }
+        }
+        mFab.setOnClickListener({
+            val story = mViewModel.liveData.value?.storyTree
+            if (story?.rootStory() != null) {
+                EditorActivity.startRootCommentEditor(this,
+                        story)
+            }
+        })
     }
 
     companion object {

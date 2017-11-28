@@ -14,7 +14,7 @@ import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
-import io.golos.golos.screens.story.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.GolosError
@@ -48,12 +48,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         if (type == FeedType.PERSONAL_FEED) out = mGolosApi.getUserFeed(mPersister.getCurrentUserName() ?: "",
                 20, 1024, startAuthor, startPermlink)
         else out = mGolosApi.getStories(limit, type, truncateBody, startAuthor, startPermlink)
-        var name = getCurrentUserData()?.userName
+        var name = getSavedActiveUserData()?.userName
         out.forEach {
             if (name != null) {
-                if (it.rootStory()?.activeVotes?.filter { it.first == name }?.count() ?: 0 > 0 &&
-                        it.rootStory()?.activeVotes?.filter { it.first == name }!!.first().second > 0)
-                    it.rootStory()?.isUserUpvotedOnThis = true
+                it.rootStory()?.isUserUpvotedOnThis = it.isUserVotedOnThis(name)
             }
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
         }
@@ -87,9 +85,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         var story = mGolosApi.getStory(blog, author, permlink)
         var name = mPersister.getCurrentUserName()
         if (name != null) {
-            if (story.rootStory()?.activeVotes?.filter { it.first == name && it.second > 0 }?.count() != 0) story.rootStory()?.isUserUpvotedOnThis = true
+            story.rootStory()?.isUserUpvotedOnThis = story.isUserVotedOnThis(name)
             story.getFlataned().forEach({
-                if (it.story.activeVotes.filter { it.first == name && it.second > 0 }.count() != 0) it.story.isUserUpvotedOnThis = true
+                it.story.isUserUpvotedOnThis = story.isUserVotedOnThis(name)
             })
         }
         return story
@@ -118,11 +116,14 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, response.activeAuth?.second),
                     Pair(PrivateKeyType.POSTING, response.postingAuth?.second)))
             mPersister.saveCurrentUserName(userName)
+            if (response.avatarPath != null)
+                mPersister.saveAvatarPathForUser(userName, response.avatarPath, System.currentTimeMillis())
+            setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
         }
         return response
     }
 
-    override fun getCurrentUserData(): UserData? {
+    override fun getSavedActiveUserData(): UserData? {
         val name = mPersister.getCurrentUserName() ?: return null
         val keys = mPersister.getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
         return UserData(mPersister.getAvatarForUser(name)?.first, name, keys[PrivateKeyType.ACTIVE], keys[PrivateKeyType.POSTING])
@@ -131,14 +132,22 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun deleteUserdata() {
         mPersister.saveCurrentUserName(null)
         mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, null), Pair(PrivateKeyType.POSTING, null)))
+        mAuthLiveData.value = null
     }
 
-    override fun setUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
-        if (privateActiveWif != null || privatePostingWif != null) {
+    override fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
+        if ((privateActiveWif != null && privateActiveWif.isNotEmpty()) ||
+                (privatePostingWif != null && privatePostingWif.isNotEmpty())) {
             val keys = HashSet<ImmutablePair<PrivateKeyType, String>>()
             if (privateActiveWif != null) keys.add(ImmutablePair(PrivateKeyType.ACTIVE, privateActiveWif))
             if (privatePostingWif != null) keys.add(ImmutablePair(PrivateKeyType.POSTING, privatePostingWif))
+            mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, privateActiveWif),
+                    Pair(PrivateKeyType.POSTING, privatePostingWif)))
+            mPersister.saveCurrentUserName(userName)
             Golos4J.getInstance().addAccount(AccountName(userName), keys, true)
+            mMainThreadExecutor.execute {
+                mAuthLiveData.value = UserData(getUserAvatarFromDb(userName), userName, privateActiveWif, privatePostingWif)
+            }
         }
     }
 
@@ -155,9 +164,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun requestStoriesListUpdate(limit: Int, feedtype: FeedType, startAuthor: String?, startPermlink: String?) {
         val request = StoriesRequest(limit, feedtype, startAuthor, startPermlink)
         if (mRequests.contains(request)) return
-        Timber.e("requestStoriesListUpdate " + feedtype)
         mRequests.add(request)
-        mWorkerExecutor.execute() {
+        mWorkerExecutor.execute {
             try {
                 val discussions = getStripeItems(limit, feedtype, 1024, startAuthor, startPermlink)
                 mMainThreadExecutor.execute {
@@ -202,7 +210,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     override fun run() {
                         try {
                             val currentWorkingItem = it.deepCopy()
-                            currentWorkingItem.rootStory()?.avatarPath = getUserAvatar("", null, null)
+                            currentWorkingItem.rootStory()?.avatarPath =
+                                    getUserAvatar(currentWorkingItem.rootStory()!!.author,
+                                            currentWorkingItem.rootStory()!!.permlink,
+                                            currentWorkingItem.rootStory()!!.categoryName)
                             val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories, mFeedStories)
                             listOfList.forEach {
                                 if (it.value?.items?.size ?: 0 > 0) {
@@ -214,7 +225,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                 }
                             }
                         } catch (e: Exception) {
-                            Timber.e("error loading avatar of ${it.rootStory()?.avatarPath}")
+                            Timber.e("error loading avatar of ${it.rootStory()?.author}," +
+                                    " permlink is ${it.rootStory()?.permlink} " +
+                                    "and category is ${it.rootStory()?.categoryName}")
                             e.printStackTrace()
                         }
                     }
@@ -361,12 +374,45 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             }
                         }
                 val content = content.joinToString(separator = "\n") { it.markdownRepresentation }
-                println("content = $content \ntags = $tags")
                 mGolosApi.sendPost(mPersister.getCurrentUserName()!!, title, content, tags.toArray(Array(tags.size, { "" })))
                 mMainThreadExecutor.execute {
                     resultListener.invoke(Unit, null)
                 }
 
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    resultListener(Unit, GolosErrorParser.parse(e))
+                }
+            }
+        }
+    }
+
+    override fun createComment(rootStory: StoryTree,
+                               to: GolosDiscussionItem,
+                               content: List<EditorPart>,
+                               resultListener: (Unit, GolosError?) -> Unit) {
+        val userData = mAuthLiveData.value ?: return
+        mWorkerExecutor.execute {
+            try {
+                val content = ArrayList(content)
+                (0 until content.size)
+                        .forEach {
+                            val part = content[it]
+                            if (part is EditorImagePart) {
+                                val newUrl = mGolosApi.uploadImage(mPersister.getCurrentUserName()!!, File(part.imageUrl))
+                                content[it] = EditorImagePart(part.id, part.imageName, newUrl, pointerPosition = part.pointerPosition)
+                            }
+                        }
+                val contentString = content.joinToString(separator = "\n") { it.markdownRepresentation }
+                mGolosApi.sendComment(userData.userName,
+                        to.author,
+                        to.permlink,
+                        contentString,
+                        rootStory.rootStory()!!.categoryName)
+                requestStoryUpdate(rootStory)
+                mMainThreadExecutor.execute {
+                    resultListener.invoke(Unit, null)
+                }
             } catch (e: Exception) {
                 mMainThreadExecutor.execute {
                     resultListener(Unit, GolosErrorParser.parse(e))

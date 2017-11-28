@@ -14,9 +14,9 @@ import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.Utils;
 import io.golos.golos.screens.main_stripes.model.StripeItem;
-import io.golos.golos.screens.story.model.GolosDiscussionItem;
+import io.golos.golos.repository.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.ImageRow;
-import io.golos.golos.screens.story.model.ItemType;
+import io.golos.golos.repository.model.ItemType;
 import io.golos.golos.screens.story.model.Row;
 import io.golos.golos.screens.story.model.StoryParserToRows;
 import io.golos.golos.screens.story.model.StoryTree;
@@ -64,7 +64,7 @@ public class ParseTest {
         assertTrue(items.get(10).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(11).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(12).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(13).getType() == ItemType.IMAGE_FIRST);
+        assertTrue(items.get(13).getType() == ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(14).getType() == ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(15).getType() == ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(16).getType() == ItemType.PLAIN_WITH_IMAGE);
@@ -91,7 +91,6 @@ public class ParseTest {
         assertTrue(items.get(37).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(38).getType() == ItemType.IMAGE_FIRST);
         assertTrue(items.get(39).getType() == ItemType.IMAGE_FIRST);
-
         StripeItem item = new StripeItem(map.get(2339567L));
         assertTrue(item.getBody().contains("Задание фотолаборатории оказалось для меня легким и в тоже время сложным для выбора фотографий"));
         item = new StripeItem(map.get(2337481L));
@@ -225,7 +224,7 @@ public class ParseTest {
         final StoryTree tree = Utils.readStoryFromResourse("story4.json");
         final StoryParserToRows parser = new StoryParserToRows();
         List<Row> rows = parser.parse(tree.rootStory());
-        assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg/"), rows.get(0));
-        assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(3));
+        assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg"), rows.get(0));
+        assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(2));
     }
 }

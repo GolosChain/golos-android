@@ -1,31 +1,29 @@
 package io.golos.golos.screens.story.model
 
-import io.golos.golos.utils.ImageVisitor
+import io.golos.golos.repository.model.Format
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
-import io.golos.golos.utils.TextVisitor
+import io.golos.golos.utils.Regexps.markdownChecker
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import org.jsoup.safety.Whitelist
 
-data class TextRow(val text: String) : Row()
+data class TextRow(val text: String) : Row() {
+}
 
 data class ImageRow(val src: String) : Row()
 
 sealed class Row
 
 class StoryParserToRows {
-    private val allHtml = Regex("(<([^>]+)>)")
-    private val anyImageLink = Regex("https?:[^)]+\\.(?:jpg|jpeg|gif|png)")
-    private val imgRegexp = Regex("<img.*>")
-    private val markdownChecker = Regex("\\[[^]]+\\]\\(https?:\\/\\/\\S+\\)")
-    private val trashTags = Regex("<p>|</p>|<b>|</b>|\\n|<br>|</br>|&nbsp;")
-    private var list: List<Element>? = null
     fun parse(story: GolosDiscussionItem): List<Row> {
 
         val out = ArrayList<Row>()
         if (story.body.isEmpty()) return out
         var str = story.body
+        str = str.replace("<center>", "").replace("</center>", "")
         if (story.format == Format.MARKDOWN || str.contains(markdownChecker)) {
             str = str.replace(Regexps.imageWithWhitespace) {
                 "![](${it.value.trim()})"
@@ -37,75 +35,124 @@ class StoryParserToRows {
             str = HtmlRenderer.builder().build().render(node)
         }
         try {
+            str = Jsoup.clean(str, Whitelist.basicWithImages())
             str = str.replace("\\s@[a-zA-Z]{5,16}[0-9]{0,6}".toRegex()) {
-                "<a href = \"https://golos.blog/${it.value.trim()}\"> ${it.value.trim()}</a>"
+                "<a hre =\"https://golos.blog/${it.value.trim()}\"> ${it.value.trim()}</a>"
             }
-            str = str.replace(Regexps.imageWithWhitespace) {
-                "<img src = \"${it.value.trim()}\">"
+            str = str.replace(Regexps.imageLinkWithoutSrctag) {
+                "<img src=\"${it.value.trim()}\">"
             }
             str = str.replace(Regexps.imageWithCenterTage) {
-                "<img src = \"${it.value
+                "<img src=\"${it.value
                         .trim()
                         .replace("<center>", "")
                         .replace("</center>", "")}\">"
             }
             str = str.replace(Regexps.linkWithWhiteSpace) {
-                "<a href = \"${it.value.trim()}\"> ${it.value.trim()}</a>"
+                "<a href=\"${it.value.trim()}\"> ${it.value.trim()}</a>"
             }
-            val doc = Jsoup.parse(str)
-            var ets = doc.body().children()
-
-            var body = doc.body()
-            list = listChildren(body)
-            if (ets.size == 1 && ets[0].children().html().isNotEmpty()) {
-                if (ets[0].ownText().isNotEmpty()) out.add(TextRow(ets[0].ownText()))
-                ets = ets[0].children()
-
-
+            str = str.replace(Regexps.linkWithoutATag) {
+                val value = it.value.trim().replace(Regexps.trashTags, "")
+                "<a href=\"$value\">$value</a>"
             }
-
-            if (ets.size == 0) {
-                ets = doc.body().children()
+            str = str.replace("&nbsp;", "")
+            var strings = str.split(Regex("<img.+?>"))
+            val stringsCleaned = ArrayList<String>()
+            val images = Regexps.imageExtract.findAll(str)
+            val iter = images.iterator()
+            val imagesList = ArrayList<String>()
+            iter.forEach {
+                if (it.groupValues.size == 1) imagesList.add(it.groupValues[0])
+                else if (it.groupValues.size == 2) imagesList.add(it.groupValues[1])
             }
-            if (ets.size == 0) {
-                val nodes = doc.body().childNodes()
-                if (nodes.size != 0) {
-                    nodes.forEach({
-                        out.add(TextRow(it.toString()))
-                    })
-                    return out
+            var isFirstImage = false
+            stringsCleaned.add(strings[0])
+            (1 until strings.size).forEach {
+                if (!strings[it].isEmpty() && !strings[it].matches(Regexps.trashTags)) {
+                    stringsCleaned.add(strings[it])
                 }
             }
-            if (ets.size == 0) {
-                println("parser fail on $story")
-                out.add(TextRow(str))
-                return out
-            }
-            if (ets!!.size > 0) {
-                ets!!.forEach {
-                    if (it.hasAttr("src")) {
-                        out.add(ImageRow(it.attr("src")))
-                    } else if (it.children().hasAttr("src")) {
-                        out.add(ImageRow(it.children().attr("src")))
-                    } else if (it.html().contains(anyImageLink)) {
-                        out.add(ImageRow(it.html()))
-                    } else if (it.html().isNotEmpty()) {
-                        out.add(TextRow(it.html()))
-                    }
-                }
-            } else {
-                list!!.forEach {
-                    if (!it.html().replace(trashTags, "").isEmpty()) {
-                        if (it.hasAttr("src")) {
-                            out.add(ImageRow(it.attr("src")))
-                        } else if (it.children().hasAttr("src")) {
-                            out.add(ImageRow(it.children().attr("src")))
-                        } else if (it.html().isNotEmpty()) {
-                            out.add(TextRow(it.html()))
+            strings = stringsCleaned
+            (0 until strings.size)
+                    .forEach {
+                        if (it == 0) {
+                            if ((strings[0].isEmpty() || strings[0].matches(Regexps.trashTags)) && imagesList.isNotEmpty()) {
+                                out.add(ImageRow(imagesList[0]))
+                                isFirstImage = true
+                            } else {
+                                out.add(TextRow(strings[0]))
+                                if (imagesList.lastIndex >= it) {
+                                    out.add(ImageRow(imagesList[it]))
+                                }
+                            }
+                        } else {
+                            if (!isFirstImage) {
+                                out.add(TextRow(strings[it]))
+                                if (imagesList.lastIndex >= it) {
+                                    out.add(ImageRow(imagesList[it]))
+                                }
+                            } else {
+                                out.add(TextRow(strings[it]))
+                                if (imagesList.lastIndex >= it) {
+                                    out.add(ImageRow(imagesList[it]))
+                                }
+                            }
                         }
                     }
-                }
-            }
+            /* val doc = Jsoup.parse(str)
+             var ets = doc.body().children()
+
+             var body = doc.body()
+             var list = listChildren(body)
+             if (ets.size == 1 && ets[0].children().html().isNotEmpty()) {
+                 ets = ets[0].children()
+             }
+             if (ets.size == 0) {
+                 ets = doc.body().children()
+             }
+             if (ets.size == 0) {
+                 val nodes = doc.body().childNodes()
+                 if (nodes.size != 0) {
+                     nodes.forEach({
+                         out.add(TextRow(it.toString()))
+                     })
+                     return out
+                 }
+             }
+             if (ets.size == 0) {
+                 println("parser fail on $story")
+                 out.add(TextRow(str))
+                 return out
+             }
+             if (ets!!.size > 0) {
+                 ets.forEach {
+                     if (it.hasAttr("src")) {
+                         out.add(ImageRow(it.attr("src")))
+                     } else if (it.children().hasAttr("src") && it.children().size == 1) {
+                         out.add(ImageRow(it.children().attr("src")))
+                     } else if (it.html().isNotEmpty()) {
+                         var htmlString = it.html()
+                         if (htmlString.matches(Regexps.link)) {
+                             htmlString = htmlString.replace(Regexps.link) {
+                                 "<a href =\"${it.value.trim()}\">${it.value.trim()}</a>"
+                             }
+                         }
+                         out.add(TextRow(htmlString))
+                     }
+                 }
+             } else {
+                 list!!.forEach {
+                     if (!it.html().replace(trashTags, "").isEmpty()) {
+                         if (it.hasAttr("src")) {
+                             out.add(ImageRow(it.attr("src")))
+                         } else if (it.children().hasAttr("src")) {
+                             out.add(ImageRow(it.children().attr("src")))
+                         } else if (it.html().isNotEmpty()) {
+                             out.add(TextRow(it.html()))
+                         }
+                     }
+                 }
+             }*/
 
 
         } catch (e: Exception) {
@@ -113,6 +160,7 @@ class StoryParserToRows {
         }
         return out
     }
+
 
     private fun listChildren(element: Element): List<Element> {
         if (element.children().count() == 0) return ArrayList()

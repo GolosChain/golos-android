@@ -37,6 +37,7 @@ class StoryViewModel : ViewModel() {
                                 it)
                     }
         }
+        mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
         mLiveData.addSource(mRepository.getCurrentUserDataAsLiveData()) {
             mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
                     mLiveData.value?.storyTitle ?: "",
@@ -65,7 +66,7 @@ class StoryViewModel : ViewModel() {
 
     val showVoteDialog: Boolean
         get() {
-            return mRepository.getCurrentUserData() != null && mRepository.getCurrentUserData()?.userName != null
+            return mRepository.getSavedActiveUserData() != null && mRepository.getSavedActiveUserData()?.userName != null
 
         }
 
@@ -76,5 +77,9 @@ class StoryViewModel : ViewModel() {
     fun onStoryVote(story: StoryWrapper, percent: Short) {
         if (canUserVoteOnThis(story)) mRepository.upVote(story.story, percent)
         else mRepository.cancelVote(story.story)
+    }
+
+    fun canUserWriteComments(): Boolean {
+        return mRepository.getSavedActiveUserData() != null && mRepository.getSavedActiveUserData()?.userName != null
     }
 }

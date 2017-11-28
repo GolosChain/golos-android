@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.steemj.base.models.Discussion
+import io.golos.golos.repository.model.Format
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.*
 import org.commonmark.node.*
 import org.commonmark.parser.Parser

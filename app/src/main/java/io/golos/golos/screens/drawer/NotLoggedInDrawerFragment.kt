@@ -54,7 +54,7 @@ class NotLoggedInDrawerFragment : Fragment() {
     private lateinit var mEnterButton: Button
     private var mProgressDialog: Dialog? = null
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater!!.inflate(R.layout.fr_auth_user_not_logged_in, container, false)
         mScanSwitch = v.findViewById(R.id.scan_switch)
         mPostingKeyMenu = v.findViewById(R.id.posting_key_lo)
@@ -68,22 +68,22 @@ class NotLoggedInDrawerFragment : Fragment() {
         mEnterButton = v.findViewById(R.id.enter_btn)
 
         val postingKeyRequest = View.OnClickListener {
-            val camerPermission = ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            val camerPermission = context?.let { it1 -> ContextCompat.checkSelfPermission(it1, android.Manifest.permission.CAMERA) } == PackageManager.PERMISSION_GRANTED
             if (camerPermission) {
                 val intent = Intent(context, BarcodeScannerActivity::class.java)
                 startActivityForResult(intent, SCAN_POSTING_REQUEST_CODE)
             } else {
-                ActivityCompat.requestPermissions(activity, Array(1, { android.Manifest.permission.CAMERA }), SCAN_POSTING_PERMISSION)
+                activity?.let { it1 -> ActivityCompat.requestPermissions(it1, Array(1, { android.Manifest.permission.CAMERA }), SCAN_POSTING_PERMISSION) }
             }
 
         }
         val activeKeyRequest = View.OnClickListener {
-            val camerPermission = ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            val camerPermission = context?.let { it1 -> ContextCompat.checkSelfPermission(it1, android.Manifest.permission.CAMERA) } == PackageManager.PERMISSION_GRANTED
             if (camerPermission) {
                 val intent = Intent(context, BarcodeScannerActivity::class.java)
                 startActivityForResult(intent, SCAN_ACTIVE_REQUEST_CODE)
             } else {
-                ActivityCompat.requestPermissions(activity, Array(1, { android.Manifest.permission.CAMERA }), SCAN_ACTIVE_PERMISSION)
+                activity?.let { it1 -> ActivityCompat.requestPermissions(it1, Array(1, { android.Manifest.permission.CAMERA }), SCAN_ACTIVE_PERMISSION) }
             }
         }
         mPostingEt = v.findViewById(R.id.posting_key_et)
@@ -101,9 +101,9 @@ class NotLoggedInDrawerFragment : Fragment() {
         return v
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel = ViewModelProviders.of(activity).get(AuthViewModel::class.java)
+        mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
         mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
             if (it?.isScanMenuVisible == true) {
                 mKeyEt.visibility = View.GONE
