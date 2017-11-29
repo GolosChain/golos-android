@@ -75,7 +75,7 @@ class ApiImpl : GolosApi() {
     override fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
         if (masterKey == null && activeWif == null && postingWif == null) return UserAuthResponse(false, userName, null, null, null, 0L, 0.0)
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(userName)))
-        if (accs.size == 0) return UserAuthResponse(false, userName, null,
+        if (accs.size == 0 || accs.get(0) == null) return UserAuthResponse(false, userName, null,
                 null, null, 0, 0.0)
         val acc = accs.get(0)
         var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey

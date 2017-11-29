@@ -1,249 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:background="@color/drawer_background"
-    android:clickable="true"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    android:layout_height="match_parent">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/title_block"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/drawer_header_height"
-
-        android:gravity="center"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="@color/drawer_background"
+        android:clickable="true"
         android:orientation="vertical">
 
-        <View
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/title_block"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="@color/colorAccent"
-            app:layout_constraintHeight_percent=".5"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="@dimen/drawer_header_height"
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHeight_percent=".5" />
-
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/white_circle"
-            android:layout_width="@dimen/avatar_size"
-            android:layout_height="@dimen/avatar_size"
-            android:src="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:riv_oval="true" />
-
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_marginBottom="1dp"
-            android:src="@color/colorAccent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:riv_oval="true" />
-
-
-        <ImageView
-            android:id="@+id/avatar_iv"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="4dp"
-            app:srcCompat="@drawable/im_logo_white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <TextView
-            android:id="@+id/logo_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_material_half"
             android:gravity="center"
-            android:text="Golos.io"
-            android:textColor="@android:color/white"
-            android:textSize="28sp"
-            app:layout_constraintBottom_toTopOf="@id/white_circle" />
+            android:orientation="vertical">
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/colorAccent"
+                app:layout_constraintHeight_percent=".5"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHeight_percent=".5" />
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/white_circle"
+                android:layout_width="@dimen/avatar_size"
+                android:layout_height="@dimen/avatar_size"
+                android:src="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:riv_oval="true" />
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="1dp"
+                android:src="@color/colorAccent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:riv_oval="true" />
+
+
+            <ImageView
+                android:id="@+id/avatar_iv"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/im_logo_white" />
+
+
+            <TextView
+                android:id="@+id/logo_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_material_half"
+                android:gravity="center"
+                android:text="Golos.io"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                app:layout_constraintBottom_toTopOf="@id/white_circle" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_material_half"
+                android:gravity="center_horizontal"
+                android:text="Рады видеть тебя"
+                android:textSize="@dimen/font_big"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/white_circle" />
+        </android.support.constraint.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/content_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title_block"
+
+            android:layout_margin="@dimen/margin_material_half"
+            android:animateLayoutChanges="true"
+            android:background="@drawable/rect_round_corners_solid_white_4dp_corners"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/material_huge">
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/login_et"
+                style="@style/LoginEditTextStyle"
+                android:layout_marginTop="@dimen/margin_material"
+                android:hint="@string/login"
+                android:imeOptions="flagNavigateNext"
+                android:inputType="textNoSuggestions"
+                android:lines="1"
+                android:maxLength="16"
+                app:backgroundTint="#dce3e5" />
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/key_et"
+                style="@style/LoginEditTextStyle"
+                android:layout_marginTop="@dimen/margin_material"
+                android:hint="@string/enter_key"
+                android:imeOptions="actionDone"
+                android:inputType="textVisiblePassword"
+                android:maxLength="52"
+                android:maxLines="2"
+                android:visibility="visible"
+                app:backgroundTint="#dce3e5" />
+
+            <RelativeLayout
+                android:id="@+id/posting_key_lo"
+                style="@style/BarcodeLayoutStyle"
+                android:layout_width="match_parent"
+                android:background="?selectableItemBackground">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/posting_key_et"
+                    style="@style/BarcodeTextStyle"
+                    android:layout_toLeftOf="@id/scan_posting"
+                    android:hint="@string/posting_key"
+                    android:imeOptions="actionDone"
+
+                    android:inputType="textVisiblePassword" />
+
+                <ImageButton
+                    android:id="@+id/scan_posting"
+                    style="@style/BarcodeButton"
+                    app:srcCompat="@drawable/ic_barcode_32dp_black" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="#dce3e5" />
+            </RelativeLayout>
+
+            <RelativeLayout
+
+                android:id="@+id/active_key_lo"
+                style="@style/BarcodeLayoutStyle"
+                android:layout_marginTop="@dimen/margin_material"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:gravity="right"
+                android:visibility="visible">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/barcode_active_key_et"
+                    style="@style/BarcodeTextStyle"
+                    android:layout_toLeftOf="@id/scan_active"
+                    android:hint="@string/active_key"
+                    android:imeOptions="actionDone"
+                    android:inputType="textVisiblePassword" />
+
+                <ImageButton
+                    android:id="@+id/scan_active"
+                    style="@style/BarcodeButton"
+                    app:srcCompat="@drawable/ic_barcode_32dp_black" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="#dce3e5" />
+            </RelativeLayout>
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/scan_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/material_big"
+                android:layout_marginStart="@dimen/margin_material"
+                android:layout_marginTop="@dimen/material_big"
+                android:checked="false"
+                android:gravity="start|center_vertical"
+                android:text="@string/scan"
+                android:textColor="@color/delimeter_color"
+                android:textSize="@dimen/font_regular"
+                app:buttonTint="@color/colorAccent" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/content_block"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/cancel_btn"
+                style="@style/LoginBottomButton"
+
+                android:layout_marginStart="4dp"
+                android:text="@string/cancel"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/gray_1" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/enter_btn"
+                style="@style/LoginBottomButton"
+                android:layout_marginEnd="4dp"
+                android:text="@string/login"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/colorAccent" />
+
+
+        </LinearLayout>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_material_half"
-            android:gravity="center_horizontal"
-            android:text="Рады видеть тебя"
-            android:textSize="@dimen/font_big"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/white_circle" />
-    </android.support.constraint.ConstraintLayout>
-
-    <LinearLayout
-        android:id="@+id/content_block"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/title_block"
-
-        android:layout_margin="@dimen/margin_material_half"
-        android:animateLayoutChanges="true"
-        android:background="@drawable/rect_round_corners_solid_white_4dp_corners"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/material_huge">
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/login_et"
-            style="@style/LoginEditTextStyle"
-            android:layout_marginTop="@dimen/margin_material"
-            android:hint="@string/login"
-            android:imeOptions="flagNavigateNext"
-            android:inputType="textNoSuggestions"
-            android:lines="1"
-            android:maxLength="16"
-            app:backgroundTint="#dce3e5" />
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/key_et"
-            style="@style/LoginEditTextStyle"
-            android:layout_marginTop="@dimen/margin_material"
-            android:hint="@string/enter_key"
-            android:imeOptions="actionDone"
-            android:inputType="textVisiblePassword"
-            android:maxLength="52"
-            android:maxLines="2"
-            android:visibility="visible"
-            app:backgroundTint="#dce3e5" />
-
-        <RelativeLayout
-            android:id="@+id/posting_key_lo"
-            style="@style/BarcodeLayoutStyle"
-            android:layout_width="match_parent"
-            android:background="?selectableItemBackground">
-
-            <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/posting_key_et"
-                style="@style/BarcodeTextStyle"
-                android:layout_toLeftOf="@id/scan_posting"
-                android:hint="@string/posting_key"
-                android:imeOptions="actionDone"
-
-                android:inputType="textVisiblePassword" />
-
-            <ImageButton
-                android:id="@+id/scan_posting"
-                style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode_32dp_black" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="#dce3e5" />
-        </RelativeLayout>
-
-        <RelativeLayout
-
-            android:id="@+id/active_key_lo"
-            style="@style/BarcodeLayoutStyle"
-            android:layout_marginTop="@dimen/margin_material"
-            android:background="?selectableItemBackground"
-            android:clickable="true"
-            android:gravity="right"
-            android:visibility="visible">
-
-            <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/barcode_active_key_et"
-                style="@style/BarcodeTextStyle"
-                android:layout_toLeftOf="@id/scan_active"
-                android:hint="@string/active_key"
-                android:imeOptions="actionDone"
-                android:inputType="textVisiblePassword" />
-
-            <ImageButton
-                android:id="@+id/scan_active"
-                style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode_32dp_black" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="#dce3e5" />
-        </RelativeLayout>
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/scan_switch"
+            android:id="@+id/register_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginEnd="@dimen/material_big"
+            android:layout_above="@id/more_about_golos"
+            android:layout_marginEnd="@dimen/margin_material"
             android:layout_marginStart="@dimen/margin_material"
-            android:layout_marginTop="@dimen/material_big"
-            android:checked="false"
-            android:gravity="start|center_vertical"
-            android:text="@string/scan"
-            android:textColor="@color/delimeter_color"
-            android:textSize="@dimen/font_regular"
-            app:buttonTint="@color/colorAccent" />
+            android:clickable="true"
+            android:textSize="@dimen/font_small" />
 
-
+        <TextView
+            android:id="@+id/more_about_golos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/margin_material"
+            android:clickable="true"
+            android:textSize="@dimen/font_small" />
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/buttons_block"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/content_block"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/cancel_btn"
-            style="@style/LoginBottomButton"
-
-            android:layout_marginStart="4dp"
-            android:text="@string/cancel"
-            android:textAllCaps="false"
-            app:backgroundTint="@color/gray_1" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/enter_btn"
-            style="@style/LoginBottomButton"
-            android:layout_marginEnd="4dp"
-            android:text="@string/login"
-            android:textAllCaps="false"
-            app:backgroundTint="@color/colorAccent" />
-
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/register_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/more_about_golos"
-        android:layout_marginEnd="@dimen/margin_material"
-        android:layout_marginStart="@dimen/margin_material"
-        android:clickable="true"
-        android:textSize="@dimen/font_small" />
-
-    <TextView
-        android:id="@+id/more_about_golos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/margin_material"
-        android:clickable="true"
-        android:textSize="@dimen/font_small" />
-</RelativeLayout>
+</android.support.v4.widget.NestedScrollView>

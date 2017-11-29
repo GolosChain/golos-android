@@ -267,4 +267,8 @@ internal class MockRepoImpl(
     override fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun requestStoryUpdate(storyId: Long, feedType: FeedType) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

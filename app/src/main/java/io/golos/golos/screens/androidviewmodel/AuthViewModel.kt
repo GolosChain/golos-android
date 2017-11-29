@@ -93,14 +93,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 })
                 postWithCatch {
                     val resp = mRepository.authWithActiveWif(mLastUserInput.login, mLastUserInput.activeWif)
-                    mHandler.post {
-                        userProfileState.value = UserProfileState(isLoggedIn = true,
-                                userName = resp.userName ?: "",
-                                avatarPath = resp.avatarPath)
-                        userAuthState.value = AuthState(isLoggedIn = true)
-                    }
-
+                    proceedAuthResponse(resp)
                 }
+
             } else if (mLastUserInput.postingWif.isNotEmpty()) {
                 mHandler.post({
                     userProfileState.value = UserProfileState(false, true, null,
@@ -108,12 +103,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 })
                 postWithCatch {
                     val resp = mRepository.authWithPostingWif(mLastUserInput.login, mLastUserInput.postingWif)
-                    mHandler.post {
-                        userProfileState.value = UserProfileState(isLoggedIn = true,
-                                userName = resp.userName ?: "",
-                                avatarPath = resp.avatarPath)
-                        userAuthState.value = AuthState(isLoggedIn = true)
-                    }
+                    proceedAuthResponse(resp)
                 }
             }
         }
@@ -126,7 +116,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                         isLoading = false,
                         error = Pair(ErrorCode.ERROR_AUTH, R.string.wrong_credentials))
             } else {
-                initUser()
+                userProfileState.value = UserProfileState(isLoggedIn = true,
+                        userName = resp.userName ?: "",
+                        avatarPath = resp.avatarPath)
+                userAuthState.value = AuthState(isLoggedIn = true)
             }
         })
     }

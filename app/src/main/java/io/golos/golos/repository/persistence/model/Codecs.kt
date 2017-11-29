@@ -1,18 +1,18 @@
 package io.golos.golos.repository.persistence.model
 
-import android.os.Build
+import android.security.KeyPairGeneratorSpec
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import io.golos.golos.App
+import java.math.BigInteger
 import java.nio.charset.Charset
+import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.KeyStore
-import java.security.NoSuchAlgorithmException
-import java.security.SecureRandom
+import java.security.PrivateKey
 import java.util.*
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
+import javax.security.auth.x500.X500Principal
 
 
 /**
@@ -21,58 +21,40 @@ import javax.crypto.spec.SecretKeySpec
 
 
 internal class EnCryptor {
-    private val TRANSFORMATION = "AES/GCM/NoPadding"
-    private val ANDROID_KEY_STORE = "AndroidKeyStore"
-    var initializationBuffer: ByteArray? = null
-
 
     fun encryptText(alias: KeystoreKeyAlias, textToEncrypt: String): ByteArray {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias))
-        initializationBuffer = cipher.iv
+        val cipher = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        } else {
+            Cipher.getInstance("RSA/ECB/PKCS1Padding")
+        }
+        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias).public)
         return cipher.doFinal(textToEncrypt.toByteArray(charset("UTF-8")))
     }
 
-    private fun getSecretKey(alias: KeystoreKeyAlias): SecretKey {
-        val start = Calendar.getInstance()
-        val end = Calendar.getInstance()
-        end.add(Calendar.YEAR, 10)
-        var keyGenerator: KeyGenerator? = null
-        try {
-            keyGenerator =  KeyGenerator
-                    .getInstance("AES", ANDROID_KEY_STORE)
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-            keyGenerator =  KeyGenerator
-                    .getInstance("RSA", ANDROID_KEY_STORE)
-        }
-        catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-            keyGenerator =  KeyGenerator
-                    .getInstance("AESWRAP", ANDROID_KEY_STORE)
-        }
-        catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-            keyGenerator =  KeyGenerator
-                    .getInstance("ARC4", ANDROID_KEY_STORE)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            keyGenerator!!.init(KeyGenParameterSpec.Builder(alias.name,
-                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setKeyValidityStart(start.time)
-                    .setKeyValidityEnd(end.time)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .build())
+    private fun getSecretKey(alias: KeystoreKeyAlias): KeyPair {
+        val generator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore")
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val spec = KeyGenParameterSpec.Builder(
+                    alias.name,
+                    KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT)
+                    .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+                    .build()
+            generator.initialize(spec)
         } else {
-            keyGenerator!!.init(SecureRandom())
-
+            val spec = KeyPairGeneratorSpec.Builder(App.context)
+                    .setAlias(alias.name)
+                    .setSubject(X500Principal("CN=Golos golos, O=Android Golos"))
+                    .setSerialNumber(BigInteger.ONE)
+                    .setStartDate(Date())
+                    .setEndDate(Date(Long.MAX_VALUE))
+                    .build()
+            generator.initialize(spec)
         }
-        return keyGenerator.generateKey()
+        return generator.genKeyPair()
     }
 }
-
 
 class DeCryptor {
 
@@ -83,17 +65,18 @@ class DeCryptor {
 
     }
 
-    fun decryptData(alias: KeystoreKeyAlias, encryptedData: ByteArray, encryptionIv: ByteArray): String {
-
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val spec = GCMParameterSpec(128, encryptionIv)
-        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(alias), spec)
-
+    fun decryptData(alias: KeystoreKeyAlias, encryptedData: ByteArray): String {
+        val cipher = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
+        } else {
+            Cipher.getInstance("RSA/ECB/PKCS1Padding")
+        }
+        cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias))
         return String(cipher.doFinal(encryptedData), Charset.forName("UTF-8"))
     }
 
-    private fun getSecretKey(alias: KeystoreKeyAlias): SecretKey {
-        return (keyStore!!.getEntry(alias.name, null) as KeyStore.SecretKeyEntry).secretKey
+    private fun getPrivateKey(alias: KeystoreKeyAlias): PrivateKey {
+        return (keyStore!!.getEntry(alias.name, null) as KeyStore.PrivateKeyEntry).privateKey
     }
 
     companion object {

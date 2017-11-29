@@ -127,12 +127,12 @@ abstract class StoriesViewModel : ViewModel() {
 
     open fun onCardClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it, type)
+        StoryActivity.start(context, it.rootStory()?.id?:0L, type)
     }
 
     open fun onCommentsClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it, type)
+        StoryActivity.start(context, it.rootStory()?.id?:0L, type)
     }
 
     open fun onShareClick(it: StoryTree, context: Context?) {

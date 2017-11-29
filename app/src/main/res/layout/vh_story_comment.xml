@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_lo"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -38,7 +37,6 @@
         android:layout_marginStart="@dimen/margin_material_half"
         android:layout_marginTop="@dimen/margin_material"
         android:drawablePadding="6dp"
-        android:drawableStart="@drawable/ic_access_time_gray_24dp"
         android:gravity="center_vertical"
         android:textColor="@color/gray_1"
         app:layout_constraintBottom_toBottomOf="@id/username_tv"
@@ -87,7 +85,6 @@
         android:layout_marginTop="6dp"
         android:background="?selectableItemBackgroundBorderless"
         android:drawablePadding="@dimen/margin_material_half"
-        android:drawableStart="@drawable/ic_upvote_18_gray"
         android:gravity="center_vertical"
         android:minWidth="40dp"
         android:padding="0dp"
@@ -104,7 +101,6 @@
         android:layout_height="32dp"
         android:layout_marginTop="6dp"
         android:drawablePadding="@dimen/margin_material_half"
-        android:drawableStart="@drawable/ic_upvote_18_gray"
         android:gravity="center_vertical"
         android:minWidth="40dp"
         android:padding="0dp"
@@ -112,12 +108,11 @@
         app:layout_constraintTop_toBottomOf="@+id/content_lo" />
 
     <android.support.constraint.Barrier
-        android:layout_width="0dp"
         android:id="@+id/barrier"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="progress,upvote_btn"
-        />
+        app:constraint_referenced_ids="progress,upvote_btn" />
 
     <Button
         android:id="@+id/answer_btn"

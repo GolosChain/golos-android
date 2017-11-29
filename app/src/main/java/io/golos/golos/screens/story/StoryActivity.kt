@@ -7,6 +7,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
@@ -20,13 +22,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
-import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
-import io.golos.golos.screens.story.model.*
+import io.golos.golos.screens.story.model.ImageRow
+import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.Translit
@@ -70,13 +73,13 @@ class StoryActivity : GolosActivity() {
     private fun setUpViewModel() {
         val provider = ViewModelProviders.of(this)
         mViewModel = provider.get(StoryViewModel::class.java)
-        val extra = intent.getStringExtra(COMMENT_TAG)
-        if (extra == null) {
+        val extra = intent.getLongExtra(COMMENT_TAG, 0L)
+        if (extra == 0L) {
             Timber.e(" no comment set to activity")
             finish()
             return
         }
-        mViewModel.onCreate(mapper.readValue<StoryTree>(extra, StoryTree::class.java), intent.getSerializableExtra(FEED_TYPE) as FeedType)
+        mViewModel.onCreate(extra, intent.getSerializableExtra(FEED_TYPE) as FeedType)
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
@@ -102,11 +105,11 @@ class StoryActivity : GolosActivity() {
                 }
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
                     mVoteBtn.setImageResource(R.drawable.ic_upvote_active_18dp_green)
-                    mVoteBtn.background = ContextCompat.getDrawable(this, R.drawable.ripple_green_solid)
+                    mVoteBtn.background = ResourcesCompat.getDrawable(resources, R.drawable.ripple_green_solid, null)
                     mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
                     mVoteBtn.setImageResource(R.drawable.ic_upvote_18_gray)
-                    mVoteBtn.background = ContextCompat.getDrawable(this, R.drawable.ripple_gray_circle)
+                    mVoteBtn.background = ResourcesCompat.getDrawable( resources, R.drawable.ripple_gray_circle, null)
                     mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
@@ -196,7 +199,7 @@ class StoryActivity : GolosActivity() {
         mVotesCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_voices_20dp_gray), null, null, null)
         mCommentsCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_comments_wth_dots_24dp_gray), null, null, null)
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
-       // mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
+        // mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
@@ -251,12 +254,11 @@ class StoryActivity : GolosActivity() {
         private val COMMENT_TAG = "COMMENT_TAG"
         private val FEED_TYPE = "FEED_TYPE"
         fun start(ctx: Context,
-                  story: StoryTree,
+                  storyId: Long,
                   feedType: FeedType) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
-            val treeString = mapper.writeValueAsString(story)
-            intent.putExtra(COMMENT_TAG, treeString)
+            intent.putExtra(COMMENT_TAG, storyId)
             intent.putExtra(FEED_TYPE, feedType)
             ctx.startActivity(intent)
         }

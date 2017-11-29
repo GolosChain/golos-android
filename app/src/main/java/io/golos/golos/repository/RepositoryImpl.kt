@@ -14,7 +14,6 @@ import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.GolosError
@@ -113,9 +112,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
-            mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, response.activeAuth?.second),
-                    Pair(PrivateKeyType.POSTING, response.postingAuth?.second)))
-            mPersister.saveCurrentUserName(userName)
             if (response.avatarPath != null)
                 mPersister.saveAvatarPathForUser(userName, response.avatarPath, System.currentTimeMillis())
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
@@ -145,6 +141,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     Pair(PrivateKeyType.POSTING, privatePostingWif)))
             mPersister.saveCurrentUserName(userName)
             Golos4J.getInstance().addAccount(AccountName(userName), keys, true)
+            val data = getSavedActiveUserData()
+            println(data)
             mMainThreadExecutor.execute {
                 mAuthLiveData.value = UserData(getUserAvatarFromDb(userName), userName, privateActiveWif, privatePostingWif)
             }
@@ -349,6 +347,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
+    override fun requestStoryUpdate(storyId: Long, feedType: FeedType) {
+        val liveData = convertFeedTypeToLiveData(feedType)
+        liveData.value?.items?.find { it.rootStory()?.id == storyId }?.let {
+            requestStoryUpdate(it)
+        }
+    }
+
     override fun getCurrentUserDataAsLiveData(): LiveData<UserData?> {
         return mAuthLiveData
     }
@@ -418,6 +423,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener(Unit, GolosErrorParser.parse(e))
                 }
             }
+        }
+    }
+
+    private fun convertFeedTypeToLiveData(feedtype: FeedType): LiveData<StoryTreeItems> {
+        return when (feedtype) {
+            FeedType.ACTUAL -> mActualStories
+            FeedType.POPULAR -> mPopularStories
+            FeedType.NEW -> mNewStories
+            FeedType.PROMO -> mPromoStories
+            FeedType.PERSONAL_FEED -> mFeedStories
         }
     }
 }

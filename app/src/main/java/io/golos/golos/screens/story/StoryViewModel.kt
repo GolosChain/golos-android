@@ -18,16 +18,18 @@ import io.golos.golos.screens.widgets.PhotoActivity
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
     private val mRepository = Repository.get
-    private lateinit var mStory: StoryTree
+    private var mStoryId: Long = 0
+    private lateinit var feedType: FeedType
 
-    fun onCreate(story: StoryTree, feedType: FeedType) {
-        mStory = story
+    fun onCreate(storyId: Long, feedType: FeedType) {
+        mStoryId = storyId
+        this.feedType = feedType
         mLiveData.removeSource(mRepository.getStories(feedType))
         mLiveData.addSource(mRepository.getStories(feedType)) {
             val storyItems = it
             it?.
                     items?.
-                    filter { it.rootStory()?.id == mStory.rootStory()?.id }?.
+                    filter { it.rootStory()?.id == mStoryId }?.
                     forEach {
                         mLiveData.value = StoryViewState(false,
                                 it.rootStory()?.title ?: "",
@@ -46,7 +48,7 @@ class StoryViewModel : ViewModel() {
                     mLiveData.value?.tags ?: ArrayList(),
                     mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
         }
-        mRepository.requestStoryUpdate(mStory)
+        mRepository.requestStoryUpdate(mStoryId, feedType)
     }
 
 

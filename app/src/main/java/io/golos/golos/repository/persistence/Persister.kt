@@ -16,7 +16,7 @@ import kotlin.collections.HashMap
 /**
  * Created by yuri on 06.11.17.
  */
- abstract class Persister {
+abstract class Persister {
 
 
     abstract fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long)
@@ -61,7 +61,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
                 val stringToEncrypt = it.value!!
                 val outBuffer = encryptor.encryptText(keyAlias, stringToEncrypt)
                 mPreference.edit().putString(keyAlias.name, Base64.encodeToString(outBuffer, Base64.DEFAULT)).apply()
-                mPreference.edit().putString("${keyAlias.name}_iv", Base64.encodeToString(encryptor.initializationBuffer, Base64.DEFAULT)).apply()
             }
         })
     }
@@ -77,12 +76,10 @@ private class OnDevicePersister(private val context: Context) : Persister() {
             if (!keyStore.containsAlias(keyAlias.name)) out.put(it, null)
             else {
                 val inBufferString = mPreference.getString(keyAlias.name, null)
-                val inInitVectorString = mPreference.getString("${keyAlias.name}_iv", null)
-                if (inBufferString == null || inInitVectorString == null) out.put(it, null)
+                if (inBufferString == null) out.put(it, null)
                 else {
                     val inBuffer = Base64.decode(inBufferString, Base64.DEFAULT)
-                    val inInitVector = Base64.decode(inInitVectorString, Base64.DEFAULT)
-                    out.put(it, decryptor.decryptData(keyAlias, inBuffer, inInitVector))
+                    out.put(it, decryptor.decryptData(keyAlias, inBuffer/*, inInitVector*/))
                 }
             }
         }

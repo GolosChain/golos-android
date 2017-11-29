@@ -1,12 +1,10 @@
 package io.golos.golos.screens.story.adapters
 
-import android.os.Build
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +21,8 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.getVectorDrawable
+import io.golos.golos.utils.toHtml
 import timber.log.Timber
 
 /**
@@ -83,6 +83,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
 
     init {
         mText.movementMethod = LinkMovementMethod.getInstance()
+        mTimeTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_access_time_gray_24dp), null, null, null)
+        mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_18_gray), null, null, null)
     }
 
     var state: CommentHolderState? = null
@@ -166,13 +168,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                         if (it is TextRow) "${it.text}\n"
                         else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
                     }.reduce { s1, s2 -> s1 + s2 }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        mText.text = Html.fromHtml(outText, Html.FROM_HTML_MODE_LEGACY, null, null)
-                    } else {
-                        mText.text = Html.fromHtml(outText, null, null)
-                    }
+                    mText.text = outText.toHtml()
                 }
-
 
             }
         }
