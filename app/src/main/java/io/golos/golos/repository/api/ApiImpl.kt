@@ -165,11 +165,15 @@ class ApiImpl : GolosApi() {
     }
 
     override fun getAccountData(of: String): AccountInfo {
-        if (of.isEmpty()) return AccountInfo(of, golosCount = 0.0, postsCount = 0)
+        if (of.isEmpty()) return AccountInfo(of, accountWorth = 0.0, postsCount = 0)
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
-        if (accs.size == 0) return AccountInfo(of, golosCount = 0.0, postsCount = 0)
+        if (accs.size == 0) return AccountInfo(of, accountWorth = 0.0, postsCount = 0)
         val acc = accs.get(index = 0)
-        return AccountInfo(of, acc.avatarPath, acc.balance.amount, acc.postCount)
+        val votePower = acc.vestingShares.amount * 0.000268379
+        val golosNum = acc.balance.amount
+        val gbgAmount = acc.sbdBalance.amount
+        val accWorth = ((votePower + golosNum) * 0.128670406) + (gbgAmount * 0.04106528)
+        return AccountInfo(of, acc.avatarPath, accWorth, acc.postCount)
     }
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {

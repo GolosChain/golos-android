@@ -6,7 +6,6 @@ import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.mapper
 import io.golos.golos.utils.UpdatingState
 
 /**
@@ -31,10 +30,7 @@ class StoryTree(rootStory: StoryWrapper?,
         return mRootStoryWrapper?.story
     }
 
-    fun isUserVotedOnThis(userName: String): Boolean {
-        return rootStory()?.activeVotes?.contains(userName) ?: false
-                && (rootStory()?.activeVotes?.get(userName) ?: 0) > 0
-    }
+
 
     fun comments(): List<GolosDiscussionItem> {
 
@@ -133,7 +129,10 @@ class StoryTree(rootStory: StoryWrapper?,
     }
 
     fun deepCopy(): StoryTree {
-        return mapper.readValue(mapper.writeValueAsString(this), StoryTree::class.java)
+        val rootWrapper = if (mRootStoryWrapper != null) {
+            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState)
+        } else null
+        return StoryTree(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
     }
 
     override fun equals(other: Any?): Boolean {

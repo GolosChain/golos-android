@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
-import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Regexps
 import org.json.JSONException
 import org.json.JSONObject
@@ -54,7 +51,8 @@ data class GolosDiscussionItem(val url: String,
                                val activeVotes: ArrayMap<String, Int> = ArrayMap(),
                                var type: ItemType = ItemType.PLAIN,
                                val firstRebloggedBy: String,
-                               var cleanedFromImages: String) : Cloneable {
+                               var cleanedFromImages: String,
+                               var parts: List<Row> = ArrayList()) : Cloneable {
 
 
     val payoutInDollars: Double
@@ -137,22 +135,22 @@ data class GolosDiscussionItem(val url: String,
         }
         body = discussion.body ?: ""
         val toRowsParser = StoryParserToRows()
-        val out = toRowsParser.parse(this)
-        if (out.size == 0) {
+        parts = toRowsParser.parse(this)
+        if (parts.size == 0) {
             Timber.e("fail on story id is ${id}\n body =  ${body}")
         } else {
-            if (out[0] is ImageRow) {
+            if (parts[0] is ImageRow) {
                 type = ItemType.IMAGE_FIRST
             } else {
                 if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
             }
         }
-        cleanedFromImages = if (out.size == 0)
+        cleanedFromImages = if (parts.size == 0)
             body.replace(Regexps.markdownImageRegexp, "")
                     .replace(Regexps.anyImageLink, "")
                     .replace(Regex("(\\*)"), "*")
         else {
-            out.joinToString("\n") {
+            parts.joinToString("\n") {
                 if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
                         .replace(Regex("(\\*)"), "*")
                 else ""
@@ -177,23 +175,11 @@ data class GolosDiscussionItem(val url: String,
     override fun toString(): String {
         return "Comment(id=$id, title='$title', permlink='$permlink')"
     }
+    fun isUserVotedOnThis(userName: String): Boolean {
+        return activeVotes.contains(userName)
+                && (activeVotes[userName] ?: 0) > 0
+    }
 
-    /*  fun cleanedFromImages(): String {
-          val toRowsParser = StoryParserToRows()
-          val out = toRowsParser.parse(this)
-          if (out.size == 0)
-              return body.replace(Regexps.markdownImageRegexp, "")
-                      .replace(Regexps.anyImageLink, "")
-                      .replace(Regex("(\\*)"), "*")
-          else {
-              return out.joinToString("\n") {
-                  if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
-                          .replace(Regexps.anyImageLink, "")
-                          .replace(Regex("(\\*)"), "*")
-                  else ""
-              }
-          }
-      }*/
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -194,7 +194,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 val data = mRepository.getAccountData(userData.userName)
                 mHandler.post({
                     userProfileState.value = UserProfileState(isLoggedIn = true, isLoading = false, userName = data.userName,
-                            avatarPath = data.avatarPath, userMoney = data.golosCount, userPostsCount = data.postsCount)
+                            avatarPath = data.avatarPath, userMoney = data.accountWorth, userPostsCount = data.postsCount)
                 })
             }
         } else {

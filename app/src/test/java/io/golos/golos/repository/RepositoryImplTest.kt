@@ -171,13 +171,31 @@ class RepositoryImplTest {
         var votingItem = popular.value?.items?.get(1)!!
 
         assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
-
+        repo.requestStoryUpdate(votingItem)
         repo.upVote(votingItem.rootStory()!!, 100)
         votingItem = popular.value?.items?.find { it.rootStory()?.id ==  votingItem.rootStory()?.id}!!
         assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
-
+        assert(!votingItem.comments().first().isUserUpvotedOnThis)
         repo.cancelVote(votingItem.rootStory()!!)
         votingItem = popular.value?.items?.find { it.rootStory()?.id ==  votingItem.rootStory()?.id}!!
         assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+    }
+    @Test
+    fun testVoting2() {
+        val popular = repo.getStories(FeedType.POPULAR)
+        repo.setActiveUserAccount(userName, privateActive, privatePosting)
+        assertNull(popular.value)
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null)
+        assertNotNull(popular.value)
+        var votingItem = popular.value?.items?.get(2)!!
+        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+
+        repo.upVote(votingItem.rootStory()!!, 100)
+
+        repo.requestStoryUpdate(votingItem)
+        votingItem = popular.value?.items?.find { it.rootStory()?.id ==  votingItem.rootStory()?.id}!!
+        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(!votingItem.comments().first().isUserUpvotedOnThis)
     }
 }

@@ -22,7 +22,6 @@ import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
@@ -82,7 +81,6 @@ class StoryActivity : GolosActivity() {
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
-                Timber.e("on new story")
                 val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE

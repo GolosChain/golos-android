@@ -5,5 +5,5 @@ package io.golos.golos.repository.persistence.model
  */
 data class AccountInfo(val userName: String,
                        val avatarPath: String? = null,
-                       val golosCount: Double,
+                       val accountWorth: Double,
                        val postsCount: Long)

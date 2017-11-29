@@ -141,5 +141,9 @@ class ApiImplTest {
         assertEquals(storyTree.comments().first().childrenCount + 1, updatedStoryTreeWithSecondLevel.comments().first().childrenCount)
     }
 
+    @Test
+    fun getAccountDataTest(){
+        service.getAccountData("yuri-vlad-second")
+    }
 
 }

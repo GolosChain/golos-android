@@ -15,6 +15,7 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
+import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.Translit
 import io.golos.golos.utils.UpdatingState
@@ -203,6 +204,14 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                                     .error(nextImage ?: error)
                                     .apply(RequestOptions.placeholderOf(errorDrawable))
                                     .into(mMainImageBig)
+                        } else {
+                            val image = wrapper.parts.find { it is ImageRow }
+                            image?.let {
+                                mGlide.load((it as ImageRow).src)
+                                        .error(nextImage ?: error)
+                                        .apply(RequestOptions.placeholderOf(errorDrawable))
+                                        .into(mMainImageBig)
+                            }
                         }
                     }
                 }

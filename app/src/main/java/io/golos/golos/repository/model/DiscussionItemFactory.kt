@@ -132,22 +132,22 @@ object DiscussionItemFactory {
 
     private fun setTypeOfItem(golosDiscussionItem: GolosDiscussionItem) {
         val toRowsParser = StoryParserToRows()
-        val out = toRowsParser.parse(golosDiscussionItem)
-        if (out.size == 0) {
+        golosDiscussionItem.parts = toRowsParser.parse(golosDiscussionItem)
+        if (golosDiscussionItem.parts.size == 0) {
             Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
         } else {
-            if (out[0] is ImageRow) {
+            if (golosDiscussionItem.parts[0] is ImageRow) {
                 golosDiscussionItem.type = ItemType.IMAGE_FIRST
             } else {
                 if (golosDiscussionItem.images.size != 0) golosDiscussionItem.type = ItemType.PLAIN_WITH_IMAGE
             }
         }
-        golosDiscussionItem.cleanedFromImages = if (out.size == 0)
+        golosDiscussionItem.cleanedFromImages = if (golosDiscussionItem.parts.isEmpty())
             golosDiscussionItem.body.replace(Regexps.markdownImageRegexp, "")
                     .replace(Regexps.anyImageLink, "")
                     .replace(Regex("(\\*)"), "*")
         else {
-            out.joinToString("\n") {
+            golosDiscussionItem.parts.joinToString("\n") {
                 if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
                         .replace(Regex("(\\*)"), "*")
                 else ""

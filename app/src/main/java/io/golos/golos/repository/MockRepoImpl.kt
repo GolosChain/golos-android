@@ -8,7 +8,6 @@ import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.GolosError
@@ -102,7 +101,7 @@ internal class MockRepoImpl(
                 var name = getSavedActiveUserData()?.userName
                 out.forEach {
                     if (name != null) {
-                        it.rootStory()?.isUserUpvotedOnThis = it.isUserVotedOnThis(name)
+                        it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
                     }
                 }
                 mMainThreadExecutor.execute {
@@ -269,6 +268,6 @@ internal class MockRepoImpl(
     }
 
     override fun requestStoryUpdate(storyId: Long, feedType: FeedType) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }

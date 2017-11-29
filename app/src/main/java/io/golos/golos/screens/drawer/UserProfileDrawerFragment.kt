@@ -51,7 +51,7 @@ class UserProfileDrawerFragment : Fragment() {
                         .into(mUserAvatar)
             }
             mUserName.text = "@${it?.userName}"
-            mPostsAndMonetTv.text = "${it?.userPostsCount} - \$ ${String.format("%.3f", it?.userMoney ?: 0.0)}"
+            mPostsAndMonetTv.text = "${it?.userPostsCount} - \$ ${String.format("%.2f", it?.userMoney ?: 0.0)}"
         })
     }
 

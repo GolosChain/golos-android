@@ -23,6 +23,7 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.toHtml
+import timber.log.Timber
 
 /**
  * Created by yuri on 08.11.17.
@@ -128,6 +129,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 }
                 mUpvoteBtn.text = "$ ${String.format("%.2f", comment.payoutInDollars)}"
+
                 if (comment.isUserUpvotedOnThis) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_green, 0, 0, 0)

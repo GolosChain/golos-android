@@ -50,7 +50,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         var name = getSavedActiveUserData()?.userName
         out.forEach {
             if (name != null) {
-                it.rootStory()?.isUserUpvotedOnThis = it.isUserVotedOnThis(name)
+                it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
             }
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
         }
@@ -84,9 +84,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         var story = mGolosApi.getStory(blog, author, permlink)
         var name = mPersister.getCurrentUserName()
         if (name != null) {
-            story.rootStory()?.isUserUpvotedOnThis = story.isUserVotedOnThis(name)
+            story.rootStory()?.isUserUpvotedOnThis = story.rootStory()?.isUserVotedOnThis(name) ?: false
             story.getFlataned().forEach({
-                it.story.isUserUpvotedOnThis = story.isUserVotedOnThis(name)
+                it.story.isUserUpvotedOnThis = it.story.isUserVotedOnThis(name)
             })
         }
         return story
@@ -234,7 +234,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
 
     override fun upVote(discussionItem: GolosDiscussionItem, percents: Short) {
-        Timber.e("upVote " + discussionItem.title)
         mWorkerExecutor.execute {
             val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories, mFeedStories)
             val replacer = StorySearcherAndReplacer()
