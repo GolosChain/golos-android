@@ -141,8 +141,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     Pair(PrivateKeyType.POSTING, privatePostingWif)))
             mPersister.saveCurrentUserName(userName)
             Golos4J.getInstance().addAccount(AccountName(userName), keys, true)
-            val data = getSavedActiveUserData()
-            println(data)
             mMainThreadExecutor.execute {
                 mAuthLiveData.value = UserData(getUserAvatarFromDb(userName), userName, privateActiveWif, privatePostingWif)
             }

@@ -119,12 +119,10 @@ class RepositoryImplTest {
         var notCommentedItem = newItems.value!!.items.first()
         repo.requestStoryUpdate(notCommentedItem)
         notCommentedItem = newItems.value!!.items.first()
-
         val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
                 pointerPosition = null)
         val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
         repo.createComment(notCommentedItem, notCommentedItem.rootStory()!!, listOf(image, text), { _, _ -> })
-
         assertEquals(notCommentedItem.comments().size + 1, newItems.value!!.items.first().comments().size)
     }
 
@@ -161,5 +159,25 @@ class RepositoryImplTest {
         assertNull(resp.activeAuth?.second)
         assertEquals(userName, resp.userName)
         assertNull(resp.avatarPath)
+    }
+
+    @Test
+    fun testVoting() {
+        val popular = repo.getStories(FeedType.POPULAR)
+        repo.setActiveUserAccount(userName, privateActive, privatePosting)
+        assertNull(popular.value)
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null)
+        assertNotNull(popular.value)
+        var votingItem = popular.value?.items?.get(1)!!
+
+        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+
+        repo.upVote(votingItem.rootStory()!!, 100)
+        votingItem = popular.value?.items?.find { it.rootStory()?.id ==  votingItem.rootStory()?.id}!!
+        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
+
+        repo.cancelVote(votingItem.rootStory()!!)
+        votingItem = popular.value?.items?.find { it.rootStory()?.id ==  votingItem.rootStory()?.id}!!
+        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
     }
 }

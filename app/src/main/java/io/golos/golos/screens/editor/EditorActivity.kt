@@ -17,17 +17,20 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.view.View
+import android.widget.Button
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.R
-import io.golos.golos.screens.GolosActivity
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.screens.GolosActivity
+import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -38,9 +41,11 @@ import java.io.FileOutputStream
  * **/
 data class EditorMode(val title: String = "",
                       val subtitle: String = "",
+                      @JsonProperty("postEditor")
                       val isPostEditor: Boolean,
-                      val rootStory: StoryTree? = null,
-                      val commentToAnswerOn: GolosDiscussionItem? = null)
+                      val rootStoryId: Long? = null,
+                      val commentToAnswerOnId: Long? = null,
+                      val feedType: FeedType? = null)
 
 class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener {
 
@@ -51,6 +56,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     private lateinit var mFooter: EditorFooter
     private lateinit var mRequestImageButton: View
     private lateinit var mViewModel: EditorViewModel
+    private lateinit var mSubmitBtn: Button
     private var mMode: EditorMode? = null
     private val PICK_IMAGE_ID = nextInt()
     private val READ_EXTERNAL_PERMISSION = nextInt()
@@ -65,15 +71,18 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mToolbar = findViewById(R.id.toolbar)
         mTitle = findViewById(R.id.title)
         mFooter = findViewById(R.id.footer)
+        mSubmitBtn = findViewById(R.id.submit_btn)
         mAdapter = EditorAdapter(interactor = this)
         mRecycler.adapter = mAdapter
         mRecycler.isNestedScrollingEnabled = false
         (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mViewModel = ViewModelProviders.of(this)[EditorViewModel::class.java]
         val mapper = ObjectMapper()
+        mSubmitBtn.setCompoundDrawablesWithIntrinsicBounds(null, null, getVectorDrawable(R.drawable.ic_send), null)
         mapper.registerModule(KotlinModule())
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        mMode = mapper.readValue(intent.getStringExtra(MODE_TAG), EditorMode::class.java)
+        val modeString = intent.getStringExtra(MODE_TAG)
+        mMode = jacksonObjectMapper().readValue(modeString, EditorMode::class.java)
         mViewModel.mode = mMode
         mViewModel.editorLiveData.observe(this, android.arch.lifecycle.Observer {
             mAdapter.parts = ArrayList(it?.parts ?: ArrayList())
@@ -89,7 +98,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                     mProgressDialog = null
                 }
             }
-            Timber.e(it.toString())
             it?.completeMessage?.let {
                 mRecycler.showSnackbar(it)
                 Handler().postDelayed({
@@ -133,7 +141,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             }
             fr.show(supportFragmentManager, null)
         })
-        findViewById<View>(R.id.submit_btn).setOnClickListener({
+        mSubmitBtn.setOnClickListener({
             mViewModel.onTagsChanged(mFooter.state.tags)
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
@@ -184,37 +192,39 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     companion object {
         val MODE_TAG = "MODE_TAG"
         fun startRootCommentEditor(ctx: Context,
-                                   rootStory: StoryTree) {
-            val mapper = ObjectMapper()
-            mapper.registerModule(KotlinModule())
+                                   rootStory: StoryTree,
+                                   feedType: FeedType) {
+            val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
                     rootStory.rootStory()!!.author,
                     false,
-                    rootStory,
-                    rootStory.rootStory()!!)))
+                    rootStory.rootStory()!!.id,
+                    rootStory.rootStory()!!.id,
+                    feedType)))
             ctx.startActivity(intent)
         }
 
         fun startAnswerOnCommentEditor(ctx: Context,
                                        rootStory: StoryTree,
-                                       commentToAnswer: GolosDiscussionItem) {
-            val mapper = ObjectMapper()
-            mapper.registerModule(KotlinModule())
+                                       commentToAnswer: GolosDiscussionItem,
+                                       feedType: FeedType) {
+            val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
                     rootStory.rootStory()!!.author,
                     false,
-                    rootStory,
-                    commentToAnswer)))
+                    rootStory.rootStory()!!.id,
+                    commentToAnswer.id,
+                    feedType)))
             ctx.startActivity(intent)
         }
 
         fun startPostEditor(ctx: Context, title: String) {
-            val mapper = ObjectMapper()
-            mapper.registerModule(KotlinModule())
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(title, isPostEditor = true)))
+            val mode = EditorMode(title, isPostEditor = true)
+            val string = jacksonObjectMapper().writeValueAsString(mode)
+            intent.putExtra(MODE_TAG, string)
             ctx.startActivity(intent)
         }
     }

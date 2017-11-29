@@ -9,12 +9,12 @@ import android.os.Handler
 import android.os.Looper
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -51,7 +51,13 @@ class FeedViewModel : StoriesViewModel() {
         var userData: UserData? = mRepository.getSavedActiveUserData() ?: return
         super.onScrollToTheEnd()
     }
+
+    override fun onNewItems(items: StoryTreeItems?): StoriesViewState {
+        return StoriesViewState(false, items?.items ?: ArrayList(), items?.error,
+                if (items?.items?.size ?: 0 == 0) R.string.nothing_here else null)
+    }
 }
+
 
 class NewViewModel : StoriesViewModel() {
     override val type: FeedType
@@ -79,7 +85,6 @@ abstract class StoriesViewModel : ViewModel() {
     protected val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
-    protected var mLatch = CountDownLatch(1)
 
     companion object {
         val mHandler = Handler(Looper.getMainLooper())
@@ -92,8 +97,20 @@ abstract class StoriesViewModel : ViewModel() {
 
     init {
         mStoriesLiveData.addSource(mRepository.getStories(type)) {
-            mStoriesLiveData.value = StoriesViewState(false, it?.items ?: ArrayList(), it?.error)
+            mStoriesLiveData.value = onNewItems(it)
         }
+    }
+
+    protected open fun onNewItems(items: StoryTreeItems?): StoriesViewState {
+        var isLoading = false
+        if (isUpdating.get() && items?.items?.size ?: 0 > 0) {
+            isLoading = true
+            if (items?.items?.size ?: 0 > mStoriesLiveData.value?.items?.size ?: 0) {
+                isLoading = false
+                isUpdating.set(false)
+            }
+        }
+        return StoriesViewState(isLoading, items?.items ?: ArrayList(), items?.error)
     }
 
     open fun onSwipeToRefresh() {
@@ -119,6 +136,9 @@ abstract class StoriesViewModel : ViewModel() {
 
     open fun onScrollToTheEnd() {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
+        if (isUpdating.get())return
+        isUpdating.set(true)
+        mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
         mRepository.requestStoriesListUpdate(20,
                 type,
                 mStoriesLiveData.value?.items?.last()?.rootStory()?.author,
@@ -127,12 +147,12 @@ abstract class StoriesViewModel : ViewModel() {
 
     open fun onCardClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it.rootStory()?.id?:0L, type)
+        StoryActivity.start(context, it.rootStory()?.id ?: 0L, type)
     }
 
     open fun onCommentsClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it.rootStory()?.id?:0L, type)
+        StoryActivity.start(context, it.rootStory()?.id ?: 0L, type)
     }
 
     open fun onShareClick(it: StoryTree, context: Context?) {

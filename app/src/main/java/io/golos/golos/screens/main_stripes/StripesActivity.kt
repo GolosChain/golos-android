@@ -18,6 +18,7 @@ import io.golos.golos.screens.drawer.UserProfileDrawerFragment
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
 import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 import java.util.*
 
 
@@ -42,6 +43,7 @@ class StripesActivity : GolosActivity() {
         val authModel = ViewModelProviders.of(this).get(AuthViewModel::class.java)
         authModel.userAuthState.observe(this, android.arch.lifecycle.Observer {
             if (it?.isLoggedIn == true) {
+                Timber.e("isLogged!")
                 if (mFab.visibility != View.VISIBLE) mFab.show()
                 if (supportFragmentManager.findFragmentByTag(mUserProfileFTag) == null) {
                     supportFragmentManager.beginTransaction()

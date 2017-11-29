@@ -4,8 +4,11 @@ import android.app.Activity
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import android.widget.ImageView
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
@@ -83,5 +86,26 @@ class StoryViewModel : ViewModel() {
 
     fun canUserWriteComments(): Boolean {
         return mRepository.getSavedActiveUserData() != null && mRepository.getSavedActiveUserData()?.userName != null
+    }
+
+    fun onWriteRootComment(ctx: Context) {
+        if (canUserWriteComments()) {
+            mLiveData.value?.let {
+                EditorActivity.startRootCommentEditor(ctx,
+                        it.storyTree,
+                        feedType)
+            }
+        }
+    }
+
+    fun onAnswerToComment(ctx: Context, item: GolosDiscussionItem) {
+        if (canUserWriteComments()) {
+            mLiveData.value?.let {
+                EditorActivity.startAnswerOnCommentEditor(ctx,
+                        it.storyTree,
+                        item,
+                        feedType)
+            }
+        }
     }
 }

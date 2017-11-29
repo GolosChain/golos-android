@@ -23,7 +23,6 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.toHtml
-import timber.log.Timber
 
 /**
  * Created by yuri on 08.11.17.
@@ -37,7 +36,6 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
 
     var items = ArrayList<StoryWrapper>()
         set(value) {
-            Timber.e("on new values")
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                     return field[oldItemPosition].story.id == value[newItemPosition].story.id

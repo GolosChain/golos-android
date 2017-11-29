@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
-import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
@@ -109,7 +108,7 @@ class StoryActivity : GolosActivity() {
                     mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
                     mVoteBtn.setImageResource(R.drawable.ic_upvote_18_gray)
-                    mVoteBtn.background = ResourcesCompat.getDrawable( resources, R.drawable.ripple_gray_circle, null)
+                    mVoteBtn.background = ResourcesCompat.getDrawable(resources, R.drawable.ripple_gray_circle, null)
                     mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
@@ -199,7 +198,6 @@ class StoryActivity : GolosActivity() {
         mVotesCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_voices_20dp_gray), null, null, null)
         mCommentsCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_comments_wth_dots_24dp_gray), null, null, null)
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
-        // mVoteBtn.background = ContextCompat.getDrawable(this,R.drawable.ripple_gray_circle)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
@@ -234,19 +232,10 @@ class StoryActivity : GolosActivity() {
             }
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
-            val story = mViewModel.liveData.value?.storyTree
-            if (mViewModel.canUserWriteComments() && story?.rootStory() != null) {
-                EditorActivity.startAnswerOnCommentEditor(this,
-                        story,
-                        it.story)
-            }
+            mViewModel.onAnswerToComment(this, it.story)
         }
         mFab.setOnClickListener({
-            val story = mViewModel.liveData.value?.storyTree
-            if (story?.rootStory() != null) {
-                EditorActivity.startRootCommentEditor(this,
-                        story)
-            }
+            mViewModel.onWriteRootComment(this)
         })
     }
 

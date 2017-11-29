@@ -35,7 +35,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var isVisibleBacking = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.fr_stripe, container, false)
+        val view = inflater.inflate(R.layout.fr_stripe, container, false)
         bindViews(view)
         setUp()
         return view
@@ -94,6 +94,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setUp() {
         mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
+        mViewModel?.storiesLiveData?.removeObservers(this)
         mViewModel?.storiesLiveData?.observe(this, Observer {
             if (it?.isLoading == true) {
                 mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })

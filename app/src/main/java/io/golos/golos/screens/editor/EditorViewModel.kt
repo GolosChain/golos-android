@@ -1,9 +1,13 @@
 package io.golos.golos.screens.editor
 
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoryTreeItems
+import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 
@@ -15,7 +19,7 @@ data class EditorState(val error: GolosError? = null,
                        var completeMessage: Int? = null,
                        val parts: List<EditorPart>)
 
-class EditorViewModel : ViewModel() {
+class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
     val editorLiveData = MutableLiveData<EditorState>()
     val titleMaxLength = 255
     val postMaxLength = 100 * 1024
@@ -24,12 +28,40 @@ class EditorViewModel : ViewModel() {
     private var mTitleText: String = ""
     private var mTags = ArrayList<String>()
     private val mRepository = Repository.get
+    private var mRootStory: StoryTree? = null
+    private var mItemToAnswerOn: GolosDiscussionItem? = null
     var mode: EditorMode? = null
+        set(value) {
+            field = value
+            val feedType = field?.feedType
+            val rootStoryId = field?.rootStoryId
+            val itemToAnsweronId = field?.commentToAnswerOnId
+            if (feedType != null && rootStoryId != null && itemToAnsweronId != null) {
+                Repository
+                        .get
+                        .getStories(feedType)
+                        .removeObserver(this)
+                Repository
+                        .get
+                        .getStories(feedType)
+                        .observeForever(this)
+            }
+
+        }
 
     init {
         editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState())
     }
 
+    override fun onChanged(t: StoryTreeItems?) {
+        mRootStory = t?.items?.findLast { it.rootStory()?.id == mode?.rootStoryId }
+        mRootStory?.let {
+            if (it.rootStory()?.id == mode?.commentToAnswerOnId) mItemToAnswerOn = it.rootStory()!!
+            else {
+                mItemToAnswerOn = it.getFlataned().findLast { it.story.id == mode?.commentToAnswerOnId }?.story
+            }
+        }
+    }
 
     fun onUserInput(action: EditorInputAction) {
         val parts = editorLiveData.value?.parts ?: ArrayList()
@@ -49,7 +81,9 @@ class EditorViewModel : ViewModel() {
     }
 
     fun onSubmit() {
-        if (mode == null) throw IllegalStateException("mode must be not null")
+        if (mode == null) {
+            return
+        }
         if (mode!!.isPostEditor) {
             if (mTitleText.isEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
@@ -76,6 +110,7 @@ class EditorViewModel : ViewModel() {
                         completeMessage = if (error == null) R.string.send_success else null)
             })
         } else {
+            if (mRootStory == null || mItemToAnswerOn == null) return
             if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
                     (editorLiveData.value?.parts?.size == 1
                             && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
@@ -84,8 +119,8 @@ class EditorViewModel : ViewModel() {
                 return
             }
             editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
-            mRepository.createComment(mode!!.rootStory!!,
-                    mode!!.commentToAnswerOn!!,
+            mRepository.createComment(mRootStory!!,
+                    mItemToAnswerOn!!,
                     editorLiveData.value?.parts ?: ArrayList(), { result, error ->
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,

@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:visibility="gone"
-        android:text="Пока ничего нет"
-        android:textSize="@dimen/font_big" />
+        android:padding="@dimen/margin_material"
+        android:textSize="@dimen/font_big"
+        android:visibility="gone" />
 </FrameLayout>

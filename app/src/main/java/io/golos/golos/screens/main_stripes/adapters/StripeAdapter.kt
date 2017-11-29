@@ -109,10 +109,10 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_accent_20dp), null, null, null)
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_gray_24dp), null, null, null)
         mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_comment_black_24dp), null, null, null)
-        noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_24dp)
-        userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_gray_24dp)
-        userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_green_24dp)
-        errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
+        if (noAvatarDrawable == null) noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_24dp)
+        if (userNotvotedDrarawble == null) userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_gray_24dp)
+        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_upvote_green_24dp)
+        if (errorDrawable == null) errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
     }
 
     var state: StripeWrapper? = null
@@ -193,6 +193,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         if (wrapper.images.size > 1) {
                             nextImage = mGlide.load(wrapper.images[1]).error(error)
                         }
+                        mMainImageBig.setImageDrawable(errorDrawable)
                         mMainImageBig.scaleType = ImageView.ScaleType.FIT_CENTER
                         mMainImageBig.visibility = View.VISIBLE
                         mSecondaryImage.visibility = View.GONE
@@ -215,15 +216,14 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
         }
 
     companion object {
-        init {
-
-        }
-
         fun inflate(parent: ViewGroup): View = LayoutInflater.from(parent.context).inflate(R.layout.vh_stripe_full_size, parent, false)
         @JvmStatic
-        lateinit var noAvatarDrawable: Drawable
-        lateinit var userNotvotedDrarawble: Drawable
-        lateinit var userVotedvotedDrarawble: Drawable
-        lateinit var errorDrawable: Drawable
+        var noAvatarDrawable: Drawable? = null
+        @JvmStatic
+        var userNotvotedDrarawble: Drawable? = null
+        @JvmStatic
+        var userVotedvotedDrarawble: Drawable? = null
+        @JvmStatic
+        var errorDrawable: Drawable? = null
     }
 }

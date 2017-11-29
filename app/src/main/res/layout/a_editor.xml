@@ -42,7 +42,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_marginEnd="@dimen/margin_material_half"
-                        android:drawableEnd="@drawable/ic_send"
                         android:drawablePadding="@dimen/margin_material_half"
                         android:gravity="end|center_vertical"
                         android:text="@string/publish"

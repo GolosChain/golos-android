@@ -62,7 +62,6 @@ class EditorFooter : FrameLayout, TextWatcher {
 
     var state: EditorFooterState = EditorFooterState()
         set(value) {
-            val old = EditorFooterState(value.showTagsEditor, value.tagsValidator, value.tags)
             field = value
             value.tagsValidator?.let { mValidator = field.tagsValidator as StringValidator }
             if (value.showTagsEditor) {
