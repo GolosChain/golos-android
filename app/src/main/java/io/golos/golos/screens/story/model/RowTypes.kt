@@ -26,34 +26,38 @@ class StoryParserToRows {
         str = str.replace("<center>", "").replace("</center>", "")
         if (story.format == Format.MARKDOWN || str.contains(markdownChecker)) {
             str = str.replace(Regexps.imageWithWhitespace) {
-                "![](${it.value.trim()})"
+                " ![](${it.value.trim()})"
             }
             str = str.replace(Regexps.linkWithWhiteSpace) {
-                "[](${it.value.trim()})"
+                " [](${it.value.trim()})"
             }
             var node = Parser.builder().build().parse(str)
             str = HtmlRenderer.builder().build().render(node)
         }
         try {
-            str = Jsoup.clean(str, Whitelist.basicWithImages())
-            str = str.replace("\\s@[a-zA-Z]{5,16}[0-9]{0,6}".toRegex()) {
-                "<a hre =\"https://golos.blog/${it.value.trim()}\"> ${it.value.trim()}</a>"
+            val whiteList = Whitelist.basicWithImages()
+            whiteList.addTags("h1", "h2","h3", "h4")
+            str = Jsoup.clean(str, whiteList)
+            str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))".toRegex()) {
+                if (!it.value.contains("a href"))" <a href =\"https://golos.blog/${it.value.trim()}\">${it.value.trim()}</a>"
+                else it.value
             }
             str = str.replace(Regexps.imageLinkWithoutSrctag) {
-                "<img src=\"${it.value.trim()}\">"
+                " <img src=\"${it.value.trim()}\">"
             }
             str = str.replace(Regexps.imageWithCenterTage) {
-                "<img src=\"${it.value
+                " <img src=\"${it.value
                         .trim()
                         .replace("<center>", "")
                         .replace("</center>", "")}\">"
             }
             str = str.replace(Regexps.linkWithWhiteSpace) {
-                "<a href=\"${it.value.trim()}\"> ${it.value.trim()}</a>"
+                if (it.value.contains("http")) "<a href=\"${it.value.trim()}\">${it.value.trim()}</a>"
+                else it.value
             }
             str = str.replace(Regexps.linkWithoutATag) {
                 val value = it.value.trim().replace(Regexps.trashTags, "")
-                "<a href=\"$value\">$value</a>"
+                " <a href=\"$value\">$value</a>"
             }
             str = str.replace("&nbsp;", "")
             var strings = str.split(Regex("<img.+?>"))

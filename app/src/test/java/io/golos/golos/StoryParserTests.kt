@@ -53,4 +53,42 @@ class StoryParserTests {
         Assert.assertTrue(rows[1] is ImageRow)
         Assert.assertTrue(rows[5] is ImageRow)
     }
+    @Test
+    fun test4() {
+        val tree = Utils.readStoryFromResourse("story7.json")
+        val rowParser = StoryParserToRows()
+        var rows = rowParser.parse(tree.rootStory()!!)
+        Assert.assertTrue(rows.size > 1)
+        val boosterComment = tree.getFlataned().find { it.story.author == "booster" }!!
+        rows = rowParser.parse(boosterComment.story)
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.blog/@Booster\">@Booster</a>"))
+
+        val upvoteComment = tree.getFlataned().find { it.story.author == "upvote50-50" }!!
+        rows = rowParser.parse(upvoteComment.story)
+        //todo support clickable images
+    }
+    @Test
+    fun test5() {
+        val tree = Utils.readStoryFromResourse("story8.json")
+        val rowParser = StoryParserToRows()
+        var rows = rowParser.parse(tree.rootStory()!!)
+        Assert.assertTrue(rows.size > 1)
+        Assert.assertTrue(rows[0] is ImageRow)
+        Assert.assertTrue(rows[1] is TextRow)
+
+        val text = (rows[1] as TextRow).text
+        Assert.assertTrue(text.contains("<a href =\"https://golos.blog/@kotbegemot\">@kotbegemot</a>"))
+
+        val marinaComment = tree.getFlataned().find { it.story.author == "marina" }!!
+        rows = rowParser.parse(marinaComment.story)
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.blog/@arcange\">@arcange</a>"))
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017\">https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017</a>"))
+
+        val kitComments  = tree.getFlataned().find { it.story.author == "dobryj.kit" }!!
+        rows = rowParser.parse(kitComments.story)
+        Assert.assertTrue((rows[0] as TextRow).text.contains(" <a href=\"https://golos.io/@litrbooh\" rel=\"nofollow\">litrbooh</a>"))
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.io/@vika-teplo\" rel=\"nofollow\">vika-teplo</a>"))
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.blog/ru--delegaty/@dobryj.kit/dobryi-kit-delegat\" rel=\"nofollow\">"))
+        println(rows)
+    }
 }

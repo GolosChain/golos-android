@@ -110,10 +110,12 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (it?.items != null) {
                 mRecycler?.post { mAdapter.setStripesCustom(it.items) }
             }
-            it?.error?.let {
-                if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
-                else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
-                else {
+            if (isVisible){
+                it?.error?.let {
+                    if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
+                    else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
+                    else {
+                    }
                 }
             }
             it?.popupMessage?.let {
