@@ -97,8 +97,10 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mViewModel?.storiesLiveData?.removeObservers(this)
         mViewModel?.storiesLiveData?.observe(this, Observer {
             if (it?.isLoading == true) {
-                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
-                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
+                if (mSwipeRefresh?.isRefreshing == false) {
+                    mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
+                    mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
+                }
             } else {
                 if (mSwipeRefresh?.isRefreshing == true) {
                     mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })

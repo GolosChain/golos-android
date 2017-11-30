@@ -8,6 +8,7 @@ import android.os.Looper
 import eu.bittrade.libs.steemj.exceptions.SteemCommunicationException
 import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
 import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
@@ -118,7 +119,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             } else {
                 userProfileState.value = UserProfileState(isLoggedIn = true,
                         userName = resp.userName ?: "",
-                        avatarPath = resp.avatarPath)
+                        avatarPath = resp.avatarPath,
+                        userPostsCount = resp.postsCount,
+                        userMoney = resp.accountWorth)
                 userAuthState.value = AuthState(isLoggedIn = true)
             }
         })

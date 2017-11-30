@@ -48,68 +48,101 @@ class ApiImplTest {
 
 
         var resp = service.auth(accname, masterPassword, null, null)
-        var neededResp = UserAuthResponse(true, "yuri-vlad-second",
-                Pair(publicPosting, privatePosting),
-                Pair(publicActive, privateActive),
-                null,
-                0,
-                0.0)
-        assertEquals(neededResp, resp)
-
-        neededResp = UserAuthResponse(true, "yuri-vlad-second",
-                Pair(publicPosting, null),
-                Pair(publicActive, privateActive),
-                null,
-                0,
-                0.0)
+        assertNull(resp.avatarPath)
+        assertTrue(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals(publicPosting, resp.postingAuth!!.first)
+        assertEquals(privatePosting, resp.postingAuth!!.second)
+        assertEquals(publicActive, resp.activeAuth!!.first)
+        assertEquals(privateActive, resp.activeAuth!!.second)
+        assertTrue(resp.postsCount > 23)
+        assertTrue(resp.accountWorth > 0.1)
 
         resp = service.auth(accname, null, privateActive, null)
-        assertEquals(neededResp, resp)
+        assertNull(resp.avatarPath)
+        assertTrue(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals(publicPosting, resp.postingAuth!!.first)
+        assertNull(resp.postingAuth!!.second)
+        assertEquals(publicActive, resp.activeAuth!!.first)
+        assertEquals(privateActive, resp.activeAuth!!.second)
+        assertTrue(resp.postsCount > 23)
+        assertTrue(resp.accountWorth > 0.1)
 
-        neededResp = UserAuthResponse(true, "yuri-vlad-second",
-                Pair(publicPosting, privatePosting),
-                Pair(publicActive, null),
-                null,
-                0,
-                0.0)
+
         resp = service.auth(accname, null, null, privatePosting)
-        assertEquals(neededResp, resp)
 
-        neededResp = UserAuthResponse(false, "yuri-vlad-second",
-                Pair(publicPosting, null),
-                Pair(publicActive, "dasgsdg"),
-                null,
-                0,
-                0.0)
+        assertNull(resp.avatarPath)
+        assertTrue(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals(publicPosting, resp.postingAuth!!.first)
+        assertEquals(privatePosting, resp.postingAuth!!.second)
+        assertEquals(publicActive, resp.activeAuth!!.first)
+        assertNull(resp.activeAuth!!.second)
+        assertTrue(resp.postsCount > 23)
+        assertTrue(resp.accountWorth > 0.1)
+
         resp = service.auth(accname, null, "dasgsdg", null)
-        assertEquals(neededResp, resp)
 
-        neededResp = UserAuthResponse(false, "yuri-vlad-second",
-                Pair(publicPosting, "sdgsdg"),
-                Pair(publicActive, null),
-                null,
-                0,
-                0.0)
+        assertFalse(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
+
+
         resp = service.auth(accname, null, null, "sdgsdg")
-        assertEquals(neededResp, resp)
+        assertFalse(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
 
-        neededResp = UserAuthResponse(false, "yuri-vlad-second",
-                Pair(publicPosting, "sdgsdg"),
-                Pair(publicActive, "sdgsdg"),
-                null,
-                0,
-                0.0)
         resp = service.auth(accname, null, "sdgsdg", "sdgsdg")
-        assertEquals(neededResp, resp)
 
-        resp = service.auth(accname, null, privateActive, privatePosting)
-        neededResp = UserAuthResponse(true, "yuri-vlad-second",
-                Pair(publicPosting, privatePosting),
-                Pair(publicActive, privateActive),
-                null,
-                0,
-                0.0)
-        assertEquals(neededResp, resp)
+        assertFalse(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
+
+        resp = service.auth(accname + "afsafs", null, privateActive, privatePosting)
+
+        assertFalse(resp.isKeyValid)
+        assertEquals(accname + "afsafs", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
+
+        resp = service.auth(accname, null, null, null)
+        assertFalse(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
+
+        resp = service.auth(accname, "asasgasgasg", null, null)
+        assertFalse(resp.isKeyValid)
+        assertEquals("yuri-vlad-second", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
+
+
+        resp = service.auth("fair", null, privateActive, privatePosting)
+
+        assertFalse(resp.isKeyValid)
+        assertEquals("fair", resp.userName)
+        assertNull(resp.postingAuth)
+        assertNull(resp.activeAuth)
+        assertTrue(resp.postsCount == 0L)
+        assertTrue(resp.accountWorth == 0.0)
     }
 
     @Test
@@ -142,7 +175,7 @@ class ApiImplTest {
     }
 
     @Test
-    fun getAccountDataTest(){
+    fun getAccountDataTest() {
         service.getAccountData("yuri-vlad-second")
     }
 

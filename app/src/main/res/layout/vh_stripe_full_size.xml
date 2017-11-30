@@ -51,6 +51,7 @@
         android:text="@string/for_"
         android:textColor="@color/gray_1"
         android:textStyle="bold"
+
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
@@ -83,17 +84,19 @@
         app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
         app:textAllCaps="true" />
 
-    <ru.noties.markwon.view.MarkwonViewCompat
+    <android.support.v7.widget.AppCompatTextView
         android:id="@+id/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="4dp"
+        android:lines="4"
         android:background="?selectableItemBackground"
         android:clickable="true"
-        android:ellipsize="marquee"
-        android:maxLength="80"
+        android:ellipsize="end"
+
+
         android:textColor="#414548"
         android:textSize="14sp"
         android:visibility="visible"

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
@@ -50,6 +51,7 @@ class StoryActivity : GolosActivity() {
     private lateinit var mForTV: TextView
     private lateinit var mBlogNameTv: TextView
     private lateinit var mtitileTv: TextView
+    private lateinit var mSwipeToRefresh: SwipeRefreshLayout
     private lateinit var mNoCommentsTv: TextView
     private lateinit var mStoryRecycler: RecyclerView
     private lateinit var mCommentsRecycler: RecyclerView
@@ -159,6 +161,7 @@ class StoryActivity : GolosActivity() {
                     mCommentsRecycler.visibility = View.VISIBLE
                     mNoCommentsTv.visibility = View.GONE
                 }
+
             }
             mtitileTv.text = it?.storyTitle
         })
@@ -182,6 +185,7 @@ class StoryActivity : GolosActivity() {
         mFlow = findViewById(R.id.tags_lo)
         mPayoutTv = findViewById(R.id.money_label)
         mCommentsTv = findViewById(R.id.comments_tv)
+        mSwipeToRefresh = findViewById(R.id.swipe_to_refresh)
         mVoteBtn = findViewById(R.id.upvote_btn)
         mCommentsCountTv = findViewById(R.id.comments_btn)
         mVotingProgress = findViewById(R.id.voting_progress)
@@ -235,6 +239,7 @@ class StoryActivity : GolosActivity() {
         mFab.setOnClickListener({
             mViewModel.onWriteRootComment(this)
         })
+        mSwipeToRefresh.isRefreshing = true
     }
 
     companion object {

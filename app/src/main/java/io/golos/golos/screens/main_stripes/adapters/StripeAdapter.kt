@@ -13,6 +13,7 @@ import android.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
@@ -26,7 +27,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 
-private val adapterWorkerExecutor = Executors.newSingleThreadExecutor()
+private val adapterWorkerExecutor = App.computationExecutor
 private val adapterMainThreadExecutor: Executor by lazy {
     val handler = Handler(Looper.getMainLooper())
     Executor { handler.post(it) }
@@ -94,7 +95,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
     private val mBlogNameTv: TextView = itemView.findViewById(R.id.blog_name_tv)
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
-    private val mBodyTextMarkwon: MarkwonViewCompat = itemView.findViewById(R.id.text)
+    private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
     private val mSecondaryImage: ImageView = itemView.findViewById(R.id.additional_image)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
     private val mUpvoteBtn: Button = itemView.findViewById(R.id.vote_btn)

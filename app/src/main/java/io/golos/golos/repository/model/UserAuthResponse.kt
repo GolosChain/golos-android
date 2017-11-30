@@ -9,4 +9,4 @@ data class UserAuthResponse(val isKeyValid: Boolean,
                             val activeAuth: Pair<String, String?>?,
                             val avatarPath: String?,
                             val postsCount: Long,
-                            val golosBalance: Double)
+                            val accountWorth: Double)

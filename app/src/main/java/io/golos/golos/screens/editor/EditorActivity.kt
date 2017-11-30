@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.GolosActivity
@@ -159,19 +161,29 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
+            val handler = Handler(Looper.getMainLooper())
             if (data != null) {
-                try {
-                    val inputStream = contentResolver.openInputStream(data.data)
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    if (bitmap == null) mToolbar.showSnackbar(R.string.wrong_image)
-                    val f = File(cacheDir, System.currentTimeMillis().toString() + ".jpg")
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(f))
-                    mViewModel
-                            .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = f.name,
-                                    imageUrl = "file://${f.absolutePath}", pointerPosition = null)))
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                    mToolbar.showSnackbar(R.string.wrong_image)
+                App.computationExecutor.execute {
+                    try {
+                        val inputStream = contentResolver.openInputStream(data.data)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        if (bitmap == null) handler.post {
+                            mToolbar.showSnackbar(R.string.wrong_image)
+                            return@post
+                        }
+                        val f = File(cacheDir, System.currentTimeMillis().toString() + ".jpg")
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(f))
+                        handler.post {
+                            mViewModel
+                                    .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = f.name,
+                                            imageUrl = "file://${f.absolutePath}", pointerPosition = null)))
+                        }
+                    } catch (e: FileNotFoundException) {
+                        e.printStackTrace()
+                        handler.post {
+                            mToolbar.showSnackbar(R.string.wrong_image)
+                        }
+                    }
                 }
             }
         }

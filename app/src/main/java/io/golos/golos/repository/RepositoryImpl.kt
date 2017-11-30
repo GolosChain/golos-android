@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -280,7 +281,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun cancelVote(discussionItem: GolosDiscussionItem) {
-        Timber.e("cancelVote " + discussionItem.title)
         mWorkerExecutor.execute {
             val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories, mFeedStories)
             val replacer = StorySearcherAndReplacer()
@@ -294,7 +294,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         }
                     }
                     try {
-                        Timber.e("canceling vote")
                         val currentStory = mGolosApi.cancelVote(discussionItem.author, discussionItem.permlink)
                         currentStory.avatarPath = getUserAvatarFromDb(discussionItem.author)
                         replacer.findAndReplace(StoryWrapper(currentStory, UpdatingState.DONE), storiesAll)
@@ -305,6 +304,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Timber.e(e.message)
+                        if (e is SteemResponseError) {
+                            Timber.e(e.error?.steemErrorDetails?.toString())
+                        }
                         mMainThreadExecutor.execute {
                             if (result) {
                                 var currentWorkingitem = discussionItem.clone() as GolosDiscussionItem

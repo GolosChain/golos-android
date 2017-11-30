@@ -19,6 +19,7 @@ import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
 import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
+import java.lang.RuntimeException
 import java.util.*
 
 

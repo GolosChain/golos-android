@@ -2,10 +2,7 @@ package io.golos.golos.repository.api
 
 import android.support.annotation.VisibleForTesting
 import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.AccountName
-import eu.bittrade.libs.steemj.base.models.DiscussionQuery
-import eu.bittrade.libs.steemj.base.models.Permlink
-import eu.bittrade.libs.steemj.base.models.PublicKey
+import eu.bittrade.libs.steemj.base.models.*
 import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
@@ -74,12 +71,21 @@ class ApiImpl : GolosApi() {
 
     override fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
         if (masterKey == null && activeWif == null && postingWif == null) return UserAuthResponse(false, userName, null, null, null, 0L, 0.0)
+        if (userName.length < 3 || userName.length > 16) {
+            return UserAuthResponse(false, userName, null,
+                    null, null, 0, 0.0)
+        }
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(userName)))
         if (accs.size == 0 || accs.get(0) == null) return UserAuthResponse(false, userName, null,
                 null, null, 0, 0.0)
         val acc = accs.get(0)
         var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
         var activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+
+        val votePower = acc.vestingShares.amount * 0.000268379
+        val golosNum = acc.balance.amount
+        val gbgAmount = acc.sbdBalance.amount
+        val accWorth = ((votePower + golosNum) * 0.128670406) + (gbgAmount * 0.04106528)
 
         if (masterKey != null) {
             val keys = AuthUtils.generatePublicWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
@@ -91,77 +97,86 @@ class ApiImpl : GolosApi() {
                         Pair(activePublicOuter, privateKeys[PrivateKeyType.ACTIVE]),
                         acc.avatarPath,
                         acc.postCount,
-                        acc.balance.amount)
+                        accWorth)
                 if (resp.isKeyValid) {
                     mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
                             ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
                 }
                 resp
             } else {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             }
         } else if (activeWif != null && postingWif != null) {
             return try {
-                val resp = UserAuthResponse(AuthUtils.isWiFsValid(activeWif, activePublicOuter) && AuthUtils.isWiFsValid(postingWif, postingPublicOuter), acc.name.name,
-                        Pair(postingPublicOuter, postingWif),
-                        Pair(activePublicOuter, activeWif),
-                        acc.avatarPath,
-                        acc.postCount,
-                        acc.balance.amount)
-                if (resp.isKeyValid) {
+                val isKeyValid = AuthUtils.isWiFsValid(activeWif, activePublicOuter) && AuthUtils.isWiFsValid(postingWif, postingPublicOuter)
+                if (isKeyValid) {
+                    val resp = UserAuthResponse(true,
+                            acc.name.name,
+                            Pair(postingPublicOuter, postingWif),
+                            Pair(activePublicOuter, activeWif),
+                            acc.avatarPath,
+                            acc.postCount,
+                            accWorth)
+
                     mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
                             ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
+                    resp
+                } else {
+                    negativeAuthResponse(acc)
                 }
-                resp
             } catch (e: java.lang.IllegalArgumentException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             } catch (e: AddressFormatException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             }
         } else if (activeWif != null) {
             return try {
-                val resp = UserAuthResponse(AuthUtils.isWiFsValid(activeWif, activePublicOuter),
-                        acc.name.name,
-                        Pair(postingPublicOuter, null),
-                        Pair(activePublicOuter, activeWif),
-                        acc.avatarPath,
-                        acc.postCount,
-                        acc.balance.amount)
-                if (resp.isKeyValid) {
+                val isKeyValid = AuthUtils.isWiFsValid(activeWif, activePublicOuter)
+                if (isKeyValid) {
+                    val resp = UserAuthResponse(AuthUtils.isWiFsValid(activeWif, activePublicOuter),
+                            acc.name.name,
+                            Pair(postingPublicOuter, null),
+                            Pair(activePublicOuter, activeWif),
+                            acc.avatarPath,
+                            acc.postCount,
+                            accWorth)
                     mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!))
+                    resp
+                } else {
+                    negativeAuthResponse(acc)
                 }
-                resp
             } catch (e: java.lang.IllegalArgumentException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             } catch (e: AddressFormatException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             }
 
         } else {
             return try {
-                val resp = UserAuthResponse(AuthUtils.isWiFsValid(postingWif!!, postingPublicOuter), acc.name.name,
-                        Pair(postingPublicOuter, postingWif),
-                        Pair(activePublicOuter, null),
-                        acc.avatarPath,
-                        acc.postCount,
-                        acc.balance.amount)
-                if (resp.isKeyValid) {
+                val isKeyValid = AuthUtils.isWiFsValid(postingWif!!, postingPublicOuter)
+                if (isKeyValid) {
+                    val resp = UserAuthResponse(AuthUtils.isWiFsValid(postingWif, postingPublicOuter), acc.name.name,
+                            Pair(postingPublicOuter, postingWif),
+                            Pair(activePublicOuter, null),
+                            acc.avatarPath,
+                            acc.postCount,
+                            accWorth)
                     mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!))
+                    resp
+                } else {
+                    negativeAuthResponse(acc)
                 }
-                resp
             } catch (e: java.lang.IllegalArgumentException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             } catch (e: AddressFormatException) {
-                UserAuthResponse(false, acc.name.name, null,
-                        null, null, 0, 0.0)
+                negativeAuthResponse(acc)
             }
         }
+    }
+
+    private fun negativeAuthResponse(acc: ExtendedAccount): UserAuthResponse {
+        return UserAuthResponse(false, acc.name.name, null,
+                null, null, 0, 0.0)
     }
 
     override fun getAccountData(of: String): AccountInfo {

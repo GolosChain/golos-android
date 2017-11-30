@@ -168,7 +168,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                         if (it is TextRow) "${it.text}\n"
                         else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
                     }.reduce { s1, s2 -> s1 + s2 }
-                    mText.text = outText.toHtml()
+                    mText.text = outText.trim().toHtml()
                 }
 
             }

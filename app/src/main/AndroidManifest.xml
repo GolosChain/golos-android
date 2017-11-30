@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".App"
@@ -44,6 +45,8 @@
             android:theme="@style/AppTheme">
 
         </activity>-->
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="e3c157b69542160c5ec78e3e4d4c71251a4c3879" />
     </application>
-
 </manifest>

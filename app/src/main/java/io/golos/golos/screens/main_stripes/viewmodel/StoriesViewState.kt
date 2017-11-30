@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.StoryTreeItems
@@ -14,7 +15,9 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.main_stripes.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -103,17 +106,21 @@ abstract class StoriesViewModel : ViewModel() {
 
     protected open fun onNewItems(items: StoryTreeItems?): StoriesViewState {
         var isLoading = false
-        if (isUpdating.get() && items?.items?.size ?: 0 > 0) {
-            isLoading = true
-            if (items?.items?.size ?: 0 > mStoriesLiveData.value?.items?.size ?: 0) {
-                isLoading = false
-                isUpdating.set(false)
-            }
-        }
+        /* if (isUpdating.get() && items?.items?.size ?: 0 > 0) {
+             isLoading = true
+             if (items?.items?.size ?: 0 > mStoriesLiveData.value?.items?.size ?: 0) {
+                 isLoading = false
+                 isUpdating.set(false)
+             }
+         }*/
         return StoriesViewState(isLoading, items?.items ?: ArrayList(), items?.error)
     }
 
     open fun onSwipeToRefresh() {
+        if (!App.isAppOnline()) {
+            setAppOffline()
+            return
+        }
         if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
             mRepository.requestStoriesListUpdate(20, type, null, null)
@@ -123,6 +130,10 @@ abstract class StoriesViewModel : ViewModel() {
 
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         if (visibleToUser) {
+            if (!App.isAppOnline()) {
+                setAppOffline()
+                return
+            }
             if (mStoriesLiveData.value == null ||
                     mStoriesLiveData.value?.items == null ||
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
@@ -134,9 +145,18 @@ abstract class StoriesViewModel : ViewModel() {
         }
     }
 
+    protected fun setAppOffline() {
+        mStoriesLiveData.value = StoriesViewState(false, mStoriesLiveData.value?.items ?: ArrayList(),
+                GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+    }
+
     open fun onScrollToTheEnd() {
+        if (!App.isAppOnline()) {
+            setAppOffline()
+            return
+        }
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
-        if (isUpdating.get())return
+        //  if (isUpdating.get())return
         isUpdating.set(true)
         mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
         mRepository.requestStoriesListUpdate(20,
@@ -165,6 +185,10 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun vote(it: StoryTree, vote: Short) {
+        if (!App.isAppOnline()) {
+            setAppOffline()
+            return
+        }
         if (mRepository.getSavedActiveUserData() == null) {
             return
         }
@@ -173,9 +197,17 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun downVote(it: StoryTree) {
-        if (mRepository.getSavedActiveUserData() == null) {
+        Timber.e("downvote")
+        if (!App.isAppOnline()) {
+            setAppOffline()
             return
         }
+        val userData = mRepository.getSavedActiveUserData()
+        if (userData == null || userData.userName == null) {
+            return
+        }
+
+
         val story = it.rootStory() ?: return
         mRepository.cancelVote(story)
     }
