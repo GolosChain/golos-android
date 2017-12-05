@@ -1,4 +1,4 @@
-package io.golos.golos.screens.drawer
+package io.golos.golos.screens.profile
 
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -13,8 +13,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.androidviewmodel.AuthViewModel
-import io.golos.golos.screens.drawer.adapters.MenuAdapter
-import io.golos.golos.screens.drawer.adapters.MenuItem
+import io.golos.golos.screens.profile.adapters.MenuAdapter
+import io.golos.golos.screens.profile.adapters.MenuItem
 
 /**
  * Created by yuri on 10.11.17.

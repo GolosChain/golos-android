@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ffffff</color>
-    <color name="colorPrimaryDark">#f85758</color>
-    <color name="colorAccent">#ff6266</color>
-    <color name="textColorP">#373b3d</color>
+    <color name="colorPrimary">#4469AF</color>
+    <color name="colorPrimaryDark">#382B2B</color>
+    <color name="gray_82">#828282</color>
+    <color name="colorAccent">#1298FF</color>
+    <color name="blue_dark">#4469AF</color>
+    <color name="textColorP">#4F4F4F</color>
     <color name="gray">#30000000</color>
     <color name="gray_1">#a0a7ab</color>
+    <color name="gray_4f">#4F4F4F</color>
     <color name="gray_story_upvote_circle">#a2a9ac</color>
     <color name="rat">#989ea3</color>
     <color name="delimeter_color">#a5000000</color>

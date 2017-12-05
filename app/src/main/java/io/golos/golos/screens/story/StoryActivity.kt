@@ -7,14 +7,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -49,7 +47,6 @@ class StoryActivity : GolosActivity() {
     private lateinit var mAvatar: ImageView
     private lateinit var mUserName: TextView
     private lateinit var mRebloggedBy: TextView
-    private lateinit var mForTV: TextView
     private lateinit var mBlogNameTv: TextView
     private lateinit var mtitileTv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
@@ -57,11 +54,9 @@ class StoryActivity : GolosActivity() {
     private lateinit var mStoryRecycler: RecyclerView
     private lateinit var mCommentsRecycler: RecyclerView
     private lateinit var mFlow: FlowLayout
-    private lateinit var mPayoutTv: TextView
-    private lateinit var mVotesCountTv: TextView
-    private lateinit var mVoteBtn: ImageButton
-    private lateinit var mCommentsCountTv: TextView
+    private lateinit var mCommentsCountBtn: TextView
     private lateinit var mVotingProgress: ProgressBar
+    private lateinit var mMoneyBtn: TextView
     private lateinit var mCommentsTv: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,17 +95,14 @@ class StoryActivity : GolosActivity() {
                             .into(mAvatar)
                     else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                     mUserName.text = story.author
-                    mForTV.visibility = View.VISIBLE
                     mBlogNameTv.visibility = View.VISIBLE
                 }
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
-                    mVoteBtn.setImageResource(R.drawable.ic_upvote_active_18dp_green)
-                    mVoteBtn.background = ResourcesCompat.getDrawable(resources, R.drawable.ripple_green_solid, null)
-                    mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_28dp), null, null, null)
+                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
-                    mVoteBtn.setImageResource(R.drawable.ic_upvote_18_gray)
-                    mVoteBtn.background = ResourcesCompat.getDrawable(resources, R.drawable.ripple_gray_circle, null)
-                    mPayoutTv.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_28dp), null, null, null)
+                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.gray_4f))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
                 else mFab.hide()
@@ -129,8 +121,7 @@ class StoryActivity : GolosActivity() {
                         }
                     }
                 }
-                mVotesCountTv.text = it.storyTree.rootStory()?.activeVotes?.toString()
-                mCommentsCountTv.text = it.storyTree.rootStory()?.commentsCount?.toString()
+                mCommentsCountBtn.text = it.storyTree.rootStory()?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
                     mFlow.removeAllViews()
                     story.tags.forEach {
@@ -138,26 +129,23 @@ class StoryActivity : GolosActivity() {
                         var text = it
                         view.setOnClickListener { mViewModel.onTagClick(this, text) }
                         if (text.contains("ru--")) text = Translit.lat2Ru(it.substring(4))
-                        view.text = text
+                        view.text = text.capitalize()
                         mFlow.addView(view)
                     }
                 }
                 if (it.storyTree.storyWithState()?.updatingState == UpdatingState.UPDATING) {
                     mVotingProgress.visibility = View.VISIBLE
-                    mPayoutTv.visibility = View.GONE
-                    mVoteBtn.visibility = View.GONE
+                    mMoneyBtn.visibility = View.GONE
+
                 } else {
                     mVotingProgress.visibility = View.GONE
-                    mVoteBtn.visibility = View.VISIBLE
-                    mPayoutTv.visibility = View.VISIBLE
+
+                    mMoneyBtn.visibility = View.VISIBLE
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
-                findViewById<View>(R.id.comments_tv).visibility = View.VISIBLE
-                mPayoutTv.text = String.format("$ %.2f", story.payoutInDollars)
-                mVotesCountTv.text = "${story.votesNum}"
-
+                mCommentsTv.visibility = View.VISIBLE
+                mMoneyBtn.text = String.format("$ %.2f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
-
                 if (it.storyTree.comments().isEmpty()) {
                     mCommentsRecycler.visibility = View.GONE
                     mNoCommentsTv.visibility = View.VISIBLE
@@ -179,20 +167,17 @@ class StoryActivity : GolosActivity() {
         mAvatar = findViewById(R.id.avatar_iv)
         mUserName = findViewById(R.id.user_name)
         mRebloggedBy = findViewById(R.id.reblogged_tv)
-        mForTV = findViewById(R.id.for_user_tv)
         mBlogNameTv = findViewById(R.id.blog_name_tv)
         mtitileTv = findViewById(R.id.title_tv)
         mNoCommentsTv = findViewById(R.id.no_comments_tv)
         mStoryRecycler = findViewById(R.id.recycler)
         mCommentsRecycler = findViewById(R.id.comments_recycler)
-        mVotesCountTv = findViewById(R.id.votes_btn)
         mFlow = findViewById(R.id.tags_lo)
-        mPayoutTv = findViewById(R.id.money_label)
-        mCommentsTv = findViewById(R.id.comments_tv)
+        mMoneyBtn = findViewById(R.id.money_btn)
         mSwipeToRefresh = findViewById(R.id.swipe_to_refresh)
-        mVoteBtn = findViewById(R.id.upvote_btn)
-        mCommentsCountTv = findViewById(R.id.comments_btn)
+        mCommentsCountBtn = findViewById(R.id.comments_btn)
         mVotingProgress = findViewById(R.id.voting_progress)
+        mCommentsTv = findViewById(R.id.comments_tv)
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
@@ -200,9 +185,8 @@ class StoryActivity : GolosActivity() {
         mCommentsRecycler.adapter = CommentsAdapter()
         mStoryRecycler.adapter = MainStoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_accent_20dp), null, null, null)
-        mVotesCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_voices_20dp_gray), null, null, null)
-        mCommentsCountTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_comments_wth_dots_24dp_gray), null, null, null)
+        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
+        mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_28dp), null, null, null)
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -210,7 +194,7 @@ class StoryActivity : GolosActivity() {
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }
-        mVoteBtn.setOnClickListener({
+        mMoneyBtn.setOnClickListener({
             if (mViewModel.showVoteDialog) {
                 val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
                 if (mViewModel.canUserVoteOnThis(story)) {

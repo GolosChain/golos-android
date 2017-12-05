@@ -2,7 +2,8 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
 
 
     <android.support.design.widget.AppBarLayout
@@ -16,7 +17,6 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-
             app:layout_scrollFlags="scroll|enterAlways">
 
 
@@ -24,8 +24,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
+                android:background="@android:color/white"
                 app:elevation="1dp"
-                app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp" />
+                app:navigationIcon="@drawable/ic_chevron_left_gray_32dp" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -34,8 +35,8 @@
 
                 <com.makeramen.roundedimageview.RoundedImageView
                     android:id="@+id/avatar_iv"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="@dimen/margin_material_half"
                     android:scaleType="centerCrop"
                     app:layout_constraintStart_toStartOf="parent"
@@ -44,14 +45,9 @@
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/user_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_material_half"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
+                    style="@style/TitleUserNameStyle"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
-                    app:layout_constraintTop_toTopOf="@id/avatar_iv"
-                    app:textAllCaps="true" />
+                    app:layout_constraintTop_toTopOf="@id/avatar_iv" />
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/reblogged_tv"
@@ -63,32 +59,20 @@
                     app:layout_constraintStart_toEndOf="@id/user_name"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/for_user_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_material_half"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/for_"
-                    android:textColor="@color/gray_1"
-                    android:textStyle="bold"
-                    android:visibility="invisible"
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/blog_name_tv"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
                     app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/blog_name_tv"
-                    android:clickable="true"
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/share_btn"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_material_half"
-                    android:layout_marginTop="2dp"
-                    android:drawablePadding="4dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textStyle="bold"
-                    android:visibility="invisible"
-                    app:layout_constraintStart_toEndOf="@id/for_user_tv"
-                    app:layout_constraintTop_toBottomOf="@+id/user_name" />
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:srcCompat="@drawable/ic_share_gray_24dp" />
             </android.support.constraint.ConstraintLayout>
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -104,10 +88,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <android.support.v4.widget.SwipeRefreshLayout
-                android:layout_width="match_parent"
                 android:id="@+id/swipe_to_refresh"
-                android:layout_height="wrap_content"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/title_tv"
                 android:layout_width="match_parent"
@@ -128,64 +114,40 @@
                 android:id="@+id/tags_lo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/margin_material" />
+                android:layout_marginEnd="@dimen/margin_material"
+                android:layout_marginStart="@dimen/margin_material" />
 
-            <android.support.constraint.ConstraintLayout
+            <LinearLayout
                 android:id="@+id/vote_lo"
-
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_margin="@dimen/margin_material"
+                android:orientation="horizontal"
                 android:visibility="visible">
 
-                <android.support.v7.widget.AppCompatImageButton
-                    android:id="@+id/upvote_btn"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_upvote_18_gray" />
 
                 <ProgressBar
                     android:id="@+id/voting_progress"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent"
                     android:layout_marginLeft="@dimen/margin_material"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/money_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="@dimen/margin_material_half"
-                    android:gravity="center_vertical|start"
-                    android:textSize="@dimen/font_medium"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/upvote_btn"
-                    app:layout_constraintLeft_toRightOf="@id/upvote_btn"
-                    app:layout_constraintTop_toTopOf="@id/upvote_btn" />
+                    android:padding="4dp"
+                    android:visibility="gone" />
 
                 <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/votes_btn"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons"
-                    android:layout_marginEnd="@dimen/material_huge"
-                    app:layout_constraintRight_toLeftOf="@+id/comments_btn"
-                    app:layout_constraintTop_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:id="@+id/money_btn"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.VoteButton"
+                    android:visibility="visible" />
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/comments_btn"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_material_half"
+                android:background="#f0f3f6"/>
 
             <TextView
                 android:id="@+id/comments_tv"
@@ -193,11 +155,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_material"
                 android:layout_marginStart="@dimen/margin_material"
-                android:layout_marginTop="@dimen/material_huge"
+                android:layout_marginTop="@dimen/margin_material"
                 android:drawablePadding="@dimen/margin_material_half"
                 android:text="@string/comments"
-                android:textSize="@dimen/font_medium"
-                android:textStyle="bold"
+                android:textSize="20sp"
                 android:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView

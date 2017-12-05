@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/tag_buttons_height"
     android:layout_marginTop="@dimen/margin_material_small"
-    android:background="@drawable/back_rect"
+    android:background="@drawable/rect_round_corners_outline_gray"
     android:ellipsize="end"
     android:textAllCaps="false"
     android:maxLength="120"
@@ -13,4 +13,4 @@
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
     android:clickable="true"
-    android:textColor="#3f4346" />
+    android:textColor="#828282" />

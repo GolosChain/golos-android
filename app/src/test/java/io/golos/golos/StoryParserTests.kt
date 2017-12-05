@@ -91,4 +91,13 @@ class StoryParserTests {
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.blog/ru--delegaty/@dobryj.kit/dobryi-kit-delegat\" rel=\"nofollow\">"))
         println(rows)
     }
+    @Test
+    fun test9() {
+        val tree = Utils.readStoryFromResourse("story9.json")
+        val rowParser = StoryParserToRows()
+        var rows = rowParser.parse(tree.rootStory()!!)
+        Assert.assertTrue(rows.size > 1)
+        Assert.assertTrue(rows[0] is ImageRow)
+        Assert.assertTrue(rows[2] is ImageRow)
+    }
 }

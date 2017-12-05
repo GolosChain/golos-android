@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/stories"
+        android:icon="@drawable/circle_pink_solid"
+        android:title="@string/stories" />
+    <item
+        android:id="@+id/groups"
+        android:icon="@drawable/circle_pink_solid"
+        android:title="@string/groups" />
+    <item
+        android:id="@+id/groups_1"
+        android:icon="@drawable/circle_pink_solid"
+        android:title="@string/groups" />
+    <item
+        android:id="@+id/groups_2"
+        android:icon="@drawable/circle_pink_solid"
+        android:title="@string/groups" />
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/ic_profile_outline_gray_24dp"
+        android:title="@string/profile" />
+</menu>

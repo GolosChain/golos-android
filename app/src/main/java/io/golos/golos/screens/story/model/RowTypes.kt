@@ -36,14 +36,17 @@ class StoryParserToRows {
         }
         try {
             val whiteList = Whitelist.basicWithImages()
-            whiteList.addTags("h1", "h2","h3", "h4")
+            whiteList.addTags("h1", "h2", "h3", "h4")
             str = Jsoup.clean(str, whiteList)
-            str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))".toRegex()) {
-                if (!it.value.contains("a href"))" <a href =\"https://golos.blog/${it.value.trim()}\">${it.value.trim()}</a>"
+            str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))\\b".toRegex()) {
+                if (!it.value.contains("a href")) " <a href =\"https://golos.blog/${it.value.trim()}\">${it.value.trim()}</a>"
                 else it.value
             }
             str = str.replace(Regexps.imageLinkWithoutSrctag) {
-                " <img src=\"${it.value.trim()}\">"
+                val index = str.indexOf(it.value)
+                if (index == 0 || str.get(index - 1).toString() != "\"")
+                    " <img src=\"${it.value.trim()}\">"
+                else it.value
             }
             str = str.replace(Regexps.imageWithCenterTage) {
                 " <img src=\"${it.value

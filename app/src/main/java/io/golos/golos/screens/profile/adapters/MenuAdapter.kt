@@ -1,4 +1,4 @@
-package io.golos.golos.screens.drawer.adapters
+package io.golos.golos.screens.profile.adapters
 
 import android.content.Context
 import android.view.LayoutInflater

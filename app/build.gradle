@@ -88,6 +88,7 @@ dependencies {
         exclude group: 'com.intellij'
     }
     compile 'com.android.support:multidex:1.0.2'
+    compile 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
     compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
     }

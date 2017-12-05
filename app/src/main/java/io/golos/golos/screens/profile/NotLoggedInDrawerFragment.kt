@@ -1,4 +1,4 @@
-package io.golos.golos.screens.drawer
+package io.golos.golos.screens.profile
 
 import android.app.Activity
 import android.app.Dialog

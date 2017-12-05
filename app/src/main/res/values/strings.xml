@@ -11,7 +11,7 @@
     <string name="publish">Опубликовать</string>
     <string name="text">Текст</string>
     <string name="comment">Комментарий</string>
-    <string name="GOLOS">ГОЛОС</string>
+    <string name="GOLOS">Голос</string>
     <string name="login">Логин</string>
     <string name="posting_key">Постинг ключ</string>
     <string name="scan">Сканировать</string>
@@ -67,4 +67,8 @@
     <string name="title_activity_filtered_stories">FilteredStoriesActivity</string>
     <string name="stories">Истории</string>
     <string name="tag_search">Посты с тэгом:</string>
+    <string name="groups">Сообщества</string>
+    <string name="profile">Профиль</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="unaval_in_current_version">Недоступно в текущей версии</string>
 </resources>

@@ -46,7 +46,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private fun bindViews(view: View) {
         mRecycler = view.findViewById(R.id.recycler)
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
-        mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.colorPrimaryDark))
+        mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = LinearLayoutManager(view.context)
@@ -84,7 +84,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                         mViewModel?.onVoteRejected(it)
                     }
                 },
-                onTagClick = { mViewModel?.onBlogClick(context ,it) }
+                onTagClick = { mViewModel?.onBlogClick(context, it) }
         )
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -123,8 +123,12 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
         if (isVisible) {
             t?.error?.let {
-                if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
-                else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
+                if (it.localizedMessage != null) activity
+                        ?.findViewById<View>(android.R.id.content)
+                        ?.showSnackbar(it.localizedMessage)
+                else if (it.nativeMessage != null) activity
+                        ?.findViewById<View>(android.R.id.content)
+                        ?.showSnackbar(it.nativeMessage)
                 else {
                 }
             }

@@ -21,6 +21,7 @@ class App : MultiDexApplication() {
             Timber.plant(Timber.DebugTree())
 
         }
+
         Fabric.with(this, Crashlytics())
     }
 

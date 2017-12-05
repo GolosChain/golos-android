@@ -1,15 +1,17 @@
 package io.golos.golos.screens.stories.adapters
 
+import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.PagerAdapter
 import android.support.v7.widget.RecyclerView
+import io.golos.golos.R
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.StoriesFragment.Companion.TYPE_TAG
 import io.golos.golos.screens.stories.model.FeedType
 
-class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manager) {
+class StripesPagerAdpater(val context: Context,  manager: FragmentManager) : FragmentPagerAdapter(manager) {
     private val typesToPosition = HashMap<Int, FeedType>()
     private val mFragments = ArrayList<StoriesFragment>()
 
@@ -45,6 +47,19 @@ class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manag
 
     override fun getItemPosition(`object`: Any): Int {
         return PagerAdapter.POSITION_NONE
+    }
+
+    override fun getPageTitle(position: Int): CharSequence? {
+        val type = typesToPosition[position]
+        var context = context
+        return when (type) {
+            FeedType.PERSONAL_FEED -> context.getString(R.string.feed)
+            FeedType.POPULAR -> context.getString(R.string.popular)
+            FeedType.PROMO -> context.getString(R.string.promo)
+            FeedType.ACTUAL -> context.getString(R.string.actual)
+            FeedType.NEW -> context.getString(R.string.stripes_new)
+            else ->""
+        }
     }
 
     override fun getCount() = if (isFeedFragmentShown) FeedType.values().size else FeedType.values().size - 1
