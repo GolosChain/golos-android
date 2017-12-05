@@ -6,14 +6,20 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.widget.ImageView
+import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.EditorActivity
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.FilteredStoriesActivity
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.PhotoActivity
+import io.golos.golos.utils.ErrorCode
+import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.Translit
 
 /**
  * Created by yuri on 06.11.17.
@@ -27,8 +33,8 @@ class StoryViewModel : ViewModel() {
     fun onCreate(storyId: Long, feedType: FeedType) {
         mStoryId = storyId
         this.feedType = feedType
-        mLiveData.removeSource(mRepository.getStories(feedType))
-        mLiveData.addSource(mRepository.getStories(feedType)) {
+        mLiveData.removeSource(mRepository.getStories(feedType, null))
+        mLiveData.addSource(mRepository.getStories(feedType, null)) {
             val storyItems = it
             it?.
                     items?.
@@ -99,13 +105,35 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onAnswerToComment(ctx: Context, item: GolosDiscussionItem) {
-        if (canUserWriteComments()) {
+        if (mRepository.isUserLoggedIn()) {
             mLiveData.value?.let {
                 EditorActivity.startAnswerOnCommentEditor(ctx,
                         it.storyTree,
                         item,
                         feedType)
             }
+        } else {
+            mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
+                    mLiveData.value?.storyTitle ?: "",
+                    mRepository.isUserLoggedIn(),
+                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment),
+                    mLiveData.value?.tags ?: ArrayList(),
+                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
         }
+    }
+
+    fun onVoteRejected(story: Int) {
+        mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
+                mLiveData.value?.storyTitle ?: "",
+                mRepository.isUserLoggedIn(),
+                GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote),
+                mLiveData.value?.tags ?: ArrayList(),
+                mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
+    }
+
+    fun onTagClick(storyActivity: StoryActivity, text: String) {
+        var text = text
+        if (text.contains(Regex("[а-яА-Я]")))text = "ru--" + Translit.ru2lat(text)
+        FilteredStoriesActivity.start(storyActivity, feedType, StoryFilter(text))
     }
 }

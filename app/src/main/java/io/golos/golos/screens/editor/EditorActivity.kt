@@ -28,7 +28,7 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment

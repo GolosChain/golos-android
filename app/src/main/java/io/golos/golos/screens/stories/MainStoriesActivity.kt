@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes
+package io.golos.golos.screens.stories
 
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -16,17 +16,16 @@ import io.golos.golos.screens.androidviewmodel.AuthViewModel
 import io.golos.golos.screens.drawer.NotLoggedInDrawerFragment
 import io.golos.golos.screens.drawer.UserProfileDrawerFragment
 import io.golos.golos.screens.editor.EditorActivity
-import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StripesPagerAdpater
 import io.golos.golos.utils.showSnackbar
 import timber.log.Timber
-import java.lang.RuntimeException
 import java.util.*
 
 
 /**
  * Created by yuri on 30.10.17.
  */
-class StripesActivity : GolosActivity() {
+class MainStoriesActivity : GolosActivity() {
     private lateinit var mDrawer: DrawerLayout
     private lateinit var mDrawerPaneLo: ViewGroup
     private lateinit var mPager: ViewPager

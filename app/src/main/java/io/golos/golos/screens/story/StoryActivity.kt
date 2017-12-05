@@ -22,8 +22,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
+import io.golos.golos.R.raw.story
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
 import io.golos.golos.screens.story.model.ImageRow
@@ -118,6 +119,7 @@ class StoryActivity : GolosActivity() {
                 } else {
                     mBlogNameTv.text = story.categoryName
                 }
+                mBlogNameTv.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
                 if (it.errorCode != null) {
                     if (it.errorCode.localizedMessage != null) it.errorCode.localizedMessage.let {
                         findViewById<View>(android.R.id.content).showSnackbar(it)
@@ -130,9 +132,11 @@ class StoryActivity : GolosActivity() {
                 mVotesCountTv.text = it.storyTree.rootStory()?.activeVotes?.toString()
                 mCommentsCountTv.text = it.storyTree.rootStory()?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
+                    mFlow.removeAllViews()
                     story.tags.forEach {
                         val view = layoutInflater.inflate(R.layout.v_story_tag_button, mFlow, false) as TextView
                         var text = it
+                        view.setOnClickListener { mViewModel.onTagClick(this, text) }
                         if (text.contains("ru--")) text = Translit.lat2Ru(it.substring(4))
                         view.text = text
                         mFlow.addView(view)
@@ -218,6 +222,8 @@ class StoryActivity : GolosActivity() {
                     }
                     dialog.show(fragmentManager, null)
                 } else mViewModel.onStoryVote(story, -1)
+            } else {
+                mViewModel.onVoteRejected(story)
             }
         })
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
@@ -231,6 +237,8 @@ class StoryActivity : GolosActivity() {
                     }
                     dialog.show(fragmentManager, null)
                 } else mViewModel.onStoryVote(it, -1)
+            } else {
+                mViewModel.onVoteRejected(story)
             }
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
@@ -240,6 +248,7 @@ class StoryActivity : GolosActivity() {
             mViewModel.onWriteRootComment(this)
         })
         mSwipeToRefresh.isRefreshing = true
+
     }
 
     companion object {

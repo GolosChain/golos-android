@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes.model
+package io.golos.golos.screens.stories.model
 
 /**
  * Created by yuri on 30.10.17.

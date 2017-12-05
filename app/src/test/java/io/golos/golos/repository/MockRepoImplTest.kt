@@ -5,7 +5,7 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.GolosApi
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import junit.framework.Assert
 import junit.framework.Assert.assertEquals
@@ -28,7 +28,7 @@ public class MockRepoImplTest {
         var popularItems: List<StoryTree>? = null
         val golosApi = mock<GolosApi> {
             on {
-                getStories(20, FeedType.POPULAR, 1024, null, null)
+                getStories(20, FeedType.POPULAR, 1024, null, null, null)
             } doReturn ArrayList(Utils.readStoriesFromResourse("stripes_6.json")) as List<StoryTree>
             on {
                 getStory("ru--apvot50-50", "lokkie", "golos-gajd-finalnyj-post-obshchie-sovety-dlya-vseh-i-kazhdogo-5050-11-19-2")
@@ -36,10 +36,10 @@ public class MockRepoImplTest {
 
         }
         val mockRepoImpl = MockRepoImpl(golosApi, executor, executor)
-        mockRepoImpl.getStories(FeedType.POPULAR).observeForever {
+        mockRepoImpl.getStories(FeedType.POPULAR, null).observeForever {
             popularItems = it?.items
         }
-        mockRepoImpl.requestStoriesListUpdate(20, FeedType.POPULAR, null, null)
+        mockRepoImpl.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertEquals(20, popularItems!!.size)
 
         val firstItem = popularItems!![0].deepCopy()

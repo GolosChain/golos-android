@@ -10,8 +10,11 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.spec.MGF1ParameterSpec
 import java.util.*
 import javax.crypto.Cipher
+import javax.crypto.spec.OAEPParameterSpec
+import javax.crypto.spec.PSource
 import javax.security.auth.x500.X500Principal
 
 
@@ -28,7 +31,14 @@ internal class EnCryptor {
         } else {
             Cipher.getInstance("RSA/ECB/PKCS1Padding")
         }
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias).public)
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val spec = OAEPParameterSpec(
+                    "SHA-256", "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT)
+            cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias).public, spec)
+        } else {
+            cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(alias).public)
+        }
         return cipher.doFinal(textToEncrypt.toByteArray(charset("UTF-8")))
     }
 
@@ -71,7 +81,14 @@ class DeCryptor {
         } else {
             Cipher.getInstance("RSA/ECB/PKCS1Padding")
         }
-        cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias))
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val spec = OAEPParameterSpec(
+                    "SHA-256", "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT)
+            cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias), spec)
+        } else {
+            cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias))
+        }
         return String(cipher.doFinal(encryptedData), Charset.forName("UTF-8"))
     }
 

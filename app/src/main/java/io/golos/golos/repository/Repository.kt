@@ -13,13 +13,14 @@ import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
-import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.main_stripes.viewmodel.ImageLoadRunnable
+import io.golos.golos.screens.stories.model.FeedType
+
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
 import java.util.*
 import java.util.concurrent.*
 
+data class StoryFilter(val tagFilter: String?)
 
 abstract class Repository {
 
@@ -59,10 +60,13 @@ abstract class Repository {
     }
 
 
-    abstract fun getStories(type: FeedType): LiveData<StoryTreeItems>
+    abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoryTreeItems>
 
-    abstract fun requestStoriesListUpdate(limit: Int, type: FeedType,
-                                          startAuthor: String? = null, startPermlink: String? = null)
+    abstract fun requestStoriesListUpdate(limit: Int,
+                                          type: FeedType,
+                                          filter: StoryFilter? = null,
+                                          startAuthor: String? = null,
+                                          startPermlink: String? = null)
 
     @WorkerThread
     abstract fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse
@@ -96,6 +100,7 @@ abstract class Repository {
 
     abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit)
 
+    abstract fun isUserLoggedIn(): Boolean
 }
 
-
+interface ImageLoadRunnable : Runnable

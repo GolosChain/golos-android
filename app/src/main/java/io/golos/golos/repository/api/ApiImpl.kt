@@ -7,11 +7,12 @@ import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair
 import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.io.File
+import java.util.*
 
 /**
  * Created by yuri on 20.11.17.
@@ -44,7 +46,8 @@ class ApiImpl : GolosApi() {
         return story
     }
 
-    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
+    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, filter: StoryFilter?,
+                            startAuthor: String?, startPermlink: String?): List<StoryTree> {
         var discussionSortType =
                 when (type) {
                     FeedType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
@@ -59,7 +62,11 @@ class ApiImpl : GolosApi() {
         if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
         query.truncateBody = truncateBody.toLong()
-
+        filter?.let {
+            it.tagFilter?.let {
+                query.selectTags = listOf(AccountName(it))
+            }
+        }
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryTree>()
         discussions.forEach {

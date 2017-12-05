@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes
+package io.golos.golos.screens.stories
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -14,10 +14,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
-import io.golos.golos.screens.main_stripes.adapters.StripeAdapter
-import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
-import io.golos.golos.screens.main_stripes.model.FeedType
-import io.golos.golos.screens.main_stripes.viewmodel.*
+import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.mapper
+import io.golos.golos.screens.stories.adapters.StripeAdapter
+import io.golos.golos.screens.stories.adapters.StripesPagerAdpater
+import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.viewmodel.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.showSnackbar
@@ -26,7 +28,7 @@ import io.golos.golos.utils.showSnackbar
 /**
  * Created by yuri on 31.10.17.
  */
-class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
@@ -51,6 +53,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(this)
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
+        val filter = arguments!!.getString(FILTER_TAG, null)
         mViewModel = when (type) {
             FeedType.NEW -> provider.get(NewViewModel::class.java)
             FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
@@ -58,6 +61,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             FeedType.PROMO -> provider.get(PromoViewModel::class.java)
             FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
         }
+        mViewModel!!.filter = if (filter == null || filter == "null") null
+        else mapper.readValue(filter, StoryFilter::class.java)
         mAdapter = StripeAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
                 onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
@@ -75,8 +80,11 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             }
                             dialog.show(activity!!.fragmentManager, null)
                         }
+                    } else {
+                        mViewModel?.onVoteRejected(it)
                     }
-                }
+                },
+                onTagClick = { mViewModel?.onBlogClick(context ,it) }
         )
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -95,50 +103,58 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setUp() {
         mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
         mViewModel?.storiesLiveData?.removeObservers(this)
-        mViewModel?.storiesLiveData?.observe(this, Observer {
-            if (it?.isLoading == true) {
-                if (mSwipeRefresh?.isRefreshing == false) {
-                    mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
-                    mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
-                }
-            } else {
-                if (mSwipeRefresh?.isRefreshing == true) {
-                    mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
-                }
-            }
+        mViewModel?.storiesLiveData?.observe(this, this)
+    }
 
-            if (it?.items != null) {
-                mRecycler?.post { mAdapter.setStripesCustom(it.items) }
+    override fun onChanged(t: StoriesViewState?) {
+        if (t?.isLoading == true) {
+            if (mSwipeRefresh?.isRefreshing == false) {
+                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
+                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
             }
-            if (isVisible){
-                it?.error?.let {
-                    if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
-                    else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
-                    else {
-                    }
+        } else {
+            if (mSwipeRefresh?.isRefreshing == true) {
+                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
+            }
+        }
+
+        if (t?.items != null) {
+            mRecycler?.post { mAdapter.setStripesCustom(t.items) }
+        }
+        if (isVisible) {
+            t?.error?.let {
+                if (it.localizedMessage != null) view?.showSnackbar(it.localizedMessage)
+                else if (it.nativeMessage != null) view?.showSnackbar(it.nativeMessage)
+                else {
                 }
             }
-            it?.popupMessage?.let {
-                view?.showSnackbar(it)
-            }
-            it?.fullscreenMessage?.let {
-                mRecycler?.visibility = View.GONE
-                mFullscreenMessageLabel.visibility = View.VISIBLE
-                mFullscreenMessageLabel.setText(it)
-            }
-            if (it?.fullscreenMessage == null) {
-                mRecycler?.visibility = View.VISIBLE
-                mFullscreenMessageLabel.visibility = View.GONE
-            }
-        })
+        }
+        t?.popupMessage?.let {
+            view?.showSnackbar(it)
+        }
+        t?.fullscreenMessage?.let {
+            mRecycler?.visibility = View.GONE
+            mFullscreenMessageLabel.visibility = View.VISIBLE
+            mFullscreenMessageLabel.setText(it)
+        }
+        if (t?.fullscreenMessage == null) {
+            mRecycler?.visibility = View.VISIBLE
+            mFullscreenMessageLabel.visibility = View.GONE
+        }
     }
 
     companion object {
         val TYPE_TAG = "TYPE_TAG"
-        fun getInstance(type: FeedType): StoriesFragment {
+        val FILTER_TAG = "FILTER_TAG"
+        fun getInstance(type: FeedType,
+                        filter: StoryFilter? = null): StoriesFragment {
             val fr = StoriesFragment()
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
+            if (filter != null)
+                bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
+            else bundle.putString(FILTER_TAG, null)
+
             fr.arguments = bundle
             return fr
         }

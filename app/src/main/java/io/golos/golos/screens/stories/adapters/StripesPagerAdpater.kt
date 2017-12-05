@@ -1,13 +1,13 @@
-package io.golos.golos.screens.main_stripes.adapters
+package io.golos.golos.screens.stories.adapters
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.PagerAdapter
 import android.support.v7.widget.RecyclerView
-import io.golos.golos.screens.main_stripes.StoriesFragment
-import io.golos.golos.screens.main_stripes.StoriesFragment.Companion.TYPE_TAG
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.StoriesFragment
+import io.golos.golos.screens.stories.StoriesFragment.Companion.TYPE_TAG
+import io.golos.golos.screens.stories.model.FeedType
 
 class StripesPagerAdpater(manager: FragmentManager) : FragmentPagerAdapter(manager) {
     private val typesToPosition = HashMap<Int, FeedType>()

@@ -13,7 +13,7 @@ import eu.bittrade.libs.steemj.base.models.Discussion;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.Utils;
-import io.golos.golos.screens.main_stripes.model.StripeItem;
+import io.golos.golos.screens.stories.model.StripeItem;
 import io.golos.golos.repository.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.ImageRow;
 import io.golos.golos.repository.model.ItemType;

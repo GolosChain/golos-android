@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes
+package io.golos.golos.screens.stories
 
 import android.content.Context
 import android.support.v4.view.ViewPager
@@ -7,7 +7,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import io.golos.golos.R
-import io.golos.golos.screens.main_stripes.adapters.StripesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StripesPagerAdpater
 
 /**
  * Created by yuri on 02.11.17.

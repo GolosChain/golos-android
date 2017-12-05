@@ -18,7 +18,7 @@
     <string name="active_key">Активный ключ</string>
     <string name="cancel">Отмена</string>
     <string name="exit">Войти</string>
-    <string name="enter_post_title">Введите заголовк поста</string>
+    <string name="enter_post_title">Введите заголовок поста</string>
     <string name="tab_back_double_to_enter">Нажмите еще раз для выхода</string>
     <string name="slow_internet_connection">Слишком медленное соединение. Попробйте еще раз</string>
     <string name="no_internet_connection">Отсутствует связь с интернетом</string>
@@ -49,7 +49,7 @@
     <string name="vote_canceled">Голос отменен</string>
     <string name="upvoted">Проголосовано</string>
     <string name="you_voted_same_way">Вы уже проголосовали за это сообщение</string>
-    <string name="login_to_vote">Зайдите или зарегестрируйтесь для голосования</string>
+    <string name="login_to_vote">Зайдите или зарегестрируйтесь, чтобы проголосовать</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
     <string name="nothing_here">Пока ничего нет, ваш персонализированный фид будет заполняться сразу после появления нового контента</string>
     <string name="wrong_image">Что-то не так с изображением, попробуйте другое.</string>
@@ -63,4 +63,8 @@
     <string name="enter_title">Заголовок поста не может быть пустым</string>
     <string name="send_success">Пост успешно опубликован</string>
     <string name="title_activity_main_test">MainTestActivity</string>
+    <string name="login_write_comment">Зайдите, чтобы писать комментарии</string>
+    <string name="title_activity_filtered_stories">FilteredStoriesActivity</string>
+    <string name="stories">Истории</string>
+    <string name="tag_search">Посты с тэгом:</string>
 </resources>

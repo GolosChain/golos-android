@@ -8,9 +8,10 @@ import eu.bittrade.libs.steemj.base.models.PublicKey
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO
 import io.golos.golos.App
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -59,7 +60,7 @@ internal class MockApiImpl : GolosApi() {
         return out
     }
 
-    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
+    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, filter: StoryFilter?, startAuthor: String?, startPermlink: String?): List<StoryTree> {
         val mapper = CommunicationHandler.getObjectMapper()
         val context = App.context
         val ins = context.resources.openRawResource(context.resources.getIdentifier("stripe",

@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes.viewmodel
+package io.golos.golos.screens.stories.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
@@ -10,14 +10,15 @@ import android.os.Looper
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.persistence.model.UserData
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.FilteredStoriesActivity
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -88,6 +89,19 @@ abstract class StoriesViewModel : ViewModel() {
     protected val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
+    var filter: StoryFilter? = null
+        set(value) {
+            if (field != value) {
+                mStoriesLiveData.value = StoriesViewState(true, ArrayList())
+                mStoriesLiveData.removeSource(mRepository.getStories(type, field))
+                mStoriesLiveData.addSource(mRepository.getStories(type, value)) {
+                    mStoriesLiveData.value = onNewItems(it)
+                }
+                mRepository.requestStoriesListUpdate(20, type, value, null, null)
+            }
+            field = value
+
+        }
 
     companion object {
         val mHandler = Handler(Looper.getMainLooper())
@@ -99,21 +113,13 @@ abstract class StoriesViewModel : ViewModel() {
         }
 
     init {
-        mStoriesLiveData.addSource(mRepository.getStories(type)) {
+        mStoriesLiveData.addSource(mRepository.getStories(type, filter)) {
             mStoriesLiveData.value = onNewItems(it)
         }
     }
 
     protected open fun onNewItems(items: StoryTreeItems?): StoriesViewState {
-        var isLoading = false
-        /* if (isUpdating.get() && items?.items?.size ?: 0 > 0) {
-             isLoading = true
-             if (items?.items?.size ?: 0 > mStoriesLiveData.value?.items?.size ?: 0) {
-                 isLoading = false
-                 isUpdating.set(false)
-             }
-         }*/
-        return StoriesViewState(isLoading, items?.items ?: ArrayList(), items?.error)
+        return StoriesViewState(false, items?.items ?: ArrayList(), items?.error)
     }
 
     open fun onSwipeToRefresh() {
@@ -123,7 +129,7 @@ abstract class StoriesViewModel : ViewModel() {
         }
         if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
-            mRepository.requestStoriesListUpdate(20, type, null, null)
+            mRepository.requestStoriesListUpdate(20, type, filter, null, null)
             isUpdating.set(true)
         }
     }
@@ -139,7 +145,7 @@ abstract class StoriesViewModel : ViewModel() {
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
                 if (isUpdating.get()) return
                 mStoriesLiveData.value = StoriesViewState(true)
-                mRepository.requestStoriesListUpdate(20, type, null, null)
+                mRepository.requestStoriesListUpdate(20, type, filter, null, null)
                 isUpdating.set(true)
             }
         }
@@ -161,8 +167,8 @@ abstract class StoriesViewModel : ViewModel() {
         mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
         mRepository.requestStoriesListUpdate(20,
                 type,
-                mStoriesLiveData.value?.items?.last()?.rootStory()?.author,
-                mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink)
+                null,
+                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink)
     }
 
     open fun onCardClick(it: StoryTree, context: Context?) {
@@ -192,27 +198,44 @@ abstract class StoriesViewModel : ViewModel() {
         if (mRepository.getSavedActiveUserData() == null) {
             return
         }
-        val story = it.rootStory() ?: return
-        mRepository.upVote(story, vote)
+        if (mRepository.isUserLoggedIn()) {
+            val story = it.rootStory() ?: return
+            mRepository.upVote(story, vote)
+        } else {
+            mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                    mStoriesLiveData.value?.items ?: ArrayList(),
+                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+        }
+
     }
 
     open fun downVote(it: StoryTree) {
-        Timber.e("downvote")
         if (!App.isAppOnline()) {
             setAppOffline()
             return
         }
-        val userData = mRepository.getSavedActiveUserData()
-        if (userData == null || userData.userName == null) {
-            return
+        if (mRepository.isUserLoggedIn()) {
+            val story = it.rootStory() ?: return
+            mRepository.cancelVote(story)
+        } else {
+            mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                    mStoriesLiveData.value?.items ?: ArrayList(),
+                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
-
-
-        val story = it.rootStory() ?: return
-        mRepository.cancelVote(story)
     }
 
     open var canVote = mRepository.getSavedActiveUserData()?.userName != null
-}
 
-interface ImageLoadRunnable : Runnable
+    fun onVoteRejected(it: StoryTree) {
+        mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                mStoriesLiveData.value?.items ?: ArrayList(),
+                GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+    }
+
+    fun onBlogClick(context: Context?, story: StoryTree) {
+
+        context?.let {
+            FilteredStoriesActivity.start(it, feedType = type, filter = StoryFilter(story.rootStory()?.categoryName))
+        }
+    }
+}

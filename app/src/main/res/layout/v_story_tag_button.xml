@@ -12,4 +12,5 @@
     android:layout_marginRight="@dimen/margin_material"
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
+    android:clickable="true"
     android:textColor="#3f4346" />

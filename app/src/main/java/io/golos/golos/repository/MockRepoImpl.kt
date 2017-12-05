@@ -7,7 +7,7 @@ import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.GolosError
@@ -77,7 +77,7 @@ internal class MockRepoImpl(
 
     }
 
-    override fun getStories(type: FeedType): LiveData<StoryTreeItems> {
+    override fun getStories(type: FeedType, filter: StoryFilter?): LiveData<StoryTreeItems> {
         return when (type) {
             FeedType.ACTUAL -> mActualStories
             FeedType.POPULAR -> mPopularStories
@@ -87,7 +87,7 @@ internal class MockRepoImpl(
         }
     }
 
-    override fun requestStoriesListUpdate(limit: Int, feedtype: FeedType, startAuthor: String?, startPermlink: String?) {
+    override fun requestStoriesListUpdate(limit: Int, feedtype: FeedType, filter: StoryFilter?, startAuthor: String?, startPermlink: String?) {
         val request = StoriesRequest(limit, feedtype, startAuthor, startPermlink)
         if (mRequests.contains(request)) return
         Timber.e("requestStoriesListUpdate " + feedtype)
@@ -97,7 +97,7 @@ internal class MockRepoImpl(
                 var out: List<StoryTree>
                 if (feedtype == FeedType.PERSONAL_FEED) out = api.getUserFeed(getSavedActiveUserData()!!.userName,
                         20, 1024, startAuthor, startPermlink)
-                else out = api.getStories(limit, feedtype, 1024, startAuthor, startPermlink)
+                else out = api.getStories(limit, feedtype, 1024, null, startAuthor, startPermlink)
                 var name = getSavedActiveUserData()?.userName
                 out.forEach {
                     if (name != null) {
@@ -129,6 +129,7 @@ internal class MockRepoImpl(
                     }
                     updatingFeed.value = StoryTreeItems(updatingFeed.value?.items ?: ArrayList(),
                             updatingFeed.value?.type ?: FeedType.NEW,
+                            null,
                             GolosErrorParser.parse(e))
                 }
             }
@@ -148,7 +149,8 @@ internal class MockRepoImpl(
                             val replaced =
                                     findAndReplace(workingCopy, currentWorkingItem)
                             mMainThreadExecutor.execute {
-                                it.value = StoryTreeItems(replaced, it.value?.type ?: FeedType.NEW, it.value?.error)
+                                it.value = StoryTreeItems(replaced, it.value?.type ?: FeedType.NEW,
+                                        null, it.value?.error)
                             }
                         }
                     }
@@ -269,5 +271,9 @@ internal class MockRepoImpl(
 
     override fun requestStoryUpdate(storyId: Long, feedType: FeedType) {
 
+    }
+
+    override fun isUserLoggedIn(): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

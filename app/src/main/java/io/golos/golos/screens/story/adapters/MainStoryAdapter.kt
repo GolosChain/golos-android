@@ -47,9 +47,11 @@ class MainStoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
             is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
+                if (vh.adapterPosition == -1)return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], null)
             })
             is ImageBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
+                if (vh.adapterPosition == -1)return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], v as? ImageView)
             })
         }

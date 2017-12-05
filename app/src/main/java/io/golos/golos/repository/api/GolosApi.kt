@@ -1,9 +1,10 @@
 package io.golos.golos.repository.api
 
 import io.golos.golos.App
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.screens.main_stripes.model.FeedType
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import java.io.File
@@ -33,7 +34,7 @@ abstract class GolosApi {
     abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
 
     abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
-                            startAuthor: String?, startPermlink: String?): List<StoryTree>
+                            filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryTree>
 
     abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
 

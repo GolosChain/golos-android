@@ -1,4 +1,4 @@
-package io.golos.golos.screens.main_stripes.model
+package io.golos.golos.screens.stories.model
 
 import android.support.annotation.VisibleForTesting
 import com.fasterxml.jackson.annotation.JsonProperty

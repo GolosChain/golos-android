@@ -9,6 +9,7 @@ import java.security.InvalidParameterException
  */
 object GolosErrorParser {
     fun parse(e: Exception): GolosError {
+        e.printStackTrace()
         return when (e) {
             is SteemResponseError -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, GolosErrorParser.getLocalizedError(e))
             is SteemInvalidTransactionException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.message, null)
@@ -29,6 +30,5 @@ object GolosErrorParser {
         else if (error.error.steemErrorDetails.message.contains(" <= now + fc::seconds(STEEMIT_MAX_TIME_UNTIL_EXPIRATION): "))
             return R.string.wrong_time
         else return R.string.unknown_error
-
     }
 }

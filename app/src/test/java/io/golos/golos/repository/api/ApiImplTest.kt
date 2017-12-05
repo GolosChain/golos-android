@@ -5,7 +5,9 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.util.AuthUtils
-import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.StoryFilter
+import io.golos.golos.screens.stories.model.FeedType
+import junit.framework.Assert
 import junit.framework.Assert.*
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.junit.Test
@@ -178,5 +180,21 @@ class ApiImplTest {
     fun getAccountDataTest() {
         service.getAccountData("yuri-vlad-second")
     }
+
+    @Test
+    fun testGetAvatar() {
+        val avatar = service.getUserAvatar("masterokst", "stoit-li-smotret-legendu-o-kolovrate", "ru----kino")
+        Assert.assertNull(avatar)
+        service.getUserAvatar("compress", "predchuvstvie-revolyucii-mirovogo-masshtaba", "ru----apvot50--50")
+    }
+
+    @Test
+    fun filteredStoriesTest() {
+       val stories = service.getStories(20, FeedType.ACTUAL, 10, StoryFilter("psk"), null, null)
+        Assert.assertEquals(20, stories.size)
+        Assert.assertFalse(stories.any { !it.rootStory()!!.tags.contains( "psk") })
+    }
+
+
 
 }

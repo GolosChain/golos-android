@@ -30,7 +30,7 @@
             android:name=".screens.widgets.PhotoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.main_stripes.StripesActivity"
+            android:name=".screens.stories.MainStoriesActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -39,14 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <!-- <activity
+        <!--
+        <activity
             android:name=".MainTestActivity"
             android:label="@string/title_activity_main_test"
             android:theme="@style/AppTheme">
 
-        </activity>-->
+        </activity>
+        -->
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="e3c157b69542160c5ec78e3e4d4c71251a4c3879" />
+
+        <activity
+            android:name=".screens.stories.FilteredStoriesActivity"
+            android:label="@string/title_activity_filtered_stories"
+            android:theme="@style/AppTheme"></activity>
     </application>
+
 </manifest>
