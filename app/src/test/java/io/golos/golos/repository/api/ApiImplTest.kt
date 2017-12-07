@@ -50,7 +50,7 @@ class ApiImplTest {
 
 
         var resp = service.auth(accname, masterPassword, null, null)
-        assertNull(resp.avatarPath)
+        assertNotNull(resp.avatarPath)
         assertTrue(resp.isKeyValid)
         assertEquals("yuri-vlad-second", resp.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
@@ -149,6 +149,7 @@ class ApiImplTest {
 
     @Test
     fun postFirstLevelCommentTest() {
+        Thread.sleep(4000)
         Golos4J.getInstance().addKeysToAccount(AccountName(accname), ImmutablePair(PrivateKeyType.POSTING, privatePosting))
         val storyTree = service.getStory("ase", "yuri-vlad-second", "123")
         assertNotNull(storyTree)

@@ -13,7 +13,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.androidviewmodel.AuthViewModel
+import io.golos.golos.screens.profile.AuthViewModel
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.utils.Translit

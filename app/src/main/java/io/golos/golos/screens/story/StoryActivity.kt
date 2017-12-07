@@ -98,10 +98,10 @@ class StoryActivity : GolosActivity() {
                     mBlogNameTv.visibility = View.VISIBLE
                 }
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_28dp), null, null, null)
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp), null, null, null)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_28dp), null, null, null)
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_24dp), null, null, null)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.gray_4f))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()

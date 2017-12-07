@@ -7,14 +7,14 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import io.golos.golos.R
-import io.golos.golos.screens.stories.adapters.StripesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 
 /**
  * Created by yuri on 02.11.17.
  */
 class PagerAndSpinnerConnection(private val spinner: Spinner,
                                 private val pager: ViewPager,
-                                private val adapter: StripesPagerAdpater) : ViewPager.OnPageChangeListener {
+                                private val adapter: StoriesPagerAdpater) : ViewPager.OnPageChangeListener {
 
     init {
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

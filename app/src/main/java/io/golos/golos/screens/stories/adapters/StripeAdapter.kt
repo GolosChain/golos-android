@@ -112,8 +112,8 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
         mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_28dp), null, null, null)
         if (noAvatarDrawable == null) noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_24dp)
-        if (userNotvotedDrarawble == null) userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_28dp)
-        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_28dp)
+        if (userNotvotedDrarawble == null) userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_24dp)
+        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp)
         if (errorDrawable == null) errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
 
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(userNotvotedDrarawble, null, null, null)
@@ -178,17 +178,17 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     }
                     wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
                         mMainImageBig.visibility = View.GONE
-                        mSecondaryImage.visibility = View.VISIBLE
+                        mSecondaryImage.visibility = View.GONE
                         mBodyTextMarkwon.visibility = View.VISIBLE
                         val options = RequestOptions()
                         options.centerInside()
                         mSecondaryImage.setImageBitmap(null)
-                        if (wrapper.images.size > 0) {
+                        /*if (wrapper.images.size > 0) {
                             mGlide.load(wrapper.images[0])
                                     .apply(options)
                                     .error(mGlide.load(errorDrawable))
                                     .into(mSecondaryImage)
-                        }
+                        }*/
                         mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
                     }
                     else -> {

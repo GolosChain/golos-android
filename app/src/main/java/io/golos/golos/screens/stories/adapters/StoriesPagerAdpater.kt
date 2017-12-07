@@ -11,7 +11,7 @@ import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.StoriesFragment.Companion.TYPE_TAG
 import io.golos.golos.screens.stories.model.FeedType
 
-class StripesPagerAdpater(val context: Context,  manager: FragmentManager) : FragmentPagerAdapter(manager) {
+class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : FragmentPagerAdapter(manager) {
     private val typesToPosition = HashMap<Int, FeedType>()
     private val mFragments = ArrayList<StoriesFragment>()
 
@@ -50,7 +50,9 @@ class StripesPagerAdpater(val context: Context,  manager: FragmentManager) : Fra
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
-        val type = typesToPosition[position]
+        var actualPosition = position
+        if (!isFeedFragmentShown) actualPosition += 1
+        val type = typesToPosition[actualPosition]
         var context = context
         return when (type) {
             FeedType.PERSONAL_FEED -> context.getString(R.string.feed)
@@ -58,7 +60,7 @@ class StripesPagerAdpater(val context: Context,  manager: FragmentManager) : Fra
             FeedType.PROMO -> context.getString(R.string.promo)
             FeedType.ACTUAL -> context.getString(R.string.actual)
             FeedType.NEW -> context.getString(R.string.stripes_new)
-            else ->""
+            else -> ""
         }
     }
 

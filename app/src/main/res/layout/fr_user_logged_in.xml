@@ -6,82 +6,126 @@
     android:background="@android:color/white"
     android:clickable="true">
 
-    <View
-        android:id="@+id/back"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/drawer_header_height"
-        android:background="@color/colorAccent"
-        android:visibility="visible"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        android:src="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/avatar_iv"
-        app:layout_constraintEnd_toEndOf="@+id/avatar_iv"
-        app:layout_constraintStart_toStartOf="@+id/avatar_iv"
-        app:layout_constraintTop_toTopOf="@+id/avatar_iv"
-        app:riv_oval="true" />
+    <ImageButton
+        android:id="@+id/settings_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material"
+        android:background="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_settings_gray_24dp" />
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
         android:layout_width="@dimen/avatar_size"
         android:layout_height="@dimen/avatar_size"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="@dimen/material_huge"
         android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="@id/back"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:riv_oval="true" />
 
     <TextView
         android:id="@+id/username_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_material_half"
-        android:gravity="center_horizontal"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/font_medium"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/avatar_iv" />
-
-    <TextView
-        android:id="@+id/posts_and_money"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/margin_material_half"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:drawablePadding="@dimen/margin_material_half"
-        android:gravity="center_horizontal"
-        android:textColor="@android:color/white"
+        android:layout_marginStart="@dimen/margin_material"
+        android:gravity="start|center_horizontal"
+        android:textColor="@android:color/black"
         android:textSize="@dimen/font_medium"
-        app:layout_constraintBottom_toBottomOf="@+id/back"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/settings_btn"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@+id/avatar_iv"
+        app:layout_constraintTop_toTopOf="@+id/avatar_iv" />
 
-    <android.support.v7.widget.AppCompatImageView
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginRight="@dimen/margin_material_half"
-        app:layout_constraintBottom_toBottomOf="@id/posts_and_money"
-        app:layout_constraintRight_toLeftOf="@id/posts_and_money"
-        app:layout_constraintTop_toTopOf="@id/posts_and_money"
-        app:srcCompat="@drawable/ic_comment_white_24dp" />
-
-    <android.support.v4.widget.NestedScrollView
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/moto"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/back">
+        android:layout_marginTop="@dimen/margin_material"
+        app:layout_constraintEnd_toStartOf="@id/settings_btn"
+        app:layout_constraintStart_toStartOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@id/avatar_iv" />
 
-        <android.support.v7.widget.ListViewCompat
-            android:id="@+id/menu_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_big" />
-    </android.support.v4.widget.NestedScrollView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/profile_divider_color"
+        app:layout_constraintBottom_toTopOf="@+id/subscribers_table" />
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/subscribers_table"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/margin_material"
+        android:orientation="horizontal"
+        app:divider="@drawable/shape_divider"
+        app:layout_constraintTop_toBottomOf="@id/moto"
+        app:showDividers="middle"
+
+        >
+
+        <TextView
+            android:id="@+id/subscribers_num_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center_vertical|end"
+            android:textColor="@color/gray_4f"
+            android:textSize="@dimen/font_medium" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:paddingEnd="@dimen/margin_material"
+            android:text="@string/subscribers"
+            android:textColor="@color/gray_7d"
+            android:textSize="10sp"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="8sp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/profile_divider_color" />
+
+        <TextView
+            android:id="@+id/subscriptions_num_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center|end"
+            android:textColor="@color/gray_4f"
+            android:textSize="@dimen/font_medium" />
+
+        <TextView
+            android:textSize="10sp"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="8sp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:paddingEnd="@dimen/margin_material"
+            android:text="@string/subscriptions"
+            android:textColor="@color/gray_7d" />
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/profile_divider_color"
+        app:layout_constraintTop_toBottomOf="@+id/subscribers_table" />
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subscribers_table" />
 </android.support.constraint.ConstraintLayout>

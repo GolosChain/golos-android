@@ -24,6 +24,7 @@ import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.toHtml
 import timber.log.Timber
+import java.util.*
 
 /**
  * Created by yuri on 08.11.17.
@@ -118,11 +119,16 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 }
                 mUsernameTv.text = comment.author
 
-                val currentTime = System.currentTimeMillis()
+
+               val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+
                 val dif = currentTime - comment.created
                 val hour = 1000 * 60 * 60
                 val hoursAgo = dif / hour
-                if (hoursAgo < 24) {
+                if  (hoursAgo == 0L){
+                    mTimeTv.text =  itemView.resources.getString(R.string.less_then_hour_ago)
+                }
+                else if (hoursAgo < 24) {
                     mTimeTv.text = "$hoursAgo ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 } else {
                     val daysAgo = hoursAgo / 24
@@ -132,10 +138,10 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
 
                 if (comment.isUserUpvotedOnThis) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_green, 0, 0, 0)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_circle_green_outline_20dp, 0, 0, 0)
                 } else {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_upvote_18_gray, 0, 0, 0)
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_cricle_gray_outline_20dp, 0, 0, 0)
                 }
                 if (field!!.comment.updatingState == UpdatingState.UPDATING) {
                     mUpvoteBtn.visibility = View.INVISIBLE

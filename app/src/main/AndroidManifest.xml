@@ -35,7 +35,6 @@
 
         <activity
             android:name=".screens.stories.FilteredStoriesActivity"
-            android:label="@string/title_activity_filtered_stories"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity

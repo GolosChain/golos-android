@@ -137,17 +137,19 @@
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/money_btn"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.VoteButton"
+                    android:textSize="@dimen/font_regular"
                     android:visibility="visible" />
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/comments_btn"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons" />
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.StoryButtons"
+                    android:textSize="@dimen/font_regular" />
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/margin_material_half"
-                android:background="#f0f3f6"/>
+                android:background="#f0f3f6" />
 
             <TextView
                 android:id="@+id/comments_tv"

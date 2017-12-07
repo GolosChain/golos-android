@@ -19,11 +19,10 @@ class MainPagerAdapter(manager: FragmentManager) : FragmentPagerAdapter(manager)
             STORIES_FRAGMENT_POITION -> StoriesHolderFragment()
             1 -> GolosFragment()
             2 -> GolosFragment()
-            3 -> GolosFragment()
             PROFILE_FRAGMENT_POITION -> ProfileRootFragment()
             else -> GolosFragment()
         }
     }
 
-    override fun getCount() = 5
+    override fun getCount() = 4
 }

@@ -1,5 +1,6 @@
 package io.golos.golos.screens.stories
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -17,7 +18,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.stories.adapters.StripeAdapter
-import io.golos.golos.screens.stories.adapters.StripesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.viewmodel.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
@@ -51,7 +52,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
-        val provider = ViewModelProviders.of(this)
+        val provider = ViewModelProviders.of(activity!!)
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
         val filter = arguments!!.getString(FILTER_TAG, null)
         mViewModel = when (type) {
@@ -97,13 +98,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 }
             }
         })
-        mRecycler?.recycledViewPool = StripesPagerAdpater.sharedPool
+        mRecycler?.recycledViewPool = StoriesPagerAdpater.sharedPool
     }
 
     private fun setUp() {
         mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
-        mViewModel?.storiesLiveData?.removeObservers(this)
-        mViewModel?.storiesLiveData?.observe(this, this)
+        mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
+        mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
     }
 
     override fun onChanged(t: StoriesViewState?) {

@@ -128,6 +128,7 @@ class RepositoryImplTest {
 
     @Test
     fun createSecondLevelComment() {
+        Thread.sleep(20000)
         val authData = repo.getCurrentUserDataAsLiveData()
         repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNotNull(authData.value)
@@ -158,7 +159,7 @@ class RepositoryImplTest {
         assertNotNull(resp.postingAuth?.second)
         assertNull(resp.activeAuth?.second)
         assertEquals(userName, resp.userName)
-        assertNull(resp.avatarPath)
+        assertNotNull(resp.avatarPath)
     }
 
     @Test
@@ -193,7 +194,7 @@ class RepositoryImplTest {
         assertNull(popular.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
-        var votingItem = popular.value?.items?.get(1)!!
+        var votingItem = popular.value?.items?.get(2)!!
         assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
 
         repo.upVote(votingItem.rootStory()!!, 100)

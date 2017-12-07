@@ -1,4 +1,4 @@
-package io.golos.golos.screens.androidviewmodel
+package io.golos.golos.screens.profile
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
@@ -8,7 +8,6 @@ import android.os.Looper
 import eu.bittrade.libs.steemj.exceptions.SteemCommunicationException
 import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
 import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
@@ -25,10 +24,7 @@ data class UserProfileState(val isLoggedIn: Boolean,
                             val userMoney: Double = 0.0,
                             val isScanMenuVisible: Boolean = false)
 
-data class AuthState(val isLoggedIn: Boolean,
-                     val userName: String = "",
-                     val postingWif: String? = null,
-                     val activeWif: String? = null)
+data class AuthState(val isLoggedIn: Boolean)
 
 data class AuthUserInput(val login: String,
                          val masterKey: String = "",
@@ -190,14 +186,19 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private fun initUser() {
         val userData = mRepository.getSavedActiveUserData()
         if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
-            userProfileState.value = UserProfileState(isLoggedIn = true, userName = userData.userName, avatarPath = userData.avatarPath)
+            userProfileState.value = UserProfileState(isLoggedIn = true,
+                    userName = userData.userName,
+                    avatarPath = userData.avatarPath)
             userAuthState.value = AuthState(isLoggedIn = true)
             mRepository.setActiveUserAccount(userData.userName, userData.privateActiveWif, userData.privatePostingWif)
             postWithCatch {
                 val data = mRepository.getAccountData(userData.userName)
                 mHandler.post({
-                    userProfileState.value = UserProfileState(isLoggedIn = true, isLoading = false, userName = data.userName,
-                            avatarPath = data.avatarPath, userMoney = data.accountWorth, userPostsCount = data.postsCount)
+                    userProfileState.value = UserProfileState(isLoggedIn = true,
+                            isLoading = false, userName = data.userName,
+                            avatarPath = data.avatarPath,
+                            userMoney = data.accountWorth,
+                            userPostsCount = data.postsCount)
                 })
             }
         } else {
@@ -210,7 +211,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onLogoutClick() {
         mRepository.deleteUserdata()
-        userProfileState.value = UserProfileState(false)
+        userProfileState.value = UserProfileState(false, false, avatarPath = null)
         userAuthState.value = AuthState(false)
     }
 }

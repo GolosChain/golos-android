@@ -34,7 +34,7 @@ internal class MockRepoImpl(
     private val mNewStories = MutableLiveData<StoryTreeItems>()
     private val mPromoStories = MutableLiveData<StoryTreeItems>()
     private val mFeedStories = MutableLiveData<StoryTreeItems>()
-    private val mAuthLiveData = MutableLiveData<UserData?>()
+    private val mAuthLiveData = MutableLiveData<UserData>()
     private val mExecutor = workingExecutors
     private val mMainThreadExecutor = mainThreadExecutor
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
@@ -257,7 +257,7 @@ internal class MockRepoImpl(
         }
     }
 
-    override fun getCurrentUserDataAsLiveData(): LiveData<UserData?> {
+    override fun getCurrentUserDataAsLiveData(): LiveData<UserData> {
         return mAuthLiveData
     }
 

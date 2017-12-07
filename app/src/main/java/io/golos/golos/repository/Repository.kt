@@ -82,7 +82,7 @@ abstract class Repository {
 
     abstract fun getSavedActiveUserData(): UserData?
 
-    abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData?>
+    abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData>
 
     abstract fun deleteUserdata()
 

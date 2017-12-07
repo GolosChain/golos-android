@@ -2,6 +2,7 @@ package io.golos.golos.screens.profile
 
 import android.app.Activity
 import android.app.Dialog
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,8 +20,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import io.golos.golos.R
-import io.golos.golos.screens.androidviewmodel.AuthUserInput
-import io.golos.golos.screens.androidviewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
 import io.golos.golos.utils.ErrorCode
@@ -31,7 +30,7 @@ import io.golos.golos.utils.showProgressDialog
 /**
  * Created by yuri on 30.10.17.
  */
-class NotLoggedInDrawerFragment : Fragment() {
+class NotLoggedInFragment : Fragment() {
     private val SCAN_POSTING_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_PERMISSION = nextInt()
@@ -46,9 +45,7 @@ class NotLoggedInDrawerFragment : Fragment() {
     private lateinit var mScanActive: ImageButton
     private lateinit var mPostingKeyMenu: ViewGroup
     private lateinit var mActiveKeyMenu: ViewGroup
-    private lateinit var mLogoText: TextView
     private lateinit var mMoreAboutGolos: TextView
-    private lateinit var mAvatarIv: ImageView
     private lateinit var mRegisterTv: TextView
     private lateinit var mCancelButton: Button
     private lateinit var mEnterButton: Button
@@ -63,8 +60,6 @@ class NotLoggedInDrawerFragment : Fragment() {
         mScanActive = v.findViewById(R.id.scan_active)
         mKeyEt = v.findViewById(R.id.key_et)
         mLogInEt = v.findViewById(R.id.login_et)
-        mLogoText = v.findViewById(R.id.logo_text)
-        mAvatarIv = v.findViewById(R.id.avatar_iv)
         mEnterButton = v.findViewById(R.id.enter_btn)
 
         val postingKeyRequest = View.OnClickListener {
@@ -98,13 +93,15 @@ class NotLoggedInDrawerFragment : Fragment() {
         mRegisterTv.text = Html.fromHtml(container!!.resources.getString(R.string.do_not_registered_register))
         mMoreAboutGolos.movementMethod = LinkMovementMethod.getInstance()
         mRegisterTv.movementMethod = LinkMovementMethod.getInstance()
+
+
         return v
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
+        mViewModel.userProfileState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
             if (it?.isScanMenuVisible == true) {
                 mKeyEt.visibility = View.GONE
                 mPostingKeyMenu.visibility = View.VISIBLE
@@ -213,8 +210,8 @@ class NotLoggedInDrawerFragment : Fragment() {
     }
 
     companion object {
-        fun getInstance(): NotLoggedInDrawerFragment {
-            val fr = NotLoggedInDrawerFragment()
+        fun getInstance(): NotLoggedInFragment {
+            val fr = NotLoggedInFragment()
             return fr
         }
     }

@@ -42,7 +42,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mPromoStories = MutableLiveData<StoryTreeItems>()
     private val mFeedStories = MutableLiveData<StoryTreeItems>()
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
-    private val mAuthLiveData = MutableLiveData<UserData?>()
+    private val mAuthLiveData = MutableLiveData<UserData>()
     private var mFilteredStoriesLiveData: Pair<FilteredRequest, MutableLiveData<StoryTreeItems>>? = null
 
     private fun getStripeItems(limit: Int, type: FeedType,
@@ -132,7 +132,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun getSavedActiveUserData(): UserData? {
         val name = mPersister.getCurrentUserName() ?: return null
         val keys = mPersister.getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
-        return UserData(mPersister.getAvatarForUser(name)?.first, name, keys[PrivateKeyType.ACTIVE], keys[PrivateKeyType.POSTING])
+        return UserData(mPersister.getAvatarForUser(name)?.first,
+                name, keys[PrivateKeyType.ACTIVE], keys[PrivateKeyType.POSTING])
     }
 
     override fun deleteUserdata() {
@@ -317,26 +318,50 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun requestStoryUpdate(story: StoryTree) {
         mWorkerExecutor.execute {
-            val story = getStory(story.rootStory()?.categoryName ?: "",
-                    story.rootStory()?.author ?: "",
-                    story.rootStory()?.permlink ?: "")
-            story.getFlataned().forEach {
-                if (it.story.avatarPath != null) {
-                    mPersister.saveAvatarPathForUser(it.story.author,
-                            it.story.avatarPath ?: "",
-                            System.currentTimeMillis())
-                }
-            }
-            val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
-                    mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
-            val replacer = StorySearcherAndReplacer()
-            listOfList.forEach {
-                val allItems = ArrayList(it.value?.items ?: ArrayList())
-                if (replacer.findAndReplace(story, allItems)) {
-                    mMainThreadExecutor.execute {
-                        it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW)
+            try {
+                val story = getStory(story.rootStory()?.categoryName ?: "",
+                        story.rootStory()?.author ?: "",
+                        story.rootStory()?.permlink ?: "")
+                story.getFlataned().forEach {
+                    if (it.story.avatarPath != null) {
+                        mPersister.saveAvatarPathForUser(it.story.author,
+                                it.story.avatarPath ?: "",
+                                System.currentTimeMillis())
                     }
                 }
+                val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
+                        mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
+                val replacer = StorySearcherAndReplacer()
+                listOfList.forEach {
+                    val allItems = ArrayList(it.value?.items ?: ArrayList())
+                    if (replacer.findAndReplace(story, allItems)) {
+                        mMainThreadExecutor.execute {
+                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Timber.e(e.message)
+                if (e is SteemResponseError) {
+                    Timber.e(e.error?.steemErrorDetails?.toString())
+                }
+                val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
+                        mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
+                val replacer = StorySearcherAndReplacer()
+                listOfList.forEach {
+                    val allItems = ArrayList(it.value?.items ?: ArrayList())
+                    var currentWorkingitem = story.rootStory()!!
+                    val result = replacer
+                            .findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), allItems)
+                    if (result) {
+                        mMainThreadExecutor.execute {
+                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW,
+                                    error = GolosErrorParser.parse(e))
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -354,7 +379,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
-    override fun getCurrentUserDataAsLiveData(): LiveData<UserData?> {
+    override fun getCurrentUserDataAsLiveData(): LiveData<UserData> {
         return mAuthLiveData
     }
 

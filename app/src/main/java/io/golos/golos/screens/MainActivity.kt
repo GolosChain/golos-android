@@ -19,6 +19,7 @@ class MainActivity : GolosActivity() {
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
+        pager.offscreenPageLimit = 4
         val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
         bottomNavView.setOnNavigationItemSelectedListener {
             when (it.itemId) {
@@ -31,10 +32,6 @@ class MainActivity : GolosActivity() {
                     false
                 }
                 R.id.groups_1 -> {
-                    bottomNavView.showSnackbar(R.string.unaval_in_current_version)
-                    false
-                }
-                R.id.groups_2 -> {
                     bottomNavView.showSnackbar(R.string.unaval_in_current_version)
                     false
                 }
@@ -65,6 +62,6 @@ class MainActivity : GolosActivity() {
 
     companion object {
         val STORIES_FRAGMENT_POITION = 0
-        val PROFILE_FRAGMENT_POITION = 4
+        val PROFILE_FRAGMENT_POITION = 3
     }
 }

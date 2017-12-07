@@ -36,4 +36,5 @@ public class ExampleUnitTest {
             Golos4J.getInstance().addAccount(new AccountName("yuri-vlad-second"), keys, true);
         }
     }
+
 }
