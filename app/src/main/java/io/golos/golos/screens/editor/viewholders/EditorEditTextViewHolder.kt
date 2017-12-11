@@ -34,6 +34,11 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             if (mEditText.onFocusChangeListener != this) {
                 mEditText.onFocusChangeListener = this
             }
+            if (value?.showHint == true) {
+                mEditText.hint = itemView.context.getString(R.string.enter_text)
+            } else {
+                mEditText.hint = null
+            }
             field = value
         }
 

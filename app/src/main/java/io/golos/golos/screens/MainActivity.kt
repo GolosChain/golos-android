@@ -31,7 +31,7 @@ class MainActivity : GolosActivity() {
                     bottomNavView.showSnackbar(R.string.unaval_in_current_version)
                     false
                 }
-                R.id.groups_1 -> {
+                R.id.notifications -> {
                     bottomNavView.showSnackbar(R.string.unaval_in_current_version)
                     false
                 }

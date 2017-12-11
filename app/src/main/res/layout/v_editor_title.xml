@@ -24,15 +24,7 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:text=""
+
         android:textColor="@color/rat"
         android:visibility="gone" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginBottom="@dimen/margin_material"
-        android:layout_marginEnd="@dimen/margin_material"
-        android:layout_marginStart="@dimen/margin_material"
-        android:layout_marginTop="@dimen/margin_material"
-        android:background="@color/delimeter_color" />
 </LinearLayout>

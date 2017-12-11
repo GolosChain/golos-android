@@ -1,10 +1,10 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.persistence.Persister
+import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
@@ -19,7 +19,7 @@ import java.util.concurrent.Executor
 /**
  * Created by yuri on 23.11.17.
  */
-class RepositoryImplTest {
+class RepositoryPostAndVoteTest {
     val userName = "yuri-vlad-second"
     val publicActive = "GLS7feysP2A87x4uNwn68q13rF3bchD6AKhJWf4CmPWjqQF8vCb5G"
     val privateActive = "5K7YbhJZqGnw3hYzsmH5HbDixWP5ByCBdnJxM5uoe9LuMX5rcZV"
@@ -40,7 +40,7 @@ class RepositoryImplTest {
                 executor,
                 object : Persister() {
                     var users = HashMap<String, String>()
-                    var keys = HashMap<PrivateKeyType, String?>()
+                    var userData: UserData? = null
                     var name: String? = null
                     override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
                         users.put(userName, avatarPath + "__" + updatedDate)
@@ -54,30 +54,47 @@ class RepositoryImplTest {
                                 path[1].replace("__", "").toLong())
                     }
 
-                    override fun saveKeys(keys: Map<PrivateKeyType, String?>) {
-                        this.keys = HashMap(keys)
+                    override fun getActiveUserData(): UserData? = userData
+
+                    override fun saveUserData(userData: UserData) {
+                        this.userData = userData
                     }
 
-                    override fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
-                        val out = HashMap<PrivateKeyType, String?>()
-                        keys.forEach { t, u ->
-                            if (types.contains(t)) out[t] = u
-                        }
-                        return out
+                    override fun deleteUserData() {
+                        userData = null
                     }
 
-                    override fun getCurrentUserName() = name
+                    override fun getCurrentUserName() = userData?.userName
 
                     override fun saveCurrentUserName(name: String?) {
                         this.name = name
                     }
                 }, ApiImpl()
         )
+        repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
+    }
+
+    @Test
+    fun testAuth() {
+        val authData = repo.getCurrentUserDataAsLiveData()
+        val resp = authData.value!!
+        assertNotNull(resp)
+        assertNotNull(resp.privateActiveWif)
+        assertNull(resp.privatePostingWif)
+        assertEquals(userName, resp.userName)
+        assertNotNull(resp.avatarPath)
+        assertNotNull(resp.getmMoto())
+        assertTrue(resp.postsCount != 0L)
+        assertTrue(resp.subscibesCount != 0L)
+        assertTrue(resp.subscribersCount != 0L)
+        assertTrue(resp.gbgAmount != 0.0)
+        assertTrue(resp.golosAmount != 0.0)
+        assertTrue(resp.golosPower != 0.0)
+        assertTrue(resp.subscibesCount > resp.subscribersCount)
     }
 
     @Test
     fun createPost() {
-        repo.authWithActiveWif("yuri-vlad-second", privateActive)
         val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
                 pointerPosition = null)
         repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", "test content", pointerPosition = null),
@@ -86,17 +103,6 @@ class RepositoryImplTest {
 
     }
 
-    @Test
-    fun testAuth() {
-        val authData = repo.getCurrentUserDataAsLiveData()
-        Assert.assertNull(authData.value)
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
-        assertNotNull(authData.value)
-        assertEquals(userName, authData.value!!.userName)
-        assertEquals(privateActive, authData.value!!.privateActiveWif)
-        assertEquals(privatePosting, authData.value!!.privatePostingWif)
-        Assert.assertNull(authData.value!!.avatarPath)
-    }
 
     @Test
     fun testAvatarUpdate() {
@@ -110,10 +116,9 @@ class RepositoryImplTest {
     @Test
     fun createCommentTest() {
         val authData = repo.getCurrentUserDataAsLiveData()
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNotNull(authData.value)
-        val newItems = repo.getStories(FeedType.NEW, null)
-        repo.requestStoriesListUpdate(20, FeedType.NEW, null, null, null)
+        val newItems = repo.getStories(FeedType.ACTUAL, null)
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
         assertNotNull(newItems.value)
         assertEquals(20, newItems.value!!.items.size)
         var notCommentedItem = newItems.value!!.items.first()
@@ -130,7 +135,6 @@ class RepositoryImplTest {
     fun createSecondLevelComment() {
         Thread.sleep(20000)
         val authData = repo.getCurrentUserDataAsLiveData()
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNotNull(authData.value)
         val newItems = repo.getStories(FeedType.POPULAR, null)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
@@ -154,22 +158,30 @@ class RepositoryImplTest {
 
     @Test
     fun testAuthWithPosting() {
-        val resp = repo.authWithPostingWif(userName, privatePosting)
-        assertNotNull(resp)
-        assertNotNull(resp.postingAuth?.second)
-        assertNull(resp.activeAuth?.second)
-        assertEquals(userName, resp.userName)
-        assertNotNull(resp.avatarPath)
+        repo.authWithPostingWif(userName, privatePosting, { resp ->
+            assertNotNull(resp)
+            assertNotNull(resp.postingAuth?.second)
+            assertNull(resp.activeAuth?.second)
+            assertEquals(userName, resp.userName)
+            assertNotNull(resp.avatarPath)
+            assertNotNull(resp.userMotto)
+            assertTrue(resp.postsCount != 0L)
+            assertTrue(resp.subscibesCount != 0L)
+            assertTrue(resp.subscribersCount != 0L)
+            assertTrue(resp.gbgAmount != 0.0)
+            assertTrue(resp.golosAmount != 0.0)
+            assertTrue(resp.golosPower != 0.0)
+        })
+
     }
 
     @Test
     fun testVoting() {
         val popular = repo.getStories(FeedType.POPULAR, null)
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNull(popular.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
-        var votingItem = popular.value?.items?.get(1)!!
+        var votingItem = popular.value?.items?.get(2)!!
 
         assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
         repo.requestStoryUpdate(votingItem)
@@ -180,6 +192,7 @@ class RepositoryImplTest {
         assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
         assert(!votingItem.comments().first().isUserUpvotedOnThis)
 
+        Thread.sleep(3000)
         repo.cancelVote(votingItem.rootStory()!!)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
@@ -190,7 +203,6 @@ class RepositoryImplTest {
     @Test
     fun testVoting2() {
         val popular = repo.getStories(FeedType.POPULAR, null)
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNull(popular.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
@@ -209,7 +221,7 @@ class RepositoryImplTest {
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName))
-        Assert.assertEquals(20, actualStoriesWithFilter.value!!.items.size)
+        Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
 
         repo.cancelVote(votingItem.rootStory()!!)
@@ -222,7 +234,6 @@ class RepositoryImplTest {
     @Test
     fun testVotingStatus() {
         val popular = repo.getStories(FeedType.ACTUAL, null)
-        repo.setActiveUserAccount(userName, privateActive, privatePosting)
         assertNull(popular.value)
         repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
         assertNotNull(popular.value)
@@ -272,18 +283,18 @@ class RepositoryImplTest {
         repo.requestStoryUpdate(actualStories.value!!.items.first().rootStory()!!.id, FeedType.POPULAR)
         Assert.assertTrue(actualStories.value!!.items.first().comments().isNotEmpty())
 
-        var updatingSoty = actualStories.value!!.items[1].rootStory()!!
+        var updatingSoty = actualStories.value!!.items[3].rootStory()!!
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
-        Assert.assertEquals(20, actualStoriesWithFilter.value!!.items.size)
+        Assert.assertTrue(actualStoriesWithFilter.value!!.items.size >2)
 
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isEmpty())
 
         repo.requestStoryUpdate(updatingSoty.id, FeedType.POPULAR)
-        Assert.assertTrue(actualStories.value!!.items[1].comments().isNotEmpty())
+        Assert.assertTrue(actualStories.value!!.items[3].comments().isNotEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isNotEmpty())
 
         actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter("psk"))

@@ -80,11 +80,20 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mViewModel = ViewModelProviders.of(this)[EditorViewModel::class.java]
         val mapper = ObjectMapper()
-        mSubmitBtn.setCompoundDrawablesWithIntrinsicBounds(null, null, getVectorDrawable(R.drawable.ic_send), null)
+        mSubmitBtn.setCompoundDrawablesWithIntrinsicBounds(null, null, getVectorDrawable(R.drawable.ic_send_blue_white_24dp), null)
         mapper.registerModule(KotlinModule())
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         val modeString = intent.getStringExtra(MODE_TAG)
         mMode = jacksonObjectMapper().readValue(modeString, EditorMode::class.java)
+        if (mMode?.isPostEditor == true) {
+            mSubmitBtn.text = getString(R.string.publish)
+        } else {
+            if (mMode?.rootStoryId == mMode?.commentToAnswerOnId) {
+                mSubmitBtn.text = getString(R.string.to_comment)
+            } else {
+                mSubmitBtn.text = getString(R.string.answer)
+            }
+        }
         mViewModel.mode = mMode
         mViewModel.editorLiveData.observe(this, android.arch.lifecycle.Observer {
             mAdapter.parts = ArrayList(it?.parts ?: ArrayList())
@@ -109,7 +118,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         })
         mTitle.state = EditorTitleState(mMode?.title ?: "", mMode?.isPostEditor ?: false, {
             mViewModel.onTitileChanges(it)
-        }, mMode?.subtitle ?: "")
+        }, mMode?.subtitle ?: "",
+                mMode?.isPostEditor == false
+                        && mMode?.rootStoryId == mMode?.commentToAnswerOnId)
         mFooter.state = EditorFooterState(mMode?.isPostEditor == true,
                 TagsStringValidator(object : StringSupplier {
                     override fun get(id: Int): String {

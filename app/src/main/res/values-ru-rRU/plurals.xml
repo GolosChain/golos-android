@@ -24,4 +24,20 @@
         <item quantity="zero">Часов</item>
         <item quantity="other">Часов</item>
     </plurals>
+    <plurals name="subscription">
+        <item quantity="few">Подписки</item>
+        <item quantity="many">Подписок</item>
+        <item quantity="one">Подписка</item>
+        <item quantity="two">Подписки</item>
+        <item quantity="zero">Подписок</item>
+        <item quantity="other">Подписок</item>
+    </plurals>
+    <plurals name="subscribers">
+        <item quantity="few">Подписчика</item>
+        <item quantity="many">Подписчиков</item>
+        <item quantity="one">Подписчик</item>
+        <item quantity="two">Подписчика</item>
+        <item quantity="zero">Подписчиков</item>
+        <item quantity="other">Подписчиков</item>
+    </plurals>
 </resources>

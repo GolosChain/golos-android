@@ -6,6 +6,7 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
+import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -16,10 +17,7 @@ import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.GolosErrorParser
-import io.golos.golos.utils.Translit
-import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.*
 import org.apache.commons.lang3.tuple.ImmutablePair
 import timber.log.Timber
 import java.io.File
@@ -27,6 +25,7 @@ import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 private data class FilteredRequest(val feedType: FeedType,
                                    val filter: StoryFilter)
@@ -36,29 +35,27 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                               private val mPersister: Persister,
                               private val mGolosApi: GolosApi) : Repository() {
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
-    private val mActualStories = MutableLiveData<StoryTreeItems>()
-    private val mPopularStories = MutableLiveData<StoryTreeItems>()
-    private val mNewStories = MutableLiveData<StoryTreeItems>()
-    private val mPromoStories = MutableLiveData<StoryTreeItems>()
-    private val mFeedStories = MutableLiveData<StoryTreeItems>()
+    private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mAuthLiveData = MutableLiveData<UserData>()
     private var mFilteredStoriesLiveData: Pair<FilteredRequest, MutableLiveData<StoryTreeItems>>? = null
 
-    private fun getStripeItems(limit: Int, type: FeedType,
+    private fun getStripeItems(limit: Int,
+                               type: FeedType,
                                filter: StoryFilter?,
                                truncateBody: Int, startAuthor: String?,
                                startPermlink: String?): List<StoryTree> {
-        var out: List<StoryTree>
-        if (type == FeedType.PERSONAL_FEED) {
-            if (filter == null) {
-                out = mGolosApi.getUserFeed(mPersister.getCurrentUserName() ?: "",
-                        20, 1024, startAuthor, startPermlink)
-            } else {
-                out = mGolosApi.getStories(limit, FeedType.NEW, truncateBody, filter, startAuthor, startPermlink)
-            }
-        } else out = mGolosApi.getStories(limit, type, truncateBody, filter, startAuthor, startPermlink)
-        var name = getSavedActiveUserData()?.userName
+        var out = when (type) {
+            FeedType.PERSONAL_FEED, FeedType.COMMENTS, FeedType.BLOG ->
+                mGolosApi.getUserFeed(mPersister.getActiveUserData()?.userName ?: "",
+                        type,
+                        limit,
+                        truncateBody,
+                        startAuthor,
+                        startPermlink)
+            else -> mGolosApi.getStories(limit, type, truncateBody, filter, startAuthor, startPermlink)
+        }
+        var name = mPersister.getActiveUserData()?.userName ?: ""
         out.forEach {
             if (name != null) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
@@ -66,6 +63,19 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
         }
         return out
+    }
+
+    init {
+        mAuthLiveData.value = mPersister.getActiveUserData()
+        mLiveDataMap.apply {
+            put(FeedType.ACTUAL, MutableLiveData<StoryTreeItems>())
+            put(FeedType.POPULAR, MutableLiveData<StoryTreeItems>())
+            put(FeedType.NEW, MutableLiveData<StoryTreeItems>())
+            put(FeedType.PROMO, MutableLiveData<StoryTreeItems>())
+            put(FeedType.PERSONAL_FEED, MutableLiveData<StoryTreeItems>())
+            put(FeedType.BLOG, MutableLiveData<StoryTreeItems>())
+            put(FeedType.COMMENTS, MutableLiveData<StoryTreeItems>())
+        }
     }
 
     private fun getUserAvatarFromDb(username: String): String? {
@@ -102,20 +112,59 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return story
     }
 
-    override fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
-        return auth(userName, masterKey, null, null)
+    override fun authWithMasterKey(userName: String, masterKey: String, listener: (UserAuthResponse) -> Unit) {
+        mWorkerExecutor.execute {
+            try {
+                val resp = auth(userName, masterKey, null, null)
+                mMainThreadExecutor.execute {
+                    listener.invoke(resp)
+                }
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    listener.invoke(UserAuthResponse(false,
+                            userName,
+                            error = GolosErrorParser.parse(e)))
+                }
+            }
+        }
     }
 
-    override fun authWithActiveWif(login: String, activeWif: String): UserAuthResponse {
-        return auth(login, null, activeWif, null)
+    override fun authWithActiveWif(login: String, activeWif: String, listener: (UserAuthResponse) -> Unit) {
+        mWorkerExecutor.execute {
+            try {
+                val resp = auth(login, null, activeWif, null)
+                mMainThreadExecutor.execute {
+                    listener.invoke(resp)
+                }
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    listener.invoke(UserAuthResponse(false,
+                            login,
+                            error = GolosErrorParser.parse(e)))
+                }
+            }
+        }
     }
 
-    override fun authWithPostingWif(login: String, postingWif: String): UserAuthResponse {
-        return auth(login, null, null, postingWif)
+    override fun authWithPostingWif(login: String, postingWif: String, listener: (UserAuthResponse) -> Unit) {
+        mWorkerExecutor.execute {
+            try {
+                val resp = auth(login, null, null, postingWif)
+                mMainThreadExecutor.execute {
+                    listener.invoke(resp)
+                }
+
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    listener.invoke(UserAuthResponse(false,
+                            login,
+                            error = GolosErrorParser.parse(e)))
+                }
+            }
+        }
     }
 
-
-    override fun getAccountData(of: String): AccountInfo {
+    private fun getAccountData(of: String): AccountInfo {
         return mGolosApi.getAccountData(of)
     }
 
@@ -123,39 +172,80 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
             if (response.avatarPath != null)
-                mPersister.saveAvatarPathForUser(userName, response.avatarPath, System.currentTimeMillis())
+                mPersister.saveAvatarPathForUser(userName,
+                        response.avatarPath,
+                        System.currentTimeMillis())
+
+            val userData = UserData(true,
+                    response.userMotto,
+                    response.avatarPath,
+                    response.userName,
+                    response.activeAuth?.second,
+                    response.postingAuth?.second,
+                    response.subscibesCount,
+                    response.subscribersCount,
+                    response.gbgAmount,
+                    response.golosAmount,
+                    response.golosPower,
+                    response.accountWorth,
+                    response.postsCount,
+                    response.safeGbg,
+                    response.safeGolos)
+
+            mPersister.saveUserData(userData)
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
+
+            mMainThreadExecutor.execute {
+
+                mAuthLiveData.value = userData
+            }
         }
         return response
     }
 
-    override fun getSavedActiveUserData(): UserData? {
-        val name = mPersister.getCurrentUserName() ?: return null
-        val keys = mPersister.getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
-        return UserData(mPersister.getAvatarForUser(name)?.first,
-                name, keys[PrivateKeyType.ACTIVE], keys[PrivateKeyType.POSTING])
+    override fun requestActiveUserDataUpdate() {
+        if (isUserLoggedIn()) {
+            val userData = mPersister.getActiveUserData()!!
+            mWorkerExecutor.execute {
+                try {
+                    val response = auth(userData.userName ?: "",
+                            null,
+                            userData.privateActiveWif,
+                            userData.privatePostingWif)
+                    if (!response.isKeyValid){
+                        mMainThreadExecutor.execute {  deleteUserdata()  }
+
+                    }
+                } catch (e: Exception) {
+                    Timber.e("requestActiveUserDataUpdate")
+                    e.printStackTrace()
+                    if (e is IllegalArgumentException
+                            && e.message?.contains("key must be 51 chars") ?: false) {
+                        mMainThreadExecutor.execute {  deleteUserdata()  }
+                    }
+                }
+            }
+        } else {
+            mAuthLiveData.value = null
+        }
+    }
+
+    private fun getSavedActiveUserData(): UserData? {
+        return mPersister.getActiveUserData()
     }
 
     override fun deleteUserdata() {
-        mPersister.saveCurrentUserName(null)
-        mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, null), Pair(PrivateKeyType.POSTING, null)))
+        mPersister.deleteUserData()
         mAuthLiveData.value = null
     }
 
-    override fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
+    private fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
         if ((privateActiveWif != null && privateActiveWif.isNotEmpty()) ||
                 (privatePostingWif != null && privatePostingWif.isNotEmpty())) {
             val keys = HashSet<ImmutablePair<PrivateKeyType, String>>()
             if (privateActiveWif != null) keys.add(ImmutablePair(PrivateKeyType.ACTIVE, privateActiveWif))
             if (privatePostingWif != null) keys.add(ImmutablePair(PrivateKeyType.POSTING, privatePostingWif))
-            mPersister.saveKeys(mapOf(Pair(PrivateKeyType.ACTIVE, privateActiveWif),
-                    Pair(PrivateKeyType.POSTING, privatePostingWif)))
-            mPersister.saveCurrentUserName(userName)
             Golos4J.getInstance().addAccount(AccountName(userName), keys, true)
-
-            mMainThreadExecutor.execute {
-                mAuthLiveData.value = UserData(getUserAvatarFromDb(userName), userName, privateActiveWif, privatePostingWif)
-            }
         }
     }
 
@@ -209,17 +299,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                     getUserAvatar(currentWorkingItem.rootStory()!!.author,
                                             currentWorkingItem.rootStory()!!.permlink,
                                             currentWorkingItem.rootStory()!!.categoryName)
-                            val listOfList = listOf(mActualStories, mPopularStories,
-                                    mPromoStories, mNewStories, mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
+                            val listOfList = mLiveDataMap.values + mFilteredStoriesLiveData?.second
                             listOfList.forEach {
-                                if (it.value?.items?.size ?: 0 > 0) {
+                                if (it?.value?.items?.size ?: 0 > 0) {
                                     val replaced =
-                                            findAndReplace(ArrayList(it.value?.items ?: ArrayList<StoryTree>()), currentWorkingItem)
+                                            findAndReplace(ArrayList(it?.value?.items ?: ArrayList<StoryTree>()), currentWorkingItem)
                                     mMainThreadExecutor.execute {
-                                        it.value = StoryTreeItems(replaced,
-                                                it.value?.type ?: FeedType.NEW,
-                                                it.value?.filter,
-                                                it.value?.error)
+                                        it?.value = StoryTreeItems(replaced,
+                                                it?.value?.type ?: FeedType.NEW,
+                                                it?.value?.filter,
+                                                it?.value?.error)
                                     }
                                 }
                             }
@@ -255,62 +344,64 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private fun vote(discussionItem: GolosDiscussionItem, isUpvote: Boolean, voteStrength: Short) {
         var isVoted = false
         var votedItem: GolosDiscussionItem? = null
+        val listOfList = mLiveDataMap.values + mFilteredStoriesLiveData?.second
+        val replacer = StorySearcherAndReplacer()
 
-        mWorkerExecutor.execute {
-            val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
-                    mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
-            val replacer = StorySearcherAndReplacer()
-
-            listOfList.forEach {
-                val storiesAll = ArrayList(it.value?.items ?: ArrayList())
-                val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
-                if (result) {
-                    mMainThreadExecutor.execute {
-                        it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
-                    }
+        listOfList.forEach {
+            val storiesAll = ArrayList(it?.value?.items ?: ArrayList())
+            val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
+            if (result) {
+                mMainThreadExecutor.execute {
+                    it?.value = StoryTreeItems(storiesAll, it?.value?.type ?: FeedType.NEW)
                 }
             }
+        }
+        mWorkerExecutor.execute {
+
             listOfList.forEach {
-                var storiesAll = ArrayList(it.value?.items ?: ArrayList())
-                val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
-                if (result) {
-                    try {
-                        if (!isVoted) {
-                            val currentStory = if (isUpvote) mGolosApi.upVote(discussionItem.author, discussionItem.permlink, voteStrength)
-                            else mGolosApi.cancelVote(discussionItem.author, discussionItem.permlink)
-                            currentStory.avatarPath = getUserAvatarFromDb(discussionItem.author)
-                            replacer.findAndReplace(StoryWrapper(currentStory, UpdatingState.DONE), storiesAll)
-                            currentStory.isUserUpvotedOnThis = isUpvote
-                            votedItem = currentStory
-                            mMainThreadExecutor.execute {
-                                it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
-                            }
-                            isVoted = true
-                        } else {
-                            val item = it
-                            votedItem?.let {
-                                replacer.findAndReplace(StoryWrapper(it, UpdatingState.DONE), storiesAll)
+                if (it != null) {
+                    var storiesAll = ArrayList(it.value?.items ?: ArrayList())
+                    val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
+                    if (result) {
+                        try {
+                            if (!isVoted) {
+                                val currentStory = if (isUpvote) mGolosApi.upVote(discussionItem.author, discussionItem.permlink, voteStrength)
+                                else mGolosApi.cancelVote(discussionItem.author, discussionItem.permlink)
+                                currentStory.avatarPath = getUserAvatarFromDb(discussionItem.author)
+                                replacer.findAndReplace(StoryWrapper(currentStory, UpdatingState.DONE), storiesAll)
+                                currentStory.isUserUpvotedOnThis = isUpvote
+                                votedItem = currentStory
                                 mMainThreadExecutor.execute {
-                                    item.value = StoryTreeItems(storiesAll, item.value?.type ?: FeedType.NEW)
+                                    it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW)
+                                }
+                                isVoted = true
+                            } else {
+                                val item = it
+                                votedItem?.let {
+                                    replacer.findAndReplace(StoryWrapper(it, UpdatingState.DONE), storiesAll)
+                                    mMainThreadExecutor.execute {
+                                        item.value = StoryTreeItems(storiesAll, item.value?.type ?: FeedType.NEW)
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Timber.e(e.message)
+                            if (e is SteemResponseError) {
+                                Timber.e(e.error?.steemErrorDetails?.toString())
+                            }
+                            mMainThreadExecutor.execute {
+                                if (result) {
+                                    var currentWorkingitem = discussionItem.clone() as GolosDiscussionItem
+                                    val result = replacer.findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), storiesAll)
+                                    it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW,
+                                            error = GolosErrorParser.parse(e))
                                 }
                             }
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Timber.e(e.message)
-                        if (e is SteemResponseError) {
-                            Timber.e(e.error?.steemErrorDetails?.toString())
-                        }
-                        mMainThreadExecutor.execute {
-                            if (result) {
-                                var currentWorkingitem = discussionItem.clone() as GolosDiscussionItem
-                                val result = replacer.findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), storiesAll)
-                                it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW,
-                                        error = GolosErrorParser.parse(e))
-                            }
-                        }
                     }
                 }
+
             }
         }
     }
@@ -329,14 +420,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                 System.currentTimeMillis())
                     }
                 }
-                val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
-                        mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
+                val listOfList = mLiveDataMap.values + mFilteredStoriesLiveData?.second
                 val replacer = StorySearcherAndReplacer()
                 listOfList.forEach {
-                    val allItems = ArrayList(it.value?.items ?: ArrayList())
+                    val allItems = ArrayList(it?.value?.items ?: ArrayList())
                     if (replacer.findAndReplace(story, allItems)) {
                         mMainThreadExecutor.execute {
-                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW)
+                            it?.value = StoryTreeItems(allItems, it?.value?.type ?: FeedType.NEW)
                         }
                     }
                 }
@@ -346,22 +436,20 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 if (e is SteemResponseError) {
                     Timber.e(e.error?.steemErrorDetails?.toString())
                 }
-                val listOfList = listOf(mActualStories, mPopularStories, mPromoStories, mNewStories,
-                        mFeedStories, mFilteredStoriesLiveData?.second ?: MutableLiveData())
+                val listOfList = mLiveDataMap.values + mFilteredStoriesLiveData?.second
                 val replacer = StorySearcherAndReplacer()
                 listOfList.forEach {
-                    val allItems = ArrayList(it.value?.items ?: ArrayList())
+                    val allItems = ArrayList(it?.value?.items ?: ArrayList())
                     var currentWorkingitem = story.rootStory()!!
                     val result = replacer
                             .findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), allItems)
                     if (result) {
                         mMainThreadExecutor.execute {
-                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW,
+                            it?.value = StoryTreeItems(allItems, it?.value?.type ?: FeedType.NEW,
                                     error = GolosErrorParser.parse(e))
                         }
                     }
                 }
-
             }
         }
     }
@@ -384,7 +472,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit) {
-        if (mPersister.getCurrentUserName() == null) return
+        if (!isUserLoggedIn()) {
+            resultListener.invoke(Unit, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
+            return
+        }
         val tags = ArrayList(tags)
         val content = ArrayList(content)
         mWorkerExecutor.execute {
@@ -421,7 +512,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                to: GolosDiscussionItem,
                                content: List<EditorPart>,
                                resultListener: (Unit, GolosError?) -> Unit) {
-        val userData = mAuthLiveData.value ?: return
+        if (!isUserLoggedIn()) {
+            resultListener.invoke(Unit, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
+            return
+        }
         mWorkerExecutor.execute {
             try {
                 val content = ArrayList(content)
@@ -434,7 +528,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             }
                         }
                 val contentString = content.joinToString(separator = "\n") { it.markdownRepresentation }
-                mGolosApi.sendComment(userData.userName,
+                mGolosApi.sendComment(mPersister.getCurrentUserName() ?: return@execute,
                         to.author,
                         to.permlink,
                         contentString,
@@ -452,21 +546,14 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun isUserLoggedIn(): Boolean {
-        val name = mPersister.getCurrentUserName() ?: return false
-        val keys = mPersister.getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
-        return keys[PrivateKeyType.ACTIVE] != null || keys[PrivateKeyType.POSTING] != null
+        val userData = mPersister.getActiveUserData()
+        return userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)
     }
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
                                           filter: StoryFilter?): MutableLiveData<StoryTreeItems> {
         if (filter == null)
-            return when (feedtype) {
-                FeedType.ACTUAL -> mActualStories
-                FeedType.POPULAR -> mPopularStories
-                FeedType.NEW -> mNewStories
-                FeedType.PROMO -> mPromoStories
-                FeedType.PERSONAL_FEED -> mFeedStories
-            }
+            return mLiveDataMap[feedtype]!!
         else {
             val filteredRequest = FilteredRequest(feedtype, filter)
             return if (mFilteredStoriesLiveData == null) {

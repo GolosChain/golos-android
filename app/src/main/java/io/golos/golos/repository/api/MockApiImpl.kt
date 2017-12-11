@@ -29,7 +29,7 @@ internal class MockApiImpl : GolosApi() {
         return "https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg"
     }
 
-    override fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
+    override fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
         return Golos4J.getInstance().databaseMethods
                 .getUserFeed(AccountName("cepera"))
                 .map {
@@ -52,6 +52,7 @@ internal class MockApiImpl : GolosApi() {
         val response = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("cepera")))
         val acc = response[0]
         val out = UserAuthResponse(true, acc.name.name,
+                "stub moto",
                 Pair((acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "posting-key-stub"),
                 Pair((acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "active-key-stub"),
                 acc.avatarPath,

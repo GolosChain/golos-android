@@ -1,71 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_lo"
+        android:animateLayoutChanges="true"
+        android:background="@android:color/white"
+        android:orientation="vertical">
 
-
-        <android.support.design.widget.CollapsingToolbarLayout
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            app:collapsedTitleGravity="center_horizontal|top"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+            android:layout_height="wrap_content">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+
+            <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                app:elevation="1dp"
-                app:navigationIcon="@drawable/ic_keyboard_backspace_gray_24dp"
-                app:title="Текст"
-                app:titleTextColor="@color/textColorP">
+                android:fitsSystemWindows="true"
+                app:collapsedTitleGravity="center_horizontal|top"
+                app:contentScrim="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
-                <RelativeLayout
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@null">
+                    android:background="@android:color/white"
+                    android:visibility="visible"
+                    app:elevation="1dp"
+                    app:navigationIcon="@drawable/ic_clear_gray_24dp"
+                    app:title="Текст"
+                    app:titleTextColor="@color/textColorP">
 
                     <android.support.v7.widget.AppCompatButton
                         android:id="@+id/submit_btn"
                         style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="@dimen/margin_material_half"
-                        android:drawablePadding="@dimen/margin_material_half"
-                        android:gravity="end|center_vertical"
+                        android:layout_marginEnd="@dimen/margin_material"
+                        android:drawablePadding="@dimen/material_huge"
+                        android:gravity="center"
                         android:text="@string/publish"
                         android:textAllCaps="false"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp" />
-                </RelativeLayout>
+                        android:textColor="#333333"
+                        android:textSize="@dimen/font_medium"
+                        android:textStyle="normal" />
 
-            </android.support.v7.widget.Toolbar>
-        </android.support.design.widget.CollapsingToolbarLayout>
-    </android.support.design.widget.AppBarLayout>
+                </android.support.v7.widget.Toolbar>
+            </android.support.design.widget.CollapsingToolbarLayout>
+        </android.support.design.widget.AppBarLayout>
 
-
-    <RelativeLayout
-
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_lo"
-            android:layout_alignParentTop="true">
+            android:layout_alignParentTop="true"
+            app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -89,38 +84,46 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
+    </android.support.design.widget.CoordinatorLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/bottom_lo"
+        android:layout_alignTop="@id/bottom_lo"
+        android:layout_marginTop="-4dp"
+        android:background="@drawable/shape_shadow" />
 
-        <LinearLayout
-            android:id="@+id/bottom_lo"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/bottom_controls_height"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="@dimen/margin_material_half"
-            android:gravity="end"
-            android:orientation="horizontal">
+    <LinearLayout
+        android:id="@+id/bottom_lo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_controls_height"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        android:gravity="end"
+        android:orientation="horizontal">
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_users"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_gravity="center"
-                android:background="?selectableItemBackground"
-                android:text="\@"
-                android:textColor="@color/btn_pink_black_color"
-                android:textSize="20dp"
-                android:visibility="gone" />
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_users"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="?selectableItemBackground"
+            android:text="\@"
+            android:textColor="@color/btn_pink_black_color"
+            android:textSize="20dp"
+            android:visibility="gone" />
 
-            <android.support.v7.widget.AppCompatImageButton
-                android:id="@+id/btn_link"
-                style="@style/BottomButtonStyle"
-                android:src="@drawable/btn_pink_black_link" />
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/btn_link"
+            style="@style/BottomButtonStyle"
+            android:layout_marginEnd="@dimen/margin_material_half"
+            app:srcCompat="@drawable/ic_link_gray_24dp" />
 
-            <android.support.v7.widget.AppCompatImageButton
-                android:id="@+id/btn_insert_image"
-                style="@style/BottomButtonStyle"
-                android:src="@drawable/btn_pink_black_image" />
-        </LinearLayout>
-    </RelativeLayout>
-
-</android.support.design.widget.CoordinatorLayout>
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/btn_insert_image"
+            style="@style/BottomButtonStyle"
+            android:layout_marginEnd="@dimen/margin_material"
+            app:srcCompat="@drawable/ic_image_gray_24dp" />
+    </LinearLayout>
+</RelativeLayout>

@@ -17,8 +17,8 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.mapper
-import io.golos.golos.screens.stories.adapters.StripeAdapter
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StripeAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.viewmodel.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
@@ -61,6 +61,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             FeedType.POPULAR -> provider.get(PopularViewModel::class.java)
             FeedType.PROMO -> provider.get(PromoViewModel::class.java)
             FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
+            FeedType.BLOG -> provider.get(BlogViewModle::class.java)
+            FeedType.COMMENTS -> provider.get(CommentsViewModle::class.java)
         }
         mViewModel!!.filter = if (filter == null || filter == "null") null
         else mapper.readValue(filter, StoryFilter::class.java)

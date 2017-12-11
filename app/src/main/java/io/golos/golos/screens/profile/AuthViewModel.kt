@@ -3,26 +3,32 @@ package io.golos.golos.screens.profile
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
-import android.os.Handler
-import android.os.Looper
-import eu.bittrade.libs.steemj.exceptions.SteemCommunicationException
-import eu.bittrade.libs.steemj.exceptions.SteemConnectionException
-import eu.bittrade.libs.steemj.exceptions.SteemTimeoutException
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.Transformations
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.utils.ErrorCode
-import org.bitcoinj.core.AddressFormatException
-import java.security.InvalidParameterException
+import io.golos.golos.utils.GolosError
 
 data class UserProfileState(val isLoggedIn: Boolean,
                             val isLoading: Boolean = false,
-                            val error: Pair<ErrorCode, Int>? = null,
+                            val error: GolosError? = null,
                             val userName: String = "",
                             val avatarPath: String? = null,
                             val userPostsCount: Long = 0L,
-                            val userMoney: Double = 0.0,
-                            val isScanMenuVisible: Boolean = false)
+                            val userAccountWorth: Double = 0.0,
+                            val isScanMenuVisible: Boolean = false,
+                            val subscribesNum: Long = 0,
+                            val userMoto: String? = null,
+                            val subscribersNum: Long = 0,
+                            val golosAmount: Double = 0.0,
+                            val golosPower: Double = 0.0,
+                            val gbgAmount: Double = 0.0,
+                            val golosInSafeAmount: Double = 0.0,
+                            val gbgInSafeAmount: Double = 0.0,
+                            val accountWorth: Double = 0.0)
 
 data class AuthState(val isLoggedIn: Boolean)
 
@@ -31,22 +37,28 @@ data class AuthUserInput(val login: String,
                          val postingWif: String = "",
                          val activeWif: String = "")
 
-class AuthViewModel(app: Application) : AndroidViewModel(app) {
+class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData> {
     val userProfileState = MutableLiveData<UserProfileState>()
-    val userAuthState = MutableLiveData<AuthState>()
-    val onCloseDrawerRequest = MutableLiveData<Void>()
+    val userAuthState = Transformations.map(userProfileState,
+            {
+                if (it?.isLoggedIn == true) AuthState(true)
+                else AuthState(false)
+            })
     private var mLastUserInput = AuthUserInput("")
     private val mRepository = Repository.get
-    private val mExecutor = Repository.sharedExecutor
-    private val mHandler = Handler(Looper.getMainLooper())
 
     init {
-        val userData = mRepository.getSavedActiveUserData()
-        if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
-            initUser()
-        } else {
-            userProfileState.value = UserProfileState(isLoggedIn = false, isScanMenuVisible = false)
-            userAuthState.value = AuthState(isLoggedIn = false)
+        mRepository
+                .getCurrentUserDataAsLiveData().observeForever(this)
+        mRepository.requestActiveUserDataUpdate()
+    }
+
+    override fun onChanged(t: UserData?) {
+        if (t == null || !t.isUserLoggedIn) {
+            userProfileState.value = UserProfileState(isLoggedIn = false,
+                    isScanMenuVisible = false)
+        } else if (t != null) {
+            initUser(t)
         }
     }
 
@@ -63,70 +75,79 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun onCancelClick() {
-        onCloseDrawerRequest.value = null
+
     }
 
     fun onLoginClick() {
         if (mLastUserInput.login.isEmpty()) {
-            userProfileState.value = createStateCopyMutatingValue(error = Pair(ErrorCode.ERROR_AUTH, R.string.enter_login))
+            userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
+                    localizedMessage = R.string.enter_login,
+                    nativeMessage = null))
+
         } else if (userProfileState.value?.isScanMenuVisible == false) {
             if (mLastUserInput.masterKey.isEmpty()) {
-                userProfileState.value = createStateCopyMutatingValue(error = Pair(ErrorCode.ERROR_AUTH, R.string.enter_password))
+                userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
+                        null,
+                        R.string.enter_password))
             } else {
                 userProfileState.value = UserProfileState(false, true, null,
                         mLastUserInput.login, isScanMenuVisible = false)
-                postWithCatch({
-                    val resp = mRepository.authWithMasterKey(mLastUserInput.login, mLastUserInput.masterKey)
-                    proceedAuthResponse(resp)
-                })
+                mRepository.authWithMasterKey(mLastUserInput.login,
+                        mLastUserInput.masterKey,
+                        { proceedAuthResponse(it) })
             }
         } else if (userProfileState.value?.isScanMenuVisible == true) {
             if (mLastUserInput.activeWif.isEmpty() && mLastUserInput.postingWif.isEmpty())
-                userProfileState.value = createStateCopyMutatingValue(error = Pair(ErrorCode.ERROR_AUTH, R.string.posting_or_active_key))
+                userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
+                        null,
+                        R.string.posting_or_active_key))
             else if (mLastUserInput.activeWif.isNotEmpty()) {
-                mHandler.post({
-                    userProfileState.value = UserProfileState(false, true, null,
-                            mLastUserInput.login, isScanMenuVisible = true)
-                })
-                postWithCatch {
-                    val resp = mRepository.authWithActiveWif(mLastUserInput.login, mLastUserInput.activeWif)
-                    proceedAuthResponse(resp)
-                }
+                userProfileState.value = UserProfileState(false, true, null,
+                        mLastUserInput.login, isScanMenuVisible = true)
+
+                mRepository.authWithActiveWif(mLastUserInput.login,
+                        mLastUserInput.activeWif,
+                        { proceedAuthResponse(it) })
 
             } else if (mLastUserInput.postingWif.isNotEmpty()) {
-                mHandler.post({
-                    userProfileState.value = UserProfileState(false, true, null,
-                            mLastUserInput.login, isScanMenuVisible = true)
-                })
-                postWithCatch {
-                    val resp = mRepository.authWithPostingWif(mLastUserInput.login, mLastUserInput.postingWif)
-                    proceedAuthResponse(resp)
-                }
+                userProfileState.value = UserProfileState(false, true, null,
+                        mLastUserInput.login, isScanMenuVisible = true)
+
+                mRepository.authWithPostingWif(mLastUserInput.login,
+                        mLastUserInput.postingWif,
+                        { proceedAuthResponse(it) })
             }
         }
     }
 
     private fun proceedAuthResponse(resp: UserAuthResponse) {
-        mHandler.post({
-            if (!resp.isKeyValid) {
-                userProfileState.value = createStateCopyMutatingValue(isLoggedIn = false,
-                        isLoading = false,
-                        error = Pair(ErrorCode.ERROR_AUTH, R.string.wrong_credentials))
-            } else {
-                userProfileState.value = UserProfileState(isLoggedIn = true,
-                        userName = resp.userName ?: "",
-                        avatarPath = resp.avatarPath,
-                        userPostsCount = resp.postsCount,
-                        userMoney = resp.accountWorth)
-                userAuthState.value = AuthState(isLoggedIn = true)
-            }
-        })
+        if (!resp.isKeyValid) {
+            userProfileState.value = createStateCopyMutatingValue(isLoggedIn = false,
+                    isLoading = false,
+                    error = resp.error)
+        } else {
+            userProfileState.value = UserProfileState(isLoggedIn = true,
+                    userName = resp.userName ?: "",
+                    avatarPath = resp.avatarPath,
+                    userPostsCount = resp.postsCount,
+                    userAccountWorth = resp.accountWorth,
+                    isLoading = false,
+                    subscribersNum = resp.subscribersCount,
+                    subscribesNum = resp.subscibesCount,
+                    userMoto = resp.userMotto,
+                    golosAmount = resp.golosAmount,
+                    golosPower = resp.golosPower,
+                    gbgAmount = resp.gbgAmount,
+                    gbgInSafeAmount = resp.safeGbg,
+                    golosInSafeAmount = resp.safeGolos,
+                    accountWorth = resp.accountWorth)
+        }
     }
 
     private fun createStateCopyMutatingValue(
             isLoggedIn: Boolean? = null,
             isLoading: Boolean? = null,
-            error: Pair<ErrorCode, Int>? = null,
+            error: GolosError? = null,
             userName: String? = null,
             avatarPath: String? = null,
             userCommentsCount: Long? = null,
@@ -138,80 +159,38 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 userName ?: mLastUserInput.login ?: "",
                 avatarPath ?: userProfileState.value?.avatarPath,
                 userCommentsCount ?: userProfileState.value?.userPostsCount ?: 0,
-                userMoney ?: userProfileState.value?.userMoney ?: 0.0,
+                userMoney ?: userProfileState.value?.userAccountWorth ?: 0.0,
                 isScanMenuVisible ?: userProfileState.value?.isScanMenuVisible == true)
     }
 
-    private fun postWithCatch(action: () -> Unit) {
-        mExecutor.execute({
-            try {
-                action.invoke()
-            } catch (e: AddressFormatException) {
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.UNKNOWN, R.string.unknown_error))
-                })
-            } catch (e: SteemTimeoutException) {
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.ERROR_SLOW_CONNECTION, R.string.slow_internet_connection))
-                })
-            } catch (e: SteemCommunicationException) {
-                e.printStackTrace()
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.ERROR_NO_CONNECTION, R.string.no_internet_connection))
-                })
-            } catch (e: SteemConnectionException) {
-                e.printStackTrace()
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.ERROR_NO_CONNECTION, R.string.no_internet_connection))
-                })
-            } catch (e: InvalidParameterException) {
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.ERROR_AUTH, R.string.wrong_credentials))
-                })
-            } catch (e: Exception) {
-                e.printStackTrace()
-                mHandler.post({
-                    userProfileState.value = createStateCopyMutatingValue(isLoading = false,
-                            error = Pair(ErrorCode.ERROR_NO_CONNECTION, R.string.no_internet_connection))
-                })
-            }
-        })
-    }
-
-    private fun initUser() {
-        val userData = mRepository.getSavedActiveUserData()
-        if (userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)) {
+    private fun initUser(userData: UserData) {
+        if (userData.privateActiveWif != null || userData.privatePostingWif != null) {
             userProfileState.value = UserProfileState(isLoggedIn = true,
-                    userName = userData.userName,
-                    avatarPath = userData.avatarPath)
-            userAuthState.value = AuthState(isLoggedIn = true)
-            mRepository.setActiveUserAccount(userData.userName, userData.privateActiveWif, userData.privatePostingWif)
-            postWithCatch {
-                val data = mRepository.getAccountData(userData.userName)
-                mHandler.post({
-                    userProfileState.value = UserProfileState(isLoggedIn = true,
-                            isLoading = false, userName = data.userName,
-                            avatarPath = data.avatarPath,
-                            userMoney = data.accountWorth,
-                            userPostsCount = data.postsCount)
-                })
-            }
+                    isLoading = false,
+                    userName = userData.userName ?: "",
+                    avatarPath = userData.avatarPath,
+                    userAccountWorth = userData.gbgAmount,
+                    userPostsCount = userData.postsCount,
+                    subscribesNum = userData.subscibesCount,
+                    subscribersNum = userData.subscribersCount,
+                    userMoto = userData.getmMoto(),
+                    golosAmount = userData.golosAmount,
+                    golosPower = userData.golosPower,
+                    gbgAmount = userData.gbgAmount,
+                    gbgInSafeAmount = userData.safeGbg,
+                    golosInSafeAmount = userData.safeGolos,
+                    accountWorth = userData.accountWorth)
         } else {
-            mHandler.post {
-                userProfileState.value = UserProfileState(isLoggedIn = false, isLoading = false, userName = mLastUserInput.login,
-                        error = Pair(ErrorCode.ERROR_AUTH, R.string.wrong_credentials))
-            }
+            userProfileState.value = UserProfileState(isLoggedIn = false,
+                    isLoading = false,
+                    userName = mLastUserInput.login,
+                    error = GolosError(ErrorCode.ERROR_AUTH, null,
+                            R.string.wrong_credentials))
         }
     }
 
     fun onLogoutClick() {
         mRepository.deleteUserdata()
         userProfileState.value = UserProfileState(false, false, avatarPath = null)
-        userAuthState.value = AuthState(false)
     }
 }

@@ -16,7 +16,8 @@ import io.golos.golos.R
 data class EditorTitleState(var title: CharSequence = "",
                             val isTitleEditable: Boolean = false,
                             val onTitleChanges: (CharSequence) -> Unit = {},
-                            val subtitle: CharSequence? = null)
+                            val subtitle: CharSequence? = null,
+                            val isHidden: Boolean = false)
 
 class EditorTitle : FrameLayout, TextWatcher {
 
@@ -39,7 +40,7 @@ class EditorTitle : FrameLayout, TextWatcher {
     private var mSubtitleText: TextView
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.vh_editor_title, this)
+        LayoutInflater.from(context).inflate(R.layout.v_editor_title, this)
         mTitleEt = findViewById(R.id.title_et)
         mSubtitleText = findViewById(R.id.subtitle_text)
     }
@@ -48,13 +49,16 @@ class EditorTitle : FrameLayout, TextWatcher {
         set(value) {
             field = value
             mTitleEt.isEnabled = field.isTitleEditable
-            if (mTitleEt.text.toString() != field.title.toString().toUpperCase()) {
-                mTitleEt.setText(field.title.toString().toUpperCase())
-            }
+            if (mTitleEt.text.toString() != value.title.toString()) mTitleEt.setText(value.title.toString())
             mSubtitleText.text = field.subtitle
             mSubtitleText.visibility = if (mSubtitleText.text.isEmpty()) View.GONE else View.VISIBLE
             mTitleEt.removeTextChangedListener(this)
             mTitleEt.addTextChangedListener(this)
+            if (value.isHidden) {
+                this.visibility = View.GONE
+            } else {
+                this.visibility = View.VISIBLE
+            }
         }
 
     override fun afterTextChanged(s: Editable?) {

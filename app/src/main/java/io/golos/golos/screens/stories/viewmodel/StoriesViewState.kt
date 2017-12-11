@@ -12,7 +12,6 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.StoryTreeItems
-import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
@@ -31,13 +30,22 @@ data class StoriesViewState(val isLoading: Boolean,
                             val fullscreenMessage: Int? = null,
                             val popupMessage: Int? = null)
 
-class FeedViewModel : StoriesViewModel() {
+class CommentsViewModle : FeedViewModel() {
+    override val type: FeedType
+        get() = FeedType.COMMENTS
+}
+
+class BlogViewModle : FeedViewModel() {
+    override val type: FeedType
+        get() = FeedType.BLOG
+}
+
+open class FeedViewModel : StoriesViewModel() {
     override val type: FeedType
         get() = FeedType.PERSONAL_FEED
 
     override fun onChangeVisibilityToUser(visibleToUser: Boolean) {
-        var userData = mRepository.getSavedActiveUserData()
-        if (userData == null && visibleToUser) {
+        if (!mRepository.isUserLoggedIn() && visibleToUser) {
             mHandler.post {
                 mStoriesLiveData.value = StoriesViewState(false,
                         ArrayList(),
@@ -47,12 +55,12 @@ class FeedViewModel : StoriesViewModel() {
     }
 
     override fun onSwipeToRefresh() {
-        var userData: UserData? = mRepository.getSavedActiveUserData() ?: return
+        if (!mRepository.isUserLoggedIn()) return
         super.onSwipeToRefresh()
     }
 
     override fun onScrollToTheEnd() {
-        var userData: UserData? = mRepository.getSavedActiveUserData() ?: return
+        if (!mRepository.isUserLoggedIn()) return
         super.onScrollToTheEnd()
     }
 
@@ -89,6 +97,7 @@ abstract class StoriesViewModel : ViewModel() {
     protected val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
+    protected var isVisibleToUser: Boolean = false
     var filter: StoryFilter? = null
         set(value) {
             if (field != value) {
@@ -135,6 +144,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
+        this.isVisibleToUser = isVisibleToUser
         if (visibleToUser) {
             if (!App.isAppOnline()) {
                 setAppOffline()
@@ -182,7 +192,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun onShareClick(it: StoryTree, context: Context?) {
-        val link = "https://golos.blog/${it.rootStory()?.categoryName}/@${it.rootStory()?.author}/${it.rootStory()?.permlink}"
+        val link = mRepository.getShareStoryLink(it.rootStory() ?: return)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
@@ -195,7 +205,7 @@ abstract class StoriesViewModel : ViewModel() {
             setAppOffline()
             return
         }
-        if (mRepository.getSavedActiveUserData() == null) {
+        if (!mRepository.isUserLoggedIn()) {
             return
         }
         if (mRepository.isUserLoggedIn()) {
@@ -224,7 +234,7 @@ abstract class StoriesViewModel : ViewModel() {
         }
     }
 
-    open var canVote = mRepository.getSavedActiveUserData()?.userName != null
+    open var canVote = mRepository.isUserLoggedIn()
 
     fun onVoteRejected(it: StoryTree) {
         mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,

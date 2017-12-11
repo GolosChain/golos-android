@@ -14,13 +14,12 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="#08000000"/>
+        android:background="#08000000" />
 
     <io.golos.golos.screens.widgets.GolosBottomNavView
         android:id="@+id/bottom_nav_view"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="@android:color/white"
-        app:itemTextColor="@color/blue_dark"
         app:menu="@menu/bottom_menu" />
 </LinearLayout>

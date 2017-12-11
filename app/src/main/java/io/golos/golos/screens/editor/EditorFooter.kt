@@ -24,7 +24,7 @@ data class EditorFooterState(val showTagsEditor: Boolean = false,
 
 class EditorFooter : FrameLayout, TextWatcher {
     private var mTagsLayout: ViewGroup
-    private var mAddBtn: Button
+    private var mAddBtn: View
     private var mTextInputLo: TextInputLayout
     private var mTagsEt: EditText
     private var mAddTagsText: TextView
@@ -49,7 +49,7 @@ class EditorFooter : FrameLayout, TextWatcher {
             : super(context, attrs, defStyleAttr, defStyleRes)
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.vh_editor_footer, this)
+        LayoutInflater.from(context).inflate(R.layout.v_editor_footer, this)
         mTagsLayout = findViewById(R.id.tags_lo)
         mAddBtn = findViewById(R.id.add_btn)
         mTextInputLo = findViewById(R.id.text_input_lo)

@@ -31,7 +31,6 @@ class StoryTree(rootStory: StoryWrapper?,
     }
 
 
-
     fun comments(): List<GolosDiscussionItem> {
 
         return mCommentsWithState.map { it.story }
@@ -49,10 +48,19 @@ class StoryTree(rootStory: StoryWrapper?,
         if (discussionWithComments.discussions.isEmpty()) {
             mCommentsWithState = ArrayList()
         } else {
-            val rootStories = discussionWithComments.discussions.find { it.parentAuthor.isEmpty } ?: throw IllegalStateException("no root stories")
-            mRootStoryWrapper = StoryWrapper(GolosDiscussionItem(rootStories, discussionWithComments.involvedAccounts.find { it.name.name == rootStories.author.name }!!),
+            var rootStories = discussionWithComments.discussions.find { it.parentAuthor.isEmpty }
+            if (rootStories == null) {
+                rootStories = discussionWithComments.discussions.find {
+                    val currentDiscussion = it
+                    discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
+                }
+            }
+            if (rootStories == null) throw IllegalStateException("not found root story")
+            mRootStoryWrapper = StoryWrapper(GolosDiscussionItem(rootStories, discussionWithComments
+                    .involvedAccounts
+                    .find { it.name.name == rootStories!!.author.name }!!),
                     UpdatingState.DONE)
-            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories.permlink.link }
+            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories!!.permlink.link }
             var firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
             discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
             val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }

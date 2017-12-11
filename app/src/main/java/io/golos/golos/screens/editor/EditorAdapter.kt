@@ -1,14 +1,11 @@
 package io.golos.golos.screens.editor
 
-import android.os.Handler
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.editor.viewholders.EditorEditTextViewHolder
 import io.golos.golos.screens.editor.viewholders.EditorImageViewHolder
-import io.golos.golos.utils.showKeyboard
-import timber.log.Timber
 
 
 /**
@@ -38,7 +35,8 @@ abstract class EditorAdapterModel(open val id: String) {
 data class EditorAdapterTextPart(val textPart: EditorTextPart,
                                  val onFocusChanged: (RecyclerView.ViewHolder, Boolean) -> Unit = { _, _ -> },
                                  val onNewText: (RecyclerView.ViewHolder, EditorTextPart) -> Unit
-                                 = { _, _ -> }) : EditorAdapterModel(textPart.id)
+                                 = { _, _ -> },
+                                 val showHint: Boolean = false) : EditorAdapterModel(textPart.id)
 
 data class EditorAdapterImagePart(val imagePart: EditorImagePart,
                                   val isLoading: Boolean = false,
@@ -87,7 +85,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                                 parts[it] = changingPart
                             }
                     interactor?.onEdit(parts)
-                })
+                }, position == 0)
                 if (parts[position].isFocused()) {
                     holder.shouldShowKeyboard()
                 }

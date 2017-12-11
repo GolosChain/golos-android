@@ -5,6 +5,8 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
+import android.content.Intent
+import android.view.View
 import android.widget.ImageView
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -77,7 +79,7 @@ class StoryViewModel : ViewModel() {
 
     val showVoteDialog: Boolean
         get() {
-            return mRepository.getSavedActiveUserData() != null && mRepository.getSavedActiveUserData()?.userName != null
+            return mRepository.isUserLoggedIn()
 
         }
 
@@ -91,7 +93,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun canUserWriteComments(): Boolean {
-        return mRepository.getSavedActiveUserData() != null && mRepository.getSavedActiveUserData()?.userName != null
+        return mRepository.isUserLoggedIn()
     }
 
     fun onWriteRootComment(ctx: Context) {
@@ -135,5 +137,14 @@ class StoryViewModel : ViewModel() {
         var text = text
         if (text.contains(Regex("[а-яА-Я]")))text = "ru--" + Translit.ru2lat(text)
         FilteredStoriesActivity.start(storyActivity, feedType, StoryFilter(text))
+    }
+
+    fun onShareClick(context: Context){
+        val link = mRepository.getShareStoryLink(mLiveData.value?.storyTree?.rootStory() ?: return)
+        val sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+        sendIntent.putExtra(Intent.EXTRA_TEXT, link)
+        sendIntent.type = "text/plain"
+        context.startActivity(sendIntent)
     }
 }

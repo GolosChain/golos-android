@@ -50,6 +50,7 @@ internal class EnCryptor {
                     KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT)
                     .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+                    .setKeyValidityEnd(Date(Long.MAX_VALUE))
                     .build()
             generator.initialize(spec)
         } else {
@@ -76,20 +77,25 @@ class DeCryptor {
     }
 
     fun decryptData(alias: KeystoreKeyAlias, encryptedData: ByteArray): String {
-        val cipher = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
-        } else {
-            Cipher.getInstance("RSA/ECB/PKCS1Padding")
-        }
+        try {
+            val cipher = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
+            } else {
+                Cipher.getInstance("RSA/ECB/PKCS1Padding")
+            }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            val spec = OAEPParameterSpec(
-                    "SHA-256", "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT)
-            cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias), spec)
-        } else {
-            cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias))
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                val spec = OAEPParameterSpec(
+                        "SHA-256", "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT)
+                cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias), spec)
+            } else {
+                cipher.init(Cipher.DECRYPT_MODE, getPrivateKey(alias))
+            }
+            return String(cipher.doFinal(encryptedData), Charset.forName("UTF-8"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ""
         }
-        return String(cipher.doFinal(encryptedData), Charset.forName("UTF-8"))
     }
 
     private fun getPrivateKey(alias: KeystoreKeyAlias): PrivateKey {

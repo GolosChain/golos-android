@@ -6,9 +6,10 @@
     android:layout_height="@dimen/tag_buttons_height"
     android:layout_marginStart="@dimen/margin_material"
     android:layout_marginTop="@dimen/margin_material_small"
-    android:background="@drawable/rect_round_corners_outline_red"
+    android:background="@drawable/rect_round_corners_stroke_blue"
     android:ellipsize="end"
     android:maxLength="120"
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
-    android:textColor="@color/colorAccent" />
+    android:textAllCaps="false"
+    android:textColor="#828282" />

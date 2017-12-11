@@ -29,7 +29,7 @@ abstract class GolosApi {
 
     abstract fun getUserAvatar(username: String, permlink: String?, blog: String?): String?
 
-    abstract fun getUserFeed(userName: String, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree>
+    abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree>
 
     abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
 

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.GolosFragment
+import timber.log.Timber
 
 /**
  * Created by yuri on 05.12.17.
@@ -32,6 +33,7 @@ class ProfileRootFragment() : GolosFragment(), Observer<AuthState> {
     }
 
     override fun onChanged(it: AuthState?) {
+        Timber.e("on changed = $it")
         if (it?.isLoggedIn == true) {
             if (childFragmentManager.findFragmentByTag(mUserProfileFTag) == null) {
                 childFragmentManager.beginTransaction()

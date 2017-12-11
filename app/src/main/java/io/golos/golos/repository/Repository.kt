@@ -3,22 +3,21 @@ package io.golos.golos.repository
 import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
-import android.support.annotation.WorkerThread
-import io.golos.golos.App
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
-
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.GolosError
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.Executor
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 data class StoryFilter(val tagFilter: String?)
 
@@ -29,19 +28,12 @@ abstract class Repository {
         val get: Repository
             @Synchronized
             get() {
-                if (App.isMocked) {
-                    if (instance == null) instance = MockRepoImpl(GolosApi.get,
-                            Executors.newSingleThreadExecutor(),
-                            mMainThreadExecutor)
-                    return instance!!
-                } else {
-                    if (instance == null) instance = RepositoryImpl(
-                            sharedExecutor,
-                            mMainThreadExecutor,
-                            Persister.get,
-                            GolosApi.get)
-                    return instance!!
-                }
+                if (instance == null) instance = RepositoryImpl(
+                        sharedExecutor,
+                        mMainThreadExecutor,
+                        Persister.get,
+                        GolosApi.get)
+                return instance!!
             }
         val sharedExecutor: ThreadPoolExecutor by lazy {
             val queu = PriorityBlockingQueue<Runnable>(15, Comparator<Runnable> { o1, o2 ->
@@ -68,25 +60,23 @@ abstract class Repository {
                                           startAuthor: String? = null,
                                           startPermlink: String? = null)
 
-    @WorkerThread
-    abstract fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse
+    abstract fun authWithMasterKey(userName: String,
+                                   masterKey: String,
+                                   listener: (UserAuthResponse) -> Unit)
 
-    @WorkerThread
-    abstract fun authWithActiveWif(login: String, activeWif: String): UserAuthResponse
+    abstract fun authWithActiveWif(login: String,
+                                   activeWif: String,
+                                   listener: (UserAuthResponse) -> Unit)
 
-    @WorkerThread
-    abstract fun authWithPostingWif(login: String, postingWif: String): UserAuthResponse
-
-    @WorkerThread
-    abstract fun getAccountData(of: String): AccountInfo
-
-    abstract fun getSavedActiveUserData(): UserData?
+    abstract fun authWithPostingWif(login: String,
+                                    postingWif: String,
+                                    listener: (UserAuthResponse) -> Unit)
 
     abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData>
 
-    abstract fun deleteUserdata()
+    abstract fun requestActiveUserDataUpdate()
 
-    abstract fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?)
+    abstract fun deleteUserdata()
 
     abstract fun upVote(comment: GolosDiscussionItem, percents: Short)
 
@@ -101,6 +91,10 @@ abstract class Repository {
     abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit)
 
     abstract fun isUserLoggedIn(): Boolean
+
+    fun getShareStoryLink(item: GolosDiscussionItem): String {
+        return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"
+    }
 }
 
 interface ImageLoadRunnable : Runnable

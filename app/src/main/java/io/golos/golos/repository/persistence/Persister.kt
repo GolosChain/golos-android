@@ -4,10 +4,8 @@ import android.content.Context
 import android.util.Base64
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.App
-import io.golos.golos.repository.persistence.model.DeCryptor
-import io.golos.golos.repository.persistence.model.EnCryptor
-import io.golos.golos.repository.persistence.model.KeystoreKeyAliasConverter
-import io.golos.golos.repository.persistence.model.UserAvatar
+import io.golos.golos.repository.model.mapper
+import io.golos.golos.repository.persistence.model.*
 import java.security.KeyStore
 import java.util.*
 import kotlin.collections.HashMap
@@ -23,12 +21,13 @@ abstract class Persister {
 
     abstract fun getAvatarForUser(userName: String): Pair<String, Long>?
 
-    abstract fun saveKeys(keys: Map<PrivateKeyType, String?>)
-
-    abstract fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?>
-
     abstract fun getCurrentUserName(): String?
+
     abstract fun saveCurrentUserName(name: String?)
+
+    abstract fun getActiveUserData(): UserData?
+
+    abstract fun saveUserData(userData: UserData)
 
     companion
     object {
@@ -40,6 +39,9 @@ abstract class Persister {
             }
     }
 
+    abstract fun deleteUserData()
+
+
 }
 
 private class OnDevicePersister(private val context: Context) : Persister() {
@@ -50,7 +52,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mDatabase.saveAvatar(UserAvatar(userName, avatarPath, updatedDate))
     }
 
-    override fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
+    private fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         val encryptor = EnCryptor()
@@ -65,7 +67,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         })
     }
 
-    override fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
+    private fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         val decryptor = DeCryptor()
@@ -93,33 +95,52 @@ private class OnDevicePersister(private val context: Context) : Persister() {
     }
 
     override fun getCurrentUserName(): String? {
-        return mPreference.getString("username", null)
+        return getActiveUserData()?.userName
     }
 
     override fun saveCurrentUserName(name: String?) {
         mPreference.edit().putString("username", name).apply()
     }
+
+    override fun getActiveUserData(): UserData? {
+        val userDataString = mPreference.getString("userdata", "") ?: return null
+        if (userDataString.isEmpty()) return null
+        val userData = mapper.readValue(userDataString, UserData::class.java)
+        val keys = getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
+        userData.privateActiveWif = keys[PrivateKeyType.ACTIVE]
+        userData.privatePostingWif = keys[PrivateKeyType.POSTING]
+        return userData
+    }
+
+    override fun saveUserData(userData: UserData) {
+        saveKeys(mapOf(Pair(PrivateKeyType.POSTING, userData.privatePostingWif),
+                Pair(PrivateKeyType.ACTIVE, userData.privateActiveWif)))
+        val copy = userData.clone() as UserData
+        copy.privateActiveWif = null
+        copy.privatePostingWif = null
+        mPreference.edit().putString("userdata", mapper.writeValueAsString(copy)).apply()
+    }
+
+    override fun deleteUserData() {
+        saveKeys(mapOf(Pair(PrivateKeyType.POSTING, null), Pair(PrivateKeyType.ACTIVE, null)))
+        saveCurrentUserName(null)
+        mPreference.edit().putString("userdata", "").apply()
+    }
 }
 
 
 private class MockPersister : Persister() {
-    private var keys = HashMap<PrivateKeyType, String?>()
+    private var userData: UserData? = null
     private var currentUserName: String? = null
     override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
 
     }
 
     override fun getAvatarForUser(userName: String): Pair<String, Long> {
+        Thread.sleep(150)
         return Pair("https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg", Date().time)
     }
 
-    override fun saveKeys(keys: Map<PrivateKeyType, String?>) {
-        this.keys = HashMap(keys)
-    }
-
-    override fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
-        return Collections.unmodifiableMap(keys)
-    }
 
     override fun getCurrentUserName(): String? {
         return currentUserName
@@ -127,5 +148,17 @@ private class MockPersister : Persister() {
 
     override fun saveCurrentUserName(name: String?) {
         currentUserName = name
+    }
+
+    override fun getActiveUserData(): UserData? {
+        return userData
+    }
+
+    override fun saveUserData(userData: UserData) {
+        this.userData = userData
+    }
+
+    override fun deleteUserData() {
+        userData = null
     }
 }

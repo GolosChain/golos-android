@@ -21,6 +21,7 @@ data class EditorState(val error: GolosError? = null,
 
 class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
     val editorLiveData = MutableLiveData<EditorState>()
+    val postStatusLiveData = MutableLiveData<Unit>()
     val titleMaxLength = 255
     val postMaxLength = 100 * 1024
     val commentMaxLength = 16 * 1024
@@ -107,7 +108,8 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
-                        completeMessage = if (error == null) R.string.send_success else null)
+                        completeMessage = if (error == null) R.string.send_post_success else null)
+                postStatusLiveData.value = Unit
             })
         } else {
             if (mRootStory == null || mItemToAnswerOn == null) return
@@ -125,7 +127,8 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
-                        completeMessage = if (error == null) R.string.send_success else null)
+                        completeMessage = if (error == null) R.string.send_comment_success else null)
+                postStatusLiveData.value = Unit
             })
         }
     }

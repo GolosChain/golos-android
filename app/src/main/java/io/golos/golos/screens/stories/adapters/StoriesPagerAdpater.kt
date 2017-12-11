@@ -64,7 +64,7 @@ class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : Frag
         }
     }
 
-    override fun getCount() = if (isFeedFragmentShown) FeedType.values().size else FeedType.values().size - 1
+    override fun getCount() = if (isFeedFragmentShown) 5 else 4
 
     companion object {
         var sharedPool = RecyclerView.RecycledViewPool()

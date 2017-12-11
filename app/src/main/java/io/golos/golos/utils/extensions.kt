@@ -99,6 +99,24 @@ val Account.avatarPath: String?
         return avatarPath
     }
 
+val Account.moto: String?
+    get() {
+        var moto: String? = null
+        try {
+            if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+                var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                node?.let {
+                    moto = node.get("profile")?.get("about")?.asText()
+                }
+            }
+
+        } catch (e: IOException) {
+            println("error parsing metadata " + jsonMetadata)
+            e.printStackTrace()
+        }
+        return moto
+    }
+
 fun String.toHtml(): Spanned {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
         return Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)

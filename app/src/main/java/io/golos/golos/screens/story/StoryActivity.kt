@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -58,6 +59,7 @@ class StoryActivity : GolosActivity() {
     private lateinit var mVotingProgress: ProgressBar
     private lateinit var mMoneyBtn: TextView
     private lateinit var mCommentsTv: TextView
+    private lateinit var mShareButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,6 +180,7 @@ class StoryActivity : GolosActivity() {
         mCommentsCountBtn = findViewById(R.id.comments_btn)
         mVotingProgress = findViewById(R.id.voting_progress)
         mCommentsTv = findViewById(R.id.comments_tv)
+        mShareButton = findViewById(R.id.share_btn)
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
@@ -186,7 +189,7 @@ class StoryActivity : GolosActivity() {
         mStoryRecycler.adapter = MainStoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
-        mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_28dp), null, null, null)
+        mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_24dp), null, null, null)
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -232,7 +235,7 @@ class StoryActivity : GolosActivity() {
             mViewModel.onWriteRootComment(this)
         })
         mSwipeToRefresh.isRefreshing = true
-
+        mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
     }
 
     companion object {

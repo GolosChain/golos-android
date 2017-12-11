@@ -22,7 +22,6 @@ import android.widget.*
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
-import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.hideKeyboard
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showProgressDialog
@@ -93,8 +92,6 @@ class NotLoggedInFragment : Fragment() {
         mRegisterTv.text = Html.fromHtml(container!!.resources.getString(R.string.do_not_registered_register))
         mMoreAboutGolos.movementMethod = LinkMovementMethod.getInstance()
         mRegisterTv.movementMethod = LinkMovementMethod.getInstance()
-
-
         return v
     }
 
@@ -118,17 +115,12 @@ class NotLoggedInFragment : Fragment() {
             }
             if (it?.isLoading == true) {
                 mProgressDialog = showProgressDialog()
-                view?.findFocus()?.let { context?.hideKeyboard(it) }
+                view.findFocus()?.let { context?.hideKeyboard(it) }
             }
             if (it?.error != null) {
-                var message = R.string.unknown_error
-                when (it.error.first) {
-                    ErrorCode.ERROR_AUTH -> message = it.error.second
-                }
-                view?.findFocus()?.let { context?.hideKeyboard(it) }
-
+                view.findFocus()?.let { context?.hideKeyboard(it) }
                 Snackbar.make(mLogInEt,
-                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
+                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage ?: 0)}</font>"),
                         Toast.LENGTH_SHORT).show()
             }
         })

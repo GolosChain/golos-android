@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="votes">
-        <item quantity="few">Голоса</item>
-        <item quantity="many">Голосов</item>
-        <item quantity="one">Голос</item>
-        <item quantity="two">Голоса</item>
-        <item quantity="zero">Голосов</item>
-        <item quantity="other">Голосов</item>
+        <item quantity="few">Golos</item>
+        <item quantity="many">Golos</item>
+        <item quantity="one">Golos</item>
+        <item quantity="two">Golos</item>
+        <item quantity="zero">Golos</item>
+        <item quantity="other">Golos</item>
     </plurals>
     <plurals name="days">
-        <item quantity="few">Дня</item>
-        <item quantity="many">Дней</item>
-        <item quantity="one">День</item>
-        <item quantity="two">Дня</item>
-        <item quantity="zero">Дней</item>
-        <item quantity="other">Дней</item>
+        <item quantity="few">Days</item>
+        <item quantity="many">Days</item>
+        <item quantity="one">Day</item>
+        <item quantity="two">Days</item>
+        <item quantity="zero">Days</item>
+        <item quantity="other">Days</item>
     </plurals>
     <plurals name="hours">
-        <item quantity="few">Часа</item>
-        <item quantity="many">Часов</item>
-        <item quantity="one">Час</item>
-        <item quantity="two">Часа</item>
-        <item quantity="zero">Часов</item>
-        <item quantity="other">Часов</item>
+        <item quantity="few">Hours</item>
+        <item quantity="many">Hours</item>
+        <item quantity="one">Hour</item>
+        <item quantity="two">Hours</item>
+        <item quantity="zero">Hour</item>
+        <item quantity="other">Hours</item>
+    </plurals>
+    <plurals name="subscription">
+        <item quantity="few">Subscriptions</item>
+        <item quantity="many">Subscriptions</item>
+        <item quantity="one">Subscription</item>
+        <item quantity="two">Subscriptions</item>
+        <item quantity="zero">Subscriptions</item>
+        <item quantity="other">Subscriptions</item>
+    </plurals>
+    <plurals name="subscribers">
+        <item quantity="few">Subscribers</item>
+        <item quantity="many">Subscribers</item>
+        <item quantity="one">Subscriber</item>
+        <item quantity="two">Subscribers</item>
+        <item quantity="zero">Subscribers</item>
+        <item quantity="other">Subscribers</item>
     </plurals>
 </resources>

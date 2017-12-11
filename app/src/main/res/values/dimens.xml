@@ -21,7 +21,9 @@
     <dimen name="stripe_item_left_and_right_margin">12dp</dimen>
     <dimen name="story_vote_btns_distance">24dp</dimen>
     <dimen name="drawer_header_height">220dp</dimen>
-    <dimen name="avatar_size">84dp</dimen>
+    <dimen name="avatar_size">100dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="login_lo_margin">36dp</dimen>
+    <dimen name="profile_tabbar_height">48dp</dimen>
+    <dimen name="quater">4dp</dimen>
 </resources>
