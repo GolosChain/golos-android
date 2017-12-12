@@ -1,14 +1,19 @@
 package io.golos.golos.screens
 
+import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.view.View
 import io.golos.golos.R
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.CreatePostResult
+import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.showSnackbar
 import java.util.*
 
-class MainActivity : GolosActivity() {
+class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
 
@@ -41,6 +46,14 @@ class MainActivity : GolosActivity() {
                 }
                 else -> true
             }
+        }
+        Repository.get.lastCreatedPost().observe(this, this)
+    }
+
+    override fun onChanged(it: CreatePostResult?) {
+        if (it?.isPost == true) {
+            StoryActivity.start(this,
+                    it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED)
         }
     }
 

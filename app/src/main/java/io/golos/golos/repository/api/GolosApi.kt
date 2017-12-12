@@ -2,6 +2,7 @@ package io.golos.golos.repository.api
 
 import io.golos.golos.App
 import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
@@ -47,11 +48,11 @@ abstract class GolosApi {
     abstract fun uploadImage(sendFromAccount: String, file: File): String
 
     abstract fun sendPost(sendFromAccount: String, title: String, content: String,
-                          tags: Array<String>)
+                          tags: Array<String>): CreatePostResult
 
     abstract fun sendComment(sendFromAccount: String,
                              authorOfItemToReply: String,
                              permlinkOfItemToReply: String,
                              content: String,
-                             categoryName: String)
+                             categoryName: String): CreatePostResult
 }

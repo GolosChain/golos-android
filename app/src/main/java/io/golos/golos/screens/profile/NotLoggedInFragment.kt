@@ -22,6 +22,7 @@ import android.widget.*
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
+import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.hideKeyboard
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showProgressDialog
@@ -90,8 +91,8 @@ class NotLoggedInFragment : Fragment() {
         mCancelButton = v.findViewById(R.id.cancel_btn)
         mMoreAboutGolos.text = Html.fromHtml(container!!.resources.getString(R.string.more_about_golos))
         mRegisterTv.text = Html.fromHtml(container!!.resources.getString(R.string.do_not_registered_register))
-        mMoreAboutGolos.movementMethod = LinkMovementMethod.getInstance()
-        mRegisterTv.movementMethod = LinkMovementMethod.getInstance()
+        mMoreAboutGolos.movementMethod = GolosMovementMethod.instance
+        mRegisterTv.movementMethod = GolosMovementMethod.instance
         return v
     }
 

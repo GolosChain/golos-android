@@ -3,35 +3,32 @@ package io.golos.golos.screens.editor
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.support.design.widget.TextInputLayout
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
 
+
 data class EditorFooterState(val showTagsEditor: Boolean = false,
                              val tagsValidator: io.golos.golos.utils.StringValidator? = null,
                              val tags: ArrayList<String> = ArrayList(),
                              val tagsListener: EditorFooter.TagsListener? = null)
 
-class EditorFooter : FrameLayout, TextWatcher {
+class EditorFooter : FrameLayout {
     private var mTagsLayout: ViewGroup
     private var mAddBtn: View
-    private var mTextInputLo: TextInputLayout
-    private var mTagsEt: EditText
+    private var mErrorTv: TextView
     private var mAddTagsText: TextView
     private var mValidator: StringValidator = object : StringValidator {
         override fun validate(input: String): Pair<Boolean, String> = Pair(true, "")
     }
-    private var mTagsText = ""
 
     @JvmOverloads
     constructor(
@@ -52,12 +49,8 @@ class EditorFooter : FrameLayout, TextWatcher {
         LayoutInflater.from(context).inflate(R.layout.v_editor_footer, this)
         mTagsLayout = findViewById(R.id.tags_lo)
         mAddBtn = findViewById(R.id.add_btn)
-        mTextInputLo = findViewById(R.id.text_input_lo)
-        mTagsEt = findViewById(R.id.tags_et)
+        mErrorTv = findViewById(R.id.error_text)
         mAddTagsText = findViewById(R.id.add_tags_label)
-        mTagsEt.removeTextChangedListener(this)
-        mTagsEt.addTextChangedListener(this)
-
     }
 
     var state: EditorFooterState = EditorFooterState()
@@ -66,63 +59,78 @@ class EditorFooter : FrameLayout, TextWatcher {
             value.tagsValidator?.let { mValidator = field.tagsValidator as StringValidator }
             if (value.showTagsEditor) {
                 mTagsLayout.visibility = View.VISIBLE
-                mTagsEt.visibility = View.VISIBLE
+                mErrorTv.visibility = View.VISIBLE
             } else {
                 mTagsLayout.visibility = View.GONE
                 mAddTagsText.visibility = View.GONE
-                mTagsEt.visibility = View.GONE
-            }
-            mTagsLayout.removeView(mAddBtn)
-            value.tags.forEachIndexed { index, s ->
-                if (s.isNotEmpty()) {
-                    if (index > mTagsLayout.childCount - 1) {
-                        val btn = LayoutInflater.from(context).inflate(R.layout.v_editor_tag_button, mTagsLayout, false) as Button
-                        btn.text = s
-                        mTagsLayout.addView(btn)
-                    } else {
-
-                        if (mTagsLayout.getChildAt(index) is Button) {
-                            val btn = mTagsLayout.getChildAt(index) as Button
-                            if (btn != mAddBtn) {
-                                btn.text = s
-                            }
-                        }
-                    }
-                }
+                mErrorTv.visibility = View.GONE
             }
             if (mTagsLayout.childCount > value.tags.size) {
                 mTagsLayout.removeViews(value.tags.size, mTagsLayout.childCount - value.tags.size)
             }
             mTagsLayout.addView(mAddBtn)
-
-            val tagsText = value.tags.joinToString(" ")
-            if (mTagsEt.text.toString() != tagsText) {
-                mTagsEt.setText(tagsText)
-                mTagsEt.post({ mTagsEt.setSelection(tagsText.length) })
-            }
             mAddBtn.setOnClickListener {
-                val validatorOut = mValidator.validate(mTagsText)
-                if (validatorOut.first) {
-                    val tags = ArrayList(mTagsText.trim().replace(Regex("\\s+"), " ").split(" ").map { it.trim() })
-                    state = EditorFooterState(state.showTagsEditor, state.tagsValidator, tags)
-                    state.tagsListener?.onTagsSubmit(tags)
+                if (mTagsLayout.childCount < 6) {
+                    if (mTagsLayout.childCount == 1) {
+                        mTagsLayout.removeView(mAddBtn)
+                        val newView = inflateNewEditText()
+                        mTagsLayout.addView(newView)
+                        mTagsLayout.addView(mAddBtn)
+                        newView.requestFocus()
+                        mErrorTv.text = ""
+                    } else {
+                        val prelast = mTagsLayout.getChildAt(mTagsLayout.childCount - 2) as EditText
+                        if (!prelast.text.isEmpty()) {
+                            val validatorOut = mValidator.validate(prelast.text.toString())
+                            if (validatorOut.first) {
+                                mTagsLayout.removeView(mAddBtn)
+                                val newView = inflateNewEditText()
+                                mTagsLayout.addView(newView)
+                                mTagsLayout.addView(mAddBtn)
+                                newView.requestFocus()
+                                mErrorTv.text = ""
+                            } else {
+                                mErrorTv.text = validatorOut.second
+                            }
+                        }
+                    }
+                } else {
+                    mErrorTv.text = resources.getString(R.string.to_much_tags)
                 }
             }
         }
 
-    override fun afterTextChanged(s: Editable?) {
-        mTagsText = s.toString()
-        val validatorOut = mValidator.validate(mTagsText)
-        s?.let { mTextInputLo.error = if (s.isNotEmpty()) validatorOut.second else "" }
+    private fun inflateNewEditText(): EditText {
+        val view = LayoutInflater.from(context).inflate(R.layout.v_editor_footer_tag_et, mTagsLayout, false) as EditText
+        view.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                if (p0 != null) onTextChanged(p0.toString())
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if (p0?.length == 0 && p1 == 0 && p3 == 0) {
+                    onDeleteEt(view)
+                }
+            }
+        })
+        return view
     }
 
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+    private fun onDeleteEt(et: EditText) {
+        mTagsLayout.removeView(et)
     }
 
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+    private fun onTextChanged(text: String) {
+        val tagsList = (0 until mTagsLayout.childCount - 1)
+                .map { (mTagsLayout.getChildAt(it) as EditText).text.toString() }
+                .toList()
+        state.tagsListener?.onTagsSubmit(tagsList)
     }
+
 
     interface TagsListener {
         fun onTagsSubmit(tags: List<String>)

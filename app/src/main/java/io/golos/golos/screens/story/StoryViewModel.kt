@@ -6,7 +6,6 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
-import android.view.View
 import android.widget.ImageView
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -29,18 +28,26 @@ import io.golos.golos.utils.Translit
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
     private val mRepository = Repository.get
-    private var mStoryId: Long = 0
+    lateinit var author: String
+    lateinit var permLink: String
+    lateinit var blog: String
     private lateinit var feedType: FeedType
 
-    fun onCreate(storyId: Long, feedType: FeedType) {
-        mStoryId = storyId
+    fun onCreate(author: String, permLink: String, blog: String, feedType: FeedType) {
+        this.author = author
+        this.permLink = permLink
+        this.blog = blog
         this.feedType = feedType
         mLiveData.removeSource(mRepository.getStories(feedType, null))
         mLiveData.addSource(mRepository.getStories(feedType, null)) {
             val storyItems = it
             it?.
                     items?.
-                    filter { it.rootStory()?.id == mStoryId }?.
+                    filter {
+                        it.rootStory()?.author == this.author
+                                && it.rootStory()?.permlink == this.permLink
+                                && it.rootStory()?.categoryName == this.blog
+                    }?.
                     forEach {
                         mLiveData.value = StoryViewState(false,
                                 it.rootStory()?.title ?: "",
@@ -59,7 +66,7 @@ class StoryViewModel : ViewModel() {
                     mLiveData.value?.tags ?: ArrayList(),
                     mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
         }
-        mRepository.requestStoryUpdate(mStoryId, feedType)
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
     }
 
 
@@ -135,11 +142,11 @@ class StoryViewModel : ViewModel() {
 
     fun onTagClick(storyActivity: StoryActivity, text: String) {
         var text = text
-        if (text.contains(Regex("[а-яА-Я]")))text = "ru--" + Translit.ru2lat(text)
+        if (text.contains(Regex("[а-яА-Я]"))) text = "ru--" + Translit.ru2lat(text)
         FilteredStoriesActivity.start(storyActivity, feedType, StoryFilter(text))
     }
 
-    fun onShareClick(context: Context){
+    fun onShareClick(context: Context) {
         val link = mRepository.getShareStoryLink(mLiveData.value?.storyTree?.rootStory() ?: return)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND

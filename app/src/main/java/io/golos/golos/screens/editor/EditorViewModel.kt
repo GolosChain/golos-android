@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -19,9 +20,13 @@ data class EditorState(val error: GolosError? = null,
                        var completeMessage: Int? = null,
                        val parts: List<EditorPart>)
 
+data class PostSendStatus(val author: String,
+                          val blog: String,
+                          val permlink: String)
+
 class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
     val editorLiveData = MutableLiveData<EditorState>()
-    val postStatusLiveData = MutableLiveData<Unit>()
+    val postStatusLiveData = MutableLiveData<PostSendStatus>()
     val titleMaxLength = 255
     val postMaxLength = 100 * 1024
     val commentMaxLength = 16 * 1024
@@ -109,7 +114,9 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
                         completeMessage = if (error == null) R.string.send_post_success else null)
-                postStatusLiveData.value = Unit
+                postStatusLiveData.value = PostSendStatus(result?.author ?: return@createPost,
+                        result.blog,
+                        result.permlink)
             })
         } else {
             if (mRootStory == null || mItemToAnswerOn == null) return
@@ -128,7 +135,6 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
                         completeMessage = if (error == null) R.string.send_comment_success else null)
-                postStatusLiveData.value = Unit
             })
         }
     }

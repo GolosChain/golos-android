@@ -48,10 +48,7 @@ class RepositoryPostAndVoteTest {
                     }
 
                     override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-                        if (!users.containsKey(userName)) return null
-                        val path = users.get(userName)!!.split("__")
-                        return Pair(path[0].replace("__", ""),
-                                path[1].replace("__", "").toLong())
+                        return Pair("sdg", System.currentTimeMillis())
                     }
 
                     override fun getActiveUserData(): UserData? = userData
@@ -129,6 +126,9 @@ class RepositoryPostAndVoteTest {
         val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
         repo.createComment(notCommentedItem, notCommentedItem.rootStory()!!, listOf(image, text), { _, _ -> })
         assertEquals(notCommentedItem.comments().size + 1, newItems.value!!.items.first().comments().size)
+
+        assertNotNull(repo.lastCreatedPost().value)
+        assertEquals(userName, repo.lastCreatedPost().value!!.author)
     }
 
     @Test
@@ -280,21 +280,23 @@ class RepositoryPostAndVoteTest {
         Assert.assertEquals(20, actualStories.value!!.items.size)
 
         Assert.assertTrue(actualStories.value!!.items.first().comments().isEmpty())
-        repo.requestStoryUpdate(actualStories.value!!.items.first().rootStory()!!.id, FeedType.POPULAR)
+
+        val firstStory = actualStories.value!!.items.first().rootStory()!!
+        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR)
         Assert.assertTrue(actualStories.value!!.items.first().comments().isNotEmpty())
 
-        var updatingSoty = actualStories.value!!.items[3].rootStory()!!
+        var updatingSoty = actualStories.value!!.items[2].rootStory()!!
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
-        Assert.assertTrue(actualStoriesWithFilter.value!!.items.size >2)
+        Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
 
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.id, FeedType.POPULAR)
-        Assert.assertTrue(actualStories.value!!.items[3].comments().isNotEmpty())
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
+        Assert.assertTrue(actualStories.value!!.items[2].comments().isNotEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isNotEmpty())
 
         actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter("psk"))
@@ -305,7 +307,8 @@ class RepositoryPostAndVoteTest {
 
         updatingSoty = actualStoriesWithFilter.value!!.items[1].rootStory()!!
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isEmpty())
-        repo.requestStoryUpdate(updatingSoty.id, FeedType.POPULAR)
+
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isNotEmpty())
     }
 }

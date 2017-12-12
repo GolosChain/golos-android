@@ -71,13 +71,16 @@ class StoryActivity : GolosActivity() {
     private fun setUpViewModel() {
         val provider = ViewModelProviders.of(this)
         mViewModel = provider.get(StoryViewModel::class.java)
-        val extra = intent.getLongExtra(COMMENT_TAG, 0L)
-        if (extra == 0L) {
+        val extra = intent.getStringExtra(PERMLINK_TAG)
+        if (extra == null) {
             Timber.e(" no comment set to activity")
             finish()
             return
         }
-        mViewModel.onCreate(extra, intent.getSerializableExtra(FEED_TYPE) as FeedType)
+        mViewModel.onCreate(intent.getStringExtra(AUTHOR_TAG),
+                intent.getStringExtra(PERMLINK_TAG),
+                intent.getStringExtra(BLOG_TAG),
+                intent.getSerializableExtra(FEED_TYPE) as FeedType)
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
@@ -99,6 +102,7 @@ class StoryActivity : GolosActivity() {
                     mUserName.text = story.author
                     mBlogNameTv.visibility = View.VISIBLE
                 }
+                mCommentsCountBtn.visibility = View.VISIBLE
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
                     mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp), null, null, null)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
@@ -190,6 +194,7 @@ class StoryActivity : GolosActivity() {
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
         mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_24dp), null, null, null)
+        mCommentsCountBtn.visibility = View.INVISIBLE
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -239,14 +244,20 @@ class StoryActivity : GolosActivity() {
     }
 
     companion object {
-        private val COMMENT_TAG = "COMMENT_TAG"
+        private val AUTHOR_TAG = "AUTHOR_TAG"
+        private val BLOG_TAG = "BLOG_TAG"
+        private val PERMLINK_TAG = "PERMLINK_TAG"
         private val FEED_TYPE = "FEED_TYPE"
         fun start(ctx: Context,
-                  storyId: Long,
+                  author: String,
+                  blog: String,
+                  permlink: String,
                   feedType: FeedType) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
-            intent.putExtra(COMMENT_TAG, storyId)
+            intent.putExtra(AUTHOR_TAG, author)
+            intent.putExtra(BLOG_TAG, blog)
+            intent.putExtra(PERMLINK_TAG, permlink)
             intent.putExtra(FEED_TYPE, feedType)
             ctx.startActivity(intent)
         }

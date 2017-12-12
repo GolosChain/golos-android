@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:id="@+id/bottom_lo"
+    android:id="@+id/bottom_lo"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_above="@+id/controlls_lo"
@@ -40,33 +40,16 @@
             app:srcCompat="@drawable/ic_add_white_28dp" />
     </com.wefika.flowlayout.FlowLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/text_input_lo"
+    <TextView
+        android:id="@+id/error_text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="@dimen/margin_material"
-        android:layout_marginStart="@dimen/margin_material"
-        android:layout_marginTop="@dimen/material_huge"
-        android:animateLayoutChanges="true"
-        app:errorEnabled="true">
+        android:layout_height="wrap_content"
+        android:inputType="text|textMultiLine"
+        android:maxLines="2"
+        android:padding="@dimen/margin_material"
+        android:textColor="@android:color/holo_red_light"
+        android:textColorHint="@color/rat"
+        android:textSize="14sp" />
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/tags_et"
-
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/enter_tag_name"
-            android:inputType="text|textMultiLine"
-            android:maxLines="2"
-            android:textColorHint="@color/rat"
-            android:textSize="14sp"
-            app:backgroundTint="@color/colorPrimaryDark" />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </android.support.design.widget.TextInputLayout>
 </LinearLayout>
 

@@ -16,4 +16,6 @@ object Regexps {
     val markdownChecker = Regex("\\[[^]]+\\]\\(https?:\\/\\/\\S+\\)")
     val gramsInUntion = 31.1034768
     val trashTags = Regex("<p>|</p>|<b>|</b>|\\n|<br>|</br>|&nbsp;")
+    val userRegexp = Regex("@([a-zA-Z.\\-]{3,16}[0-9]{0,6})")
+    val storyLink = Regex("([a-z0-9\\-]+)/@([a-zA-Z.\\-]{3,16}[0-9]{0,6})/([a-z0-9\\-]+)")
 }

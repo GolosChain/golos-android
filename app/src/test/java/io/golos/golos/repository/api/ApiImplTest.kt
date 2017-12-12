@@ -188,11 +188,20 @@ class ApiImplTest {
 
     @Test
     fun filteredStoriesTest() {
-       val stories = service.getStories(20, FeedType.ACTUAL, 10, StoryFilter("psk"), null, null)
+        val stories = service.getStories(20, FeedType.ACTUAL, 10, StoryFilter("psk"), null, null)
         Assert.assertEquals(20, stories.size)
-        Assert.assertFalse(stories.any { !it.rootStory()!!.tags.contains( "psk") })
+        Assert.assertFalse(stories.any { !it.rootStory()!!.tags.contains("psk") })
     }
 
-
-
+    @Test
+    fun createPostTest() {
+        service.auth(accname, null, null, privatePosting)
+        val tags = arrayOf<String>("first", "second", "third")
+        val result = service.sendPost(accname,
+                "Test Title" + UUID.randomUUID().toString().substring(8),
+                " ewtwetwetwet",
+                tags)
+        assertEquals(accname,result.author)
+        assertEquals("first",result.blog)
+    }
 }

@@ -22,6 +22,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
+import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.R
 import java.io.IOException
@@ -156,4 +157,25 @@ fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {
 
 fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
     return AppCompatResources.getDrawable(context, resId)!!
+}
+
+fun CommentOperation.getTags(): List<String> {
+    val out = ArrayList<String>()
+    try {
+        if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+            var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+            node?.let {
+                val tags = node.get("tags")?.asIterable()
+                tags?.forEach({
+                    out.add(it.asText())
+                })
+            }
+        }
+
+    } catch (e: IOException) {
+        println("error parsing metadata " + jsonMetadata)
+        e.printStackTrace()
+    }
+    return out
+
 }

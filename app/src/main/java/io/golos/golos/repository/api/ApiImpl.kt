@@ -9,6 +9,7 @@ import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
 import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
@@ -309,19 +310,21 @@ class ApiImpl : GolosApi() {
         return response.urlString ?: "error"
     }
 
-    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
-        mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
+    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
+        val result = mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
+        return CreatePostResult(true, result.author.name, result.getTags().first() ?: "", result.permlink.link)
     }
 
     override fun sendComment(sendFromAccount: String,
                              authorOfItemToReply: String,
                              permlinkOfItemToReply: String,
                              content: String,
-                             categoryName: String) {
-        mGolosApi.simplifiedOperations.createComment(AccountName(authorOfItemToReply),
+                             categoryName: String): CreatePostResult {
+        val result = mGolosApi.simplifiedOperations.createComment(AccountName(authorOfItemToReply),
                 Permlink(permlinkOfItemToReply),
                 AccountName(sendFromAccount),
                 content,
                 Array(1, { categoryName }))
+        return CreatePostResult(false, result.author.name, result.getTags().first() ?: "", result.permlink.link)
     }
 }

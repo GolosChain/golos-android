@@ -9,6 +9,7 @@ import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO
 import io.golos.golos.App
 import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
@@ -99,11 +100,11 @@ internal class MockApiImpl : GolosApi() {
         return "mock_image_url_${UUID.randomUUID()}"
     }
 
-    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>) {
+    override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun sendComment(sendFromAccount: String, authorOfItemToReply: String, permlinkOfItemToReply: String, content: String, categoryName: String) {
+    override fun sendComment(sendFromAccount: String, authorOfItemToReply: String, permlinkOfItemToReply: String, content: String, categoryName: String): CreatePostResult {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -63,6 +63,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
             FeedType.BLOG -> provider.get(BlogViewModle::class.java)
             FeedType.COMMENTS -> provider.get(CommentsViewModle::class.java)
+            else -> throw IllegalStateException(" $type is unsupported")
         }
         mViewModel!!.filter = if (filter == null || filter == "null") null
         else mapper.readValue(filter, StoryFilter::class.java)

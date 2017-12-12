@@ -18,10 +18,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryTree
-import io.golos.golos.utils.Translit
-import io.golos.golos.utils.UpdatingState
-import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.toHtml
+import io.golos.golos.utils.*
 import java.util.concurrent.Executor
 
 
@@ -175,6 +172,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         mSecondaryImage.visibility = View.GONE
                         mBodyTextMarkwon.visibility = View.VISIBLE
                         mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
+                        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
                     }
                     wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
                         mMainImageBig.visibility = View.GONE
@@ -190,6 +188,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                                     .into(mSecondaryImage)
                         }*/
                         mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
+                        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
                     }
                     else -> {
                         val error = mGlide.load(errorDrawable)

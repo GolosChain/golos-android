@@ -17,6 +17,7 @@ import io.golos.golos.screens.story.GlideImageGetter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.utils.GolosMovementMethod
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
@@ -97,7 +98,7 @@ class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(
     private val mText: TextView = itemView.findViewById(R.id.text)
 
     init {
-        mText.movementMethod = LinkMovementMethod.getInstance()
+        mText.movementMethod = GolosMovementMethod.instance
     }
 
     var state: RowWrapper? = null

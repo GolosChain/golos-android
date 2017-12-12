@@ -38,6 +38,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mAuthLiveData = MutableLiveData<UserData>()
+    private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
     private var mFilteredStoriesLiveData: Pair<FilteredRequest, MutableLiveData<StoryTreeItems>>? = null
 
     private fun getStripeItems(limit: Int,
@@ -75,6 +76,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             put(FeedType.PERSONAL_FEED, MutableLiveData<StoryTreeItems>())
             put(FeedType.BLOG, MutableLiveData<StoryTreeItems>())
             put(FeedType.COMMENTS, MutableLiveData<StoryTreeItems>())
+            put(FeedType.UNCLASSIFIED, MutableLiveData<StoryTreeItems>())
         }
     }
 
@@ -164,6 +166,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
+    override fun lastCreatedPost(): LiveData<CreatePostResult> {
+        return mLastPostLiveData
+    }
+
     private fun getAccountData(of: String): AccountInfo {
         return mGolosApi.getAccountData(of)
     }
@@ -212,8 +218,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             null,
                             userData.privateActiveWif,
                             userData.privatePostingWif)
-                    if (!response.isKeyValid){
-                        mMainThreadExecutor.execute {  deleteUserdata()  }
+                    if (!response.isKeyValid) {
+                        mMainThreadExecutor.execute { deleteUserdata() }
 
                     }
                 } catch (e: Exception) {
@@ -221,7 +227,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     e.printStackTrace()
                     if (e is IllegalArgumentException
                             && e.message?.contains("key must be 51 chars") ?: false) {
-                        mMainThreadExecutor.execute {  deleteUserdata()  }
+                        mMainThreadExecutor.execute { deleteUserdata() }
                     }
                 }
             }
@@ -454,16 +460,39 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
-    override fun requestStoryUpdate(storyId: Long, feedType: FeedType) {
-        val liveData = convertFeedTypeToLiveData(feedType, null)//todo proper request for filtered list
-        var item = liveData.value?.items?.find { it.rootStory()?.id == storyId } /*.let {
-            requestStoryUpdate(it)
-        }*/
-        if (item == null && mFilteredStoriesLiveData != null) {
-            item = mFilteredStoriesLiveData?.second?.value?.items?.find { it.rootStory()?.id == storyId }
-        }
-        item?.let {
-            requestStoryUpdate(it)
+
+    override fun requestStoryUpdate(author: String, permLink: String, blog: String, feedType: FeedType) {
+        if (feedType != FeedType.UNCLASSIFIED) {
+            val liveData = convertFeedTypeToLiveData(feedType, null)
+            var item = liveData.value?.items?.find {
+                it.rootStory()?.author == author
+                        && it.rootStory()?.permlink == permLink
+                        && it.rootStory()?.categoryName == blog
+            }
+            if (item == null && mFilteredStoriesLiveData != null) {
+                item = mFilteredStoriesLiveData?.second?.value?.items?.find {
+                    it.rootStory()?.author == author
+                            && it.rootStory()?.permlink == permLink
+                            && it.rootStory()?.categoryName == blog
+                }
+            }
+            item?.let {
+                requestStoryUpdate(it)
+            }
+        } else {
+            mWorkerExecutor.execute {
+                try {
+                    val story = getStory(blog, author, permLink)
+                    val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
+                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(listOf(story), FeedType.UNCLASSIFIED) }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    val error = GolosErrorParser.parse(e)
+                    val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
+                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(listOf(), FeedType.UNCLASSIFIED, null, error) }
+                }
+            }
         }
     }
 
@@ -471,9 +500,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return mAuthLiveData
     }
 
-    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit) {
+    override fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (CreatePostResult?, GolosError?) -> Unit) {
         if (!isUserLoggedIn()) {
-            resultListener.invoke(Unit, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
+            resultListener.invoke(null, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
             return
         }
         val tags = ArrayList(tags)
@@ -495,14 +524,29 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             }
                         }
                 val content = content.joinToString(separator = "\n") { it.markdownRepresentation }
-                mGolosApi.sendPost(mPersister.getCurrentUserName()!!, title, content, tags.toArray(Array(tags.size, { "" })))
+
+                val result = mGolosApi.sendPost(mPersister.getCurrentUserName()!!, title, content, tags.toArray(Array(tags.size, { "" })))
+
+
                 mMainThreadExecutor.execute {
-                    resultListener.invoke(Unit, null)
+                    result.isPost = true
+                    mLastPostLiveData.value = result
+                    resultListener.invoke(result, null)
+                }
+                mWorkerExecutor.execute {
+                    val newStory = getStripeItems(1, FeedType.BLOG, null,
+                            1024, null, null)[0]
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, null)
+
+                    mMainThreadExecutor.execute {
+                        comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
+                                FeedType.BLOG, null, comments.value?.error)
+                    }
                 }
 
             } catch (e: Exception) {
                 mMainThreadExecutor.execute {
-                    resultListener(Unit, GolosErrorParser.parse(e))
+                    resultListener(null, GolosErrorParser.parse(e))
                 }
             }
         }
@@ -511,9 +555,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun createComment(rootStory: StoryTree,
                                to: GolosDiscussionItem,
                                content: List<EditorPart>,
-                               resultListener: (Unit, GolosError?) -> Unit) {
+                               resultListener: (CreatePostResult?, GolosError?) -> Unit) {
         if (!isUserLoggedIn()) {
-            resultListener.invoke(Unit, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
+            resultListener.invoke(null, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
             return
         }
         mWorkerExecutor.execute {
@@ -528,18 +572,34 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             }
                         }
                 val contentString = content.joinToString(separator = "\n") { it.markdownRepresentation }
-                mGolosApi.sendComment(mPersister.getCurrentUserName() ?: return@execute,
+                val result = mGolosApi.sendComment(mPersister.getCurrentUserName() ?: return@execute,
                         to.author,
                         to.permlink,
                         contentString,
                         rootStory.rootStory()!!.categoryName)
                 requestStoryUpdate(rootStory)
                 mMainThreadExecutor.execute {
-                    resultListener.invoke(Unit, null)
+                    result.isPost = false
+                    mLastPostLiveData.value = result
+                    resultListener.invoke(result, null)
+                }
+                mWorkerExecutor.execute {
+                    val newStory = getStripeItems(1, FeedType.COMMENTS, null,
+                            1024, null, null)[0]
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, null)
+
+                    mMainThreadExecutor.execute {
+                        comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
+                                FeedType.COMMENTS, null, comments.value?.error)
+                    }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+                if (e is SteemResponseError) {
+                    Timber.e(e.message)
+                }
                 mMainThreadExecutor.execute {
-                    resultListener(Unit, GolosErrorParser.parse(e))
+                    resultListener(null, GolosErrorParser.parse(e))
                 }
             }
         }

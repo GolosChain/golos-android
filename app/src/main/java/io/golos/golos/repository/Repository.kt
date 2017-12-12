@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
 import io.golos.golos.repository.api.GolosApi
+import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.UserAuthResponse
@@ -78,17 +79,21 @@ abstract class Repository {
 
     abstract fun deleteUserdata()
 
+    abstract fun lastCreatedPost(): LiveData<CreatePostResult>
+
     abstract fun upVote(comment: GolosDiscussionItem, percents: Short)
 
     abstract fun cancelVote(comment: GolosDiscussionItem)
 
     abstract fun requestStoryUpdate(story: StoryTree)
 
-    abstract fun requestStoryUpdate(storyId: Long, feedType: FeedType)
+    abstract fun requestStoryUpdate(author: String, permLink: String, blog: String, feedType: FeedType)
 
-    abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>, resultListener: (Unit, GolosError?) -> Unit)
+    abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
+                            resultListener: (CreatePostResult?, GolosError?) -> Unit)
 
-    abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>, resultListener: (Unit, GolosError?) -> Unit)
+    abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>,
+                               resultListener: (CreatePostResult?, GolosError?) -> Unit)
 
     abstract fun isUserLoggedIn(): Boolean
 

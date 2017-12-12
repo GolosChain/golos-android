@@ -113,7 +113,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 mRecycler.showSnackbar(it)
                 Handler().postDelayed({
                     finish()
-                }, 3000)
+                }, 30)
             }
         })
         mTitle.state = EditorTitleState(mMode?.title ?: "", mMode?.isPostEditor ?: false, {
@@ -155,7 +155,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             fr.show(supportFragmentManager, null)
         })
         mSubmitBtn.setOnClickListener({
-            mViewModel.onTagsChanged(mFooter.state.tags)
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
         })

@@ -20,6 +20,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.toHtml
@@ -82,7 +83,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
 
     init {
-        mText.movementMethod = LinkMovementMethod.getInstance()
+        mText.movementMethod = GolosMovementMethod.instance
         mTimeTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_access_time_gray_24dp), null, null, null)
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_18_gray), null, null, null)
     }

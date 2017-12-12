@@ -183,12 +183,18 @@ abstract class StoriesViewModel : ViewModel() {
 
     open fun onCardClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it.rootStory()?.id ?: 0L, type)
+        StoryActivity.start(context, it.rootStory()?.author ?: return,
+                it.rootStory()?.categoryName ?: return,
+                it.rootStory()?.permlink ?: return,
+                type)
     }
 
     open fun onCommentsClick(it: StoryTree, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it.rootStory()?.id ?: 0L, type)
+        StoryActivity.start(context, it.rootStory()?.author ?: return,
+                it.rootStory()?.categoryName ?: return,
+                it.rootStory()?.permlink ?: return,
+                type)
     }
 
     open fun onShareClick(it: StoryTree, context: Context?) {
