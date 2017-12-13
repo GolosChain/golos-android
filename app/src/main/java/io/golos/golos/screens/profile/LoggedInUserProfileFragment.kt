@@ -3,6 +3,7 @@ package io.golos.golos.screens.profile
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -17,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
+import io.golos.golos.screens.settings.SettingActivity
 
 /**
  * Created by yuri on 10.11.17.
@@ -49,6 +51,10 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
         pager.adapter = adapter
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
         tabbar.setupWithViewPager(pager)
+        v.findViewById<View>(R.id.settings_btn).setOnClickListener({
+            val i = Intent(activity!!, SettingActivity::class.java)
+            activity?.startActivity(i)
+        })
         return v
     }
 
@@ -59,8 +65,9 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
     }
 
     override fun onChanged(it: UserProfileState?) {
+        if (view == null) return
         mUserName.text = it?.userName?.capitalize()
-        val glide = Glide.with(view)
+        val glide = Glide.with(view ?: return)
         if (it?.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
             glide.load(it.avatarPath)

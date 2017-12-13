@@ -34,6 +34,8 @@ abstract class GolosApi {
 
     abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
 
+    abstract fun getStoryWithoutComments(author: String, permlink: String): StoryTree
+
     abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
                             filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryTree>
 

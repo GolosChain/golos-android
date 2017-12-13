@@ -82,6 +82,7 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -99,17 +100,21 @@
                 android:textStyle="bold"
                 app:textAllCaps="true" />
 
-            <android.support.v4.widget.SwipeRefreshLayout
-                android:id="@+id/swipe_to_refresh"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                 />
+                android:layout_height="wrap_content">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible" />
+                <android.support.v4.widget.SwipeRefreshLayout
+                    android:id="@+id/swipe_to_refresh"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
+
 
             <com.wefika.flowlayout.FlowLayout
                 android:id="@+id/tags_lo"

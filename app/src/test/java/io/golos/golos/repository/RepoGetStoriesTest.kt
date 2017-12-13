@@ -41,7 +41,7 @@ class RepoGetStoriesTest {
                     }
 
                     override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-                        return Pair("sdg", System.currentTimeMillis())
+                        return null
                     }
 
                     override fun getActiveUserData(): UserData? = userData
@@ -152,10 +152,31 @@ class RepoGetStoriesTest {
 
     @Test
     fun testGetComments() {
-        repo.authWithPostingWif(userName,privatePosting, {_->})
+        repo.authWithPostingWif(userName, privatePosting, { _ -> })
         val items = repo.getStories(FeedType.COMMENTS)
-        repo.requestStoriesListUpdate(20,FeedType.COMMENTS)
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS)
         println(items)
     }
 
+    @Test
+    fun testGetNewStories() {
+        val items = repo.getStories(FeedType.PROMO)
+        repo.requestStoriesListUpdate(20, FeedType.PROMO)
+        (0 until 10).forEach {
+            repo.requestStoriesListUpdate(20, FeedType.PROMO)
+        }
+        println(items)
+    }
+
+    @Test
+    fun testStoryNoBlog() {
+        val items = repo.getStories(FeedType.UNCLASSIFIED)
+        Assert.assertNull(items.value)
+        repo.requestStoryUpdate("sinte",
+                "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh",
+                null, FeedType.UNCLASSIFIED)
+        Assert.assertNotNull(items.value)
+        Assert.assertEquals(1, items.value?.items?.size)
+        Assert.assertTrue(items.value?.items!![0].comments().isNotEmpty())
+    }
 }

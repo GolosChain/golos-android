@@ -107,4 +107,8 @@ internal class MockApiImpl : GolosApi() {
     override fun sendComment(sendFromAccount: String, authorOfItemToReply: String, permlinkOfItemToReply: String, content: String, categoryName: String): CreatePostResult {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun getStoryWithoutComments(author: String, permlink: String): StoryTree {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

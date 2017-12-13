@@ -201,7 +201,14 @@ class ApiImplTest {
                 "Test Title" + UUID.randomUUID().toString().substring(8),
                 " ewtwetwetwet",
                 tags)
-        assertEquals(accname,result.author)
-        assertEquals("first",result.blog)
+        assertEquals(accname, result.author)
+        assertEquals("first", result.blog)
+    }
+
+    @Test
+    fun getStoryNoComments() {
+        val story = service.getStoryWithoutComments("sinte",
+                "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh")
+        Assert.assertNotNull(story)
     }
 }

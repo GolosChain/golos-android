@@ -70,6 +70,13 @@ class ApiImpl : GolosApi() {
         return story
     }
 
+    override fun getStoryWithoutComments(author: String, permlink: String): StoryTree {
+        val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(
+                mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
+                null), UpdatingState.DONE), ArrayList())
+        return story
+    }
+
     override fun getStories(limit: Int, type: FeedType,
                             truncateBody: Int, filter: StoryFilter?,
                             startAuthor: String?,

@@ -39,6 +39,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
+            android:name=".screens.settings.SettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name=".screens.MainActivity"
             android:label="@string/GOLOS"
             android:screenOrientation="portrait"

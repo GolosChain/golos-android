@@ -102,8 +102,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return ava
     }
 
-    private fun getStory(blog: String, author: String, permlink: String): StoryTree {
-        var story = mGolosApi.getStory(blog, author, permlink)
+    private fun getStory(blog: String?, author: String, permlink: String): StoryTree {
+        var story = if (blog != null) mGolosApi.getStory(blog, author, permlink)
+        else mGolosApi.getStoryWithoutComments(author, permlink)
         var name = mPersister.getCurrentUserName()
         if (name != null) {
             story.rootStory()?.isUserUpvotedOnThis = story.rootStory()?.isUserVotedOnThis(name) ?: false
@@ -461,19 +462,20 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
 
-    override fun requestStoryUpdate(author: String, permLink: String, blog: String, feedType: FeedType) {
+    override fun requestStoryUpdate(author: String,
+                                    permLink: String,
+                                    blog: String?,
+                                    feedType: FeedType) {
         if (feedType != FeedType.UNCLASSIFIED) {
             val liveData = convertFeedTypeToLiveData(feedType, null)
             var item = liveData.value?.items?.find {
                 it.rootStory()?.author == author
                         && it.rootStory()?.permlink == permLink
-                        && it.rootStory()?.categoryName == blog
             }
             if (item == null && mFilteredStoriesLiveData != null) {
                 item = mFilteredStoriesLiveData?.second?.value?.items?.find {
                     it.rootStory()?.author == author
                             && it.rootStory()?.permlink == permLink
-                            && it.rootStory()?.categoryName == blog
                 }
             }
             item?.let {
@@ -484,8 +486,12 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 try {
                     val story = getStory(blog, author, permLink)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
-                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(listOf(story), FeedType.UNCLASSIFIED) }
-
+                    mMainThreadExecutor.execute {
+                        liveData.value = StoryTreeItems(listOf(story), FeedType.UNCLASSIFIED)
+                    }
+                    if (blog == null) {
+                        requestStoryUpdate(story)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     val error = GolosErrorParser.parse(e)

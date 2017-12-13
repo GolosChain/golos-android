@@ -8,6 +8,7 @@ import android.view.View
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
+import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.showSnackbar
@@ -38,6 +39,10 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                 }
                 R.id.notifications -> {
                     bottomNavView.showSnackbar(R.string.unaval_in_current_version)
+                    false
+                }
+                R.id.add -> {
+                    EditorActivity.startPostEditor(this, "")
                     false
                 }
                 R.id.profile -> {

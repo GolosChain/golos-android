@@ -50,6 +50,10 @@ abstract class Repository {
                 val handler = Handler(Looper.getMainLooper())
                 return Executor { command -> handler.post(command) }
             }
+
+        fun setSingletoneInstance(repository: Repository){
+            instance = repository
+        }
     }
 
 
@@ -87,7 +91,8 @@ abstract class Repository {
 
     abstract fun requestStoryUpdate(story: StoryTree)
 
-    abstract fun requestStoryUpdate(author: String, permLink: String, blog: String, feedType: FeedType)
+    abstract fun requestStoryUpdate(author: String, permLink: String,
+                                    blog: String?, feedType: FeedType)
 
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
                             resultListener: (CreatePostResult?, GolosError?) -> Unit)

@@ -13,11 +13,11 @@
     <string name="comment">comment</string>
     <string name="GOLOS">Golos</string>
     <string name="login">Login</string>
-    <string name="posting_key">Posting key</string>
+    <string name="posting_key">Private posting key</string>
     <string name="scan">Scan</string>
-    <string name="active_key">Active key</string>
+    <string name="active_key">Private active key</string>
     <string name="cancel">Cancel</string>
-    <string name="exit">Enter</string>
+    <string name="exit">Exit</string>
     <string name="enter_post_title">Add an interesting title</string>
     <string name="tab_back_double_to_enter">Tap again to exit</string>
     <string name="slow_internet_connection">Connection is too slow. Please try again</string>
@@ -87,5 +87,10 @@
     <string name="safe_gbg">Safe - GBG</string>
     <string name="enter_text">Enter message text</string>
     <string name="to_comment">Comment</string>
+    <string name="wiki">Golos Wiki</string>
+    <string name="about_golos">About Golos.io</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="golos_android_v">Golos for Android v.%s</string>
+    <string name="user_made_logout">User made logout</string>
 </resources>
 

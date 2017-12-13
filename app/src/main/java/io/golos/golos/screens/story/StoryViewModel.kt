@@ -6,6 +6,7 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
+import android.support.annotation.VisibleForTesting
 import android.widget.ImageView
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -27,26 +28,27 @@ import io.golos.golos.utils.Translit
  */
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
-    private val mRepository = Repository.get
-    lateinit var author: String
-    lateinit var permLink: String
-    lateinit var blog: String
+    @VisibleForTesting
+    var mRepository: Repository = Repository.get
+    private lateinit var author: String
+    private lateinit var permLink: String
+    var blog: String? = null
     private lateinit var feedType: FeedType
 
-    fun onCreate(author: String, permLink: String, blog: String, feedType: FeedType) {
+    fun onCreate(author: String, permLink: String, blog: String?, feedType: FeedType) {
         this.author = author
         this.permLink = permLink
         this.blog = blog
         this.feedType = feedType
         mLiveData.removeSource(mRepository.getStories(feedType, null))
         mLiveData.addSource(mRepository.getStories(feedType, null)) {
+            println("on new $it")
             val storyItems = it
             it?.
                     items?.
                     filter {
                         it.rootStory()?.author == this.author
                                 && it.rootStory()?.permlink == this.permLink
-                                && it.rootStory()?.categoryName == this.blog
                     }?.
                     forEach {
                         mLiveData.value = StoryViewState(false,

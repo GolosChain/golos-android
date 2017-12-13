@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_seacrh_gray_24dp"
         android:title="@string/groups" />
     <item
+        android:id="@+id/add"
+        android:icon="@drawable/ic_rect_with_plus_gray_24dp"
+        android:title="@string/groups" />
+    <item
         android:id="@+id/notifications"
         android:icon="@drawable/ic_bell_gray_24dp"
         android:title="@string/groups" />

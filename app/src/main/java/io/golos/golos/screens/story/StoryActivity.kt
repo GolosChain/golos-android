@@ -73,7 +73,7 @@ class StoryActivity : GolosActivity() {
         mViewModel = provider.get(StoryViewModel::class.java)
         val extra = intent.getStringExtra(PERMLINK_TAG)
         if (extra == null) {
-            Timber.e(" no comment set to activity")
+            Timber.e(" no story set to activity")
             finish()
             return
         }
@@ -250,7 +250,7 @@ class StoryActivity : GolosActivity() {
         private val FEED_TYPE = "FEED_TYPE"
         fun start(ctx: Context,
                   author: String,
-                  blog: String,
+                  blog: String?,
                   permlink: String,
                   feedType: FeedType) {
 
