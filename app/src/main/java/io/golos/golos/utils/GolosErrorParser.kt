@@ -26,9 +26,12 @@ object GolosErrorParser {
             return R.string.user_used_max_comments_chances
         if (error.error.steemErrorDetails.data.toString().contains(" You have already voted in a similar way"))
             return R.string.you_voted_same_way
-        else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes")) return R.string.you_can_post_only_every_five_minutes
+        else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes"))
+            return R.string.you_can_post_only_every_five_minutes
         else if (error.error.steemErrorDetails.message.contains(" <= now + fc::seconds(STEEMIT_MAX_TIME_UNTIL_EXPIRATION): "))
             return R.string.wrong_time
+        else if (error.error.steemErrorDetails.message.contains("= STEEMIT_MIN_VOTE_INTERVAL_SEC: Can only vote once every "))
+            return R.string.can_vote_once_per_three_second
         else return R.string.unknown_error
     }
 }

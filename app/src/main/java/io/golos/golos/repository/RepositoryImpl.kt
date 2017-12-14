@@ -279,7 +279,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         out = current + out.subList(1, out.size)
                     }
                     updatingFeed.value = StoryTreeItems(out, feedType)
-                    startLoadingAbscentAvatars(out)
+                    startLoadingAbscentAvatars(out, feedType, filter)
                 }
                 mRequests.remove(request)
             } catch (e: Exception) {
@@ -295,38 +295,35 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
-    private fun startLoadingAbscentAvatars(forItems: List<StoryTree>) {
-        forItems.forEach {
-            if (it.rootStory()?.avatarPath == null) {
-                mWorkerExecutor.execute(object : ImageLoadRunnable {
-                    override fun run() {
-                        try {
-                            val currentWorkingItem = it.deepCopy()
-                            currentWorkingItem.rootStory()?.avatarPath =
-                                    getUserAvatar(currentWorkingItem.rootStory()!!.author,
-                                            currentWorkingItem.rootStory()!!.permlink,
-                                            currentWorkingItem.rootStory()!!.categoryName)
-                            val listOfList = mLiveDataMap.values + mFilteredStoriesLiveData?.second
-                            listOfList.forEach {
-                                if (it?.value?.items?.size ?: 0 > 0) {
-                                    val replaced =
-                                            findAndReplace(ArrayList(it?.value?.items ?: ArrayList<StoryTree>()), currentWorkingItem)
-                                    mMainThreadExecutor.execute {
-                                        it?.value = StoryTreeItems(replaced,
-                                                it?.value?.type ?: FeedType.NEW,
-                                                it?.value?.filter,
-                                                it?.value?.error)
-                                    }
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Timber.e("error loading avatar of ${it.rootStory()?.author}," +
-                                    " permlink is ${it.rootStory()?.permlink} " +
-                                    "and category is ${it.rootStory()?.categoryName}")
-                            e.printStackTrace()
-                        }
+    private fun startLoadingAbscentAvatars(forItems: List<StoryTree>, feedType: FeedType, filter: StoryFilter?) {
+        mWorkerExecutor.execute {
+            val userNames = forItems
+                    .filter { it.rootStory()?.avatarPath == null }
+                    .distinct()
+                    .map { it.rootStory()?.author ?: "" }
+            val avatars = mGolosApi.getUserAvatars(userNames)
+            avatars
+                    .filter { it.value != null }
+                    .forEach {
+                        mPersister.saveAvatarPathForUser(it.key, it.value!!, System.currentTimeMillis())
                     }
-                })
+            var items = convertFeedTypeToLiveData(feedType, filter).value!!.items
+            items = ArrayList(items)
+                    .map {
+                        if (avatars.containsKey(it.rootStory()?.author ?: "")) it.deepCopy()
+                        else it
+                    }
+
+            items.forEach {
+                if (avatars.containsKey(it.rootStory()?.author ?: "")) {
+                    it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: ""]
+                }
+            }
+
+            convertFeedTypeToLiveData(feedType, filter).let {
+                mMainThreadExecutor.execute {
+                    it.value = StoryTreeItems(items, feedType, filter, it.value?.error)
+                }
             }
         }
     }

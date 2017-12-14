@@ -19,6 +19,7 @@ import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.concurrent.Executor
 
 
@@ -45,7 +46,6 @@ class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) }
 
 
     private var stripes = ArrayList<StoryTree>()
-
     fun setStripesCustom(newItems: List<StoryTree>) {
         if (stripes.isEmpty()) {
             stripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
@@ -60,7 +60,7 @@ class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) }
                     override fun getOldListSize() = stripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition].storyWithState() == newItems[newItemPosition].storyWithState()
+                        return stripes[oldItemPosition] == newItems[newItemPosition]
                     }
                 })
                 adapterMainThreadExecutor.execute {

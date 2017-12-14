@@ -211,4 +211,14 @@ class ApiImplTest {
                 "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh")
         Assert.assertNotNull(story)
     }
+
+    @Test
+    fun getAvatarsOf() {
+        val avatars = service.getUserAvatars(listOf("yuri-vlad", "yuri-vlad-second", "jevgenika", "sinte"))
+        Assert.assertNotNull(avatars)
+        Assert.assertEquals(4, avatars.size)
+        Assert.assertNotNull(avatars["yuri-vlad-second"])
+        Assert.assertNotNull(avatars["jevgenika"])
+        Assert.assertNull(avatars["yuri-vlad"])
+    }
 }

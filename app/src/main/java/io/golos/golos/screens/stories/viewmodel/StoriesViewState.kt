@@ -240,7 +240,9 @@ abstract class StoriesViewModel : ViewModel() {
         }
     }
 
-    open var canVote = mRepository.isUserLoggedIn()
+    fun canVote(): Boolean {
+     return   mRepository.isUserLoggedIn()
+    }
 
     fun onVoteRejected(it: StoryTree) {
         mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,

@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Golos</string>
+    <string name="app_name">Golos.io</string>
     <string name="add_max_five_tags">Напишите 5 тегов</string>
     <string name="enter_tag_name">Введите название тeгов, через пробел</string>
-    <string name="to_much_tags">Можно указать до пяти тэгов</string>
-    <string name="use_only_one_dash">в тэге может быть только один дефис</string>
-    <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тэги</string>
+    <string name="to_much_tags">Можно указать до пяти тeгов</string>
+    <string name="use_only_one_dash">в тeге может быть только один дефис</string>
+    <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тeги</string>
     <string name="only_lowercase_characters">Используйте только символы нижнего регистра</string>
     <string name="use_only_allowed_characters">Используйте только строчные буквы, цифры и одно тире</string>
     <string name="first_char_must_be_a_letter">Должно начинаться с буквы</string>
@@ -12,7 +12,7 @@
     <string name="text">Текст</string>
     <string name="comment">Комментарий</string>
     <string name="to_comment">Комментировать</string>
-    <string name="GOLOS">Голос</string>
+    <string name="GOLOS">Golos.io</string>
     <string name="login">Введите логин</string>
     <string name="posting_key">Приватный постинг ключ</string>
     <string name="scan">Сканировать ключ</string>
@@ -65,7 +65,7 @@
     <string name="title_activity_main_test">MainTestActivity</string>
     <string name="login_write_comment">Зайдите, чтобы писать комментарии</string>
     <string name="stories">Истории</string>
-    <string name="tag_search">Посты с тэгом:</string>
+    <string name="tag_search">Посты с тeгом:</string>
     <string name="groups">Сообщества</string>
     <string name="profile">Профиль</string>
     <string name="unaval_in_current_version">Недоступно в текущей версии</string>
@@ -91,4 +91,5 @@
     <string name="privacy_policy">Политика конфиденциальности</string>
     <string name="golos_android_v">Golos для Android v.%s</string>
     <string name="user_made_logout">Вы вышли из аккаунта</string>
+    <string name="can_vote_once_per_three_second">Вы можете проголосовать раз в три секунды</string>
 </resources>

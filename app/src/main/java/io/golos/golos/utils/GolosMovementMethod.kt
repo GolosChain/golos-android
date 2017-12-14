@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.TextView
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.webview.WebViewActivity
 
 /**
  * Handles URL clicks on TextViews. Unlike the default implementation, this:
@@ -37,6 +38,9 @@ class GolosMovementMethod protected constructor() : LinkMovementMethod() {
                         matchResult.blog,
                         matchResult.permlink,
                         FeedType.UNCLASSIFIED)
+                return true
+            } else {
+                WebViewActivity.start(textView.context, url)
                 return true
             }
             return false

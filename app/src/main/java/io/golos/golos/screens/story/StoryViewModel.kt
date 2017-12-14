@@ -42,7 +42,6 @@ class StoryViewModel : ViewModel() {
         this.feedType = feedType
         mLiveData.removeSource(mRepository.getStories(feedType, null))
         mLiveData.addSource(mRepository.getStories(feedType, null)) {
-            println("on new $it")
             val storyItems = it
             it?.
                     items?.
@@ -57,6 +56,7 @@ class StoryViewModel : ViewModel() {
                                 storyItems?.error,
                                 it.rootStory()?.tags ?: ArrayList(),
                                 it)
+                        this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
                     }
         }
         mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
@@ -155,5 +155,9 @@ class StoryViewModel : ViewModel() {
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
         sendIntent.type = "text/plain"
         context.startActivity(sendIntent)
+    }
+
+    fun requestRefresh() {
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
     }
 }

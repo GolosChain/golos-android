@@ -111,4 +111,8 @@ internal class MockApiImpl : GolosApi() {
     override fun getStoryWithoutComments(author: String, permlink: String): StoryTree {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun getUserAvatars(names: List<String>): Map<String, String?> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

@@ -3,10 +3,10 @@ package io.golos.golos.repository.api
 import io.golos.golos.App
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.CreatePostResult
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import java.io.File
 
@@ -29,6 +29,8 @@ abstract class GolosApi {
     }
 
     abstract fun getUserAvatar(username: String, permlink: String?, blog: String?): String?
+
+    abstract fun getUserAvatars(names: List<String>): Map<String, String?>
 
     abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree>
 

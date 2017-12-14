@@ -72,7 +72,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
                 onShareClick = { mViewModel?.onShareClick(it, activity) },
                 onUpvoteClick = {
-                    if (mViewModel?.canVote == true) {
+                    if (mViewModel?.canVote() == true) {
                         if (it.rootStory()?.isUserUpvotedOnThis == true) {
                             mViewModel?.downVote(it)
                         } else {

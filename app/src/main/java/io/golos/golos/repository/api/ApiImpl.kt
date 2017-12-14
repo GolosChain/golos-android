@@ -22,7 +22,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair
 import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.io.File
-import java.util.*
 
 /**
  * Created by yuri on 20.11.17.
@@ -59,8 +58,10 @@ class ApiImpl : GolosApi() {
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryTree>()
         discussions.forEach {
-            val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
-            out.add(story)
+            if (it != null){
+                val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
+                out.add(story)
+            }
         }
         return out
     }
@@ -75,6 +76,15 @@ class ApiImpl : GolosApi() {
                 mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
                 null), UpdatingState.DONE), ArrayList())
         return story
+    }
+
+    override fun getUserAvatars(names: List<String>): Map<String, String?> {
+        val out = HashMap<String, String?>()
+        val extendedAccs = mGolosApi.databaseMethods.getAccounts(names.map { AccountName(it) })
+        extendedAccs.forEach {
+            out[it?.name?.name ?: ""] = it?.avatarPath
+        }
+        return out
     }
 
     override fun getStories(limit: Int, type: FeedType,

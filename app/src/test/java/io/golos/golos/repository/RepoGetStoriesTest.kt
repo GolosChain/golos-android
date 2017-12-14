@@ -179,4 +179,13 @@ class RepoGetStoriesTest {
         Assert.assertEquals(1, items.value?.items?.size)
         Assert.assertTrue(items.value?.items!![0].comments().isNotEmpty())
     }
+
+    @Test
+    fun loadAvatartest() {
+        val items = repo.getStories(FeedType.POPULAR)
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR)
+        Assert.assertNotNull(items.value)
+
+    }
 }

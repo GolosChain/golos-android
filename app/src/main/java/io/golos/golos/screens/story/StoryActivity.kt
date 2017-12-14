@@ -40,7 +40,7 @@ import timber.log.Timber
 /**
  * Created by yuri on 06.11.17.
  */
-class StoryActivity : GolosActivity() {
+class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mViewModel: StoryViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mFab: FloatingActionButton
@@ -68,6 +68,10 @@ class StoryActivity : GolosActivity() {
         setUpViewModel()
     }
 
+    override fun onRefresh() {
+       mViewModel.requestRefresh()
+    }
+
     private fun setUpViewModel() {
         val provider = ViewModelProviders.of(this)
         mViewModel = provider.get(StoryViewModel::class.java)
@@ -84,6 +88,7 @@ class StoryActivity : GolosActivity() {
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
+                mSwipeToRefresh.isRefreshing = false
                 val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE
@@ -202,6 +207,7 @@ class StoryActivity : GolosActivity() {
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }
+        mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({
             if (mViewModel.showVoteDialog) {
                 val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
@@ -241,6 +247,7 @@ class StoryActivity : GolosActivity() {
         })
         mSwipeToRefresh.isRefreshing = true
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
+        mSwipeToRefresh.setOnRefreshListener(this)
     }
 
     companion object {

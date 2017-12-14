@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -33,6 +34,7 @@ import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -135,10 +137,17 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_GRANTED
             if (readExternalPermission) {
-                val intent = Intent();
-                intent.type = "image/*"
-                intent.action = Intent.ACTION_GET_CONTENT
-                startActivityForResult(intent, PICK_IMAGE_ID)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                    intent.type = "image/jpeg"
+                    startActivityForResult(intent, PICK_IMAGE_ID)
+                }else {
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.type = "image/*"
+                    startActivityForResult(intent, PICK_IMAGE_ID)
+                }
+
             } else {
                 ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
             }
@@ -170,11 +179,13 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Timber.e("onActivityResult data = $data")
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())
             if (data != null) {
                 App.computationExecutor.execute {
                     try {
+                        Timber.e("onActivityResult data.data = ${data.data}")
                         val inputStream = contentResolver.openInputStream(data.data)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
                         if (bitmap == null) handler.post {
@@ -209,6 +220,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
     override fun onPhotoDelete(image: EditorImagePart, parts: List<EditorPart>) {
         mViewModel.onUserInput(EditorInputAction.DeleteAction(parts.indexOf(image)))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Timber.e("on onDestroy")
     }
 
     companion object {

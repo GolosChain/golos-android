@@ -1,6 +1,7 @@
 package io.golos.golos.screens.widgets;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.AttributeSet;
 
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;

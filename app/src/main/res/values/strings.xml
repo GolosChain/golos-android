@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Golos</string>
+    <string name="app_name">Golos.io</string>
     <string name="add_max_five_tags">Add tags(max 5)</string>
     <string name="enter_tag_name">Enter tags with space</string>
     <string name="to_much_tags">You can add up to 5 tags</string>
@@ -11,7 +11,7 @@
     <string name="publish">Publish</string>
     <string name="text">text</string>
     <string name="comment">comment</string>
-    <string name="GOLOS">Golos</string>
+    <string name="GOLOS">Golos.io</string>
     <string name="login">Login</string>
     <string name="posting_key">Private posting key</string>
     <string name="scan">Scan</string>
@@ -92,5 +92,6 @@
     <string name="privacy_policy">Privacy policy</string>
     <string name="golos_android_v">Golos for Android v.%s</string>
     <string name="user_made_logout">User made logout</string>
+    <string name="can_vote_once_per_three_second">You can vote once per three seconds</string>
 </resources>
 
