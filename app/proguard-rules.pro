@@ -55,6 +55,7 @@ public static ** valueOf(java.lang.String);
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }
 -keep,includedescriptorclasses class org.commonmark.** { *; }
 -keep,includedescriptorclasses class java.beans.** { *; }
+-keep,includedescriptorclasses class com.ittianyu.bottomnavigationviewex.** { *; }
 
 
 -keep class com.fasterxml.jackson.annotation.** { *; }
