@@ -35,13 +35,16 @@ class StoryViewModel : ViewModel() {
     var blog: String? = null
     private lateinit var feedType: FeedType
 
-    fun onCreate(author: String, permLink: String, blog: String?, feedType: FeedType) {
+    fun onCreate(author: String,
+                 permLink: String,
+                 blog: String?,
+                 feedType: FeedType,
+                 filter: StoryFilter?) {
         this.author = author
         this.permLink = permLink
         this.blog = blog
         this.feedType = feedType
-        mLiveData.removeSource(mRepository.getStories(feedType, null))
-        mLiveData.addSource(mRepository.getStories(feedType, null)) {
+        mLiveData.addSource(mRepository.getStories(feedType, filter)) {
             val storyItems = it
             it?.
                     items?.

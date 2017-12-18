@@ -1,13 +1,11 @@
 package io.golos.golos.screens.stories.viewmodel
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.StoryFilter
@@ -18,6 +16,7 @@ import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.InternetStatusNotifier
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -33,9 +32,10 @@ data class StoriesViewState(val isLoading: Boolean,
 class CommentsViewModle : FeedViewModel() {
     override val type: FeedType
         get() = FeedType.COMMENTS
+
 }
 
-class BlogViewModle : FeedViewModel() {
+class BlogViewModel : FeedViewModel() {
     override val type: FeedType
         get() = FeedType.BLOG
 }
@@ -45,22 +45,18 @@ open class FeedViewModel : StoriesViewModel() {
         get() = FeedType.PERSONAL_FEED
 
     override fun onChangeVisibilityToUser(visibleToUser: Boolean) {
-        if (!mRepository.isUserLoggedIn() && visibleToUser) {
-            mHandler.post {
-                mStoriesLiveData.value = StoriesViewState(false,
-                        ArrayList(),
-                        fullscreenMessage = R.string.login_to_see_feed)
-            }
-        } else super.onChangeVisibilityToUser(visibleToUser)
+        if (filter?.userNameFilter != null && visibleToUser) {
+            super.onChangeVisibilityToUser(visibleToUser)
+        }
     }
 
     override fun onSwipeToRefresh() {
-        if (!mRepository.isUserLoggedIn()) return
+        if (filter?.userNameFilter == null) return
         super.onSwipeToRefresh()
     }
 
     override fun onScrollToTheEnd() {
-        if (!mRepository.isUserLoggedIn()) return
+        if (filter?.userNameFilter == null) return
         super.onScrollToTheEnd()
     }
 
@@ -92,39 +88,29 @@ class PromoViewModel : StoriesViewModel() {
 }
 
 
-abstract class StoriesViewModel : ViewModel() {
+abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
     protected abstract val type: FeedType
-    protected val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
+    protected val mStoriesLiveData: MutableLiveData<StoriesViewState> = MutableLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
     protected var isVisibleToUser: Boolean = false
-    var filter: StoryFilter? = null
-        set(value) {
-            if (field != value) {
-                mStoriesLiveData.value = StoriesViewState(true, ArrayList())
-                mStoriesLiveData.removeSource(mRepository.getStories(type, field))
-                mStoriesLiveData.addSource(mRepository.getStories(type, value)) {
-                    mStoriesLiveData.value = onNewItems(it)
-                }
-                mRepository.requestStoriesListUpdate(20, type, value, null, null)
-            }
-            field = value
-
-        }
-
-    companion object {
-        val mHandler = Handler(Looper.getMainLooper())
-    }
+    protected var filter: StoryFilter? = null
+    protected lateinit var internetStatusNotifier: InternetStatusNotifier
 
     val storiesLiveData: LiveData<StoriesViewState>
         get() {
             return mStoriesLiveData
         }
 
-    init {
-        mStoriesLiveData.addSource(mRepository.getStories(type, filter)) {
-            mStoriesLiveData.value = onNewItems(it)
-        }
+    fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
+        this.filter = filter
+        this.internetStatusNotifier = internetStatusNotifier
+        mRepository.getStories(type, filter).observeForever(this)
+    }
+
+    override fun onChanged(t: StoryTreeItems?) {
+        if (t?.type == type && t.filter == filter)
+            mStoriesLiveData.value = onNewItems(t)
     }
 
     protected open fun onNewItems(items: StoryTreeItems?): StoriesViewState {
@@ -132,7 +118,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun onSwipeToRefresh() {
-        if (!App.isAppOnline()) {
+        if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
         }
@@ -146,7 +132,7 @@ abstract class StoriesViewModel : ViewModel() {
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         this.isVisibleToUser = isVisibleToUser
         if (visibleToUser) {
-            if (!App.isAppOnline()) {
+            if (!internetStatusNotifier.isAppOnline()) {
                 setAppOffline()
                 return
             }
@@ -167,7 +153,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun onScrollToTheEnd() {
-        if (!App.isAppOnline()) {
+        if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
         }
@@ -186,7 +172,7 @@ abstract class StoriesViewModel : ViewModel() {
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
-                type)
+                type, filter)
     }
 
     open fun onCommentsClick(it: StoryTree, context: Context?) {
@@ -194,7 +180,8 @@ abstract class StoriesViewModel : ViewModel() {
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
-                type)
+                type,
+                filter)
     }
 
     open fun onShareClick(it: StoryTree, context: Context?) {
@@ -207,7 +194,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun vote(it: StoryTree, vote: Short) {
-        if (!App.isAppOnline()) {
+        if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
         }
@@ -226,7 +213,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     open fun downVote(it: StoryTree) {
-        if (!App.isAppOnline()) {
+        if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
         }
@@ -241,7 +228,7 @@ abstract class StoriesViewModel : ViewModel() {
     }
 
     fun canVote(): Boolean {
-     return   mRepository.isUserLoggedIn()
+        return mRepository.isUserLoggedIn()
     }
 
     fun onVoteRejected(it: StoryTree) {

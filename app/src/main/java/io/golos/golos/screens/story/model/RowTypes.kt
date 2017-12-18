@@ -39,7 +39,7 @@ class StoryParserToRows {
             whiteList.addTags("h1", "h2", "h3", "h4")
             str = Jsoup.clean(str, whiteList)
             str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))\\b".toRegex()) {
-                if (!it.value.contains("a href")) " <a href =\"https://golos.blog/${it.value.trim()}\">${it.value.trim()}</a>"
+                if (!it.value.contains("a href")) " <a href =\"https://golos.io/${it.value.trim()}\">${it.value.trim()}</a>"
                 else it.value
             }
             str = str.replace(Regexps.imageLinkWithoutSrctag) {

@@ -31,10 +31,10 @@ class StoriesHolderFragment : GolosFragment() {
         authModel.userAuthState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
             if (it?.isLoggedIn == true) {
                 if (mFab.visibility != View.VISIBLE) mFab.show()
-                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = true
+                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = Pair(true, it.username)
             } else if (it?.isLoggedIn == false) {
                 mFab.visibility = View.GONE
-                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = false
+                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = Pair(false, it.username)
             }
         })
         return view

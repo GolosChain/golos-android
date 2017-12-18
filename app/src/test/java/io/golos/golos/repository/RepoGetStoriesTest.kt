@@ -1,15 +1,14 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import io.golos.golos.MainThreadExecutor
+import io.golos.golos.MockPersister
 import io.golos.golos.repository.api.ApiImpl
-import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.stories.model.FeedType
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
 import java.util.concurrent.Executor
 
 class RepoGetStoriesTest {
@@ -29,37 +28,10 @@ class RepoGetStoriesTest {
     @Before
     fun before() {
         repo = RepositoryImpl(
-                executor,
-                executor,
-                object : Persister() {
-                    var users = HashMap<String, String>()
-                    var userData: UserData? = null
-                    var name: String? = null
-                    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-                        users.put(userName, avatarPath + "__" + updatedDate)
-
-                    }
-
-                    override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-                        return null
-                    }
-
-                    override fun getActiveUserData(): UserData? = userData
-
-                    override fun saveUserData(userData: UserData) {
-                        this.userData = userData
-                    }
-
-                    override fun deleteUserData() {
-                        userData = null
-                    }
-
-                    override fun getCurrentUserName() = userData?.userName
-
-                    override fun saveCurrentUserName(name: String?) {
-                        this.name = name
-                    }
-                }, ApiImpl()
+                MainThreadExecutor,
+                MainThreadExecutor,
+                MockPersister,
+                ApiImpl()
         )
     }
 
@@ -93,18 +65,6 @@ class RepoGetStoriesTest {
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.POPULAR,
-                null,
-                stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink)
-        Assert.assertTrue(stories.value!!.items.size > size)
-
-        stories = repo.getStories(FeedType.PROMO)
-        repo.requestStoriesListUpdate(10, FeedType.PROMO)
-
-        Assert.assertTrue(stories.value!!.items.size > 9)
-        size = stories.value!!.items.size
-        repo.requestStoriesListUpdate(20,
-                FeedType.PROMO,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
                 stories.value!!.items.last().rootStory()!!.permlink)
@@ -185,6 +145,25 @@ class RepoGetStoriesTest {
         val items = repo.getStories(FeedType.POPULAR)
         Assert.assertNull(items.value)
         repo.requestStoriesListUpdate(20, FeedType.POPULAR)
+        Assert.assertNotNull(items.value)
+
+    }
+
+    @Test
+    fun laodPersonalizedTest() {
+        var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"))
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"))
+        Assert.assertNotNull(items.value)
+
+        items = repo.getStories(FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"))
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"))
+        Assert.assertNotNull(items.value)
+
+        items = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNotNull(items.value)
 
     }

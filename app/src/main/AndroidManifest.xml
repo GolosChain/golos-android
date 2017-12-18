@@ -30,6 +30,9 @@
         <activity
             android:name=".screens.widgets.PhotoActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".screens.profile.ProfileActivity"
+            android:screenOrientation="portrait" />
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="e3c157b69542160c5ec78e3e4d4c71251a4c3879" />

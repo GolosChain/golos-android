@@ -30,7 +30,8 @@ data class UserProfileState(val isLoggedIn: Boolean,
                             val gbgInSafeAmount: Double = 0.0,
                             val accountWorth: Double = 0.0)
 
-data class AuthState(val isLoggedIn: Boolean)
+data class AuthState(val isLoggedIn: Boolean,
+                     val username: String = "")
 
 data class AuthUserInput(val login: String,
                          val masterKey: String = "",
@@ -41,8 +42,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
     val userProfileState = MutableLiveData<UserProfileState>()
     val userAuthState = Transformations.map(userProfileState,
             {
-                if (it?.isLoggedIn == true) AuthState(true)
-                else AuthState(false)
+                if (it?.isLoggedIn == true) AuthState(true, it.userName)
+                else AuthState(false, "")
             })
     private var mLastUserInput = AuthUserInput("")
     private val mRepository = Repository.get

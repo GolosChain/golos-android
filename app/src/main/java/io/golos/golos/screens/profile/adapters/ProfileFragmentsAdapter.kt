@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import io.golos.golos.R
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.screens.profile.PouchFragment
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.model.FeedType
@@ -13,12 +14,14 @@ import io.golos.golos.screens.widgets.GolosFragment
 /**
  * Created by yuri on 08.12.17.
  */
-class ProfileFragmentsAdapter(manager: FragmentManager, private val context: Context) : FragmentPagerAdapter(manager) {
+class ProfileFragmentsAdapter(manager: FragmentManager,
+                              private val context: Context,
+                              private val profileUserName: String) : FragmentPagerAdapter(manager) {
     public val size = 3
     override fun getItem(position: Int): Fragment {
         return when (position) {
-            0 -> StoriesFragment.getInstance(FeedType.BLOG)
-            1 -> StoriesFragment.getInstance(FeedType.COMMENTS)
+            0 -> StoriesFragment.getInstance(FeedType.BLOG, StoryFilter(userNameFilter = profileUserName))
+            1 -> StoriesFragment.getInstance(FeedType.COMMENTS, StoryFilter(userNameFilter = profileUserName))
             2 -> PouchFragment()
             else -> GolosFragment()
         }

@@ -46,9 +46,14 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
         mSubscribers = v.findViewById(R.id.subscribers_tv)
         mSubscriptions = v.findViewById(R.id.subscribes_tv)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
-        val adapter = ProfileFragmentsAdapter(childFragmentManager, activity!!)
-        pager.offscreenPageLimit = adapter.size
-        pager.adapter = adapter
+        if (arguments?.containsKey(USERNAME_TAG) == true) {
+            val adapter = ProfileFragmentsAdapter(childFragmentManager,
+                    activity!!,
+                    arguments!!.getString(USERNAME_TAG))
+            pager.offscreenPageLimit = adapter.size
+            pager.adapter = adapter
+        }
+
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
         tabbar.setupWithViewPager(pager)
         v.findViewById<View>(R.id.settings_btn).setOnClickListener({
@@ -83,8 +88,12 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
     }
 
     companion object {
-        fun getInstance(): LoggedInUserProfileFragment {
+        private val USERNAME_TAG = "USERNAME_TAG"
+        fun getInstance(username: String): LoggedInUserProfileFragment {
+            val b = Bundle()
+            b.putString(USERNAME_TAG, username)
             val f = LoggedInUserProfileFragment()
+            f.arguments = b
             return f
         }
     }

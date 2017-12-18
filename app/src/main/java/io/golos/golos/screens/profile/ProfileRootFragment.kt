@@ -8,8 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
+import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosFragment
-import timber.log.Timber
 
 /**
  * Created by yuri on 05.12.17.
@@ -33,14 +33,14 @@ class ProfileRootFragment() : GolosFragment(), Observer<AuthState> {
     }
 
     override fun onChanged(it: AuthState?) {
-        Timber.e("on changed = $it")
         if (it?.isLoggedIn == true) {
-            if (childFragmentManager.findFragmentByTag(mUserProfileFTag) == null) {
+            if (Repository.get.getCurrentUserDataAsLiveData().value?.userName != null)
                 childFragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.fade_in, 0)
-                        .replace(mRoot.id, LoggedInUserProfileFragment.getInstance(), mUserProfileFTag)
+                        .replace(mRoot.id,
+                                LoggedInUserProfileFragment.getInstance(it.username),
+                                mUserProfileFTag)
                         .commit()
-            }
         } else {
             if (childFragmentManager.findFragmentByTag(mNotLoggedFTag) == null) {
                 childFragmentManager.beginTransaction()

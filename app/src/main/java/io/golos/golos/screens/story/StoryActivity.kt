@@ -22,6 +22,8 @@ import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
 import io.golos.golos.R.raw.story
+import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
@@ -69,7 +71,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onRefresh() {
-       mViewModel.requestRefresh()
+        mViewModel.requestRefresh()
     }
 
     private fun setUpViewModel() {
@@ -84,7 +86,9 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mViewModel.onCreate(intent.getStringExtra(AUTHOR_TAG),
                 intent.getStringExtra(PERMLINK_TAG),
                 intent.getStringExtra(BLOG_TAG),
-                intent.getSerializableExtra(FEED_TYPE) as FeedType)
+                intent.getSerializableExtra(FEED_TYPE) as FeedType,
+                mapper.readValue(intent.getStringExtra(STORY_FILTER), StoryFilter::class.java))
+
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
             if (it?.storyTree?.rootStory() != null) {
@@ -255,17 +259,20 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         private val BLOG_TAG = "BLOG_TAG"
         private val PERMLINK_TAG = "PERMLINK_TAG"
         private val FEED_TYPE = "FEED_TYPE"
+        private val STORY_FILTER = "STORY_FILTER"
         fun start(ctx: Context,
                   author: String,
                   blog: String?,
                   permlink: String,
-                  feedType: FeedType) {
+                  feedType: FeedType,
+                  filter: StoryFilter?) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
             intent.putExtra(AUTHOR_TAG, author)
             intent.putExtra(BLOG_TAG, blog)
             intent.putExtra(PERMLINK_TAG, permlink)
             intent.putExtra(FEED_TYPE, feedType)
+            intent.putExtra(STORY_FILTER, mapper.writeValueAsString(filter))
             ctx.startActivity(intent)
         }
     }

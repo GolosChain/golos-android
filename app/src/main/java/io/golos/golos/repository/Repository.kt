@@ -3,6 +3,7 @@ package io.golos.golos.repository
 import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -20,7 +21,11 @@ import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-data class StoryFilter(val tagFilter: String?)
+data class StoryFilter(
+        @JsonProperty("tagFilter")
+        val tagFilter: String? = null,
+        @JsonProperty("userNameFilter")
+        val userNameFilter: String? = null)
 
 abstract class Repository {
 
@@ -51,7 +56,7 @@ abstract class Repository {
                 return Executor { command -> handler.post(command) }
             }
 
-        fun setSingletoneInstance(repository: Repository){
+        fun setSingletoneInstance(repository: Repository) {
             instance = repository
         }
     }

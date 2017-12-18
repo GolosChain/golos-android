@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.mapper
@@ -23,7 +24,9 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.viewmodel.*
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 
 
 /**
@@ -54,19 +57,32 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mRecycler?.layoutManager = manager
         val provider = ViewModelProviders.of(activity!!)
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
-        val filter = arguments!!.getString(FILTER_TAG, null)
+        val filterString = arguments!!.getString(FILTER_TAG, null)
         mViewModel = when (type) {
             FeedType.NEW -> provider.get(NewViewModel::class.java)
             FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
             FeedType.POPULAR -> provider.get(PopularViewModel::class.java)
             FeedType.PROMO -> provider.get(PromoViewModel::class.java)
             FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
-            FeedType.BLOG -> provider.get(BlogViewModle::class.java)
+            FeedType.BLOG -> provider.get(BlogViewModel::class.java)
             FeedType.COMMENTS -> provider.get(CommentsViewModle::class.java)
             else -> throw IllegalStateException(" $type is unsupported")
         }
-        mViewModel!!.filter = if (filter == null || filter == "null") null
-        else mapper.readValue(filter, StoryFilter::class.java)
+        val filter = if (filterString == null || filterString == "null") null
+        else mapper.readValue(filterString, StoryFilter::class.java)
+        if ((mViewModel is FeedViewModel
+                || mViewModel is CommentsViewModle
+                || mViewModel is BlogViewModel) && filter == null){
+            Timber.e("view model of $type is created without filter")
+        }
+        else {
+            mViewModel?.onCreate(object : InternetStatusNotifier {
+                override fun isAppOnline(): Boolean {
+                    return App.isAppOnline()
+                }
+            }, filter)
+        }
+
         mAdapter = StripeAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
                 onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
@@ -152,19 +168,25 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     }
 
     companion object {
-        val TYPE_TAG = "TYPE_TAG"
-        val FILTER_TAG = "FILTER_TAG"
+        private val TYPE_TAG = "TYPE_TAG"
+        private val FILTER_TAG = "FILTER_TAG"
         fun getInstance(type: FeedType,
                         filter: StoryFilter? = null): StoriesFragment {
             val fr = StoriesFragment()
+            val bundle = createArguments(type, filter)
+            fr.arguments = bundle
+            return fr
+        }
+
+        fun createArguments(type: FeedType,
+                            filter: StoryFilter? = null): Bundle {
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
             if (filter != null)
                 bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
             else bundle.putString(FILTER_TAG, null)
 
-            fr.arguments = bundle
-            return fr
+            return bundle
         }
     }
 

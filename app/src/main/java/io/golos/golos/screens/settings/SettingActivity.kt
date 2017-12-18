@@ -31,7 +31,8 @@ class SettingActivity : GolosActivity() {
             StoryActivity.start(this,
                     "golos", "ru--konfidenczialxnostx",
                     "politika-konfidencialnosti",
-                    FeedType.UNCLASSIFIED)
+                    FeedType.UNCLASSIFIED,
+                    null)
         })
         findViewById<View>(R.id.exit).setOnClickListener({
             Repository.get.deleteUserdata()

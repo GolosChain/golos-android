@@ -58,7 +58,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     override fun onChanged(it: CreatePostResult?) {
         if (it?.isPost == true) {
             StoryActivity.start(this,
-                    it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED)
+                    it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
         }
     }
 

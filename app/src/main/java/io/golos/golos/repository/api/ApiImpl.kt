@@ -97,13 +97,23 @@ class ApiImpl : GolosApi() {
                     FeedType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
                     FeedType.NEW -> DiscussionSortType.GET_DISCUSSIONS_BY_CREATED
                     FeedType.PROMO -> DiscussionSortType.GET_DISCUSSIONS_BY_PROMOTED
-                    else -> throw IllegalArgumentException("use getUserFeed() for $type type of feed")
+                    FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
+                    FeedType.BLOG -> DiscussionSortType.GET_DISCUSSIONS_BY_BLOG
+                    FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
+                    else ->throw IllegalStateException(" type $type is unsupported")
                 }
         val query = DiscussionQuery()
         query.limit = limit
 
         if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
+
+        if (startAuthor == null && (type == FeedType.COMMENTS)) query.startAuthor = AccountName(filter!!.userNameFilter)
+
+        filter?.userNameFilter?.let {
+            query.selectAuthors = listOf(AccountName(it))
+        }
+
         query.truncateBody = truncateBody
         filter?.let {
             it.tagFilter?.let {
