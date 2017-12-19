@@ -4,6 +4,7 @@ import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.api.ApiImpl
+import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import org.junit.Assert
 import org.junit.Before
@@ -166,5 +167,73 @@ class RepoGetStoriesTest {
         repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNotNull(items.value)
 
+    }
+
+    @Test
+    fun testloadComments() {
+        var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"))
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"))
+        Assert.assertNotNull(items.value)
+    }
+
+    @Test
+    fun testLoadPostsWithFilter() {
+        var items = repo.getStories(FeedType.ACTUAL, StoryFilter("psk", null))
+        Assert.assertNull(items.value)
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null))
+        Assert.assertNotNull(items.value)
+    }
+
+    @Test
+    fun getAccountInfo() {
+        var items = repo.getUserInfo("yuri-vlad")
+        Assert.assertNull(items.value)
+        var userInfo: AccountInfo? = null
+        repo.requestUserInfoUpdate("yuri-vlad", { a, _ ->
+            userInfo = a
+        })
+        Assert.assertNotNull(items.value)
+        Assert.assertNotNull(userInfo)
+
+        Assert.assertEquals("yuri-vlad", userInfo!!.userName)
+        Assert.assertEquals(null, userInfo!!.userMotto)
+        Assert.assertTrue(userInfo!!.activePublicKey.isNotEmpty())
+        Assert.assertTrue(userInfo!!.avatarPath == null)
+        Assert.assertTrue(userInfo!!.postingPublicKey.isNotEmpty())
+        Assert.assertTrue(userInfo!!.accountWorth > 0.0)
+        Assert.assertTrue(userInfo!!.gbgAmount > 0)
+        Assert.assertTrue(userInfo!!.golosAmount > 0)
+        Assert.assertTrue(userInfo!!.golosPower > 0)
+        Assert.assertTrue(userInfo!!.postsCount == 2L)
+        Assert.assertTrue(userInfo!!.safeGbg > 0)
+        Assert.assertTrue(userInfo!!.subscibesCount == 6L)
+        Assert.assertTrue(userInfo!!.subscribersCount == 7L)
+
+        repo.authWithPostingWif(userName, postingWif = privatePosting, listener = {})
+        items = repo.getUserInfo(userName)
+        items.observeForever { userInfo = it }
+        Assert.assertNotNull(items.value)
+        repo.requestUserInfoUpdate(userName, { a, _ ->
+            userInfo = a
+        })
+        Assert.assertNotNull(items.value)
+        Assert.assertNotNull(userInfo)
+
+        Assert.assertEquals(userName, userInfo!!.userName)
+        Assert.assertNotNull(userInfo!!.userMotto)
+        Assert.assertTrue(userInfo!!.activePublicKey.isNotEmpty())
+        Assert.assertNotNull(userInfo!!.avatarPath)
+        Assert.assertTrue(userInfo!!.postingPublicKey.isNotEmpty())
+        Assert.assertTrue(userInfo!!.accountWorth > 0.0)
+        Assert.assertTrue(userInfo!!.gbgAmount > 0)
+        Assert.assertTrue(userInfo!!.golosAmount > 0)
+        Assert.assertTrue(userInfo!!.golosPower > 0)
+        Assert.assertTrue(userInfo!!.postsCount > 10)
+        Assert.assertTrue(userInfo!!.safeGbg == 0.0)
+        Assert.assertTrue(userInfo!!.subscibesCount == 3L)
+        Assert.assertTrue(userInfo!!.subscribersCount == 1L)
+
+        Assert.assertTrue(repo.isUserLoggedIn())
     }
 }

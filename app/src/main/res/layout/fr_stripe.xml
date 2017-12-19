@@ -20,7 +20,8 @@
         android:id="@+id/fullscreen_label"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="top|center_horizontal"
+        android:paddingTop="100dp"
         android:padding="@dimen/margin_material"
         android:textSize="@dimen/font_big"
         android:visibility="gone" />

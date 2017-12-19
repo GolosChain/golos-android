@@ -18,21 +18,25 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
+import io.golos.golos.screens.profile.viewmodel.UserAccountModel
+import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingActivity
 
 /**
  * Created by yuri on 10.11.17.
  */
-class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
+class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mUserAvatar: ImageView
     private lateinit var mUserName: TextView
-    private lateinit var mViewModel: AuthViewModel
+    private lateinit var mViewModel: UserInfoViewModel
     private lateinit var mSettingButton: ImageButton
     private lateinit var mMotoTv: TextView
     private lateinit var mSubscribersNumTv: TextView
     private lateinit var mSubscriptionsNum: TextView
     private lateinit var mSubscribers: TextView
     private lateinit var mSubscriptions: TextView
+    private lateinit var mPostsTv: TextView
+    private lateinit var mPostsCountTv: TextView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -45,6 +49,8 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
         mSubscriptionsNum = v.findViewById(R.id.subscriptions_num_tv)
         mSubscribers = v.findViewById(R.id.subscribers_tv)
         mSubscriptions = v.findViewById(R.id.subscribes_tv)
+        mPostsTv = v.findViewById(R.id.posts_tv)
+        mPostsCountTv = v.findViewById(R.id.posts_num_tv)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
@@ -56,43 +62,59 @@ class LoggedInUserProfileFragment : Fragment(), Observer<UserProfileState> {
 
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
         tabbar.setupWithViewPager(pager)
-        v.findViewById<View>(R.id.settings_btn).setOnClickListener({
+        val settingsButton = v.findViewById<View>(R.id.settings_btn)
+        settingsButton.setOnClickListener({
             val i = Intent(activity!!, SettingActivity::class.java)
             activity?.startActivity(i)
         })
+        if (arguments?.getBoolean(IS_CURRENT_USER, false) == true) {
+            settingsButton.visibility = View.VISIBLE
+        } else {
+            settingsButton.visibility = View.GONE
+        }
         return v
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        mViewModel.userProfileState.observe(activity as LifecycleOwner, this)
+        mViewModel = ViewModelProviders.of(activity!!).get(UserInfoViewModel::class.java)
+        mViewModel.getLiveData().observe(activity as LifecycleOwner, this)
+        if (arguments?.containsKey(USERNAME_TAG) == true) {
+            mViewModel.onCreate(arguments!!.getString(USERNAME_TAG))
+        }
     }
 
-    override fun onChanged(it: UserProfileState?) {
+    override fun onChanged(t: UserAccountModel?) {
         if (view == null) return
-        mUserName.text = it?.userName?.capitalize()
+        val it = t?.accountInfo ?: return
+        mUserName.text = it.userName?.capitalize()
         val glide = Glide.with(view ?: return)
-        if (it?.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
+        if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
             glide.load(it.avatarPath)
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)
         }
-        mMotoTv.text = it?.userMoto
-        mSubscribersNumTv.text = it?.subscribersNum?.toString()
-        mSubscriptionsNum.text = it?.subscribesNum?.toString()
-        mSubscribers.text = resources.getQuantityString(R.plurals.subscribers, it?.subscribersNum?.toInt() ?: 0)
-        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it?.subscribesNum?.toInt() ?: 0)
+        mMotoTv.text = it.userMotto
+        mSubscribersNumTv.text = it.subscribersCount.toString()
+        mSubscriptionsNum.text = it.subscibesCount.toString()
+        mPostsCountTv.text = it.postsCount.toString()
+        mSubscribers.text = resources.getQuantityString(R.plurals.subscribers, it.subscribersCount.toInt())
+        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscibesCount.toInt())
+        mPostsTv.text = resources.getQuantityString(R.plurals.posts, it.postsCount.toInt())
+
     }
 
     companion object {
         private val USERNAME_TAG = "USERNAME_TAG"
-        fun getInstance(username: String): LoggedInUserProfileFragment {
+        private val IS_CURRENT_USER = "IS_CURRENT_USER"
+        fun getInstance(username: String,
+                        isCurrentUser: Boolean): UserProfileFragment {
             val b = Bundle()
             b.putString(USERNAME_TAG, username)
-            val f = LoggedInUserProfileFragment()
+            b.putBoolean(IS_CURRENT_USER, isCurrentUser)
+            val f = UserProfileFragment()
             f.arguments = b
             return f
         }

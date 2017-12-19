@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.editor.EditorActivity
-import io.golos.golos.screens.profile.AuthViewModel
+import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 import io.golos.golos.screens.widgets.GolosFragment
 

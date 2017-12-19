@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.Persister
+import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
@@ -85,6 +86,10 @@ abstract class Repository {
     abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData>
 
     abstract fun requestActiveUserDataUpdate()
+
+    abstract fun getUserInfo(userName: String): LiveData<AccountInfo>
+
+    abstract fun requestUserInfoUpdate(userName: String, completionHandler: (AccountInfo, GolosError?) -> Unit)
 
     abstract fun deleteUserdata()
 

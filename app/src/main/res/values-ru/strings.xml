@@ -12,7 +12,7 @@
     <string name="text">Текст</string>
     <string name="comment">Комментарий</string>
     <string name="to_comment">Комментировать</string>
-    <string name="GOLOS">Golos.io</string>
+    <string name="GOLOS">Голос</string>
     <string name="login">Введите логин</string>
     <string name="posting_key">Приватный постинг ключ</string>
     <string name="scan">Сканировать ключ</string>
@@ -92,4 +92,5 @@
     <string name="golos_android_v">Golos для Android v.%s</string>
     <string name="user_made_logout">Вы вышли из аккаунта</string>
     <string name="can_vote_once_per_three_second">Вы можете проголосовать раз в три секунды</string>
+
 </resources>

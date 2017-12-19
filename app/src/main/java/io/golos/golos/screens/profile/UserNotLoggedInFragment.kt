@@ -14,12 +14,13 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
 import android.text.Editable
 import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import io.golos.golos.R
+import io.golos.golos.screens.profile.viewmodel.AuthUserInput
+import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
 import io.golos.golos.utils.GolosMovementMethod
@@ -30,7 +31,7 @@ import io.golos.golos.utils.showProgressDialog
 /**
  * Created by yuri on 30.10.17.
  */
-class NotLoggedInFragment : Fragment() {
+class UserNotLoggedInFragment : Fragment() {
     private val SCAN_POSTING_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_PERMISSION = nextInt()
@@ -100,29 +101,32 @@ class NotLoggedInFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
         mViewModel.userProfileState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
-            if (it?.isScanMenuVisible == true) {
-                mKeyEt.visibility = View.GONE
-                mPostingKeyMenu.visibility = View.VISIBLE
-                mActiveKeyMenu.visibility = View.VISIBLE
-            } else {
-                mKeyEt.visibility = View.VISIBLE
-                mPostingKeyMenu.visibility = View.GONE
-                mActiveKeyMenu.visibility = View.GONE
-            }
-            mLogInEt.setText(it?.userName)
-            mProgressDialog?.let {
-                it.dismiss()
-                mProgressDialog = null
-            }
-            if (it?.isLoading == true) {
-                mProgressDialog = showProgressDialog()
-                view.findFocus()?.let { context?.hideKeyboard(it) }
-            }
-            if (it?.error != null) {
-                view.findFocus()?.let { context?.hideKeyboard(it) }
-                Snackbar.make(mLogInEt,
-                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage ?: 0)}</font>"),
-                        Toast.LENGTH_SHORT).show()
+            if (context != null) {
+                if (it?.isScanMenuVisible == true) {
+                    mKeyEt.visibility = View.GONE
+                    mPostingKeyMenu.visibility = View.VISIBLE
+                    mActiveKeyMenu.visibility = View.VISIBLE
+                } else {
+                    mKeyEt.visibility = View.VISIBLE
+                    mPostingKeyMenu.visibility = View.GONE
+                    mActiveKeyMenu.visibility = View.GONE
+                }
+                mLogInEt.setText(it?.userName)
+                mProgressDialog?.let {
+                    it.dismiss()
+                    mProgressDialog = null
+                }
+
+                if (it?.isLoading == true) {
+                    mProgressDialog = showProgressDialog()
+                    view.findFocus()?.let { context?.hideKeyboard(it) }
+                }
+                if (it?.error != null) {
+                    view.findFocus()?.let { context?.hideKeyboard(it) }
+                    Snackbar.make(mLogInEt,
+                            Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage ?: 0)}</font>"),
+                            Toast.LENGTH_SHORT).show()
+                }
             }
         })
         mScanSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -203,8 +207,8 @@ class NotLoggedInFragment : Fragment() {
     }
 
     companion object {
-        fun getInstance(): NotLoggedInFragment {
-            val fr = NotLoggedInFragment()
+        fun getInstance(): UserNotLoggedInFragment {
+            val fr = UserNotLoggedInFragment()
             return fr
         }
     }

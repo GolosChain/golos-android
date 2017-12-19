@@ -52,13 +52,10 @@ internal class MockApiImpl : GolosApi() {
     fun authWithMasterKey(userName: String, masterKey: String): UserAuthResponse {
         val response = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("cepera")))
         val acc = response[0]
-        val out = UserAuthResponse(true, acc.name.name,
-                "stub moto",
+        val out = UserAuthResponse(true,
                 Pair((acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "posting-key-stub"),
                 Pair((acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey, "active-key-stub"),
-                acc.avatarPath,
-                acc.postCount,
-                acc.balance.amount / 1000)
+                accountInfo = AccountInfo("cepera"))
         return out
     }
 

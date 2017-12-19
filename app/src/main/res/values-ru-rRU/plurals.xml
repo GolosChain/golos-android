@@ -40,4 +40,12 @@
         <item quantity="zero">Подписчиков</item>
         <item quantity="other">Подписчиков</item>
     </plurals>
+    <plurals name="posts" >
+        <item quantity="few">Постов</item>
+        <item quantity="many">Постов</item>
+        <item quantity="one">Пост</item>
+        <item quantity="two">Поста</item>
+        <item quantity="zero">Постов</item>
+        <item quantity="other">Постов</item>
+    </plurals>
 </resources>

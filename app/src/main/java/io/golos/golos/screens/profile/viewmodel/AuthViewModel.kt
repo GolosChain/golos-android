@@ -1,4 +1,4 @@
-package io.golos.golos.screens.profile
+package io.golos.golos.screens.profile.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
@@ -128,20 +128,20 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
                     error = resp.error)
         } else {
             userProfileState.value = UserProfileState(isLoggedIn = true,
-                    userName = resp.userName ?: "",
-                    avatarPath = resp.avatarPath,
-                    userPostsCount = resp.postsCount,
-                    userAccountWorth = resp.accountWorth,
+                    userName = resp.accountInfo.userName ?: "",
+                    avatarPath = resp.accountInfo.avatarPath,
+                    userPostsCount = resp.accountInfo.postsCount,
+                    userAccountWorth = resp.accountInfo.accountWorth,
                     isLoading = false,
-                    subscribersNum = resp.subscribersCount,
-                    subscribesNum = resp.subscibesCount,
-                    userMoto = resp.userMotto,
-                    golosAmount = resp.golosAmount,
-                    golosPower = resp.golosPower,
-                    gbgAmount = resp.gbgAmount,
-                    gbgInSafeAmount = resp.safeGbg,
-                    golosInSafeAmount = resp.safeGolos,
-                    accountWorth = resp.accountWorth)
+                    subscribersNum = resp.accountInfo.subscribersCount,
+                    subscribesNum = resp.accountInfo.subscibesCount,
+                    userMoto = resp.accountInfo.userMotto,
+                    golosAmount = resp.accountInfo.golosAmount,
+                    golosPower = resp.accountInfo.golosPower,
+                    gbgAmount = resp.accountInfo.gbgAmount,
+                    gbgInSafeAmount = resp.accountInfo.safeGbg,
+                    golosInSafeAmount = resp.accountInfo.safeGolos,
+                    accountWorth = resp.accountInfo.accountWorth)
         }
     }
 

@@ -13,14 +13,15 @@ import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.profile.AuthViewModel
 import io.golos.golos.screens.editor.EditorActivity
+import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.utils.Translit
 import timber.log.Timber
 
 class FilteredStoriesActivity : GolosActivity() {
     private lateinit var mContentFrameLo: FrameLayout
+    private val FRAGMENT_TAG = "FRAGMENT_TAG"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,12 +37,11 @@ class FilteredStoriesActivity : GolosActivity() {
             finish()
             return
         }
-        Timber.e("filter = $filter")
         setup(filter)
         var fragment = StoriesFragment.getInstance(type, filter)
         supportFragmentManager
                 .beginTransaction()
-                .replace(mContentFrameLo.id, fragment, null)
+                .replace(mContentFrameLo.id, fragment, FRAGMENT_TAG)
                 .commit()
 
 
@@ -71,6 +71,13 @@ class FilteredStoriesActivity : GolosActivity() {
             }
         })
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)?.let {
+            it.userVisibleHint = true
+        }
     }
 
     companion object {

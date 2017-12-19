@@ -5,19 +5,20 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.text.SpannableString
-import android.text.style.StyleSpan
 import android.text.style.TextAppearanceSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.screens.profile.viewmodel.UserAccountModel
+import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.widgets.GolosFragment
 
 /**
  * Created by yuri on 08.12.17.
  */
-class PouchFragment : GolosFragment(), Observer<UserProfileState> {
+class PurseFragment : GolosFragment(), Observer<UserAccountModel> {
     private lateinit var mGolosnumTv: TextView
     private lateinit var mGolosPoweNumrTv: TextView
     private lateinit var mGbgNumTv: TextView
@@ -39,23 +40,25 @@ class PouchFragment : GolosFragment(), Observer<UserProfileState> {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val viewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        viewModel.userProfileState.observe(activity as LifecycleOwner, this)
+        val viewModel = ViewModelProviders.of(activity!!).get(UserInfoViewModel::class.java)
+        viewModel.getLiveData().observe(activity as LifecycleOwner, this)
     }
 
-    override fun onChanged(t: UserProfileState?) {
-        if (t != null) {
+    override fun onChanged(it: UserAccountModel?) {
+        if (it != null) {
+            val t = it.accountInfo
             mGolosnumTv.text = setStyleAndCurrency(t.golosAmount, true)
             mGolosPoweNumrTv.text = setStyleAndCurrency(t.golosPower, true)
             mGbgNumTv.text = setStyleAndCurrency(t.gbgAmount, false)
-            mGolosSafeNumTV.text = setStyleAndCurrency(t.golosInSafeAmount, true)
-            mGolosSafeGbgNum.text = setStyleAndCurrency(t.gbgInSafeAmount, false)
-            mAccWorthNumTv.text = setStyleAndCurrency(t.userAccountWorth, false)
+            mGolosSafeNumTV.text = setStyleAndCurrency(t.safeGolos, true)
+            mGolosSafeGbgNum.text = setStyleAndCurrency(t.safeGbg, false)
+            mAccWorthNumTv.text = setStyleAndCurrency(t.accountWorth, false)
         }
     }
 
     private fun setStyleAndCurrency(to: Double, isGolosCurrency: Boolean): CharSequence {
-        val mainSpannable = TextAppearanceSpan(activity!!,R.style.ProfileNumberStyle)
+        if (activity == null) return ""
+        val mainSpannable = TextAppearanceSpan(activity!!, R.style.ProfileNumberStyle)
         val currnecySpannable = TextAppearanceSpan(activity!!, R.style.ProfileCurrensyStyle)
         val number = String.format("%.2f", to)
         val currency = if (isGolosCurrency) "  golos" else "  GBG"

@@ -2,7 +2,10 @@ package io.golos.golos.repository.api
 
 import android.support.annotation.VisibleForTesting
 import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.*
+import eu.bittrade.libs.steemj.base.models.AccountName
+import eu.bittrade.libs.steemj.base.models.DiscussionQuery
+import eu.bittrade.libs.steemj.base.models.Permlink
+import eu.bittrade.libs.steemj.base.models.PublicKey
 import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
@@ -58,7 +61,7 @@ class ApiImpl : GolosApi() {
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryTree>()
         discussions.forEach {
-            if (it != null){
+            if (it != null) {
                 val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
                 out.add(story)
             }
@@ -100,7 +103,7 @@ class ApiImpl : GolosApi() {
                     FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
                     FeedType.BLOG -> DiscussionSortType.GET_DISCUSSIONS_BY_BLOG
                     FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
-                    else ->throw IllegalStateException(" type $type is unsupported")
+                    else -> throw IllegalStateException(" type $type is unsupported")
                 }
         val query = DiscussionQuery()
         query.limit = limit
@@ -123,190 +126,149 @@ class ApiImpl : GolosApi() {
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryTree>()
         discussions.forEach {
-            val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
-            out.add(story)
+            if (it != null) {
+                val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
+                out.add(story)
+            }
         }
         return out
     }
 
     override fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
         if (masterKey == null && activeWif == null && postingWif == null)
-            return UserAuthResponse(false, userName, null, null, null,
-                    error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
-        if (userName.length < 3 || userName.length > 16) {
-            return UserAuthResponse(false, userName, null,
-                    null, null, error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
-        }
-        val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(userName)))
-        if (accs.size == 0 || accs.get(0) == null) return UserAuthResponse(false, userName, null,
-                null, null, error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
-        val acc = accs.get(0)
-        var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
-        var activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+            return UserAuthResponse(false, null, null,
+                    error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
+                    accountInfo = AccountInfo(userName))
 
-        val votePower = acc.vestingShares.amount * 0.000268379
-        val golosNum = acc.balance.amount
-        val gbgAmount = acc.sbdBalance.amount
-        val safeGolos = acc.savingsBalance.amount
-        val safeGbg = acc.savingsSbdBalance.amount
-        val accWorth = ((votePower + golosNum + safeGolos) * 0.128670406) + ((gbgAmount + safeGbg) * 0.04106528)
+        if (userName.length < 3 || userName.length > 16) {
+            return UserAuthResponse(false, null, null,
+                    error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
+                    accountInfo = AccountInfo(userName))
+        }
+        val acc = getAccountData(userName)
+        if (acc.activePublicKey.isEmpty()) return UserAuthResponse(false, null, null,
+                error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
+                accountInfo = AccountInfo(userName))
 
         if (masterKey != null) {
             val keys = AuthUtils.generatePublicWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
-            return if (postingPublicOuter == keys[PrivateKeyType.POSTING] || activePublicOuter == keys[PrivateKeyType.ACTIVE]) {
-
-                val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(userName))
-                val followersCount = followObject.followerCount.toLong()
-                val followingCount = followObject.followingCount.toLong()
+            return if (acc.postingPublicKey == keys[PrivateKeyType.POSTING] || acc.activePublicKey == keys[PrivateKeyType.ACTIVE]) {
 
                 val privateKeys = AuthUtils.generatePrivateWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
                 val resp = UserAuthResponse(true,
-                        acc.name.name,
-                        acc.moto,
-                        Pair(postingPublicOuter, privateKeys[PrivateKeyType.POSTING]),
-                        Pair(activePublicOuter, privateKeys[PrivateKeyType.ACTIVE]),
-                        acc.avatarPath,
-                        acc.postCount,
-                        accWorth,
-                        followingCount,
-                        followersCount,
-                        gbgAmount,
-                        golosNum,
-                        votePower,
-                        safeGbg,
-                        safeGolos)
+                        Pair(acc.postingPublicKey, privateKeys[PrivateKeyType.POSTING]),
+                        Pair(acc.activePublicKey, privateKeys[PrivateKeyType.ACTIVE]),
+                        accountInfo = acc)
                 if (resp.isKeyValid) {
                     mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
                             ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
                 }
                 resp
             } else {
-                negativeAuthResponse(acc)
+                negativeAuthResponse(userName)
             }
         } else if (activeWif != null && postingWif != null) {
             return try {
-                val isKeyValid = AuthUtils.isWiFsValid(activeWif, activePublicOuter) && AuthUtils.isWiFsValid(postingWif, postingPublicOuter)
+                val isKeyValid = AuthUtils.isWiFsValid(activeWif, acc.activePublicKey)
+                        && AuthUtils.isWiFsValid(postingWif, acc.postingPublicKey)
                 if (isKeyValid) {
-                    val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(userName))
-                    val followersCount = followObject.followerCount.toLong()
-                    val followingCount = followObject.followingCount.toLong()
 
                     val resp = UserAuthResponse(true,
-                            acc.name.name,
-                            acc.moto,
-                            Pair(postingPublicOuter, postingWif),
-                            Pair(activePublicOuter, activeWif),
-                            acc.avatarPath,
-                            acc.postCount,
-                            accWorth,
-                            followingCount,
-                            followersCount,
-                            gbgAmount,
-                            golosNum,
-                            votePower,
-                            safeGbg,
-                            safeGolos)
-
+                            Pair(acc.postingPublicKey, postingWif),
+                            Pair(acc.activePublicKey, activeWif),
+                            accountInfo = acc)
                     mGolosApi.addKeysToAccount(AccountName(userName), setOf(ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!),
                             ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!)))
                     resp
                 } else {
-                    negativeAuthResponse(acc)
+                    negativeAuthResponse(userName)
                 }
             } catch (e: java.lang.IllegalArgumentException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             } catch (e: AddressFormatException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             }
         } else if (activeWif != null) {
             return try {
-                val isKeyValid = AuthUtils.isWiFsValid(activeWif, activePublicOuter)
+                val isKeyValid = AuthUtils.isWiFsValid(activeWif, acc.activePublicKey)
                 if (isKeyValid) {
-                    val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(userName))
-                    val followersCount = followObject.followerCount.toLong()
-                    val followingCount = followObject.followingCount.toLong()
 
                     val resp = UserAuthResponse(true,
-                            acc.name.name,
-                            acc.moto,
-                            Pair(postingPublicOuter, null),
-                            Pair(activePublicOuter, activeWif),
-                            acc.avatarPath,
-                            acc.postCount,
-                            accWorth,
-                            followingCount,
-                            followersCount,
-                            gbgAmount,
-                            golosNum,
-                            votePower,
-                            safeGbg,
-                            safeGolos)
+                            Pair(acc.postingPublicKey, null),
+                            Pair(acc.activePublicKey, activeWif),
+                            accountInfo = acc)
                     mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.ACTIVE, resp.activeAuth!!.second!!))
                     resp
                 } else {
-                    negativeAuthResponse(acc)
+                    negativeAuthResponse(userName)
                 }
             } catch (e: java.lang.IllegalArgumentException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             } catch (e: AddressFormatException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             }
 
         } else {
             return try {
-                val isKeyValid = AuthUtils.isWiFsValid(postingWif!!, postingPublicOuter)
+                val isKeyValid = AuthUtils.isWiFsValid(postingWif!!, acc.postingPublicKey)
                 if (isKeyValid) {
-                    val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(userName))
-                    val followersCount = followObject.followerCount.toLong()
-                    val followingCount = followObject.followingCount.toLong()
-
                     val resp = UserAuthResponse(true,
-                            acc.name.name,
-                            acc.moto,
-                            Pair(postingPublicOuter, postingWif),
-                            Pair(activePublicOuter, null),
-                            acc.avatarPath,
-                            acc.postCount,
-                            accWorth,
-                            followingCount,
-                            followersCount,
-                            gbgAmount,
-                            golosNum,
-                            votePower,
-                            safeGbg,
-                            safeGolos)
+                            Pair(acc.postingPublicKey, postingWif),
+                            Pair(acc.activePublicKey, null),
+                            accountInfo = acc)
                     mGolosApi.addKeysToAccount(AccountName(userName), ImmutablePair(PrivateKeyType.POSTING, resp.postingAuth!!.second!!))
                     resp
                 } else {
-                    negativeAuthResponse(acc)
+                    negativeAuthResponse(userName)
                 }
             } catch (e: java.lang.IllegalArgumentException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             } catch (e: AddressFormatException) {
-                negativeAuthResponse(acc, e)
+                negativeAuthResponse(userName, e)
             }
         }
     }
 
-    private fun negativeAuthResponse(acc: ExtendedAccount, e: Exception? = null): UserAuthResponse {
+    private fun negativeAuthResponse(username: String, e: Exception? = null): UserAuthResponse {
         val error = if (e != null) GolosErrorParser.parse(e) else GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials)
-        return UserAuthResponse(false, acc.name.name,
+        return UserAuthResponse(false,
                 null,
                 null,
-                null,
-                error = error)
+                error = error,
+                accountInfo = AccountInfo(username))
     }
 
     override fun getAccountData(of: String): AccountInfo {
-        if (of.isEmpty()) return AccountInfo(of, accountWorth = 0.0, postsCount = 0)
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
-        if (accs.size == 0) return AccountInfo(of, accountWorth = 0.0, postsCount = 0)
-        val acc = accs.get(index = 0)
+        if (accs.size == 0 || accs.get(0) == null) return AccountInfo(of)
+        val acc = accs.get(0)
         val votePower = acc.vestingShares.amount * 0.000268379
         val golosNum = acc.balance.amount
         val gbgAmount = acc.sbdBalance.amount
-        val accWorth = ((votePower + golosNum) * 0.128670406) + (gbgAmount * 0.04106528)
-        return AccountInfo(of, acc.avatarPath, accWorth, acc.postCount)
+        val safeGolos = acc.savingsBalance.amount
+        val safeGbg = acc.savingsSbdBalance.amount
+        val accWorth = ((votePower + golosNum + safeGolos) * 0.128670406) + ((gbgAmount + safeGbg) * 0.04106528)
+        val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(of))
+        val followersCount = followObject.followerCount.toLong()
+        val followingCount = followObject.followingCount.toLong()
+
+        var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+        var activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+
+        return AccountInfo(of,
+                acc.moto,
+                acc.avatarPath,
+                acc.postCount,
+                accWorth,
+                followingCount,
+                followersCount,
+                gbgAmount,
+                golosNum,
+                votePower,
+                safeGbg,
+                safeGolos,
+                postingPublicOuter,
+                activePublicOuter)
     }
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {

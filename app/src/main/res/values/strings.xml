@@ -11,7 +11,7 @@
     <string name="publish">Publish</string>
     <string name="text">text</string>
     <string name="comment">comment</string>
-    <string name="GOLOS">Golos.io</string>
+    <string name="GOLOS">Golos</string>
     <string name="login">Login</string>
     <string name="posting_key">Private posting key</string>
     <string name="scan">Scan</string>
@@ -37,7 +37,7 @@
     <string name="enter_key">Enter the key</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">About Golos.io</>]]></string>
     <string name="do_not_registered_register"> Don’t have an account? <![CDATA[<a href = "https://golos.io/create_account"> Sing up here</>]]></string>
-    <string name="enter_login">Username</string>
+    <string name="enter_login">You must enter your username</string>
     <string name="enter_password">Password</string>
     <string name="posting_or_active_key">Enter active or posting key</string>
     <string name="wrong_args">Incorrect call</string>
@@ -93,5 +93,6 @@
     <string name="golos_android_v">Golos for Android v.%s</string>
     <string name="user_made_logout">User made logout</string>
     <string name="can_vote_once_per_three_second">You can vote once per three seconds</string>
+
 </resources>
 

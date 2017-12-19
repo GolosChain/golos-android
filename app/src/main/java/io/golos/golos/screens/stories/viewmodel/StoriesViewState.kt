@@ -10,6 +10,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.StoryTreeItems
+import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
@@ -29,7 +30,7 @@ data class StoriesViewState(val isLoading: Boolean,
                             val fullscreenMessage: Int? = null,
                             val popupMessage: Int? = null)
 
-class CommentsViewModle : FeedViewModel() {
+class CommentsViewModel : FeedViewModel() {
     override val type: FeedType
         get() = FeedType.COMMENTS
 
@@ -163,7 +164,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
         mRepository.requestStoriesListUpdate(20,
                 type,
-                null,
+                filter,
                 mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink)
     }
 
@@ -242,5 +243,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         context?.let {
             FilteredStoriesActivity.start(it, feedType = type, filter = StoryFilter(story.rootStory()?.categoryName))
         }
+    }
+
+    fun onUserClick(context: Context?, it: StoryTree) {
+        ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
 }

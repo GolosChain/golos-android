@@ -9,19 +9,20 @@ import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.utils.InternetStatusNotifier
 import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 /**
- * Created by yuri on 15.12.17.
+ * Created by yuri on 19.12.17.
  */
-class CommentsViewModleTest {
+class PopularViewModelTest{
     @Rule
     @JvmField
     public val rule = InstantTaskExecutorRule()
     private lateinit var repo: RepositoryImpl
-    private lateinit var storyViewModel: CommentsViewModel
+    private lateinit var storyViewModel: PopularViewModel
     @Before
     fun before() {
         repo = RepositoryImpl(
@@ -30,12 +31,12 @@ class CommentsViewModleTest {
                 MockPersister, ApiImpl()
         )
         Repository.setSingletoneInstance(repo)
-        storyViewModel = CommentsViewModel()
+        storyViewModel = PopularViewModel()
     }
 
     @Test
     fun testGetComments() {
-        val filter = StoryFilter(null, "yuri-vlad-second")
+        val filter = StoryFilter("psk")
         var state: StoriesViewState? = null
         storyViewModel.storiesLiveData.observeForever { state = it }
         Assert.assertNull(state)
@@ -50,6 +51,5 @@ class CommentsViewModleTest {
         Assert.assertEquals(null, state!!.fullscreenMessage)
         Assert.assertEquals(null, state!!.popupMessage)
         Assert.assertEquals(20, state!!.items.size)
-
     }
 }

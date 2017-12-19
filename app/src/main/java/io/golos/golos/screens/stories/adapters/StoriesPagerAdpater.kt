@@ -10,11 +10,10 @@ import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.model.FeedType
-import timber.log.Timber
 
 class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : FragmentPagerAdapter(manager) {
     private val typesToPosition = HashMap<Int, FeedType>()
-    private val mFragments = ArrayList<StoriesFragment>()
+    private val mFragments = HashMap<Int, StoriesFragment?>()
 
     init {
         typesToPosition.put(0, FeedType.PERSONAL_FEED)
@@ -29,15 +28,18 @@ class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : Frag
             var old = field
             field = value
             if (old != value) {
-                mFragments.forEachIndexed({ i, f ->
-                    var actual = i
-                    if (!isFeedFragmentShown.first) actual += 1
-                    val type = typesToPosition[actual]
-                    if (type == FeedType.PERSONAL_FEED) {
-                        f.arguments = StoriesFragment.createArguments(typesToPosition[actual]!!,
-                                StoryFilter(userNameFilter = field.second))
-                    } else f.arguments = StoriesFragment.createArguments(typesToPosition[actual]!!)
-                })
+                mFragments
+                        .forEach({ v ->
+                            var actual = v.key
+                            if (!isFeedFragmentShown.first) actual += 1
+                            if (actual < typesToPosition.size) {
+                                val type = typesToPosition[actual]
+                                if (type == FeedType.PERSONAL_FEED) {
+                                    v.value?.arguments = StoriesFragment.createArguments(typesToPosition[actual]!!,
+                                            StoryFilter(userNameFilter = field.second))
+                                } else v.value?.arguments = StoriesFragment.createArguments(typesToPosition[actual]!!)
+                            }
+                        })
                 notifyDataSetChanged()
             }
         }
@@ -47,9 +49,9 @@ class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : Frag
         if (!isFeedFragmentShown.first) actualPosition += 1
         val type = typesToPosition[actualPosition]
         val fr = if (type == FeedType.PERSONAL_FEED) StoriesFragment.getInstance(FeedType.PERSONAL_FEED, StoryFilter(
-                 userNameFilter =  isFeedFragmentShown.second ?: ""))
+                userNameFilter = isFeedFragmentShown.second ?: ""))
         else StoriesFragment.getInstance(typesToPosition[actualPosition]!!)
-        mFragments.add(position, fr)
+        mFragments.put(position, fr)
         return fr
     }
 

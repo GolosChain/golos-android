@@ -6,6 +6,7 @@ import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import java.io.File

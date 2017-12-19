@@ -25,7 +25,12 @@ class SettingActivity : GolosActivity() {
             startActivity(createIntentForShowUrl("https://wiki.golos.io/"))
         })
         findViewById<View>(R.id.about_golos_tv).setOnClickListener({
-            startActivity(createIntentForShowUrl("https://golos.io/about/"))
+            //https://golos.io/ru--golos/@golos/golos-russkoyazychnaya-socialno-mediinaya-blokchein-platforma
+            StoryActivity.start(this,
+                    "golos", "ru--golo",
+                    "golos-russkoyazychnaya-socialno-mediinaya-blokchein-platforma",
+                    FeedType.UNCLASSIFIED,
+                    null)
         })
         findViewById<View>(R.id.privacy_policy_tv).setOnClickListener({
             StoryActivity.start(this,

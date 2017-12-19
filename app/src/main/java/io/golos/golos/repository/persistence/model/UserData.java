@@ -2,11 +2,13 @@ package io.golos.golos.repository.persistence.model;
 
 import javax.annotation.Nullable;
 
+import io.golos.golos.repository.model.UserAuthResponse;
+
 /**
  * Created by yuri on 13.11.17.
  */
 
-public class UserData implements Cloneable{
+public class UserData implements Cloneable {
     private boolean isUserLoggedIn;
     @Nullable
     private String mMoto;
@@ -17,7 +19,11 @@ public class UserData implements Cloneable{
     @Nullable
     private String privateActiveWif;
     @Nullable
+    private String publicActiveWif;
+    @Nullable
     private String privatePostingWif;
+    @Nullable
+    private String publicPostingWif;
     @Nullable
     private long subscibesCount;
     private long subscribersCount;
@@ -33,9 +39,11 @@ public class UserData implements Cloneable{
     public UserData(boolean isUserLoggedIn,
                     @Nullable String mMoto,
                     @Nullable String avatarPath,
-                    @Nullable  String userName,
-                    @Nullable  String privateActiveWif,
-                    @Nullable  String privatePostingWif,
+                    @Nullable String userName,
+                    @Nullable String privateActiveWif,
+                    @Nullable String privatePostingWif,
+                    @Nullable String publicActiveWif,
+                    @Nullable String publicPostingWif,
                     long subscibesCount,
                     long subscribersCount,
                     double gbgAmount,
@@ -60,9 +68,27 @@ public class UserData implements Cloneable{
         this.postsCount = postsCount;
         this.safeGbg = safeGbg;
         this.safeGolos = safeGolos;
+        this.publicActiveWif = publicActiveWif;
+        this.publicPostingWif = publicPostingWif;
     }
 
     public UserData() {
+    }
+
+    public String getPublicActiveWif() {
+        return publicActiveWif;
+    }
+
+    public void setPublicActiveWif(String publicActiveWif) {
+        this.publicActiveWif = publicActiveWif;
+    }
+
+    public String getPublicPostingWif() {
+        return publicPostingWif;
+    }
+
+    public void setPublicPostingWif(String publicPostingWif) {
+        this.publicPostingWif = publicPostingWif;
     }
 
     public double getSafeGolos() {
@@ -201,6 +227,34 @@ public class UserData implements Cloneable{
 
     public void setPrivatePostingWif(String privatePostingWif) {
         this.privatePostingWif = privatePostingWif;
+    }
+
+    public static UserData fromPositiveAuthResponse(UserAuthResponse response) {
+        return new UserData(true,
+                response.getAccountInfo().getUserMotto(),
+                response.getAccountInfo().getAvatarPath(),
+                response.getAccountInfo().getUserName(),
+                response.getActiveAuth().getSecond(),
+                response.getPostingAuth().getSecond(),
+                response.getAccountInfo().getActivePublicKey(),
+                response.getAccountInfo().getPostingPublicKey(),
+                response.getAccountInfo().getSubscibesCount(),
+                response.getAccountInfo().getSubscribersCount(),
+                response.getAccountInfo().getGbgAmount(),
+                response.getAccountInfo().getGolosAmount(),
+                response.getAccountInfo().getGolosPower(),
+                response.getAccountInfo().getAccountWorth(),
+                response.getAccountInfo().getPostsCount(),
+                response.getAccountInfo().getSafeGbg(),
+                response.getAccountInfo().getSafeGolos());
+    }
+
+    public AccountInfo toAccountInfo() {
+
+        return new AccountInfo(userName, mMoto, avatarPath,
+                postsCount, accountWorth, subscibesCount, subscribersCount,
+                gbgAmount, golosAmount, golosPower, safeGbg,
+                safeGolos, publicPostingWif, publicActiveWif);
     }
 
     @Override

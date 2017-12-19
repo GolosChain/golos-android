@@ -200,4 +200,21 @@
         <item name="android:gravity">center_vertical|start</item>
         <item name="android:minHeight">54dp</item>
     </style>
+
+    <style name="ProfileLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textColor">@color/gray_7d</item>
+        <item name="android:textSize">@dimen/font_small</item>
+    </style>
+
+    <style name="ProfileNumLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textColor">@color/gray_4f</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>

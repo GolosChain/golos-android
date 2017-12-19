@@ -49,59 +49,62 @@ class ApiImplTest {
         assertTrue(AuthUtils.isWiFsValid(privatePosting, publicPosting))
 
         var resp = service.auth(accname, masterPassword, null, null)
-        assertNotNull(resp.avatarPath)
+        assertNotNull(resp.accountInfo.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
-        assertEquals(1, resp.subscribersCount)
-        assertEquals(3, resp.subscibesCount)
-        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.", resp.userMotto)
-        assertTrue(resp.postsCount > 23)
-        assertTrue(resp.accountWorth > 0.1)
+        assertEquals(1, resp.accountInfo.subscribersCount)
+        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
+                resp.accountInfo.userMotto)
+        assertTrue(resp.accountInfo.postsCount > 23)
+        assertTrue(resp.accountInfo.accountWorth > 0.1)
 
         resp = service.auth(accname, null, privateActive, null)
-        assertNotNull(resp.avatarPath)
+        assertNotNull(resp.accountInfo.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertNull(resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
         assertEquals(privateActive, resp.activeAuth!!.second)
-        assertEquals(1, resp.subscribersCount)
-        assertEquals(3, resp.subscibesCount)
-        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.", resp.userMotto)
-        assertTrue(resp.postsCount > 23)
-        assertTrue(resp.accountWorth > 0.1)
+        assertEquals(1, resp.accountInfo.subscribersCount)
+        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
+                resp.accountInfo.userMotto)
+        assertTrue(resp.accountInfo.postsCount > 23)
+        assertTrue(resp.accountInfo.accountWorth > 0.1)
 
 
         resp = service.auth(accname, null, null, privatePosting)
 
-        assertNotNull(resp.avatarPath)
+        assertNotNull(resp.accountInfo.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
-        assertEquals(1, resp.subscribersCount)
-        assertEquals(3, resp.subscibesCount)
-        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.", resp.userMotto)
+        assertEquals(1, resp.accountInfo.subscribersCount)
+        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
+                resp.accountInfo.userMotto)
         assertNull(resp.activeAuth!!.second)
-        assertTrue(resp.postsCount > 23)
-        assertTrue(resp.accountWorth > 0.1)
+        assertTrue(resp.accountInfo.postsCount > 23)
+        assertTrue(resp.accountInfo.accountWorth > 0.1)
 
         resp = service.auth(accname, null, "dasgsdg", null)
 
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
 
         resp = service.auth(accname, null, null, "sdgsdg")
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -109,7 +112,7 @@ class ApiImplTest {
         resp = service.auth(accname, null, "sdgsdg", "sdgsdg")
 
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -117,20 +120,20 @@ class ApiImplTest {
         resp = service.auth(accname + "afsafs", null, privateActive, privatePosting)
 
         assertFalse(resp.isKeyValid)
-        assertEquals(accname + "afsafs", resp.userName)
+        assertEquals(accname + "afsafs", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
 
         resp = service.auth(accname, null, null, null)
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
         resp = service.auth(accname, "asasgasgasg", null, null)
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -139,7 +142,7 @@ class ApiImplTest {
         resp = service.auth("fair", null, privateActive, privatePosting)
 
         assertFalse(resp.isKeyValid)
-        assertEquals("fair", resp.userName)
+        assertEquals("fair", resp.accountInfo.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
     }

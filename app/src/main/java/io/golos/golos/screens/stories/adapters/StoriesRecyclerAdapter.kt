@@ -19,7 +19,6 @@ import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.concurrent.Executor
 
 
@@ -35,13 +34,15 @@ data class StripeWrapper(val stripe: StoryTree,
                          val onCardClick: (RecyclerView.ViewHolder) -> Unit,
                          val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
                          val onShareClick: (RecyclerView.ViewHolder) -> Unit,
-                         val onBlogClick: (RecyclerView.ViewHolder) -> Unit)
+                         val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
+                         val onUserClick: (RecyclerView.ViewHolder) -> Unit)
 
-class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
-                    private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
-                    private var onShareClick: (StoryTree) -> Unit = { print(it) },
-                    private var onUpvoteClick: (StoryTree) -> Unit = { print(it) },
-                    private var onTagClick: (StoryTree) -> Unit = { print(it) })
+class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
+                             private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
+                             private var onShareClick: (StoryTree) -> Unit = { print(it) },
+                             private var onUpvoteClick: (StoryTree) -> Unit = { print(it) },
+                             private var onTagClick: (StoryTree) -> Unit = { print(it) },
+                             private var onUserClick: (StoryTree) -> Unit = { print(it) })
     : RecyclerView.Adapter<StripeViewHolder>() {
 
 
@@ -77,7 +78,8 @@ class StripeAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) }
                 onCardClick = { onCardClick.invoke(stripes[it.adapterPosition]) },
                 onCommentsClick = { onCommentsClick.invoke(stripes[it.adapterPosition]) },
                 onShareClick = { onShareClick.invoke(stripes[it.adapterPosition]) },
-                onBlogClick = { onTagClick.invoke(stripes[it.adapterPosition]) })
+                onBlogClick = { onTagClick.invoke(stripes[it.adapterPosition]) },
+                onUserClick = { onUserClick.invoke(stripes[it.adapterPosition]) })
     }
 
     override fun getItemCount() = stripes.size
@@ -127,6 +129,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         mShareBtn -> it.setOnClickListener({ field!!.onShareClick(this) })
                         mUpvoteBtn -> it.setOnClickListener({ field!!.onUpvoteClick(this) })
                         mBlogNameTv -> it.setOnClickListener({ field!!.onBlogClick(this) })
+                        mAvatar, mUserNameTv -> it.setOnClickListener({ field!!.onUserClick(this) })
                         else -> it.setOnClickListener({ field!!.onCardClick(this) })
                     }
                 })

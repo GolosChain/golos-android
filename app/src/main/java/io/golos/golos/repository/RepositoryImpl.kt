@@ -2,6 +2,7 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
@@ -37,6 +38,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
     private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
     private val mFilteredMap: HashMap<FilteredRequest, MutableLiveData<StoryTreeItems>> = HashMap()
+    private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mAuthLiveData = MutableLiveData<UserData>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
@@ -118,8 +120,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             } catch (e: Exception) {
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
-                            userName,
-                            error = GolosErrorParser.parse(e)))
+                            error = GolosErrorParser.parse(e),
+                            accountInfo = AccountInfo(userName)))
                 }
             }
         }
@@ -135,8 +137,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             } catch (e: Exception) {
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
-                            login,
-                            error = GolosErrorParser.parse(e)))
+                            error = GolosErrorParser.parse(e),
+                            accountInfo = AccountInfo(login)))
                 }
             }
         }
@@ -153,8 +155,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             } catch (e: Exception) {
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
-                            login,
-                            error = GolosErrorParser.parse(e)))
+                            error = GolosErrorParser.parse(e),
+                            accountInfo = AccountInfo(login)))
                 }
             }
         }
@@ -171,32 +173,17 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
-            if (response.avatarPath != null)
+            if (response.accountInfo.avatarPath != null)
                 mPersister.saveAvatarPathForUser(userName,
-                        response.avatarPath,
+                        response.accountInfo.avatarPath,
                         System.currentTimeMillis())
 
-            val userData = UserData(true,
-                    response.userMotto,
-                    response.avatarPath,
-                    response.userName,
-                    response.activeAuth?.second,
-                    response.postingAuth?.second,
-                    response.subscibesCount,
-                    response.subscribersCount,
-                    response.gbgAmount,
-                    response.golosAmount,
-                    response.golosPower,
-                    response.accountWorth,
-                    response.postsCount,
-                    response.safeGbg,
-                    response.safeGolos)
+            val userData = UserData.fromPositiveAuthResponse(response)
 
             mPersister.saveUserData(userData)
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
 
             mMainThreadExecutor.execute {
-
                 mAuthLiveData.value = userData
             }
         }
@@ -230,6 +217,48 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
+    override fun getUserInfo(userName: String): LiveData<AccountInfo> {
+        return if (isUserLoggedIn()
+                && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData, {
+            it?.toAccountInfo()
+        }) else {
+            if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
+            mUsersAccountInfo[userName]!!
+        }
+    }
+
+    override fun requestUserInfoUpdate(userName: String,
+                                       completionHandler: (AccountInfo, GolosError?) -> Unit) {
+        mWorkerExecutor.execute {
+            try {
+                val accinfo = mGolosApi.getAccountData(userName)
+                if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {
+                    mMainThreadExecutor.execute {
+                        mAuthLiveData.value = UserData(true, accinfo.userMotto, accinfo.avatarPath,
+                                accinfo.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
+                                accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
+                                accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
+                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos)
+                        completionHandler.invoke(accinfo, null)
+                    }
+                } else {
+                    if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
+                    val userInfo = mUsersAccountInfo[userName]!!
+
+                    mMainThreadExecutor.execute {
+                        userInfo.value = accinfo
+                        completionHandler.invoke(accinfo, null)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                mMainThreadExecutor.execute {
+                    completionHandler.invoke(AccountInfo(userName), GolosErrorParser.parse(e))
+                }
+            }
+        }
+    }
+
     private fun getSavedActiveUserData(): UserData? {
         return mPersister.getActiveUserData()
     }
@@ -260,6 +289,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                           startPermlink: String?) {
         val request = StoriesRequest(limit, feedType, startAuthor, startPermlink, filter)
         if (mRequests.contains(request)) return
+
         mRequests.add(request)
         mWorkerExecutor.execute {
             try {
@@ -276,6 +306,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
                 mRequests.remove(request)
             } catch (e: Exception) {
+                e.printStackTrace()
                 mRequests.remove(request)
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(feedType, filter)
@@ -530,9 +561,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.BLOG, null,
+                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(null,mAuthLiveData.value?.userName?:""),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, null)
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(null,mAuthLiveData.value?.userName?:""))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
@@ -580,9 +611,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.COMMENTS, null,
+                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(null,mAuthLiveData.value?.userName?:""),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, null)
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(null,mAuthLiveData.value?.userName?:""))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),

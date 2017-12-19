@@ -40,4 +40,12 @@
         <item quantity="zero">Subscribers</item>
         <item quantity="other">Subscribers</item>
     </plurals>
+    <plurals name="posts" >
+            <item quantity="few">Posts</item>
+            <item quantity="many">Posts</item>
+            <item quantity="one">Post</item>
+            <item quantity="two">Posts</item>
+            <item quantity="zero">Posts</item>
+            <item quantity="other">Posts</item>
+    </plurals>
 </resources>

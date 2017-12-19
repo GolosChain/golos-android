@@ -9,12 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.screens.profile.viewmodel.AuthState
+import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.GolosFragment
 
 /**
  * Created by yuri on 05.12.17.
  */
-class ProfileRootFragment() : GolosFragment(), Observer<AuthState> {
+class ProfileRootFragment : GolosFragment(), Observer<AuthState> {
     private val mNotLoggedFTag = "mNotLoggedFTag"
     private val mUserProfileFTag = "mUserProfileFTag"
     private lateinit var mRoot: ViewGroup
@@ -34,18 +36,20 @@ class ProfileRootFragment() : GolosFragment(), Observer<AuthState> {
 
     override fun onChanged(it: AuthState?) {
         if (it?.isLoggedIn == true) {
-            if (Repository.get.getCurrentUserDataAsLiveData().value?.userName != null)
-                childFragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.fade_in, 0)
-                        .replace(mRoot.id,
-                                LoggedInUserProfileFragment.getInstance(it.username),
-                                mUserProfileFTag)
-                        .commit()
+            if (childFragmentManager.findFragmentByTag(mUserProfileFTag) == null) {
+                if (Repository.get.getCurrentUserDataAsLiveData().value?.userName != null)
+                    childFragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.fade_in, 0)
+                            .replace(mRoot.id,
+                                    UserProfileFragment.getInstance(it.username, true),
+                                    mUserProfileFTag)
+                            .commit()
+            }
         } else {
             if (childFragmentManager.findFragmentByTag(mNotLoggedFTag) == null) {
                 childFragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.fade_in, 0)
-                        .replace(mRoot.id, NotLoggedInFragment.getInstance(), mNotLoggedFTag)
+                        .replace(mRoot.id, UserNotLoggedInFragment.getInstance(), mNotLoggedFTag)
                         .commit()
             }
         }

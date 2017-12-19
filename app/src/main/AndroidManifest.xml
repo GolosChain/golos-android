@@ -51,7 +51,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screens.MainActivity"
-            android:label="@string/GOLOS"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme">
