@@ -2,10 +2,9 @@ package io.golos.golos.repository.api
 
 import android.support.annotation.VisibleForTesting
 import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.AccountName
-import eu.bittrade.libs.steemj.base.models.DiscussionQuery
-import eu.bittrade.libs.steemj.base.models.Permlink
-import eu.bittrade.libs.steemj.base.models.PublicKey
+import eu.bittrade.libs.steemj.apis.follow.enums.FollowType
+import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
+import eu.bittrade.libs.steemj.base.models.*
 import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
@@ -69,8 +68,12 @@ class ApiImpl : GolosApi() {
         return out
     }
 
-    override fun getStory(blog: String, author: String, permlink: String): StoryTree {
-        var story = StoryTree(mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink)))
+    override fun getStory(blog: String, author: String,
+                          permlink: String,
+                          accountDataHandler: (List<AccountInfo>) -> Unit): StoryTree {
+        val rawStory = mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink))
+        var story = StoryTree(rawStory)
+        accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story
     }
 
@@ -240,22 +243,30 @@ class ApiImpl : GolosApi() {
 
     override fun getAccountData(of: String): AccountInfo {
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
-        if (accs.size == 0 || accs.get(0) == null) return AccountInfo(of)
-        val acc = accs.get(0)
+        if (accs.size == 0 || accs[0] == null) return AccountInfo(of)
+        return convertExtendedAccountToAccountInfo(accs[0], true)
+    }
+
+    private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount, fetchSubscribersInfo: Boolean): AccountInfo {
         val votePower = acc.vestingShares.amount * 0.000268379
         val golosNum = acc.balance.amount
         val gbgAmount = acc.sbdBalance.amount
         val safeGolos = acc.savingsBalance.amount
         val safeGbg = acc.savingsSbdBalance.amount
         val accWorth = ((votePower + golosNum + safeGolos) * 0.128670406) + ((gbgAmount + safeGbg) * 0.04106528)
-        val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(of))
-        val followersCount = followObject.followerCount.toLong()
-        val followingCount = followObject.followingCount.toLong()
+
+        var followersCount = 0L
+        var followingCount = 0L
+        if (fetchSubscribersInfo) {
+            val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(acc.name.name))
+            followersCount = followObject.followerCount.toLong()
+            followingCount = followObject.followingCount.toLong()
+        }
 
         var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
         var activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
 
-        return AccountInfo(of,
+        return AccountInfo(acc.name.name,
                 acc.moto,
                 acc.avatarPath,
                 acc.postCount,
@@ -277,7 +288,7 @@ class ApiImpl : GolosApi() {
     }
 
     private fun getRootStoryWithoutComments(author: String, permlink: String): GolosDiscussionItem {
-        val story = GolosDiscussionItem(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
+        val story = DiscussionItemFactory.create(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
 
         return story
     }
@@ -315,5 +326,60 @@ class ApiImpl : GolosApi() {
                 content,
                 Array(1, { categoryName }))
         return CreatePostResult(false, result.author.name, result.getTags().first() ?: "", result.permlink.link)
+    }
+
+    override fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject> {
+        val forUser = AccountName(forUser)
+        if (startFrom == null) {
+            var count = Golos4J.getInstance().followApiMethods.getFollowCount(forUser).followingCount
+            if (count == 0) return listOf()
+            var frs = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                    AccountName(""),
+                    FollowType.BLOG,
+                    if (count < 100) count.toShort() else 100)
+            if (count > 100) {
+                count -= 100
+                val times = count / 99
+                (0..times)
+                        .forEach {
+                            var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                                    frs.last().following,
+                                    FollowType.BLOG, 100)
+                            new = new.subList(1, new.size)
+                            frs = frs + new
+                        }
+                val last = count - (99 * times)
+                var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                        frs.last().following,
+                        FollowType.BLOG, last.toShort())
+                new = new.subList(1, new.size)
+                frs = frs + new
+            }
+            return frs
+        } else {
+            var frs = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                    AccountName(startFrom),
+                    FollowType.BLOG,
+                    100)
+            if (frs.size == 100) {
+                while (true) {
+                    var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                            frs.last().following,
+                            FollowType.BLOG, 100)
+                    new = new.subList(1, new.size)
+                    frs = frs + new
+                    if (new.size != 99) break
+                }
+            }
+            return frs
+        }
+    }
+
+    override fun follow(user: String) {
+        Golos4J.getInstance().simplifiedOperations.follow(AccountName(user))
+    }
+
+    override fun unfollow(user: String) {
+        Golos4J.getInstance().simplifiedOperations.unfollow(AccountName(user))
     }
 }

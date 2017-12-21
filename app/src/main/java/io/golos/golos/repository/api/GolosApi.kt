@@ -1,12 +1,12 @@
 package io.golos.golos.repository.api
 
+import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
 import io.golos.golos.App
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import java.io.File
@@ -35,7 +35,9 @@ abstract class GolosApi {
 
     abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree>
 
-    abstract fun getStory(blog: String, author: String, permlink: String): StoryTree
+    abstract fun getStory(blog: String,
+                          author: String,
+                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _->}): StoryTree
 
     abstract fun getStoryWithoutComments(author: String, permlink: String): StoryTree
 
@@ -60,4 +62,10 @@ abstract class GolosApi {
                              permlinkOfItemToReply: String,
                              content: String,
                              categoryName: String): CreatePostResult
+
+    abstract fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject>
+
+    abstract fun follow(user:String)
+
+    abstract fun unfollow(user:String)
 }

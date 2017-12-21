@@ -62,6 +62,7 @@ abstract class Repository {
         }
     }
 
+    open fun onAppCreate() {}
 
     abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoryTreeItems>
 
@@ -111,6 +112,10 @@ abstract class Repository {
                                resultListener: (CreatePostResult?, GolosError?) -> Unit)
 
     abstract fun isUserLoggedIn(): Boolean
+
+    abstract fun follow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+
+    abstract fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"

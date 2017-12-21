@@ -1,6 +1,7 @@
 package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.Golos4J
+import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
@@ -17,7 +18,6 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
-import io.golos.golos.utils.avatarPath
 import java.io.File
 import java.util.*
 
@@ -38,7 +38,7 @@ internal class MockApiImpl : GolosApi() {
                 }
     }
 
-    override fun getStory(blog: String, author: String, permlink: String): StoryTree {
+    override fun getStory(blog: String, author: String, permlink: String, h: (List<AccountInfo>) -> Unit): StoryTree {
         val mapper = CommunicationHandler.getObjectMapper()
         val context = App.context
         val ins = context.resources.openRawResource(context.resources.getIdentifier("story",
@@ -110,6 +110,18 @@ internal class MockApiImpl : GolosApi() {
     }
 
     override fun getUserAvatars(names: List<String>): Map<String, String?> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun follow(user: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun unfollow(user: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

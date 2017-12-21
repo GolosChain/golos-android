@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.steemj.base.models.Discussion
+import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.Format
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.ItemType
@@ -52,7 +53,7 @@ data class StripeItem(val discussion: Discussion) {
     val reputation: Long
 
     init {
-        val comment = GolosDiscussionItem(discussion, null)
+        val comment = DiscussionItemFactory.create(discussion, null)
         this.url = comment.url
         this.id = comment.id
         this.title = comment.title

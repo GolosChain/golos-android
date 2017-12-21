@@ -46,43 +46,53 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
     : RecyclerView.Adapter<StripeViewHolder>() {
 
 
-    private var stripes = ArrayList<StoryTree>()
+    private var mStripes = ArrayList<StoryTree>()
+    private val mItemsMap = HashMap<Long, Int>()
+
     fun setStripesCustom(newItems: List<StoryTree>) {
-        if (stripes.isEmpty()) {
-            stripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
+        if (mStripes.isEmpty()) {
+            mStripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
             notifyDataSetChanged()
+            mStripes.forEach {
+                mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+            }
         } else {
             adapterWorkerExecutor.execute {
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
+                        return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
                     }
 
-                    override fun getOldListSize() = stripes.size
+                    override fun getOldListSize() = mStripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return stripes[oldItemPosition] == newItems[newItemPosition]
+                        val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
+                        return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
+                        // return mStripes[oldItemPosition] == newItems[newItemPosition]
                     }
                 })
                 adapterMainThreadExecutor.execute {
                     result.dispatchUpdatesTo(this)
-                    stripes = ArrayList(newItems)
+                    mStripes = ArrayList(newItems)
+                    mStripes.forEach {
+                        mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                    }
                 }
             }
         }
     }
 
     override fun onBindViewHolder(holder: StripeViewHolder?, position: Int) {
-        holder?.state = StripeWrapper(stripes[position],
-                onUpvoteClick = { onUpvoteClick.invoke(stripes[it.adapterPosition]) },
-                onCardClick = { onCardClick.invoke(stripes[it.adapterPosition]) },
-                onCommentsClick = { onCommentsClick.invoke(stripes[it.adapterPosition]) },
-                onShareClick = { onShareClick.invoke(stripes[it.adapterPosition]) },
-                onBlogClick = { onTagClick.invoke(stripes[it.adapterPosition]) },
-                onUserClick = { onUserClick.invoke(stripes[it.adapterPosition]) })
+        holder?.state = StripeWrapper(mStripes[position],
+                onUpvoteClick = { onUpvoteClick.invoke(mStripes[it.adapterPosition]) },
+                onCardClick = { onCardClick.invoke(mStripes[it.adapterPosition]) },
+                onCommentsClick = { onCommentsClick.invoke(mStripes[it.adapterPosition]) },
+                onShareClick = { onShareClick.invoke(mStripes[it.adapterPosition]) },
+                onBlogClick = { onTagClick.invoke(mStripes[it.adapterPosition]) },
+                onUserClick = { onUserClick.invoke(mStripes[it.adapterPosition]) })
     }
 
-    override fun getItemCount() = stripes.size
+    override fun getItemCount() = mStripes.size
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int) = StripeViewHolder(parent!!)
 
@@ -146,7 +156,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mBlogNameTv.text = wrapper.categoryName
                 }
                 mTitleTv.text = wrapper.title
-                mUpvoteBtn.text = "$ ${String.format("%.2f", wrapper.payoutInDollars)}"
+                mUpvoteBtn.text = "$ ${String.format("%.3f", wrapper.payoutInDollars)}"
                 mCommentsButton.text = wrapper.commentsCount.toString()
                 if (wrapper.avatarPath != null) mGlide
                         .load(wrapper.avatarPath)

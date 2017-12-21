@@ -241,7 +241,13 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
     fun onBlogClick(context: Context?, story: StoryTree) {
 
         context?.let {
-            FilteredStoriesActivity.start(it, feedType = type, filter = StoryFilter(story.rootStory()?.categoryName))
+            var feedType: FeedType = type
+            if (feedType == FeedType.BLOG
+                    || feedType == FeedType.COMMENTS
+                    || feedType == FeedType.PERSONAL_FEED
+                    || feedType == FeedType.UNCLASSIFIED
+                    || feedType == FeedType.PROMO) feedType = FeedType.NEW
+            FilteredStoriesActivity.start(it, feedType = feedType, filter = StoryFilter(story.rootStory()?.categoryName ?: return))
         }
     }
 

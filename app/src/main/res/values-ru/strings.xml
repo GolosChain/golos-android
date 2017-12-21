@@ -92,5 +92,8 @@
     <string name="golos_android_v">Golos для Android v.%s</string>
     <string name="user_made_logout">Вы вышли из аккаунта</string>
     <string name="can_vote_once_per_three_second">Вы можете проголосовать раз в три секунды</string>
-
+    <string name="must_be_logged_in_for_this_action">Вы должны быть залогинены для этого действия</string>
+    <string name="must_be_subscribed_for_action">Вы должны быть подписаны на автора, чтобы отписаться от него</string>
+    <string name="follow">Подписаться</string>
+    <string name="unfollow">Отписаться</string>
 </resources>

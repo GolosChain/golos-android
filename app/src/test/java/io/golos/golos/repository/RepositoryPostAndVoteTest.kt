@@ -4,6 +4,7 @@ import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.persistence.Persister
+import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
@@ -310,5 +311,55 @@ class RepositoryPostAndVoteTest {
 
         repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isNotEmpty())
+    }
+
+    @Test
+    fun testFollowAndUnfollow() {
+        val workingAccount = "vredinka2345"
+        var accountInfo: AccountInfo? = null
+        var userAcc: UserData? = null
+        repo.getUserInfo(workingAccount).observeForever {
+            accountInfo = it
+        }
+        repo.getCurrentUserDataAsLiveData().observeForever({
+            userAcc = it
+        })
+        repo.follow("golosmedia", { _, _ -> })
+
+        Assert.assertNull(accountInfo)
+        repo.requestUserInfoUpdate(workingAccount, { _, _ -> })
+        Assert.assertNotNull(accountInfo)
+        Assert.assertNotNull(userAcc)
+        Assert.assertEquals(false, accountInfo!!.isCurrentUserSubscribed)
+        val subscibesCount = accountInfo!!.subscribersCount
+        val userSubsCount = userAcc!!.subscibesCount
+
+        repo.follow(workingAccount, { _, _ -> })
+        Assert.assertEquals(true, accountInfo!!.isCurrentUserSubscribed)
+        Assert.assertEquals(subscibesCount + 1, accountInfo!!.subscribersCount)
+        Assert.assertEquals(userSubsCount + 1, userAcc!!.subscibesCount)
+
+        repo.unFollow(workingAccount, { _, _ -> })
+
+        Assert.assertEquals(false, accountInfo!!.isCurrentUserSubscribed)
+        Assert.assertEquals(subscibesCount, accountInfo!!.subscribersCount)
+        Assert.assertEquals(userSubsCount, userAcc!!.subscibesCount)
+        repo.follow("med", { _, _ -> })
+        repo.unFollow("med", { _, _ -> })
+
+        val feedStories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName))
+        Assert.assertNull(feedStories.value)
+        repo.requestStoriesListUpdate(20,FeedType.PERSONAL_FEED,StoryFilter(userNameFilter = userName))
+        Assert.assertNotNull(feedStories.value)
+
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        repo.unFollow("golosmedia", { _, _ -> })
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+
+        val story = feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first()
+        repo.requestStoryUpdate(story)
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        repo.follow("golosmedia", { _, _ -> })
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
     }
 }

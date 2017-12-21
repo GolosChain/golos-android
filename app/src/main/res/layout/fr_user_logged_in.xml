@@ -59,6 +59,23 @@
                     app:layout_constraintStart_toEndOf="@+id/avatar_iv"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/follow_btn"
+                    style="@style/FollowButtonPosition"
+                    android:text="@string/follow"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/font_regular"
+                    app:backgroundTint="@android:color/white"
+                    app:layout_constraintStart_toStartOf="@id/username_tv"
+                    app:layout_constraintTop_toBottomOf="@id/username_tv" />
+
+                <ProgressBar
+                    style="@style/FollowButtonPosition"
+                    android:visibility="gone"
+                    android:id="@+id/progress"
+                    app:layout_constraintStart_toStartOf="@id/username_tv"
+                    app:layout_constraintTop_toBottomOf="@id/username_tv" />
+
                 <TextView
                     android:id="@+id/moto"
                     android:layout_width="match_parent"
@@ -74,13 +91,12 @@
                     android:id="@+id/settings_btn"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:layout_marginEnd="@dimen/margin_material"
                     android:layout_marginTop="@dimen/margin_material"
                     android:padding="0dp"
                     app:backgroundTint="@android:color/transparent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_settings_gray_24dp" />
+                    app:srcCompat="@drawable/ic_settings_white_24dp" />
 
 
                 <View
@@ -115,10 +131,12 @@
                             android:id="@+id/posts_num_tv"
                             style="@style/ProfileNumLabel" />
                     </android.support.v7.widget.LinearLayoutCompat>
+
                     <View
                         android:layout_width="1dp"
                         android:layout_height="match_parent"
                         android:background="@color/profile_divider_color" />
+
                     <android.support.v7.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="match_parent"

@@ -13,12 +13,8 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
 import io.golos.golos.R.raw.story
@@ -59,9 +55,13 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mFlow: FlowLayout
     private lateinit var mCommentsCountBtn: TextView
     private lateinit var mVotingProgress: ProgressBar
+    private lateinit var mAuthorSubscribeProgress: ProgressBar
     private lateinit var mMoneyBtn: TextView
     private lateinit var mCommentsTv: TextView
     private lateinit var mShareButton: ImageButton
+    private lateinit var mAvatarofAuthorInFollowLo: ImageView
+    private lateinit var mNameOfAuthorInFollowLo: TextView
+    private lateinit var mAuthorSubscribeButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,26 +91,53 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
+
             if (it?.storyTree?.rootStory() != null) {
                 mSwipeToRefresh.isRefreshing = false
                 val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
                 mStoryRecycler.visibility = View.VISIBLE
-                if (ets.size == 1) {
-                    Timber.e("parser fail!!!!! on ${it.storyTree.rootStory()}")
-                }
                 (mStoryRecycler.adapter as MainStoryAdapter).items = ArrayList(ets)
+
                 if (mAvatar.drawable == null) {
                     mAvatar.visibility = View.VISIBLE
-                    if (story.avatarPath != null) Glide.with(this)
-                            .load(story.avatarPath)
-                            .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
-                            .apply(RequestOptions.placeholderOf(R.drawable.ic_person_gray_24dp))
-                            .into(mAvatar)
-                    else mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                     mUserName.text = story.author
                     mBlogNameTv.visibility = View.VISIBLE
+                    mNameOfAuthorInFollowLo.text = story.author.capitalize()
+
+                    story.avatarPath?.let {
+                        val glide = Glide.with(this)
+
+                        glide
+                                .load(story.avatarPath)
+                                .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
+                                .into(mAvatar)
+                        glide
+                                .load(story.avatarPath)
+                                .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
+                                .into(mAvatarofAuthorInFollowLo)
+                    }
+                    if (it.canUserMakeSubscriptionActions) {
+                        mAuthorSubscribeButton.visibility = View.VISIBLE
+
+                    }
+                    mUserName.setOnClickListener {
+                        mViewModel.onUserClick(this, mUserName.text.toString())
+                    }
+                    mAvatarofAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
+                    mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
+                    mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
+                mAuthorSubscribeButton.text = if (it.storyTree.userSubscribeUpdatingStatus.isSubscribed) getString(R.string.unfollow)
+                else getString(R.string.follow)
+
+
+                mAuthorSubscribeButton.visibility = if (it.storyTree.userSubscribeUpdatingStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
+                else View.GONE
+                mAuthorSubscribeProgress.visibility = if (mAuthorSubscribeButton.visibility == View.GONE) View.VISIBLE else View.GONE
+
+                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeButtonClick() }
+
                 mCommentsCountBtn.visibility = View.VISIBLE
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
                     mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp), null, null, null)
@@ -159,7 +186,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
                 mCommentsTv.visibility = View.VISIBLE
-                mMoneyBtn.text = String.format("$ %.2f", story.payoutInDollars)
+                mMoneyBtn.text = String.format("$ %.3f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
                 if (it.storyTree.comments().isEmpty()) {
                     mCommentsRecycler.visibility = View.GONE
@@ -194,11 +221,17 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mVotingProgress = findViewById(R.id.voting_progress)
         mCommentsTv = findViewById(R.id.comments_tv)
         mShareButton = findViewById(R.id.share_btn)
+        mAvatarofAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
+        mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
+        mAuthorSubscribeButton = findViewById(R.id.follow_btn)
+        mAuthorSubscribeProgress = findViewById(R.id.user_subscribe_progress)
+
+        mAuthorSubscribeButton.visibility = View.GONE
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
-        mCommentsRecycler.adapter = CommentsAdapter()
+        mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel?.onUserClick(this, it.story.author) })
         mStoryRecycler.adapter = MainStoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)

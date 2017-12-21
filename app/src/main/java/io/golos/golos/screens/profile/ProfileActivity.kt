@@ -14,7 +14,7 @@ class ProfileActivity : GolosActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_profile)
         if (intent.hasExtra(USERNAME_TAG)) {
-            val fragment = UserProfileFragment.getInstance(intent.getStringExtra(USERNAME_TAG), false)
+            val fragment = UserProfileFragment.getInstance(intent.getStringExtra(USERNAME_TAG))
             supportFragmentManager.beginTransaction()
                     .replace(R.id.root_lo, fragment).commit()
         }

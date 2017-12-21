@@ -11,16 +11,20 @@ import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingActivity
+import io.golos.golos.utils.InternetStatusNotifier
+import io.golos.golos.utils.showSnackbar
 
 /**
  * Created by yuri on 10.11.17.
@@ -37,6 +41,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mSubscriptions: TextView
     private lateinit var mPostsTv: TextView
     private lateinit var mPostsCountTv: TextView
+    private lateinit var mFollowBtn: Button
+    private lateinit var mFollowProgress: View
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -51,6 +57,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mSubscriptions = v.findViewById(R.id.subscribes_tv)
         mPostsTv = v.findViewById(R.id.posts_tv)
         mPostsCountTv = v.findViewById(R.id.posts_num_tv)
+        mFollowBtn = v.findViewById(R.id.follow_btn)
+        mFollowProgress = v.findViewById(R.id.progress)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
@@ -67,11 +75,6 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val i = Intent(activity!!, SettingActivity::class.java)
             activity?.startActivity(i)
         })
-        if (arguments?.getBoolean(IS_CURRENT_USER, false) == true) {
-            settingsButton.visibility = View.VISIBLE
-        } else {
-            settingsButton.visibility = View.GONE
-        }
         return v
     }
 
@@ -80,8 +83,14 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mViewModel = ViewModelProviders.of(activity!!).get(UserInfoViewModel::class.java)
         mViewModel.getLiveData().observe(activity as LifecycleOwner, this)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
-            mViewModel.onCreate(arguments!!.getString(USERNAME_TAG))
+            mViewModel.onCreate(arguments!!.getString(USERNAME_TAG),
+                    object : InternetStatusNotifier {
+                        override fun isAppOnline(): Boolean {
+                            return App.isAppOnline()
+                        }
+                    })
         }
+        mFollowBtn.setOnClickListener({ mViewModel.onFollowBtnClick() })
     }
 
     override fun onChanged(t: UserAccountModel?) {
@@ -96,6 +105,12 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)
         }
+
+        if (it.isCurrentUserSubscribed) mFollowBtn.text = getString(R.string.unfollow)
+        else mFollowBtn.text = getString(R.string.follow)
+        mSettingButton.visibility = if (t.isActiveUserPage) View.VISIBLE else View.GONE
+        mFollowBtn.visibility = if (t.isFollowButtonVisible && !t.isSubscriptionInProgress) View.VISIBLE else View.GONE
+        mFollowProgress.visibility = if (t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mMotoTv.text = it.userMotto
         mSubscribersNumTv.text = it.subscribersCount.toString()
         mSubscriptionsNum.text = it.subscibesCount.toString()
@@ -103,17 +118,16 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mSubscribers.text = resources.getQuantityString(R.plurals.subscribers, it.subscribersCount.toInt())
         mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscibesCount.toInt())
         mPostsTv.text = resources.getQuantityString(R.plurals.posts, it.postsCount.toInt())
-
+        t.error?.let {
+            view?.showSnackbar(it.localizedMessage ?: 0)
+        }
     }
 
     companion object {
         private val USERNAME_TAG = "USERNAME_TAG"
-        private val IS_CURRENT_USER = "IS_CURRENT_USER"
-        fun getInstance(username: String,
-                        isCurrentUser: Boolean): UserProfileFragment {
+        fun getInstance(username: String): UserProfileFragment {
             val b = Bundle()
             b.putString(USERNAME_TAG, username)
-            b.putBoolean(IS_CURRENT_USER, isCurrentUser)
             val f = UserProfileFragment()
             f.arguments = b
             return f

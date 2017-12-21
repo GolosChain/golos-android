@@ -6,6 +6,7 @@ import android.support.multidex.MultiDexApplication
 import android.support.v7.app.AppCompatDelegate
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
+import io.golos.golos.repository.Repository
 import timber.log.Timber
 import java.util.concurrent.Executors
 
@@ -21,8 +22,8 @@ class App : MultiDexApplication() {
             Timber.plant(Timber.DebugTree())
 
         }
-
         Fabric.with(this, Crashlytics())
+        Repository.get.onAppCreate()
     }
 
     companion object get {
@@ -34,5 +35,6 @@ class App : MultiDexApplication() {
         }
 
         val computationExecutor = Executors.newSingleThreadExecutor()
+
     }
 }

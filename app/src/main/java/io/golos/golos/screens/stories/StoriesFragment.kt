@@ -26,6 +26,7 @@ import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 
 
 /**
@@ -37,7 +38,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private var mViewModel: StoriesViewModel? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
-    private var isVisibleBacking = false
+    private var isVisibleBacking: Boolean? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stripe, container, false)
@@ -106,7 +107,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                     }
                 },
                 onTagClick = { mViewModel?.onBlogClick(context, it) },
-                onUserClick = {mViewModel?.onUserClick(context, it)}
+                onUserClick = { mViewModel?.onUserClick(context, it) }
         )
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -123,7 +124,10 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     }
 
     private fun setUp() {
-        mViewModel?.onChangeVisibilityToUser(isVisibleBacking)
+
+        if (isVisibleBacking == true) {
+            mViewModel?.onChangeVisibilityToUser(true)
+        }
         mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
         mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
     }

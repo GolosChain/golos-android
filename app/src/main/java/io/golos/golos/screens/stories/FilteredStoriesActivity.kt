@@ -87,6 +87,7 @@ class FilteredStoriesActivity : GolosActivity() {
                   feedType: FeedType,
                   filter: StoryFilter) {
             val intent = Intent(context, FilteredStoriesActivity::class.java)
+            Timber.e("start with type = $feedType")
             intent.putExtra(TAG_FEED, feedType)
             intent.putExtra(TAG_FILTER, mapper.writeValueAsString(filter))
             context.startActivity(intent)

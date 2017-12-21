@@ -3,6 +3,7 @@ package io.golos.golos.repository
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
+import android.support.annotation.WorkerThread
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
@@ -16,6 +17,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.story.model.StoryAuthorSubscribeStatus
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
@@ -27,6 +29,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 private data class FilteredRequest(val feedType: FeedType,
                                    val filter: StoryFilter)
@@ -42,6 +45,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mAuthLiveData = MutableLiveData<UserData>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
+    private val mSubscriptions = HashSet<String>()
 
     private fun getStripeItems(limit: Int,
                                type: FeedType,
@@ -56,8 +60,11 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
         var name = mPersister.getActiveUserData()?.userName ?: ""
         out.forEach {
-            if (name != null) {
+            if (name.isNotEmpty()) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
+                it.userSubscribeUpdatingStatus =
+                        StoryAuthorSubscribeStatus(isUserSubscribedOn(it.rootStory()?.author ?: ""),
+                                UpdatingState.DONE)
             }
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
         }
@@ -98,7 +105,18 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryTree {
-        var story = if (blog != null) mGolosApi.getStory(blog, author, permlink)
+        var story = if (blog != null) mGolosApi.getStory(blog, author, permlink, { list ->
+            list.forEach {
+                if (!mUsersAccountInfo.containsKey(it.userName)) {
+                    val liveData = MutableLiveData<AccountInfo>()
+                    mMainThreadExecutor.execute {
+                        liveData.value = it
+                        mUsersAccountInfo[it.userName ?: ""] = liveData
+                    }
+                }
+            }
+
+        })
         else mGolosApi.getStoryWithoutComments(author, permlink)
         var name = mPersister.getCurrentUserName()
         if (name != null) {
@@ -107,6 +125,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 it.story.isUserUpvotedOnThis = it.story.isUserVotedOnThis(name)
             })
         }
+        story.userSubscribeUpdatingStatus =
+                StoryAuthorSubscribeStatus(isUserSubscribedOn(story.rootStory()?.author ?: ""), UpdatingState.DONE)
         return story
     }
 
@@ -222,7 +242,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData, {
             it?.toAccountInfo()
         }) else {
-            if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
+            if (!mUsersAccountInfo.containsKey(userName)) {
+                mUsersAccountInfo.put(userName, MutableLiveData())
+            }
             mUsersAccountInfo[userName]!!
         }
     }
@@ -231,6 +253,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                        completionHandler: (AccountInfo, GolosError?) -> Unit) {
         mWorkerExecutor.execute {
             try {
+                loadSubscribersIfNeeded()
+                if (isUserLoggedIn()
+                        && mSubscriptions.contains(userName)
+                        && userName != mAuthLiveData.value?.userName) {
+                    if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
+                    val userInfo = mUsersAccountInfo[userName]!!
+                    mMainThreadExecutor.execute {
+                        userInfo.value = AccountInfo(userName, isCurrentUserSubscribed = isUserSubscribedOn(userName))
+                    }
+                }
                 val accinfo = mGolosApi.getAccountData(userName)
                 if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {
                     mMainThreadExecutor.execute {
@@ -242,6 +274,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {
+                    accinfo.isCurrentUserSubscribed = isUserSubscribedOn(accinfo.userName ?: "")
                     if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
                     val userInfo = mUsersAccountInfo[userName]!!
 
@@ -259,6 +292,148 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
+    private fun isUserSubscribedOn(onAuthor: String): Boolean {
+        if (isUserLoggedIn()) {
+            if (mSubscriptions.size == 0) {
+                mSubscriptions.addAll(mGolosApi
+                        .getSubscriptions(mPersister.getCurrentUserName() ?: return false, null)
+                        .filter { it != null }
+                        .map {
+                            it.following!!.name
+                        })
+            }
+            return mSubscriptions.contains(onAuthor)
+        }
+        return false
+    }
+
+    private fun followOrUnfollow(isFollow: Boolean, user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        mWorkerExecutor.execute {
+            try {
+                if (!isUserLoggedIn()) {
+                    mMainThreadExecutor.execute {
+                        completionHandler.invoke(Unit,
+                                GolosError(ErrorCode.WRONG_STATE,
+                                        null,
+                                        R.string.must_be_logged_in_for_this_action))
+                    }
+                    return@execute
+                }
+                if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
+                    mMainThreadExecutor.execute {
+                        completionHandler.invoke(Unit,
+                                GolosError(ErrorCode.WRONG_STATE,
+                                        null,
+                                        if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
+                    }
+                    return@execute
+                }
+                allLiveData().forEach {
+                    val workingLiveData = it
+                    var isChangedSmth = false
+                    workingLiveData
+                            .value
+                            ?.items
+                            ?.filter { it.rootStory()?.author == user }
+                            ?.forEach {
+                                isChangedSmth = true
+                                it.userSubscribeUpdatingStatus = StoryAuthorSubscribeStatus(!isFollow, UpdatingState.UPDATING)
+                            }
+                    mMainThreadExecutor.execute {
+                        if (isChangedSmth) it.value = it.value
+                    }
+                }
+                if (isFollow) mGolosApi.follow(user) else mGolosApi.unfollow(user)
+                if (isFollow) requestSubscribesUpdate(user) else mSubscriptions.remove(user)
+                val userValue = mUsersAccountInfo[user]
+                userValue?.let {
+                    val info = it.value
+                    if (info != null) {
+                        val copy = info.copy()
+                        copy.isCurrentUserSubscribed = isFollow
+
+                        copy.subscribersCount = if (isFollow) copy.subscribersCount + 1 else copy.subscribersCount - 1
+                        val userAccCopy = mAuthLiveData.value!!.clone() as UserData
+                        userAccCopy.subscibesCount = if (isFollow) userAccCopy.subscibesCount + 1 else userAccCopy.subscibesCount - 1
+                        mMainThreadExecutor.execute {
+                            it.value = copy
+                            mAuthLiveData.value = userAccCopy
+                        }
+                    }
+                }
+                allLiveData().forEach {
+                    val workingLiveData = it
+                    var isChangedSmth = false
+                    workingLiveData
+                            .value
+                            ?.items
+                            ?.filter { it.rootStory()?.author == user }
+                            ?.forEach {
+                                isChangedSmth = true
+                                it.userSubscribeUpdatingStatus = StoryAuthorSubscribeStatus(isFollow, UpdatingState.DONE)
+                            }
+                    mMainThreadExecutor.execute {
+                        if (isChangedSmth) it.value = it.value
+                    }
+                }
+                mMainThreadExecutor.execute {
+                    completionHandler.invoke(Unit, null)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                if (e is SteemResponseError) {
+                    Timber.e(e.message)
+                }
+                allLiveData().forEach {
+                    val workingLiveData = it
+                    var isChangedSmth = false
+                    workingLiveData
+                            .value
+                            ?.items
+                            ?.filter { it.rootStory()?.author == user }
+                            ?.forEach {
+                                isChangedSmth = true
+                                it.userSubscribeUpdatingStatus = StoryAuthorSubscribeStatus(!isFollow, UpdatingState.FAILED)
+                            }
+                    mMainThreadExecutor.execute {
+                        if (isChangedSmth) it.value = it.value
+                    }
+                }
+                mMainThreadExecutor.execute {
+                    completionHandler.invoke(Unit, GolosErrorParser.parse(e))
+                }
+            }
+        }
+    }
+
+    override fun follow(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        followOrUnfollow(true, user, completionHandler)
+    }
+
+    override fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        followOrUnfollow(false, user, completionHandler)
+    }
+
+    @WorkerThread
+    private fun requestSubscribesUpdate(startFrom: String?) {
+        mSubscriptions.addAll(mGolosApi
+                .getSubscriptions(mPersister.getCurrentUserName() ?: return, startFrom)
+                .filter { it != null }
+                .map {
+                    it.following!!.name
+                })
+    }
+
+    @WorkerThread
+    private fun loadSubscribersIfNeeded() {
+        try {
+            if (isUserLoggedIn() && mSubscriptions.size == 0) requestSubscribesUpdate(null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
     private fun getSavedActiveUserData(): UserData? {
         return mPersister.getActiveUserData()
     }
@@ -266,6 +441,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun deleteUserdata() {
         mPersister.deleteUserData()
         mAuthLiveData.value = null
+        mSubscriptions.clear()
+        mMainThreadExecutor.execute {
+            allLiveData().forEach {
+                it.value?.items?.forEach {
+                    it.rootStory()?.isUserUpvotedOnThis = false
+                }
+                it.value = it.value
+            }
+
+        }
     }
 
     private fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
@@ -305,6 +490,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     startLoadingAbscentAvatars(out, feedType, filter)
                 }
                 mRequests.remove(request)
+                loadSubscribersIfNeeded()
             } catch (e: Exception) {
                 e.printStackTrace()
                 mRequests.remove(request)
@@ -437,6 +623,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun requestStoryUpdate(story: StoryTree) {
         mWorkerExecutor.execute {
+            loadSubscribersIfNeeded()
             try {
                 val story = getStory(story.rootStory()?.categoryName ?: "",
                         story.rootStory()?.author ?: "",
@@ -504,6 +691,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             }
         } else {
             mWorkerExecutor.execute {
+
+                loadSubscribersIfNeeded()
+
                 try {
                     val story = getStory(blog, author, permLink)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
@@ -561,9 +751,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(null,mAuthLiveData.value?.userName?:""),
+                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(null, mAuthLiveData.value?.userName ?: ""),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(null,mAuthLiveData.value?.userName?:""))
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
@@ -611,9 +801,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(null,mAuthLiveData.value?.userName?:""),
+                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(null, mAuthLiveData.value?.userName ?: ""),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(null,mAuthLiveData.value?.userName?:""))
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),

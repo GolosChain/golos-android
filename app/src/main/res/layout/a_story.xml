@@ -38,14 +38,17 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="@dimen/margin_material_half"
+                    android:clickable="true"
                     android:scaleType="centerCrop"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:riv_corner_radius="30dp" />
+                    app:riv_corner_radius="30dp"
+                    app:srcCompat="@drawable/ic_person_gray_24dp" />
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/user_name"
                     style="@style/TitleUserNameStyle"
+                    android:clickable="true"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
                     app:layout_constraintTop_toTopOf="@id/avatar_iv" />
 
@@ -62,6 +65,7 @@
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/blog_name_tv"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
+                    android:clickable="true"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
                     app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
@@ -151,7 +155,66 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/margin_material_half"
+                    android:layout_height="@dimen/height_of_gray_break"
+                    android:background="#f0f3f6" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/follow_lo"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:orientation="horizontal">
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:id="@+id/avatar_in_follow_lo_iv"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        android:layout_marginStart="24dp"
+                        android:clickable="true"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:riv_oval="true"
+                        app:srcCompat="@drawable/ic_person_gray_80dp" />
+
+                    <TextView
+                        android:id="@+id/author_name_in_follow_lo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin_material_small"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:textColor="#333333"
+                        android:textSize="@dimen/font_medium"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/avatar_in_follow_lo_iv"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/follow_btn"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless"
+                        android:layout_width="108dp"
+                        android:layout_height="38dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="24dp"
+                        android:background="@drawable/back_story_button_round_corners_gray"
+                        android:textAllCaps="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ProgressBar
+                        android:id="@+id/user_subscribe_progress"
+                        style="@style/StorySubscribeButtonSize"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/height_of_gray_break"
                     android:background="#f0f3f6" />
 
                 <TextView

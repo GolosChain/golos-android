@@ -41,7 +41,7 @@ class ProfileRootFragment : GolosFragment(), Observer<AuthState> {
                     childFragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.fade_in, 0)
                             .replace(mRoot.id,
-                                    UserProfileFragment.getInstance(it.username, true),
+                                    UserProfileFragment.getInstance(it.username),
                                     mUserProfileFTag)
                             .commit()
             }

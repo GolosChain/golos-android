@@ -8,11 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
 import android.widget.ImageView
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.EditorActivity
+import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
@@ -69,7 +71,8 @@ class StoryViewModel : ViewModel() {
                     it?.userName != null,
                     mLiveData.value?.errorCode,
                     mLiveData.value?.tags ?: ArrayList(),
-                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
+                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                    mRepository.isUserLoggedIn())
         }
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
     }
@@ -127,28 +130,24 @@ class StoryViewModel : ViewModel() {
                         feedType)
             }
         } else {
-            mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
-                    mLiveData.value?.storyTitle ?: "",
-                    mRepository.isUserLoggedIn(),
-                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment),
-                    mLiveData.value?.tags ?: ArrayList(),
-                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
+            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment))
         }
     }
 
     fun onVoteRejected(story: Int) {
-        mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
-                mLiveData.value?.storyTitle ?: "",
-                mRepository.isUserLoggedIn(),
-                GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote),
-                mLiveData.value?.tags ?: ArrayList(),
-                mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()))
+        showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
-    fun onTagClick(storyActivity: StoryActivity, text: String) {
+    fun onTagClick(context: Context, text: String?) {
         var text = text
-        if (text.contains(Regex("[а-яА-Я]"))) text = "ru--" + Translit.ru2lat(text)
-        FilteredStoriesActivity.start(storyActivity, feedType, StoryFilter(text))
+        var feedType: FeedType = feedType
+        if (feedType == FeedType.BLOG
+                || feedType == FeedType.COMMENTS
+                || feedType == FeedType.PERSONAL_FEED
+                || feedType == FeedType.UNCLASSIFIED
+                || feedType == FeedType.PROMO) feedType = FeedType.NEW
+        if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text ?: return)
+        FilteredStoriesActivity.start(context, feedType, StoryFilter(text ?: return))
     }
 
     fun onShareClick(context: Context) {
@@ -162,5 +161,40 @@ class StoryViewModel : ViewModel() {
 
     fun requestRefresh() {
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
+    }
+
+    fun onSubscribeButtonClick() {
+        if (!mRepository.isUserLoggedIn()) {
+            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
+            return
+        }
+        if (!App.isAppOnline()) {
+            showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+            return
+        }
+
+        if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isSubscribed == true)
+            mRepository.unFollow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+                showError(e ?: return@unFollow)
+            })
+        else if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isSubscribed == false) {
+            mRepository.follow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+                showError(e ?: return@follow)
+            })
+        }
+    }
+
+    fun onUserClick(context: Context, userName: String?) {
+        ProfileActivity.start(context, userName?.toLowerCase() ?: return)
+    }
+
+    private fun showError(error: GolosError) {
+        mLiveData.value = StoryViewState(false,
+                mLiveData.value?.storyTitle ?: "",
+                mRepository.isUserLoggedIn(),
+                error,
+                mLiveData.value?.tags ?: ArrayList(),
+                mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                mRepository.isUserLoggedIn())
     }
 }

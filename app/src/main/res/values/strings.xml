@@ -21,7 +21,7 @@
     <string name="enter_post_title">Add an interesting title</string>
     <string name="tab_back_double_to_enter">Tap again to exit</string>
     <string name="slow_internet_connection">Connection is too slow. Please try again</string>
-    <string name="no_internet_connection">There is no connection</string>
+    <string name="no_internet_connection">There is no internet connection</string>
     <string name="unknown_error">An unknown error occurred, please try again later</string>
     <string name="stripes_new">New</string>
     <string name="actual">Hot</string>
@@ -71,7 +71,6 @@
     <string name="profile">Profile</string>
     <string name="unaval_in_current_version">Not available in current version</string>
     <string name="less_then_hour_ago">Less than an hour ago</string>
-
     <string name="enter">Login</string>
     <string name="subscribers">Subscribers</string>
     <string name="subscriptions">Subscriptions</string>
@@ -93,6 +92,10 @@
     <string name="golos_android_v">Golos for Android v.%s</string>
     <string name="user_made_logout">User made logout</string>
     <string name="can_vote_once_per_three_second">You can vote once per three seconds</string>
-
+    <string name="must_be_logged_in_for_this_action">You must be logged in to perform this action</string>
+    <string name="must_be_subscribed_for_action">You must be subscribed to user to unsubscribe</string>
+    <string name="you_already_subscribed">You are already subscribed to this author</string>
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
 </resources>
 

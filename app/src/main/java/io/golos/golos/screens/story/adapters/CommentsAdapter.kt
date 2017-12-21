@@ -5,7 +5,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,6 @@ import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.toHtml
-import timber.log.Timber
 import java.util.*
 
 /**
@@ -32,10 +30,13 @@ import java.util.*
  */
 data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onAnswerClick: (RecyclerView.ViewHolder) -> Unit)
+                              val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
+                              val onUserClick: (RecyclerView.ViewHolder) -> Unit)
 
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
-                      var onAnswerClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+                      var onAnswerClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onUserClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+
 
     var items = ArrayList<StoryWrapper>()
         set(value) {
@@ -60,7 +61,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
     override fun onBindViewHolder(holder: CommentViewHolder?, position: Int) {
         holder?.state = CommentHolderState(items[position],
                 onUpvoteClick = { onUpvoteClick.invoke(items[it.adapterPosition]) },
-                onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) })
+                onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) },
+                onUserClick = { onUserClick.invoke(items[it.adapterPosition]) })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CommentViewHolder {
@@ -110,6 +112,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mRootLo.setPadding((level * itemView.resources.getDimension(R.dimen.margin_material)).toInt(), 0, 0, 0)
                 mUpvoteBtn.setOnClickListener({ state?.onUpvoteClick?.invoke(this) })
                 mAnswerIbtn.setOnClickListener({ state?.onAnswerClick?.invoke(this) })
+                mAvatar.setOnClickListener { state?.onUserClick?.invoke(this) }
+                mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
@@ -121,21 +125,20 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mUsernameTv.text = comment.author
 
 
-               val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+                val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
                 val dif = currentTime - comment.created
                 val hour = 1000 * 60 * 60
                 val hoursAgo = dif / hour
-                if  (hoursAgo == 0L){
-                    mTimeTv.text =  itemView.resources.getString(R.string.less_then_hour_ago)
-                }
-                else if (hoursAgo < 24) {
+                if (hoursAgo == 0L) {
+                    mTimeTv.text = itemView.resources.getString(R.string.less_then_hour_ago)
+                } else if (hoursAgo < 24) {
                     mTimeTv.text = "$hoursAgo ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 } else {
                     val daysAgo = hoursAgo / 24
                     mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 }
-                mUpvoteBtn.text = "$ ${String.format("%.2f", comment.payoutInDollars)}"
+                mUpvoteBtn.text = "$ ${String.format("%.3f", comment.payoutInDollars)}"
 
                 if (comment.isUserUpvotedOnThis) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))

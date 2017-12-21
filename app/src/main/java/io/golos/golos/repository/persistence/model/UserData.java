@@ -254,7 +254,7 @@ public class UserData implements Cloneable {
         return new AccountInfo(userName, mMoto, avatarPath,
                 postsCount, accountWorth, subscibesCount, subscribersCount,
                 gbgAmount, golosAmount, golosPower, safeGbg,
-                safeGolos, publicPostingWif, publicActiveWif);
+                safeGolos, publicPostingWif, publicActiveWif, false);
     }
 
     @Override

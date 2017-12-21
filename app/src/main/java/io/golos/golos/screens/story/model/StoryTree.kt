@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.UpdatingState
 
@@ -17,9 +18,13 @@ data class StoryWrapper(
         @JsonProperty("updatingState")
         val updatingState: UpdatingState)
 
+data class StoryAuthorSubscribeStatus(val isSubscribed: Boolean,
+                                      val updatingState: UpdatingState)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 class StoryTree(rootStory: StoryWrapper?,
-                comments: List<StoryWrapper>) : Cloneable {
+                comments: List<StoryWrapper>,
+                var userSubscribeUpdatingStatus: StoryAuthorSubscribeStatus = StoryAuthorSubscribeStatus(false, UpdatingState.DONE)) : Cloneable {
 
     @JsonProperty("rootStory")
     private var mRootStoryWrapper: StoryWrapper? = rootStory
@@ -56,7 +61,7 @@ class StoryTree(rootStory: StoryWrapper?,
                 }
             }
             if (rootStories == null) throw IllegalStateException("not found root story")
-            mRootStoryWrapper = StoryWrapper(GolosDiscussionItem(rootStories, discussionWithComments
+            mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
                     .involvedAccounts
                     .find { it.name.name == rootStories!!.author.name }!!),
                     UpdatingState.DONE)
@@ -100,7 +105,7 @@ class StoryTree(rootStory: StoryWrapper?,
     }
 
     private fun convert(discussion: Discussion, accounts: List<ExtendedAccount>): GolosDiscussionItem {
-        return GolosDiscussionItem(discussion, accounts.filter { it.name.name == discussion.author.name }.first())
+        return DiscussionItemFactory.create(discussion, accounts.filter { it.name.name == discussion.author.name }.first())
     }
 
     fun getFlataned(): List<StoryWrapper> {

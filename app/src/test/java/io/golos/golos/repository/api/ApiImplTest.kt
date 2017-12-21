@@ -224,4 +224,36 @@ class ApiImplTest {
         Assert.assertNotNull(avatars["jevgenika"])
         Assert.assertNull(avatars["yuri-vlad"])
     }
+
+    @Test
+    fun getFollowersTest() {
+        var frs = service.getSubscriptions("yuri-vlad", null)
+        Assert.assertEquals(6, frs.size)
+        frs = service.getSubscriptions("vredinka2345", null)
+        Assert.assertEquals(417, frs.size)
+
+
+        frs = service.getSubscriptions("vredinka2345", "med")
+        Assert.assertEquals(416, frs.size)
+    }
+    @Test
+    fun getFollowersTest2() {
+        var frs = service.getSubscriptions("vox-populi", null)
+        println(frs)
+    }
+
+    @Test
+    fun followAndUnfolloweTest() {
+        service.auth(accname, null, null, privatePosting)
+        Golos4J.getInstance().setDefaultAccount(AccountName(accname))
+        Golos4J.getInstance().simplifiedOperations.follow(AccountName("vredinka2345"))
+        var followers = service.getSubscriptions(accname, null)
+        Assert.assertTrue(followers.find { it.following.name == "vredinka2345" } != null)
+        Golos4J.getInstance().simplifiedOperations.unfollow(AccountName("vredinka2345"))
+
+        followers = service.getSubscriptions(accname, null)
+
+        Assert.assertTrue(followers.find { it.following.name == "vredinka2345" } == null)
+
+    }
 }

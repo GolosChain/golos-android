@@ -23,15 +23,18 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.story.StoryActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.widgets.PhotoActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.profile.ProfileActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -39,18 +42,22 @@
 
         <activity
             android:name=".screens.stories.FilteredStoriesActivity"
+
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screens.webview.WebViewActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screens.settings.SettingActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screens.MainActivity"
+            android:launchMode="singleInstance"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"
