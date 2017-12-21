@@ -13,13 +13,13 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 
 data class UserProfileState(val isLoggedIn: Boolean,
-                            val isLoading: Boolean = false,
+                            val isLoading: Boolean,
                             val error: GolosError? = null,
-                            val userName: String = "",
+                            val userName: String,
                             val avatarPath: String? = null,
                             val userPostsCount: Long = 0L,
                             val userAccountWorth: Double = 0.0,
-                            val isScanMenuVisible: Boolean = false,
+                            val isPostingKeyVisible: Boolean,
                             val subscribesNum: Long = 0,
                             val userMoto: String? = null,
                             val subscribersNum: Long = 0,
@@ -57,7 +57,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
     override fun onChanged(t: UserData?) {
         if (t == null || !t.isUserLoggedIn) {
             userProfileState.value = UserProfileState(isLoggedIn = false,
-                    isScanMenuVisible = false)
+                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true,
+                    isLoading = false,
+                    userName = t?.userName ?: "")
         } else if (t != null) {
             initUser(t)
         }
@@ -67,11 +69,12 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
         mLastUserInput = input.copy()
     }
 
-    fun onScanSwitch(isOn: Boolean) {
-        if (isOn) {
-            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isScanMenuVisible = true)
+    fun onChangeKeyTypeClick() {
+        val isCurrentPostingVisible = userProfileState.value?.isPostingKeyVisible ?: true
+        if (isCurrentPostingVisible) {
+            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isPostingKeyVisible = false)
         } else {
-            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isScanMenuVisible = false)
+            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isPostingKeyVisible = true)
         }
     }
 
@@ -79,53 +82,57 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
 
     }
 
+    private fun showAuthError(error: GolosError) {
+        userProfileState.value = UserProfileState(error = error,
+                isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true,
+                isLoggedIn = false,
+                isLoading = false,
+                userName = userProfileState.value?.userName ?: "")
+    }
+
     fun onLoginClick() {
         if (mLastUserInput.login.isEmpty()) {
-            userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
+            showAuthError(GolosError(ErrorCode.ERROR_AUTH,
                     localizedMessage = R.string.enter_login,
                     nativeMessage = null))
 
-        } else if (userProfileState.value?.isScanMenuVisible == false) {
-            if (mLastUserInput.masterKey.isEmpty()) {
-                userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
+        } else if (userProfileState.value?.isPostingKeyVisible == false) {
+            if (mLastUserInput.activeWif.isEmpty()) {
+                showAuthError(GolosError(ErrorCode.ERROR_AUTH,
                         null,
-                        R.string.enter_password))
+                        R.string.enter_private_active_wif))
             } else {
                 userProfileState.value = UserProfileState(false, true, null,
-                        mLastUserInput.login, isScanMenuVisible = false)
-                mRepository.authWithMasterKey(mLastUserInput.login,
-                        mLastUserInput.masterKey,
-                        { proceedAuthResponse(it) })
-            }
-        } else if (userProfileState.value?.isScanMenuVisible == true) {
-            if (mLastUserInput.activeWif.isEmpty() && mLastUserInput.postingWif.isEmpty())
-                userProfileState.value = createStateCopyMutatingValue(error = GolosError(ErrorCode.ERROR_AUTH,
-                        null,
-                        R.string.posting_or_active_key))
-            else if (mLastUserInput.activeWif.isNotEmpty()) {
-                userProfileState.value = UserProfileState(false, true, null,
-                        mLastUserInput.login, isScanMenuVisible = true)
-
+                        mLastUserInput.login, isPostingKeyVisible = false)
                 mRepository.authWithActiveWif(mLastUserInput.login,
                         mLastUserInput.activeWif,
                         { proceedAuthResponse(it) })
-
-            } else if (mLastUserInput.postingWif.isNotEmpty()) {
-                userProfileState.value = UserProfileState(false, true, null,
-                        mLastUserInput.login, isScanMenuVisible = true)
+            }
+        } else if (userProfileState.value?.isPostingKeyVisible == true) {
+            if (mLastUserInput.postingWif.isEmpty()) {
+                showAuthError(GolosError(ErrorCode.ERROR_AUTH,
+                        null,
+                        R.string.enter_private_posting_wif))
+            } else {
+                userProfileState.value = UserProfileState(false,
+                        true, null,
+                        mLastUserInput.login,
+                        isPostingKeyVisible = true,
+                        userMoto = userProfileState.value?.userName ?: "")
 
                 mRepository.authWithPostingWif(mLastUserInput.login,
                         mLastUserInput.postingWif,
                         { proceedAuthResponse(it) })
+
             }
         }
     }
 
     private fun proceedAuthResponse(resp: UserAuthResponse) {
         if (!resp.isKeyValid) {
-            userProfileState.value = createStateCopyMutatingValue(isLoggedIn = false,
-                    isLoading = false,
-                    error = resp.error)
+            resp.error?.let {
+                showAuthError(it)
+            }
         } else {
             userProfileState.value = UserProfileState(isLoggedIn = true,
                     userName = resp.accountInfo.userName ?: "",
@@ -141,27 +148,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
                     gbgAmount = resp.accountInfo.gbgAmount,
                     gbgInSafeAmount = resp.accountInfo.safeGbg,
                     golosInSafeAmount = resp.accountInfo.safeGolos,
-                    accountWorth = resp.accountInfo.accountWorth)
+                    accountWorth = resp.accountInfo.accountWorth,
+                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
         }
-    }
-
-    private fun createStateCopyMutatingValue(
-            isLoggedIn: Boolean? = null,
-            isLoading: Boolean? = null,
-            error: GolosError? = null,
-            userName: String? = null,
-            avatarPath: String? = null,
-            userCommentsCount: Long? = null,
-            userMoney: Double? = null,
-            isScanMenuVisible: Boolean? = null): UserProfileState {
-        return UserProfileState(isLoggedIn ?: userProfileState.value?.isLoggedIn == true,
-                isLoading ?: userProfileState.value?.isLoading == true,
-                error ?: userProfileState.value?.error,
-                userName ?: mLastUserInput.login ?: "",
-                avatarPath ?: userProfileState.value?.avatarPath,
-                userCommentsCount ?: userProfileState.value?.userPostsCount ?: 0,
-                userMoney ?: userProfileState.value?.userAccountWorth ?: 0.0,
-                isScanMenuVisible ?: userProfileState.value?.isScanMenuVisible == true)
     }
 
     private fun initUser(userData: UserData) {
@@ -180,18 +169,20 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
                     gbgAmount = userData.gbgAmount,
                     gbgInSafeAmount = userData.safeGbg,
                     golosInSafeAmount = userData.safeGolos,
-                    accountWorth = userData.accountWorth)
+                    accountWorth = userData.accountWorth,
+                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
         } else {
-            userProfileState.value = UserProfileState(isLoggedIn = false,
-                    isLoading = false,
-                    userName = mLastUserInput.login,
-                    error = GolosError(ErrorCode.ERROR_AUTH, null,
-                            R.string.wrong_credentials))
+            showAuthError(GolosError(ErrorCode.ERROR_AUTH, null,
+                    R.string.wrong_credentials))
         }
     }
 
     fun onLogoutClick() {
         mRepository.deleteUserdata()
-        userProfileState.value = UserProfileState(false, false, avatarPath = null)
+        userProfileState.value = UserProfileState(false,
+                false,
+                avatarPath = null,
+                isPostingKeyVisible = true,
+                userName = "")
     }
 }

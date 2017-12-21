@@ -836,8 +836,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             return mLiveDataMap[feedtype]!!
         } else {
             val filteredRequest = FilteredRequest(feedtype, filter)
-            if (mFilteredMap.containsKey(filteredRequest)) return mFilteredMap[filteredRequest]!!
-            else {
+            if (mFilteredMap.containsKey(filteredRequest)) {
+                return mFilteredMap[filteredRequest]!!
+            } else {
                 val liveData = MutableLiveData<StoryTreeItems>()
                 mFilteredMap.put(filteredRequest, liveData)
                 return liveData

@@ -97,5 +97,9 @@
     <string name="you_already_subscribed">You are already subscribed to this author</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
+    <string name="enter_with_active_key">Login with active key</string>
+    <string name="enter_with_posting_key">Login with posting key</string>
+    <string name="enter_private_active_wif">You must enter you private active wif</string>
+    <string name="enter_private_posting_wif">You must enter your private posting key</string>
 </resources>
 

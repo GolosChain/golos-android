@@ -96,4 +96,9 @@
     <string name="must_be_subscribed_for_action">Вы должны быть подписаны на автора, чтобы отписаться от него</string>
     <string name="follow">Подписаться</string>
     <string name="unfollow">Отписаться</string>
+    <string name="enter_with_active_key">Войти с активным ключом</string>
+    <string name="enter_with_posting_key">Войти с постинг ключом</string>
+    <string name="enter_private_active_wif">Введите свой приватный активный ключ</string>
+    <string name="enter_private_posting_wif">Введите свой приватный постинг ключ</string>
+    <string name="you_already_subscribed">Вы уже подписаны на этого автора</string>
 </resources>

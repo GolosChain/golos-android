@@ -31,11 +31,13 @@ import java.util.*
 data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onUserClick: (RecyclerView.ViewHolder) -> Unit)
+                              val onUserClick: (RecyclerView.ViewHolder) -> Unit,
+                              val onCommentsClick: (RecyclerView.ViewHolder) -> Unit)
 
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onAnswerClick: (StoryWrapper) -> Unit = { print(it) },
-                      var onUserClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+                      var onUserClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onCommentsClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
 
     var items = ArrayList<StoryWrapper>()
@@ -62,7 +64,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
         holder?.state = CommentHolderState(items[position],
                 onUpvoteClick = { onUpvoteClick.invoke(items[it.adapterPosition]) },
                 onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) },
-                onUserClick = { onUserClick.invoke(items[it.adapterPosition]) })
+                onUserClick = { onUserClick.invoke(items[it.adapterPosition]) },
+                onCommentsClick = { onCommentsClick.invoke(items[it.adapterPosition]) })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CommentViewHolder {
@@ -113,6 +116,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mUpvoteBtn.setOnClickListener({ state?.onUpvoteClick?.invoke(this) })
                 mAnswerIbtn.setOnClickListener({ state?.onAnswerClick?.invoke(this) })
                 mAvatar.setOnClickListener { state?.onUserClick?.invoke(this) }
+                mText.setOnClickListener { state?.onCommentsClick?.invoke(this) }
+                mImage.setOnClickListener { mText.callOnClick() }
                 mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {

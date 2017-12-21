@@ -29,20 +29,18 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
         mRepository
                 .getUserInfo(userName)
                 .observeForever(this)
-        mLiveData.value = UserAccountModel(
-                AccountInfo(userName),
-                null,
-                isActiveUserPage(),
-                isFollowButtonVisible(),
-                false)
         mRepository.requestUserInfoUpdate(userName, { a, e ->
-            mLiveData.value = UserAccountModel(a,
-                    e,
-                    isActiveUserPage(),
-                    isFollowButtonVisible(),
-                    false)
+            showError(e ?: return@requestUserInfoUpdate)
         }
         )
+    }
+
+    private fun showError(error: GolosError) {
+        mLiveData.value = UserAccountModel(mLiveData.value?.accountInfo ?: AccountInfo(""),
+                error,
+                isActiveUserPage(),
+                isFollowButtonVisible(),
+                mLiveData.value?.isSubscriptionInProgress ?: false)
     }
 
     private fun isActiveUserPage() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == userName
@@ -54,7 +52,8 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
     }
 
     override fun onChanged(t: AccountInfo?) {
-        mLiveData.value = UserAccountModel(t ?: AccountInfo(""),
+        val accInfo = t ?: AccountInfo("")
+        mLiveData.value = UserAccountModel(accInfo,
                 null,
                 isActiveUserPage(),
                 isFollowButtonVisible(),
@@ -78,11 +77,7 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
                 }
             }
         } else {
-            mLiveData.value = UserAccountModel(mLiveData.value?.accountInfo ?: AccountInfo(userName),
-                    GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection),
-                    isActiveUserPage(),
-                    isFollowButtonVisible(),
-                    true)
+            showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
         }
     }
 }

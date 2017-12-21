@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.SwitchCompat
 import android.text.Editable
 import android.text.Html
 import android.view.LayoutInflater
@@ -36,11 +35,9 @@ class UserNotLoggedInFragment : Fragment() {
     private val SCAN_ACTIVE_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_PERMISSION = nextInt()
     private val SCAN_POSTING_PERMISSION = nextInt()
-    private lateinit var mKeyEt: EditText
     private lateinit var mPostingEt: EditText
     private lateinit var mLogInEt: EditText
     private lateinit var mActiveKeyEt: EditText
-    private lateinit var mScanSwitch: SwitchCompat
     private lateinit var mViewModel: AuthViewModel
     private lateinit var mScanPosting: ImageButton
     private lateinit var mScanActive: ImageButton
@@ -49,17 +46,17 @@ class UserNotLoggedInFragment : Fragment() {
     private lateinit var mMoreAboutGolos: TextView
     private lateinit var mRegisterTv: TextView
     private lateinit var mCancelButton: Button
+    private lateinit var mLogOptionButton: Button
     private lateinit var mEnterButton: Button
     private var mProgressDialog: Dialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater!!.inflate(R.layout.fr_auth_user_not_logged_in, container, false)
-        mScanSwitch = v.findViewById(R.id.scan_switch)
         mPostingKeyMenu = v.findViewById(R.id.posting_key_lo)
+        mLogOptionButton = v.findViewById(R.id.login_option_btn)
         mActiveKeyMenu = v.findViewById(R.id.active_key_lo)
         mScanPosting = v.findViewById(R.id.scan_posting)
         mScanActive = v.findViewById(R.id.scan_active)
-        mKeyEt = v.findViewById(R.id.key_et)
         mLogInEt = v.findViewById(R.id.login_et)
         mEnterButton = v.findViewById(R.id.enter_btn)
 
@@ -102,14 +99,14 @@ class UserNotLoggedInFragment : Fragment() {
         mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
         mViewModel.userProfileState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
             if (context != null) {
-                if (it?.isScanMenuVisible == true) {
-                    mKeyEt.visibility = View.GONE
+                if (it?.isPostingKeyVisible == true) {
                     mPostingKeyMenu.visibility = View.VISIBLE
-                    mActiveKeyMenu.visibility = View.VISIBLE
-                } else {
-                    mKeyEt.visibility = View.VISIBLE
-                    mPostingKeyMenu.visibility = View.GONE
                     mActiveKeyMenu.visibility = View.GONE
+                    mLogOptionButton.text = getString(R.string.enter_with_active_key)
+                } else {
+                    mPostingKeyMenu.visibility = View.GONE
+                    mActiveKeyMenu.visibility = View.VISIBLE
+                    mLogOptionButton.text = getString(R.string.enter_with_posting_key)
                 }
                 mLogInEt.setText(it?.userName)
                 mProgressDialog?.let {
@@ -129,23 +126,11 @@ class UserNotLoggedInFragment : Fragment() {
                 }
             }
         })
-        mScanSwitch.setOnCheckedChangeListener { _, isChecked ->
-            mViewModel.onScanSwitch(isChecked)
-        }
+        mLogOptionButton.setOnClickListener { mViewModel.onChangeKeyTypeClick() }
         mLogInEt.addTextChangedListener(object : LateTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
                 mViewModel.onUserInput(collectInputData())
             }
-        })
-
-        mKeyEt.addTextChangedListener(object : LateTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                mViewModel.onUserInput(collectInputData());
-            }
-        })
-        mKeyEt.setOnEditorActionListener({ _, _, _ ->
-            mViewModel.onLoginClick()
-            true
         })
         mPostingEt.addTextChangedListener(object : LateTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
@@ -187,7 +172,7 @@ class UserNotLoggedInFragment : Fragment() {
 
     private fun collectInputData(): AuthUserInput {
         return AuthUserInput(mLogInEt.text.toString(),
-                mKeyEt.text.toString(),
+                "",
                 mPostingEt.text.toString(),
                 mActiveKeyEt.text.toString())
     }

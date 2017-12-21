@@ -93,6 +93,9 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
 
             if (it?.storyTree?.rootStory() != null) {
+                if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
+                    mtitileTv.visibility = View.GONE
+                }
                 mSwipeToRefresh.isRefreshing = false
                 val story = it.storyTree.rootStory()!!
                 var ets = StoryParserToRows().parse(story)
@@ -231,7 +234,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsRecycler.isNestedScrollingEnabled = false
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
-        mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel?.onUserClick(this, it.story.author) })
+        mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
+                onCommentsClick = { mViewModel.onCommentClick(this, it.story) })
         mStoryRecycler.adapter = MainStoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)

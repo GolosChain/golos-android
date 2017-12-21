@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="200dp">
@@ -65,7 +66,8 @@
             <ImageButton
                 android:id="@+id/scan_posting"
                 style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode_32dp_black" />
+                android:scaleType="center"
+                app:srcCompat="@drawable/ic_barcode_24dp_gray" />
 
             <View
                 android:layout_width="match_parent"
@@ -78,7 +80,6 @@
 
             android:id="@+id/active_key_lo"
             style="@style/BarcodeLayoutStyle"
-            android:layout_marginTop="@dimen/margin_material"
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:gravity="right"
@@ -95,7 +96,7 @@
             <ImageButton
                 android:id="@+id/scan_active"
                 style="@style/BarcodeButton"
-                app:srcCompat="@drawable/ic_barcode_32dp_black" />
+                app:srcCompat="@drawable/ic_barcode_24dp_gray" />
 
             <View
                 android:layout_width="match_parent"
@@ -104,25 +105,21 @@
                 android:background="#dce3e5" />
         </RelativeLayout>
 
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/scan_switch"
+        <android.support.v7.widget.AppCompatButton
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginEnd="@dimen/login_lo_margin"
-            android:layout_marginStart="@dimen/login_lo_margin"
-            android:layout_marginTop="40dp"
-            android:checked="false"
-            android:gravity="start|center_vertical"
-            android:text="@string/scan"
-            android:textColor="@color/delimeter_color"
-            android:textSize="@dimen/font_medium"
-            app:buttonTint="@color/colorAccent" />
+            android:layout_height="48dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/enter_with_active_key"
+            android:textAllCaps="false"
+            android:id="@+id/login_option_btn"
+            android:textColor="@color/gray_7d"
+            android:textSize="@dimen/font_medium" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/enter_btn"
             style="@style/LoginBottomButton"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:text="@string/enter"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
@@ -131,12 +128,12 @@
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/cancel_btn"
             style="@style/LoginBottomButton"
+            android:layout_height="20dp"
             android:layout_marginTop="@dimen/margin_material_half"
             android:text="@string/cancel"
-            android:layout_height="20dp"
-            android:visibility="invisible"
             android:textAllCaps="false"
             android:textColor="@color/gray_7d"
+            android:visibility="invisible"
             app:backgroundTint="#F1F3F6" />
 
 
@@ -147,11 +144,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_material"
             android:gravity="bottom|center_horizontal"
+            android:includeFontPadding="false"
             android:minHeight="36dp"
             android:padding="0dp"
             android:paddingTop="@dimen/material_big"
             android:textAllCaps="false"
-            android:includeFontPadding="false"
             android:textColor="#7d7d7d"
             android:textSize="@dimen/font_regular" />
 
@@ -164,9 +161,8 @@
             android:gravity="center_horizontal|top"
             android:minHeight="0dp"
             android:padding="0dp"
-            android:textSize="@dimen/font_regular"
             android:paddingTop="@dimen/margin_material_half"
             android:textAllCaps="false"
-            />
+            android:textSize="@dimen/font_regular" />
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

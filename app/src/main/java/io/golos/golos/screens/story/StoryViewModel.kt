@@ -163,6 +163,14 @@ class StoryViewModel : ViewModel() {
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
     }
 
+    fun onCommentClick(context: Context, comment: GolosDiscussionItem) {
+        StoryActivity.start(context, comment.author,
+                comment.categoryName,
+                comment.permlink,
+                FeedType.UNCLASSIFIED,
+                null)
+    }
+
     fun onSubscribeButtonClick() {
         if (!mRepository.isUserLoggedIn()) {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
