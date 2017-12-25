@@ -17,6 +17,8 @@ import org.junit.Test
  * Created by yuri on 15.12.17.
  */
 class BlogViewModleTest {
+    val userName = "yuri-vlad-second"
+    val privatePosting = "5JeKh4taphREBdqfKzfapu6ar3gCNPPKgG5QbUzEwmuasSAQFs3"
     @Rule
     @JvmField
     public val rule = InstantTaskExecutorRule()
@@ -51,5 +53,31 @@ class BlogViewModleTest {
         Assert.assertEquals(null, state!!.popupMessage)
         Assert.assertEquals(20, state!!.items.size)
 
+    }
+
+    @Test
+    fun testVote() {
+        repo.authWithPostingWif(userName, privatePosting, {})
+        val filter = StoryFilter(null, "yuri-vlad-second")
+        var state: StoriesViewState? = null
+        storyViewModel.storiesLiveData.observeForever { state = it }
+        Assert.assertNull(state)
+        storyViewModel.onCreate(object : InternetStatusNotifier {
+            override fun isAppOnline(): Boolean {
+                return true
+            }
+        }, filter)
+        storyViewModel.onChangeVisibilityToUser(true)
+        Assert.assertNotNull(state)
+        Assert.assertEquals(false, state!!.isLoading)
+        Assert.assertEquals(null, state!!.fullscreenMessage)
+        Assert.assertEquals(null, state!!.popupMessage)
+        Assert.assertEquals(20, state!!.items.size)
+        repo.cancelVote(state!!.items[3].rootStory()!!)
+
+        Assert.assertTrue(!state!!.items[3].rootStory()!!.isUserUpvotedOnThis)
+        storyViewModel.vote(state!!.items[3], 100)
+
+        Assert.assertTrue(state!!.items[3].rootStory()!!.isUserUpvotedOnThis)
     }
 }

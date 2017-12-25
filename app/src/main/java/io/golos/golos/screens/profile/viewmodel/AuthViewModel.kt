@@ -57,7 +57,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
     override fun onChanged(t: UserData?) {
         if (t == null || !t.isUserLoggedIn) {
             userProfileState.value = UserProfileState(isLoggedIn = false,
-                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true,
+                    isPostingKeyVisible = true,
                     isLoading = false,
                     userName = t?.userName ?: "")
         } else if (t != null) {

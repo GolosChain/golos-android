@@ -3,6 +3,7 @@ package io.golos.golos.repository
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
+import io.golos.golos.repository.model.FollowUserObject
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
@@ -201,6 +202,7 @@ class RepositoryPostAndVoteTest {
         assert(!votingItem.comments().first().isUserUpvotedOnThis)
     }
 
+
     @Test
     fun testVoting2() {
         val popular = repo.getStories(FeedType.POPULAR, null)
@@ -229,7 +231,25 @@ class RepositoryPostAndVoteTest {
 
         Assert.assertFalse(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
         Assert.assertFalse(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+    }
 
+    @Test
+    fun testVoting3() {
+        val feedItems = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(null, userName))
+        assertNull(feedItems.value)
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED,
+                StoryFilter(null, userName),
+                null,
+                null)
+        assertNotNull(feedItems.value)
+        var votingItem = feedItems.value?.items?.get(2)!!
+
+        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+
+        repo.upVote(votingItem.rootStory()!!, 100)
+
+        votingItem = feedItems.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
+        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
     }
 
     @Test
@@ -316,50 +336,81 @@ class RepositoryPostAndVoteTest {
     @Test
     fun testFollowAndUnfollow() {
         val workingAccount = "vredinka2345"
-        var accountInfo: AccountInfo? = null
+        var vredinkaAccountInfo: AccountInfo? = null
         var userAcc: UserData? = null
+        var subscribesStatus: List<FollowUserObject>? = null
+
+        repo.getSubscribers(workingAccount).observeForever {
+            subscribesStatus = it
+        }
         repo.getUserInfo(workingAccount).observeForever {
-            accountInfo = it
+            vredinkaAccountInfo = it
         }
         repo.getCurrentUserDataAsLiveData().observeForever({
             userAcc = it
         })
         repo.follow("golosmedia", { _, _ -> })
 
-        Assert.assertNull(accountInfo)
+        Assert.assertNull(vredinkaAccountInfo)
+        Assert.assertNull(subscribesStatus)
+
         repo.requestUserInfoUpdate(workingAccount, { _, _ -> })
-        Assert.assertNotNull(accountInfo)
+        repo.requestSubscribersUpdate(workingAccount, { _, _ -> })
+        repo.unFollow(subscribesStatus!!.first().name, { _, _ -> })
+        repo.unFollow(workingAccount, { _, _ -> })
+        repo.requestSubscribersUpdate(workingAccount, { _, _ -> })
+
+        Assert.assertNotNull(vredinkaAccountInfo)
         Assert.assertNotNull(userAcc)
-        Assert.assertEquals(false, accountInfo!!.isCurrentUserSubscribed)
-        val subscibesCount = accountInfo!!.subscribersCount
+        Assert.assertNotNull(subscribesStatus)
+
+
+        Assert.assertEquals(false, vredinkaAccountInfo!!.isCurrentUserSubscribed)
+        val subscibesCount = vredinkaAccountInfo!!.subscribersCount
         val userSubsCount = userAcc!!.subscibesCount
 
         repo.follow(workingAccount, { _, _ -> })
-        Assert.assertEquals(true, accountInfo!!.isCurrentUserSubscribed)
-        Assert.assertEquals(subscibesCount + 1, accountInfo!!.subscribersCount)
+        Assert.assertEquals(true, vredinkaAccountInfo!!.isCurrentUserSubscribed)
+        Assert.assertEquals(subscibesCount + 1, vredinkaAccountInfo!!.subscribersCount)
+        Assert.assertEquals(userSubsCount + 1, userAcc!!.subscibesCount)
+        Assert.assertTrue(subscribesStatus!!.find { it.name == userName } != null)
+
+        val firstInSubscribersList = subscribesStatus!!.first()
+
+
+        repo.follow(firstInSubscribersList.name, { _, _ -> })
+        Assert.assertEquals(userSubsCount + 2, userAcc!!.subscibesCount)
+        Assert.assertTrue(subscribesStatus!!.first().subscribeStatus.isCurrentUserSubscribed)
+        repo.unFollow(firstInSubscribersList.name, { _, _ -> })
         Assert.assertEquals(userSubsCount + 1, userAcc!!.subscibesCount)
 
         repo.unFollow(workingAccount, { _, _ -> })
 
-        Assert.assertEquals(false, accountInfo!!.isCurrentUserSubscribed)
-        Assert.assertEquals(subscibesCount, accountInfo!!.subscribersCount)
+        Assert.assertEquals(false, vredinkaAccountInfo!!.isCurrentUserSubscribed)
+
+        repo.requestSubscribersUpdate(workingAccount, { _, _ -> })
+        Assert.assertEquals(subscibesCount, vredinkaAccountInfo!!.subscribersCount)
+
         Assert.assertEquals(userSubsCount, userAcc!!.subscibesCount)
+        Assert.assertTrue(subscribesStatus!!.find { it.name == userName } == null)
+
         repo.follow("med", { _, _ -> })
         repo.unFollow("med", { _, _ -> })
 
         val feedStories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName))
         Assert.assertNull(feedStories.value)
-        repo.requestStoriesListUpdate(20,FeedType.PERSONAL_FEED,StoryFilter(userNameFilter = userName))
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName))
         Assert.assertNotNull(feedStories.value)
 
-        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
         repo.unFollow("golosmedia", { _, _ -> })
-        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
 
         val story = feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first()
         repo.requestStoryUpdate(story)
-        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
         repo.follow("golosmedia", { _, _ -> })
-        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isSubscribed)
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
+
     }
 }

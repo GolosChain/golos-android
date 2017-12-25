@@ -18,13 +18,13 @@ data class StoryWrapper(
         @JsonProperty("updatingState")
         val updatingState: UpdatingState)
 
-data class StoryAuthorSubscribeStatus(val isSubscribed: Boolean,
-                                      val updatingState: UpdatingState)
+data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
+                           val updatingState: UpdatingState)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class StoryTree(rootStory: StoryWrapper?,
                 comments: List<StoryWrapper>,
-                var userSubscribeUpdatingStatus: StoryAuthorSubscribeStatus = StoryAuthorSubscribeStatus(false, UpdatingState.DONE)) : Cloneable {
+                var userSubscribeUpdatingStatus: SubscribeStatus = SubscribeStatus(false, UpdatingState.DONE)) : Cloneable {
 
     @JsonProperty("rootStory")
     private var mRootStoryWrapper: StoryWrapper? = rootStory

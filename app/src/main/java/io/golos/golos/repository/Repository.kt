@@ -15,6 +15,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.repository.model.FollowUserObject
 import io.golos.golos.utils.GolosError
 import java.util.*
 import java.util.concurrent.Executor
@@ -116,6 +117,14 @@ abstract class Repository {
     abstract fun follow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
     abstract fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+
+    abstract fun getSubscribers(ofUser: String): LiveData<List<FollowUserObject>>
+
+    abstract fun requestSubscribersUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
+
+    abstract fun getSubscriptions(ofUser: String): LiveData<List<FollowUserObject>>
+
+    abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"

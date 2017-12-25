@@ -329,41 +329,73 @@ class ApiImpl : GolosApi() {
     }
 
     override fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject> {
+        return getSubscribesOrSubscribers(false, forUser, startFrom)
+    }
+
+    override fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject> {
+        return getSubscribesOrSubscribers(true, forUser, startFrom)
+    }
+
+    private fun getSubscribesOrSubscribers(isSubscribers: Boolean,
+                                           forUser: String,
+                                           startFrom: String?): List<FollowApiObject> {
         val forUser = AccountName(forUser)
         if (startFrom == null) {
-            var count = Golos4J.getInstance().followApiMethods.getFollowCount(forUser).followingCount
+            val followObject = Golos4J.getInstance().followApiMethods.getFollowCount(forUser)
+            var count = if (isSubscribers) followObject.followerCount else followObject.followingCount
             if (count == 0) return listOf()
-            var frs = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+            var frs = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
                     AccountName(""),
                     FollowType.BLOG,
                     if (count < 100) count.toShort() else 100)
+            else Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                    AccountName(""),
+                    FollowType.BLOG,
+                    if (count < 100) count.toShort() else 100)
+
             if (count > 100) {
                 count -= 100
                 val times = count / 99
-                (0..times)
+                (0 until times)
                         .forEach {
-                            var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                            var new = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
+                                    frs.last().follower,
+                                    FollowType.BLOG, 100)
+                            else Golos4J.getInstance().followApiMethods.getFollowing(forUser,
                                     frs.last().following,
                                     FollowType.BLOG, 100)
+
                             new = new.subList(1, new.size)
                             frs = frs + new
                         }
                 val last = count - (99 * times)
-                var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                var new = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
+                        frs.last().follower,
+                        FollowType.BLOG, 100)
+                else Golos4J.getInstance().followApiMethods.getFollowing(forUser,
                         frs.last().following,
-                        FollowType.BLOG, last.toShort())
+                        FollowType.BLOG, 100)
+
                 new = new.subList(1, new.size)
                 frs = frs + new
             }
-            return frs
+            return frs.filter { it != null }
         } else {
-            var frs = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+            var frs = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
                     AccountName(startFrom),
                     FollowType.BLOG,
                     100)
+            else Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                    AccountName(startFrom),
+                    FollowType.BLOG,
+                    100)
+
             if (frs.size == 100) {
                 while (true) {
-                    var new = Golos4J.getInstance().followApiMethods.getFollowing(forUser,
+                    var new = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
+                            frs.last().following,
+                            FollowType.BLOG, 100)
+                    else Golos4J.getInstance().followApiMethods.getFollowing(forUser,
                             frs.last().following,
                             FollowType.BLOG, 100)
                     new = new.subList(1, new.size)
@@ -371,7 +403,7 @@ class ApiImpl : GolosApi() {
                     if (new.size != 99) break
                 }
             }
-            return frs
+            return frs.filter { it != null }
         }
     }
 

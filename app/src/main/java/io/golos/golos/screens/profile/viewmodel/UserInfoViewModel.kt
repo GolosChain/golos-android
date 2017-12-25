@@ -4,9 +4,11 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
@@ -79,5 +81,13 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
         } else {
             showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
         }
+    }
+
+    fun onSubscriberClick(ctx: Context, string: String?) {
+        UsersListActivity.start(ctx, string ?: return, true)
+    }
+
+    fun onSubscriptionsClick(ctx: Context, string: String?) {
+        UsersListActivity.start(ctx, string ?: return, false)
     }
 }

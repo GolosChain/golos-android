@@ -65,6 +65,8 @@ abstract class GolosApi {
 
     abstract fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject>
 
+    abstract fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject>
+
     abstract fun follow(user:String)
 
     abstract fun unfollow(user:String)

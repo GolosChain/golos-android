@@ -43,6 +43,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mPostsCountTv: TextView
     private lateinit var mFollowBtn: Button
     private lateinit var mFollowProgress: View
+    private lateinit var mSubscribersBtn: View
+    private lateinit var mSubscriptionsBtn: View
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -59,6 +61,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mPostsCountTv = v.findViewById(R.id.posts_num_tv)
         mFollowBtn = v.findViewById(R.id.follow_btn)
         mFollowProgress = v.findViewById(R.id.progress)
+        mSubscriptionsBtn = v.findViewById(R.id.subscriptions_lo)
+        mSubscribersBtn = v.findViewById(R.id.subscribers_lo)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
@@ -66,6 +70,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
                     arguments!!.getString(USERNAME_TAG))
             pager.offscreenPageLimit = adapter.size
             pager.adapter = adapter
+
         }
 
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
@@ -89,6 +94,12 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
                             return App.isAppOnline()
                         }
                     })
+            mSubscribersBtn.setOnClickListener {
+                mViewModel.onSubscriberClick(activity ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
+            }
+            mSubscriptionsBtn.setOnClickListener {
+                mViewModel.onSubscriptionsClick(activity ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
+            }
         }
         mFollowBtn.setOnClickListener({ mViewModel.onFollowBtnClick() })
     }

@@ -131,7 +131,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
-                mAuthorSubscribeButton.text = if (it.storyTree.userSubscribeUpdatingStatus.isSubscribed) getString(R.string.unfollow)
+                mAuthorSubscribeButton.text = if (it.storyTree.userSubscribeUpdatingStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
                 else getString(R.string.follow)
 
 

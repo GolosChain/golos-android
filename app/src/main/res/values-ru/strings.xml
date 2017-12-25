@@ -101,4 +101,5 @@
     <string name="enter_private_active_wif">Введите свой приватный активный ключ</string>
     <string name="enter_private_posting_wif">Введите свой приватный постинг ключ</string>
     <string name="you_already_subscribed">Вы уже подписаны на этого автора</string>
+    <string name="you_cannot_subscribe_on_yourself">Вы не можете подписаться на себя</string>
 </resources>

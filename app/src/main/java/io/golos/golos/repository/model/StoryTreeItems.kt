@@ -7,6 +7,6 @@ import io.golos.golos.utils.GolosError
 
 data class StoryTreeItems(val items: List<StoryTree>,
                           val type: FeedType,
-                          val filter: StoryFilter? = null,
+                          val filter: StoryFilter?,
                           val error: GolosError? = null)
 

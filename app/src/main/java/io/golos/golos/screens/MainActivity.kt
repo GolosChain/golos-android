@@ -42,8 +42,12 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                     false
                 }
                 R.id.add -> {
-                    EditorActivity.startPostEditor(this, "")
-                    false
+                    if (!Repository.get.isUserLoggedIn()) {
+                        false
+                    } else {
+                        EditorActivity.startPostEditor(this, "")
+                        false
+                    }
                 }
                 R.id.profile -> {
                     pager.currentItem = PROFILE_FRAGMENT_POITION

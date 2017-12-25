@@ -181,11 +181,11 @@ class StoryViewModel : ViewModel() {
             return
         }
 
-        if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isSubscribed == true)
+        if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isCurrentUserSubscribed == true)
             mRepository.unFollow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
                 showError(e ?: return@unFollow)
             })
-        else if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isSubscribed == false) {
+        else if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isCurrentUserSubscribed == false) {
             mRepository.follow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
                 showError(e ?: return@follow)
             })

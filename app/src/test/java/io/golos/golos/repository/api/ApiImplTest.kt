@@ -227,15 +227,20 @@ class ApiImplTest {
 
     @Test
     fun getFollowersTest() {
+        val fObject = Golos4J.getInstance().followApiMethods.getFollowCount(AccountName("vredinka2345"))
         var frs = service.getSubscriptions("yuri-vlad", null)
         Assert.assertEquals(6, frs.size)
         frs = service.getSubscriptions("vredinka2345", null)
-        Assert.assertEquals(417, frs.size)
+        Assert.assertEquals(fObject.followingCount, frs.size)
 
 
         frs = service.getSubscriptions("vredinka2345", "med")
-        Assert.assertEquals(416, frs.size)
+        Assert.assertEquals(fObject.followingCount - 1, frs.size)
+
+        frs = service.getSubscribers("vredinka2345", null)
+        Assert.assertEquals(fObject.followerCount, frs.size)
     }
+
     @Test
     fun getFollowersTest2() {
         var frs = service.getSubscriptions("vox-populi", null)

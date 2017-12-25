@@ -6,6 +6,7 @@ import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.App
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
+import io.golos.golos.screens.story.model.StoryTree
 import java.security.KeyStore
 import java.util.*
 import kotlin.collections.HashMap
@@ -28,6 +29,10 @@ abstract class Persister {
     abstract fun getActiveUserData(): UserData?
 
     abstract fun saveUserData(userData: UserData)
+
+   /* abstract fun saveStory(story: StoryTree)
+
+    abstract fun getStory(id: Long): StoryTree?*/
 
     companion
     object {
@@ -66,6 +71,14 @@ private class OnDevicePersister(private val context: Context) : Persister() {
             }
         })
     }
+
+   /* override fun saveStory(story: StoryTree) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getStory(id: Long): StoryTree? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }*/
 
     private fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")

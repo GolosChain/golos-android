@@ -139,6 +139,9 @@
 
                     <android.support.v7.widget.LinearLayoutCompat
                         android:layout_width="0dp"
+                        android:clickable="true"
+                        android:id="@+id/subscribers_lo"
+                        android:background="?selectableItemBackground"
                         android:layout_height="match_parent"
                         android:layout_weight="0.33"
                         android:orientation="vertical">
@@ -165,6 +168,9 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="0.33"
+                        android:clickable="true"
+                        android:id="@+id/subscriptions_lo"
+                        android:background="?selectableItemBackground"
                         android:orientation="vertical">
 
                         <TextView

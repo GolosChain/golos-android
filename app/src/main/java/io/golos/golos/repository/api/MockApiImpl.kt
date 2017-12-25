@@ -124,4 +124,8 @@ internal class MockApiImpl : GolosApi() {
     override fun unfollow(user: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

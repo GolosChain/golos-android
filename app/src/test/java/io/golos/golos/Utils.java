@@ -12,9 +12,8 @@ import eu.bittrade.libs.steemj.base.models.Discussion;
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
-import io.golos.golos.repository.model.DiscussionItemFactory;
 import io.golos.golos.repository.model.GolosDiscussionItem;
-import io.golos.golos.screens.story.model.StoryAuthorSubscribeStatus;
+import io.golos.golos.screens.story.model.SubscribeStatus;
 import io.golos.golos.screens.story.model.StoryTree;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import io.golos.golos.utils.UpdatingState;
@@ -49,7 +48,7 @@ public class Utils {
             @Override
             public void accept(Discussion discussion) {
                 stories.add(new StoryTree(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
-                        new ArrayList(),new StoryAuthorSubscribeStatus(false, UpdatingState.DONE)));
+                        new ArrayList(),new SubscribeStatus(false, UpdatingState.DONE)));
 
             }
         });

@@ -1,6 +1,8 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import eu.bittrade.libs.steemj.Golos4J
+import eu.bittrade.libs.steemj.base.models.AccountName
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.api.ApiImpl
@@ -235,5 +237,24 @@ class RepoGetStoriesTest {
         Assert.assertTrue(userInfo!!.subscribersCount == 1L)
 
         Assert.assertTrue(repo.isUserLoggedIn())
+    }
+
+    @Test
+    fun testGetSubscribersAndSubscriptions() {
+        val wokrkingAcc = "vredinka2345"
+        var subs = repo.getSubscribers(wokrkingAcc)
+        Assert.assertNull(subs.value)
+        val countObject = Golos4J.getInstance().followApiMethods.getFollowCount(AccountName(wokrkingAcc))
+        repo.requestSubscribersUpdate(wokrkingAcc, { _, _ -> })
+        Assert.assertNotNull(subs.value)
+        Assert.assertEquals(countObject.followerCount, subs.value!!.size)
+        Assert.assertTrue(subs.value!!.find { it.subscribeStatus.isCurrentUserSubscribed } == null)
+
+        subs = repo.getSubscriptions(wokrkingAcc)
+        Assert.assertNull(subs.value)
+        repo.requestSubscriptionUpdate(wokrkingAcc, { _, _ -> })
+        Assert.assertNotNull(subs.value)
+        Assert.assertEquals(countObject.followingCount, subs.value!!.size)
+        Assert.assertTrue(subs.value!!.find { it.subscribeStatus.isCurrentUserSubscribed } == null)
     }
 }
