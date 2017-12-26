@@ -3,6 +3,7 @@ package io.golos.golos
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.utils.Regexps
 import org.junit.Assert
 import org.junit.Test
 
@@ -94,6 +95,16 @@ class StoryParserTests {
     @Test
     fun test9() {
         val tree = Utils.readStoryFromResourse("story9.json")
+        val rowParser = StoryParserToRows()
+        var rows = rowParser.parse(tree.rootStory()!!)
+        Assert.assertTrue(rows.size > 1)
+        Assert.assertTrue(rows[0] is ImageRow)
+        Assert.assertTrue(rows[2] is ImageRow)
+    }
+    @Test
+    fun test10() {
+        Assert.assertTrue("https://imgp.golos.io/67x80t0/http://golosboard.com/@chugoi/comments.png".matches(Regexps.linkToGolosBoard))
+        val tree = Utils.readStoryFromResourse("story10.json")
         val rowParser = StoryParserToRows()
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)

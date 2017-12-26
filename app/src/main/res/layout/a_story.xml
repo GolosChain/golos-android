@@ -114,8 +114,14 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler"
                     android:layout_width="match_parent"
+                    android:padding="0dp"
                     android:layout_height="wrap_content" />
 
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/additional_images_recycler"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"
+                    android:layout_height="100dp" />
 
                 <com.wefika.flowlayout.FlowLayout
                     android:id="@+id/tags_lo"

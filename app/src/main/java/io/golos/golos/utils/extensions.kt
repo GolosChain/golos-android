@@ -179,3 +179,7 @@ fun CommentOperation.getTags(): List<String> {
     return out
 
 }
+
+fun <E> List<out E>.toArrayList(): ArrayList<E> {
+    return ArrayList(this)
+}

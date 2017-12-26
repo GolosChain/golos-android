@@ -1,10 +1,7 @@
 package io.golos.golos.screens.story.adapters
 
-import android.os.Build
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
-import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +10,12 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.screens.story.GlideImageGetter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
+import io.golos.golos.utils.toArrayList
+import io.golos.golos.utils.toHtml
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
@@ -26,18 +24,23 @@ class MainStoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onRowClick: ((Row, ImageView?) -> Unit)? = null
     var items = ArrayList<Row>()
         set(value) {
+            val newItems = value.filter {
+                it is ImageRow
+                        || (it is TextRow && it.text.toHtml().isNotEmpty())
+            }.toArrayList()
+
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
+                    return field[oldItemPosition] == newItems[newItemPosition]
                 }
 
                 override fun getOldListSize() = field.size
-                override fun getNewListSize() = value.size
+                override fun getNewListSize() = newItems.size
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
+                    return field[oldItemPosition] == newItems[newItemPosition]
                 }
             }).dispatchUpdatesTo(this)
-            field = value
+            field = newItems
         }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
@@ -48,11 +51,11 @@ class MainStoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
             is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
-                if (vh.adapterPosition == -1)return@RowWrapper
+                if (vh.adapterPosition == -1) return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], null)
             })
             is ImageBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
-                if (vh.adapterPosition == -1)return@RowWrapper
+                if (vh.adapterPosition == -1) return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], v as? ImageView)
             })
         }
@@ -106,12 +109,12 @@ class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(
             field = value
             if (field == null) return
             val textRow = field!!.row as TextRow
-            val width = itemView.resources.displayMetrics.widthPixels - 2 * (itemView.resources.getDimension(R.dimen.margin_material)).toInt()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mText.text = Html.fromHtml(textRow.text, Html.FROM_HTML_MODE_LEGACY, GlideImageGetter(mText, width), null)
+            val text = textRow.text.toHtml()
+            if (text.isEmpty()) {
+                mText.visibility = View.GONE
             } else {
-                mText.text = Html.fromHtml(textRow.text, GlideImageGetter(mText, width), null)
+                mText.visibility = View.VISIBLE
+                mText.text = text
             }
             mText.setOnClickListener({ field?.clickListener?.invoke(this, mText) })
         }

@@ -24,7 +24,7 @@ android {
         }
         debug {
             minifyEnabled true
-            useProguard true
+            useProguard false
             debuggable true
             testCoverageEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

@@ -70,10 +70,10 @@ class PhotoActivity : GolosActivity() {
                                          imageSrc: String) {
             val startIntent = Intent(context, PhotoActivity::class.java)
             startIntent.putExtra(PHOTO_SRC_TAG, imageSrc)
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(context as Activity,
+           /* val options = ActivityOptionsCompat.makeSceneTransitionAnimation(context as Activity,
                     sharedView,
-                    "profile")
-            context.startActivity(startIntent, options.toBundle())
+                    "profile")*/
+            context.startActivity(startIntent)
         }
     }
 }

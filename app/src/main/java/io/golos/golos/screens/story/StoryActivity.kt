@@ -23,16 +23,14 @@ import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
+import io.golos.golos.screens.story.adapters.ImagesAdapter
 import io.golos.golos.screens.story.adapters.MainStoryAdapter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
-import io.golos.golos.utils.Translit
-import io.golos.golos.utils.UpdatingState
-import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.showSnackbar
+import io.golos.golos.utils.*
 import timber.log.Timber
 
 /**
@@ -52,6 +50,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mNoCommentsTv: TextView
     private lateinit var mStoryRecycler: RecyclerView
     private lateinit var mCommentsRecycler: RecyclerView
+    private lateinit var mBottomImagesRecycler: RecyclerView
     private lateinit var mFlow: FlowLayout
     private lateinit var mCommentsCountBtn: TextView
     private lateinit var mVotingProgress: ProgressBar
@@ -98,7 +97,27 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 }
                 mSwipeToRefresh.isRefreshing = false
                 val story = it.storyTree.rootStory()!!
-                var ets = StoryParserToRows().parse(story)
+                var ets = ArrayList(StoryParserToRows().parse(story))
+                if (ets.find { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) } != null) {
+                    val list = ArrayList<ImageRow>()
+                    val a = ets
+                            .filter { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) }
+                            .map { it as ImageRow }
+                    list.addAll(a)
+
+                    Timber.e("list size is ${list.size}")
+                    if (list.size > 1) {
+                        list.forEach {
+                            ets.remove(it)
+                        }
+                        mBottomImagesRecycler.visibility = View.VISIBLE
+                        if (mBottomImagesRecycler.adapter == null) {
+                            mBottomImagesRecycler.adapter =
+                                    ImagesAdapter({ mViewModel.onMainStoryImageClick(this, it.src, null) },
+                                            list)
+                        }
+                    }
+                }
                 mStoryRecycler.visibility = View.VISIBLE
                 (mStoryRecycler.adapter as MainStoryAdapter).items = ArrayList(ets)
 
@@ -228,12 +247,16 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
         mAuthorSubscribeButton = findViewById(R.id.follow_btn)
         mAuthorSubscribeProgress = findViewById(R.id.user_subscribe_progress)
+        mBottomImagesRecycler = findViewById(R.id.additional_images_recycler)
 
         mAuthorSubscribeButton.visibility = View.GONE
         mStoryRecycler.isNestedScrollingEnabled = false
         mCommentsRecycler.isNestedScrollingEnabled = false
+        mBottomImagesRecycler.isNestedScrollingEnabled = false
+
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
+        mBottomImagesRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) })
         mStoryRecycler.adapter = MainStoryAdapter()

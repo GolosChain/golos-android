@@ -43,6 +43,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                 }
                 R.id.add -> {
                     if (!Repository.get.isUserLoggedIn()) {
+                        bottomNavView.showSnackbar(R.string.must_be_logged_in_for_this_action)
                         false
                     } else {
                         EditorActivity.startPostEditor(this, "")

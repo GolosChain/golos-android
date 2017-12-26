@@ -19,4 +19,5 @@ object Regexps {
     val userRegexp = Regex("@([a-zA-Z.\\-]{3,16}[0-9]{0,6})")
     val storyLink = Regex("([a-z0-9\\-]+)/@([a-zA-Z.\\-]{3,16}[0-9]{0,6})/([a-z0-9\\-]+)")
     val storyLinkNoBlog = Regex("@([a-zA-Z.\\-]{3,16}[0-9]{0,6})/([a-z0-9-]+)[/]?")
+    val linkToGolosBoard = Regex("https://imgp.golos.io/.+/http://golosboard.com/.+/.+.png")
 }
