@@ -1,5 +1,6 @@
 package io.golos.golos
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.support.multidex.MultiDexApplication
@@ -14,6 +15,7 @@ import java.util.concurrent.Executors
  * Created by yuri on 30.10.17.
  */
 class App : MultiDexApplication() {
+    @SuppressLint("ApplySharedPref")
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -24,6 +26,11 @@ class App : MultiDexApplication() {
         }
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
+        val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
+        if (!sharedPrefs.getBoolean("deleteUserData", false)) {
+            Repository.get.deleteUserdata()
+            sharedPrefs.edit().putBoolean("deleteUserData", true).commit()
+        }
     }
 
     companion object get {

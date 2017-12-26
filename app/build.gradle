@@ -9,8 +9,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 13
-        versionName "0.28"
+        versionCode 14
+        versionName "0.29"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -24,7 +24,7 @@ android {
         }
         debug {
             minifyEnabled true
-            useProguard false
+            useProguard true
             debuggable true
             testCoverageEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
