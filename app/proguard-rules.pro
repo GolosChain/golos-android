@@ -49,14 +49,19 @@ public static ** valueOf(java.lang.String);
 #-keep class org.jetbrains.** { *; }
 -keep,includedescriptorclasses class javax.lang.model.type.** { *; }
 -keep,includedescriptorclasses class io.golos.** { *; }
+-keep,includedescriptorclasses class eu.bittrade.libs.steemj.apis.** { *; }
 -keep,includedescriptorclasses class eu.bittrade.libs.steemj.base.models.** { *; }
 -keep,includedescriptorclasses class kotlin.reflect.jvm.** { *; }
 
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }
 -keep,includedescriptorclasses class org.commonmark.** { *; }
 -keep,includedescriptorclasses class java.beans.** { *; }
--keep,includedescriptorclasses class com.ittianyu.bottomnavigationviewex.** { *; }
 
+# support design
+-dontwarn android.support.design.**
+-keep class android.support.design.** { *; }
+-keep interface android.support.design.** { *; }
+-keep public class android.support.design.R$* { *; }
 
 -keep class com.fasterxml.jackson.annotation.** { *; }
 -keepattributes Signature,InnerClasses,*Annotation*
@@ -67,10 +72,8 @@ public static ** valueOf(java.lang.String);
 -keep,includedescriptorclasses  class com.caverock.androidsvg.** { *; }
 -keep,includedescriptorclasses  class javax.websocket.** { *; }
 
-#-keep,includedescriptorclasses  class org.jsoup.** { *; }
 -keeppackagenames org.jsoup.nodes
 -keep,includedescriptorclasses  class android.support.v7.util.** { *; }
--keep,includedescriptorclasses  class android.support.design.widget.FloatingActionButton.** { *; }
 
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
