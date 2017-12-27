@@ -612,7 +612,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                                           type: FeedType,
                                           filter: StoryFilter?,
                                           startAuthor: String?,
-                                          startPermlink: String?) {
+                                          startPermlink: String?, complitionHandler: (Unit, GolosError?) -> Unit) {
         val request = StoriesRequest(limit, type, startAuthor, startPermlink, filter)
         if (mRequests.contains(request)) return
 
@@ -628,6 +628,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         out = current + out.subList(1, out.size)
                     }
                     updatingFeed.value = StoryTreeItems(out, type, filter)
+                    complitionHandler.invoke(Unit, null)
                     startLoadingAbscentAvatars(out, type, filter)
                 }
                 mRequests.remove(request)
@@ -641,6 +642,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             updatingFeed.value?.type ?: FeedType.NEW,
                             filter,
                             GolosErrorParser.parse(e))
+                    complitionHandler.invoke(Unit,  GolosErrorParser.parse(e))
                 }
             }
         }

@@ -5,17 +5,13 @@ import android.os.Handler
 import android.os.Looper
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.repository.api.GolosApi
-import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.StoryTreeItems
-import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
-import io.golos.golos.repository.model.FollowUserObject
 import io.golos.golos.utils.GolosError
 import java.util.*
 import java.util.concurrent.Executor
@@ -71,7 +67,8 @@ abstract class Repository {
                                           type: FeedType,
                                           filter: StoryFilter? = null,
                                           startAuthor: String? = null,
-                                          startPermlink: String? = null)
+                                          startPermlink: String? = null,
+                                          complitionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun authWithMasterKey(userName: String,
                                    masterKey: String,

@@ -107,7 +107,7 @@ class RepositoryPostAndVoteTest {
     fun testAvatarUpdate() {
         val popular = repo.getStories(FeedType.ACTUAL, null)
         assertNull(popular.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null, { _, _ -> })
         assertNotNull(popular.value)
         assertTrue(popular.value!!.items.any { it.rootStory()!!.avatarPath != null })
     }
@@ -139,7 +139,7 @@ class RepositoryPostAndVoteTest {
         val authData = repo.getCurrentUserDataAsLiveData()
         assertNotNull(authData.value)
         val newItems = repo.getStories(FeedType.POPULAR, null)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null, { _, _ -> })
         assertNotNull(newItems.value)
         assertEquals(20, newItems.value!!.items.size)
         var notCommentedItem = newItems.value!!.items.first()
@@ -223,7 +223,7 @@ class RepositoryPostAndVoteTest {
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName))
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName), complitionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
 
@@ -278,7 +278,7 @@ class RepositoryPostAndVoteTest {
         val filteredStories = repo.getStories(FeedType.ACTUAL, StoryFilter("psk"))
         assertNotNull(filteredStories)
         assertNull(filteredStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"))
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"), complitionHandler = { _, _ -> })
         assertNotNull(filteredStories.value)
         Assert.assertEquals(20, filteredStories.value!!.items.size)
         Assert.assertFalse(filteredStories.value!!.items.any { !it.rootStory()!!.tags.contains("psk") })
@@ -296,7 +296,7 @@ class RepositoryPostAndVoteTest {
         val actualStories = repo.getStories(FeedType.POPULAR, null)
         assertNotNull(actualStories)
         assertNull(actualStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null)
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, complitionHandler = { _, _ -> })
         assertNotNull(actualStories.value)
         Assert.assertEquals(20, actualStories.value!!.items.size)
 
@@ -310,7 +310,7 @@ class RepositoryPostAndVoteTest {
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName), complitionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
 
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
@@ -323,7 +323,7 @@ class RepositoryPostAndVoteTest {
         actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter("psk"))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"))
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"), complitionHandler = { _, _ -> })
 
 
         updatingSoty = actualStoriesWithFilter.value!!.items[1].rootStory()!!
@@ -399,7 +399,7 @@ class RepositoryPostAndVoteTest {
 
         val feedStories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName))
         Assert.assertNull(feedStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName))
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName), complitionHandler = { _, _ -> })
         Assert.assertNotNull(feedStories.value)
 
         Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)

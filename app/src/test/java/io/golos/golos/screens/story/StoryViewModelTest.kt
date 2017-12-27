@@ -53,7 +53,7 @@ class StoryViewModelTest {
     fun requestPersonalPage() {
         val stories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"))
         Assert.assertNull(stories.value)
-        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"))
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), complitionHandler = {})
         Assert.assertNotNull(stories.value)
         var state: StoryViewState? = null
         storyViewModel.liveData.observeForever { t -> state = t }

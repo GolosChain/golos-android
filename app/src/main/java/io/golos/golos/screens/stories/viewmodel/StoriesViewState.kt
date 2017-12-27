@@ -125,7 +125,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         }
         if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
-            mRepository.requestStoriesListUpdate(20, type, filter, null, null)
+            mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
             isUpdating.set(true)
         }
     }
@@ -142,7 +142,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
                 if (isUpdating.get()) return
                 mStoriesLiveData.value = StoriesViewState(true)
-                mRepository.requestStoriesListUpdate(20, type, filter, null, null)
+                mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
                 isUpdating.set(true)
             }
         }
@@ -165,7 +165,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         mRepository.requestStoriesListUpdate(20,
                 type,
                 filter,
-                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink)
+                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink, { _, _ -> })
     }
 
     open fun onCardClick(it: StoryTree, context: Context?) {

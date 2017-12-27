@@ -54,7 +54,12 @@ public static ** valueOf(java.lang.String);
 -keep,includedescriptorclasses class kotlin.reflect.jvm.** { *; }
 
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }
+
 -keep,includedescriptorclasses class org.commonmark.** { *; }
+-keepclassmembers class org.commonmark.internal.util.Html5Entities {
+    <fields>;
+}
+
 -keep,includedescriptorclasses class java.beans.** { *; }
 
 # support design

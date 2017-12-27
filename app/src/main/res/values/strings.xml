@@ -102,5 +102,6 @@
     <string name="enter_private_active_wif">You must enter you private active wif</string>
     <string name="enter_private_posting_wif">You must enter your private posting key</string>
     <string name="you_cannot_subscribe_on_yourself">You cannot subscribe on yourself</string>
+    <string name="retry">Retry</string>
 </resources>
 

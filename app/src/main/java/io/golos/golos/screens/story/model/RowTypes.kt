@@ -31,8 +31,12 @@ class StoryParserToRows {
             str = str.replace(Regexps.linkWithWhiteSpace) {
                 " [](${it.value.trim()})"
             }
-            var node = Parser.builder().build().parse(str)
-            str = HtmlRenderer.builder().build().render(node)
+            try {
+                val node = Parser.builder().build().parse(str)
+                str = HtmlRenderer.builder().build().render(node)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         try {
             val whiteList = Whitelist.basicWithImages()
