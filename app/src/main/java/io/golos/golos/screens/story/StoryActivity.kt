@@ -24,7 +24,7 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.ImagesAdapter
-import io.golos.golos.screens.story.adapters.MainStoryAdapter
+import io.golos.golos.screens.story.adapters.StoryAdapter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
@@ -119,7 +119,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 mStoryRecycler.visibility = View.VISIBLE
-                (mStoryRecycler.adapter as MainStoryAdapter).items = ArrayList(ets)
+                (mStoryRecycler.adapter as StoryAdapter).items = ArrayList(ets)
 
                 if (mAvatar.drawable == null) {
                     mAvatar.visibility = View.VISIBLE
@@ -259,7 +259,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mBottomImagesRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) })
-        mStoryRecycler.adapter = MainStoryAdapter()
+        mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
         mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_24dp), null, null, null)
@@ -267,7 +267,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        (mStoryRecycler.adapter as MainStoryAdapter).onRowClick = { row, iv ->
+        (mStoryRecycler.adapter as StoryAdapter).onRowClick = { row, iv ->
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }

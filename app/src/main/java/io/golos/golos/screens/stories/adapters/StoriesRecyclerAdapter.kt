@@ -172,6 +172,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userNotvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray_4f))
                 }
+
                 if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
                     mVotingProgress.visibility = View.VISIBLE
                     mUpvoteBtn.visibility = View.GONE

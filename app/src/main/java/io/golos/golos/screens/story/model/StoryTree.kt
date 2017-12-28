@@ -16,7 +16,7 @@ data class StoryWrapper(
         @JsonProperty("story")
         val story: GolosDiscussionItem,
         @JsonProperty("updatingState")
-        val updatingState: UpdatingState)
+        var updatingState: UpdatingState)
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState)

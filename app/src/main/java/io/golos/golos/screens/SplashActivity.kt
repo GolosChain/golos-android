@@ -13,18 +13,34 @@ import io.golos.golos.screens.stories.model.FeedType
  * Created by yuri on 27.12.17.
  */
 class SplashActivity : GolosActivity() {
+    val repo = Repository.get
+    val isUserLoggedIn = Repository.get.isUserLoggedIn()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_splash)
-        startPreloading()
+        val progress = findViewById<View>(R.id.progress)
+        val stories = repo.getStories(if (isUserLoggedIn) FeedType.PERSONAL_FEED else FeedType.POPULAR,
+                if (isUserLoggedIn) StoryFilter(userNameFilter = repo.getCurrentUserDataAsLiveData().value?.userName ?: "") else null)
+        if (stories.value?.items?.size ?: 0 > 0) {
+            progress.visibility = View.GONE
+            val i = Intent(this, MainActivity::class.java)
+            startActivity(i)
+            finish()
+
+        } else {
+            startPreloading()
+        }
     }
 
     private fun startPreloading() {
         val progress = findViewById<View>(R.id.progress)
         val isUserLoggedIn = Repository.get.isUserLoggedIn()
+
         Repository.get.requestStoriesListUpdate(20,
                 if (isUserLoggedIn) FeedType.PERSONAL_FEED else FeedType.POPULAR,
-                filter = if (isUserLoggedIn) StoryFilter(userNameFilter = Repository.get.getCurrentUserDataAsLiveData().value?.userName ?: "") else null,
+                filter = if (isUserLoggedIn) StoryFilter(userNameFilter = repo.getCurrentUserDataAsLiveData().value?.userName ?: "") else null,
                 complitionHandler = { _, e ->
                     progress.visibility = View.GONE
                     if (e == null) {

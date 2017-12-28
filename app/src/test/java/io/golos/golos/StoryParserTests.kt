@@ -19,9 +19,11 @@ class StoryParserTests {
         val rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertEquals(5, rows.size)
         Assert.assertTrue(rows[1] is ImageRow)
+        Assert.assertTrue((rows[1] as ImageRow).src == "https://s1.postimg.org/2ujuhodmlr/hf17.jpg")
         Assert.assertEquals("https://s1.postimg.org/2ujuhodmlr/hf17.jpg", (rows[1] as ImageRow).src)
         Assert.assertTrue(rows[0] is TextRow)
         Assert.assertTrue(rows[3] is ImageRow)
+        Assert.assertTrue((rows[3] as ImageRow).src == "https://cloud.githubusercontent.com/assets/410789/25783476/0c523dd6-335d-11e7-9165-f5ffc4fc8b5e.png")
         Assert.assertTrue(rows[4] is TextRow)
     }
 
@@ -102,13 +104,21 @@ class StoryParserTests {
         Assert.assertTrue(rows[2] is ImageRow)
     }
     @Test
-    fun test10() {
-        Assert.assertTrue("https://imgp.golos.io/67x80t0/http://golosboard.com/@chugoi/comments.png".matches(Regexps.linkToGolosBoard))
-        val tree = Utils.readStoryFromResourse("story10.json")
+    fun test11() {
+        val tree = Utils.readStoryFromResourse("story11.json")
         val rowParser = StoryParserToRows()
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
-        Assert.assertTrue(rows[0] is ImageRow)
-        Assert.assertTrue(rows[2] is ImageRow)
+        Assert.assertTrue(rows[1] is ImageRow)
+        Assert.assertTrue((rows[1] as ImageRow).src == "http://storage6.static.itmages.ru/i/17/0924/h_1506279023_2776210_bda460a049.jpg")
+
+        Assert.assertTrue(rows[3] is ImageRow)
+        Assert.assertTrue((rows[3] as ImageRow).src == "http://storage5.static.itmages.ru/i/17/1226/h_1514289553_9188862_d656df349b.jpg")
+
+        Assert.assertTrue(rows[5] is ImageRow)
+        Assert.assertTrue((rows[5] as ImageRow).src == "http://storage1.static.itmages.ru/i/17/1226/h_1514289332_9104582_07de855c1c.jpg")
+
+        Assert.assertTrue(rows[7] is ImageRow)
+        Assert.assertTrue((rows[3] as ImageRow).src == "http://storage1.static.itmages.ru/i/17/0923/h_1506198219_3111825_717fa89727.jpg")
     }
 }

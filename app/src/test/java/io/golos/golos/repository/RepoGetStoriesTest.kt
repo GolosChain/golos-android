@@ -41,36 +41,36 @@ class RepoGetStoriesTest {
     @Test
     fun getStoriesNotAuthedTest() {
         var stories = repo.getStories(FeedType.NEW)
-        repo.requestStoriesListUpdate(20, FeedType.NEW, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.NEW, complitionHandler = {_,_ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         var size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.NEW,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.ACTUAL)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, complitionHandler = {_,_ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.ACTUAL,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.POPULAR)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {_,_ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.POPULAR,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
     }
 
@@ -78,37 +78,37 @@ class RepoGetStoriesTest {
     fun testGetAuthedStoiries() {
         repo.authWithActiveWif(userName, privateActive, { _ -> })
         var stories = repo.getStories(FeedType.BLOG)
-        repo.requestStoriesListUpdate(5, FeedType.BLOG, complitionHandler = {})
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, complitionHandler = {_,_ ->})
         Assert.assertTrue(stories.value!!.items.size > 4)
         var size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.BLOG,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.PERSONAL_FEED)
-        repo.requestStoriesListUpdate(10, FeedType.PERSONAL_FEED, complitionHandler = {})
+        repo.requestStoriesListUpdate(10, FeedType.PERSONAL_FEED, complitionHandler = {_,_ ->})
         Assert.assertTrue(stories.value!!.items.size > 9)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.PERSONAL_FEED,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
 
 
         stories = repo.getStories(FeedType.COMMENTS)
-        repo.requestStoriesListUpdate(10, FeedType.COMMENTS, complitionHandler = {})
+        repo.requestStoriesListUpdate(10, FeedType.COMMENTS, complitionHandler = {_,_ ->})
         Assert.assertEquals(10, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
                 FeedType.COMMENTS,
                 null,
                 stories.value!!.items.last().rootStory()!!.author,
-                stories.value!!.items.last().rootStory()!!.permlink) {}
+                stories.value!!.items.last().rootStory()!!.permlink) {_,_ ->}
         Assert.assertTrue(stories.value!!.items.size > size)
 
     }
@@ -117,16 +117,16 @@ class RepoGetStoriesTest {
     fun testGetComments() {
         repo.authWithPostingWif(userName, privatePosting, { _ -> })
         val items = repo.getStories(FeedType.COMMENTS)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, complitionHandler = {_,_ ->})
         println(items)
     }
 
     @Test
     fun testGetNewStories() {
         val items = repo.getStories(FeedType.PROMO)
-        repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {_,_ ->})
         (0 until 10).forEach {
-            repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {})
+            repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {_,_ ->})
         }
         println(items)
     }
@@ -147,7 +147,7 @@ class RepoGetStoriesTest {
     fun loadAvatartest() {
         val items = repo.getStories(FeedType.POPULAR)
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
 
     }
@@ -156,17 +156,17 @@ class RepoGetStoriesTest {
     fun laodPersonalizedTest() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {})
+        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {})
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {})
+        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
 
     }
@@ -175,7 +175,7 @@ class RepoGetStoriesTest {
     fun testloadComments() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
     }
 
@@ -183,7 +183,7 @@ class RepoGetStoriesTest {
     fun testLoadPostsWithFilter() {
         var items = repo.getStories(FeedType.ACTUAL, StoryFilter("psk", null))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), complitionHandler = {})
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), complitionHandler = {_,_ ->})
         Assert.assertNotNull(items.value)
     }
 
@@ -212,7 +212,7 @@ class RepoGetStoriesTest {
         Assert.assertTrue(userInfo!!.subscibesCount == 6L)
         Assert.assertTrue(userInfo!!.subscribersCount == 7L)
 
-        repo.authWithPostingWif(userName, postingWif = privatePosting, listener = {})
+        repo.authWithPostingWif(userName, postingWif = privatePosting, listener = {_ ->})
         items = repo.getUserInfo(userName)
         items.observeForever { userInfo = it }
         Assert.assertNotNull(items.value)

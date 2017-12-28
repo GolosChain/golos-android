@@ -627,7 +627,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         val current = ArrayList(updatingFeed.value?.items ?: ArrayList<StoryTree>())
                         out = current + out.subList(1, out.size)
                     }
-                    updatingFeed.value = StoryTreeItems(out, type, filter)
+                    updatingFeed.value = StoryTreeItems(out.toArrayList(), type, filter)
                     complitionHandler.invoke(Unit, null)
                     startLoadingAbscentAvatars(out, type, filter)
                 }
@@ -642,7 +642,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             updatingFeed.value?.type ?: FeedType.NEW,
                             filter,
                             GolosErrorParser.parse(e))
-                    complitionHandler.invoke(Unit,  GolosErrorParser.parse(e))
+                    complitionHandler.invoke(Unit, GolosErrorParser.parse(e))
                 }
             }
         }
@@ -666,7 +666,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         .map {
                             if (avatars.containsKey(it.rootStory()?.author ?: "")) it.deepCopy()
                             else it
-                        }
+                        }.toArrayList()
 
                 items.forEach {
                     if (avatars.containsKey(it.rootStory()?.author ?: "")) {
@@ -695,11 +695,11 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private fun vote(discussionItem: GolosDiscussionItem, isUpvote: Boolean, voteStrength: Short) {
         var isVoted = false
         var votedItem: GolosDiscussionItem? = null
-        val listOfList = allLiveData()
+        var listOfList = allLiveData()
         val replacer = StorySearcherAndReplacer()
 
         listOfList.forEach {
-            val storiesAll = ArrayList(it.value?.items ?: ArrayList())
+            val storiesAll = it.value?.items ?: ArrayList()
             val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
             if (result) {
                 mMainThreadExecutor.execute {
@@ -708,12 +708,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             }
         }
         mWorkerExecutor.execute {
-
+            listOfList = allLiveData()
             listOfList.forEach {
-                val storiesAll = ArrayList(it.value?.items ?: ArrayList())
+                val storiesAll = it.value?.items ?: ArrayList()
                 val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
                 if (result) {
                     try {
+
                         if (!isVoted) {
                             val currentStory = if (isUpvote) mGolosApi.upVote(discussionItem.author, discussionItem.permlink, voteStrength)
                             else mGolosApi.cancelVote(discussionItem.author, discussionItem.permlink)
@@ -834,7 +835,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     val story = getStory(blog, author, permLink)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute {
-                        liveData.value = StoryTreeItems(listOf(story), FeedType.UNCLASSIFIED, liveData.value?.filter)
+                        liveData.value = StoryTreeItems(listOf(story).toArrayList(), FeedType.UNCLASSIFIED, liveData.value?.filter)
                     }
                     if (blog == null) {
                         requestStoryUpdate(story)
@@ -843,7 +844,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     e.printStackTrace()
                     val error = GolosErrorParser.parse(e)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
-                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(listOf(), FeedType.UNCLASSIFIED, null, error) }
+                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(arrayListOf(), FeedType.UNCLASSIFIED, null, error) }
                 }
             }
         }
@@ -892,7 +893,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
+                        comments.value = StoryTreeItems(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG, null, comments.value?.error)
                     }
                 }
@@ -942,7 +943,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoryTreeItems(arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList()),
+                        comments.value = StoryTreeItems((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
                                 FeedType.COMMENTS, null, comments.value?.error)
                     }
                 }

@@ -8,7 +8,7 @@ object Regexps {
     val anyImageLink = Regex("(https||http)?://[^/\\s]+/\\S+\\.(jpg|png|gif|jpeg)")
     val imageWithWhitespace = Regex("(https||http)?://[^/\\s]+/\\S+\\.(jpg|png|gif|jpeg)\\s")
     val imageWithCenterTage = Regex("<center>(https||http)?://[^/\\s]+/\\S+\\.(jpg|png|gif|jpeg)</center>")
-    val imageLinkWithoutSrctag = Regex("(https||http)?://[^/\\s]+/\\S+\\.(jpg|png|gif|jpeg)[^\"]")
+    val imageLinkWithoutSrctag = Regex("(https||http)?://[^/\\s]+/\\S+\\.(jpg|png|gif|jpeg)")
     val linkWithWhiteSpace = Regex("(https://||http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w@a]+)?\\s")
     val linkWithoutATag = Regex("<.?>(https://||http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w@a]+)?<.+?>")
     val link = Regex("(https://||http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w@a]+)")
