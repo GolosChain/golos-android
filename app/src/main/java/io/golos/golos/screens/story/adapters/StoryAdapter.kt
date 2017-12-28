@@ -121,6 +121,16 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         cb?.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                     }
 
+                    override fun onDestroy() {
+                        mGlide.clear(mSmallImage)
+                        mGlide.clear(mMediumImage)
+                        mGlide.clear(mImageFullWidth)
+                        mGlide.clear(itemView)
+                        mTarget?.let {
+                            mGlide.clear(it)
+                        }
+                    }
+
                     override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>) {
                         resource?.let {
                             Timber.e("onResourceReady it.width = ${it.intrinsicWidth} it.height = ${it.intrinsicHeight}")
@@ -153,7 +163,8 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                                         .load(it)
 
                                         .apply(RequestOptions()
-                                                .fitCenter())
+                                                .fitCenter()
+                                                .placeholder(R.drawable.error))
                                         .into(mImageFullWidth)
                             }
                         }
