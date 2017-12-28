@@ -43,12 +43,17 @@ import java.io.FileOutputStream
 /**
  *
  * **/
-data class EditorMode(val title: String = "",
+data class EditorMode(@JsonProperty("title")
+                      val title: String = "",
+                      @JsonProperty("subtitle")
                       val subtitle: String = "",
                       @JsonProperty("postEditor")
                       val isPostEditor: Boolean,
+                      @JsonProperty("rootStoryId")
                       val rootStoryId: Long? = null,
+                      @JsonProperty("commentToAnswerOnId")
                       val commentToAnswerOnId: Long? = null,
+                      @JsonProperty("feedType")
                       val feedType: FeedType? = null)
 
 class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener {
@@ -137,12 +142,12 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_GRANTED
             if (readExternalPermission) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
                     intent.type = "image/jpeg"
                     startActivityForResult(intent, PICK_IMAGE_ID)
-                }else {
+                } else {
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.type = "image/*"
                     startActivityForResult(intent, PICK_IMAGE_ID)

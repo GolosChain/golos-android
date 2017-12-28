@@ -112,7 +112,6 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 mImageFullWidth.setImageBitmap(null)
                 mImageFullWidth.setImageResource(R.drawable.error)
 
-
                 if (src.endsWith("/")) src = src.substring(0..src.lastIndex - 1)
 
                 mTarget = object : ViewTarget<View, Drawable>(itemView) {
