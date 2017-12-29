@@ -22,7 +22,6 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.toArrayList
 import io.golos.golos.utils.toHtml
-import timber.log.Timber
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
@@ -130,9 +129,15 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         }
                     }
 
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        super.onLoadCleared(placeholder)
+                        mGlide.clear(mSmallImage)
+                        mGlide.clear(mMediumImage)
+                        mGlide.clear(mImageFullWidth)
+                    }
+
                     override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>) {
                         resource?.let {
-                            Timber.e("onResourceReady it.width = ${it.intrinsicWidth} it.height = ${it.intrinsicHeight}")
                             if (it.intrinsicWidth < 150 || it.intrinsicHeight < 150) {
                                 mImageFullWidth.visibility = View.GONE
                                 mMediumImage.visibility = View.GONE

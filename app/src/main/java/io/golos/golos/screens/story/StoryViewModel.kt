@@ -34,6 +34,7 @@ class StoryViewModel : ViewModel() {
     var mRepository: Repository = Repository.get
     private lateinit var author: String
     private lateinit var permLink: String
+    private var filter: StoryFilter? = null
     var blog: String? = null
     private lateinit var feedType: FeedType
 
@@ -46,6 +47,7 @@ class StoryViewModel : ViewModel() {
         this.permLink = permLink
         this.blog = blog
         this.feedType = feedType
+        this.filter = filter
         mLiveData.addSource(mRepository.getStories(feedType, filter)) {
             val storyItems = it
             it?.
@@ -116,7 +118,8 @@ class StoryViewModel : ViewModel() {
             mLiveData.value?.let {
                 EditorActivity.startRootCommentEditor(ctx,
                         it.storyTree,
-                        feedType)
+                        feedType,
+                        filter)
             }
         }
     }
@@ -127,7 +130,8 @@ class StoryViewModel : ViewModel() {
                 EditorActivity.startAnswerOnCommentEditor(ctx,
                         it.storyTree,
                         item,
-                        feedType)
+                        feedType,
+                        filter)
             }
         } else {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment))

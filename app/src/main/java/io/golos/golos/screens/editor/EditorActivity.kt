@@ -27,6 +27,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
@@ -53,6 +54,8 @@ data class EditorMode(@JsonProperty("title")
                       val rootStoryId: Long? = null,
                       @JsonProperty("commentToAnswerOnId")
                       val commentToAnswerOnId: Long? = null,
+                      @JsonProperty("storyFilter")
+                      val storyFilter: StoryFilter? = null,
                       @JsonProperty("feedType")
                       val feedType: FeedType? = null)
 
@@ -236,7 +239,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         val MODE_TAG = "MODE_TAG"
         fun startRootCommentEditor(ctx: Context,
                                    rootStory: StoryTree,
-                                   feedType: FeedType) {
+                                   feedType: FeedType,
+                                   storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
@@ -244,6 +248,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                     false,
                     rootStory.rootStory()!!.id,
                     rootStory.rootStory()!!.id,
+                    storyFilter,
                     feedType)))
             ctx.startActivity(intent)
         }
@@ -251,7 +256,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         fun startAnswerOnCommentEditor(ctx: Context,
                                        rootStory: StoryTree,
                                        commentToAnswer: GolosDiscussionItem,
-                                       feedType: FeedType) {
+                                       feedType: FeedType,
+                                       storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
@@ -259,6 +265,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                     false,
                     rootStory.rootStory()!!.id,
                     commentToAnswer.id,
+                    storyFilter,
                     feedType)))
             ctx.startActivity(intent)
         }

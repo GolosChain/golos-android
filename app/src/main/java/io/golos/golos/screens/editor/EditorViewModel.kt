@@ -45,14 +45,13 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
             if (feedType != null && rootStoryId != null && itemToAnsweronId != null) {
                 Repository
                         .get
-                        .getStories(feedType, null)
+                        .getStories(feedType, mode?.storyFilter)
                         .removeObserver(this)
                 Repository
                         .get
-                        .getStories(feedType, null)
+                        .getStories(feedType, mode?.storyFilter)
                         .observeForever(this)
             }
-
         }
 
     init {

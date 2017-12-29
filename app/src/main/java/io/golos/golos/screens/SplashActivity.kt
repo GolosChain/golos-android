@@ -48,6 +48,7 @@ class SplashActivity : GolosActivity() {
                         startActivity(i)
                         finish()
                     } else {
+                        if (this.isFinishing || this.isDestroyed) return@requestStoriesListUpdate
                         AlertDialog.Builder(this)
                                 .setMessage(e.localizedMessage ?: R.string.unknown_error)
 

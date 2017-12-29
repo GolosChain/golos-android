@@ -105,7 +105,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                             .map { it as ImageRow }
                     list.addAll(a)
 
-                    Timber.e("list size is ${list.size}")
                     if (list.size > 1) {
                         list.forEach {
                             ets.remove(it)

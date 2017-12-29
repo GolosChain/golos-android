@@ -60,12 +60,20 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
             adapterWorkerExecutor.execute {
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        if (mStripes == null
+                                || newItems == null
+                                || mStripes.lastIndex < oldItemPosition
+                                || newItems.size < newItemPosition)return false
                         return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
                     }
 
                     override fun getOldListSize() = mStripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        if (mStripes == null
+                                || newItems == null
+                                || mStripes.lastIndex < oldItemPosition
+                                || newItems.size < newItemPosition)return false
                         val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
                         return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
                         // return mStripes[oldItemPosition] == newItems[newItemPosition]
