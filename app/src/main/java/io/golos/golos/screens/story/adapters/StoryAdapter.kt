@@ -1,6 +1,7 @@
 package io.golos.golos.screens.story.adapters
 
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
+import android.os.Looper
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -14,7 +15,6 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.target.ViewTarget
-import com.bumptech.glide.request.transition.Transition
 import io.golos.golos.R
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
@@ -82,101 +82,89 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mSmallImage: ImageView = itemView.findViewById(R.id.small_image)
     private val mMediumImage: ImageView = itemView.findViewById(R.id.medium_image)
     private val mFrame: FrameLayout = itemView.findViewById(R.id.frame)
-    private val mGlide = Glide.with(parent.context)
-    private var mTarget: ViewTarget<View, Drawable>? = null
+    private val mGlide = Glide.with(itemView)
+    private val handler = android.os.Handler(Looper.getMainLooper())
+    private var mTarget: ViewTarget<View, Bitmap>? = null
 
     var state: RowWrapper? = null
         set(value) {
             mGlide.clear(mSmallImage)
             mGlide.clear(mMediumImage)
             mGlide.clear(mImageFullWidth)
-            mGlide.clear(itemView)
-            mTarget?.let {
-                mGlide.clear(it)
-            }
+
             field = value
             if (field == null) return
+            handler.removeCallbacksAndMessages(null)
             val imageRow = field!!.row as ImageRow
             if (imageRow.src.isEmpty()) {
                 mSmallImage.visibility = View.GONE
+                mMediumImage.visibility = View.GONE
                 mImageFullWidth.visibility = View.VISIBLE
                 mGlide.load(R.drawable.error)
                         .into(mImageFullWidth)
             } else {
                 var src = imageRow.src
+                mImageFullWidth.setImageResource(R.drawable.error)
+
                 mSmallImage.visibility = View.GONE
                 mMediumImage.visibility = View.GONE
                 mImageFullWidth.visibility = View.VISIBLE
 
-                mImageFullWidth.setImageBitmap(null)
-                mImageFullWidth.setImageResource(R.drawable.error)
 
                 if (src.endsWith("/")) src = src.substring(0..src.lastIndex - 1)
 
-                mTarget = object : ViewTarget<View, Drawable>(itemView) {
+                mTarget = object : ViewTarget<View, Bitmap>(itemView) {
 
                     override fun getSize(cb: SizeReadyCallback?) {
                         cb?.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                     }
 
-                    override fun onDestroy() {
-                        mGlide.clear(mSmallImage)
-                        mGlide.clear(mMediumImage)
-                        mGlide.clear(mImageFullWidth)
-                        mGlide.clear(itemView)
-                        mTarget?.let {
-                            mGlide.clear(it)
-                        }
-                    }
 
-                    override fun onLoadCleared(placeholder: Drawable?) {
-                        super.onLoadCleared(placeholder)
-                        mGlide.clear(mSmallImage)
-                        mGlide.clear(mMediumImage)
-                        mGlide.clear(mImageFullWidth)
-                    }
 
-                    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>) {
-                        resource?.let {
-                            if (it.intrinsicWidth < 150 || it.intrinsicHeight < 150) {
-                                mImageFullWidth.visibility = View.GONE
-                                mMediumImage.visibility = View.GONE
+                    override fun onResourceReady(resource: Bitmap?, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>) {
+                        if (resource == null || resource.isRecycled) return
 
-                                mSmallImage.visibility = View.VISIBLE
-                                mGlide.load(it)
-
+                        if (resource.width < 150 || resource.height < 150) {
+                            mSmallImage.visibility = View.VISIBLE
+                            mImageFullWidth.visibility = View.GONE
+                            mMediumImage.visibility = View.GONE
+                            handler.post {
+                                mGlide.load(src)
                                         .into(mSmallImage)
-                            } else if (it.intrinsicWidth < 250 || it.intrinsicHeight < 250) {
-                                mImageFullWidth.visibility = View.GONE
-                                mSmallImage.visibility = View.GONE
+                            }
+                        } else if (resource.width < 250 || resource.height < 250) {
+                            mMediumImage.visibility = View.VISIBLE
+                            mImageFullWidth.visibility = View.GONE
 
-                                mMediumImage.visibility = View.VISIBLE
-
-                                mMediumImage.setImageBitmap(null)
-                                mGlide.load(it)
-
+                            mSmallImage.visibility = View.GONE
+                            mMediumImage.setImageBitmap(null)
+                            handler.post {
+                                mGlide.load(src)
                                         .into(mMediumImage)
-                            } else {
-                                mMediumImage.visibility = View.GONE
-                                mSmallImage.visibility = View.GONE
+                            }
+                        } else {
+                            mImageFullWidth.visibility = View.VISIBLE
 
-                                mImageFullWidth.visibility = View.VISIBLE
-
-                                mImageFullWidth.setImageBitmap(null)
+                            mMediumImage.visibility = View.GONE
+                            mSmallImage.visibility = View.GONE
+                            mImageFullWidth.setImageBitmap(null)
+                            handler.post {
                                 mGlide
-                                        .load(it)
-
+                                        .load(src)
                                         .apply(RequestOptions()
                                                 .fitCenter()
                                                 .placeholder(R.drawable.error))
                                         .into(mImageFullWidth)
                             }
-                        }
 
+                        }
+                        handler.post {
+                            mGlide.clear(this)
+                        }
                     }
                 }
-
                 mGlide
+                        .asBitmap()
                         .load(src)
                         .into(mTarget ?: return)
             }
