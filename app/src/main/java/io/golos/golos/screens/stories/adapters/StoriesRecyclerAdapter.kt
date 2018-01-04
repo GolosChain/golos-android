@@ -58,32 +58,44 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
             }
         } else {
             adapterWorkerExecutor.execute {
-                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        if (mStripes == null
-                                || newItems == null
-                                || mStripes.lastIndex < oldItemPosition
-                                || newItems.size < newItemPosition)return false
-                        return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
-                    }
+                try {
+                    val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                            if (mStripes == null
+                                    || newItems == null
+                                    || mStripes.isEmpty()
+                                    || newItems.isEmpty()
+                                    || mStripes.lastIndex < oldItemPosition
+                                    || newItems.size < newItemPosition) return false
+                            return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
+                        }
 
-                    override fun getOldListSize() = mStripes.size
-                    override fun getNewListSize() = newItems.size
-                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        if (mStripes == null
-                                || newItems == null
-                                || mStripes.lastIndex < oldItemPosition
-                                || newItems.size < newItemPosition)return false
-                        val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                        return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
-                        // return mStripes[oldItemPosition] == newItems[newItemPosition]
+                        override fun getOldListSize() = mStripes.size
+                        override fun getNewListSize() = newItems.size
+                        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                            if (mStripes == null
+                                    || newItems == null
+                                    || mStripes.isEmpty()
+                                    || newItems.isEmpty()
+                                    || mStripes.lastIndex < oldItemPosition
+                                    || newItems.size < newItemPosition) return false
+                            val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
+                            return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
+                            // return mStripes[oldItemPosition] == newItems[newItemPosition]
+                        }
+                    })
+                    adapterMainThreadExecutor.execute {
+                        result.dispatchUpdatesTo(this)
+                        mStripes = ArrayList(newItems)
+                        mStripes.forEach {
+                            mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                        }
                     }
-                })
-                adapterMainThreadExecutor.execute {
-                    result.dispatchUpdatesTo(this)
-                    mStripes = ArrayList(newItems)
-                    mStripes.forEach {
-                        mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    adapterMainThreadExecutor.execute {
+                        mStripes = ArrayList(newItems)
+                        notifyDataSetChanged()
                     }
                 }
             }

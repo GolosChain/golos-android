@@ -34,7 +34,7 @@ class RepoGetStoriesTest {
                 MainThreadExecutor,
                 MainThreadExecutor,
                 MockPersister,
-                ApiImpl()
+                ApiImpl(), null
         )
     }
 

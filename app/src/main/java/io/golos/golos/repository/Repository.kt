@@ -3,6 +3,7 @@ package io.golos.golos.repository
 import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
+import com.crashlytics.android.Crashlytics
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
@@ -12,6 +13,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
 import java.util.*
 import java.util.concurrent.Executor
@@ -36,7 +38,11 @@ abstract class Repository {
                         sharedExecutor,
                         mMainThreadExecutor,
                         Persister.get,
-                        GolosApi.get)
+                        GolosApi.get, object : ExceptionLogger {
+                    override fun log(t: Throwable) {
+                        Crashlytics.logException(t)
+                    }
+                })
                 return instance!!
             }
         val sharedExecutor: ThreadPoolExecutor by lazy {

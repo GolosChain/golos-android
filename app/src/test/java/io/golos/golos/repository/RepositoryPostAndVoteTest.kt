@@ -68,7 +68,7 @@ class RepositoryPostAndVoteTest {
                     override fun saveCurrentUserName(name: String?) {
                         this.name = name
                     }
-                }, ApiImpl()
+                }, ApiImpl(), null
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }

@@ -48,6 +48,7 @@ class StoryViewModel : ViewModel() {
         this.blog = blog
         this.feedType = feedType
         this.filter = filter
+        mLiveData.removeSource(mRepository.getStories(feedType, filter))
         mLiveData.addSource(mRepository.getStories(feedType, filter)) {
             val storyItems = it
             it?.

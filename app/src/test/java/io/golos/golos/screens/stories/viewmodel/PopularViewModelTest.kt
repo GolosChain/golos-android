@@ -9,7 +9,6 @@ import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.utils.InternetStatusNotifier
 import org.junit.Assert
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +27,7 @@ class PopularViewModelTest{
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor,
-                MockPersister, ApiImpl()
+                MockPersister, ApiImpl(), null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = PopularViewModel()

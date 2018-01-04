@@ -27,7 +27,7 @@ class FeedViewModelTest {
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor,
-                MockPersister, ApiImpl()
+                MockPersister, ApiImpl(), null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = FeedViewModel()

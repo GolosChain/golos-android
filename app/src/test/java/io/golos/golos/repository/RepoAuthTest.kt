@@ -65,7 +65,7 @@ class RepoAuthTest {
                     override fun saveCurrentUserName(name: String?) {
                         this.name = name
                     }
-                }, ApiImpl()
+                }, ApiImpl(), null
         )
     }
 
