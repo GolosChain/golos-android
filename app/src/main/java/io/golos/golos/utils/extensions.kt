@@ -44,6 +44,9 @@ fun Cursor.getString(columnName: String): String {
 fun Cursor.getLong(columnName: String): Long {
     return this.getLong(this.getColumnIndex(columnName))
 }
+fun Cursor.getDouble(columnName: String): Double {
+    return this.getDouble(this.getColumnIndex(columnName))
+}
 
 fun Fragment.showProgressDialog(): ProgressDialog {
     val dialog = ProgressDialog(context, R.style.AppCompatAlertDialogStyle)

@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.Base64
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.App
+import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
-import io.golos.golos.screens.story.model.StoryTree
 import java.security.KeyStore
 import java.util.*
 import kotlin.collections.HashMap
@@ -30,9 +30,13 @@ abstract class Persister {
 
     abstract fun saveUserData(userData: UserData)
 
-   /* abstract fun saveStory(story: StoryTree)
+    /* abstract fun saveStory(story: StoryTree)
 
-    abstract fun getStory(id: Long): StoryTree?*/
+     abstract fun getStory(id: Long): StoryTree?*/
+
+    abstract fun saveTags(tags: List<Tag>)
+
+    abstract fun getTags(): List<Tag>
 
     companion
     object {
@@ -72,13 +76,21 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         })
     }
 
-   /* override fun saveStory(story: StoryTree) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    /* override fun saveStory(story: StoryTree) {
+         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+     }
+
+     override fun getStory(id: Long): StoryTree? {
+         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+     }*/
+
+    override fun saveTags(tags: List<Tag>) {
+        mDatabase.saveTags(tags)
     }
 
-    override fun getStory(id: Long): StoryTree? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }*/
+    override fun getTags(): List<Tag> {
+       return mDatabase.getTags()
+    }
 
     private fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
@@ -154,6 +166,13 @@ private class MockPersister : Persister() {
         return Pair("https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg", Date().time)
     }
 
+    override fun saveTags(tags: List<Tag>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getTags(): List<Tag> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun getCurrentUserName(): String? {
         return currentUserName

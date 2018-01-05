@@ -230,11 +230,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mViewModel.onUserInput(EditorInputAction.DeleteAction(parts.indexOf(image)))
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Timber.e("on onDestroy")
-    }
-
     companion object {
         val MODE_TAG = "MODE_TAG"
         fun startRootCommentEditor(ctx: Context,

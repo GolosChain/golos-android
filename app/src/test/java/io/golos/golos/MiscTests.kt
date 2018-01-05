@@ -45,4 +45,10 @@ class MiscTests {
                 }
         Thread.sleep(10_000)
     }
+
+    @Test
+    fun getTags() {
+        val v = Golos4J.getInstance().databaseMethods.getTrendingTags("", Integer.MAX_VALUE)
+        println(v)
+    }
 }

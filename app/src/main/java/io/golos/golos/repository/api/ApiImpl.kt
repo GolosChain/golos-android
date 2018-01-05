@@ -11,10 +11,7 @@ import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
 import io.golos.golos.R
 import io.golos.golos.repository.StoryFilter
-import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.DiscussionItemFactory
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
@@ -146,6 +143,12 @@ class ApiImpl : GolosApi() {
         if (userName.length < 3 || userName.length > 16) {
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
+                    accountInfo = AccountInfo(userName))
+        }
+        if (activeWif?.startsWith("GLS") == true
+                || postingWif?.startsWith("GLS") == true) {
+            return UserAuthResponse(false, null, null,
+                    error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.enter_private_key),
                     accountInfo = AccountInfo(userName))
         }
         val acc = getAccountData(userName)
@@ -403,7 +406,7 @@ class ApiImpl : GolosApi() {
                     if (new.size != 99) break
                 }
             }
-            return frs.filter { it != null }
+            return frs.filterNotNull()
         }
     }
 
@@ -413,5 +416,11 @@ class ApiImpl : GolosApi() {
 
     override fun unfollow(user: String) {
         Golos4J.getInstance().simplifiedOperations.unfollow(AccountName(user))
+    }
+
+    override fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag> {
+        return Golos4J.getInstance().databaseMethods.getTrendingTags(startFrom, maxCount)
+                .filterNotNull()
+                .map { Tag(it) }
     }
 }

@@ -103,5 +103,7 @@
     <string name="enter_private_posting_wif">You must enter your private posting key</string>
     <string name="you_cannot_subscribe_on_yourself">You cannot subscribe on yourself</string>
     <string name="retry">Retry</string>
+    <string name="scan_fail">failed to recognize QR - code, please try again</string>
+    <string name="enter_private_key">Please, enter your private, not public, key</string>
 </resources>
 

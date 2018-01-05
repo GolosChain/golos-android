@@ -24,7 +24,7 @@ class App : MultiDexApplication() {
             Timber.plant(Timber.DebugTree())
 
         }
-       // Fabric.with(this, Crashlytics())
+        Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
         if (!sharedPrefs.getBoolean("deleteUserData", false)) {

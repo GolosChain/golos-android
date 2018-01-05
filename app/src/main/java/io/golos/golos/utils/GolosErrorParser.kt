@@ -22,6 +22,9 @@ object GolosErrorParser {
     }
 
     fun getLocalizedError(error: SteemResponseError): Int {
+        if (error.error == null || error.error.steemErrorDetails == null || error.error.steemErrorDetails.data == null){
+            return R.string.unknown_error
+        }
         if (error.error.steemErrorDetails.data.toString().contains(" Voter has used the maximum number of vote changes on this commen"))
             return R.string.user_used_max_comments_chances
         if (error.error.steemErrorDetails.data.toString().contains(" You have already voted in a similar way"))

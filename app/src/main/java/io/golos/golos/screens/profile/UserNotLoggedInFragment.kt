@@ -22,10 +22,7 @@ import io.golos.golos.screens.profile.viewmodel.AuthUserInput
 import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
-import io.golos.golos.utils.GolosMovementMethod
-import io.golos.golos.utils.hideKeyboard
-import io.golos.golos.utils.nextInt
-import io.golos.golos.utils.showProgressDialog
+import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 30.10.17.
@@ -159,12 +156,17 @@ class UserNotLoggedInFragment : Fragment() {
         if (data == null) return
         if (resultCode == Activity.RESULT_OK) {
             val out = data.getStringExtra(BarcodeScannerActivity.SCAN_RESULT_TAG)
-            when (requestCode) {
-                SCAN_POSTING_REQUEST_CODE -> {
-                    mPostingEt.setText(out)
-                }
-                SCAN_ACTIVE_REQUEST_CODE -> {
-                    mActiveKeyEt.setText(out)
+            if (out == "http://") {
+                view?.showSnackbar(R.string.scan_fail)
+            } else {
+                when (requestCode) {
+                    SCAN_POSTING_REQUEST_CODE -> {
+
+                        mPostingEt.setText(out)
+                    }
+                    SCAN_ACTIVE_REQUEST_CODE -> {
+                        mActiveKeyEt.setText(out)
+                    }
                 }
             }
         }

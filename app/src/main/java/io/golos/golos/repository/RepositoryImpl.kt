@@ -44,11 +44,14 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
 
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
+
+    private val mTags = MutableLiveData<List<Tag>>()
+
     //feed posts lists
     private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
     private val mFilteredMap: HashMap<FilteredRequest, MutableLiveData<StoryTreeItems>> = HashMap()
 
-    //user data
+    //users data
     private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<FollowUserObject>>> = HashMap()
     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<FollowUserObject>>> = HashMap()
@@ -1011,5 +1014,41 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     private fun allSubscriptionsLiveData(): List<MutableLiveData<List<FollowUserObject>>> {
         return mUsersSubscriptions.values + mUsersSubscribers.values
+    }
+
+    override fun getTrendingTag(): LiveData<List<Tag>> {
+        if (mTags.value == null) {
+            mWorkerExecutor.execute {
+                try {
+                    val tags = mPersister.getTags()
+                    if (tags.isNotEmpty()) {
+                        mMainThreadExecutor.execute {
+                            mTags.value = tags
+                        }
+                    }
+                } catch (e: Exception) {
+                    mLogger?.log(e)
+                }
+            }
+        }
+        return mTags
+    }
+
+    override fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit) {
+        if (mTags.value == null) {
+            mWorkerExecutor.execute {
+                try {
+                    val tags = mPersister.getTags()
+                    if (tags.isNotEmpty()) {
+                        mMainThreadExecutor.execute {
+                            mTags.value = tags
+                        }
+                    }
+                } catch (e: Exception) {
+                    mLogger?.log(e)
+                }
+            }
+        }
+
     }
 }

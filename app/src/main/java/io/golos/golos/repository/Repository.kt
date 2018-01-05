@@ -5,6 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import com.crashlytics.android.Crashlytics
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.fabric.sdk.android.Fabric
+import io.golos.golos.App
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -40,7 +42,14 @@ abstract class Repository {
                         Persister.get,
                         GolosApi.get, object : ExceptionLogger {
                     override fun log(t: Throwable) {
-                        Crashlytics.logException(t)
+                        try {
+                            if (!Fabric.isInitialized()) {
+                                Fabric.with(App.context, Crashlytics())
+                            }
+                            Crashlytics.logException(t)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 })
                 return instance!!
@@ -128,6 +137,10 @@ abstract class Repository {
     abstract fun getSubscriptions(ofUser: String): LiveData<List<FollowUserObject>>
 
     abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
+
+    abstract fun getTrendingTag(): LiveData<List<Tag>>
+
+    abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"

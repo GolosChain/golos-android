@@ -5,6 +5,7 @@ import io.golos.golos.App
 import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
@@ -37,7 +38,7 @@ abstract class GolosApi {
 
     abstract fun getStory(blog: String,
                           author: String,
-                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _->}): StoryTree
+                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _ -> }): StoryTree
 
     abstract fun getStoryWithoutComments(author: String, permlink: String): StoryTree
 
@@ -67,7 +68,10 @@ abstract class GolosApi {
 
     abstract fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject>
 
-    abstract fun follow(user:String)
+    abstract fun follow(user: String)
 
-    abstract fun unfollow(user:String)
+    abstract fun unfollow(user: String)
+
+    // empty start from to start from beginning, maxCount 1 - 1000
+    abstract fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag>
 }

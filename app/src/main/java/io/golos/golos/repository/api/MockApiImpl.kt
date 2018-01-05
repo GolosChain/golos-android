@@ -15,6 +15,7 @@ import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
@@ -126,6 +127,10 @@ internal class MockApiImpl : GolosApi() {
     }
 
     override fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
