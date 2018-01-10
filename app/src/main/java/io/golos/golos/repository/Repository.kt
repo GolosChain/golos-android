@@ -17,6 +17,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.Regexps
 import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.PriorityBlockingQueue
@@ -72,6 +73,14 @@ abstract class Repository {
         fun setSingletoneInstance(repository: Repository) {
             instance = repository
         }
+
+        @JvmStatic
+        val blacklistTags = hashSetOf("test", "bm-open", "bm-ceh23", "bm-tasks", "bm-taskceh1", "хардфоркамынежде")
+
+    }
+
+    internal fun checkTagIsValid(tag: String): Boolean {
+        return tag.length > 2 && !blacklistTags.contains(tag) && !Regexps.wrongTagRegexp.matches(tag)
     }
 
     open fun onAppCreate() {}
@@ -130,17 +139,23 @@ abstract class Repository {
 
     abstract fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
-    abstract fun getSubscribers(ofUser: String): LiveData<List<FollowUserObject>>
+    abstract fun getSubscribersToUserBlog(ofUser: String): LiveData<List<FollowUserObject>>
 
     abstract fun requestSubscribersUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
 
-    abstract fun getSubscriptions(ofUser: String): LiveData<List<FollowUserObject>>
+    abstract fun getSubscriptionsToUserBlogs(ofUser: String): LiveData<List<FollowUserObject>>
 
     abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
 
-    abstract fun getTrendingTag(): LiveData<List<Tag>>
+    abstract fun getTrendingTags(): LiveData<List<Tag>>
 
     abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
+
+    abstract fun getUserSubscribedTags(): LiveData<Set<Tag>>
+
+    abstract fun subscribeOnTag(tag: Tag)
+
+    abstract fun unSubscribeOnTag(tag: Tag)
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"

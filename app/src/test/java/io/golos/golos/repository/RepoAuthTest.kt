@@ -1,15 +1,13 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import io.golos.golos.MockPersister
 import io.golos.golos.R
 import io.golos.golos.repository.api.ApiImpl
-import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.repository.persistence.model.UserData
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
 import java.util.concurrent.Executor
 
 /**
@@ -34,38 +32,7 @@ class RepoAuthTest {
         repo = RepositoryImpl(
                 executor,
                 executor,
-                object : Persister() {
-                    var users = HashMap<String, String>()
-                    var userData: UserData? = null
-                    var name: String? = null
-                    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-                        users.put(userName, avatarPath + "__" + updatedDate)
-
-                    }
-
-                    override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-                        if (!users.containsKey(userName)) return null
-                        val path = users.get(userName)!!.split("__")
-                        return Pair(path[0].replace("__", ""),
-                                path[1].replace("__", "").toLong())
-                    }
-
-                    override fun getActiveUserData(): UserData? = userData
-
-                    override fun saveUserData(userData: UserData) {
-                        this.userData = userData
-                    }
-
-                    override fun deleteUserData() {
-                        userData = null
-                    }
-
-                    override fun getCurrentUserName() = userData?.userName
-
-                    override fun saveCurrentUserName(name: String?) {
-                        this.name = name
-                    }
-                }, ApiImpl(), null
+                MockPersister, ApiImpl(), null
         )
     }
 
@@ -110,7 +77,7 @@ class RepoAuthTest {
                     Assert.assertNotNull(resp)
                     Assert.assertNull(resp.activeAuth?.second)
                     Assert.assertNotNull(resp.postingAuth?.second)
-                    Assert.assertEquals(userName, resp.accountInfo. userName)
+                    Assert.assertEquals(userName, resp.accountInfo.userName)
                     Assert.assertNotNull(resp.accountInfo.avatarPath)
                     Assert.assertNotNull(resp.accountInfo.userMotto)
                     Assert.assertTrue(resp.accountInfo.postsCount != 0L)

@@ -7,6 +7,7 @@ import io.golos.golos.App
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
+import io.golos.golos.utils.toArrayList
 import java.security.KeyStore
 import java.util.*
 import kotlin.collections.HashMap
@@ -37,6 +38,12 @@ abstract class Persister {
     abstract fun saveTags(tags: List<Tag>)
 
     abstract fun getTags(): List<Tag>
+
+    abstract fun saveUserSubscribedTags(tags: List<Tag>)
+
+    abstract fun getUserSubscribedTags(): List<Tag>
+
+    abstract fun deleteUserSubscribedTag(tag: Tag)
 
     companion
     object {
@@ -76,6 +83,19 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         })
     }
 
+    override fun saveUserSubscribedTags(tags: List<Tag>) {
+        mDatabase.saveTagsForFilter(tags, "f1")
+    }
+
+    override fun getUserSubscribedTags(): List<Tag> {
+        return mDatabase.getTagsForFilter("f1")
+    }
+
+    override fun deleteUserSubscribedTag(tag: Tag) {
+        val tags = getUserSubscribedTags().toArrayList()
+        tags.remove(tag)
+        saveUserSubscribedTags(tags)
+    }
     /* override fun saveStory(story: StoryTree) {
          TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
      }
@@ -89,7 +109,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
     }
 
     override fun getTags(): List<Tag> {
-       return mDatabase.getTags()
+        return mDatabase.getTags()
     }
 
     private fun getKeys(types: Set<PrivateKeyType>): Map<PrivateKeyType, String?> {
@@ -159,6 +179,18 @@ private class MockPersister : Persister() {
     private var currentUserName: String? = null
     override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
 
+    }
+
+    override fun saveUserSubscribedTags(tags: List<Tag>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getUserSubscribedTags(): List<Tag> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deleteUserSubscribedTag(tag: Tag) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getAvatarForUser(userName: String): Pair<String, Long> {

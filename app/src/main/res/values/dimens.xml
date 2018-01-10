@@ -27,4 +27,5 @@
     <dimen name="profile_tabbar_height">48dp</dimen>
     <dimen name="quater">4dp</dimen>
     <dimen name="height_of_gray_break">10dp</dimen>
+    <dimen name="tags_reycler_height">30dp</dimen>
 </resources>

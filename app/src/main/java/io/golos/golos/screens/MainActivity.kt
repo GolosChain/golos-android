@@ -34,8 +34,8 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                     true
                 }
                 R.id.groups -> {
-                    bottomNavView.showSnackbar(R.string.unaval_in_current_version)
-                    false
+                    pager.currentItem = FILTERED_BY_TAG_STORIES
+                    true
                 }
                 R.id.notifications -> {
                     bottomNavView.showSnackbar(R.string.unaval_in_current_version)
@@ -85,6 +85,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
     companion object {
         val STORIES_FRAGMENT_POITION = 0
+        val FILTERED_BY_TAG_STORIES = 1
         val PROFILE_FRAGMENT_POITION = 3
     }
 }

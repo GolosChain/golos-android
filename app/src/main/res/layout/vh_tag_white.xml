@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/TagStyle"
+    android:paddingBottom="2dp"
+    android:background="@drawable/rect_round_corners_stroke_blue">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tag_name"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/margin_material"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:gravity="center"
+        />
+
+    <ImageButton
+
+        android:id="@+id/minus_ibtn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/margin_material_half"
+        android:background="?selectableItemBackground"
+        android:minWidth="30dp"
+        android:paddingStart="@dimen/margin_material_half"
+        app:srcCompat="@drawable/ic_minus_blue_12dp" />
+</LinearLayout>

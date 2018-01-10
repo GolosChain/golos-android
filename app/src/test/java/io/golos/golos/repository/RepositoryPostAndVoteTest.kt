@@ -1,10 +1,10 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import io.golos.golos.MockPersister
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.FollowUserObject
-import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
@@ -40,35 +40,7 @@ class RepositoryPostAndVoteTest {
         repo = RepositoryImpl(
                 executor,
                 executor,
-                object : Persister() {
-                    var users = HashMap<String, String>()
-                    var userData: UserData? = null
-                    var name: String? = null
-                    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-                        users.put(userName, avatarPath + "__" + updatedDate)
-
-                    }
-
-                    override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-                        return Pair("sdg", System.currentTimeMillis())
-                    }
-
-                    override fun getActiveUserData(): UserData? = userData
-
-                    override fun saveUserData(userData: UserData) {
-                        this.userData = userData
-                    }
-
-                    override fun deleteUserData() {
-                        userData = null
-                    }
-
-                    override fun getCurrentUserName() = userData?.userName
-
-                    override fun saveCurrentUserName(name: String?) {
-                        this.name = name
-                    }
-                }, ApiImpl(), null
+                MockPersister, ApiImpl(), null
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }
@@ -340,7 +312,7 @@ class RepositoryPostAndVoteTest {
         var userAcc: UserData? = null
         var subscribesStatus: List<FollowUserObject>? = null
 
-        repo.getSubscribers(workingAccount).observeForever {
+        repo.getSubscribersToUserBlog(workingAccount).observeForever {
             subscribesStatus = it
         }
         repo.getUserInfo(workingAccount).observeForever {

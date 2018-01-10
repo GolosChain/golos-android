@@ -12,6 +12,7 @@ import junit.framework.Assert.*
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.junit.Test
 import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * Created by yuri on 23.11.17.
@@ -261,4 +262,25 @@ class ApiImplTest {
         Assert.assertTrue(followers.find { it.following.name == "vredinka2345" } == null)
 
     }
+
+     @Test
+    fun testGetTags(){
+         var size = 1000
+         var tags = service.getTrendingTag("", size)
+         Assert.assertEquals(size, tags.size)
+         var tagsSet = HashSet(tags)
+         Assert.assertEquals(size, tagsSet.size)
+
+         size = 1500
+         tags = service.getTrendingTag("", size)
+         Assert.assertEquals(size, tags.size)
+         tagsSet = HashSet(tags)
+         Assert.assertEquals(size, tagsSet.size)
+
+         size = 3200
+         tags = service.getTrendingTag("", size)
+         Assert.assertEquals(size, tags.size)
+         tagsSet = HashSet(tags)
+         Assert.assertEquals(size, tagsSet.size)
+     }
 }

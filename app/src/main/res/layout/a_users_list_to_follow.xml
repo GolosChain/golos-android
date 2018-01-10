@@ -54,8 +54,7 @@
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior" />
 
     <ProgressBar
+
         android:id="@+id/progress"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center" />
+        style="@style/FullscreenProgressStyle" />
 </android.support.design.widget.CoordinatorLayout>

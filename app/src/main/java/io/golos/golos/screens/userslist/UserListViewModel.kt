@@ -28,8 +28,8 @@ class UserListViewModel : ViewModel() {
                  subscribersOrSubscriptions: Boolean) {
         this.userName = userName
         this.subscribersOrSubscriptions = subscribersOrSubscriptions
-        val ld = if (subscribersOrSubscriptions) Repository.get.getSubscribers(userName)
-        else Repository.get.getSubscriptions(userName)
+        val ld = if (subscribersOrSubscriptions) Repository.get.getSubscribersToUserBlog(userName)
+        else Repository.get.getSubscriptionsToUserBlogs(userName)
         ld.observeForever({
             mLiveData.value = UserListViewState(it ?: ArrayList(), null)
         })

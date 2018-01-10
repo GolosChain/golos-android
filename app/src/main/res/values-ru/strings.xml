@@ -105,4 +105,12 @@
     <string name="retry">Еще раз</string>
     <string name="scan_fail">Не удалось распозанть QR- код, попробуйте еще раз</string>
     <string name="enter_private_key">Необходимо ввести приватный, а не публичный ключ</string>
+    <string name="tags_you_subscribed">теги, на которые вы подписаны</string>
+    <string name="popular_now">популярное сейчас</string>
+    <string name="no_tags_chose">Ни один тэг не выбран</string>
+    <string name="subscribed">подписанные</string>
+    <string name="tags">теги</string>
+    <string name="tags_search">Поиск по тегам</string>
+    <string name="golos_search">Поиск в  Golos.io</string>
+    <string name="recommended">Рекомендуемые</string>
 </resources>

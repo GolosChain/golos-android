@@ -4,11 +4,11 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.support.annotation.WorkerThread
-import com.crashlytics.android.Crashlytics
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
@@ -60,6 +60,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mAuthLiveData = MutableLiveData<UserData>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
     private val mBlogOfUserSubscriptions = HashSet<String>()
+    private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private fun getStripeItems(limit: Int,
                                type: FeedType,
@@ -139,7 +140,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     listener.invoke(resp)
                 }
             } catch (e: Exception) {
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
@@ -157,7 +158,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     listener.invoke(resp)
                 }
             } catch (e: Exception) {
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
@@ -176,7 +177,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
 
             } catch (e: Exception) {
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
@@ -191,6 +192,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     private fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse {
+        val userName = userName.removePrefix("@").toLowerCase()
+
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
             if (response.accountInfo.avatarPath != null)
@@ -224,8 +227,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
                     }
                 } catch (e: Exception) {
-                    mLogger?.log(e)
-                    e.printStackTrace()
+                    logException(e)
                     if (e is IllegalArgumentException
                             && e.message?.contains("key must be 51 chars") == true) {
                         mMainThreadExecutor.execute { deleteUserdata() }
@@ -284,9 +286,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     }
                 }
             } catch (e: Exception) {
-                mLogger?.log(e)
-                e.printStackTrace()
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     completionHandler.invoke(AccountInfo(userName), GolosErrorParser.parse(e))
                 }
@@ -441,8 +441,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     completionHandler.invoke(Unit, null)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
-                mLogger?.log(e)
+                logException(e)
                 if (e is SteemResponseError) {
                     Timber.e(e.message)
                 }
@@ -511,12 +510,12 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     }
 
-    override fun getSubscribers(ofUser: String): LiveData<List<FollowUserObject>> {
+    override fun getSubscribersToUserBlog(ofUser: String): LiveData<List<FollowUserObject>> {
         if (!mUsersSubscribers.contains(ofUser)) mUsersSubscribers.put(ofUser, MutableLiveData())
         return mUsersSubscribers[ofUser]!!
     }
 
-    override fun getSubscriptions(ofUser: String): LiveData<List<FollowUserObject>> {
+    override fun getSubscriptionsToUserBlogs(ofUser: String): LiveData<List<FollowUserObject>> {
         if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions.put(ofUser, MutableLiveData())
         return mUsersSubscriptions[ofUser]!!
     }
@@ -572,8 +571,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     completionHandler.invoke(ArrayList(), GolosErrorParser.parse(e))
                 }
@@ -647,8 +645,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 mRequests.remove(request)
                 loadSubscribersIfNeeded()
             } catch (e: Exception) {
-                e.printStackTrace()
-                mLogger?.log(e)
+                logException(e)
                 mRequests.remove(request)
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
@@ -695,9 +692,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         }
                     }
                 } catch (e: Exception) {
-                    mLogger?.log(e)
-                    Crashlytics.logException(e)
-                    e.printStackTrace()
+                    logException(e)
                 }
             }
         })
@@ -757,9 +752,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             }
                         }
                     } catch (e: Exception) {
-                        mLogger?.log(e)
-                        e.printStackTrace()
-                        Timber.e(e.message)
+                        logException(e)
                         if (e is SteemResponseError) {
                             Timber.e(e.error?.steemErrorDetails?.toString())
                         }
@@ -863,8 +856,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         requestStoryUpdate(story)
                     }
                 } catch (e: Exception) {
-                    mLogger?.log(e)
-                    e.printStackTrace()
+                    logException(e)
                     val error = GolosErrorParser.parse(e)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute { liveData.value = StoryTreeItems(arrayListOf(), FeedType.UNCLASSIFIED, null, error) }
@@ -922,7 +914,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
 
             } catch (e: Exception) {
-                mLogger?.log(e)
+                logException(e)
                 mMainThreadExecutor.execute {
                     resultListener(null, GolosErrorParser.parse(e))
                 }
@@ -972,8 +964,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     }
                 }
             } catch (e: Exception) {
-                mLogger?.log(e)
-                e.printStackTrace()
+                logException(e)
                 if (e is SteemResponseError) {
                     Timber.e(e.message)
                 }
@@ -1016,18 +1007,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return mUsersSubscriptions.values + mUsersSubscribers.values
     }
 
-    override fun getTrendingTag(): LiveData<List<Tag>> {
+    override fun getTrendingTags(): LiveData<List<Tag>> {
         if (mTags.value == null) {
             mWorkerExecutor.execute {
                 try {
                     val tags = mPersister.getTags()
-                    if (tags.isNotEmpty()) {
-                        mMainThreadExecutor.execute {
-                            mTags.value = tags
-                        }
+                    mMainThreadExecutor.execute {
+                        mTags.value = tags
                     }
                 } catch (e: Exception) {
-                    mLogger?.log(e)
+                    logException(e)
                 }
             }
         }
@@ -1035,20 +1024,58 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit) {
-        if (mTags.value == null) {
-            mWorkerExecutor.execute {
+        mWorkerExecutor.execute {
+            if (!App.isAppOnline()) {
+                mMainThreadExecutor.execute {
+                    completionHandler.invoke(arrayListOf(), GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+                }
+
+            } else {
                 try {
-                    val tags = mPersister.getTags()
-                    if (tags.isNotEmpty()) {
-                        mMainThreadExecutor.execute {
-                            mTags.value = tags
-                        }
+                    var tags = mGolosApi.getTrendingTag("", 2997)
+                    tags = tags.filter { checkTagIsValid(it.name) }
+                    mPersister.saveTags(tags)
+                    tags = mPersister.getTags()
+
+                    mMainThreadExecutor.execute {
+                        mTags.value = tags
+                        completionHandler.invoke(tags, null)
                     }
                 } catch (e: Exception) {
-                    mLogger?.log(e)
+                    mMainThreadExecutor.execute {
+                        completionHandler.invoke(arrayListOf(), GolosErrorParser.parse(e))
+                    }
+                    logException(e)
                 }
             }
         }
+    }
 
+    override fun getUserSubscribedTags(): LiveData<Set<Tag>> {
+        if (mUserSubscribedTags.value == null) {
+            val tags = mPersister.getUserSubscribedTags()
+            mUserSubscribedTags.value = HashSet(tags)
+        }
+        return mUserSubscribedTags
+    }
+
+    override fun subscribeOnTag(tag: Tag) {
+        val currentTags = HashSet(mUserSubscribedTags.value ?: ArrayList())
+        currentTags.add(tag)
+        mPersister.saveUserSubscribedTags(currentTags.toList())
+        mUserSubscribedTags.value = currentTags
+    }
+
+    override fun unSubscribeOnTag(tag: Tag) {
+        val currentTags = HashSet(mUserSubscribedTags.value ?: ArrayList())
+        currentTags.remove(tag)
+        mPersister.saveUserSubscribedTags(currentTags.toList())
+        mUserSubscribedTags.value = currentTags
+    }
+
+    private fun logException(e: Throwable) {
+        Timber.e(e)
+        e.printStackTrace()
+        mLogger?.log(e)
     }
 }

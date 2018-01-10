@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Golos.io</string>
-    <string name="add_max_five_tags">Add tags(max 5)</string>
+    <string name="add_max_five_tags">Add tags (max 5)</string>
     <string name="enter_tag_name">Enter tags with space</string>
     <string name="to_much_tags">You can add up to 5 tags</string>
     <string name="use_only_one_dash">A tag can have only one hyphen</string>
@@ -105,5 +105,13 @@
     <string name="retry">Retry</string>
     <string name="scan_fail">failed to recognize QR - code, please try again</string>
     <string name="enter_private_key">Please, enter your private, not public, key</string>
+    <string name="tags_you_subscribed">tags, you subscribed on</string>
+    <string name="popular_now">popular now</string>
+    <string name="no_tags_chose">no tags chosen</string>
+    <string name="subscribed">subscribed</string>
+    <string name="tags" >tags</string>
+    <string name="tags_search">Tags search</string>
+    <string name="golos_search">Search in Golos.io</string>
+    <string name="recommended">Recommended</string>
 </resources>
 

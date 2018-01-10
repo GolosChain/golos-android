@@ -419,8 +419,34 @@ class ApiImpl : GolosApi() {
     }
 
     override fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag> {
-        return Golos4J.getInstance().databaseMethods.getTrendingTags(startFrom, maxCount)
+
+        return if (maxCount <= 1000) Golos4J.getInstance().databaseMethods.getTrendingTags(startFrom, maxCount)
                 .filterNotNull()
                 .map { Tag(it) }
+        else {
+            val out = Golos4J.getInstance().databaseMethods.getTrendingTags(startFrom, 1000)
+                    .filterNotNull()
+                    .map { Tag(it) }.toArrayList()
+
+            val times = (maxCount / 1000) - 1
+            (0 until times)
+                    .forEach {
+                        val new = Golos4J.getInstance().databaseMethods.getTrendingTags(out.last().name, 1000)
+                                .filterNotNull()
+                                .map { Tag(it) }
+                                .toList()
+                        out.addAll(new.subList(1, new.size))
+                    }
+            val last = maxCount - (1000 * (times + 1)) + times + 1
+            if (last > 0) {
+                val new = Golos4J.getInstance().databaseMethods.getTrendingTags(out.last().name, last)
+                        .filterNotNull()
+                        .map { Tag(it) }
+                        .toList()
+                out.addAll(new.subList(1, new.size))
+            }
+
+            return out
+        }
     }
 }

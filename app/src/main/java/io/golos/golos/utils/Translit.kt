@@ -7,18 +7,18 @@ object Translit {
     fun lat2Ru(string: String): String {
 
         var current = string.toLowerCase()
-        current = current.replace("yie".toRegex(), "ые")
+        current = current.replace("yie", "ые")
         for (i in rusLetters.indices) {
-            current = current.replace(engLetters[i].toRegex(), rusLetters[i])
+            current = current.replace(engLetters[i], rusLetters[i])
         }
         return current
     }
 
     fun ru2lat(string: String): String {
         var current = string.toLowerCase()
-        current = current.replace("ые".toRegex(), "yie")
+        current = current.replace("ые", "yie")
         for (i in engLetters.indices) {
-            current = current.replace(rusLetters[i].toRegex(), engLetters[i])
+            current = current.replace(rusLetters[i], engLetters[i])
         }
         return current
     }
