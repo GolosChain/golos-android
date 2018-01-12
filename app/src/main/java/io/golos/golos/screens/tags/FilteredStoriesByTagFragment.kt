@@ -12,13 +12,18 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.Tag
+import io.golos.golos.screens.stories.StoriesFragment
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.adapters.StartMarginDecorator
 import io.golos.golos.screens.tags.adapters.SubscribedTagsAdapter
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagFragmentViewModel
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagViewModel
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 import io.golos.golos.utils.toArrayList
 
 /**
@@ -27,6 +32,7 @@ import io.golos.golos.utils.toArrayList
 class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesByTagViewModel> {
     private lateinit var mTagsReycler: RecyclerView
     private lateinit var mFragmentsFrame: FrameLayout
+    private val mFragmentTag = "filtered_stories_fragment"
     private lateinit var mNoTagsTv: TextView
     private lateinit var mPopularNowTv: TextView
 
@@ -62,11 +68,31 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
                 items.add(LocalizedTag(Tag("", 0.0, 0L, 0L)))
                 (mTagsReycler.adapter as SubscribedTagsAdapter).tags = items
             } else {
-                mFragmentsFrame.visibility = View.VISIBLE
-                mPopularNowTv.visibility = View.VISIBLE
-                mNoTagsTv.visibility = View.GONE
+                mFragmentsFrame.setViewVisible()
+                mPopularNowTv.setViewVisible()
+                mNoTagsTv.setViewGone()
                 items.add(0, LocalizedTag(Tag("", 0.0, 0L, 0L)))
                 (mTagsReycler.adapter as SubscribedTagsAdapter).tags = items
+                if (childFragmentManager.findFragmentByTag(mFragmentTag) == null) {
+                    val fr = StoriesFragment.getInstance(FeedType.NEW, StoryFilter(it.tags.map { it.tag.name }))
+                    childFragmentManager
+                            .beginTransaction()
+                            .replace(mFragmentsFrame.id,
+                                    fr,
+                                    mFragmentTag).commit()
+                    if (isVisible){
+                        fr.userVisibleHint = true
+                    }
+
+                } else {
+                    val fr = childFragmentManager.findFragmentByTag(mFragmentTag) as StoriesFragment
+                    fr.arguments = StoriesFragment.createArguments(FeedType.NEW, StoryFilter(it.tags.map { it.tag.name }))
+                    childFragmentManager.beginTransaction().detach(fr).attach(fr).commit()
+                    fr.userVisibleHint = true
+                    if (isVisible){
+                        fr.userVisibleHint = true
+                    }
+                }
             }
         }
     }

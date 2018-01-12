@@ -9,7 +9,6 @@ import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.utils.getDouble
 import io.golos.golos.utils.getLong
 import io.golos.golos.utils.getString
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -93,7 +92,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$filterName text )"
 
         fun saveTagsToTable(db: SQLiteDatabase, tags: List<Tag>, filterName: String) {
-            Timber.e("saveTagsToTable $tags")
+
             db.delete(databaseName, "${UserFilterTable.filterName} = \'$filterName\'", null)
             val values = ContentValues()
             db.beginTransaction()

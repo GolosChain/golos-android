@@ -3,12 +3,8 @@ package io.golos.golos.repository.api
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
 import eu.bittrade.libs.steemj.base.models.AccountName
-import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.PublicKey
-import eu.bittrade.libs.steemj.communication.CommunicationHandler
-import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO
-import io.golos.golos.App
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.Tag

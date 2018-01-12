@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import io.golos.golos.R
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.PurseFragment
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.model.FeedType

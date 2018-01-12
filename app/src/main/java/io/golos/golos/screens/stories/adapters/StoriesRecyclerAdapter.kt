@@ -175,7 +175,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 } else {
                     mBlogNameTv.text = wrapper.categoryName
                 }
-                mTitleTv.text = wrapper.title
+                mTitleTv.text = wrapper.title.toLowerCase().capitalize()
                 mUpvoteBtn.text = "$ ${String.format("%.3f", wrapper.payoutInDollars)}"
                 mCommentsButton.text = wrapper.commentsCount.toString()
                 if (wrapper.avatarPath != null) mGlide

@@ -8,7 +8,6 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
@@ -903,9 +902,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(null, mAuthLiveData.value?.userName ?: ""),
+                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
@@ -954,9 +953,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(null, mAuthLiveData.value?.userName ?: ""),
+                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(userNameFilter =  listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(null, mAuthLiveData.value?.userName ?: ""))
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
                     mMainThreadExecutor.execute {
                         comments.value = StoryTreeItems((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
@@ -1025,28 +1024,21 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit) {
         mWorkerExecutor.execute {
-            if (!App.isAppOnline()) {
+            try {
+                var tags = mGolosApi.getTrendingTag("", 2997)
+                tags = tags.filter { checkTagIsValid(it.name) }
+                mPersister.saveTags(tags)
+                tags = mPersister.getTags()
+
                 mMainThreadExecutor.execute {
-                    completionHandler.invoke(arrayListOf(), GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+                    mTags.value = tags
+                    completionHandler.invoke(tags, null)
                 }
-
-            } else {
-                try {
-                    var tags = mGolosApi.getTrendingTag("", 2997)
-                    tags = tags.filter { checkTagIsValid(it.name) }
-                    mPersister.saveTags(tags)
-                    tags = mPersister.getTags()
-
-                    mMainThreadExecutor.execute {
-                        mTags.value = tags
-                        completionHandler.invoke(tags, null)
-                    }
-                } catch (e: Exception) {
-                    mMainThreadExecutor.execute {
-                        completionHandler.invoke(arrayListOf(), GolosErrorParser.parse(e))
-                    }
-                    logException(e)
+            } catch (e: Exception) {
+                mMainThreadExecutor.execute {
+                    completionHandler.invoke(arrayListOf(), GolosErrorParser.parse(e))
                 }
+                logException(e)
             }
         }
     }

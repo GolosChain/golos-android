@@ -141,6 +141,12 @@ fun View.showSnackbar(message: String) {
             Html.fromHtml("<font color=\"#ffffff\">${message}</font>"),
             Toast.LENGTH_SHORT).show()
 }
+fun View.setViewGone(){
+    if (this.visibility != View.GONE)visibility = View.GONE
+}
+fun View.setViewVisible(){
+    if (this.visibility != View.VISIBLE)visibility = View.VISIBLE
+}
 
 fun View.hideKeyboard() {
     val imm = context.getSystemService(

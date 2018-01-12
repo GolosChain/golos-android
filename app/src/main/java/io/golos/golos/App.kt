@@ -6,6 +6,8 @@ import android.net.ConnectivityManager
 import android.support.multidex.MultiDexApplication
 import android.support.v7.app.AppCompatDelegate
 import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.repository.Repository
 import timber.log.Timber
@@ -31,6 +33,9 @@ class App : MultiDexApplication() {
             Repository.get.deleteUserdata()
             sharedPrefs.edit().putBoolean("deleteUserData", true).commit()
         }
+        val ce = if (resources.getBoolean(R.bool.isTablet)) CustomEvent("app launched on tablet")
+        else CustomEvent("app launched on phone")
+        Answers.getInstance().logCustom(ce)
     }
 
     companion object get {

@@ -11,7 +11,7 @@ import android.widget.ImageView
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.ProfileActivity
@@ -151,8 +151,8 @@ class StoryViewModel : ViewModel() {
                 || feedType == FeedType.PERSONAL_FEED
                 || feedType == FeedType.UNCLASSIFIED
                 || feedType == FeedType.PROMO) feedType = FeedType.NEW
-        if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text ?: return)
-        FilteredStoriesActivity.start(context, feedType, StoryFilter(text ?: return))
+        if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text)
+        FilteredStoriesActivity.start(context, feedType, text ?: return)
     }
 
     fun onShareClick(context: Context) {

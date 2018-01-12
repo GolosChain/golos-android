@@ -5,6 +5,7 @@ import io.golos.golos.MockPersister
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.FollowUserObject
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart

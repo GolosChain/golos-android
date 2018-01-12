@@ -2,7 +2,7 @@ package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
 import io.golos.golos.App
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.Tag

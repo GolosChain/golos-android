@@ -6,6 +6,7 @@ import eu.bittrade.libs.steemj.base.models.AccountName
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.api.ApiImpl
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import org.junit.Assert
@@ -156,17 +157,17 @@ class RepoGetStoriesTest {
     fun laodPersonalizedTest() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
     }
@@ -175,7 +176,7 @@ class RepoGetStoriesTest {
     fun testloadComments() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), complitionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
     }
 
@@ -183,7 +184,7 @@ class RepoGetStoriesTest {
     fun testLoadPostsWithFilter() {
         var items = repo.getStories(FeedType.ACTUAL, StoryFilter("psk", null))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), complitionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
     }
 

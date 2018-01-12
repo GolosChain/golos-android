@@ -5,7 +5,6 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.StoryFilter
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.model.LocalizedTag
@@ -73,7 +72,7 @@ class AddTagTofilterViewModel : ViewModel() {
     }
 
     fun onTagClick(context: Context?, tag: LocalizedTag) {
-        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, StoryFilter(tagFilter = tag.tag.name))
+        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, tag.tag.name)
     }
 
     fun onTagUnSubscribe(tag: LocalizedTag) {

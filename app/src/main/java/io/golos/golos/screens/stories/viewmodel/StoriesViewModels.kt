@@ -1,14 +1,14 @@
 package io.golos.golos.screens.stories.viewmodel
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.*
 import android.content.Context
 import android.content.Intent
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
@@ -18,12 +18,52 @@ import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 /**
  * Created by yuri on 01.11.17.
  */
+object StoriesModelFactory {
+
+    fun getStoriesViewModel(type: FeedType,
+                            activity: FragmentActivity?,
+                            fragment: Fragment?,
+                            filter: StoryFilter?): StoriesViewModel {
+
+        val provider = if (activity != null) ViewModelProviders.of(activity)
+        else {
+            if (fragment == null) throw IllegalStateException("activity or fragment must be not null")
+            else ViewModelProviders.of(fragment)
+        }
+        var viewModel: StoriesViewModel
+
+
+        viewModel = when (type) {
+            FeedType.NEW -> provider.get(NewViewModel::class.java)
+            FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
+            FeedType.POPULAR -> provider.get(PopularViewModel::class.java)
+            FeedType.PROMO -> provider.get(PromoViewModel::class.java)
+            FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
+            FeedType.BLOG -> provider.get(BlogViewModel::class.java)
+            FeedType.COMMENTS -> provider.get(CommentsViewModel::class.java)
+            else -> throw IllegalStateException(" $type is unsupported")
+        }
+        if ((viewModel is FeedViewModel
+                || viewModel is CommentsViewModel
+                || viewModel is BlogViewModel) && filter == null) {
+        } else {
+            viewModel.onCreate(object : InternetStatusNotifier {
+                override fun isAppOnline(): Boolean {
+                    return App.isAppOnline()
+                }
+            }, filter)
+        }
+        return viewModel
+    }
+}
+
 data class StoriesViewState(val isLoading: Boolean,
                             val items: List<StoryTree> = ArrayList(),
                             val error: GolosError? = null,
@@ -104,6 +144,11 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         }
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
+        if (this.filter != null && this.filter != filter) {//recreating
+            mStoriesLiveData.value = StoriesViewState(false, arrayListOf())
+            isUpdating.set(false)
+            onChangeVisibilityToUser(isVisibleToUser)
+        }
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
         mRepository.getStories(type, filter).observeForever(this)
@@ -119,6 +164,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
     }
 
     open fun onSwipeToRefresh() {
+
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -247,11 +293,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
                     || feedType == FeedType.PERSONAL_FEED
                     || feedType == FeedType.UNCLASSIFIED
                     || feedType == FeedType.PROMO) feedType = FeedType.NEW
-            FilteredStoriesActivity.start(it, feedType = feedType, filter = StoryFilter(story.rootStory()?.categoryName ?: return))
+            FilteredStoriesActivity.start(it, feedType = feedType, tagName = story.rootStory()?.categoryName ?: return)
         }
     }
 
     fun onUserClick(context: Context?, it: StoryTree) {
         ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
+
 }

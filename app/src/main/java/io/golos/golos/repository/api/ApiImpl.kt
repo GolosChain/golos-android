@@ -10,7 +10,7 @@ import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
 import io.golos.golos.R
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
@@ -111,16 +111,16 @@ class ApiImpl : GolosApi() {
         if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
 
-        if (startAuthor == null && (type == FeedType.COMMENTS)) query.startAuthor = AccountName(filter!!.userNameFilter)
+        if (startAuthor == null && (type == FeedType.COMMENTS)) query.startAuthor = AccountName(filter!!.userNameFilter.first())
 
         filter?.userNameFilter?.let {
-            query.selectAuthors = listOf(AccountName(it))
+            query.selectAuthors = it.map { AccountName(it) }
         }
 
         query.truncateBody = truncateBody
         filter?.let {
-            it.tagFilter?.let {
-                query.selectTags = listOf(it)
+            it.tagFilter.let {
+                query.selectTags = it
             }
         }
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)

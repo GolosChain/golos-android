@@ -5,7 +5,7 @@ import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.RepositoryImpl
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryViewState
@@ -53,7 +53,7 @@ class StoryViewModelTest {
     fun requestPersonalPage() {
         val stories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"))
         Assert.assertNull(stories.value)
-        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), complitionHandler = {_,_->})
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), complitionHandler = { _, _->})
         Assert.assertNotNull(stories.value)
         var state: StoryViewState? = null
         storyViewModel.liveData.observeForever { t -> state = t }

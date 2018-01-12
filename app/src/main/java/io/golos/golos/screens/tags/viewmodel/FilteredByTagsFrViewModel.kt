@@ -7,7 +7,6 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.StoryFilter
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
@@ -40,7 +39,7 @@ class FilteredStoriesByTagFragmentViewModel : ViewModel(), Observer<Set<Tag>> {
     }
 
     fun onTagClick(context: Context?, it: LocalizedTag) {
-        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, StoryFilter(it.tag.name, null))
+        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, it.tag.name)
     }
 
     fun onTagDeleteClick(activity: Context?, it: LocalizedTag) {

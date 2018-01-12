@@ -27,7 +27,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.App
 import io.golos.golos.R
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType

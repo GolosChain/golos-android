@@ -5,7 +5,7 @@ import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.RepositoryImpl
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.utils.InternetStatusNotifier
 import org.junit.Assert

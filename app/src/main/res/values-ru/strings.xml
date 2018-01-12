@@ -113,4 +113,7 @@
     <string name="tags_search">Поиск по тегам</string>
     <string name="golos_search">Поиск в  Golos.io</string>
     <string name="recommended">Рекомендуемые</string>
+    <string name="similar">Похожие:</string>
+    <string name="subscribe">Подписаться</string>
+    <string name="subscribes">Подписки</string>
 </resources>

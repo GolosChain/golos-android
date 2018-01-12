@@ -5,7 +5,7 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.util.AuthUtils
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.model.FeedType
 import junit.framework.Assert
 import junit.framework.Assert.*

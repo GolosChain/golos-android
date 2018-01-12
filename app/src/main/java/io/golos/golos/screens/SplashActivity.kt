@@ -6,7 +6,7 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.model.FeedType
 
 /**
@@ -22,7 +22,7 @@ class SplashActivity : GolosActivity() {
         setContentView(R.layout.a_splash)
         val progress = findViewById<View>(R.id.progress)
         val stories = repo.getStories(if (isUserLoggedIn) FeedType.PERSONAL_FEED else FeedType.POPULAR,
-                if (isUserLoggedIn) StoryFilter(userNameFilter = repo.getCurrentUserDataAsLiveData().value?.userName ?: "") else null)
+                if (isUserLoggedIn) StoryFilter(userNameFilter = listOf(repo.getCurrentUserDataAsLiveData().value?.userName ?: "")) else null)
         if (stories.value?.items?.size ?: 0 > 0) {
             progress.visibility = View.GONE
             val i = Intent(this, MainActivity::class.java)

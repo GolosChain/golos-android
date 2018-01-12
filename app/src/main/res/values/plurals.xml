@@ -48,4 +48,13 @@
             <item quantity="zero">Posts</item>
             <item quantity="other">Posts</item>
     </plurals>
+
+    <plurals name="top_posts" >
+        <item quantity="few">Top posts</item>
+        <item quantity="many">Top posts</item>
+        <item quantity="one">Top post</item>
+        <item quantity="two">Top posts</item>
+        <item quantity="zero">Top posts</item>
+        <item quantity="other">Top posts</item>
+    </plurals>
 </resources>

@@ -2,7 +2,6 @@ package io.golos.golos.screens.stories
 
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -14,19 +13,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import io.golos.golos.App
 import io.golos.golos.R
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.stories.viewmodel.*
+import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
+import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
+import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
-import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.showSnackbar
-import timber.log.Timber
 
 
 /**
@@ -55,35 +53,16 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
-        val provider = ViewModelProviders.of(activity!!)
 
         if (arguments?.getSerializable(TYPE_TAG) == null) return
 
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
         val filterString = arguments!!.getString(FILTER_TAG, null)
-
-        mViewModel = when (type) {
-            FeedType.NEW -> provider.get(NewViewModel::class.java)
-            FeedType.ACTUAL -> provider.get(ActualViewModle::class.java)
-            FeedType.POPULAR -> provider.get(PopularViewModel::class.java)
-            FeedType.PROMO -> provider.get(PromoViewModel::class.java)
-            FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
-            FeedType.BLOG -> provider.get(BlogViewModel::class.java)
-            FeedType.COMMENTS -> provider.get(CommentsViewModel::class.java)
-            else -> throw IllegalStateException(" $type is unsupported")
-        }
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
-        if ((mViewModel is FeedViewModel
-                || mViewModel is CommentsViewModel
-                || mViewModel is BlogViewModel) && filter == null) {
-        } else {
-            mViewModel?.onCreate(object : InternetStatusNotifier {
-                override fun isAppOnline(): Boolean {
-                    return App.isAppOnline()
-                }
-            }, filter)
-        }
+
+        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, this, filter)
+
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
                 onCardClick = { mViewModel?.onCardClick(it, activity) },
@@ -191,7 +170,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             if (filter != null)
                 bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
             else bundle.putString(FILTER_TAG, null)
-
             return bundle
         }
     }

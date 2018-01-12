@@ -48,4 +48,12 @@
         <item quantity="zero">Постов</item>
         <item quantity="other">Постов</item>
     </plurals>
+    <plurals name="top_posts" >
+        <item quantity="few">Постов в топе</item>
+        <item quantity="many">Постов в топе</item>
+        <item quantity="one">Пост в топе</item>
+        <item quantity="two">Поста в топе</item>
+        <item quantity="zero">Постов в топе</item>
+        <item quantity="other">Постов в топе</item>
+    </plurals>
 </resources>

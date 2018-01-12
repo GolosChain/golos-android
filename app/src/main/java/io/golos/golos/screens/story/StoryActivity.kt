@@ -18,7 +18,7 @@ import com.bumptech.glide.Glide
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.R
 import io.golos.golos.R.raw.story
-import io.golos.golos.repository.StoryFilter
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType

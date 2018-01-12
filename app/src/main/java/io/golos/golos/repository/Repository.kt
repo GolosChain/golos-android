@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData
 import android.os.Handler
 import android.os.Looper
 import com.crashlytics.android.Crashlytics
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.repository.api.GolosApi
@@ -23,12 +22,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-
-data class StoryFilter(
-        @JsonProperty("tagFilter")
-        val tagFilter: String? = null,
-        @JsonProperty("userNameFilter")
-        val userNameFilter: String? = null)
 
 abstract class Repository {
 
