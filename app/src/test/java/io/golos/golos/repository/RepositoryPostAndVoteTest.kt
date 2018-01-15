@@ -375,15 +375,15 @@ class RepositoryPostAndVoteTest {
         repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = userName), complitionHandler = { _, _ -> })
         Assert.assertNotNull(feedStories.value)
 
-        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed)
         repo.unFollow("golosmedia", { _, _ -> })
-        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed)
 
         val story = feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first()
         repo.requestStoryUpdate(story)
-        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
+        Assert.assertFalse(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed)
         repo.follow("golosmedia", { _, _ -> })
-        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().userSubscribeUpdatingStatus.isCurrentUserSubscribed)
+        Assert.assertTrue(feedStories.value!!.items.filter { it.rootStory()!!.author == "golosmedia" }.first().subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed)
 
     }
 }

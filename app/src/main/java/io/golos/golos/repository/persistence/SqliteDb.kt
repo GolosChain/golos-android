@@ -13,7 +13,7 @@ import io.golos.golos.utils.getString
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 1
+private val dbVersion = 2
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
     private val mAvatarsTable = AvatarsTable
@@ -27,7 +27,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-
+        db?.execSQL(mTagsTable.createTableString)
+        db?.execSQL(mUserFilterTable.createTableString)
     }
 
     fun saveAvatar(avatar: UserAvatar) {

@@ -28,6 +28,7 @@ import io.golos.golos.screens.story.adapters.StoryAdapter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.*
@@ -44,6 +45,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mAvatar: ImageView
     private lateinit var mUserName: TextView
     private lateinit var mRebloggedBy: TextView
+    private lateinit var mTagName: TextView
+    private lateinit var mTagSubscribeBtn: Button
     private lateinit var mBlogNameTv: TextView
     private lateinit var mtitileTv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
@@ -61,6 +64,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mAvatarofAuthorInFollowLo: ImageView
     private lateinit var mNameOfAuthorInFollowLo: TextView
     private lateinit var mAuthorSubscribeButton: Button
+    private lateinit var mTagAvatar: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,7 +142,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatarofAuthorInFollowLo)
                     }
-                    if (it.canUserMakeSubscriptionActions) {
+                    if (it.canUserMakeBlogSubscriptionActions) {
                         mAuthorSubscribeButton.visibility = View.VISIBLE
 
                     }
@@ -149,15 +153,22 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
-                mAuthorSubscribeButton.text = if (it.storyTree.userSubscribeUpdatingStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
+                mAuthorSubscribeButton.text = if (it.storyTree.subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
                 else getString(R.string.follow)
 
 
-                mAuthorSubscribeButton.visibility = if (it.storyTree.userSubscribeUpdatingStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
+                mAuthorSubscribeButton.visibility = if (it.storyTree.subscriptionOnBlogUpdatingStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
                 else View.GONE
                 mAuthorSubscribeProgress.visibility = if (mAuthorSubscribeButton.visibility == View.GONE) View.VISIBLE else View.GONE
 
-                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeButtonClick() }
+                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
+
+
+                if (it.storyTree.subscriptionOnTagUpdatingStatus.isCurrentUserSubscribed) {
+                    mTagSubscribeBtn.setText(R.string.unfollow)
+                }else {
+                    mTagSubscribeBtn.setText(R.string.follow)
+                }
 
                 mCommentsCountBtn.visibility = View.VISIBLE
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
@@ -169,11 +180,13 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
                 else mFab.hide()
-                if (story.categoryName.contains("ru--")) {
-                    mBlogNameTv.text = Translit.lat2Ru(story.categoryName.substring(4))
-                } else {
-                    mBlogNameTv.text = story.categoryName
-                }
+
+                val tagName = LocalizedTag.convertToLocalizedName(story.categoryName)
+                mBlogNameTv.text = tagName
+                mTagName.text = tagName.capitalize()
+                mTagAvatar.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
+                mTagName.setOnClickListener { mTagAvatar.callOnClick() }
+
                 mBlogNameTv.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
                 if (it.errorCode != null) {
                     if (it.errorCode.localizedMessage != null) it.errorCode.localizedMessage.let {
@@ -184,6 +197,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         }
                     }
                 }
+
                 mCommentsCountBtn.text = it.storyTree.rootStory()?.commentsCount?.toString()
                 if (mFlow.childCount != story.tags.count()) {
                     mFlow.removeAllViews()
@@ -229,6 +243,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mFab = findViewById(R.id.fab)
         mAvatar = findViewById(R.id.avatar_iv)
         mUserName = findViewById(R.id.user_name)
+        mTagName = findViewById(R.id.tag_name)
+        mTagSubscribeBtn = findViewById(R.id.subscribe_tag_btn)
         mRebloggedBy = findViewById(R.id.reblogged_tv)
         mBlogNameTv = findViewById(R.id.blog_name_tv)
         mtitileTv = findViewById(R.id.title_tv)
@@ -243,6 +259,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsTv = findViewById(R.id.comments_tv)
         mShareButton = findViewById(R.id.share_btn)
         mAvatarofAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
+        mTagAvatar = findViewById(R.id.tag_avatar)
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
         mAuthorSubscribeButton = findViewById(R.id.follow_btn)
         mAuthorSubscribeProgress = findViewById(R.id.user_subscribe_progress)
@@ -272,7 +289,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         }
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({
-            if (mViewModel.showVoteDialog) {
+            if (mViewModel.canShowVoteDialog) {
                 val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
                 if (mViewModel.canUserVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
@@ -288,7 +305,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             }
         })
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
-            if (mViewModel.showVoteDialog) {
+            if (mViewModel.canShowVoteDialog) {
                 if (mViewModel.canUserVoteOnThis(it)) {
                     val dialog = VoteDialog.getInstance()
                     dialog.selectPowerListener = object : OnVoteSubmit {
@@ -310,6 +327,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         })
         mSwipeToRefresh.isRefreshing = true
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
+        mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
     }
 

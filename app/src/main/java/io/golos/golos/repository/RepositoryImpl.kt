@@ -76,11 +76,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         out.forEach {
             if (name.isNotEmpty()) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
-                it.userSubscribeUpdatingStatus =
+                it.subscriptionOnBlogUpdatingStatus =
                         SubscribeStatus(isUserSubscribedOn(it.rootStory()?.author ?: ""),
                                 UpdatingState.DONE)
             }
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
+            it.subscriptionOnTagUpdatingStatus =
+                    SubscribeStatus(mUserSubscribedTags.value?.contains(Tag(it.rootStory()?.categoryName ?: "", 0.0, 0L, 0L)) ?: false, UpdatingState.DONE)
         }
         return out
     }
@@ -126,8 +128,11 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 it.story.isUserUpvotedOnThis = it.story.isUserVotedOnThis(name)
             })
         }
-        story.userSubscribeUpdatingStatus =
+        story.subscriptionOnBlogUpdatingStatus =
                 SubscribeStatus(isUserSubscribedOn(story.rootStory()?.author ?: ""), UpdatingState.DONE)
+
+        story.subscriptionOnTagUpdatingStatus =
+                SubscribeStatus(mUserSubscribedTags.value?.contains(Tag(story.rootStory()?.categoryName ?: "", 0.0, 0L, 0L)) ?: false, UpdatingState.DONE)
         return story
     }
 
@@ -345,7 +350,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             ?.filter { it.rootStory()?.author == user }
                             ?.forEach {
                                 isChangedSmth = true
-                                it.userSubscribeUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.UPDATING)
+                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.UPDATING)
                             }
                     mMainThreadExecutor.execute {
                         if (isChangedSmth) it.value = it.value
@@ -384,7 +389,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             ?.filter { it.rootStory()?.author == user }
                             ?.forEach {
                                 isChangedSmth = true
-                                it.userSubscribeUpdatingStatus = SubscribeStatus(isFollow, UpdatingState.DONE)
+                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(isFollow, UpdatingState.DONE)
                             }
                     mMainThreadExecutor.execute {
                         if (isChangedSmth) it.value = it.value
@@ -452,7 +457,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             ?.filter { it.rootStory()?.author == user }
                             ?.forEach {
                                 isChangedSmth = true
-                                it.userSubscribeUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.FAILED)
+                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.FAILED)
                             }
                     mMainThreadExecutor.execute {
                         if (isChangedSmth) it.value = it.value
@@ -953,7 +958,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(userNameFilter =  listOf(mAuthLiveData.value?.userName ?: "")),
+                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
@@ -1055,13 +1060,42 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         val currentTags = HashSet(mUserSubscribedTags.value ?: ArrayList())
         currentTags.add(tag)
         mPersister.saveUserSubscribedTags(currentTags.toList())
+
+        allLiveData().forEach {
+            var wasChanged = false
+            it.value?.items?.forEach {
+                if (it.rootStory()?.categoryName ?: "" == tag.name) {
+                    it.subscriptionOnTagUpdatingStatus = SubscribeStatus(true, UpdatingState.DONE)
+                    wasChanged = true
+                }
+            }
+            if (wasChanged) {
+                it.value = it.value
+            }
+        }
         mUserSubscribedTags.value = currentTags
+    }
+
+    private fun isUserSubscribedOnTag(tagName: String): Boolean {
+        return mUserSubscribedTags.value?.contains(Tag(tagName, 0.0, 0L, 0L)) ?: false
     }
 
     override fun unSubscribeOnTag(tag: Tag) {
         val currentTags = HashSet(mUserSubscribedTags.value ?: ArrayList())
         currentTags.remove(tag)
         mPersister.saveUserSubscribedTags(currentTags.toList())
+        allLiveData().forEach {
+            var wasChanged = false
+            it.value?.items?.forEach {
+                if (it.rootStory()?.categoryName ?: "" == tag.name) {
+                    it.subscriptionOnTagUpdatingStatus = SubscribeStatus(false, UpdatingState.DONE)
+                    wasChanged = true
+                }
+            }
+            if (wasChanged) {
+                it.value = it.value
+            }
+        }
         mUserSubscribedTags.value = currentTags
     }
 

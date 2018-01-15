@@ -11,8 +11,9 @@ import android.widget.ImageView
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
@@ -95,7 +96,7 @@ class StoryViewModel : ViewModel() {
         else PhotoActivity.startActivityUsingTransition(activity, iv, src)
     }
 
-    val showVoteDialog: Boolean
+    val canShowVoteDialog: Boolean
         get() {
             return mRepository.isUserLoggedIn()
 
@@ -176,7 +177,7 @@ class StoryViewModel : ViewModel() {
                 null)
     }
 
-    fun onSubscribeButtonClick() {
+    fun onSubscribeToBlogButtonClick() {
         if (!mRepository.isUserLoggedIn()) {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
             return
@@ -186,15 +187,23 @@ class StoryViewModel : ViewModel() {
             return
         }
 
-        if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isCurrentUserSubscribed == true)
+        if (mLiveData.value?.storyTree?.subscriptionOnBlogUpdatingStatus?.isCurrentUserSubscribed == true)
             mRepository.unFollow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
                 showError(e ?: return@unFollow)
             })
-        else if (mLiveData.value?.storyTree?.userSubscribeUpdatingStatus?.isCurrentUserSubscribed == false) {
+        else if (mLiveData.value?.storyTree?.subscriptionOnBlogUpdatingStatus?.isCurrentUserSubscribed == false) {
             mRepository.follow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
                 showError(e ?: return@follow)
             })
         }
+    }
+
+    fun onSubscribeToMainTagClick() {
+        val tag = mLiveData.value?.storyTree?.rootStory()?.categoryName
+        if (tag == null) return
+        if (mLiveData.value?.storyTree?.subscriptionOnTagUpdatingStatus?.isCurrentUserSubscribed == true) {
+            mRepository.unSubscribeOnTag(Tag(tag, 0.0, 0L, 0L))
+        } else if (mLiveData.value?.storyTree?.subscriptionOnTagUpdatingStatus?.isCurrentUserSubscribed == false) mRepository.subscribeOnTag(Tag(tag, 0.0, 0L, 0L))
     }
 
     fun onUserClick(context: Context, userName: String?) {

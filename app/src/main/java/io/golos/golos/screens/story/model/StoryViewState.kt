@@ -13,4 +13,4 @@ data class StoryViewState(val isLoading: Boolean = false,
                           val errorCode: GolosError? = null,
                           val tags: List<String> = emptyList(),
                           val storyTree: StoryTree = StoryTree(discussionWithComments = DiscussionWithComments()),
-                          val canUserMakeSubscriptionActions: Boolean = false)
+                          val canUserMakeBlogSubscriptionActions: Boolean = false)

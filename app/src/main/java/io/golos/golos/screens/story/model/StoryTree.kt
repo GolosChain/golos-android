@@ -24,7 +24,8 @@ data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
 @JsonIgnoreProperties(ignoreUnknown = true)
 class StoryTree(rootStory: StoryWrapper?,
                 comments: List<StoryWrapper>,
-                var userSubscribeUpdatingStatus: SubscribeStatus = SubscribeStatus(false, UpdatingState.DONE)) : Cloneable {
+                var subscriptionOnBlogUpdatingStatus: SubscribeStatus = SubscribeStatus(false, UpdatingState.DONE),
+                var subscriptionOnTagUpdatingStatus: SubscribeStatus = SubscribeStatus(false, UpdatingState.DONE)) : Cloneable {
 
     @JsonProperty("rootStory")
     private var mRootStoryWrapper: StoryWrapper? = rootStory

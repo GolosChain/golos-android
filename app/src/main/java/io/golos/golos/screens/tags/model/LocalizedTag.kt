@@ -53,6 +53,11 @@ class LocalizedTag(val tag: Tag) : Comparable<LocalizedTag>, Parcelable {
     }
 
     companion object {
+
+        fun convertToLocalizedName(tagName: String) : String {
+           return if (tagName.startsWith("ru--")) Translit.lat2Ru(tagName.substring(4)) else tagName
+        }
+
         @JvmField
         val CREATOR: Parcelable.Creator<LocalizedTag> = object : Parcelable.Creator<LocalizedTag> {
             override fun createFromParcel(source: Parcel): LocalizedTag = LocalizedTag(source)

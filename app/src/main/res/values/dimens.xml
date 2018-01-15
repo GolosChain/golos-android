@@ -28,4 +28,5 @@
     <dimen name="quater">4dp</dimen>
     <dimen name="height_of_gray_break">10dp</dimen>
     <dimen name="tags_reycler_height">30dp</dimen>
+    <dimen name="story_tag_user_avatar_size">54dp</dimen>
 </resources>
