@@ -118,5 +118,8 @@
     <string name="subscribe">Subscribe</string>
     <string name="subscribes">Subscribes</string>
     <string name="published_ib">Published in</string>
+    <string name="cancel_sub_onTag">Cancel subscription on #%s?</string>
+    <string name="cancel_tag_sub">Cancel subscription</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
 

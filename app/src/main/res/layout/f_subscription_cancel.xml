@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/material_huge"
+    android:paddingTop="@dimen/material_huge">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        app:srcCompat="@drawable/ic_tag" />
+
+    <TextView
+        android:id="@+id/cancel_lbl"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginEnd="@dimen/material_big"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_material"
+        android:gravity="center_horizontal"
+        android:minWidth="320dp"
+        android:text="@string/cancel_sub_onTag"
+        android:textColor="@color/black3" />
+
+    <TextView
+        android:id="@+id/cancel_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/margin_material_half"
+        android:text="@string/cancel_tag_sub"
+        android:textAllCaps="false"
+        android:textColor="@color/black3" />
+
+    <TextView
+        android:id="@+id/dismiss_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/margin_material_half"
+        android:text="@string/dismiss"
+        android:textAllCaps="false"
+        android:textColor="@color/black3" />
+</LinearLayout>

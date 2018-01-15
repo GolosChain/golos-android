@@ -15,6 +15,8 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.AddTagTofilterViewModel
 import io.golos.golos.screens.tags.viewmodel.FiltersScreenState
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 
 /**
  * Created by yuri on 08.01.18.
@@ -28,6 +30,7 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
     private lateinit var mAppBar: View
     private lateinit var mScrolllLO: View
     private lateinit var mProgress: View
+    private lateinit var mSubscribedLbl: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +68,7 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
         mAppBar = findViewById(R.id.appbar)
         mProgress = findViewById(R.id.progress)
         mScrolllLO = findViewById(R.id.scroll_lo)
+        mSubscribedLbl = findViewById(R.id.subscribed_lbl)
         sv.setFocusable(false)
     }
 
@@ -77,6 +81,13 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
             mAppBar.visibility = View.VISIBLE
             mScrolllLO.visibility = View.VISIBLE
             mProgress.visibility = View.GONE
+        }
+        if (t?.subscribedTags?.size ?: 0 == 0) {
+            mSubscribedLbl.setViewGone()
+            mUserSubscibedTagsOn.setViewGone()
+        } else {
+            mSubscribedLbl.setViewVisible()
+            mUserSubscibedTagsOn.setViewVisible()
         }
         t?.subscribedTags?.let {
             val lastIndexOfButton = mUserSubscibedTagsOn.childCount - 1

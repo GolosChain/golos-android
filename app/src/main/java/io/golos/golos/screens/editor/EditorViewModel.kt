@@ -10,7 +10,6 @@ import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -89,6 +88,7 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
         if (mode == null) {
             return
         }
+        if (!mRepository.isUserLoggedIn()) return
         if (mode!!.isPostEditor) {
             if (mTitleText.isEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),

@@ -117,4 +117,7 @@
     <string name="subscribe">Подписаться</string>
     <string name="subscribes">Подписки</string>
     <string name="published_ib">Опубликовано в</string>
+    <string name="cancel_sub_onTag">Отменить подписку на #%s?</string>
+    <string name="cancel_tag_sub">Отменить подписку</string>
+    <string name="dismiss">Отмена</string>
 </resources>

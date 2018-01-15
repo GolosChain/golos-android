@@ -18,6 +18,7 @@ import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.FilteredStoriesViewModel
 import io.golos.golos.screens.stories.model.FilteredStoriesViewState
+import io.golos.golos.screens.tags.TagSubscriptionCancelDialogFr
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.Translit
 import io.golos.golos.utils.setViewGone
@@ -25,7 +26,7 @@ import io.golos.golos.utils.setViewVisible
 import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 
-class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewState> {
+class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewState>, TagSubscriptionCancelDialogFr.ResultListener {
     private lateinit var mContentFrameLo: FrameLayout
     private lateinit var mPostCountTv: TextView
     private lateinit var mTagTitle: TextView
@@ -62,6 +63,13 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
                 .commit()
     }
 
+    override fun onCancelConfirm() {
+       mViewModel.onTagUnsubscribe()
+    }
+
+    override fun onCancelCancel() {
+    }
+
     override fun onChanged(t: FilteredStoriesViewState?) {
         t?.let {
             mTagTitle.text = "#${it.mainTag.getLocalizedName()}"
@@ -74,7 +82,7 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
                 mSubscribeBtnLo.setViewGone()
                 mSubscribesBtnLo.setViewVisible()
                 mSubscribesBtn.setOnClickListener {
-                    mViewModel.onTagUnsubscribe()
+                    TagSubscriptionCancelDialogFr.getInstance(t.mainTag).show(supportFragmentManager, "tag")
                 }
             } else {
                 mSubscribeBtnLo.setViewVisible()
@@ -127,6 +135,11 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
     override fun onDestroy() {
         super.onDestroy()
         mViewModel.onDestroy()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
     }
 
     companion object {

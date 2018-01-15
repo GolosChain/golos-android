@@ -28,7 +28,12 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 mEditText.setText(value?.textPart?.text)
             }
             if (value?.textPart?.pointerPosition != null && value.textPart.pointerPosition != mEditText.selectionEnd) {
-                mEditText.setSelection(value.textPart.pointerPosition!!)
+                if (mEditText.text.length < value.textPart.pointerPosition ?: 0) {
+                    mEditText.setSelection(mEditText.text.length)
+                } else {
+                    mEditText.setSelection(value.textPart.pointerPosition!!)
+                }
+
 
             } else if (value?.textPart?.pointerPosition == null) mEditText.isSelected = false
             if (mEditText.onFocusChangeListener != this) {

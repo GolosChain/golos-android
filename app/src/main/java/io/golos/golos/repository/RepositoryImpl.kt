@@ -1012,7 +1012,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun getTrendingTags(): LiveData<List<Tag>> {
-        if (mTags.value == null) {
+        if (mTags.value == null || mTags.value?.size == 0) {
             mWorkerExecutor.execute {
                 try {
                     val tags = mPersister.getTags()
