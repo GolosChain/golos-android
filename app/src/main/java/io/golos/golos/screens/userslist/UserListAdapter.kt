@@ -10,21 +10,23 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.repository.model.FollowUserObject
+import io.golos.golos.screens.userslist.model.UserListRowData
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 
 /**
  * Created by yuri on 22.12.17.
  */
-data class UserListItemState(val item: FollowUserObject,
+data class UserListItemState(val item: UserListRowData,
                              val onUserClick: (RecyclerView.ViewHolder) -> Unit,
                              val onSubscribeClick: (RecyclerView.ViewHolder) -> Unit)
 
-class UserListAdapter(private val onUserClick: (FollowUserObject) -> Unit = { _ -> },
-                      private val onSubscribeClick: (FollowUserObject) -> Unit = { _ -> }) : RecyclerView.Adapter<UserListViewHolder>() {
+class UserListAdapter(private val onUserClick: (UserListRowData) -> Unit = { _ -> },
+                      private val onSubscribeClick: (UserListRowData) -> Unit = { _ -> }) : RecyclerView.Adapter<UserListViewHolder>() {
     private val mHashes = HashMap<String, Int>()
-    var listItems: List<FollowUserObject> = ArrayList()
+    var listItems: List<UserListRowData> = ArrayList()
         set(value) {
             if (field.isEmpty()) {
                 field = value
@@ -73,6 +75,7 @@ class UserListAdapter(private val onUserClick: (FollowUserObject) -> Unit = { _ 
 class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_list_item, parent) {
     private val mAvatar = itemView.findViewById<ImageView>(R.id.avatar_iv)
     private val mTitleText = itemView.findViewById<TextView>(R.id.name_tv)
+    private val mSubTitleTv = itemView.findViewById<TextView>(R.id.sub_tv)
     private val mSubscibeButton = itemView.findViewById<Button>(R.id.follow_btn)
     private val mProgress = itemView.findViewById<View>(R.id.progress)
     var state: UserListItemState? = null
@@ -96,6 +99,11 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                     mAvatar.setImageResource(R.drawable.ic_person_gray_80dp)
                 }
                 mTitleText.text = value.item.name.capitalize()
+                mSubTitleTv.text = value.item.shownValue
+
+                if (value.item.shownValue == null) mSubTitleTv.setViewGone()
+                else mSubTitleTv.setViewVisible()
+
                 mSubscibeButton.text = if (value.item.subscribeStatus.isCurrentUserSubscribed) itemView.context.getString(R.string.unfollow)
                 else itemView.context.getString(R.string.follow)
                 mSubscibeButton.setOnClickListener { value.onSubscribeClick.invoke(this) }

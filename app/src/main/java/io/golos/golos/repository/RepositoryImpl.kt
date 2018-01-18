@@ -39,7 +39,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister,
                               private val mGolosApi: GolosApi,
-                              val mLogger: ExceptionLogger?) : Repository() {
+                              private val mLogger: ExceptionLogger?) : Repository() {
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
 
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
@@ -52,13 +52,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     //users data
     private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
-    private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<FollowUserObject>>> = HashMap()
-    private val mUsersSubscribers: HashMap<String, MutableLiveData<List<FollowUserObject>>> = HashMap()
+    private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
+    private val mUsersSubscribers: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
 
     //current user data
     private val mAuthLiveData = MutableLiveData<UserData>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
-    private val mBlogOfUserSubscriptions = HashSet<String>()
+    private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private fun getStripeItems(limit: Int,
@@ -76,13 +76,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         out.forEach {
             if (name.isNotEmpty()) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
-                it.subscriptionOnBlogUpdatingStatus =
-                        SubscribeStatus(isUserSubscribedOn(it.rootStory()?.author ?: ""),
-                                UpdatingState.DONE)
             }
             it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
-            it.subscriptionOnTagUpdatingStatus =
-                    SubscribeStatus(mUserSubscribedTags.value?.contains(Tag(it.rootStory()?.categoryName ?: "", 0.0, 0L, 0L)) ?: false, UpdatingState.DONE)
         }
         return out
     }
@@ -128,11 +123,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 it.story.isUserUpvotedOnThis = it.story.isUserVotedOnThis(name)
             })
         }
-        story.subscriptionOnBlogUpdatingStatus =
-                SubscribeStatus(isUserSubscribedOn(story.rootStory()?.author ?: ""), UpdatingState.DONE)
-
-        story.subscriptionOnTagUpdatingStatus =
-                SubscribeStatus(mUserSubscribedTags.value?.contains(Tag(story.rootStory()?.categoryName ?: "", 0.0, 0L, 0L)) ?: false, UpdatingState.DONE)
         return story
     }
 
@@ -260,17 +250,22 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         mWorkerExecutor.execute {
             try {
                 loadSubscribersIfNeeded()
-                if (isUserLoggedIn()
-                        && mBlogOfUserSubscriptions.contains(userName)
+
+                if (isUserLoggedIn()//if we updating state of user, that is cashed in current user subscriptions
+                        && mCurrentUserSubscriptions.value?.find { it.user.name == userName } != null
                         && userName != mAuthLiveData.value?.userName) {
+
                     if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo.put(userName, MutableLiveData())
+
                     val userInfo = mUsersAccountInfo[userName]!!
                     mMainThreadExecutor.execute {
                         userInfo.value = AccountInfo(userName, isCurrentUserSubscribed = isUserSubscribedOn(userName))
                     }
                 }
+
+
                 val accinfo = mGolosApi.getAccountData(userName)
-                if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {
+                if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {//if we updating current user
                     mMainThreadExecutor.execute {
                         mAuthLiveData.value = UserData(true, accinfo.userMotto, accinfo.avatarPath,
                                 accinfo.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
@@ -298,123 +293,93 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
     }
 
+    @WorkerThread
     private fun isUserSubscribedOn(onAuthor: String): Boolean {
         if (isUserLoggedIn()) {
-            if (mBlogOfUserSubscriptions.size == 0) {
-                mBlogOfUserSubscriptions.addAll(mGolosApi
+            var subs = mCurrentUserSubscriptions.value
+            if (subs == null) {
+                subs = mGolosApi
                         .getSubscriptions(mPersister.getCurrentUserName() ?: return false, null)
                         .map {
-                            it.following!!.name
-                        })
+                            UserBlogSubscription(UserObject(it.following.name, getUserAvatarFromDb(it.following.name)),
+                                    SubscribeStatus.SubscribedStatus)
+                        }
+                mMainThreadExecutor.execute {
+                    mCurrentUserSubscriptions.value = subs
+                }
             }
-            return mBlogOfUserSubscriptions.contains(onAuthor)
+            return subs.find { it.user.name == onAuthor } != null
         }
         return false
     }
 
     private fun followOrUnfollow(isFollow: Boolean, user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        if (!isUserLoggedIn()) {
+            mMainThreadExecutor.execute {
+                completionHandler.invoke(Unit,
+                        GolosError(ErrorCode.WRONG_STATE,
+                                null,
+                                R.string.must_be_logged_in_for_this_action))
+            }
+            return
+        }
+        if (isUserLoggedIn() && mPersister.getCurrentUserName() == user) {
+            mMainThreadExecutor.execute {
+                completionHandler.invoke(Unit,
+                        GolosError(ErrorCode.WRONG_STATE,
+                                null,
+                                R.string.you_cannot_subscribe_on_yourself))
+            }
+            return
+        }
+        if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
+            mMainThreadExecutor.execute {
+                completionHandler.invoke(Unit,
+                        GolosError(ErrorCode.WRONG_STATE,
+                                null,
+                                if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
+            }
+            return
+        }
+
+
+        if (isFollow) {
+            val users = ArrayList(mCurrentUserSubscriptions.value ?: arrayListOf())
+            users.add(UserBlogSubscription(UserObject(user, getUserAvatarFromDb(user)), SubscribeStatus(false, UpdatingState.UPDATING)))
+            mCurrentUserSubscriptions.value = users
+        } else {
+            mCurrentUserSubscriptions.value?.find {
+                it.user.name == user
+            }?.status = SubscribeStatus(true, UpdatingState.UPDATING)
+            mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value
+        }
+
         mWorkerExecutor.execute {
             try {
-                if (!isUserLoggedIn()) {
-                    mMainThreadExecutor.execute {
-                        completionHandler.invoke(Unit,
-                                GolosError(ErrorCode.WRONG_STATE,
-                                        null,
-                                        R.string.must_be_logged_in_for_this_action))
-                    }
-                    return@execute
-                }
-                if (isUserLoggedIn() && mPersister.getCurrentUserName() == user) {
-                    mMainThreadExecutor.execute {
-                        completionHandler.invoke(Unit,
-                                GolosError(ErrorCode.WRONG_STATE,
-                                        null,
-                                        R.string.you_cannot_subscribe_on_yourself))
-                    }
-                    return@execute
-                }
-                if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
-                    mMainThreadExecutor.execute {
-                        completionHandler.invoke(Unit,
-                                GolosError(ErrorCode.WRONG_STATE,
-                                        null,
-                                        if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
-                    }
-                    return@execute
-                }
-                allLiveData().forEach {
-                    var isChangedSmth = false
-                    it
-                            .value
-                            ?.items
-                            ?.filter { it.rootStory()?.author == user }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.UPDATING)
-                            }
-                    mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
-                    }
-                }
-                allSubscriptionsLiveData().forEach {
-                    var isChangedSmth = false
-                    it.value
-                            ?.filter {
-                                it.name == user
-                            }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscribeStatus = SubscribeStatus(!isFollow,
-                                        UpdatingState.UPDATING)
-                            }
-                    mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
-                    }
-                }
-
                 if (isFollow) mGolosApi.follow(user) else mGolosApi.unfollow(user)
-                if (isFollow) requestSubscribesUpdate(user) else mBlogOfUserSubscriptions.remove(user)
 
-                val userAccCopy = mAuthLiveData.value!!.clone() as UserData
-                userAccCopy.subscibesCount = mBlogOfUserSubscriptions.size.toLong()
-
-                mMainThreadExecutor.execute {
-                    mAuthLiveData.value = userAccCopy
-                }
-                allLiveData().forEach {
-                    var isChangedSmth = false
-                    it
-                            .value
-                            ?.items
-                            ?.filter { it.rootStory()?.author == user }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(isFollow, UpdatingState.DONE)
-                            }
+                if (isFollow) {//update current user subscriptions list
                     mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
+                        mCurrentUserSubscriptions.value?.find {
+                            it.user.name == user
+                        }?.status = SubscribeStatus.SubscribedStatus
+                    }
+                    requestSubscribesUpdate(user)
+                } else {
+                    mMainThreadExecutor.execute {
+                        val items = ArrayList((mCurrentUserSubscriptions.value ?: arrayListOf()))
+                                .filter { it.user.name != user }
+                        mCurrentUserSubscriptions.value = items
+                        mAuthLiveData.value?.subscibesCount = items.size.toLong()
+                        mAuthLiveData.value = mAuthLiveData.value
                     }
                 }
-                allSubscriptionsLiveData().forEach {
-                    var isChangedSmth = false
-                    it.value
-                            ?.filter {
-                                it.name == user
-                            }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscribeStatus = SubscribeStatus(isFollow,
-                                        UpdatingState.DONE)
 
-                            }
-                    mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
-                    }
-                }
+
                 if (isFollow
-                        && mUsersSubscribers.contains(user)) {
-                    val currentUserFollowObject = FollowUserObject(mPersister.getCurrentUserName() ?: "",
-                            mAuthLiveData.value?.avatarPath, SubscribeStatus(false, UpdatingState.DONE))
+                        && mUsersSubscribers.contains(user)) {//add current user to subscribers list of cashed users data
+                    val currentUserFollowObject = UserObject(mPersister.getCurrentUserName() ?: "",
+                            mAuthLiveData.value?.avatarPath)
                     val subscribers = ArrayList(mUsersSubscribers[user]
                             ?.value ?: ArrayList())
                     subscribers.add(currentUserFollowObject)
@@ -449,64 +414,61 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 if (e is SteemResponseError) {
                     Timber.e(e.message)
                 }
-                allLiveData().forEach {
-                    var isChangedSmth = false
-                    it
-                            .value
-                            ?.items
-                            ?.filter { it.rootStory()?.author == user }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscriptionOnBlogUpdatingStatus = SubscribeStatus(!isFollow, UpdatingState.FAILED)
-                            }
-                    mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
-                    }
-                }
-                allSubscriptionsLiveData().forEach {
-                    var isChangedSmth = false
-                    it.value
-                            ?.filter {
-                                it.name == user
-                            }
-                            ?.forEach {
-                                isChangedSmth = true
-                                it.subscribeStatus = SubscribeStatus(!isFollow,
-                                        UpdatingState.FAILED)
-                            }
-                    mMainThreadExecutor.execute {
-                        if (isChangedSmth) it.value = it.value
-                    }
-                }
                 mMainThreadExecutor.execute {
+                    if (isFollow) {
+                        mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value?.filter {
+                            it.user.name != user
+                        }
+                    } else {
+                        mCurrentUserSubscriptions.value?.find {
+                            it.user.name == user
+                        }?.status = SubscribeStatus(true, UpdatingState.FAILED)
+                    }
+                    mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value
                     completionHandler.invoke(Unit, GolosErrorParser.parse(e))
                 }
             }
         }
     }
 
-    override fun follow(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+    override fun subscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
         followOrUnfollow(true, user, completionHandler)
     }
 
-    override fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+    override fun unSubscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
         followOrUnfollow(false, user, completionHandler)
     }
 
     @WorkerThread
     private fun requestSubscribesUpdate(startFrom: String?) {
-        mBlogOfUserSubscriptions.addAll(mGolosApi
+        val objects = mGolosApi
                 .getSubscriptions(mPersister.getCurrentUserName() ?: return, startFrom)
                 .map {
-                    it.following!!.name
-                })
+                    UserBlogSubscription(UserObject(it.following.name, getUserAvatarFromDb(it.following.name)),
+                            SubscribeStatus.SubscribedStatus)
+                }
+        if (startFrom == null) {
+            mMainThreadExecutor.execute {
+                mCurrentUserSubscriptions.value = objects
+            }
+        } else {
+            val current = mCurrentUserSubscriptions.value ?: arrayListOf()
+            current.forEach {
+                if (it.user.avatar == null) it.user.avatar = getUserAvatarFromDb(it.user.name)
+            }
+            mMainThreadExecutor.execute {
+                mCurrentUserSubscriptions.value = (current + objects).distinct()
+                mAuthLiveData.value?.subscibesCount = mCurrentUserSubscriptions.value?.size?.toLong() ?: 0L
+                mAuthLiveData.value = mAuthLiveData.value
+            }
+        }
     }
 
 
     @WorkerThread
     private fun loadSubscribersIfNeeded() {
         try {
-            if (isUserLoggedIn() && mBlogOfUserSubscriptions.size == 0) requestSubscribesUpdate(null)
+            if (isUserLoggedIn() && mCurrentUserSubscriptions.value?.size ?: 0 == 0) requestSubscribesUpdate(null)
         } catch (e: Exception) {
             mLogger?.log(e)
             e.printStackTrace()
@@ -514,47 +476,58 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     }
 
-    override fun getSubscribersToUserBlog(ofUser: String): LiveData<List<FollowUserObject>> {
+    override fun getSubscribersToBlog(ofUser: String): LiveData<List<UserObject>> {
         if (!mUsersSubscribers.contains(ofUser)) mUsersSubscribers.put(ofUser, MutableLiveData())
         return mUsersSubscribers[ofUser]!!
     }
 
-    override fun getSubscriptionsToUserBlogs(ofUser: String): LiveData<List<FollowUserObject>> {
+    override fun getSubscriptionsToBlogs(ofUser: String): LiveData<List<UserObject>> {
+        if (isUserLoggedIn() && mAuthLiveData.value?.userName == ofUser) return Transformations.map(mCurrentUserSubscriptions, {
+            it.map { UserObject(it.user.name, it.user.avatar) }
+        })
+
         if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions.put(ofUser, MutableLiveData())
         return mUsersSubscriptions[ofUser]!!
     }
 
-    private fun requestSubscribersOrSubscriptionbsUpdate(isSubscriber: Boolean,
+    override fun getCurrentUserSubscriptions(): LiveData<List<UserBlogSubscription>> {
+        return mCurrentUserSubscriptions
+    }
+
+    private fun requestSubscribersOrSubscriptionbsUpdate(isSubscribers: Boolean,
                                                          ofUser: String,
-                                                         completionHandler: (List<FollowUserObject>, GolosError?) -> Unit) {
+                                                         completionHandler: (List<UserObject>, GolosError?) -> Unit) {
         mWorkerExecutor.execute {
             try {
 
-                if (isSubscriber) {
+                if (isSubscribers) {
                     if (!mUsersSubscribers.contains(ofUser)) mUsersSubscribers.put(ofUser, MutableLiveData())
                 } else {
-                    if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions.put(ofUser, MutableLiveData())
+                    if (ofUser != mAuthLiveData.value?.userName) {//check if we are  not updating current user subscriptions
+                        if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions.put(ofUser, MutableLiveData())
+                    }
                 }
 
-                val users = if (isSubscriber) mGolosApi.getSubscribers(ofUser, null) else mGolosApi.getSubscriptions(ofUser, null)
+                val users = if (isSubscribers) mGolosApi.getSubscribers(ofUser, null) else mGolosApi.getSubscriptions(ofUser, null)
                 val usersFollowObjects = users
                         .map {
-                            val name = if (isSubscriber) it.follower.name else it.following.name
-                            FollowUserObject(name,
-                                    getUserAvatarFromDb(name),
-                                    SubscribeStatus(isUserSubscribedOn(name), UpdatingState.DONE))
+                            val name = if (isSubscribers) it.follower.name else it.following.name
+                            UserObject(name,
+                                    getUserAvatarFromDb(name))
                         }
                 mMainThreadExecutor.execute {
-                    if (isSubscriber) mUsersSubscribers[ofUser]?.value = usersFollowObjects
-                    else mUsersSubscriptions[ofUser]?.value = usersFollowObjects
+                    if (isSubscribers) mUsersSubscribers[ofUser]?.value = usersFollowObjects
+                    else {
+                        if (ofUser == mAuthLiveData.value?.userName) {
+                            mCurrentUserSubscriptions.value = usersFollowObjects.map { UserBlogSubscription(it, SubscribeStatus.SubscribedStatus) }
+                        } else {
+                            mUsersSubscriptions[ofUser]?.value = usersFollowObjects
+                        }
 
-                    if (mUsersAccountInfo.contains(ofUser)) {
-                        if (isSubscriber) mUsersAccountInfo[ofUser]!!.value?.subscribersCount = usersFollowObjects.size.toLong()
                     }
 
-                    if (isUserLoggedIn() && !isSubscriber && ofUser == mPersister.getCurrentUserName()) {
-                        mBlogOfUserSubscriptions.clear()
-                        mBlogOfUserSubscriptions.addAll(usersFollowObjects.map { it.name })
+                    if (mUsersAccountInfo.contains(ofUser)) {
+                        if (isSubscribers) mUsersAccountInfo[ofUser]?.value?.subscribersCount = usersFollowObjects.size.toLong()
                     }
                     completionHandler.invoke(usersFollowObjects, null)
                 }
@@ -570,8 +543,15 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     it.avatar = getUserAvatarFromDb(it.name)
                 }
                 mMainThreadExecutor.execute {
-                    if (isSubscriber) mUsersSubscribers[ofUser]?.value = usersFollowObjects
-                    else mUsersSubscriptions[ofUser]?.value = usersFollowObjects
+                    if (isSubscribers) mUsersSubscribers[ofUser]?.value = usersFollowObjects
+                    else {
+                        if (ofUser == mAuthLiveData.value?.userName) {
+                            mCurrentUserSubscriptions.value = usersFollowObjects.map { UserBlogSubscription(it, SubscribeStatus.SubscribedStatus) }
+                        } else {
+                            mUsersSubscriptions[ofUser]?.value = usersFollowObjects
+                        }
+
+                    }
                 }
 
             } catch (e: Exception) {
@@ -585,27 +565,24 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun requestSubscribersUpdate(ofUser: String,
-                                          completionHandler: (List<FollowUserObject>, GolosError?) -> Unit) {
+                                          completionHandler: (List<UserObject>, GolosError?) -> Unit) {
         requestSubscribersOrSubscriptionbsUpdate(true, ofUser, completionHandler)
     }
 
     override fun requestSubscriptionUpdate(ofUser: String,
-                                           completionHandler: (List<FollowUserObject>, GolosError?) -> Unit) {
+                                           completionHandler: (List<UserObject>, GolosError?) -> Unit) {
         requestSubscribersOrSubscriptionbsUpdate(false, ofUser, completionHandler)
     }
 
     override fun deleteUserdata() {
         mPersister.deleteUserData()
         mAuthLiveData.value = null
-        mBlogOfUserSubscriptions.clear()
-        mMainThreadExecutor.execute {
-            allLiveData().forEach {
-                it.value?.items?.forEach {
-                    it.rootStory()?.isUserUpvotedOnThis = false
-                }
-                it.value = it.value
+        mCurrentUserSubscriptions.value = null
+        allLiveData().forEach {
+            it.value?.items?.forEach {
+                it.rootStory()?.isUserUpvotedOnThis = false
             }
-
+            it.value = it.value
         }
     }
 
@@ -1007,10 +984,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return ArrayList(mLiveDataMap.values) + ArrayList(mFilteredMap.values)
     }
 
-    private fun allSubscriptionsLiveData(): List<MutableLiveData<List<FollowUserObject>>> {
-        return mUsersSubscriptions.values + mUsersSubscribers.values
-    }
-
     override fun getTrendingTags(): LiveData<List<Tag>> {
         if (mTags.value == null || mTags.value?.size == 0) {
             mWorkerExecutor.execute {
@@ -1061,43 +1034,60 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         currentTags.add(tag)
         mPersister.saveUserSubscribedTags(currentTags.toList())
 
-        allLiveData().forEach {
-            var wasChanged = false
-            it.value?.items?.forEach {
-                if (it.rootStory()?.categoryName ?: "" == tag.name) {
-                    it.subscriptionOnTagUpdatingStatus = SubscribeStatus(true, UpdatingState.DONE)
-                    wasChanged = true
-                }
-            }
-            if (wasChanged) {
-                it.value = it.value
-            }
-        }
-        mUserSubscribedTags.value = currentTags
-    }
 
-    private fun isUserSubscribedOnTag(tagName: String): Boolean {
-        return mUserSubscribedTags.value?.contains(Tag(tagName, 0.0, 0L, 0L)) ?: false
+        mUserSubscribedTags.value = currentTags
     }
 
     override fun unSubscribeOnTag(tag: Tag) {
         val currentTags = HashSet(mUserSubscribedTags.value ?: ArrayList())
         currentTags.remove(tag)
         mPersister.saveUserSubscribedTags(currentTags.toList())
-        allLiveData().forEach {
-            var wasChanged = false
-            it.value?.items?.forEach {
-                if (it.rootStory()?.categoryName ?: "" == tag.name) {
-                    it.subscriptionOnTagUpdatingStatus = SubscribeStatus(false, UpdatingState.DONE)
-                    wasChanged = true
-                }
-            }
-            if (wasChanged) {
-                it.value = it.value
-            }
-        }
         mUserSubscribedTags.value = currentTags
     }
+
+    override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
+        val liveData = MutableLiveData<List<VotedUserObject>>()
+        val item: GolosDiscussionItem? =
+                allLiveData()
+                        .flatMap {
+                            it.value?.items ?: arrayListOf()
+                        }
+                        .find {
+                            it.rootStory()?.id == id
+                        }
+                        ?.rootStory()
+
+        mWorkerExecutor.execute {
+            item?.let {
+                var voters = it.activeVotes.map {
+                    VotedUserObject(it.key, getUserAvatarFromDb(it.key), "${it.value / 100}%")
+                }
+                mMainThreadExecutor.execute {
+                    liveData.value = voters
+                }
+                try {
+                    mGolosApi.getUserAvatars(voters
+                            .filter { it.avatar == null }
+                            .map { it.name })
+                            .forEach {
+                                if (it.value != null) {
+                                    mPersister.saveAvatarPathForUser(it.key, it.value!!, System.currentTimeMillis())
+                                }
+                            }
+                    voters = it.activeVotes.map {
+                        VotedUserObject(it.key, getUserAvatarFromDb(it.key), "${it.value / 100}%")
+                    }
+                    mMainThreadExecutor.execute {
+                        liveData.value = voters
+                    }
+                } catch (e: Exception) {
+                    logException(e)
+                }
+            }
+        }
+        return liveData
+    }
+
 
     private fun logException(e: Throwable) {
         Timber.e(e)

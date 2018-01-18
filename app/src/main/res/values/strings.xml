@@ -121,5 +121,6 @@
     <string name="cancel_sub_onTag">Cancel subscription on #%s?</string>
     <string name="cancel_tag_sub">Cancel subscription</string>
     <string name="dismiss">Dismiss</string>
+    <string name="voted">Votes</string>
 </resources>
 

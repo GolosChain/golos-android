@@ -17,15 +17,15 @@ object MockPersister : Persister() {
     var name: String? = null
     var userSubscribedTags = ArrayList<Tag>()
     override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-        users.put(userName, avatarPath + "__" + updatedDate)
+        users.put(userName, "$avatarPath#$$#$updatedDate")
 
     }
 
     override fun getAvatarForUser(userName: String): Pair<String, Long>? {
         if (!users.containsKey(userName)) return null
-        val path = users.get(userName)!!.split("__")
-        return Pair(path[0].replace("__", ""),
-                path[1].replace("__", "").toLong())
+        val path = users.get(userName)!!.split("#$$#")
+        return Pair(path[0].replace("#$$#", ""),
+                 path[1].replace("#$$#", "").toLong())
     }
 
     override fun getActiveUserData(): UserData? = userData

@@ -67,7 +67,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
 
             while (urlMatcher.find()) {
                 val foundString = urlMatcher.group()
-                //val foundString = out.substring(urlMatcher.start(0), urlMatcher.end(0))
+                //val foundString = out.substring(urlMatcher.startForSubscribersOrSubscriptions(0), urlMatcher.end(0))
                 if (foundString.endsWith("zip", true)
                         || foundString.endsWith("rar", true)
                         || foundString.endsWith("exe", true)

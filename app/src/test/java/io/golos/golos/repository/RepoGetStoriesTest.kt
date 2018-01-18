@@ -243,19 +243,17 @@ class RepoGetStoriesTest {
     @Test
     fun testGetSubscribersAndSubscriptions() {
         val wokrkingAcc = "vredinka2345"
-        var subs = repo.getSubscribersToUserBlog(wokrkingAcc)
+        var subs = repo.getSubscribersToBlog(wokrkingAcc)
         Assert.assertNull(subs.value)
         val countObject = Golos4J.getInstance().followApiMethods.getFollowCount(AccountName(wokrkingAcc))
         repo.requestSubscribersUpdate(wokrkingAcc, { _, _ -> })
         Assert.assertNotNull(subs.value)
         Assert.assertEquals(countObject.followerCount, subs.value!!.size)
-        Assert.assertTrue(subs.value!!.find { it.subscribeStatus.isCurrentUserSubscribed } == null)
 
-        subs = repo.getSubscriptionsToUserBlogs(wokrkingAcc)
+        subs = repo.getSubscriptionsToBlogs(wokrkingAcc)
         Assert.assertNull(subs.value)
         repo.requestSubscriptionUpdate(wokrkingAcc, { _, _ -> })
         Assert.assertNotNull(subs.value)
         Assert.assertEquals(countObject.followingCount, subs.value!!.size)
-        Assert.assertTrue(subs.value!!.find { it.subscribeStatus.isCurrentUserSubscribed } == null)
     }
 }

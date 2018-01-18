@@ -5,8 +5,10 @@ import io.golos.golos.screens.story.model.SubscribeStatus
 /**
  * Created by yuri on 22.12.17.
  */
-data class FollowUserObject(
+data class UserBlogSubscription(val user: UserObject,
+                                var status: SubscribeStatus)
+
+data class UserObject(
         val name: String,
-        var avatar: String?,
-        var subscribeStatus: SubscribeStatus
+        var avatar: String?
 )

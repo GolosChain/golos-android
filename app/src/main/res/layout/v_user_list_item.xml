@@ -10,20 +10,37 @@
         android:layout_height="50dp"
         android:layout_marginStart="@dimen/material_big"
         android:scaleType="centerCrop"
+        android:src="@drawable/test"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-
         app:riv_oval="true" />
 
-    <TextView
-        android:id="@+id/name_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/margin_material_small"
-        android:gravity="center_vertical|start"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_material_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/follow_btn"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toTopOf="parent">
 
-        app:layout_constraintStart_toEndOf="@id/avatar_iv" />
+        <TextView
+            android:id="@+id/name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black3" />
+
+        <TextView
+            android:id="@+id/sub_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:textColor="@color/gray_7d"
+            android:textSize="@dimen/font_small" />
+    </LinearLayout>
+
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/follow_btn"

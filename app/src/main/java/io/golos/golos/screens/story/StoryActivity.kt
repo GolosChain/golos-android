@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
 import com.wefika.flowlayout.FlowLayout
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.R.raw.story
 import io.golos.golos.repository.model.StoryFilter
@@ -80,8 +81,10 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private fun setUpViewModel() {
         val provider = ViewModelProviders.of(this)
         mViewModel = provider.get(StoryViewModel::class.java)
-        val extra = intent.getStringExtra(PERMLINK_TAG)
-        if (extra == null) {
+
+        if (!intent.hasExtra(PERMLINK_TAG) ||
+                !intent.hasExtra(FEED_TYPE) ||
+                !intent.hasExtra(PERMLINK_TAG)) {
             Timber.e(" no story set to activity")
             finish()
             return
@@ -90,7 +93,10 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 intent.getStringExtra(PERMLINK_TAG),
                 intent.getStringExtra(BLOG_TAG),
                 intent.getSerializableExtra(FEED_TYPE) as FeedType,
-                mapper.readValue(intent.getStringExtra(STORY_FILTER), StoryFilter::class.java))
+                mapper.readValue(intent.getStringExtra(STORY_FILTER), StoryFilter::class.java),
+                object : InternetStatusNotifier {
+                    override fun isAppOnline() = App.isAppOnline()
+                })
 
         mViewModel.liveData.observe(this, Observer {
             mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
@@ -142,10 +148,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatarofAuthorInFollowLo)
                     }
-                    if (it.canUserMakeBlogSubscriptionActions) {
-                        mAuthorSubscribeButton.visibility = View.VISIBLE
 
-                    }
                     mUserName.setOnClickListener {
                         mViewModel.onUserClick(this, mUserName.text.toString())
                     }
@@ -153,20 +156,19 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
-                mAuthorSubscribeButton.text = if (it.storyTree.subscriptionOnBlogUpdatingStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
+                mAuthorSubscribeButton.text = if (it.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
                 else getString(R.string.follow)
-
-
-                mAuthorSubscribeButton.visibility = if (it.storyTree.subscriptionOnBlogUpdatingStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
+                mAuthorSubscribeButton.visibility = if (it.subscribeOnStoryAuthorStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
                 else View.GONE
+
                 mAuthorSubscribeProgress.visibility = if (mAuthorSubscribeButton.visibility == View.GONE) View.VISIBLE else View.GONE
 
                 mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
 
 
-                if (it.storyTree.subscriptionOnTagUpdatingStatus.isCurrentUserSubscribed) {
+                if (it.subscribeOnTagStatus.isCurrentUserSubscribed) {
                     mTagSubscribeBtn.setText(R.string.unfollow)
-                }else {
+                } else {
                     mTagSubscribeBtn.setText(R.string.follow)
                 }
 
@@ -330,6 +332,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
     }
+
 
     companion object {
         private val AUTHOR_TAG = "AUTHOR_TAG"

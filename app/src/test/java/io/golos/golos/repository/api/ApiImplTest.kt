@@ -3,6 +3,7 @@ package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
+import eu.bittrade.libs.steemj.base.models.operations.AccountUpdateOperation
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.util.AuthUtils
 import io.golos.golos.repository.model.StoryFilter
@@ -263,24 +264,31 @@ class ApiImplTest {
 
     }
 
-     @Test
-    fun testGetTags(){
-         var size = 1000
-         var tags = service.getTrendingTag("", size)
-         Assert.assertEquals(size, tags.size)
-         var tagsSet = HashSet(tags)
-         Assert.assertEquals(size, tagsSet.size)
+    @Test
+    fun testGetTags() {
+        var size = 1000
+        var tags = service.getTrendingTag("", size)
+        Assert.assertEquals(size, tags.size)
+        var tagsSet = HashSet(tags)
+        Assert.assertEquals(size, tagsSet.size)
 
-         size = 1500
-         tags = service.getTrendingTag("", size)
-         Assert.assertEquals(size, tags.size)
-         tagsSet = HashSet(tags)
-         Assert.assertEquals(size, tagsSet.size)
+        size = 1500
+        tags = service.getTrendingTag("", size)
+        Assert.assertEquals(size, tags.size)
+        tagsSet = HashSet(tags)
+        Assert.assertEquals(size, tagsSet.size)
 
-         size = 3200
-         tags = service.getTrendingTag("", size)
-         Assert.assertEquals(size, tags.size)
-         tagsSet = HashSet(tags)
-         Assert.assertEquals(size, tagsSet.size)
-     }
+        size = 3200
+        tags = service.getTrendingTag("", size)
+        Assert.assertEquals(size, tags.size)
+        tagsSet = HashSet(tags)
+        Assert.assertEquals(size, tagsSet.size)
+    }
+
+    @Test
+    fun testUpdateAccount() {
+        val acc = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("lokkie")))
+        val accUpdateOperation = AccountUpdateOperation(AccountName("yuri-vlad-second"), null, null, null, null, "")
+
+    }
 }

@@ -9,6 +9,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.userslist.UsersListActivity
+import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
@@ -73,9 +74,9 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
                     }
                 }
                 if (it.accountInfo.isCurrentUserSubscribed) {
-                    mRepository.unFollow(it.accountInfo.userName ?: return@let, resultHandler)
+                    mRepository.unSubscribeOnUserBlog(it.accountInfo.userName ?: return@let, resultHandler)
                 } else {
-                    mRepository.follow(it.accountInfo.userName ?: return@let, resultHandler)
+                    mRepository.subscribeOnUserBlog(it.accountInfo.userName ?: return@let, resultHandler)
                 }
             }
         } else {
@@ -84,10 +85,10 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
     }
 
     fun onSubscriberClick(ctx: Context, string: String?) {
-        UsersListActivity.start(ctx, string ?: return, true)
+        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string ?: return, ListType.SUBSCRIBERS)
     }
 
     fun onSubscriptionsClick(ctx: Context, string: String?) {
-        UsersListActivity.start(ctx, string ?: return, false)
+        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string ?: return, ListType.SUBSCRIPTIONS)
     }
 }

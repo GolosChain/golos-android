@@ -128,27 +128,29 @@ abstract class Repository {
 
     abstract fun isUserLoggedIn(): Boolean
 
-    abstract fun follow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+    //subscription to blog
+    abstract fun getCurrentUserSubscriptions(): LiveData<List<UserBlogSubscription>>
 
-    abstract fun unFollow(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+    abstract fun getSubscribersToBlog(ofUser: String): LiveData<List<UserObject>>
+    abstract fun getSubscriptionsToBlogs(ofUser: String): LiveData<List<UserObject>>
 
-    abstract fun getSubscribersToUserBlog(ofUser: String): LiveData<List<FollowUserObject>>
+    abstract fun requestSubscribersUpdate(ofUser: String, completionHandler: (List<UserObject>, GolosError?) -> Unit)
+    abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<UserObject>, GolosError?) -> Unit)
 
-    abstract fun requestSubscribersUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
+    abstract fun subscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+    abstract fun unSubscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
-    abstract fun getSubscriptionsToUserBlogs(ofUser: String): LiveData<List<FollowUserObject>>
-
-    abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<FollowUserObject>, GolosError?) -> Unit)
-
-    abstract fun getTrendingTags(): LiveData<List<Tag>>
-
-    abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
-
+    //tags
     abstract fun getUserSubscribedTags(): LiveData<Set<Tag>>
 
     abstract fun subscribeOnTag(tag: Tag)
-
     abstract fun unSubscribeOnTag(tag: Tag)
+
+    abstract fun getTrendingTags(): LiveData<List<Tag>>
+    abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
+
+    abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
+
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"

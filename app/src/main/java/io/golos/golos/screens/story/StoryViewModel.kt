@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
 import android.widget.ImageView
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -21,10 +20,9 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
 import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.widgets.PhotoActivity
-import io.golos.golos.utils.ErrorCode
-import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.Translit
+import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 06.11.17.
@@ -38,33 +36,42 @@ class StoryViewModel : ViewModel() {
     private var filter: StoryFilter? = null
     var blog: String? = null
     private lateinit var feedType: FeedType
+    private lateinit var mInternetStatusNotifier: InternetStatusNotifier
 
     fun onCreate(author: String,
                  permLink: String,
                  blog: String?,
                  feedType: FeedType,
-                 filter: StoryFilter?) {
+                 filter: StoryFilter?,
+                 internetStatusNotifier: InternetStatusNotifier) {
         this.author = author
         this.permLink = permLink
         this.blog = blog
         this.feedType = feedType
         this.filter = filter
+        this.mInternetStatusNotifier = internetStatusNotifier
+
         mLiveData.removeSource(mRepository.getStories(feedType, filter))
         mLiveData.addSource(mRepository.getStories(feedType, filter)) {
             val storyItems = it
             it?.
                     items?.
-                    filter {
+                    find {
                         it.rootStory()?.author == this.author
                                 && it.rootStory()?.permlink == this.permLink
                     }?.
-                    forEach {
+                    let {
+
                         mLiveData.value = StoryViewState(false,
                                 it.rootStory()?.title ?: "",
-                                mLiveData.value?.isStoryCommentButtonShown ?: false,
+                                mRepository.isUserLoggedIn(),
                                 storyItems?.error,
                                 it.rootStory()?.tags ?: ArrayList(),
-                                it)
+                                it,
+                                mRepository.isUserLoggedIn(),
+                                mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                                mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
+
                         this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
                     }
         }
@@ -72,12 +79,44 @@ class StoryViewModel : ViewModel() {
         mLiveData.addSource(mRepository.getCurrentUserDataAsLiveData()) {
             mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
                     mLiveData.value?.storyTitle ?: "",
-                    it?.userName != null,
+                    mRepository.isUserLoggedIn(),
                     mLiveData.value?.errorCode,
                     mLiveData.value?.tags ?: ArrayList(),
                     mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
-                    mRepository.isUserLoggedIn())
+                    mRepository.isUserLoggedIn(),
+                    mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                    mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus
+            )
         }
+        mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
+        mLiveData.addSource(mRepository.getCurrentUserSubscriptions(), {
+            if (it?.any { it.user.name == this.author } == true) {
+                val followItem = it.find { it.user.name == this.author } ?: return@addSource
+                mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
+                        mLiveData.value?.storyTitle ?: "",
+                        mRepository.isUserLoggedIn(),
+                        mLiveData.value?.errorCode,
+                        mLiveData.value?.tags ?: ArrayList(),
+                        mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                        mRepository.isUserLoggedIn(),
+                        followItem.status,
+                        mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
+            }
+        })
+        mLiveData.removeSource(mRepository.getUserSubscribedTags())
+        mLiveData.addSource(mRepository.getUserSubscribedTags(), {
+            val tagItem = it?.find { it.name == this.blog }
+            mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
+                    mLiveData.value?.storyTitle ?: "",
+                    mRepository.isUserLoggedIn(),
+                    mLiveData.value?.errorCode,
+                    mLiveData.value?.tags ?: ArrayList(),
+                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                    mRepository.isUserLoggedIn(),
+                    mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                    SubscribeStatus(tagItem != null, UpdatingState.DONE)
+            )
+        })
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
     }
 
@@ -182,28 +221,27 @@ class StoryViewModel : ViewModel() {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
             return
         }
-        if (!App.isAppOnline()) {
+        if (!mInternetStatusNotifier.isAppOnline()) {
             showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
             return
         }
 
-        if (mLiveData.value?.storyTree?.subscriptionOnBlogUpdatingStatus?.isCurrentUserSubscribed == true)
-            mRepository.unFollow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
-                showError(e ?: return@unFollow)
+        if (mLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == true)
+            mRepository.unSubscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+                showError(e ?: return@unSubscribeOnUserBlog)
             })
-        else if (mLiveData.value?.storyTree?.subscriptionOnBlogUpdatingStatus?.isCurrentUserSubscribed == false) {
-            mRepository.follow(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
-                showError(e ?: return@follow)
+        else if (mLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == false) {
+            mRepository.subscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+                showError(e ?: return@subscribeOnUserBlog)
             })
         }
     }
 
     fun onSubscribeToMainTagClick() {
-        val tag = mLiveData.value?.storyTree?.rootStory()?.categoryName
-        if (tag == null) return
-        if (mLiveData.value?.storyTree?.subscriptionOnTagUpdatingStatus?.isCurrentUserSubscribed == true) {
+        val tag = mLiveData.value?.storyTree?.rootStory()?.categoryName ?: return
+        if (mLiveData.value?.subscribeOnTagStatus?.isCurrentUserSubscribed == true) {
             mRepository.unSubscribeOnTag(Tag(tag, 0.0, 0L, 0L))
-        } else if (mLiveData.value?.storyTree?.subscriptionOnTagUpdatingStatus?.isCurrentUserSubscribed == false) mRepository.subscribeOnTag(Tag(tag, 0.0, 0L, 0L))
+        } else if (mLiveData.value?.subscribeOnTagStatus?.isCurrentUserSubscribed == false) mRepository.subscribeOnTag(Tag(tag, 0.0, 0L, 0L))
     }
 
     fun onUserClick(context: Context, userName: String?) {
@@ -217,6 +255,8 @@ class StoryViewModel : ViewModel() {
                 error,
                 mLiveData.value?.tags ?: ArrayList(),
                 mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
-                mRepository.isUserLoggedIn())
+                mRepository.isUserLoggedIn(),
+                mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
     }
 }

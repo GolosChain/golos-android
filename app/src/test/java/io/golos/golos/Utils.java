@@ -48,7 +48,8 @@ public class Utils {
             @Override
             public void accept(Discussion discussion) {
                 stories.add(new StoryTree(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
-                        new ArrayList(),new SubscribeStatus(false, UpdatingState.DONE)));
+                        new ArrayList()
+                        ));
 
             }
         });

@@ -72,6 +72,6 @@ abstract class GolosApi {
 
     abstract fun unfollow(user: String)
 
-    // empty start from to start from beginning, maxCount 1 - 1000
+    // empty startForSubscribersOrSubscriptions from to startForSubscribersOrSubscriptions from beginning, maxCount 1 - 1000
     abstract fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag>
 }
