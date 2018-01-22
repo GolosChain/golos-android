@@ -19,9 +19,9 @@
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/user_name"
+        style="@style/TitleUserNameStyle"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
-        app:layout_constraintTop_toTopOf="parent"
-        style="@style/TitleUserNameStyle" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
@@ -116,61 +116,59 @@
         app:constraint_referenced_ids="text, image_main " />
 
     <android.support.v7.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
         android:id="@+id/bottom_buttons_lo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/post_bottom_controls_height"
         android:layout_marginTop="@dimen/margin_material_half"
-        android:gravity="center"
+        android:gravity="start"
         android:paddingStart="@dimen/margin_material"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/barrier">
 
-        <android.support.v7.widget.AppCompatButton
+        <TextView
             android:id="@+id/vote_btn"
-            android:textSize="@dimen/font_regular"
-            style="@style/Base.Widget.AppCompat.Button.Borderless.VoteButton"
-
-            />
+            style="@style/VoteButton"
+            android:background="?attr/selectableItemBackground"
+            android:textSize="@dimen/font_regular" />
 
         <ProgressBar
             android:id="@+id/progress"
-            android:layout_width="140dp"
-
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
             android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/voters_btn"
+            style="@style/StoryBottomControlButton"
+            android:background="?attr/selectableItemBackground"
+            android:paddingBottom="3dp" />
 
-        <android.support.v7.widget.AppCompatButton
+        <TextView
+            android:layout_marginStart="@dimen/margin_material_half"
             android:id="@+id/comments_btn"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:textSize="@dimen/font_regular"
-            android:textColor="@color/gray_4f"
-            android:gravity="center" />
+            style="@style/StoryBottomControlButton"
+            android:background="?attr/selectableItemBackground" />
 
         <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.40">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <android.support.v7.widget.AppCompatImageButton
                 android:id="@+id/share_btn"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="right"
-                app:srcCompat="@drawable/ic_share_gray_24dp" />
+                android:layout_gravity="end"
+                app:srcCompat="@drawable/ic_share_gray_20dp" />
         </FrameLayout>
 
-
     </android.support.v7.widget.LinearLayoutCompat>
+
     <View
-        android:layout_marginTop="@dimen/margin_material_half"
         android:layout_width="wrap_content"
-        android:layout_height="4dp"
-        android:background="#f0f1f1"
-        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo"/>
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:background="#f4f4f4"
+        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo" />
 </android.support.constraint.ConstraintLayout>

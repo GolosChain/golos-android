@@ -19,9 +19,13 @@ import kotlin.collections.HashMap
 abstract class Persister {
 
 
-    abstract fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long)
+    abstract fun saveAvatarPathForUser(userAvatar: UserAvatar)
+
+    abstract fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>)
 
     abstract fun getAvatarForUser(userName: String): Pair<String, Long>?
+
+    abstract fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?>
 
     abstract fun getCurrentUserName(): String?
 
@@ -64,8 +68,12 @@ private class OnDevicePersister(private val context: Context) : Persister() {
     private val mDatabase: SqliteDb = SqliteDb(context)
     private val mPreference = context.getSharedPreferences("ondevicepersister", Context.MODE_PRIVATE)
 
-    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-        mDatabase.saveAvatar(UserAvatar(userName, avatarPath, updatedDate))
+    override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
+        mDatabase.saveAvatar(userAvatar)
+    }
+
+    override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
+        mDatabase.saveAvatars(userAvatars)
     }
 
     private fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
@@ -139,6 +147,10 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         else return Pair(userAvatar.avatarPath, userAvatar.dateUpdated)
     }
 
+    override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
+        return mDatabase.getAvatars(users)
+    }
+
     override fun getCurrentUserName(): String? {
         return getActiveUserData()?.userName
     }
@@ -177,20 +189,27 @@ private class OnDevicePersister(private val context: Context) : Persister() {
 private class MockPersister : Persister() {
     private var userData: UserData? = null
     private var currentUserName: String? = null
-    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
+    override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
 
+    }
+
+    override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
+
+    }
+
+    override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
+        return HashMap()
     }
 
     override fun saveUserSubscribedTags(tags: List<Tag>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun getUserSubscribedTags(): List<Tag> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return arrayListOf()
     }
 
     override fun deleteUserSubscribedTag(tag: Tag) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getAvatarForUser(userName: String): Pair<String, Long> {
@@ -199,11 +218,10 @@ private class MockPersister : Persister() {
     }
 
     override fun saveTags(tags: List<Tag>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getTags(): List<Tag> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return listOf()
     }
 
     override fun getCurrentUserName(): String? {

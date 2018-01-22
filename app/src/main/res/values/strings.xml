@@ -45,14 +45,14 @@
     <string name="wrong_credentials">Incorrect login or password</string>
     <string name="logout">Log out</string>
     <string name="loading">Loading...</string>
-    <string name="choose_vote_power">Choose your vote power</string>
-    <string name="user_used_max_comments_chances">You can not vote for this post anymore</string>
+    <string name="choose_vote_power">Choose your name power</string>
+    <string name="user_used_max_comments_chances">You can not name for this post anymore</string>
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>
     <string name="you_voted_same_way">You have already voted for the post</string>
-    <string name="login_to_vote">Log in or register to vote</string>
+    <string name="login_to_vote">Log in or register to name</string>
     <string name="login_to_see_feed">Login to view your feed</string>
-    <string name="nothing_here">While there is nothing, your personalized feed will be filled immediately after the appearance of new content</string>
+    <string name="nothing_here">While there is nothing, it will be filled immediately after the appearance of new content</string>
     <string name="wrong_image">Something is wrong with the image,please try another one.</string>
     <string name="link_name">Name of link</string>
     <string name="link_address">Link address</string>
@@ -92,7 +92,7 @@
     <string name="privacy_policy">Privacy policy</string>
     <string name="golos_android_v">Golos for Android v.%s</string>
     <string name="user_made_logout">User made logout</string>
-    <string name="can_vote_once_per_three_second">You can vote once per three seconds</string>
+    <string name="can_vote_once_per_three_second">You can vote only once per three seconds</string>
     <string name="must_be_logged_in_for_this_action">You must be logged in to perform this action</string>
     <string name="must_be_subscribed_for_action">You must be subscribed to user to unsubscribe</string>
     <string name="you_already_subscribed">You are already subscribed to this author</string>

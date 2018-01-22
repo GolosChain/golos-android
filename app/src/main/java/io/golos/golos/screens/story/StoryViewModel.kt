@@ -21,6 +21,7 @@ import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryViewState
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
+import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.widgets.PhotoActivity
 import io.golos.golos.utils.*
 
@@ -258,5 +259,9 @@ class StoryViewModel : ViewModel() {
                 mRepository.isUserLoggedIn(),
                 mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
                 mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
+    }
+
+    fun onStoryVotesClick(context: Context) {
+        UsersListActivity.startToShowVoters(context,mLiveData.value?.storyTree?.rootStory()?.id?:return)
     }
 }

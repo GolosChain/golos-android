@@ -52,7 +52,7 @@
     <string name="you_voted_same_way">Вы уже проголосовали за это сообщение</string>
     <string name="login_to_vote">Зайдите или зарегестрируйтесь, чтобы проголосовать</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
-    <string name="nothing_here">Пока ничего нет, ваша персонализированная фид-лента будет заполняться сразу после появления нового контента</string>
+    <string name="nothing_here">Пока ничего нет, данные будут заполняться сразу после появления нового контента</string>
     <string name="wrong_image">Что-то не так с изображением, попробуйте другое.</string>
     <string name="link_name">Название ссылки</string>
     <string name="link_address">Адрес ссылки</string>

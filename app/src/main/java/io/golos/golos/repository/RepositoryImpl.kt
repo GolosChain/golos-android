@@ -13,6 +13,7 @@ import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorPart
@@ -50,6 +51,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
     private val mFilteredMap: HashMap<FilteredRequest, MutableLiveData<StoryTreeItems>> = HashMap()
 
+    //votes
+    var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
+
     //users data
     private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
@@ -73,12 +77,18 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         val out = mGolosApi.getStories(limit, type, truncateBody, filter, startAuthor, startPermlink)
 
         val name = mPersister.getActiveUserData()?.userName ?: ""
+
+        val authors = out.map { it.rootStory()?.author ?: "_____absent_____" }
+        val avatars = getUserAvatarsFromDb(authors)
+
         out.forEach {
             if (name.isNotEmpty()) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
             }
-            it.rootStory()?.avatarPath = getUserAvatarFromDb(it.rootStory()?.author ?: "_____absent_____")
+            it.rootStory()?.avatarPath = avatars.get(it.rootStory()?.author ?: "_____absent_____")
         }
+
+
         return out
     }
 
@@ -100,6 +110,22 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             return avatar.first
         }
         return null
+    }
+
+    private fun getUserAvatarsFromDb(users: List<String>): Map<String, String?> {
+        val avatars = mPersister.getAvatarsFor(users)
+        val currentTime = System.currentTimeMillis()
+        val map = HashMap<String, String?>(avatars.size)
+        avatars.forEach({
+            val userName = it.key
+            val avatar = it.value
+            if (avatar != null && currentTime < (avatar.dateUpdated + mAvatarRefreshDelay)) {
+                map.put(userName, avatar.avatarPath)
+            } else {
+                map.put(userName, null)
+            }
+        })
+        return map
     }
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryTree {
@@ -190,10 +216,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
-            if (response.accountInfo.avatarPath != null)
-                mPersister.saveAvatarPathForUser(userName,
-                        response.accountInfo.avatarPath,
-                        System.currentTimeMillis())
+            if (response.accountInfo.avatarPath != null) {
+                mPersister.saveAvatarPathForUser(UserAvatar(userName, response.accountInfo.avatarPath, System.currentTimeMillis()))
+            }
 
             val userData = UserData.fromPositiveAuthResponse(response)
 
@@ -533,12 +558,14 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
 
                 val absentAvatar = usersFollowObjects.filter { it.avatar == null }.map { it.name }
-                val avatars = HashMap(mGolosApi.getUserAvatars(absentAvatar))
-                avatars
+
+                val avatars = mGolosApi.getUserAvatars(absentAvatar)
                         .filter { it.value != null }
-                        .forEach {
-                            mPersister.saveAvatarPathForUser(it.key, it.value!!, System.currentTimeMillis())
+                        .map {
+                            UserAvatar(it.key, it.value, System.currentTimeMillis())
                         }
+                mPersister.saveAvatarsPathForUsers(avatars)
+
                 usersFollowObjects.forEach {
                     it.avatar = getUserAvatarFromDb(it.name)
                 }
@@ -648,28 +675,24 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             .filter { it.rootStory()?.avatarPath == null }
                             .distinct()
                             .map { it.rootStory()?.author ?: "" }
-                    val avatars = mGolosApi.getUserAvatars(userNames)
-                    avatars
-                            .filter { it.value != null }
-                            .forEach {
-                                mPersister.saveAvatarPathForUser(it.key, it.value!!, System.currentTimeMillis())
-                            }
-                    var items = convertFeedTypeToLiveData(feedType, filter).value!!.items
-                    items = ArrayList(items)
-                            .map {
-                                if (avatars.containsKey(it.rootStory()?.author ?: "")) it.deepCopy()
-                                else it
-                            }.toArrayList()
 
+                    val avatarsMap = mGolosApi.getUserAvatars(userNames)
+                    val avatars =
+                            avatarsMap
+                                    .filter { it.value != null }
+                                    .map {
+                                        UserAvatar(it.key, it.value, System.currentTimeMillis())
+                                    }
+                    mPersister.saveAvatarsPathForUsers(avatars)
+
+                    var items = convertFeedTypeToLiveData(feedType, filter).value!!.items
                     items.forEach {
-                        if (avatars.containsKey(it.rootStory()?.author ?: "")) {
-                            it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: ""]
-                        }
+                        if (avatarsMap.containsKey(it.rootStory()?.author ?: "")) it.rootStory()?.avatarPath = avatarsMap[it.rootStory()?.author ?: ""]
                     }
 
                     convertFeedTypeToLiveData(feedType, filter).let {
                         mMainThreadExecutor.execute {
-                            it.value = StoryTreeItems(items, feedType, filter, it.value?.error)
+                            it.value = it.value
                         }
                     }
                 } catch (e: Exception) {
@@ -760,13 +783,16 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 val updatedStory = getStory(story.rootStory()?.categoryName ?: "",
                         story.rootStory()?.author ?: "",
                         story.rootStory()?.permlink ?: "")
-                updatedStory.getFlataned().forEach {
-                    if (it.story.avatarPath != null) {
-                        mPersister.saveAvatarPathForUser(it.story.author,
-                                it.story.avatarPath ?: "",
-                                System.currentTimeMillis())
-                    }
-                }
+
+                val avatars = updatedStory.getFlataned()
+                        .filter {
+                            it.story.avatarPath != null
+                        }
+                        .map {
+                            UserAvatar(it.story.author, it.story.avatarPath, System.currentTimeMillis())
+                        }
+                mPersister.saveAvatarsPathForUsers(avatars)
+
                 val listOfList = allLiveData()
                 val replacer = StorySearcherAndReplacer()
                 listOfList.forEach {
@@ -1047,7 +1073,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
         val liveData = MutableLiveData<List<VotedUserObject>>()
-        val item: GolosDiscussionItem? =
+        mVotesLiveData = Pair(id, liveData)
+
+        var item: GolosDiscussionItem? =
                 allLiveData()
                         .flatMap {
                             it.value?.items ?: arrayListOf()
@@ -1056,26 +1084,53 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                             it.rootStory()?.id == id
                         }
                         ?.rootStory()
+        if (item == null)
+            item = allLiveData()
+                    .flatMap {
+                        it.value?.items ?: arrayListOf()
+                    }
+                    .flatMap { it.getFlataned() }
+                    .map { it.story }
 
+                    .find {
+                        it.id == id
+                    }
+
+        if (item == null || item.activeVotes.size == 0){
+            liveData.value = listOf()
+            return liveData
+        }
         mWorkerExecutor.execute {
             item?.let {
-                var voters = it.activeVotes.map {
-                    VotedUserObject(it.key, getUserAvatarFromDb(it.key), "${it.value / 100}%")
-                }
+
+                val avatars = getUserAvatarsFromDb(it.activeVotes.map { it.name })
+
+                val payouts = RSharesConverter.convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
+
+                var voters = it
+                        .activeVotes
+                        .filter { it.percent > 0 }
+                        .mapIndexed { index, voteLight ->
+                    VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
+                }.sorted()
+
                 mMainThreadExecutor.execute {
                     liveData.value = voters
                 }
                 try {
-                    mGolosApi.getUserAvatars(voters
+                    val avatars = mGolosApi.getUserAvatars(voters
                             .filter { it.avatar == null }
                             .map { it.name })
-                            .forEach {
-                                if (it.value != null) {
-                                    mPersister.saveAvatarPathForUser(it.key, it.value!!, System.currentTimeMillis())
-                                }
+
+                    val avatarObjects = avatars
+                            .filter { it.value != null }
+                            .map {
+                                UserAvatar(it.key, it.value, System.currentTimeMillis())
                             }
-                    voters = it.activeVotes.map {
-                        VotedUserObject(it.key, getUserAvatarFromDb(it.key), "${it.value / 100}%")
+                    mPersister.saveAvatarsPathForUsers(avatarObjects)
+
+                    voters.forEach {
+                        if (avatars.containsKey(it.name)) it.avatar = avatars[it.name]
                     }
                     mMainThreadExecutor.execute {
                         liveData.value = voters

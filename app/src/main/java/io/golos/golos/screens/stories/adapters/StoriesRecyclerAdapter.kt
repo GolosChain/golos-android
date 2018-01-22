@@ -9,7 +9,10 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
@@ -35,14 +38,16 @@ data class StripeWrapper(val stripe: StoryTree,
                          val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
                          val onShareClick: (RecyclerView.ViewHolder) -> Unit,
                          val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
-                         val onUserClick: (RecyclerView.ViewHolder) -> Unit)
+                         val onUserClick: (RecyclerView.ViewHolder) -> Unit,
+                         val onVotersClick:  (RecyclerView.ViewHolder) -> Unit)
 
 class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
                              private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
                              private var onShareClick: (StoryTree) -> Unit = { print(it) },
                              private var onUpvoteClick: (StoryTree) -> Unit = { print(it) },
                              private var onTagClick: (StoryTree) -> Unit = { print(it) },
-                             private var onUserClick: (StoryTree) -> Unit = { print(it) })
+                             private var onUserClick: (StoryTree) -> Unit = { print(it) },
+                             private var onVotersClick: (StoryTree) -> Unit = { print(it) })
     : RecyclerView.Adapter<StripeViewHolder>() {
 
 
@@ -109,7 +114,8 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
                 onCommentsClick = { onCommentsClick.invoke(mStripes[it.adapterPosition]) },
                 onShareClick = { onShareClick.invoke(mStripes[it.adapterPosition]) },
                 onBlogClick = { onTagClick.invoke(mStripes[it.adapterPosition]) },
-                onUserClick = { onUserClick.invoke(mStripes[it.adapterPosition]) })
+                onUserClick = { onUserClick.invoke(mStripes[it.adapterPosition]) },
+                onVotersClick = { onVotersClick.invoke(mStripes[it.adapterPosition]) })
     }
 
     override fun getItemCount() = mStripes.size
@@ -128,23 +134,25 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
     private val mSecondaryImage: ImageView = itemView.findViewById(R.id.additional_image)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
-    private val mUpvoteBtn: Button = itemView.findViewById(R.id.vote_btn)
+    private val mUpvoteBtn: TextView = itemView.findViewById(R.id.vote_btn)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
-    private val mCommentsButton: Button = itemView.findViewById(R.id.comments_btn)
+    private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_btn)
+    private val mVotersBtn: TextView = itemView.findViewById(R.id.voters_btn)
     private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
     private val views = listOf<View>(mAvatar, mUserNameTv, mRebloggedByTv,
             mBlogNameTv, mTitleTv, mBodyTextMarkwon, mSecondaryImage, mMainImageBig, mUpvoteBtn, mCommentsButton, mShareBtn, itemView)
     private val mGlide = Glide.with(parent.context)
 
     init {
-        mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
-        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_24dp), null, null, null)
         if (noAvatarDrawable == null) noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_24dp)
-        if (userNotvotedDrarawble == null) userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_24dp)
-        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp)
+        if (userNotvotedDrarawble == null) userNotvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp)
+        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
         if (errorDrawable == null) errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
 
+        mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
+        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
+        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
+        mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(userNotvotedDrarawble, null, null, null)
     }
 
@@ -160,10 +168,13 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         mUpvoteBtn -> it.setOnClickListener({ field!!.onUpvoteClick(this) })
                         mBlogNameTv -> it.setOnClickListener({ field!!.onBlogClick(this) })
                         mAvatar, mUserNameTv -> it.setOnClickListener({ field!!.onUserClick(this) })
+
                         else -> it.setOnClickListener({ field!!.onCardClick(this) })
                     }
                 })
                 mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
+                mVotersBtn.setOnClickListener({ field!!.onVotersClick(this) })
+
                 mUserNameTv.text = wrapper.author
                 if (wrapper.firstRebloggedBy.isNotEmpty()) {
                     mRebloggedByTv.text = wrapper.firstRebloggedBy
@@ -200,6 +211,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mVotingProgress.visibility = View.GONE
                     mUpvoteBtn.visibility = View.VISIBLE
                 }
+                mVotersBtn.text = value?.stripe?.rootStory()?.votesNum?.toString() ?: ""
                 when {
                     wrapper.type == ItemType.PLAIN -> {
                         mMainImageBig.visibility = View.GONE

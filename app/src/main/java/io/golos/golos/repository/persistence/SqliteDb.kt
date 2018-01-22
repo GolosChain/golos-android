@@ -35,8 +35,16 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         mAvatarsTable.saveAvatarToTable(writableDatabase, avatar)
     }
 
+    fun saveAvatars(avatars: List<UserAvatar>) {
+        mAvatarsTable.saveAvatarsToTable(writableDatabase, avatars)
+    }
+
     fun getAvatar(userName: String): UserAvatar? {
         return mAvatarsTable.getAvatarFromDb(writableDatabase, userName)
+    }
+
+    fun getAvatars(userName: List<String>): Map<String, UserAvatar?> {
+        return mAvatarsTable.getAvatarsFromDb(writableDatabase, userName)
     }
 
     fun saveTags(list: List<Tag>) {
@@ -72,16 +80,79 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         }
 
+        fun saveAvatarsToTable(db: SQLiteDatabase, avatars: List<UserAvatar>) {
+            db.beginTransaction()
+            val values = ContentValues()
+            avatars.forEach {
+                values.put(avatarPathColumn, it.avatarPath)
+                values.put(userNameColumn, it.userName)
+                values.put(dateColumn, it.dateUpdated)
+                db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            db.setTransactionSuccessful()
+            db.endTransaction()
+        }
+
         fun getAvatarFromDb(db: SQLiteDatabase, username: String): UserAvatar? {
             val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
                     "$userNameColumn = \'$username\'", null, null, null, null)
             if (cursor.count == 0) return null
             cursor.moveToFirst()
-            val avatar = UserAvatar(cursor.getString(userNameColumn),
+            val avatar = UserAvatar(cursor.getString(userNameColumn) ?: return null,
                     cursor.getString(avatarPathColumn),
                     cursor.getLong(dateColumn))
             cursor.close()
             return avatar
+        }
+
+        fun getAvatarsFromDb(db: SQLiteDatabase, usernames: List<String>): Map<String, UserAvatar?> {
+
+            val users = usernames.distinct()
+            val map = HashMap<String, UserAvatar?>(users.size)
+
+            val numberOfLists = users.size / 500 + 1
+
+            val listOfUsers = ArrayList<List<String>>(numberOfLists)
+
+
+            (0 until numberOfLists).forEach {
+                var upperBound = 500 * (it + 1)
+                upperBound = if (upperBound > users.size) users.size else upperBound
+                listOfUsers.add(users.subList(500 * it, upperBound))
+            }
+
+            listOfUsers.forEach {
+                val selection = StringBuilder()
+                selection.append("( ")
+                var disabled = false
+                it.forEachIndexed { index, username ->
+                    if (disabled) {
+                        selection.append(" or ")
+                    } else {
+                        disabled = true
+                    }
+                    selection.append("$userNameColumn = \'$username\'")
+                }
+                selection.append(" )")
+                val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
+                        selection.toString(), null, null, null, null)
+                if (cursor.count == 0) return map
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    val name = cursor.getString(userNameColumn)
+                    if (name != null) {
+                        val avatar = UserAvatar(name,
+                                cursor.getString(avatarPathColumn),
+                                cursor.getLong(dateColumn))
+                        map.put(name, avatar)
+                    }
+
+                    cursor.moveToNext()
+                }
+                cursor.close()
+            }
+
+            return map
         }
     }
 
@@ -118,11 +189,15 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             cursor.moveToFirst()
             val out = ArrayList<Tag>()
             while (!cursor.isAfterLast) {
-                val tag = Tag(cursor.getString(TagsTable.tagName),
-                        cursor.getDouble(TagsTable.payoutInGbg),
-                        cursor.getLong(TagsTable.votesCount),
-                        cursor.getLong(TagsTable.topPostsCount))
-                out.add(tag)
+                val tagName = cursor.getString(TagsTable.tagName)
+                if (tagName != null) {
+                    val tag = Tag(tagName,
+                            cursor.getDouble(TagsTable.payoutInGbg),
+                            cursor.getLong(TagsTable.votesCount),
+                            cursor.getLong(TagsTable.topPostsCount))
+                    out.add(tag)
+                }
+
                 cursor.moveToNext()
             }
             cursor.close()
@@ -134,7 +209,10 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                     "distinct", null, null, null, null)
             val out = ArrayList<String>()
             while (!cursor.isAfterLast) {
-                out.add(cursor.getString(filterName))
+                val tagName = cursor.getString(filterName)
+                if (tagName != null) {
+                    out.add(tagName)
+                }
                 cursor.moveToNext()
             }
             cursor.close()
@@ -175,11 +253,15 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             cursor.moveToFirst()
             val out = ArrayList<Tag>()
             while (!cursor.isAfterLast) {
-                val tag = Tag(cursor.getString(tagName),
-                        cursor.getDouble(payoutInGbg),
-                        cursor.getLong(votesCount),
-                        cursor.getLong(topPostsCount))
-                out.add(tag)
+                val tagName = cursor.getString(tagName)
+                if (tagName != null) {
+                    val tag = Tag(tagName,
+                            cursor.getDouble(payoutInGbg),
+                            cursor.getLong(votesCount),
+                            cursor.getLong(topPostsCount))
+                    out.add(tag)
+                }
+
                 cursor.moveToNext()
             }
             cursor.close()
@@ -192,11 +274,14 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             cursor.moveToFirst()
             val out = ArrayList<Tag>()
             while (!cursor.isAfterLast) {
-                val tag = Tag(cursor.getString(tagName),
-                        cursor.getDouble(payoutInGbg),
-                        cursor.getLong(votesCount),
-                        cursor.getLong(topPostsCount))
-                out.add(tag)
+                val tagName = cursor.getString(tagName)
+                if (tagName != null) {
+                    val tag = Tag(tagName,
+                            cursor.getDouble(payoutInGbg),
+                            cursor.getLong(votesCount),
+                            cursor.getLong(topPostsCount))
+                    out.add(tag)
+                }
                 cursor.moveToNext()
             }
             cursor.close()

@@ -86,7 +86,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                     }
                 },
                 onTagClick = { mViewModel?.onBlogClick(context, it) },
-                onUserClick = { mViewModel?.onUserClick(context, it) }
+                onUserClick = { mViewModel?.onUserClick(context, it) },
+                onVotersClick = {mViewModel?.onVotersClick(context, it)}
+
         )
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false

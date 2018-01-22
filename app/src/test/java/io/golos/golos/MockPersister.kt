@@ -2,30 +2,34 @@ package io.golos.golos
 
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.persistence.Persister
+import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.utils.toArrayList
-import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * Created by yuri on 15.12.17.
  */
 object MockPersister : Persister() {
-    var users = HashMap<String, String>()
+    var users = ArrayList<UserAvatar>()
     var tags = ArrayList<Tag>()
     var userData: UserData? = null
     var name: String? = null
     var userSubscribedTags = ArrayList<Tag>()
-    override fun saveAvatarPathForUser(userName: String, avatarPath: String, updatedDate: Long) {
-        users.put(userName, "$avatarPath#$$#$updatedDate")
+    override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
+        users.add(userAvatar)
 
     }
 
+    override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
+        users.addAll(userAvatars)
+    }
+
     override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-        if (!users.containsKey(userName)) return null
-        val path = users.get(userName)!!.split("#$$#")
-        return Pair(path[0].replace("#$$#", ""),
-                 path[1].replace("#$$#", "").toLong())
+
+        return users.find{ it.userName == userName}?.let { Pair(it.avatarPath?:return null,it.dateUpdated) }
+
     }
 
     override fun getActiveUserData(): UserData? = userData
@@ -36,6 +40,10 @@ object MockPersister : Persister() {
 
     override fun deleteUserData() {
         userData = null
+    }
+
+    override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
+       return HashMap()
     }
 
     override fun getCurrentUserName() = userData?.userName

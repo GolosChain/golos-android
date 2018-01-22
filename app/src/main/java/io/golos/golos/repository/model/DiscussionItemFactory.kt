@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionLight
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
@@ -34,14 +35,16 @@ object DiscussionItemFactory {
         val body = discussion.body ?: ""
         val author = discussion.author?.name ?: ""
         val cleanedFromImages = ""
+        val totalRshares = discussion.voteRshares
 
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
+                votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, childrenCount = childrenCount, reputation = reputation,
                 lastUpdated = lastUpdated, created = created, parentPermlink = parentPermlink, firstRebloggedBy = firstRebloggedBy,
                 gbgAmount = gbgAmount, body = body, author = author, cleanedFromImages = cleanedFromImages)
         setDataFromTagsString(discussion.jsonMetadata, item)
         discussion.activeVotes?.forEach {
-            item.activeVotes.put(it.voter.name, it.percent / 100)
+            item.activeVotes.add(VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100))
         }
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
@@ -66,13 +69,15 @@ object DiscussionItemFactory {
         val body = discussion.body ?: ""
         val author = discussion.author ?: ""
         val cleanedFromImages = ""
+        val totalRshares = discussion.voteRshares
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
+                votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, childrenCount = childrenCount, reputation = reputation,
                 lastUpdated = lastUpdated, created = created, parentPermlink = parentPermlink, firstRebloggedBy = firstRebloggedBy,
                 gbgAmount = gbgAmount, body = body, author = author, cleanedFromImages = cleanedFromImages)
 
         setDataFromTagsString(discussion.jsonMetadata, item)
-        item.activeVotes.putAll(discussion.votes)
+        item.activeVotes.addAll(discussion.votes)
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
         return item

@@ -37,7 +37,7 @@ object Counter {
 
 public fun Any.nextInt() = Counter.counter.incrementAndGet()
 
-fun Cursor.getString(columnName: String): String {
+fun Cursor.getString(columnName: String): String? {
     return this.getString(this.getColumnIndex(columnName))
 }
 

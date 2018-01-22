@@ -50,6 +50,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mTagSubscribeBtn: Button
     private lateinit var mBlogNameTv: TextView
     private lateinit var mtitileTv: TextView
+    private lateinit var mVotesIv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
     private lateinit var mNoCommentsTv: TextView
     private lateinit var mStoryRecycler: RecyclerView
@@ -174,10 +175,10 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 mCommentsCountBtn.visibility = View.VISIBLE
                 if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_24dp), null, null, null)
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp), null, null, null)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_24dp), null, null, null)
+                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.gray_4f))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
@@ -201,6 +202,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 mCommentsCountBtn.text = it.storyTree.rootStory()?.commentsCount?.toString()
+                mVotesIv.text = it.storyTree.rootStory()?.votesNum?.toString()?:""
+                mVotesIv.setOnClickListener { mViewModel.onStoryVotesClick(this) }
                 if (mFlow.childCount != story.tags.count()) {
                     mFlow.removeAllViews()
                     story.tags.forEach {
@@ -255,6 +258,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsRecycler = findViewById(R.id.comments_recycler)
         mFlow = findViewById(R.id.tags_lo)
         mMoneyBtn = findViewById(R.id.money_btn)
+        mVotesIv = findViewById(R.id.votes_btn)
         mSwipeToRefresh = findViewById(R.id.swipe_to_refresh)
         mCommentsCountBtn = findViewById(R.id.comments_btn)
         mVotingProgress = findViewById(R.id.voting_progress)
@@ -280,7 +284,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
-        mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_24dp), null, null, null)
+        mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
+        mVotesIv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
         mCommentsCountBtn.visibility = View.INVISIBLE
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false

@@ -3,15 +3,19 @@ package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
+import eu.bittrade.libs.steemj.base.models.DiscussionQuery
 import eu.bittrade.libs.steemj.base.models.operations.AccountUpdateOperation
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.util.AuthUtils
+import io.golos.golos.Utils
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.utils.RSharesConverter
 import junit.framework.Assert
 import junit.framework.Assert.*
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.junit.Test
+import java.math.BigInteger
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -290,5 +294,85 @@ class ApiImplTest {
         val acc = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("lokkie")))
         val accUpdateOperation = AccountUpdateOperation(AccountName("yuri-vlad-second"), null, null, null, null, "")
 
+    }
+
+    private fun calculate_vshares(rshares: BigInteger): BigInteger {
+        val s = BigInteger("2000000000000")
+        // (rshares + s) * (rshares + s) - s * s
+        /* var sum = rshares.add(s)
+         sum = sum.multiply(sum)
+         val ccs = s.multiply(s)
+         sum = sum.subtract(ccs)*/
+        return (rshares + s).pow(2) - s.pow(2)
+    }
+
+    private fun getMedianPrice(): Double {
+        /*
+            feed_history = get_feed_history()
+            current_median_history = feed_history.current_median_history
+
+            baseAmount = current_median_history.base.split(" ")[0]
+            quoteAmount = current_median_history.quote.split(" ")[0]
+        */
+        val baseAmount = 1.000
+        val quoteAmount = 0.115
+        return baseAmount / quoteAmount
+    }
+
+    @Test
+    fun test1() {
+        // props = get_dynamic_global_properties()
+        // props.total_reward_shares2
+        val total_reward_shares2 = "5133376796721014669412091165625"
+        // content.active_votes -> voter.rshares
+        val vote_rshares = "122177915528"
+
+        val total_reward_fund_steem = 34482.399 // 34482.399 GOLOS
+        val medianPrice = getMedianPrice()
+
+        // props.total_reward_fund_steem
+        var pot = total_reward_fund_steem
+        pot *= medianPrice
+        pot = java.lang.Double.parseDouble(String.format("%.3f", pot))
+
+        val total_r2 = BigInteger(total_reward_shares2)
+
+        var r2 = calculate_vshares(BigInteger(vote_rshares))
+        r2 = r2.multiply(BigInteger(pot.toString().replace(".", "")))
+        r2 = r2.divide(total_r2)
+
+        val result = r2.toString().toLong()
+        print((result / 1000).toString() + "." + result % 1000)
+        println(" GBG")
+    }
+
+    @Test
+    fun testConvertRsharesToGbg() {
+        val dq = DiscussionQuery()
+        dq.limit = 2
+        dq.truncateBody = 1
+        //   val postRaw = Golos4J.getInstance().databaseMethods.getDiscussionsLightBy(dq, DiscussionSortType.GET_DISCUSSIONS_BY_HOT)[0]
+        val post = Utils.readStoriesFromResourse("stripe.json")[0].rootStory()!!
+
+        var votesRshares = BigInteger.ZERO
+        // val properties = Golos4J.getInstance().databaseMethods.dynamicGlobalProperties
+
+        val current = System.currentTimeMillis()
+        var out: List<Double> = arrayListOf()
+
+        (0 until 1).forEach {
+            val votes = post.activeVotes.map { it.rshares }
+
+            out = RSharesConverter.convertRSharesToGbg2(post.gbgAmount, votes,
+                    post.votesRshares)
+
+            println("payout must be ${post.gbgAmount}")
+            var calculated = 0.0
+            out.forEach { calculated += it }
+            println("my calculated is ${calculated} they differs in ${(1 - (post.gbgAmount / calculated)) * 100}%")
+
+        }
+
+        println("time elapsed is ${System.currentTimeMillis() - current}")//3971
     }
 }

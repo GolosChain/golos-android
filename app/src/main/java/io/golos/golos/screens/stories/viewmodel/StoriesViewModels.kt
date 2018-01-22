@@ -15,10 +15,10 @@ import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -299,6 +299,10 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
 
     fun onUserClick(context: Context?, it: StoryTree) {
         ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
+    }
+
+    fun onVotersClick(context: Context?, it: StoryTree) {
+        UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
 
 }

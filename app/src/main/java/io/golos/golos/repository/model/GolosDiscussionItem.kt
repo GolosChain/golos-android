@@ -1,12 +1,12 @@
 package io.golos.golos.repository.model
 
-import android.support.v4.util.ArrayMap
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Regexps
 import org.json.JSONException
@@ -32,6 +32,7 @@ data class GolosDiscussionItem(val url: String,
                                val images: ArrayList<String> = ArrayList(),
                                val links: ArrayList<String> = ArrayList(),
                                val votesNum: Int,
+                               val votesRshares: Long,
                                val commentsCount: Int,
                                val permlink: String,
                                var gbgAmount: Double,
@@ -48,7 +49,7 @@ data class GolosDiscussionItem(val url: String,
                                val lastUpdated: Long,
                                val created: Long,
                                var isUserUpvotedOnThis: Boolean = false,
-                               val activeVotes: ArrayMap<String, Int> = ArrayMap(),
+                               val activeVotes: ArrayList<VoteLight> = arrayListOf(),
                                var type: ItemType = ItemType.PLAIN,
                                val firstRebloggedBy: String,
                                var cleanedFromImages: String,
@@ -68,6 +69,7 @@ data class GolosDiscussionItem(val url: String,
             title = discussion.title ?: "",
             categoryName = discussion.category ?: "",
             votesNum = discussion.netVotes,
+            votesRshares = discussion.voteRshares,
             commentsCount = discussion.children,
             permlink = discussion.permlink?.link ?: "",
             childrenCount = discussion.children,
@@ -83,9 +85,9 @@ data class GolosDiscussionItem(val url: String,
 
 
         val tagsString = discussion.jsonMetadata
-        discussion.activeVotes?.forEach {
-            activeVotes.put(it.voter.name, it.percent / 100)
-        }
+
+        activeVotes.addAll(discussion.activeVotes.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) })
+
         var json: JSONObject? = null
         try {
             json = JSONObject(tagsString)
@@ -175,9 +177,10 @@ data class GolosDiscussionItem(val url: String,
     override fun toString(): String {
         return "Comment(id=$id, title='$title', permlink='$permlink')"
     }
+
     fun isUserVotedOnThis(userName: String): Boolean {
-        return activeVotes.contains(userName)
-                && (activeVotes[userName] ?: 0) > 0
+        val item = activeVotes.find { it.name == userName }
+        return item != null && item.percent > 0
     }
 
 

@@ -12,7 +12,10 @@ import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.screens.userslist.model.UserListRowData
-import io.golos.golos.utils.*
+import io.golos.golos.utils.ErrorCode
+import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.InternetStatusNotifier
+import io.golos.golos.utils.StringSupplier
 import timber.log.Timber
 
 data class UserListViewState(val title: String,
@@ -65,7 +68,6 @@ class UserListViewModel : ViewModel() {
             }
 
 
-
             val ld = if (mListType == ListType.SUBSCRIPTIONS) mRepository.getSubscriptionsToBlogs(userName)
             else mRepository.getSubscribersToBlog(userName)
             ld.observeForever({
@@ -94,13 +96,19 @@ class UserListViewModel : ViewModel() {
                 return
             }
             mLiveData.addSource(mRepository.getVotedUsersForDiscussion(storyId), {
-                mLiveData.value = UserListViewState(mTitle, it?.map {
+
+                if (it == null) {
+                    mLiveData.value = null
+                    return@addSource
+                }
+                mLiveData.value = UserListViewState(mTitle, it.map {
                     val currentVotingObject = it
+                    val excheangeCourse = mRepository.getExchengeLiveData()
                     UserListRowData(it.name,
                             it.avatar,
-                            it.showValue,
+                            "$ ${String.format("%.3f", it.gbgValue * (excheangeCourse.value?.dollarsPerGbg ?: 1.0))}",
                             mCurrentUsersubscriptions.find { it.user.name == currentVotingObject.name }?.status ?: SubscribeStatus.UnsubscribedStatus)
-                } ?: listOf()
+                }
                         , null)
             })
 
@@ -109,13 +117,14 @@ class UserListViewModel : ViewModel() {
         mLiveData.addSource(mRepository.getCurrentUserSubscriptions(), {
             mCurrentUsersubscriptions.clear()
             mCurrentUsersubscriptions.addAll(it ?: listOf())
+            if (mLiveData.value == null) return@addSource
             mLiveData.value = UserListViewState(mTitle,
                     (mLiveData.value?.users ?: listOf()).onEach {
                         val currentWorkingitem = it
                         val item = mCurrentUsersubscriptions.find { it.user.name == currentWorkingitem.name }
                         if (item != null) {
                             currentWorkingitem.subscribeStatus = item.status
-                        }else {
+                        } else {
                             currentWorkingitem.subscribeStatus = SubscribeStatus.UnsubscribedStatus
                         }
                     }, null)

@@ -16,9 +16,7 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.userslist.model.ListType
-import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.StringSupplier
-import io.golos.golos.utils.showSnackbar
+import io.golos.golos.utils.*
 import timber.log.Timber
 
 /**
@@ -28,7 +26,8 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
     private lateinit var mTitle: TextView
     private lateinit var mRecycler: RecyclerView
     private lateinit var mProgress: ProgressBar
-    private lateinit var mViewModel:UserListViewModel
+    private lateinit var mViewModel: UserListViewModel
+    private lateinit var mNothigHereLabel: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +35,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mTitle = findViewById(R.id.title_text)
         mRecycler = findViewById(R.id.recycler)
         mProgress = findViewById(R.id.progress)
+        mNothigHereLabel = findViewById(R.id.nothing_tv)
         mViewModel = ViewModelProviders.of(this).get(UserListViewModel::class.java)
         mViewModel.getLiveData().observe(this, this)
 
@@ -59,9 +59,8 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
                         return App.isAppOnline()
                     }
                 })
-
-        mRecycler.visibility = View.GONE
-        mProgress.visibility = View.VISIBLE
+        mProgress.setViewVisible()
+        mRecycler.setViewGone()
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
         mRecycler.layoutManager = LinearLayoutManager(this)
         (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -72,9 +71,22 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
     }
 
     override fun onChanged(t: UserListViewState?) {
-        if (t == null) return
-        mProgress.visibility = if (t.users.isEmpty()) View.VISIBLE else View.GONE
-        mRecycler.visibility = if (t.users.isNotEmpty()) View.VISIBLE else View.GONE
+
+        if (t == null) {
+            mProgress.setViewVisible()
+            mRecycler.setViewGone()
+            mNothigHereLabel.setViewGone()
+            return
+        }
+
+        mProgress.setViewGone()
+        if (t.users.isNotEmpty()){
+            mRecycler.setViewVisible()
+            mNothigHereLabel.setViewGone()
+        } else {
+            mRecycler.setViewGone()
+            mNothigHereLabel.setViewVisible()
+        }
         (mRecycler.adapter as UserListAdapter).listItems = t.users
         t.error?.let {
             mRecycler.showSnackbar(it.localizedMessage ?: 0)

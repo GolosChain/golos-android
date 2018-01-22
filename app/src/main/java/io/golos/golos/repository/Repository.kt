@@ -1,6 +1,7 @@
 package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.os.Handler
 import android.os.Looper
 import com.crashlytics.android.Crashlytics
@@ -150,6 +151,12 @@ abstract class Repository {
     abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
 
     abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
+
+    open fun getExchengeLiveData(): LiveData<ExchangeValues> {
+        val liveData = MutableLiveData<ExchangeValues>()
+        liveData.value = ExchangeValues(00.04106528)
+        return liveData
+    }
 
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {

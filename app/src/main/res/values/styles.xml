@@ -144,13 +144,12 @@
         <item name="android:textSize">@dimen/font_medium</item>
     </style>
 
-    <style name="Base.Widget.AppCompat.Button.Borderless.VoteButton">
-        <item name="android:layout_width">140dp</item>
+    <style name="VoteButton">
+        <item name="android:layout_width">100dp</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center</item>
         <item name="android:drawablePadding">6dp</item>
         <item name="android:gravity">start|center_vertical</item>
-        <item name="android:textSize">@dimen/font_medium</item>
+        <item name="android:textSize">@dimen/font_small</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textColor">@color/gray_4f</item>
@@ -286,5 +285,16 @@
         <item name="android:layout_marginEnd">24dp</item>
         <item name="android:background">@drawable/back_story_button_round_corners_gray</item>
         <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="StoryBottomControlButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:paddingEnd">@dimen/margin_material_half</item>
+        <item name="android:paddingStart">@dimen/margin_material_half</item>
+        <item name="android:textColor">@color/gray_4f</item>
+        <item name="android:textSize">@dimen/font_small</item>
     </style>
 </resources>

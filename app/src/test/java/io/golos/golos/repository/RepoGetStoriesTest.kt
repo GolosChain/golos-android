@@ -256,4 +256,5 @@ class RepoGetStoriesTest {
         Assert.assertNotNull(subs.value)
         Assert.assertEquals(countObject.followingCount, subs.value!!.size)
     }
+
 }

@@ -54,7 +54,16 @@
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior" />
 
     <ProgressBar
-
         android:id="@+id/progress"
-        style="@style/FullscreenProgressStyle" />
+        style="@style/FullscreenProgressStyle"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/nothing_tv"
+        android:visibility="gone"
+        android:paddingTop="52dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="@dimen/margin_material"
+        android:text="@string/nothing_here"/>
 </android.support.design.widget.CoordinatorLayout>
