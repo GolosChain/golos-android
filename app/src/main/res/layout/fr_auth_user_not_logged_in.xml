@@ -25,15 +25,31 @@
                 app:srcCompat="@drawable/im_logo_red_blue" />
         </FrameLayout>
 
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/login_et"
-            style="@style/LoginEditTextStyle"
-            android:hint="@string/login"
-            android:imeOptions="flagNavigateNext"
-            android:inputType="textNoSuggestions"
-            android:lines="1"
-            android:maxLength="16"
-            app:backgroundTint="#DBDBDB" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/login_et"
+                style="@style/LoginEditTextStyle"
+                android:hint="@string/login"
+                android:imeOptions="flagNavigateNext"
+                android:inputType="textNoSuggestions"
+                android:lines="1"
+                android:maxLength="16"
+                app:backgroundTint="#DBDBDB" />
+
+            <ImageButton
+                android:id="@+id/help_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="36dp"
+                android:background="?attr/selectableItemBackground"
+                app:srcCompat="@drawable/ic_info_outline_gray_24dp" />
+        </RelativeLayout>
+
 
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/key_et"
@@ -106,13 +122,13 @@
         </RelativeLayout>
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/login_option_btn"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="32dp"
             android:text="@string/enter_with_active_key"
             android:textAllCaps="false"
-            android:id="@+id/login_option_btn"
             android:textColor="@color/gray_7d"
             android:textSize="@dimen/font_medium" />
 

@@ -50,7 +50,7 @@ class SearchTagAdapter(var onTagClick: (LocalizedTag) -> Unit) : RecyclerView.Ad
 }
 
 class TagWithSearchIconVh(parent: ViewGroup) : GolosViewHolder(R.layout.vh_tag_search, parent) {
-    private val mTagNameTv = itemView as TextView
+    private val mTagNameTv = itemView.findViewById<TextView>(R.id.text)
 
     var state: SearchTagState? = null
         set(value) {

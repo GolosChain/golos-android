@@ -2,7 +2,6 @@ package io.golos.golos.screens.stories.adapters
 
 import android.graphics.drawable.Drawable
 import android.os.Handler
-import android.os.Looper
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
@@ -15,21 +14,14 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.utils.*
-import java.util.concurrent.Executor
-
-
-private val adapterWorkerExecutor = App.computationExecutor
-private val adapterMainThreadExecutor: Executor by lazy {
-    val handler = Handler(Looper.getMainLooper())
-    Executor { handler.post(it) }
-}
+import java.util.concurrent.Executors
 
 
 data class StripeWrapper(val stripe: StoryTree,
@@ -39,7 +31,7 @@ data class StripeWrapper(val stripe: StoryTree,
                          val onShareClick: (RecyclerView.ViewHolder) -> Unit,
                          val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
                          val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                         val onVotersClick:  (RecyclerView.ViewHolder) -> Unit)
+                         val onVotersClick: (RecyclerView.ViewHolder) -> Unit)
 
 class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
                              private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
@@ -50,20 +42,30 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
                              private var onVotersClick: (StoryTree) -> Unit = { print(it) })
     : RecyclerView.Adapter<StripeViewHolder>() {
 
+    companion object {
+        @JvmStatic
+        private val workingExecutor = Executors.newSingleThreadExecutor()
+    }
 
     private var mStripes = ArrayList<StoryTree>()
     private val mItemsMap = HashMap<Long, Int>()
+    private val handler = Handler()
+
 
     fun setStripesCustom(newItems: List<StoryTree>) {
         if (mStripes.isEmpty()) {
-            mStripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
-            notifyDataSetChanged()
-            mStripes.forEach {
-                mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+            handler.post {
+                mStripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
+                notifyDataSetChanged()
+                mStripes.forEach {
+                    mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                }
             }
+
         } else {
-            adapterWorkerExecutor.execute {
+            workingExecutor.execute {
                 try {
+
                     val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                             if (mStripes == null
@@ -86,10 +88,9 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
                                     || newItems.size < newItemPosition) return false
                             val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
                             return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
-                            // return mStripes[oldItemPosition] == newItems[newItemPosition]
                         }
                     })
-                    adapterMainThreadExecutor.execute {
+                    handler.post {
                         result.dispatchUpdatesTo(this)
                         mStripes = ArrayList(newItems)
                         mStripes.forEach {
@@ -97,8 +98,8 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    adapterMainThreadExecutor.execute {
+                    handler.post {
+                        e.printStackTrace()
                         mStripes = ArrayList(newItems)
                         notifyDataSetChanged()
                     }
@@ -161,6 +162,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
             field = value
             if (field != null) {
                 val wrapper = field?.stripe?.rootStory() ?: return
+
                 views.forEach({
                     when (it) {
                         mCommentsButton -> it.setOnClickListener({ field!!.onCommentsClick(this) })
@@ -172,6 +174,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         else -> it.setOnClickListener({ field!!.onCardClick(this) })
                     }
                 })
+
                 mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
                 mVotersBtn.setOnClickListener({ field!!.onVotersClick(this) })
 
@@ -179,23 +182,29 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 if (wrapper.firstRebloggedBy.isNotEmpty()) {
                     mRebloggedByTv.text = wrapper.firstRebloggedBy
                 } else {
-                    mRebloggedByTv.visibility = View.INVISIBLE
+                    mRebloggedByTv.visibility = View.GONE
                 }
-                if (wrapper.categoryName.contains("ru--")) {
+                if (wrapper.categoryName.startsWith("ru--")) {
                     mBlogNameTv.text = Translit.lat2Ru(wrapper.categoryName.substring(4))
                 } else {
                     mBlogNameTv.text = wrapper.categoryName
                 }
+
                 mTitleTv.text = wrapper.title.toLowerCase().capitalize()
                 mUpvoteBtn.text = "$ ${String.format("%.3f", wrapper.payoutInDollars)}"
+
                 mCommentsButton.text = wrapper.commentsCount.toString()
+
                 if (wrapper.avatarPath != null) mGlide
                         .load(wrapper.avatarPath)
                         .error(mGlide.load(noAvatarDrawable))
-                        .apply(RequestOptions.placeholderOf(noAvatarDrawable))
+                        .apply(RequestOptions
+                                .placeholderOf(noAvatarDrawable)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
                         .into(mAvatar)
                 else mAvatar.setImageDrawable(noAvatarDrawable)
-                val res = itemView.resources
+
+
                 if (wrapper.isUserUpvotedOnThis) {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
@@ -203,7 +212,6 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userNotvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray_4f))
                 }
-
                 if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
                     mVotingProgress.visibility = View.VISIBLE
                     mUpvoteBtn.visibility = View.GONE
@@ -212,6 +220,8 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                     mUpvoteBtn.visibility = View.VISIBLE
                 }
                 mVotersBtn.text = value?.stripe?.rootStory()?.votesNum?.toString() ?: ""
+
+
                 when {
                     wrapper.type == ItemType.PLAIN -> {
                         mMainImageBig.visibility = View.GONE
@@ -227,12 +237,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                         val options = RequestOptions()
                         options.centerInside()
                         mSecondaryImage.setImageBitmap(null)
-                        /*if (wrapper.images.size > 0) {
-                            mGlide.load(wrapper.images[0])
-                                    .apply(options)
-                                    .error(mGlide.load(errorDrawable))
-                                    .into(mSecondaryImage)
-                        }*/
+
                         mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
                         mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
                     }

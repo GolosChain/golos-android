@@ -77,7 +77,7 @@
     <string name="subscriptions">Subscriptions</string>
     <string name="blog">Blog</string>
     <string name="answers">Comments</string>
-    <string name="pouch">Purse</string>
+    <string name="pouch">Wallet</string>
     <string name="golos_power">Golos power</string>
     <string name="Золотой">gbg</string>
     <string name="gbg">GBG</string>
@@ -122,5 +122,13 @@
     <string name="cancel_tag_sub">Cancel subscription</string>
     <string name="dismiss">Dismiss</string>
     <string name="voted">Votes</string>
+    <string name="to_enter_to_app">To login to the app, you need:</string>
+    <string name="_1_golos_ios">1) You must have a registered account in GOLOS blockchain</string>
+    <string name="enter_pouch_">2) Proceed to \'Wallet\' section</string>
+    <string name="press_permissions_buttin">3) Press \'Permissions\' button</string>
+    <string name="step_4">4) there will be four PUBLIC keys, but for login you need a PRIVATE active ot posting key. To reveal it, press the \'show private key\' button to the right of appropriate key.</string>
+    <string name="step_4_cont">Public key has GLS prefix, but private  - 1 or 5. Remember, you need PRIVATE key.</string>
+    <string name="step_5">5)You can enter you private key in app, or scan qr-code, which places to the left of the key.</string>
+    <string name="login_final">After entering you login (without \'@\' prefix) and appropriate private key, you can login to the app.</string>
 </resources>
 

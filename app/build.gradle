@@ -9,8 +9,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 24
-        versionName "0.38"
+        versionCode 26
+        versionName "0.41"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
