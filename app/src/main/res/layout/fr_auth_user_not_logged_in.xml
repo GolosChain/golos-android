@@ -25,30 +25,16 @@
                 app:srcCompat="@drawable/im_logo_red_blue" />
         </FrameLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/login_et"
-                style="@style/LoginEditTextStyle"
-                android:hint="@string/login"
-                android:imeOptions="flagNavigateNext"
-                android:inputType="textNoSuggestions"
-                android:lines="1"
-                android:maxLength="16"
-                app:backgroundTint="#DBDBDB" />
-
-            <ImageButton
-                android:id="@+id/help_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginEnd="36dp"
-                android:background="?attr/selectableItemBackground"
-                app:srcCompat="@drawable/ic_info_outline_gray_24dp" />
-        </RelativeLayout>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/login_et"
+            style="@style/LoginEditTextStyle"
+            android:gravity="start"
+            android:hint="@string/login"
+            android:imeOptions="flagNavigateNext"
+            android:inputType="textNoSuggestions"
+            android:lines="1"
+            android:maxLength="16"
+            app:backgroundTint="#DBDBDB" />
 
 
         <android.support.v7.widget.AppCompatEditText
@@ -69,7 +55,7 @@
             style="@style/BarcodeLayoutStyle"
             android:layout_width="match_parent"
             android:background="?selectableItemBackground"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/posting_key_et"
@@ -82,8 +68,15 @@
             <ImageButton
                 android:id="@+id/scan_posting"
                 style="@style/BarcodeButton"
-                android:scaleType="center"
+                android:layout_marginEnd="@dimen/margin_material_half"
+                android:layout_toLeftOf="@+id/login_help_posting"
                 app:srcCompat="@drawable/ic_barcode_24dp_gray" />
+
+            <ImageButton
+                android:id="@+id/login_help_posting"
+                style="@style/BarcodeButton"
+                android:layout_alignParentEnd="true"
+                app:srcCompat="@drawable/ic_questions_outline_gray_22dp" />
 
             <View
                 android:layout_width="match_parent"
@@ -98,8 +91,8 @@
             style="@style/BarcodeLayoutStyle"
             android:background="?selectableItemBackground"
             android:clickable="true"
-            android:gravity="right"
-            android:visibility="gone">
+            android:gravity="start"
+            android:visibility="visible">
 
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/barcode_active_key_et"
@@ -112,7 +105,15 @@
             <ImageButton
                 android:id="@+id/scan_active"
                 style="@style/BarcodeButton"
+                android:layout_marginEnd="@dimen/margin_material_half"
+                android:layout_toLeftOf="@id/login_help_active"
                 app:srcCompat="@drawable/ic_barcode_24dp_gray" />
+
+            <ImageButton
+                android:id="@+id/login_help_active"
+                style="@style/BarcodeButton"
+                android:layout_alignParentEnd="true"
+                app:srcCompat="@drawable/ic_questions_outline_gray_22dp" />
 
             <View
                 android:layout_width="match_parent"

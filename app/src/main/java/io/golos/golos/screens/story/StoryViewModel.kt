@@ -262,6 +262,10 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onStoryVotesClick(context: Context) {
-        UsersListActivity.startToShowVoters(context,mLiveData.value?.storyTree?.rootStory()?.id?:return)
+        UsersListActivity.startToShowVoters(context, mLiveData.value?.storyTree?.rootStory()?.id ?: return)
+    }
+
+    fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
+        UsersListActivity.startToShowVoters(activity, it.story.id)
     }
 }

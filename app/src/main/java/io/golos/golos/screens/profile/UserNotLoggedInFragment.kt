@@ -45,14 +45,12 @@ class UserNotLoggedInFragment : Fragment() {
     private lateinit var mCancelButton: Button
     private lateinit var mLogOptionButton: Button
     private lateinit var mEnterButton: Button
-    private lateinit var mHelpButton: View
     private var mProgressDialog: Dialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater!!.inflate(R.layout.fr_auth_user_not_logged_in, container, false)
+        val v = inflater.inflate(R.layout.fr_auth_user_not_logged_in, container, false)
         mPostingKeyMenu = v.findViewById(R.id.posting_key_lo)
         mLogOptionButton = v.findViewById(R.id.login_option_btn)
-        mHelpButton = v.findViewById(R.id.help_button)
         mActiveKeyMenu = v.findViewById(R.id.active_key_lo)
         mScanPosting = v.findViewById(R.id.scan_posting)
         mScanActive = v.findViewById(R.id.scan_active)
@@ -86,8 +84,8 @@ class UserNotLoggedInFragment : Fragment() {
         mMoreAboutGolos = v.findViewById(R.id.more_about_golos)
         mRegisterTv = v.findViewById(R.id.register_tv)
         mCancelButton = v.findViewById(R.id.cancel_btn)
-        mMoreAboutGolos.text = Html.fromHtml(container!!.resources.getString(R.string.more_about_golos))
-        mRegisterTv.text = Html.fromHtml(container!!.resources.getString(R.string.do_not_registered_register))
+        mMoreAboutGolos.text = container!!.resources.getString(R.string.more_about_golos).toHtml()
+        mRegisterTv.text = container.resources.getString(R.string.do_not_registered_register).toHtml()
         mMoreAboutGolos.movementMethod = GolosMovementMethod.instance
         mRegisterTv.movementMethod = GolosMovementMethod.instance
         return v
@@ -151,8 +149,15 @@ class UserNotLoggedInFragment : Fragment() {
         })
         mCancelButton.setOnClickListener({ mViewModel.onCancelClick() })
         mEnterButton.setOnClickListener({ mViewModel.onLoginClick() })
-        mHelpButton.setOnClickListener {
-            LoginHelperFragment.getInstance().show(activity?.supportFragmentManager ?: return@setOnClickListener, null)
+        view.findViewById<View>(R.id.login_help_posting)?.setOnClickListener {
+            LoginHelperFragment
+                    .getInstance(LoginHelpType.FOR_POSTING_KEY)
+                    .show(activity?.supportFragmentManager ?: return@setOnClickListener, null)
+        }
+        view.findViewById<View>(R.id.login_help_active)?.setOnClickListener {
+            LoginHelperFragment
+                    .getInstance(LoginHelpType.FOR_ACTIVE_KEY)
+                    .show(activity?.supportFragmentManager ?: return@setOnClickListener, null)
         }
     }
 

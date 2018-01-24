@@ -32,12 +32,14 @@ data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
                               val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onCommentsClick: (RecyclerView.ViewHolder) -> Unit)
+                              val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
+                              val onUserVotesClick: (RecyclerView.ViewHolder) -> Unit)
 
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onAnswerClick: (StoryWrapper) -> Unit = { print(it) },
                       var onUserClick: (StoryWrapper) -> Unit = { print(it) },
-                      var onCommentsClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+                      var onCommentsClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onUserVotesClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
 
     var items = ArrayList<StoryWrapper>()
@@ -65,7 +67,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                 onUpvoteClick = { onUpvoteClick.invoke(items[it.adapterPosition]) },
                 onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) },
                 onUserClick = { onUserClick.invoke(items[it.adapterPosition]) },
-                onCommentsClick = { onCommentsClick.invoke(items[it.adapterPosition]) })
+                onCommentsClick = { onCommentsClick.invoke(items[it.adapterPosition]) },
+                onUserVotesClick = { onUserVotesClick.invoke(items[it.adapterPosition]) })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CommentViewHolder {
@@ -86,11 +89,13 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mLayout: LinearLayoutCompat = itemView.findViewById(R.id.content_lo)
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
     private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
+    private val mVotesIv: TextView = itemView.findViewById(R.id.votes_btn)
 
     init {
         mText.movementMethod = GolosMovementMethod.instance
         mTimeTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_access_time_gray_24dp), null, null, null)
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_18_gray), null, null, null)
+        mVotesIv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
     }
 
     var state: CommentHolderState? = null
@@ -119,6 +124,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mText.setOnClickListener { state?.onCommentsClick?.invoke(this) }
                 mImage.setOnClickListener { mText.callOnClick() }
                 mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
+                mVotesIv.setOnClickListener { state?.onUserVotesClick?.invoke(this) }
+
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
@@ -161,6 +168,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mUpvoteBtn.isClickable = true
                     mProgress.visibility = View.GONE
                 }
+                mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
                 val rows = ArrayList(StoryParserToRows().parse(comment))
                 var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {

@@ -59,8 +59,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">@null</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingStart">40dp</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">start|center_vertical</item>
         <item name="android:textColor">@color/delimeter_color</item>
         <item name="android:textSize">16sp</item>
     </style>
@@ -89,9 +88,7 @@
 
     <style name="BarcodeButton">
         <item name="android:layout_width">36dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_centerVertical">true</item>
-        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_height">36dp</item>
         <item name="android:background">@null</item>
     </style>
 
@@ -188,6 +185,7 @@
         <item name="android:textSize">16sp</item>
 
     </style>
+
     <style name="ProfileCurrensyStyle">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/gray_1</item>
