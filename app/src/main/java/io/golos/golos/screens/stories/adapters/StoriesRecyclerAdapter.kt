@@ -133,7 +133,6 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mBlogNameTv: TextView = itemView.findViewById(R.id.blog_name_tv)
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
-    private val mSecondaryImage: ImageView = itemView.findViewById(R.id.additional_image)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
     private val mUpvoteBtn: TextView = itemView.findViewById(R.id.vote_btn)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
@@ -141,7 +140,7 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     private val mVotersBtn: TextView = itemView.findViewById(R.id.voters_btn)
     private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
     private val views = listOf<View>(mAvatar, mUserNameTv, mRebloggedByTv,
-            mBlogNameTv, mTitleTv, mBodyTextMarkwon, mSecondaryImage, mMainImageBig, mUpvoteBtn, mCommentsButton, mShareBtn, itemView)
+            mBlogNameTv, mTitleTv, mBodyTextMarkwon, mMainImageBig, mUpvoteBtn, mCommentsButton, mShareBtn, itemView)
     private val mGlide = Glide.with(parent.context)
 
     init {
@@ -163,20 +162,19 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
             if (field != null) {
                 val wrapper = field?.stripe?.rootStory() ?: return
 
-                views.forEach({
-                    when (it) {
-                        mCommentsButton -> it.setOnClickListener({ field!!.onCommentsClick(this) })
-                        mShareBtn -> it.setOnClickListener({ field!!.onShareClick(this) })
-                        mUpvoteBtn -> it.setOnClickListener({ field!!.onUpvoteClick(this) })
-                        mBlogNameTv -> it.setOnClickListener({ field!!.onBlogClick(this) })
-                        mAvatar, mUserNameTv -> it.setOnClickListener({ field!!.onUserClick(this) })
-
-                        else -> it.setOnClickListener({ field!!.onCardClick(this) })
-                    }
-                })
-
+                mCommentsButton.setOnClickListener({ field!!.onCommentsClick(this) })
+                mShareBtn.setOnClickListener({ field!!.onShareClick(this) })
+                mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
+                mBlogNameTv.setOnClickListener({ field!!.onBlogClick(this) })
+                mAvatar.setOnClickListener({ field!!.onUserClick(this) })
+                mUserNameTv.setOnClickListener({ field!!.onUserClick(this) })
                 mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
                 mVotersBtn.setOnClickListener({ field!!.onVotersClick(this) })
+
+                mTitleTv.setOnClickListener({ field!!.onCardClick(this) })
+                mBodyTextMarkwon.setOnClickListener({ field!!.onCardClick(this) })
+                mMainImageBig.setOnClickListener({ field!!.onCardClick(this) })
+                itemView.setOnClickListener({ field!!.onCardClick(this) })
 
                 mUserNameTv.text = wrapper.author
                 if (wrapper.firstRebloggedBy.isNotEmpty()) {
@@ -221,54 +219,38 @@ class StripeViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 }
                 mVotersBtn.text = value?.stripe?.rootStory()?.votesNum?.toString() ?: ""
 
-
-                when {
-                    wrapper.type == ItemType.PLAIN -> {
-                        mMainImageBig.visibility = View.GONE
-                        mSecondaryImage.visibility = View.GONE
-                        mBodyTextMarkwon.visibility = View.VISIBLE
-                        mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
-                        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
+                if (wrapper.type == ItemType.PLAIN || wrapper.type == ItemType.PLAIN_WITH_IMAGE) {
+                    mMainImageBig.visibility = View.GONE
+                    mBodyTextMarkwon.visibility = View.VISIBLE
+                    mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
+                    mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
+                } else if (wrapper.type == ItemType.IMAGE_FIRST) {
+                    val error = mGlide.load(errorDrawable)
+                    mBodyTextMarkwon.setViewGone()
+                    var nextImage: RequestBuilder<Drawable>? = null
+                    if (wrapper.images.size > 1) {
+                        nextImage = mGlide.load(wrapper.images[1]).error(error)
                     }
-                    wrapper.type == ItemType.PLAIN_WITH_IMAGE -> {
-                        mMainImageBig.visibility = View.GONE
-                        mSecondaryImage.visibility = View.GONE
-                        mBodyTextMarkwon.visibility = View.VISIBLE
-                        val options = RequestOptions()
-                        options.centerInside()
-                        mSecondaryImage.setImageBitmap(null)
+                    mMainImageBig.scaleType = ImageView.ScaleType.FIT_CENTER
+                    mMainImageBig.visibility = View.VISIBLE
 
-                        mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
-                        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
-                    }
-                    else -> {
-                        val error = mGlide.load(errorDrawable)
-                        mBodyTextMarkwon.text = ""
-                        var nextImage: RequestBuilder<Drawable>? = null
-                        if (wrapper.images.size > 1) {
-                            nextImage = mGlide.load(wrapper.images[1]).error(error)
-                        }
-                        mMainImageBig.setImageDrawable(errorDrawable)
-                        mMainImageBig.scaleType = ImageView.ScaleType.FIT_CENTER
-                        mMainImageBig.visibility = View.VISIBLE
-                        mSecondaryImage.visibility = View.GONE
-                        mBodyTextMarkwon.visibility = View.GONE
-                        if (wrapper.images.size > 0) {
-                            mGlide.load(wrapper.images[0])
+                    mBodyTextMarkwon.visibility = View.GONE
+                    if (wrapper.images.size > 0) {
+                        mGlide.load(wrapper.images[0])
+                                .error(nextImage ?: error)
+                                .apply(RequestOptions.placeholderOf(errorDrawable))
+                                .into(mMainImageBig)
+                    } else {
+                        val image = wrapper.parts.find { it is ImageRow }
+                        image?.let {
+                            mGlide.load((it as ImageRow).src)
                                     .error(nextImage ?: error)
                                     .apply(RequestOptions.placeholderOf(errorDrawable))
                                     .into(mMainImageBig)
-                        } else {
-                            val image = wrapper.parts.find { it is ImageRow }
-                            image?.let {
-                                mGlide.load((it as ImageRow).src)
-                                        .error(nextImage ?: error)
-                                        .apply(RequestOptions.placeholderOf(errorDrawable))
-                                        .into(mMainImageBig)
-                            }
                         }
                     }
                 }
+
             } else {
                 views.forEach {
                     it.setOnClickListener(null)
