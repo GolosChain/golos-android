@@ -32,11 +32,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-private data class FilteredRequest(val feedType: FeedType,
-                                   val filter: StoryFilter)
-
 @Suppress("NAME_SHADOWING")
-internal class RepositoryImpl(private val mWorkerExecutor: Executor,
+internal class RepositoryImpl(private val networkExecutor: Executor,
+                              private val workerExecutor: Executor,
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister,
                               private val mGolosApi: GolosApi,
@@ -48,8 +46,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mTags = MutableLiveData<List<Tag>>()
 
     //feed posts lists
-    private val mLiveDataMap: HashMap<FeedType, MutableLiveData<StoryTreeItems>> = HashMap()
-    private val mFilteredMap: HashMap<FilteredRequest, MutableLiveData<StoryTreeItems>> = HashMap()
+    private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoryTreeItems>> = HashMap()
 
     //votes
     var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
@@ -65,11 +62,12 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
-    private fun getStripeItems(limit: Int,
-                               type: FeedType,
-                               filter: StoryFilter?,
-                               truncateBody: Int, startAuthor: String?,
-                               startPermlink: String?): List<StoryTree> {
+    @WorkerThread
+    private fun loadStories(limit: Int,
+                            type: FeedType,
+                            filter: StoryFilter?,
+                            truncateBody: Int, startAuthor: String?,
+                            startPermlink: String?): List<StoryTree> {
         if (type == FeedType.PERSONAL_FEED || type == FeedType.COMMENTS || type == FeedType.BLOG) {
             if (filter?.userNameFilter == null) throw IllegalStateException(" for this types of stories," +
                     "user filter must be set")
@@ -94,15 +92,17 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     init {
         mAuthLiveData.value = mPersister.getActiveUserData()
-        mLiveDataMap.apply {
-            put(FeedType.ACTUAL, MutableLiveData())
-            put(FeedType.POPULAR, MutableLiveData())
-            put(FeedType.NEW, MutableLiveData())
-            put(FeedType.PROMO, MutableLiveData())
-            put(FeedType.UNCLASSIFIED, MutableLiveData())
+
+        mFilteredMap.apply {
+            put(StoryRequest(FeedType.ACTUAL, null), MutableLiveData())
+            put(StoryRequest(FeedType.POPULAR, null), MutableLiveData())
+            put(StoryRequest(FeedType.NEW, null), MutableLiveData())
+            put(StoryRequest(FeedType.PROMO, null), MutableLiveData())
+            put(StoryRequest(FeedType.UNCLASSIFIED, null), MutableLiveData())
         }
     }
 
+    @WorkerThread
     private fun getUserAvatarFromDb(username: String): String? {
         val avatar = mPersister.getAvatarForUser(username)
         val currentTime = System.currentTimeMillis()
@@ -112,7 +112,10 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         return null
     }
 
+    @WorkerThread
     private fun getUserAvatarsFromDb(users: List<String>): Map<String, String?> {
+        if (users.isEmpty()) return hashMapOf()
+
         val avatars = mPersister.getAvatarsFor(users)
         val currentTime = System.currentTimeMillis()
         val map = HashMap<String, String?>(avatars.size)
@@ -153,7 +156,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun authWithMasterKey(userName: String, masterKey: String, listener: (UserAuthResponse) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 val resp = auth(userName, masterKey, null, null)
                 mMainThreadExecutor.execute {
@@ -171,7 +174,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun authWithActiveWif(login: String, activeWif: String, listener: (UserAuthResponse) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 val resp = auth(login, null, activeWif, null)
                 mMainThreadExecutor.execute {
@@ -189,7 +192,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun authWithPostingWif(login: String, postingWif: String, listener: (UserAuthResponse) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 val resp = auth(login, null, null, postingWif)
                 mMainThreadExecutor.execute {
@@ -235,7 +238,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     override fun requestActiveUserDataUpdate() {
         if (isUserLoggedIn()) {
             val userData = mPersister.getActiveUserData()!!
-            mWorkerExecutor.execute {
+            networkExecutor.execute {
                 try {
                     val response = auth(userData.userName ?: "",
                             null,
@@ -272,7 +275,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     override fun requestUserInfoUpdate(userName: String,
                                        completionHandler: (AccountInfo, GolosError?) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 loadSubscribersIfNeeded()
 
@@ -379,7 +382,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value
         }
 
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 if (isFollow) mGolosApi.follow(user) else mGolosApi.unfollow(user)
 
@@ -522,7 +525,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     private fun requestSubscribersOrSubscriptionbsUpdate(isSubscribers: Boolean,
                                                          ofUser: String,
                                                          completionHandler: (List<UserObject>, GolosError?) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
 
                 if (isSubscribers) {
@@ -636,9 +639,9 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         if (mRequests.contains(request)) return
 
         mRequests.add(request)
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
-                val discussions = getStripeItems(limit, type, filter, 1024, startAuthor, startPermlink)
+                val discussions = loadStories(limit, type, filter, 1024, startAuthor, startPermlink)
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
                     var out = discussions
@@ -668,7 +671,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     private fun startLoadingAbscentAvatars(forItems: List<StoryTree>, feedType: FeedType, filter: StoryFilter?) {
-        mWorkerExecutor.execute(object : ImageLoadRunnable {
+        networkExecutor.execute(object : ImageLoadRunnable {
             override fun run() {
                 try {
                     val userNames = forItems
@@ -726,7 +729,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 }
             }
         }
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             listOfList = allLiveData()
             listOfList.forEach {
                 val storiesAll = it.value?.items ?: ArrayList()
@@ -777,7 +780,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
 
     override fun requestStoryUpdate(story: StoryTree) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             loadSubscribersIfNeeded()
             try {
                 val updatedStory = getStory(story.rootStory()?.categoryName ?: "",
@@ -849,7 +852,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                 requestStoryUpdate(it)
             }
         } else {
-            mWorkerExecutor.execute {
+            networkExecutor.execute {
 
                 loadSubscribersIfNeeded()
 
@@ -883,7 +886,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         }
         val tags = ArrayList(tags)
         val content = ArrayList(content)
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 (0 until tags.size)
                         .forEach {
@@ -909,8 +912,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     mLastPostLiveData.value = result
                     resultListener.invoke(result, null)
                 }
-                mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
+                networkExecutor.execute {
+                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
@@ -937,7 +940,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
             resultListener.invoke(null, GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials))
             return
         }
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 val content = ArrayList(content)
                 (0 until content.size)
@@ -960,8 +963,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                     mLastPostLiveData.value = result
                     resultListener.invoke(result, null)
                 }
-                mWorkerExecutor.execute {
-                    val newStory = getStripeItems(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
+                networkExecutor.execute {
+                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
@@ -989,13 +992,17 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
                                           filter: StoryFilter?): MutableLiveData<StoryTreeItems> {
+
         return if (filter == null) {
-            if (!mLiveDataMap.containsKey(feedtype)) {
+            if (feedtype == FeedType.PERSONAL_FEED ||
+                    feedtype == FeedType.BLOG ||
+                    feedtype == FeedType.COMMENTS) {
                 throw IllegalStateException("type $feedtype is not supported without tag")
             }
-            mLiveDataMap[feedtype]!!
+            val filteredRequest = StoryRequest(feedtype, filter)
+            return mFilteredMap[filteredRequest]!!
         } else {
-            val filteredRequest = FilteredRequest(feedtype, filter)
+            val filteredRequest = StoryRequest(feedtype, filter)
             if (mFilteredMap.containsKey(filteredRequest)) {
                 mFilteredMap[filteredRequest]!!
             } else {
@@ -1007,12 +1014,12 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     private fun allLiveData(): List<MutableLiveData<StoryTreeItems>> {
-        return ArrayList(mLiveDataMap.values) + ArrayList(mFilteredMap.values)
+        return mFilteredMap.values.toList()
     }
 
     override fun getTrendingTags(): LiveData<List<Tag>> {
         if (mTags.value == null || mTags.value?.size == 0) {
-            mWorkerExecutor.execute {
+            networkExecutor.execute {
                 try {
                     val tags = mPersister.getTags()
                     mMainThreadExecutor.execute {
@@ -1027,7 +1034,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit) {
-        mWorkerExecutor.execute {
+        networkExecutor.execute {
             try {
                 var tags = mGolosApi.getTrendingTag("", 2997)
                 tags = tags.filter { checkTagIsValid(it.name) }
@@ -1072,6 +1079,7 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
     }
 
     override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
+
         val liveData = MutableLiveData<List<VotedUserObject>>()
         mVotesLiveData = Pair(id, liveData)
 
@@ -1096,11 +1104,13 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         it.id == id
                     }
 
-        if (item == null || item.activeVotes.size == 0){
+        if (item == null || item.activeVotes.size == 0) {
             liveData.value = listOf()
             return liveData
         }
-        mWorkerExecutor.execute {
+
+
+        networkExecutor.execute {
             item?.let {
 
                 val avatars = getUserAvatarsFromDb(it.activeVotes.map { it.name })
@@ -1111,8 +1121,8 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
                         .activeVotes
                         .filter { it.percent > 0 }
                         .mapIndexed { index, voteLight ->
-                    VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
-                }.sorted()
+                            VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
+                        }.sorted()
 
                 mMainThreadExecutor.execute {
                     liveData.value = voters
@@ -1149,4 +1159,6 @@ internal class RepositoryImpl(private val mWorkerExecutor: Executor,
         e.printStackTrace()
         mLogger?.log(e)
     }
+
+
 }

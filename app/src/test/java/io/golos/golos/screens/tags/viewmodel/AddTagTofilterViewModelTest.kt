@@ -25,8 +25,8 @@ class AddTagTofilterViewModelTest {
     fun before() {
         repo = RepositoryImpl(
                 MainThreadExecutor,
-                MainThreadExecutor,
-                MockPersister, ApiImpl(), null
+                ,
+                MainThreadExecutor, MockPersister, ApiImpl(), null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = AddTagTofilterViewModel()

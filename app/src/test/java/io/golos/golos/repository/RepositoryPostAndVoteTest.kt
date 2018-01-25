@@ -40,8 +40,8 @@ class RepositoryPostAndVoteTest {
     fun before() {
         repo = RepositoryImpl(
                 executor,
-                executor,
-                MockPersister, ApiImpl(), null
+                executor ,
+                executor, MockPersister, ApiImpl(), null
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }

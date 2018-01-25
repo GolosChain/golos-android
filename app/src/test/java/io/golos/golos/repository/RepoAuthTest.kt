@@ -31,8 +31,8 @@ class RepoAuthTest {
     fun before() {
         repo = RepositoryImpl(
                 executor,
-                executor,
-                MockPersister, ApiImpl(), null
+                executor ,
+                executor, MockPersister, ApiImpl(), null
         )
     }
 

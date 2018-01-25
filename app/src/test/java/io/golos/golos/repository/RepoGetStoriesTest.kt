@@ -34,8 +34,8 @@ class RepoGetStoriesTest {
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor,
-                MockPersister,
-                ApiImpl(), null
+                MainThreadExecutor,
+                MockPersister, ApiImpl(), null
         )
     }
 

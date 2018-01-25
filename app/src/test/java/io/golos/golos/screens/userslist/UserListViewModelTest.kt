@@ -36,8 +36,8 @@ class UserListViewModelTest {
     fun before() {
         repo = RepositoryImpl(
                 executor,
-                executor,
-                MockPersister, ApiImpl(), null
+                ,
+                executor, MockPersister, ApiImpl(), null
         )
         Repository.setSingletoneInstance(repo)
         mViewModel = UserListViewModel()

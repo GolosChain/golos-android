@@ -27,9 +27,9 @@ class RepoTagsTest {
     fun before() {
         repo = RepositoryImpl(
                 MainThreadExecutor,
+                MainThreadExecutor ,
                 MainThreadExecutor,
-                MockPersister,
-                ApiImpl(), null
+                MockPersister, ApiImpl(), null
         )
     }
 

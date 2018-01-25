@@ -44,6 +44,15 @@ fun Cursor.getString(columnName: String): String? {
 fun Cursor.getLong(columnName: String): Long {
     return this.getLong(this.getColumnIndex(columnName))
 }
+
+fun Cursor.getBool(columnName: String): Boolean {
+    return this.getInt(this.getColumnIndex(columnName)) > 0
+}
+
+fun Cursor.getInt(columnName: String): Int {
+    return this.getInt(this.getColumnIndex(columnName))
+}
+
 fun Cursor.getDouble(columnName: String): Double {
     return this.getDouble(this.getColumnIndex(columnName))
 }
@@ -141,11 +150,13 @@ fun View.showSnackbar(message: String) {
             Html.fromHtml("<font color=\"#ffffff\">${message}</font>"),
             Toast.LENGTH_SHORT).show()
 }
-fun View.setViewGone(){
-    if (this.visibility != View.GONE)visibility = View.GONE
+
+fun View.setViewGone() {
+    if (this.visibility != View.GONE) visibility = View.GONE
 }
-fun View.setViewVisible(){
-    if (this.visibility != View.VISIBLE)visibility = View.VISIBLE
+
+fun View.setViewVisible() {
+    if (this.visibility != View.VISIBLE) visibility = View.VISIBLE
 }
 
 fun View.hideKeyboard() {

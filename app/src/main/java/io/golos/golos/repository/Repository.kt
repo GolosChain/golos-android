@@ -19,10 +19,7 @@ import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.Regexps
 import java.util.*
-import java.util.concurrent.Executor
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 abstract class Repository {
 
@@ -32,7 +29,8 @@ abstract class Repository {
             @Synchronized
             get() {
                 if (instance == null) instance = RepositoryImpl(
-                        sharedExecutor,
+                        networkExecutor,
+                        Executors.newSingleThreadExecutor(),
                         mMainThreadExecutor,
                         Persister.get,
                         GolosApi.get, object : ExceptionLogger {
@@ -49,7 +47,7 @@ abstract class Repository {
                 })
                 return instance!!
             }
-        val sharedExecutor: ThreadPoolExecutor by lazy {
+        private val networkExecutor: ThreadPoolExecutor by lazy {
             val queu = PriorityBlockingQueue<Runnable>(15, Comparator<Runnable> { o1, o2 ->
                 if (o1 is ImageLoadRunnable) Int.MAX_VALUE
                 else if (o1 is Runnable) Int.MIN_VALUE

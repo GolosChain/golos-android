@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Base64
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.App
+import io.golos.golos.repository.model.StoryRequest
+import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
@@ -49,6 +51,12 @@ abstract class Persister {
 
     abstract fun deleteUserSubscribedTag(tag: Tag)
 
+    abstract fun saveStories(stories: Map<StoryRequest, StoryTreeItems>)
+
+    abstract fun getStories(): Map<StoryRequest, StoryTreeItems>
+
+    abstract fun deleteAllStories()
+
     companion
     object {
         val get: Persister
@@ -74,6 +82,18 @@ private class OnDevicePersister(private val context: Context) : Persister() {
 
     override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
         mDatabase.saveAvatars(userAvatars)
+    }
+
+    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+        mDatabase.saveStories(stories)
+    }
+
+    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+        return mDatabase.getStories()
+    }
+
+    override fun deleteAllStories() {
+        mDatabase.deleteAllStories()
     }
 
     private fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
@@ -190,6 +210,18 @@ private class MockPersister : Persister() {
     private var userData: UserData? = null
     private var currentUserName: String? = null
     override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
+
+    }
+
+    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+
+    }
+
+    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+       return hashMapOf()
+    }
+
+    override fun deleteAllStories() {
 
     }
 
