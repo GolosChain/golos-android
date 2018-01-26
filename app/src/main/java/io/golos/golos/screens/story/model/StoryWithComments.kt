@@ -30,8 +30,8 @@ data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class StoryTree(rootStory: StoryWrapper?,
-                comments: List<StoryWrapper>) : Cloneable {
+class StoryWithComments(rootStory: StoryWrapper?,
+                        comments: List<StoryWrapper>) : Cloneable {
 
     @JsonProperty("rootStory")
     private var mRootStoryWrapper: StoryWrapper? = rootStory
@@ -148,16 +148,16 @@ class StoryTree(rootStory: StoryWrapper?,
 
     }
 
-    fun deepCopy(): StoryTree {
+    fun deepCopy(): StoryWithComments {
         val rootWrapper = if (mRootStoryWrapper != null) {
             StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState)
         } else null
-        return StoryTree(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
+        return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is StoryTree) return false
+        if (other !is StoryWithComments) return false
 
         if (mRootStoryWrapper != other.mRootStoryWrapper) return false
         if (mCommentsWithState != other.mCommentsWithState) return false

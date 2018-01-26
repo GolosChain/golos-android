@@ -11,7 +11,7 @@ import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.UpdatingState
 import java.io.File
@@ -29,15 +29,15 @@ internal class MockApiImpl : GolosApi() {
         return "https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg"
     }
 
-    override fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree> {
+    override fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryWithComments> {
         return Golos4J.getInstance().databaseMethods
                 .getUserFeed(AccountName("cepera"))
                 .map {
-                    StoryTree(StoryWrapper(GolosDiscussionItem(it, null), UpdatingState.DONE), ArrayList())
+                    StoryWithComments(StoryWrapper(GolosDiscussionItem(it, null), UpdatingState.DONE), ArrayList())
                 }
     }
 
-    override fun getStory(blog: String, author: String, permlink: String, h: (List<AccountInfo>) -> Unit): StoryTree {
+    override fun getStory(blog: String, author: String, permlink: String, h: (List<AccountInfo>) -> Unit): StoryWithComments {
         /* val mapper = CommunicationHandler.getObjectMapper()
          val context = App.context
          val ins = context.resources.openRawResource(context.resources.getIdentifier("story",
@@ -60,7 +60,7 @@ internal class MockApiImpl : GolosApi() {
         return out
     }
 
-    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, filter: StoryFilter?, startAuthor: String?, startPermlink: String?): List<StoryTree> {
+    override fun getStories(limit: Int, type: FeedType, truncateBody: Int, filter: StoryFilter?, startAuthor: String?, startPermlink: String?): List<StoryWithComments> {
        /* val mapper = CommunicationHandler.getObjectMapper()
         val context = App.context
         val ins = context.resources.openRawResource(context.resources.getIdentifier("stripe",
@@ -112,7 +112,7 @@ internal class MockApiImpl : GolosApi() {
         return originalService.sendComment(sendFromAccount, authorOfItemToReply, content, permlinkOfItemToReply, categoryName)
     }
 
-    override fun getStoryWithoutComments(author: String, permlink: String): StoryTree {
+    override fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments {
         return originalService.getStoryWithoutComments(author, permlink)
     }
 

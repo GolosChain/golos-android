@@ -9,7 +9,7 @@ import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import java.io.File
 
 /**
@@ -34,16 +34,16 @@ abstract class GolosApi {
 
     abstract fun getUserAvatars(names: List<String>): Map<String, String?>
 
-    abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryTree>
+    abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryWithComments>
 
     abstract fun getStory(blog: String,
                           author: String,
-                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _ -> }): StoryTree
+                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _ -> }): StoryWithComments
 
-    abstract fun getStoryWithoutComments(author: String, permlink: String): StoryTree
+    abstract fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments
 
     abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
-                            filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryTree>
+                            filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryWithComments>
 
     abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
 

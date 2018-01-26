@@ -34,6 +34,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
+    private var mRefreshButton: View? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
@@ -48,6 +49,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private fun bindViews(view: View) {
         mRecycler = view.findViewById(R.id.recycler)
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
+        mRefreshButton = view.findViewById(R.id.refresh_btn)
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
@@ -102,6 +104,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             }
         })
         mRecycler?.recycledViewPool = StoriesPagerAdpater.sharedPool
+        mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
     }
 
     private fun setUp() {
@@ -128,6 +131,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (t?.items != null) {
             mRecycler?.post { mAdapter.setStripesCustom(t.items) }
         }
+        mRefreshButton?.visibility = if (t?.showRefreshButton == true)View.VISIBLE else View.GONE
         if (isVisible) {
             t?.error?.let {
                 if (it.localizedMessage != null) activity

@@ -19,7 +19,7 @@ import io.golos.golos.screens.story.model.ImageRow;
 import io.golos.golos.repository.model.ItemType;
 import io.golos.golos.screens.story.model.Row;
 import io.golos.golos.screens.story.model.StoryParserToRows;
-import io.golos.golos.screens.story.model.StoryTree;
+import io.golos.golos.screens.story.model.StoryWithComments;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import kotlin.text.Regex;
 
@@ -188,7 +188,7 @@ public class ParseTest {
 
     @Test
     public void testTree() throws Exception {
-        StoryTree tree = Utils.readStoryFromResourse("story.json");
+        StoryWithComments tree = Utils.readStoryFromResourse("story.json");
 
         List<StoryWrapper> comts = tree.getFlataned();
         StoryWrapper cmt = comts.stream().filter(new Predicate<StoryWrapper>() {
@@ -214,14 +214,14 @@ public class ParseTest {
 
     @Test
     public void testTreeTwo() throws Exception {
-        StoryTree tree = Utils.readStoryFromResourse("story2.json");
+        StoryWithComments tree = Utils.readStoryFromResourse("story2.json");
         List<StoryWrapper> comts = tree.getFlataned();
         System.out.println(comts);
     }
 
     @Test
     public void storyParserTest() throws Exception {
-        final StoryTree tree = Utils.readStoryFromResourse("story4.json");
+        final StoryWithComments tree = Utils.readStoryFromResourse("story4.json");
         final StoryParserToRows parser = new StoryParserToRows();
         List<Row> rows = parser.parse(tree.rootStory());
         assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg"), rows.get(0));

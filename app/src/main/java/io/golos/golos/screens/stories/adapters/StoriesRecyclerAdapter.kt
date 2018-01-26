@@ -19,12 +19,12 @@ import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.*
 import java.util.concurrent.Executors
 
 
-data class StripeWrapper(val stripe: StoryTree,
+data class StripeWrapper(val stripe: StoryWithComments,
                          val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                          val onCardClick: (RecyclerView.ViewHolder) -> Unit,
                          val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
@@ -33,13 +33,13 @@ data class StripeWrapper(val stripe: StoryTree,
                          val onUserClick: (RecyclerView.ViewHolder) -> Unit,
                          val onVotersClick: (RecyclerView.ViewHolder) -> Unit)
 
-class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { print(it) },
-                             private var onCommentsClick: (StoryTree) -> Unit = { print(it) },
-                             private var onShareClick: (StoryTree) -> Unit = { print(it) },
-                             private var onUpvoteClick: (StoryTree) -> Unit = { print(it) },
-                             private var onTagClick: (StoryTree) -> Unit = { print(it) },
-                             private var onUserClick: (StoryTree) -> Unit = { print(it) },
-                             private var onVotersClick: (StoryTree) -> Unit = { print(it) })
+class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onCommentsClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onShareClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onUpvoteClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onTagClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onUserClick: (StoryWithComments) -> Unit = { print(it) },
+                             private var onVotersClick: (StoryWithComments) -> Unit = { print(it) })
     : RecyclerView.Adapter<StripeViewHolder>() {
 
     companion object {
@@ -47,15 +47,15 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryTree) -> Unit = { pr
         private val workingExecutor = Executors.newSingleThreadExecutor()
     }
 
-    private var mStripes = ArrayList<StoryTree>()
+    private var mStripes = ArrayList<StoryWithComments>()
     private val mItemsMap = HashMap<Long, Int>()
     private val handler = Handler()
 
 
-    fun setStripesCustom(newItems: List<StoryTree>) {
+    fun setStripesCustom(newItems: List<StoryWithComments>) {
         if (mStripes.isEmpty()) {
             handler.post {
-                mStripes = ArrayList(newItems).clone() as ArrayList<StoryTree>
+                mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
                 notifyDataSetChanged()
                 mStripes.forEach {
                     mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())

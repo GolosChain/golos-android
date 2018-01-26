@@ -129,4 +129,5 @@
     <string name="help_step_4">4. Его нужно скопировать или сканировать через QR-код.</string>
     <string name="thanks_understood">Спасибо, я все понял</string>
     <string name="close">Закрыть</string>
+    <string name="refresh_question">Refresh?</string>
 </resources>

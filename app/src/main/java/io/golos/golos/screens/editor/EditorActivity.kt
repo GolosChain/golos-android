@@ -31,7 +31,7 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
@@ -233,7 +233,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     companion object {
         val MODE_TAG = "MODE_TAG"
         fun startRootCommentEditor(ctx: Context,
-                                   rootStory: StoryTree,
+                                   rootStory: StoryWithComments,
                                    feedType: FeedType,
                                    storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
@@ -249,7 +249,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         }
 
         fun startAnswerOnCommentEditor(ctx: Context,
-                                       rootStory: StoryTree,
+                                       rootStory: StoryWithComments,
                                        commentToAnswer: GolosDiscussionItem,
                                        feedType: FeedType,
                                        storyFilter: StoryFilter?) {

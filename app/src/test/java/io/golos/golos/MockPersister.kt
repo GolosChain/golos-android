@@ -1,7 +1,7 @@
 package io.golos.golos
 
 import io.golos.golos.repository.model.StoryRequest
-import io.golos.golos.repository.model.StoryTreeItems
+import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.UserAvatar
@@ -62,11 +62,11 @@ object MockPersister : Persister() {
         return tags
     }
 
-    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+    override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+    override fun getStories(): Map<StoryRequest, StoriesFeed> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

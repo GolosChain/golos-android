@@ -5,7 +5,7 @@ import android.util.Base64
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.golos.golos.App
 import io.golos.golos.repository.model.StoryRequest
-import io.golos.golos.repository.model.StoryTreeItems
+import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
@@ -51,9 +51,9 @@ abstract class Persister {
 
     abstract fun deleteUserSubscribedTag(tag: Tag)
 
-    abstract fun saveStories(stories: Map<StoryRequest, StoryTreeItems>)
+    abstract fun saveStories(stories: Map<StoryRequest, StoriesFeed>)
 
-    abstract fun getStories(): Map<StoryRequest, StoryTreeItems>
+    abstract fun getStories(): Map<StoryRequest, StoriesFeed>
 
     abstract fun deleteAllStories()
 
@@ -84,11 +84,11 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mDatabase.saveAvatars(userAvatars)
     }
 
-    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+    override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
         mDatabase.saveStories(stories)
     }
 
-    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+    override fun getStories(): Map<StoryRequest, StoriesFeed> {
         return mDatabase.getStories()
     }
 
@@ -213,11 +213,11 @@ private class MockPersister : Persister() {
 
     }
 
-    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+    override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
 
     }
 
-    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+    override fun getStories(): Map<StoryRequest, StoriesFeed> {
        return hashMapOf()
     }
 

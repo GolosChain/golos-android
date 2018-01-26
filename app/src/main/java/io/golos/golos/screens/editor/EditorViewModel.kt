@@ -6,8 +6,8 @@ import android.arch.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.StoryTreeItems
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.repository.model.StoriesFeed
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 
@@ -23,7 +23,7 @@ data class PostSendStatus(val author: String,
                           val blog: String,
                           val permlink: String)
 
-class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
+class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     val editorLiveData = MutableLiveData<EditorState>()
     val postStatusLiveData = MutableLiveData<PostSendStatus>()
     val titleMaxLength = 255
@@ -33,7 +33,7 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
     private var mTitleText: String = ""
     private var mTags = ArrayList<String>()
     private val mRepository = Repository.get
-    private var mRootStory: StoryTree? = null
+    private var mRootStory: StoryWithComments? = null
     private var mItemToAnswerOn: GolosDiscussionItem? = null
     var mode: EditorMode? = null
         set(value) {
@@ -57,7 +57,7 @@ class EditorViewModel : ViewModel(), Observer<StoryTreeItems> {
         editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState())
     }
 
-    override fun onChanged(t: StoryTreeItems?) {
+    override fun onChanged(t: StoriesFeed?) {
         mRootStory = t?.items?.findLast { it.rootStory()?.id == mode?.rootStoryId }
         mRootStory?.let {
             if (it.rootStory()?.id == mode?.commentToAnswerOnId) mItemToAnswerOn = it.rootStory()!!

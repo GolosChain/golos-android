@@ -18,7 +18,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.utils.*
@@ -48,7 +48,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     private val mTags = MutableLiveData<List<Tag>>()
 
     //feed posts lists
-    private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoryTreeItems>> = HashMap()
+    private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoriesFeed>> = HashMap()
 
     //votes
     private var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
@@ -69,7 +69,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             type: FeedType,
                             filter: StoryFilter?,
                             truncateBody: Int, startAuthor: String?,
-                            startPermlink: String?): List<StoryTree> {
+                            startPermlink: String?): List<StoryWithComments> {
         if (type == FeedType.PERSONAL_FEED || type == FeedType.COMMENTS || type == FeedType.BLOG) {
             if (filter?.userNameFilter == null) throw IllegalStateException(" for this types of stories," +
                     "user filter must be set")
@@ -87,7 +87,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             }
             it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: "_____absent_____"]
         }
-
 
         return out
     }
@@ -133,7 +132,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         return map
     }
 
-    private fun getStory(blog: String?, author: String, permlink: String): StoryTree {
+    private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
         val story = if (blog != null) mGolosApi.getStory(blog, author, permlink, { list ->
             list.forEach {
                 if (!mUsersAccountInfo.containsKey(it.userName)) {
@@ -632,7 +631,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         }
     }
 
-    override fun getStories(type: FeedType, filter: StoryFilter?): LiveData<StoryTreeItems> {
+    override fun getStories(type: FeedType, filter: StoryFilter?): LiveData<StoriesFeed> {
         return convertFeedTypeToLiveData(type, filter)
     }
 
@@ -648,14 +647,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         networkExecutor.execute {
             try {
                 val discussions = loadStories(limit, type, filter, 1024, startAuthor, startPermlink)
+
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
                     var out = discussions
                     if (startAuthor != null && startPermlink != null) {
-                        val current = ArrayList(updatingFeed.value?.items ?: ArrayList<StoryTree>())
+                        val current = ArrayList(updatingFeed.value?.items ?: ArrayList<StoryWithComments>())
                         out = current + out.subList(1, out.size)
                     }
-                    updatingFeed.value = StoryTreeItems(out.toArrayList(), type, filter)
+                    val feed = StoriesFeed(out.toArrayList(), type, filter)
+                    updatingFeed.value = feed
                     complitionHandler.invoke(Unit, null)
                     startLoadingAbscentAvatars(out, type, filter)
                 }
@@ -666,7 +667,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 mRequests.remove(request)
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
-                    updatingFeed.value = StoryTreeItems(updatingFeed.value?.items ?: ArrayList(),
+                    updatingFeed.value = StoriesFeed(updatingFeed.value?.items ?: ArrayList(),
                             updatingFeed.value?.type ?: FeedType.NEW,
                             filter,
                             GolosErrorParser.parse(e))
@@ -676,7 +677,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         }
     }
 
-    private fun startLoadingAbscentAvatars(forItems: List<StoryTree>, feedType: FeedType, filter: StoryFilter?) {
+    private fun startLoadingAbscentAvatars(forItems: List<StoryWithComments>, feedType: FeedType, filter: StoryFilter?) {
         networkExecutor.execute(object : ImageLoadRunnable {
             override fun run() {
                 try {
@@ -731,7 +732,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
             if (result) {
                 mMainThreadExecutor.execute {
-                    it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                    it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
                 }
             }
         }
@@ -751,14 +752,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             currentStory.isUserUpvotedOnThis = isUpvote
                             votedItem = currentStory
                             mMainThreadExecutor.execute {
-                                it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                                it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
                             }
                             isVoted = true
                         } else {
                             votedItem?.let { voteItem ->
                                 replacer.findAndReplace(StoryWrapper(voteItem, UpdatingState.DONE), storiesAll)
                                 mMainThreadExecutor.execute {
-                                    it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                                    it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
                                 }
                             }
                         }
@@ -771,7 +772,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             if (result) {
                                 val currentWorkingitem = discussionItem.clone() as GolosDiscussionItem
                                 replacer.findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), storiesAll)
-                                it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW,
+                                it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW,
                                         error = GolosErrorParser.parse(e), filter = it.value?.filter)
                             }
                         }
@@ -783,7 +784,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     }
 
 
-    override fun requestStoryUpdate(story: StoryTree) {
+    override fun requestStoryUpdate(story: StoryWithComments) {
         networkExecutor.execute {
             loadSubscribersIfNeeded()
             try {
@@ -806,7 +807,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val allItems = ArrayList(it.value?.items ?: ArrayList())
                     if (replacer.findAndReplace(updatedStory, allItems)) {
                         mMainThreadExecutor.execute {
-                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                            it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW, it.value?.filter)
                         }
                     }
                 }
@@ -826,7 +827,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             .findAndReplace(StoryWrapper(currentWorkingitem, UpdatingState.FAILED), allItems)
                     if (result) {
                         mMainThreadExecutor.execute {
-                            it.value = StoryTreeItems(allItems, it.value?.type ?: FeedType.NEW,
+                            it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW,
                                     error = GolosErrorParser.parse(e), filter = it.value?.filter)
                         }
                     }
@@ -864,7 +865,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val story = getStory(blog, author, permLink)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute {
-                        liveData.value = StoryTreeItems(listOf(story).toArrayList(), FeedType.UNCLASSIFIED, liveData.value?.filter)
+                        liveData.value = StoriesFeed(listOf(story).toArrayList(), FeedType.UNCLASSIFIED, liveData.value?.filter)
                     }
                     if (blog == null) {
                         requestStoryUpdate(story)
@@ -873,7 +874,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     logException(e)
                     val error = GolosErrorParser.parse(e)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
-                    mMainThreadExecutor.execute { liveData.value = StoryTreeItems(arrayListOf(), FeedType.UNCLASSIFIED, null, error) }
+                    mMainThreadExecutor.execute { liveData.value = StoriesFeed(arrayListOf(), FeedType.UNCLASSIFIED, null, error) }
                 }
             }
         }
@@ -922,7 +923,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoryTreeItems(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
+                        comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG, null, comments.value?.error)
                     }
                 }
@@ -936,7 +937,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         }
     }
 
-    override fun createComment(rootStory: StoryTree,
+    override fun createComment(rootStory: StoryWithComments,
                                to: GolosDiscussionItem,
                                content: List<EditorPart>,
                                resultListener: (CreatePostResult?, GolosError?) -> Unit) {
@@ -973,7 +974,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoryTreeItems((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
+                        comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
                                 FeedType.COMMENTS, null, comments.value?.error)
                     }
                 }
@@ -995,7 +996,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     }
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
-                                          filter: StoryFilter?): MutableLiveData<StoryTreeItems> {
+                                          filter: StoryFilter?): MutableLiveData<StoriesFeed> {
 
         return if (filter == null) {
             if (feedtype == FeedType.PERSONAL_FEED ||
@@ -1010,14 +1011,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             if (mFilteredMap.containsKey(filteredRequest)) {
                 mFilteredMap[filteredRequest]!!
             } else {
-                val liveData = MutableLiveData<StoryTreeItems>()
+                val liveData = MutableLiveData<StoriesFeed>()
                 mFilteredMap.put(filteredRequest, liveData)
                 liveData
             }
         }
     }
 
-    private fun allLiveData(): List<MutableLiveData<StoryTreeItems>> {
+    private fun allLiveData(): List<MutableLiveData<StoriesFeed>> {
         return mFilteredMap.values.toList()
     }
 
@@ -1160,7 +1161,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
     override fun onAppCreate() {
         super.onAppCreate()
-        Timber.e("onAppCreate")
         workerExecutor.execute {
             try {
                 val savedStories = mPersister.getStories()
@@ -1168,8 +1168,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                 val stories = savedStories
                         .mapValues {
-                            val items = MutableLiveData<StoryTreeItems>()
-                            mMainThreadExecutor.execute { items.value = it.value }
+                            val items = MutableLiveData<StoriesFeed>()
+                            mMainThreadExecutor.execute {
+                                it.value.isFeedActual = false
+                                items.value = it.value
+                            }
                             items
                         }
                 if (savedStories.isEmpty()) {
@@ -1218,7 +1221,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         .map { it.rootStory()!! }
                         .forEach {
                             if (it.activeVotes.size > 100) {
-                                val temp = it.activeVotes.slice(0.. 100)
+                                val temp = it.activeVotes.slice(0..100)
                                 it.activeVotes.clear()
                                 it.activeVotes.addAll(temp)
                             }

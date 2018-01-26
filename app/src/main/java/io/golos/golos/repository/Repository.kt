@@ -14,7 +14,7 @@ import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.Regexps
@@ -77,7 +77,7 @@ abstract class Repository {
 
     open fun onAppCreate() {}
 
-    abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoryTreeItems>
+    abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoriesFeed>
 
     abstract fun requestStoriesListUpdate(limit: Int,
                                           type: FeedType,
@@ -114,7 +114,7 @@ abstract class Repository {
 
     abstract fun cancelVote(comment: GolosDiscussionItem)
 
-    abstract fun requestStoryUpdate(story: StoryTree)
+    abstract fun requestStoryUpdate(story: StoryWithComments)
 
     abstract fun requestStoryUpdate(author: String, permLink: String,
                                     blog: String?, feedType: FeedType)
@@ -122,7 +122,7 @@ abstract class Repository {
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
                             resultListener: (CreatePostResult?, GolosError?) -> Unit)
 
-    abstract fun createComment(rootStory: StoryTree, to: GolosDiscussionItem, content: List<EditorPart>,
+    abstract fun createComment(rootStory: StoryWithComments, to: GolosDiscussionItem, content: List<EditorPart>,
                                resultListener: (CreatePostResult?, GolosError?) -> Unit)
 
     abstract fun isUserLoggedIn(): Boolean

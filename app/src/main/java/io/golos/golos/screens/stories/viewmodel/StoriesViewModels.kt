@@ -8,13 +8,13 @@ import android.support.v4.app.FragmentActivity
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
@@ -65,7 +65,8 @@ object StoriesModelFactory {
 }
 
 data class StoriesViewState(val isLoading: Boolean,
-                            val items: List<StoryTree> = ArrayList(),
+                            val showRefreshButton: Boolean,
+                            val items: List<StoryWithComments> = ArrayList(),
                             val error: GolosError? = null,
                             val fullscreenMessage: Int? = null,
                             val popupMessage: Int? = null)
@@ -101,8 +102,11 @@ open class FeedViewModel : StoriesViewModel() {
         super.onScrollToTheEnd()
     }
 
-    override fun onNewItems(items: StoryTreeItems?): StoriesViewState {
-        return StoriesViewState(false, items?.items ?: ArrayList(), items?.error,
+    override fun onNewItems(items: StoriesFeed?): StoriesViewState {
+        return StoriesViewState(false,
+                items?.isFeedActual == false,
+                items?.items ?: ArrayList(),
+                items?.error,
                 if (items?.items?.size ?: 0 == 0) R.string.nothing_here else null)
     }
 }
@@ -129,7 +133,7 @@ class PromoViewModel : StoriesViewModel() {
 }
 
 
-abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
+abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     protected abstract val type: FeedType
     protected val mStoriesLiveData: MutableLiveData<StoriesViewState> = MutableLiveData()
     protected val mRepository = Repository.get
@@ -145,7 +149,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
         if (this.filter != null && this.filter != filter) {//recreating
-            mStoriesLiveData.value = StoriesViewState(false, arrayListOf())
+            mStoriesLiveData.value = StoriesViewState(false,
+                    false,
+                    arrayListOf())
             isUpdating.set(false)
             onChangeVisibilityToUser(isVisibleToUser)
         }
@@ -154,13 +160,16 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         mRepository.getStories(type, filter).observeForever(this)
     }
 
-    override fun onChanged(t: StoryTreeItems?) {
+    override fun onChanged(t: StoriesFeed?) {
         if (t?.type == type && t.filter == filter)
             mStoriesLiveData.value = onNewItems(t)
     }
 
-    protected open fun onNewItems(items: StoryTreeItems?): StoriesViewState {
-        return StoriesViewState(false, items?.items ?: ArrayList(), items?.error)
+    protected open fun onNewItems(items: StoriesFeed?): StoriesViewState {
+        return StoriesViewState(false,
+                items?.isFeedActual == false,
+                items?.items ?: ArrayList(),
+                items?.error)
     }
 
     open fun onSwipeToRefresh() {
@@ -170,7 +179,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
             return
         }
         if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
+            mStoriesLiveData.value = StoriesViewState(true,
+                    false,
+                    mStoriesLiveData.value?.items ?: ArrayList())
             mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
             isUpdating.set(true)
         }
@@ -187,7 +198,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
                     mStoriesLiveData.value?.items == null ||
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
                 if (isUpdating.get()) return
-                mStoriesLiveData.value = StoriesViewState(true)
+                mStoriesLiveData.value = StoriesViewState(true, false)
                 mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
                 isUpdating.set(true)
             }
@@ -195,8 +206,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
     }
 
     protected fun setAppOffline() {
-        mStoriesLiveData.value = StoriesViewState(false, mStoriesLiveData.value?.items ?: ArrayList(),
-                GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+        mStoriesLiveData.value = StoriesViewState(false,
+                mStoriesLiveData.value?.showRefreshButton == true,
+                mStoriesLiveData.value?.items ?: ArrayList(),
+                GolosError(ErrorCode.ERROR_NO_CONNECTION,
+                        null,
+                        R.string.no_internet_connection))
     }
 
     open fun onScrollToTheEnd() {
@@ -207,14 +222,16 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         //  if (isUpdating.get())return
         isUpdating.set(true)
-        mStoriesLiveData.value = StoriesViewState(true, mStoriesLiveData.value?.items ?: ArrayList())
+        mStoriesLiveData.value = StoriesViewState(true,
+                mStoriesLiveData.value?.showRefreshButton == true,
+                mStoriesLiveData.value?.items ?: ArrayList())
         mRepository.requestStoriesListUpdate(20,
                 type,
                 filter,
                 mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink, { _, _ -> })
     }
 
-    open fun onCardClick(it: StoryTree, context: Context?) {
+    open fun onCardClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
@@ -222,7 +239,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
                 type, filter)
     }
 
-    open fun onCommentsClick(it: StoryTree, context: Context?) {
+    open fun onCommentsClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
@@ -231,7 +248,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
                 filter)
     }
 
-    open fun onShareClick(it: StoryTree, context: Context?) {
+    open fun onShareClick(it: StoryWithComments, context: Context?) {
         val link = mRepository.getShareStoryLink(it.rootStory() ?: return)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
@@ -240,7 +257,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         context?.startActivity(sendIntent)
     }
 
-    open fun vote(it: StoryTree, vote: Short) {
+    open fun vote(it: StoryWithComments, vote: Short) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -253,13 +270,14 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
             mRepository.upVote(story, vote)
         } else {
             mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                    mStoriesLiveData.value?.showRefreshButton == true,
                     mStoriesLiveData.value?.items ?: ArrayList(),
                     GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
 
     }
 
-    open fun downVote(it: StoryTree) {
+    open fun downVote(it: StoryWithComments) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -269,6 +287,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
             mRepository.cancelVote(story)
         } else {
             mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                    mStoriesLiveData.value?.showRefreshButton == true,
                     mStoriesLiveData.value?.items ?: ArrayList(),
                     GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
@@ -278,13 +297,14 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         return mRepository.isUserLoggedIn()
     }
 
-    fun onVoteRejected(it: StoryTree) {
+    fun onVoteRejected(it: StoryWithComments) {
         mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
+                mStoriesLiveData.value?.showRefreshButton == true,
                 mStoriesLiveData.value?.items ?: ArrayList(),
                 GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
-    fun onBlogClick(context: Context?, story: StoryTree) {
+    fun onBlogClick(context: Context?, story: StoryWithComments) {
 
         context?.let {
             var feedType: FeedType = type
@@ -297,11 +317,11 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoryTreeItems> {
         }
     }
 
-    fun onUserClick(context: Context?, it: StoryTree) {
+    fun onUserClick(context: Context?, it: StoryWithComments) {
         ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
 
-    fun onVotersClick(context: Context?, it: StoryTree) {
+    fun onVotersClick(context: Context?, it: StoryWithComments) {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
 

@@ -8,7 +8,7 @@ import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
 
@@ -71,7 +71,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     }
 
 
-    fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+    fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
         val discussionItem = stories
                 .map { it.value.items }
                 .flatMap { it }
@@ -89,13 +89,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         StoriesRequestsTable.save(storiesIds, writableDatabase)
     }
 
-    fun getStories(): Map<StoryRequest, StoryTreeItems> {
+    fun getStories(): Map<StoryRequest, StoriesFeed> {
         val storiesIds = StoriesRequestsTable.get(writableDatabase)
         return storiesIds
                 .groupBy { it }
                 .mapValues {
-                    StoryTreeItems(DiscussionItemsTable.get(it.key.storyIds, VotesTable, AvatarsTable, writableDatabase)
-                            .map { StoryTree(StoryWrapper(it, UpdatingState.DONE), arrayListOf()) }.toArrayList(),
+                    StoriesFeed(DiscussionItemsTable.get(it.key.storyIds, VotesTable, AvatarsTable, writableDatabase)
+                            .map { StoryWithComments(StoryWrapper(it, UpdatingState.DONE), arrayListOf()) }.toArrayList(),
                             it.key.request.feedType,
                             it.key.request.filter,
                             null)

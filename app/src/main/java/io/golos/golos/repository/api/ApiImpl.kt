@@ -14,7 +14,7 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
 import org.apache.commons.lang3.tuple.ImmutablePair
@@ -37,7 +37,7 @@ class ApiImpl : GolosApi() {
                              type: FeedType,
                              limit: Int,
                              truncateBody: Int,
-                             startAuthor: String?, startPermlink: String?): List<StoryTree> {
+                             startAuthor: String?, startPermlink: String?): List<StoryWithComments> {
         var discussionSortType =
                 when (type) {
                     FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
@@ -55,10 +55,10 @@ class ApiImpl : GolosApi() {
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
         query.selectAuthors = listOf(AccountName(userName))
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
-        val out = ArrayList<StoryTree>()
+        val out = ArrayList<StoryWithComments>()
         discussions.forEach {
             if (it != null) {
-                val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
+                val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
                 out.add(story)
             }
         }
@@ -67,15 +67,15 @@ class ApiImpl : GolosApi() {
 
     override fun getStory(blog: String, author: String,
                           permlink: String,
-                          accountDataHandler: (List<AccountInfo>) -> Unit): StoryTree {
+                          accountDataHandler: (List<AccountInfo>) -> Unit): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink))
-        var story = StoryTree(rawStory)
+        var story = StoryWithComments(rawStory)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story
     }
 
-    override fun getStoryWithoutComments(author: String, permlink: String): StoryTree {
-        val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(
+    override fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments {
+        val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
                 mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
                 null), UpdatingState.DONE), ArrayList())
         return story
@@ -93,7 +93,7 @@ class ApiImpl : GolosApi() {
     override fun getStories(limit: Int, type: FeedType,
                             truncateBody: Int, filter: StoryFilter?,
                             startAuthor: String?,
-                            startPermlink: String?): List<StoryTree> {
+                            startPermlink: String?): List<StoryWithComments> {
         var discussionSortType =
                 when (type) {
                     FeedType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
@@ -124,10 +124,10 @@ class ApiImpl : GolosApi() {
             }
         }
         val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
-        val out = ArrayList<StoryTree>()
+        val out = ArrayList<StoryWithComments>()
         discussions.forEach {
             if (it != null) {
-                val story = StoryTree(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
+                val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
                 out.add(story)
             }
         }

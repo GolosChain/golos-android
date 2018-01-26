@@ -17,7 +17,7 @@ import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryTree
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryViewState
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
@@ -83,7 +83,7 @@ class StoryViewModel : ViewModel() {
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.errorCode,
                     mLiveData.value?.tags ?: ArrayList(),
-                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                    mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
                     mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus
@@ -98,7 +98,7 @@ class StoryViewModel : ViewModel() {
                         mRepository.isUserLoggedIn(),
                         mLiveData.value?.errorCode,
                         mLiveData.value?.tags ?: ArrayList(),
-                        mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                        mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                         mRepository.isUserLoggedIn(),
                         followItem.status,
                         mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
@@ -112,7 +112,7 @@ class StoryViewModel : ViewModel() {
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.errorCode,
                     mLiveData.value?.tags ?: ArrayList(),
-                    mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                    mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
                     SubscribeStatus(tagItem != null, UpdatingState.DONE)
@@ -255,7 +255,7 @@ class StoryViewModel : ViewModel() {
                 mRepository.isUserLoggedIn(),
                 error,
                 mLiveData.value?.tags ?: ArrayList(),
-                mLiveData.value?.storyTree ?: StoryTree(null, ArrayList()),
+                mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                 mRepository.isUserLoggedIn(),
                 mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
                 mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)

@@ -13,8 +13,7 @@ import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.repository.model.GolosDiscussionItem;
-import io.golos.golos.screens.story.model.SubscribeStatus;
-import io.golos.golos.screens.story.model.StoryTree;
+import io.golos.golos.screens.story.model.StoryWithComments;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import io.golos.golos.utils.UpdatingState;
 
@@ -23,31 +22,31 @@ import io.golos.golos.utils.UpdatingState;
  */
 
 public class Utils {
-    public static StoryTree readStoryFromResourse(String fileNameWithExtension) throws Exception {
+    public static StoryWithComments readStoryFromResourse(String fileNameWithExtension) throws Exception {
         ObjectMapper mapper = CommunicationHandler.getObjectMapper();
         File f = new File(Utils.class.getClassLoader().getResource(fileNameWithExtension).getPath());
         ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, DiscussionWithComments.class);
         List<DiscussionWithComments> stories = mapper.convertValue(wrapperDTO.getResult(), type);
-        return new StoryTree(stories.get(0));
+        return new StoryWithComments(stories.get(0));
     }
 
     public static File getFileFromResources(String fileNameWithExtension) throws Exception {
         return new File(Utils.class.getClassLoader().getResource(fileNameWithExtension).getPath());
     }
 
-    public static List<StoryTree> readStoriesFromResourse(String fileNameWithExtension) throws Exception {
+    public static List<StoryWithComments> readStoriesFromResourse(String fileNameWithExtension) throws Exception {
 
         ObjectMapper mapper = CommunicationHandler.getObjectMapper();
         File f = new File(Utils.class.getClassLoader().getResource(fileNameWithExtension).getPath());
         ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
-        final List<StoryTree> stories = new ArrayList();
+        final List<StoryWithComments> stories = new ArrayList();
         discussions.forEach(new Consumer<Discussion>() {
             @Override
             public void accept(Discussion discussion) {
-                stories.add(new StoryTree(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
+                stories.add(new StoryWithComments(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE),
                         new ArrayList()
                         ));
 

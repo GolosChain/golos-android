@@ -129,6 +129,7 @@
     <string name="help_step_4">4. You can copy-paste it, or scan through QR-code.</string>
     <string name="thanks_understood">Got it</string>
     <string name="close">Close</string>
+    <string name="refresh_question">Обновить?</string>
 
 </resources>
 
