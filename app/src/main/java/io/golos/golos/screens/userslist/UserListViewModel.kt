@@ -103,7 +103,7 @@ class UserListViewModel : ViewModel() {
                 }
                 mLiveData.value = UserListViewState(mTitle, it.map {
                     val currentVotingObject = it
-                    val excheangeCourse = mRepository.getExchengeLiveData()
+                    val excheangeCourse = mRepository.getExchangeLiveData()
                     UserListRowData(it.name,
                             it.avatar,
                             "$ ${String.format("%.3f", it.gbgValue * (excheangeCourse.value?.dollarsPerGbg ?: 1.0))}",

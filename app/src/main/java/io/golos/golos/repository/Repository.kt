@@ -150,7 +150,11 @@ abstract class Repository {
 
     abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
 
-    open fun getExchengeLiveData(): LiveData<ExchangeValues> {
+    abstract fun getAppReadyStatus(): LiveData<ReadyStatus>
+
+    abstract fun requestInitRetry()
+
+    open fun getExchangeLiveData(): LiveData<ExchangeValues> {
         val liveData = MutableLiveData<ExchangeValues>()
         liveData.value = ExchangeValues(00.04106528)
         return liveData
@@ -160,6 +164,18 @@ abstract class Repository {
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"
     }
+
+    open fun onAppStop() {
+
+
+    }
+
+    open fun onAppDestroy() {
+
+
+    }
+
+
 }
 
 interface ImageLoadRunnable : Runnable

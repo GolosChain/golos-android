@@ -26,7 +26,7 @@ class CommentsViewModleTest {
     fun before() {
         repo = RepositoryImpl(
                 MainThreadExecutor,
-                ,
+                MainThreadExecutor,
                 MainThreadExecutor, MockPersister, ApiImpl(), null
         )
         Repository.setSingletoneInstance(repo)

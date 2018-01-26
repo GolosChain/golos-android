@@ -1,5 +1,7 @@
 package io.golos.golos
 
+import io.golos.golos.repository.model.StoryRequest
+import io.golos.golos.repository.model.StoryTreeItems
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.UserAvatar
@@ -58,6 +60,18 @@ object MockPersister : Persister() {
 
     override fun getTags(): List<Tag> {
         return tags
+    }
+
+    override fun saveStories(stories: Map<StoryRequest, StoryTreeItems>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getStories(): Map<StoryRequest, StoryTreeItems> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deleteAllStories() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun saveUserSubscribedTags(tags: List<Tag>) {

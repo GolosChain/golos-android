@@ -41,6 +41,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                               private val mLogger: ExceptionLogger?) : Repository() {
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
 
+    private val mAppReadyStatusLiveData = MutableLiveData<ReadyStatus>()
+
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
 
     private val mTags = MutableLiveData<List<Tag>>()
@@ -49,7 +51,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoryTreeItems>> = HashMap()
 
     //votes
-    var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
+    private var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
 
     //users data
     private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
@@ -83,7 +85,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             if (name.isNotEmpty()) {
                 it.rootStory()?.isUserUpvotedOnThis = it.rootStory()?.isUserVotedOnThis(name) ?: false
             }
-            it.rootStory()?.avatarPath = avatars.get(it.rootStory()?.author ?: "_____absent_____")
+            it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: "_____absent_____"]
         }
 
 
@@ -208,6 +210,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 }
             }
         }
+    }
+
+    override fun getAppReadyStatus(): LiveData<ReadyStatus> {
+        return mAppReadyStatusLiveData
     }
 
     override fun lastCreatedPost(): LiveData<CreatePostResult> {
@@ -688,7 +694,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                                     }
                     mPersister.saveAvatarsPathForUsers(avatars)
 
-                    var items = convertFeedTypeToLiveData(feedType, filter).value!!.items
+                    val items = convertFeedTypeToLiveData(feedType, filter).value!!.items
                     items.forEach {
                         if (avatarsMap.containsKey(it.rootStory()?.author ?: "")) it.rootStory()?.avatarPath = avatarsMap[it.rootStory()?.author ?: ""]
                     }
@@ -749,12 +755,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             }
                             isVoted = true
                         } else {
-
-                            val item = it
-                            votedItem?.let {
-                                replacer.findAndReplace(StoryWrapper(it, UpdatingState.DONE), storiesAll)
+                            votedItem?.let { voteItem ->
+                                replacer.findAndReplace(StoryWrapper(voteItem, UpdatingState.DONE), storiesAll)
                                 mMainThreadExecutor.execute {
-                                    item.value = StoryTreeItems(storiesAll, item.value?.type ?: FeedType.NEW, item.value?.filter)
+                                    it.value = StoryTreeItems(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
                                 }
                             }
                         }
@@ -1019,7 +1023,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
     override fun getTrendingTags(): LiveData<List<Tag>> {
         if (mTags.value == null || mTags.value?.size == 0) {
-            networkExecutor.execute {
+            workerExecutor.execute {
                 try {
                     val tags = mPersister.getTags()
                     mMainThreadExecutor.execute {
@@ -1109,15 +1113,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             return liveData
         }
 
-
-        networkExecutor.execute {
+        workerExecutor.execute {
             item?.let {
 
                 val avatars = getUserAvatarsFromDb(it.activeVotes.map { it.name })
-
                 val payouts = RSharesConverter.convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
-
-                var voters = it
+                val voters = it
                         .activeVotes
                         .filter { it.percent > 0 }
                         .mapIndexed { index, voteLight ->
@@ -1127,38 +1128,113 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 mMainThreadExecutor.execute {
                     liveData.value = voters
                 }
-                try {
-                    val avatars = mGolosApi.getUserAvatars(voters
-                            .filter { it.avatar == null }
-                            .map { it.name })
+                networkExecutor.execute {
+                    try {
+                        val avatars = mGolosApi.getUserAvatars(voters
+                                .filter { it.avatar == null }
+                                .map { it.name })
 
-                    val avatarObjects = avatars
-                            .filter { it.value != null }
-                            .map {
-                                UserAvatar(it.key, it.value, System.currentTimeMillis())
+                        val avatarObjects = avatars
+                                .filter { it.value != null }
+                                .map {
+                                    UserAvatar(it.key, it.value, System.currentTimeMillis())
+                                }
+                        workerExecutor.execute {
+                            mPersister.saveAvatarsPathForUsers(avatarObjects)
+
+                            voters.forEach {
+                                if (avatars.containsKey(it.name)) it.avatar = avatars[it.name]
                             }
-                    mPersister.saveAvatarsPathForUsers(avatarObjects)
-
-                    voters.forEach {
-                        if (avatars.containsKey(it.name)) it.avatar = avatars[it.name]
+                            mMainThreadExecutor.execute {
+                                liveData.value = voters
+                            }
+                        }
+                    } catch (e: Exception) {
+                        logException(e)
                     }
-                    mMainThreadExecutor.execute {
-                        liveData.value = voters
-                    }
-                } catch (e: Exception) {
-                    logException(e)
                 }
             }
         }
         return liveData
     }
 
+    override fun onAppCreate() {
+        super.onAppCreate()
+        Timber.e("onAppCreate")
+        workerExecutor.execute {
+            try {
+                val savedStories = mPersister.getStories()
+                        .filter { it.value.items.size != 0 }
+
+                val stories = savedStories
+                        .mapValues {
+                            val items = MutableLiveData<StoryTreeItems>()
+                            mMainThreadExecutor.execute { items.value = it.value }
+                            items
+                        }
+                if (savedStories.isEmpty()) {
+                    requestStoriesListUpdate(20,
+                            if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.POPULAR,
+                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = getCurrentUserDataAsLiveData().value?.userName ?: "") else null,
+                            complitionHandler = { _, e ->
+                                if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)
+                                else mAppReadyStatusLiveData.value = ReadyStatus(true, null)
+                            })
+
+                } else {
+                    mMainThreadExecutor.execute {
+                        mFilteredMap.putAll(stories)
+                        mAppReadyStatusLiveData.value = ReadyStatus(true, null)
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                logException(e)
+                mMainThreadExecutor.execute {
+                    mFilteredMap.clear()
+                    mAppReadyStatusLiveData.value = ReadyStatus(false, GolosErrorParser.parse(e))
+                }
+            }
+        }
+    }
+
+    override fun requestInitRetry() {
+        mPersister.deleteAllStories()
+        onAppCreate()
+    }
+
+    override fun onAppStop() {
+        super.onAppStop()
+        workerExecutor.execute {
+            try {
+                mPersister.deleteAllStories()
+                val storiesToSave = mFilteredMap
+                        .filter { it.value.value != null }
+                        .mapValues { it.value.value!!.copy() }
+                storiesToSave
+                        .flatMap { it.value.items }
+                        .filter { it.rootStory() != null }
+                        .map { it.rootStory()!! }
+                        .forEach {
+                            if (it.activeVotes.size > 100) {
+                                val temp = it.activeVotes.slice(0.. 100)
+                                it.activeVotes.clear()
+                                it.activeVotes.addAll(temp)
+                            }
+                        }
+
+                mPersister.saveStories(storiesToSave)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                logException(e)
+            }
+        }
+    }
 
     private fun logException(e: Throwable) {
         Timber.e(e)
         e.printStackTrace()
         mLogger?.log(e)
     }
-
-
 }

@@ -1,7 +1,14 @@
 package io.golos.golos
 
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.readValues
 import eu.bittrade.libs.steemj.Golos4J
 import io.golos.golos.repository.ImageLoadRunnable
+import io.golos.golos.repository.model.mapper
+import io.golos.golos.repository.persistence.SqliteDb
+import io.golos.golos.utils.getString
+import io.golos.golos.utils.toArrayList
 import org.junit.Test
 import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
@@ -51,4 +58,16 @@ class MiscTests {
         val v = Golos4J.getInstance().databaseMethods.getTrendingTags("", Integer.MAX_VALUE)
         println(v)
     }
+    @Test
+    fun testConvert(){
+        val list = listOf("ru--fotografiya", "vpp", "vpp-newbie")
+        val s = mapper.writeValueAsString(list)
+        println(s)
+
+        val tagsString = "{[\"ru--fotografiya\",\"vpp\",\"vpp-newbie\"]}"
+      //  val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+        val tags = mapper.readValue<List<String>>(s)
+        println(tags)
+    }
+
 }

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.UserAvatar
-import io.golos.golos.screens.story.model.Row
+import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryTree
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
@@ -229,17 +229,16 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private val type = "type"
         private val firstRebloggedBy = "firstRebloggedBy"
         private val cleanedFromImages = "cleanedFromImages"
-        private val parts = "parts"
         private val childrenCount = "childrenCount"
 
 
         val createTableString = "create table if not exists $databaseName ( $id integer primary key ," +
                 "$url text, $title text, $categoryName text, $tags text, $images text, $links text," +
-                "$votesNum integer, $votesRshares integer, $commentsCount integer, $permlink text," +
+                "$votesNum integer, $votesRshares integer, $commentsCount integer, " +
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +
                 "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
                 "$created integer, $isUserUpvotedOnThis integer, $type text, $firstRebloggedBy text," +
-                "$cleanedFromImages text, $parts text, $childrenCount integer)"
+                "$cleanedFromImages text, $childrenCount integer)"
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
@@ -271,8 +270,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.type, it.type.name)
                 values.put(this.firstRebloggedBy, it.firstRebloggedBy)
                 values.put(this.cleanedFromImages, it.cleanedFromImages)
-                values.put(this.parts, mapper.writeValueAsString(it.parts))
                 values.put(this.childrenCount, it.childrenCount)
+                values.put(this.votesNum, it.votesNum)
+                values.put(this.votesRshares, it.votesRshares)
 
                 voteTable.save(it.activeVotes, it.id, db)
 
@@ -293,23 +293,24 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
             val workingIds = if (ids.size > 100) ids.subList(0, 100) else ids
             val idBuilder = StringBuilder("( ")
-            ids.forEachIndexed { index, item ->
-                if (index != ids.lastIndex)
+            workingIds.forEachIndexed { index, item ->
+                if (index != workingIds.lastIndex)
                     idBuilder.append(" $id = $item or ")
                 else idBuilder.append("$id = $item ) ")
             }
-            val cursor = db.query(databaseName, null, ids.toString(), null, null, null, null)
+            val cursor = db.rawQuery("select * from $databaseName where $idBuilder", null)
             val out = ArrayList<GolosDiscussionItem>(cursor.count)
 
             if (cursor.count != 0) {
                 cursor.moveToFirst()
+                val temp = ArrayList<GolosDiscussionItem>(cursor.count)
+                val rowsParser = StoryParserToRows()
                 while (!cursor.isAfterLast) {
                     val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
-                    val rowType = mapper.typeFactory.constructCollectionType(List::class.java, Row::class.java)
-                    val tags = mapper.convertValue<List<String>>(cursor.getString(tags) ?: "", stringListType).toArrayList()
-                    val images = mapper.convertValue<List<String>>(cursor.getString(images) ?: "", stringListType).toArrayList()
-                    val links = mapper.convertValue<List<String>>(cursor.getString(links) ?: "", stringListType).toArrayList()
-                    val rows = mapper.convertValue<List<Row>>(cursor.getString(parts) ?: "", stringListType).toArrayList()
+
+                    val tags = mapper.readValue<List<String>>(cursor.getString(tags) ?: "", stringListType).toArrayList()
+                    val images = mapper.readValue<List<String>>(cursor.getString(images) ?: "", stringListType).toArrayList()
+                    val links = mapper.readValue<List<String>>(cursor.getString(links) ?: "", stringListType).toArrayList()
                     val format = cursor.getString(format)
                     val itemType = cursor.getString(type)
 
@@ -342,15 +343,18 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             if (itemType != null) ItemType.valueOf(itemType) else ItemType.PLAIN,
                             cursor.getString(firstRebloggedBy) ?: "",
                             cursor.getString(cleanedFromImages) ?: "",
-                            rows)
-
+                            arrayListOf())
+                    discussionItem.parts = rowsParser.parse(discussionItem)
                     discussionItem.avatarPath = avatarTable.get(discussionItem.author, db)?.avatarPath
                     discussionItem.activeVotes.addAll(voteTable.get(discussionItem.id, db))
-                    out.add(discussionItem)
+                    temp.add(discussionItem)
 
                     cursor.moveToNext()
                 }
-
+                workingIds.forEach { id ->
+                    val item = temp.find { it.id == id }
+                    item?.let { out.add(item) }
+                }
             }
             cursor.close()
             return out
