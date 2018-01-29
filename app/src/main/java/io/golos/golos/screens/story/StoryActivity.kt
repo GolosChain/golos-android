@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar
 import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.App
 import io.golos.golos.R
@@ -142,10 +143,12 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                         glide
                                 .load(story.avatarPath)
+                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatar)
                         glide
                                 .load(story.avatarPath)
+                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatarofAuthorInFollowLo)
                     }

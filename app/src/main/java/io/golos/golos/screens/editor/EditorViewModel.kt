@@ -41,6 +41,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val feedType = field?.feedType
             val rootStoryId = field?.rootStoryId
             val itemToAnsweronId = field?.commentToAnswerOnId
+            DraftsPersister.getDraft(value ?: return, {
+                if (it.isNotEmpty())
+                    editorLiveData.value = EditorState(null, false, null, it)
+            })
             if (feedType != null && rootStoryId != null && itemToAnsweronId != null) {
                 Repository
                         .get
@@ -56,6 +60,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     init {
         editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState())
     }
+
 
     override fun onChanged(t: StoriesFeed?) {
         mRootStory = t?.items?.findLast { it.rootStory()?.id == mode?.rootStoryId }
@@ -116,6 +121,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 postStatusLiveData.value = PostSendStatus(result?.author ?: return@createPost,
                         result.blog,
                         result.permlink)
+                DraftsPersister.saveDraft(mode ?:return@createPost, listOf(), {})
             })
         } else {
             if (mRootStory == null || mItemToAnswerOn == null) return
@@ -134,8 +140,14 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
                         completeMessage = if (error == null) R.string.send_comment_success else null)
+                DraftsPersister.saveDraft(mode ?:return@createComment, listOf(), {})
             })
+
         }
+    }
+
+    fun onDestroy() {
+        DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts ?: return, {})
     }
 }
 

@@ -274,6 +274,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.childrenCount, it.childrenCount)
                 values.put(this.votesNum, it.votesNum)
                 values.put(this.votesRshares, it.votesRshares)
+                values.put(this.commentsCount, it.commentsCount)
 
                 voteTable.save(it.activeVotes, it.id, db)
 

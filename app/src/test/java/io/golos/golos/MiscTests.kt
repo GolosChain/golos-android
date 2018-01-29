@@ -1,15 +1,9 @@
 package io.golos.golos
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.readValues
 import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.AccountName
 import io.golos.golos.repository.ImageLoadRunnable
 import io.golos.golos.repository.model.mapper
-import io.golos.golos.repository.persistence.SqliteDb
-import io.golos.golos.utils.getString
-import io.golos.golos.utils.toArrayList
+import io.golos.golos.screens.editor.DraftsPersister
 import org.junit.Test
 import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
@@ -57,8 +51,10 @@ class MiscTests {
 
     @Test
     fun testAcc() {
-        val v = AccountName("tesha2009 ")
-        println(v)
+        val v = "[{\"id\":\"21d0656f-aa81-4b32-8b5a-fa9b02472a3a\",\"imageName\":null,\"imageUrl\":null,\"pointerPosition\":14,\"text\":\"etwtwetwet1111\",\"type\":\"text\"}]"
+        val type = mapper.typeFactory.constructCollectionType(List::class.java, DraftsPersister.DraftsTable.EditorPartDescriptor::class.java)
+        val parts = mapper.readValue<List<DraftsPersister.DraftsTable.EditorPartDescriptor>>(v, type)
+        println(parts)
     }
 
 }

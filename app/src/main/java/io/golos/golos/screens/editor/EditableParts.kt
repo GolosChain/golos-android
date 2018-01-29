@@ -8,7 +8,6 @@ import java.util.regex.Pattern
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
  */
 
-
 abstract class EditorPart(open val id: String = UUID.randomUUID().toString()) {
     abstract val markdownRepresentation: CharSequence
     abstract var pointerPosition: Int?

@@ -218,6 +218,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel.onDestroy()
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == READ_EXTERNAL_PERMISSION &&
