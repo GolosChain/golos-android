@@ -1,6 +1,6 @@
 package io.golos.golos;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -8,6 +8,7 @@ import java.util.HashSet;
 import eu.bittrade.libs.steemj.Golos4J;
 import eu.bittrade.libs.steemj.base.models.AccountName;
 import eu.bittrade.libs.steemj.enums.PrivateKeyType;
+import eu.bittrade.libs.steemj.util.ImmutablePair;
 
 import static org.junit.Assert.assertEquals;
 

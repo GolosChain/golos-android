@@ -7,13 +7,14 @@ import eu.bittrade.libs.steemj.base.models.DiscussionQuery
 import eu.bittrade.libs.steemj.base.models.operations.AccountUpdateOperation
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.util.AuthUtils
+import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.Utils
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.utils.RSharesConverter
 import junit.framework.Assert
 import junit.framework.Assert.*
-import org.apache.commons.lang3.tuple.ImmutablePair
+
 import org.junit.Test
 import java.math.BigInteger
 import java.util.*

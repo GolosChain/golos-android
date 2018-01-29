@@ -9,6 +9,7 @@ import eu.bittrade.libs.steemj.enums.DiscussionSortType
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
+import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.*
@@ -17,7 +18,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
-import org.apache.commons.lang3.tuple.ImmutablePair
+
 import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.io.File

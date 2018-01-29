@@ -8,6 +8,7 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
+import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
@@ -22,7 +23,7 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.utils.*
-import org.apache.commons.lang3.tuple.ImmutablePair
+
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -612,7 +613,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     override fun deleteUserdata() {
         mPersister.deleteUserData()
         mAuthLiveData.value = null
-        mCurrentUserSubscriptions.value = null
+        mCurrentUserSubscriptions.value = listOf()
         allLiveData().forEach {
             it.value?.items?.forEach {
                 it.rootStory()?.isUserUpvotedOnThis = false
@@ -653,7 +654,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     var out = discussions
                     if (startAuthor != null && startPermlink != null) {
                         val current = ArrayList(updatingFeed.value?.items ?: ArrayList<StoryWithComments>())
-                        out = current + out.subList(1, out.size)
+                        out = current + out.slice(1..out.lastIndex)
                     }
                     val feed = StoriesFeed(out.toArrayList(), type, filter)
                     updatingFeed.value = feed

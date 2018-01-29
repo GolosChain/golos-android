@@ -15,14 +15,22 @@ object GolosErrorParser {
             is SteemInvalidTransactionException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.message, null)
             is SteemTimeoutException -> GolosError(ErrorCode.ERROR_SLOW_CONNECTION, null, R.string.slow_internet_connection)
             is SteemCommunicationException -> GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection)
-            is InvalidParameterException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, R.string.wrong_args)
+            is InvalidParameterException -> {
+                if (e.message?.contains("method without providing an account") == true) {
+                    GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, R.string.reenter_acc)
+                } else {
+                    GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, R.string.wrong_args)
+                }
+
+            }
+
             is SteemConnectionException -> GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection)
             else -> GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.unknown_error)
         }
     }
 
     fun getLocalizedError(error: SteemResponseError): Int {
-        if (error.error == null || error.error.steemErrorDetails == null || error.error.steemErrorDetails.data == null){
+        if (error.error == null || error.error.steemErrorDetails == null || error.error.steemErrorDetails.data == null) {
             return R.string.unknown_error
         }
         if (error.error.steemErrorDetails.data.toString().contains(" Voter has used the maximum number of vote changes on this commen"))

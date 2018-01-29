@@ -130,6 +130,7 @@
     <string name="thanks_understood">Got it</string>
     <string name="close">Close</string>
     <string name="refresh_question">Обновить?</string>
+    <string name="reenter_acc">Ошибка авторизации.  Если повториться - попробуйте выйти и зайти в свой аккаунт.</string>
 
 </resources>
 

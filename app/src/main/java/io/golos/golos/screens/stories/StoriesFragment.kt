@@ -40,7 +40,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private var isVisibleBacking: Boolean? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fr_stripe, container, false)
+        val view = inflater.inflate(R.layout.fr_stories, container, false)
         bindViews(view)
         setUp()
         return view

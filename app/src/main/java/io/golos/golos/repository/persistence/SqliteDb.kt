@@ -151,6 +151,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun getAvatarsFromDb(db: SQLiteDatabase, usernames: List<String>): Map<String, UserAvatar?> {
+            if (usernames.isEmpty()) return hashMapOf()
 
             val users = usernames.distinct()
             val map = HashMap<String, UserAvatar?>(users.size)
