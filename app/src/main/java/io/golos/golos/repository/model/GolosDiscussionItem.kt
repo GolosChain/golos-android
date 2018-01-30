@@ -9,6 +9,7 @@ import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.toArrayList
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -53,7 +54,7 @@ data class GolosDiscussionItem(val url: String,
                                var type: ItemType = ItemType.PLAIN,
                                val firstRebloggedBy: String,
                                var cleanedFromImages: String,
-                               var parts: List<Row> = ArrayList()) : Cloneable {
+                               var parts: ArrayList<Row> = ArrayList()) : Cloneable {
 
 
     val payoutInDollars: Double
@@ -137,7 +138,7 @@ data class GolosDiscussionItem(val url: String,
         }
         body = discussion.body ?: ""
         val toRowsParser = StoryParserToRows()
-        parts = toRowsParser.parse(this)
+        parts = toRowsParser.parse(this).toArrayList()
         if (parts.size == 0) {
             Timber.e("fail on story id is ${id}\n body =  ${body}")
         } else {

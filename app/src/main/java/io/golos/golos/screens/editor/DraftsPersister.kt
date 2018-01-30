@@ -64,6 +64,26 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
     }
 
+    open fun deleteDraft(mode: EditorMode, completionHandler: (Unit) -> Unit) {
+        executor.execute {
+            try {
+                DraftsTable.delete(mode, writableDatabase)
+                handler.post {
+                    completionHandler.invoke(Unit)
+                }
+
+            } catch (e: Exception) {
+                Timber.e(e)
+                e.printStackTrace()
+                handler.post {
+                    completionHandler.invoke(Unit)
+                }
+
+            }
+        }
+    }
+
+
     private final object DraftsTable {
         private val tableName = "drafts"
         private val modeColumn = "mode"
@@ -71,6 +91,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         val createDefinition = "create table  if not exists $tableName ($modeColumn text primary key, $partsColunm text)"
 
         fun save(mode: EditorMode, parts: List<EditorPart>, db: SQLiteDatabase) {
+            Timber.e("save with $mode")
             val parts = parts.map {
                 if (it is EditorTextPart) {
                     EditorPartDescriptor("text", it.id, null, null, it.text, it.pointerPosition)
@@ -110,6 +131,10 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
             return out
         }
 
+        fun delete(mode: EditorMode, writableDatabase: SQLiteDatabase?) {
+            Timber.e("delete with $mode")
+            writableDatabase?.delete(tableName, " $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
+        }
 
         data class EditorPartDescriptor constructor(
                 @JsonProperty("type")
@@ -124,5 +149,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                 val text: String?,
                 @JsonProperty("pointerPosition")
                 val pointerPosition: Int?)
+
+
     }
 }

@@ -129,6 +129,6 @@
     <string name="help_step_4">4. Его нужно скопировать или сканировать через QR-код.</string>
     <string name="thanks_understood">Спасибо, я все понял</string>
     <string name="close">Закрыть</string>
-    <string name="refresh_question">Refresh?</string>
-    <string name="reenter_acc">Auth error. If this repeats, try exit and enter to your account one more time.</string>
+    <string name="reenter_acc">Ошибка авторизации.  Если повториться - попробуйте выйти и зайти в свой аккаунт.</string>
+    <string name="refresh_question">Обновить</string>
 </resources>

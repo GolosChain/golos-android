@@ -11,6 +11,7 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -306,10 +307,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             if (cursor.count != 0) {
                 cursor.moveToFirst()
                 val temp = ArrayList<GolosDiscussionItem>(cursor.count)
-                val rowsParser = StoryParserToRows()
+                val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
                 while (!cursor.isAfterLast) {
-                    val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
-
                     val tags = mapper.readValue<List<String>>(cursor.getString(tags) ?: "", stringListType).toArrayList()
                     val images = mapper.readValue<List<String>>(cursor.getString(images) ?: "", stringListType).toArrayList()
                     val links = mapper.readValue<List<String>>(cursor.getString(links) ?: "", stringListType).toArrayList()
@@ -346,7 +345,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(firstRebloggedBy) ?: "",
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
-                    discussionItem.parts = rowsParser.parse(discussionItem)
+
+                 //   discussionItem.parts = rowsParser.parse(discussionItem)
                     discussionItem.avatarPath = avatarTable.get(discussionItem.author, db)?.avatarPath
                     discussionItem.activeVotes.addAll(voteTable.get(discussionItem.id, db))
                     temp.add(discussionItem)

@@ -129,8 +129,8 @@
     <string name="help_step_4">4. You can copy-paste it, or scan through QR-code.</string>
     <string name="thanks_understood">Got it</string>
     <string name="close">Close</string>
-    <string name="refresh_question">Обновить?</string>
-    <string name="reenter_acc">Ошибка авторизации.  Если повториться - попробуйте выйти и зайти в свой аккаунт.</string>
+    <string name="refresh_question">Refresh</string>
 
+    <string name="reenter_acc">Auth error. If this repeats, try exit and enter to your account one more time.</string>
 </resources>
 

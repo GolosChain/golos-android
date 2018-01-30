@@ -9,6 +9,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.toArrayList
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -137,7 +138,7 @@ object DiscussionItemFactory {
 
     private fun setTypeOfItem(golosDiscussionItem: GolosDiscussionItem) {
         val toRowsParser = StoryParserToRows()
-        golosDiscussionItem.parts = toRowsParser.parse(golosDiscussionItem)
+        golosDiscussionItem.parts = toRowsParser.parse(golosDiscussionItem).toArrayList()
         if (golosDiscussionItem.parts.size == 0) {
             Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
         } else {

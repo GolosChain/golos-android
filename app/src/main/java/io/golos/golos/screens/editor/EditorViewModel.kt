@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -35,6 +36,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
     private var mItemToAnswerOn: GolosDiscussionItem? = null
+    private var wasSent = false
     var mode: EditorMode? = null
         set(value) {
             field = value
@@ -42,6 +44,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val rootStoryId = field?.rootStoryId
             val itemToAnsweronId = field?.commentToAnswerOnId
             DraftsPersister.getDraft(value ?: return, {
+                Timber.e(it.toString())
                 if (it.isNotEmpty())
                     editorLiveData.value = EditorState(null, false, null, it)
             })
@@ -114,6 +117,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             }
             editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
             mRepository.createPost(mTitleText, editorLiveData.value?.parts ?: ArrayList(), mTags, { result, error ->
+                if (error == null) {
+                    wasSent = true
+                    DraftsPersister.deleteDraft(mode ?: return@createPost, {})
+                }
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
@@ -121,7 +128,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 postStatusLiveData.value = PostSendStatus(result?.author ?: return@createPost,
                         result.blog,
                         result.permlink)
-                DraftsPersister.saveDraft(mode ?:return@createPost, listOf(), {})
+
             })
         } else {
             if (mRootStory == null || mItemToAnswerOn == null) return
@@ -136,18 +143,23 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             mRepository.createComment(mRootStory!!,
                     mItemToAnswerOn!!,
                     editorLiveData.value?.parts ?: ArrayList(), { result, error ->
+                if (error == null) {
+                    wasSent = true
+                    DraftsPersister.deleteDraft(mode ?: return@createComment, {})
+                }
+
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
                         completeMessage = if (error == null) R.string.send_comment_success else null)
-                DraftsPersister.saveDraft(mode ?:return@createComment, listOf(), {})
+
             })
 
         }
     }
 
     fun onDestroy() {
-        DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts ?: return, {})
+        if (!wasSent) DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts ?: return, {})
     }
 }
 

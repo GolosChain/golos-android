@@ -1215,6 +1215,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 mPersister.deleteAllStories()
                 val storiesToSave = mFilteredMap
                         .filter { it.value.value != null }
+                        .filter { it.key.filter == null ||
+                                it.key.filter!!.tagFilter.size > 1 ||
+                                (isUserLoggedIn() &&
+                                        it.key.filter!!.userNameFilter.size == 1 &&
+                                        it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.userName)}
                         .mapValues { it.value.value!!.copy() }
                 storiesToSave
                         .flatMap { it.value.items }

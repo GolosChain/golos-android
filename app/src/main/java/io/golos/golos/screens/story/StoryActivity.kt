@@ -108,8 +108,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mtitileTv.visibility = View.GONE
                 }
                 mSwipeToRefresh.isRefreshing = false
-                val story = it.storyTree.rootStory()!!
-                var ets = ArrayList(StoryParserToRows().parse(story))
+                val story = it.storyTree.rootStory() ?: return@Observer
+
+                var ets = if (story.parts.isEmpty()) StoryParserToRows().parse(story).toArrayList() else story.parts
+                if (story.parts.isEmpty()) story.parts.addAll(ets)
+
                 if (ets.find { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) } != null) {
                     val list = ArrayList<ImageRow>()
                     val a = ets
@@ -205,7 +208,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 mCommentsCountBtn.text = it.storyTree.rootStory()?.commentsCount?.toString()
-                mVotesIv.text = it.storyTree.rootStory()?.votesNum?.toString()?:""
+                mVotesIv.text = it.storyTree.rootStory()?.votesNum?.toString() ?: ""
                 mVotesIv.setOnClickListener { mViewModel.onStoryVotesClick(this) }
                 if (mFlow.childCount != story.tags.count()) {
                     mFlow.removeAllViews()
@@ -284,7 +287,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mBottomImagesRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
-                onUserVotesClick = { mViewModel.onCommentVoteClick(this,it)})
+                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)

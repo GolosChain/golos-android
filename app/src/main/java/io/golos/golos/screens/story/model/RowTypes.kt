@@ -9,6 +9,7 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.safety.Whitelist
+import timber.log.Timber
 
 data class TextRow(val text: String) : Row() {
 }
