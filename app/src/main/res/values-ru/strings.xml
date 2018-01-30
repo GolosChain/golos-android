@@ -68,7 +68,7 @@
     <string name="tag_search">Посты с тeгом:</string>
     <string name="groups">Сообщества</string>
     <string name="profile">Профиль</string>
-    <string name="unaval_in_current_version">Недоступно в текущей версии</string>
+    <string name="unaval_in_current_version">Не доступно в текущей версии</string>
     <string name="less_then_hour_ago">Меньше часа назад</string>
     <string name="enter">Войти</string>
     <string name="subscribers">Подписчиков</string>

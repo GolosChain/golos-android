@@ -17,9 +17,9 @@ class StoriesPagerAdpater(val context: Context, manager: FragmentManager) : Frag
 
     init {
         typesToPosition.put(0, FeedType.PERSONAL_FEED)
-        typesToPosition.put(1, FeedType.POPULAR)
-        typesToPosition.put(2, FeedType.ACTUAL)
-        typesToPosition.put(3, FeedType.NEW)
+        typesToPosition.put(1, FeedType.NEW)
+        typesToPosition.put(2, FeedType.POPULAR)
+        typesToPosition.put(3, FeedType.ACTUAL)
         typesToPosition.put(4, FeedType.PROMO)
     }
 
