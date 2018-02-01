@@ -7,11 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.UserAvatar
-import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -127,6 +125,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun save(avatars: List<UserAvatar>, db: SQLiteDatabase) {
+            if (avatars.isEmpty()) return
             db.beginTransaction()
             val values = ContentValues()
             avatars.forEach {
@@ -247,6 +246,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                  avatarTable: AvatarsTable,
                  db: SQLiteDatabase) {
 
+            if (items.isEmpty()) return
+
             val values = ContentValues()
             db.beginTransaction()
             items.forEach {
@@ -293,8 +294,10 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 voteTable: VotesTable,
                 avatarTable: AvatarsTable,
                 db: SQLiteDatabase): List<GolosDiscussionItem> {
+            if (ids.isEmpty()) return listOf()
 
             val workingIds = if (ids.size > 100) ids.subList(0, 100) else ids
+
             val idBuilder = StringBuilder("( ")
             workingIds.forEachIndexed { index, item ->
                 if (index != workingIds.lastIndex)
@@ -346,7 +349,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
 
-                 //   discussionItem.parts = rowsParser.parse(discussionItem)
+                    //   discussionItem.parts = rowsParser.parse(discussionItem)
                     discussionItem.avatarPath = avatarTable.get(discussionItem.author, db)?.avatarPath
                     discussionItem.activeVotes.addAll(voteTable.get(discussionItem.id, db))
                     temp.add(discussionItem)
@@ -374,6 +377,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         val createTableString = "create table if not exists $databaseName ( $serializedRequest text primary key)"
 
         fun save(filters: List<FilteredStoriesIds>, db: SQLiteDatabase) {
+            if (filters.isEmpty()) return
             val values = ContentValues()
             db.beginTransaction()
             filters.forEach {
@@ -417,6 +421,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$rshares integer, $percent integer, $storyId integer )"
 
         fun save(votes: List<VoteLight>, storyId: Long, db: SQLiteDatabase) {
+            if (votes.isEmpty()) return
             val values = ContentValues()
             db.beginTransaction()
             votes.forEach {
@@ -531,6 +536,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$payoutInGbg real, $votesCount integer, $topPostsCount integer)"
 
         fun save(tags: List<Tag>, db: SQLiteDatabase) {
+            if (tags.isEmpty()) return
+
             val values = ContentValues()
             db.beginTransaction()
             tags.forEach {

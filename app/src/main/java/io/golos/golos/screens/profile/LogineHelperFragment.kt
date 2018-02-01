@@ -34,6 +34,7 @@ class LoginHelperFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        isCancelable
         dialog.window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 

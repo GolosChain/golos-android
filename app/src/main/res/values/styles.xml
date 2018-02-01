@@ -9,6 +9,7 @@
         <item name="android:textColor">@color/textColorP</item>
         <item name="android:windowBackground">@android:color/white</item>
     </style>
+    
 
     <style name="LauncherTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash_back</item>

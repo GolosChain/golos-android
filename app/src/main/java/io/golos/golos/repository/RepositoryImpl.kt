@@ -1006,6 +1006,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 throw IllegalStateException("type $feedtype is not supported without tag")
             }
             val filteredRequest = StoryRequest(feedtype, filter)
+            if (!mFilteredMap.containsKey(filteredRequest))mFilteredMap.put(filteredRequest,MutableLiveData())
             return mFilteredMap[filteredRequest]!!
         } else {
             val filteredRequest = StoryRequest(feedtype, filter)
@@ -1178,7 +1179,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         }
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
-                            if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.POPULAR,
+                            if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
                             filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = getCurrentUserDataAsLiveData().value?.userName ?: "") else null,
                             complitionHandler = { _, e ->
                                 if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)
