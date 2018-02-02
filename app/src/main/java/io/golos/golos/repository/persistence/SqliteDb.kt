@@ -366,7 +366,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun deleteAll(db: SQLiteDatabase) {
-            db.execSQL("delete from $databaseName")
+            db.delete(databaseName, null, null)
         }
     }
 
@@ -406,7 +406,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun deleteAll(db: SQLiteDatabase) {
-            db.execSQL("delete from $databaseName")
+            db.delete(databaseName, null, null)
         }
     }
 
@@ -429,7 +429,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(rshares, it.rshares)
                 values.put(percent, it.percent)
                 values.put(this.storyId, storyId)
-                db.insert(databaseName, null, values)
+                db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
             db.setTransactionSuccessful()
             db.endTransaction()
@@ -458,7 +458,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun deleteAll(db: SQLiteDatabase) {
-            db.execSQL("delete from $databaseName")
+            db.delete(databaseName, null, null)
         }
     }
 

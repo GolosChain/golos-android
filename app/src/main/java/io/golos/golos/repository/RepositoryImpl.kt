@@ -23,7 +23,6 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.utils.*
-
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -1006,7 +1005,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 throw IllegalStateException("type $feedtype is not supported without tag")
             }
             val filteredRequest = StoryRequest(feedtype, filter)
-            if (!mFilteredMap.containsKey(filteredRequest))mFilteredMap.put(filteredRequest,MutableLiveData())
+            if (!mFilteredMap.containsKey(filteredRequest)) mFilteredMap.put(filteredRequest, MutableLiveData())
             return mFilteredMap[filteredRequest]!!
         } else {
             val filteredRequest = StoryRequest(feedtype, filter)
@@ -1126,7 +1125,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         .filter { it.percent > 0 }
                         .mapIndexed { index, voteLight ->
                             VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
-                        }.sorted()
+                        }
+                    //    .distinct()
+                        .sorted()
 
                 mMainThreadExecutor.execute {
                     liveData.value = voters
@@ -1168,15 +1169,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 val savedStories = mPersister.getStories()
                         .filter { it.value.items.size != 0 }
 
-                val stories = savedStories
-                        .mapValues {
-                            val items = MutableLiveData<StoriesFeed>()
-                            mMainThreadExecutor.execute {
-                                it.value.isFeedActual = false
-                                items.value = it.value
-                            }
-                            items
-                        }
+
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
@@ -1188,6 +1181,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                 } else {
                     mMainThreadExecutor.execute {
+                        val stories = savedStories
+                                .mapValues {
+                                    val items = MutableLiveData<StoriesFeed>()
+                                    it.value.isFeedActual = false
+                                    items.value = it.value
+                                    items
+                                }
                         mFilteredMap.putAll(stories)
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
                     }
@@ -1216,11 +1216,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 mPersister.deleteAllStories()
                 val storiesToSave = mFilteredMap
                         .filter { it.value.value != null }
-                        .filter { it.key.filter == null ||
-                                it.key.filter!!.tagFilter.size > 1 ||
-                                (isUserLoggedIn() &&
-                                        it.key.filter!!.userNameFilter.size == 1 &&
-                                        it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.userName)}
+                        .filter {
+                            it.key.filter == null ||
+                                    it.key.filter!!.tagFilter.size > 1 ||
+                                    (isUserLoggedIn() &&
+                                            it.key.filter!!.userNameFilter.size == 1 &&
+                                            it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.userName)
+                        }
                         .mapValues { it.value.value!!.copy() }
                 storiesToSave
                         .flatMap { it.value.items }
@@ -1228,6 +1230,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         .map { it.rootStory()!! }
                         .forEach {
                             if (it.activeVotes.size > 100) {
+                                it.activeVotes.sortBy { -it.rshares }
                                 val temp = it.activeVotes.slice(0..100)
                                 it.activeVotes.clear()
                                 it.activeVotes.addAll(temp)
