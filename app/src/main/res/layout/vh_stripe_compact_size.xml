@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingTop="12dp">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/avatar_iv"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="@dimen/margin_material"
+        android:scaleType="centerCrop"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:riv_corner_radius="30dp" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/user_name"
+        style="@style/TitleUserNameStyle"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/reblogged_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:drawablePadding="4dp"
+        app:layout_constraintStart_toEndOf="@id/user_name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/blog_name_tv"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
+        app:textAllCaps="false" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="4dp"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:lines="4"
+
+
+        android:textColor="#414548"
+        android:textSize="14sp"
+        android:visibility="visible"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/image_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:adjustViewBounds="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:cropToPadding="true"
+        android:minHeight="220dp"
+        android:scaleType="fitCenter"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="text, image_main " />
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/bottom_buttons_lo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/post_bottom_controls_height"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:gravity="start"
+        android:paddingStart="@dimen/margin_material"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier">
+
+        <TextView
+            android:id="@+id/vote_btn"
+            style="@style/VoteButton"
+            android:background="?attr/selectableItemBackground"
+            android:textSize="@dimen/font_regular" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/voters_btn"
+            style="@style/StoryBottomControlButton"
+            android:background="?attr/selectableItemBackground"
+            android:paddingBottom="3dp" />
+
+        <TextView
+            android:id="@+id/comments_btn"
+            style="@style/StoryBottomControlButton"
+            android:layout_marginStart="@dimen/margin_material_half"
+            android:background="?attr/selectableItemBackground" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/share_btn"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                app:srcCompat="@drawable/ic_share_gray_20dp" />
+        </FrameLayout>
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:background="#f4f4f4"
+        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo" />
+</android.support.constraint.ConstraintLayout>

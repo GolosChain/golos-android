@@ -13,6 +13,7 @@ import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.repository.Repository
+import io.golos.golos.screens.settings.UserSettings
 import timber.log.Timber
 import java.util.concurrent.Executors
 
@@ -34,6 +35,7 @@ class App : MultiDexApplication() {
             Timber.plant(Timber.DebugTree())
 
         }
+        UserSettings.setUp()
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
