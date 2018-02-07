@@ -30,4 +30,5 @@
     <dimen name="tags_reycler_height">30dp</dimen>
     <dimen name="story_tag_user_avatar_size">54dp</dimen>
     <dimen name="post_bottom_controls_height">20dp</dimen>
+    <dimen name="feed_story_authe_avatar_size">32dp</dimen>
 </resources>

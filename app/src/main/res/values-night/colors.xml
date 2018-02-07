@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bottom_navbar_color">#272727</color>
+    <color name="delimeter_color_feed">#2a2a2a</color>
+    <color name="textColorP">@android:color/white</color>
+    <color name="stripe_title">#ffffff</color>
+    <color name="stripe_subtitle">#A6A6A6</color>
+    <color name="stripe_text_color">#ffffff</color>
+    <color name="tab_indicator">#80FFFFFF</color>
+    <color name="tab_in_profile">@android:color/black</color>
+    <color name="tab_in_profile_indicator">@color/tab_indicator</color>
+    <color name="profile_top">#000000</color>
+    <color name="profile_bottom">@color/background_night</color>
+    <color name="splash_back">@color/background_night</color>
+</resources>

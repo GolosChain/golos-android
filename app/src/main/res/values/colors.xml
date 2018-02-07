@@ -5,7 +5,8 @@
     <color name="gray_82">#828282</color>
     <color name="colorAccent">#1298FF</color>
     <color name="blue_dark">#4469AF</color>
-    <color name="textColorP">#4F4F4F</color>33
+    <color name="textColorP">#4F4F4F</color>
+    <color name="textSecondary">#4F4F4F</color>
     <color name="gray">#30000000</color>
     <color name="gray_1">#a0a7ab</color>
 
@@ -13,6 +14,7 @@
     <color name="gray_story_upvote_circle">#a2a9ac</color>
     <color name="rat">#989ea3</color>
     <color name="delimeter_color">#a5000000</color>
+    <color name="delimeter_color_feed">#f2f2f2</color>
     <color name="upvote_green">#3da449</color>
     <color name="screen_background">#e8edf1</color>
     <color name="story_btn_green">#3da449</color>
@@ -22,4 +24,17 @@
     <color name="gray_7d">#7D7D7D</color>
     <color name="profile_divider_color">#dadada</color>
     <color name="black3">#333333</color>
+    <color name="background_night">#3c3939</color>
+    <color name="bottom_navbar_color">@android:color/white</color>
+    <color name="gra_6c">#6C6B6B</color>
+    <color name="stripe_title">#333333</color>
+    <color name="stripe_subtitle">#4F4F4F</color>
+    <color name="stripe_text_color">#333333</color>
+    <color name="tab_indicator">#ffffff</color>
+    <color name="tab_in_profile">#ffffff</color>
+    <color name="tab_in_profile_indicator">@color/colorAccent</color>
+    <color name="profile_top">@color/colorPrimary</color>
+    <color name="profile_bottom">#ffffff</color>
+    <color name="splash_back">#ffffff</color>
+    >
 </resources>

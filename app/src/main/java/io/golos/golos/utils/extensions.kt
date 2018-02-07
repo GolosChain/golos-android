@@ -5,20 +5,26 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
+import android.support.annotation.LayoutRes
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.text.Html
 import android.text.Spanned
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
@@ -53,8 +59,26 @@ fun Cursor.getInt(columnName: String): Int {
     return this.getInt(this.getColumnIndex(columnName))
 }
 
+fun Activity.restart() {
+    this.recreate()
+}
+
+fun <T : View> ViewGroup.inflate(@LayoutRes layoutResId: Int): T {
+    return LayoutInflater.from(this.context).inflate(layoutResId, this, false) as T
+}
+
 fun Cursor.getDouble(columnName: String): Double {
     return this.getDouble(this.getColumnIndex(columnName))
+}
+
+fun String.asIntentToShowUrl(): Intent {
+    val i = Intent(Intent.ACTION_VIEW)
+    i.data = Uri.parse(this);
+    return i
+}
+
+fun TextView.setTextColorById(@ColorRes colorId: Int) {
+    this.setTextColor(ContextCompat.getColor(this.context, colorId))
 }
 
 fun Fragment.showProgressDialog(): ProgressDialog {

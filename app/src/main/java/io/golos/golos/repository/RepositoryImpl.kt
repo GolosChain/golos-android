@@ -250,8 +250,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             userData.privateActiveWif,
                             userData.privatePostingWif)
                     if (!response.isKeyValid) {
-                        mMainThreadExecutor.execute { deleteUserdata() }
-
+                        mMainThreadExecutor.execute {
+                            try {
+                                deleteUserdata()
+                            } catch (e: Exception) {
+                                logException(e)
+                            }
+                        }
                     }
                 } catch (e: Exception) {
                     logException(e)
@@ -610,15 +615,20 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     }
 
     override fun deleteUserdata() {
-        mPersister.deleteUserData()
-        mAuthLiveData.value = null
-        mCurrentUserSubscriptions.value = listOf()
-        allLiveData().forEach {
-            it.value?.items?.forEach {
-                it.rootStory()?.isUserUpvotedOnThis = false
+        try {
+            mPersister.deleteUserData()
+            mAuthLiveData.value = null
+            mCurrentUserSubscriptions.value = listOf()
+            allLiveData().forEach {
+                it.value?.items?.forEach {
+                    it.rootStory()?.isUserUpvotedOnThis = false
+                }
+                it.value = it.value
             }
-            it.value = it.value
+        } catch (e: Exception) {
+            logException(e)
         }
+
     }
 
     private fun setActiveUserAccount(userName: String, privateActiveWif: String?, privatePostingWif: String?) {
@@ -640,9 +650,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                                           filter: StoryFilter?,
                                           startAuthor: String?,
                                           startPermlink: String?, complitionHandler: (Unit, GolosError?) -> Unit) {
+
         val request = StoriesRequest(limit, type, startAuthor, startPermlink, filter)
         if (mRequests.contains(request)) return
-
         mRequests.add(request)
         networkExecutor.execute {
             try {
@@ -1126,7 +1136,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         .mapIndexed { index, voteLight ->
                             VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
                         }
-                    //    .distinct()
+                        //    .distinct()
                         .sorted()
 
                 mMainThreadExecutor.execute {

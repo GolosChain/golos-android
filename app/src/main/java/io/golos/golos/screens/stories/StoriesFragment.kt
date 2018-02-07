@@ -16,6 +16,8 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
+import io.golos.golos.screens.settings.UserSettings
+import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
@@ -35,6 +37,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
     private var mRefreshButton: View? = null
+    private var mRefreshLo: View? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
@@ -50,6 +53,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mRecycler = view.findViewById(R.id.recycler)
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
         mRefreshButton = view.findViewById(R.id.refresh_btn)
+        mRefreshLo = view.findViewById(R.id.refresh_lo)
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
@@ -89,9 +93,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 },
                 onTagClick = { mViewModel?.onBlogClick(context, it) },
                 onUserClick = { mViewModel?.onUserClick(context, it) },
-                onVotersClick = {mViewModel?.onVotersClick(context, it)}
+                onVotersClick = { mViewModel?.onVotersClick(context, it) },
+                feedCellSettings = getFeedModeSettings())
 
-        )
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -105,6 +109,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         })
         mRecycler?.recycledViewPool = StoriesPagerAdpater.sharedPool
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
+        view.findViewById<View>(R.id.refresh_lo).setOnClickListener { mRefreshButton?.callOnClick() }
     }
 
     private fun setUp() {
@@ -114,6 +119,15 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
         mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
         mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
+
+        UserSettings.isStoriesCompactMode().removeObservers(this)
+        UserSettings.isImagesShown().removeObservers(this)
+
+        val observer = Observer<Boolean> { _ ->
+            mAdapter.feedCellSettings = getFeedModeSettings()
+        }
+        UserSettings.isStoriesCompactMode().observe(this, observer)
+        UserSettings.isImagesShown().observe(this, observer)
     }
 
     override fun onChanged(t: StoriesViewState?) {
@@ -131,7 +145,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (t?.items != null) {
             mRecycler?.post { mAdapter.setStripesCustom(t.items) }
         }
-        mRefreshButton?.visibility = if (t?.showRefreshButton == true)View.VISIBLE else View.GONE
+        mRefreshLo?.visibility = if (t?.showRefreshButton == true) View.VISIBLE else View.GONE
+        mRefreshButton?.visibility = if (t?.showRefreshButton == true) View.VISIBLE else View.GONE
+
         if (isVisible) {
             t?.error?.let {
                 if (it.localizedMessage != null) activity
@@ -189,4 +205,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
     }
+
+    private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,
+            UserSettings.isImagesShown().value == true)
 }

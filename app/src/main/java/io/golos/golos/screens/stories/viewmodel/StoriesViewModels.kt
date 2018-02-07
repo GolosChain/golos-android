@@ -222,9 +222,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         //  if (isUpdating.get())return
         isUpdating.set(true)
-        mStoriesLiveData.value = StoriesViewState(true,
-                mStoriesLiveData.value?.showRefreshButton == true,
-                mStoriesLiveData.value?.items ?: ArrayList())
+        if ( mStoriesLiveData.value?.isLoading == false){
+            mStoriesLiveData.value = StoriesViewState(true,
+                    mStoriesLiveData.value?.showRefreshButton == true,
+                    mStoriesLiveData.value?.items ?: ArrayList())
+        }
+
         mRepository.requestStoriesListUpdate(20,
                 type,
                 filter,

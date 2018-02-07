@@ -131,4 +131,16 @@
     <string name="close">Закрыть</string>
     <string name="reenter_acc">Ошибка авторизации.  Если повториться - попробуйте выйти и зайти в свой аккаунт.</string>
     <string name="refresh_question">Обновить</string>
+    <string name="settings">Настройки</string>
+    <string name="stripe_settings">Просмотр ленты</string>
+    <string name="mode">Режим</string>
+    <string name="compact_mode">Компактный режим</string>
+    <string name="images_mode">Просмотр картинок</string>
+    <string name="like_app_question">Нравится приложение? Оцени его!</string>
+    <string name="not_now">Не сейчас</string>
+    <string name="vote_exclamation">Проголосовать!</string>
+    <string-array name="daynight">
+        <item>День</item>
+        <item>Ночь</item>
+    </string-array>
 </resources>

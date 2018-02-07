@@ -1,56 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="@dimen/material_huge"
-    android:background="@android:color/white"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        app:navigationIcon="@drawable/ic_chevron_left_gray_24dp_7d" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignBottom="@+id/toolbar"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="@string/settings" />
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:fillViewport="true">
+
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <android.support.v7.widget.AppCompatTextView
-                style="@style/SettingTextViewStyle"
-                android:id="@+id/golos_wiki_tv"
-                android:background="?selectableItemBackground"
-                android:text="@string/wiki" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/material_big"
+                android:orientation="vertical">
 
-            <android.support.v7.widget.AppCompatTextView
-                style="@style/SettingTextViewStyle"
-                android:id="@+id/about_golos_tv"
-                android:background="?selectableItemBackground"
-                android:text="@string/about_golos" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stripe_settings"
+                    android:textAllCaps="true"
+                    android:textColor="#8c8c8c" />
 
-            <android.support.v7.widget.AppCompatTextView
-                style="@style/SettingTextViewStyle"
-                android:id="@+id/privacy_policy_tv"
-                android:background="?selectableItemBackground"
-                android:text="@string/privacy_policy" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_material_half"
+                    android:orientation="horizontal">
 
-            <android.support.v7.widget.AppCompatTextView
-                style="@style/SettingTextViewStyle"
-                android:id="@+id/exit"
-                android:background="?selectableItemBackground"
-                android:text="@string/exit" />
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/mode" />
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9">
+
+                        <android.support.v7.widget.AppCompatSpinner
+                            android:id="@+id/mode_spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="end"
+                            android:background="@null"
+                            android:gravity="end" />
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/compact_mode" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/compact_mode_switch"
+                        android:layout_width="0dp"
+
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9"
+                        android:gravity="end|center_vertical" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/images_mode" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/show_images_switch"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9"
+                        android:gravity="end|center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="#f1f4f7" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_big"
+                android:layout_marginStart="@dimen/material_big"
+                android:orientation="vertical">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/golos_wiki_tv"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/wiki" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/about_golos_tv"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/about_golos" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/privacy_policy_tv"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/privacy_policy" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/exit"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/exit" />
 
 
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/version_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom|center_horizontal"
+                android:text="@string/golos_android_v"
+                android:textColor="#A6A6A6"
+                android:textSize="@dimen/font_small" />
         </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom|center_horizontal"
-            android:text="@string/golos_android_v"
-            android:textColor="#A6A6A6"
-            android:id="@+id/version_tv"
-            android:textSize="@dimen/font_small" />
-    </LinearLayout>
-
-</android.support.v4.widget.NestedScrollView>
+    </android.support.v4.widget.NestedScrollView>
+</RelativeLayout>

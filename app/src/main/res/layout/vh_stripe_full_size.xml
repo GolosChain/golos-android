@@ -3,13 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
     android:paddingTop="12dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/feed_story_authe_avatar_size"
+        android:layout_height="@dimen/feed_story_authe_avatar_size"
         android:layout_marginStart="@dimen/margin_material"
         android:scaleType="centerCrop"
 
@@ -29,28 +28,30 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:drawablePadding="4dp"
+        android:textSize="12sp"
+
         app:layout_constraintStart_toEndOf="@id/user_name"
         app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/blog_name_tv"
         style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
+        android:layout_marginTop="0dp"
+        android:includeFontPadding="false"
+        android:padding="0dp"
+        android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/title"
+        style="@style/StripeTitle"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_half"
-        android:background="?selectableItemBackground"
-        android:clickable="true"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textSize="20sp"
-        android:textStyle="bold"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,10 +69,8 @@
         android:clickable="true"
         android:ellipsize="end"
         android:lines="4"
-
-
         android:textColor="#414548"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:visibility="visible"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -113,8 +112,7 @@
         <TextView
             android:id="@+id/vote_btn"
             style="@style/VoteButton"
-            android:background="?attr/selectableItemBackground"
-            android:textSize="@dimen/font_regular" />
+            android:background="?attr/selectableItemBackground" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -151,9 +149,10 @@
     </android.support.v7.widget.LinearLayoutCompat>
 
     <View
+        android:id="@+id/delimeter"
         android:layout_width="wrap_content"
         android:layout_height="2dp"
         android:layout_marginTop="@dimen/margin_material_half"
-        android:background="#f4f4f4"
+        android:background="@color/delimeter_color_feed"
         app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo" />
 </android.support.constraint.ConstraintLayout>

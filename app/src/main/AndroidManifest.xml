@@ -32,8 +32,8 @@
         <activity
             android:name=".screens.tags.TagsCloudActivity"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".screens.story.StoryActivity"
             android:screenOrientation="portrait" />
@@ -68,32 +68,21 @@
         <activity
             android:name=".screens.stories.FilteredStoriesActivity"
 
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".screens.webview.WebViewActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".screens.settings.SettingActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".screens.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan">
-            <!-- <intent-filter>
-                 <action android:name="android.intent.action.MAIN" />
-
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>-->
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>

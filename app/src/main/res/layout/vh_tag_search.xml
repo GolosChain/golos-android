@@ -9,6 +9,5 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_material"
         android:background="?attr/selectableItemBackground"
-        android:drawablePadding="@dimen/margin_material"
-        android:drawableStart="@drawable/ic_seacrh_gray_24dp_7d" />
+        android:drawablePadding="@dimen/margin_material" />
 </FrameLayout>

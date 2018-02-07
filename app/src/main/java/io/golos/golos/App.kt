@@ -27,15 +27,15 @@ class App : MultiDexApplication() {
     private var aStopped = 0
     private var aDestroyed = 0
 
+
     override fun onCreate() {
+        context = this
         super.onCreate()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        context = this
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-
         }
-        UserSettings.setUp()
+
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
@@ -77,7 +77,7 @@ class App : MultiDexApplication() {
                 if (aCreated == aDestroyed) Repository.get.onAppDestroy()
             }
         })
-
+        UserSettings.setVoteQuestionMade(false)
     }
 
     companion object get {
@@ -89,6 +89,5 @@ class App : MultiDexApplication() {
         }
 
         val computationExecutor = Executors.newSingleThreadExecutor()
-
     }
 }

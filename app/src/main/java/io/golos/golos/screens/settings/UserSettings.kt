@@ -1,40 +1,64 @@
 package io.golos.golos.screens.settings
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.content.Context
-import android.content.SharedPreferences
 import io.golos.golos.App
 
 /**
  * Created by yuri on 05.02.18.
  */
-object UserSettings : SharedPreferences.OnSharedPreferenceChangeListener {
+object UserSettings {
     private val sharedPrefName = "UserSettings"
-    private val compactModeListeners = ArrayList<(Boolean) -> Unit>()
+    private val mCompactLiveData = MutableLiveData<Boolean>()
+    private val mShowImageLiveData = MutableLiveData<Boolean>()
 
     fun setUp() {
-        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this)
+        mCompactLiveData.value = App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
+        mShowImageLiveData.value = App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isShown", true)
     }
 
     fun setStoriesCompactMode(isCompact: Boolean) {
         App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("isCompact", isCompact).apply()
+        mCompactLiveData.value = isCompact
     }
 
-    fun getStoriesCompactMode(): Boolean {
-        return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
+    fun isStoriesCompactMode(): LiveData<Boolean> {
+        return mCompactLiveData
     }
 
-    fun registerCompactModeChangeListener(listener: (Boolean) -> Unit) {
-        compactModeListeners.add(listener)
+    fun setUserVotedForApp(isVotedForApp: Boolean) {
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("isVotedForApp", isVotedForApp).apply()
     }
 
-    override fun onSharedPreferenceChanged(p0: SharedPreferences?, p1: String?) {
-        p1?.let {
-            when (it) {
-                "isCompact" -> {
-                    val isCompact = getStoriesCompactMode()
-                    compactModeListeners.forEach { it.invoke(isCompact) }
-                }
-            }
-        }
+    fun isUserVotedForApp(): Boolean {
+        return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isVotedForApp", false)
     }
+
+    fun setVoteQuestionMade(isMade: Boolean) {
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("setVoteQuestionMade", isMade).apply()
+    }
+
+    fun isVoteQuestionMad(): Boolean {
+        return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("setVoteQuestionMade", false)
+    }
+
+    fun setShowImages(isShown: Boolean) {
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("isShown", isShown).apply()
+        mShowImageLiveData.value = isShown
+    }
+
+    fun isImagesShown(): LiveData<Boolean> {
+        return mShowImageLiveData
+    }
+
+    fun setNightMode(isNight: Boolean) {
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("isNight", isNight).apply()
+    }
+
+    fun isNightMode(): Boolean {
+        return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isNight", false)
+    }
+
+
 }

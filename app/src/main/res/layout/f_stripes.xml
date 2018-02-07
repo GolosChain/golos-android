@@ -24,7 +24,7 @@
                 android:id="@+id/tab_lo"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                app:tabIndicatorColor="@android:color/white"
+                app:tabIndicatorColor="@color/tab_indicator"
                 app:tabTextAppearance="@style/TabTextStyle"
                 app:tabSelectedTextColor="@android:color/white"
                 app:tabMode="scrollable"

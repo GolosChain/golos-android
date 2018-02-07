@@ -2,15 +2,20 @@ package io.golos.golos.repository.persistence
 
 import android.content.Context
 import android.util.Base64
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
-import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.StoriesFeed
+import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.repository.persistence.model.*
 import io.golos.golos.utils.toArrayList
+import timber.log.Timber
 import java.security.KeyStore
+import java.security.KeyStoreException
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -102,8 +107,16 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         val encryptor = EnCryptor()
         keysToSave.forEach({
             val keyAlias = KeystoreKeyAliasConverter.convert(it.key)
-            if (it.value == null) keyStore.deleteEntry(keyAlias.name)
-            else {
+            if (it.value == null) {
+                try {
+                    if (keyStore.containsAlias(keyAlias.name))
+                    keyStore.deleteEntry(keyAlias.name)
+                } catch (e: KeyStoreException) {
+                    Timber.e(e)
+                    if (Fabric.isInitialized())Crashlytics.logException(e)
+                }
+
+            } else {
                 val stringToEncrypt = it.value!!
                 val outBuffer = encryptor.encryptText(keyAlias, stringToEncrypt)
                 mPreference.edit().putString(keyAlias.name, Base64.encodeToString(outBuffer, Base64.DEFAULT)).apply()
@@ -124,13 +137,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         tags.remove(tag)
         saveUserSubscribedTags(tags)
     }
-    /* override fun saveStory(story: StoryTree) {
-         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-     }
-
-     override fun getStory(id: Long): StoryTree? {
-         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-     }*/
 
     override fun saveTags(tags: List<Tag>) {
         mDatabase.saveTags(tags)
@@ -218,7 +224,7 @@ private class MockPersister : Persister() {
     }
 
     override fun getStories(): Map<StoryRequest, StoriesFeed> {
-       return hashMapOf()
+        return hashMapOf()
     }
 
     override fun deleteAllStories() {
