@@ -817,7 +817,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val allItems = ArrayList(it.value?.items ?: ArrayList())
                     if (replacer.findAndReplace(updatedStory, allItems)) {
                         mMainThreadExecutor.execute {
-                            it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                            it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW, it.value?.filter,
+                                    isFeedActual = it.value?.isFeedActual == true)
                         }
                     }
                 }

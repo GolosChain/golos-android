@@ -8,7 +8,7 @@
     <dimen name="text_big">20sp</dimen>
     <dimen name="material_big">20dp</dimen>
     <dimen name="material_huge">28dp</dimen>
-    <dimen name="tag_buttons_height">36dp</dimen>
+    <dimen name="tag_buttons_height">30dp</dimen>
     <dimen name="font_biggest">34dp</dimen>
     <dimen name="font_medium">16sp</dimen>
     <dimen name="avatar_size_story">40dp</dimen>
@@ -28,7 +28,7 @@
     <dimen name="quater">4dp</dimen>
     <dimen name="height_of_gray_break">10dp</dimen>
     <dimen name="tags_reycler_height">30dp</dimen>
-    <dimen name="story_tag_user_avatar_size">54dp</dimen>
+    <dimen name="story_tag_user_avatar_size">52dp</dimen>
     <dimen name="post_bottom_controls_height">20dp</dimen>
     <dimen name="feed_story_authe_avatar_size">32dp</dimen>
 </resources>

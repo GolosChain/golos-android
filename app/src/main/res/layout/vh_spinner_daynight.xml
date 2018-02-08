@@ -13,8 +13,7 @@
         android:layout_marginBottom="@dimen/margin_material_half"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material"
-        android:text="23235235"
-        android:textColor="@color/gray_7d" />
+        android:textColor="@color/textColorP" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:layout_width="wrap_content"

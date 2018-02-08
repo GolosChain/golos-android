@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="#f9f9f9">
+    >
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -15,9 +15,9 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="@color/white_black_toolbar_color"
             android:fitsSystemWindows="true"
-            app:contentScrim="#f9f9f9"
+            app:contentScrim="@color/white_black_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways"
             app:toolbarId="@+id/toolbar">
 
@@ -56,7 +56,7 @@
                         android:includeFontPadding="false"
                         android:lines="1"
 
-                        android:textColor="#333333"
+                        android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_medium" />
 
                     <TextView
@@ -67,7 +67,7 @@
                         android:gravity="center"
                         android:includeFontPadding="false"
 
-                        android:textColor="@color/gray_7d" />
+                        android:textColor="@color/textColorP" />
 
                     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -106,10 +106,10 @@
                             android:clickable="true"
                             android:gravity="center"
                             android:paddingBottom="2dp"
-                            android:paddingEnd="@dimen/margin_material"
+                            android:paddingEnd="@dimen/font_regular"
                             android:paddingStart="@dimen/margin_material"
                             android:text="@string/subscribes"
-                            android:textColor="#333333"
+                            android:textColor="@color/text_color_white_black"
                             android:textSize="@dimen/font_small" />
                     </FrameLayout>
 
@@ -121,7 +121,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="@dimen/margin_material_small"
-                    android:background="#407d7d7d"
+                    android:background="@color/delimeter_color_feed"
                     app:layout_constraintTop_toBottomOf="@id/tag_lo" />
 
                 <HorizontalScrollView
@@ -144,7 +144,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:text="@string/similar"
-                            android:textColor="@color/gray_7d"
+                            android:textColor="@color/textColorP"
                             android:textSize="@dimen/font_small" />
 
                         <TextView style="@style/TagListStyle" />

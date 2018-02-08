@@ -38,6 +38,7 @@ class App : MultiDexApplication() {
 
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
+        UserSettings.setUp()
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
         if (!sharedPrefs.getBoolean("deleteUserData", false)) {
             Repository.get.deleteUserdata()

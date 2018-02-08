@@ -27,7 +27,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@null</item>
-        <item name="android:textCursorDrawable">@drawable/cursor_pink</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
     </style>
 
 
@@ -45,9 +45,10 @@
         <item name="android:layout_marginEnd">36dp</item>
         <item name="android:layout_marginStart">36dp</item>
         <item name="android:lines">1</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:textSize">17sp</item>
-
-        <item name="android:textCursorDrawable">@drawable/cursor_pink</item>
+        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
     </style>
 
     <style name="BarcodeImage">
@@ -62,7 +63,8 @@
         <item name="android:background">@null</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:gravity">start|center_vertical</item>
-        <item name="android:textColor">@color/delimeter_color</item>
+        <item name="android:textColor">@color/textColorP</item>
+        <item name="android:textColorHint">@color/textColorP</item>
         <item name="android:textSize">16sp</item>
     </style>
 
@@ -124,7 +126,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">@dimen/margin_material_half</item>
         <item name="android:gravity">top|start</item>
-        <item name="android:textColor">@color/textSecondary</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textSize">12sp</item>
     </style>
@@ -152,7 +154,7 @@
         <item name="android:textSize">@dimen/font_small</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:textColor">@color/gray_4f</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:visibility">visible</item>
     </style>
 
@@ -160,7 +162,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/font_medium</item>
-        <item name="android:textColor">#000000</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:layout_marginTop">@dimen/material_huge</item>
     </style>
 
@@ -168,6 +170,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:background">@drawable/rect_round_corners_outline_gray</item>
         <item name="android:paddingStart">@dimen/material_big</item>
         <item name="android:paddingEnd">@dimen/material_big</item>
@@ -210,7 +213,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:gravity">center_horizontal</item>
-        <item name="android:textColor">@color/gray_7d</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:textSize">@dimen/font_small</item>
     </style>
 
@@ -218,7 +221,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center_horizontal</item>
-        <item name="android:textColor">@color/gray_4f</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:textSize">16sp</item>
     </style>
 
@@ -273,7 +276,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingStart">@dimen/margin_material_small</item>
-        <item name="android:textColor">#333333</item>
+        <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:textSize">@dimen/font_small</item>
     </style>
 
@@ -284,6 +287,7 @@
         <item name="android:minHeight">38dp</item>
         <item name="android:layout_gravity">end|center_vertical</item>
         <item name="android:layout_marginEnd">24dp</item>
+        <item name="android:textSize">@dimen/font_small</item>
         <item name="android:background">@drawable/back_story_button_round_corners_gray</item>
         <item name="android:textAllCaps">false</item>
     </style>
@@ -293,6 +297,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:drawablePadding">6dp</item>
+        <item name="android:textColor">@color/textColorP</item>
         <item name="android:paddingEnd">@dimen/margin_material_half</item>
         <item name="android:paddingStart">@dimen/margin_material_half</item>
         <item name="android:textSize">@dimen/font_small</item>

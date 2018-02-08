@@ -64,7 +64,9 @@
                     style="@style/FollowButtonPosition"
                     android:text="@string/follow"
                     android:textAllCaps="false"
+                    android:textColor="@color/black3"
                     android:textSize="@dimen/font_regular"
+
                     app:backgroundTint="@android:color/white"
                     app:layout_constraintStart_toStartOf="@id/username_tv"
                     app:layout_constraintTop_toBottomOf="@id/username_tv" />
@@ -83,7 +85,7 @@
                     android:layout_marginEnd="@dimen/material_big"
                     android:layout_marginStart="@dimen/material_big"
                     android:layout_marginTop="@dimen/margin_material"
-                    android:textColor="@color/gray_4f"
+                    android:textColor="@color/textColorP"
                     app:layout_constraintTop_toBottomOf="@id/user_backing" />
 
 
@@ -213,11 +215,9 @@
                 android:background="@color/tab_in_profile"
                 app:layout_collapseMode="pin"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="@color/colorAccent"
+                app:tabIndicatorColor="@color/tab_indicator"
                 app:tabMode="fixed"
-                app:tabSelectedTextColor="@android:color/black"
-                app:tabTextAppearance="@style/TabTextStyle"
-                app:tabTextColor="#7D7D7D" />
+                app:tabTextAppearance="@style/TabTextStyle" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

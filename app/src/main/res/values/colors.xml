@@ -9,7 +9,7 @@
     <color name="textSecondary">#4F4F4F</color>
     <color name="gray">#30000000</color>
     <color name="gray_1">#a0a7ab</color>
-
+    <color name="blue_light">#1298FF</color>
     <color name="gray_4f">#4F4F4F</color>
     <color name="gray_story_upvote_circle">#a2a9ac</color>
     <color name="rat">#989ea3</color>
@@ -30,11 +30,12 @@
     <color name="stripe_title">#333333</color>
     <color name="stripe_subtitle">#4F4F4F</color>
     <color name="stripe_text_color">#333333</color>
-    <color name="tab_indicator">#ffffff</color>
-    <color name="tab_in_profile">#ffffff</color>
+    <color name="tab_indicator">@android:color/white</color>
+    <color name="tab_in_profile">@android:color/white</color>
     <color name="tab_in_profile_indicator">@color/colorAccent</color>
     <color name="profile_top">@color/colorPrimary</color>
-    <color name="profile_bottom">#ffffff</color>
-    <color name="splash_back">#ffffff</color>
-    >
+    <color name="profile_bottom">@android:color/white</color>
+    <color name="splash_back">@android:color/white</color>
+    <color name="white_black_toolbar_color">@android:color/white</color>
+    <color name="text_color_white_black">#333333</color>
 </resources>

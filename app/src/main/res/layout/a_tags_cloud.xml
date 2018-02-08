@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@android:color/white"
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
@@ -19,14 +18,14 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:collapsedTitleGravity="center_horizontal|top"
-            app:contentScrim="?attr/colorPrimary"
+            app:contentScrim="@color/white_black_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
+                android:background="@color/white_black_toolbar_color"
                 android:padding="0dp"
                 android:visibility="visible"
                 app:elevation="1dp"
@@ -62,8 +61,9 @@
                         app:defaultQueryHint="@string/tags_search"
                         app:iconifiedByDefault="false"
                         app:queryHint="@string/tags_search"
-                        app:searchIcon="@drawable/ic_seacrh_gray_24dp_7d"
-                        app:submitBackground="@color/gray_7d" />
+
+                        app:searchIcon="@drawable/ic_search_icon_gray_24dp"
+                        app:submitBackground="@color/textColorP" />
                 </LinearLayout>
 
             </android.support.v7.widget.Toolbar>
@@ -91,7 +91,7 @@
                 android:layout_margin="@dimen/margin_material"
                 android:paddingTop="@dimen/margin_material_half"
                 android:text="@string/subscribed"
-                android:textColor="@color/gray_7d"
+                android:textColor="@color/textColorP"
                 app:textAllCaps="true" />
 
             <com.wefika.flowlayout.FlowLayout
@@ -108,7 +108,7 @@
                 android:layout_margin="@dimen/margin_material"
                 android:paddingTop="24dp"
                 android:text="@string/tags"
-                android:textColor="@color/gray_7d"
+                android:textColor="@color/textColorP"
                 app:textAllCaps="true" />
 
             <com.wefika.flowlayout.FlowLayout

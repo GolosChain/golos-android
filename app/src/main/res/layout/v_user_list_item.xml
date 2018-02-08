@@ -10,7 +10,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="@dimen/material_big"
         android:scaleType="centerCrop"
-        android:src="@drawable/test"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -30,14 +30,14 @@
             android:id="@+id/name_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black3" />
+            android:textColor="@color/text_color_white_black" />
 
         <TextView
             android:id="@+id/sub_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="2dp"
-            android:textColor="@color/gray_7d"
+            android:textColor="@color/textColorP"
             android:textSize="@dimen/font_small" />
     </LinearLayout>
 

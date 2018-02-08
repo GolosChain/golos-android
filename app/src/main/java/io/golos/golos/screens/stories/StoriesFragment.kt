@@ -26,6 +26,7 @@ import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.utils.getColorCompat
 import io.golos.golos.utils.showSnackbar
 
 
@@ -59,7 +60,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
-
+        mSwipeRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
+        mSwipeRefresh?.setColorSchemeResources(R.color.blue_light)
         if (arguments?.getSerializable(TYPE_TAG) == null) return
 
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType

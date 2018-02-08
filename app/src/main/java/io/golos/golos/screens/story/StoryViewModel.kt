@@ -180,7 +180,7 @@ class StoryViewModel : ViewModel() {
         }
     }
 
-    fun onVoteRejected(story: Int) {
+    fun onVoteRejected() {
         showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 

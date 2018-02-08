@@ -54,7 +54,7 @@ class TagWithSearchIconVh(parent: ViewGroup) : GolosViewHolder(R.layout.vh_tag_s
     private val mTagNameTv = itemView.findViewById<TextView>(R.id.text)
 
     init {
-        mTagNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_seacrh_gray_24dp_7d), null, null, null)
+        mTagNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_search_icon_gray_24dp), null, null, null)
     }
     var state: SearchTagState? = null
         set(value) {

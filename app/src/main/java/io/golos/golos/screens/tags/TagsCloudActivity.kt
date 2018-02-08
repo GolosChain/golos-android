@@ -15,6 +15,7 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.AddTagTofilterViewModel
 import io.golos.golos.screens.tags.viewmodel.FiltersScreenState
+import io.golos.golos.utils.setTextColorHint
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
 
@@ -62,7 +63,7 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
             if (v == sv && isFocused && sv.query.isEmpty()) mViewModel.onSearchStart()
             else if (v == sv && !isFocused && sv.query.isEmpty()) mViewModel.onSearchEnd()
         })
-
+        sv.setTextColorHint(R.color.textColorP)
         mUserSubscibedTagsOn = findViewById(R.id.subscribed_tags)
         mALltagsLo = findViewById(R.id.all_tags_lo)
         mAppBar = findViewById(R.id.appbar)

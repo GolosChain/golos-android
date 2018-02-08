@@ -94,17 +94,4 @@ class SettingActivity : GolosActivity() {
             UserSettings.setStoriesCompactMode(switch.isChecked)
         }
     }
-
-  /*  override fun finish() {
-        super.finish()
-        if (starter != null)
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        else overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right)
-    }
-
-    override fun startActivity(intent: Intent?) {
-        super.startActivity(intent)
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        starter = intent
-    }*/
 }

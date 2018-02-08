@@ -156,13 +156,13 @@ class StripeFullViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inf
 
     private fun setUpTheme() {
         mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
-        mVotersBtn.setTextColorById(R.color.textColorP)
-        mCommentsButton.setTextColorById(R.color.textColorP)
-        mTitleTv.setTextColorById(R.color.stripe_title)
-        mBodyTextMarkwon.setTextColorById(R.color.stripe_text_color)
-        mUserNameTv.setTextColorById(R.color.stripe_subtitle)
-        mRebloggedByTv.setTextColorById(R.color.stripe_subtitle)
-        mBlogNameTv.setTextColorById(R.color.stripe_subtitle)
+        mVotersBtn.setTextColorCompat(R.color.textColorP)
+        mCommentsButton.setTextColorCompat(R.color.textColorP)
+        mTitleTv.setTextColorCompat(R.color.stripe_title)
+        mBodyTextMarkwon.setTextColorCompat(R.color.stripe_text_color)
+        mUserNameTv.setTextColorCompat(R.color.stripe_subtitle)
+        mRebloggedByTv.setTextColorCompat(R.color.stripe_subtitle)
+        mBlogNameTv.setTextColorCompat(R.color.stripe_subtitle)
         mDelimeter.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))
     }
 
