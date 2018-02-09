@@ -10,7 +10,6 @@ import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -44,7 +43,6 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val rootStoryId = field?.rootStoryId
             val itemToAnsweronId = field?.commentToAnswerOnId
             DraftsPersister.getDraft(value ?: return, {
-                Timber.e(it.toString())
                 if (it.isNotEmpty())
                     editorLiveData.value = EditorState(null, false, null, it)
             })

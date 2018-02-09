@@ -23,15 +23,16 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:src="@drawable/ic_www" />
+                app:srcCompat="@drawable/ic_www_36dp" />
 
             <TextView
                 android:id="@+id/go_to_site_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_material"
-                android:layout_marginTop="@dimen/margin_material_half"
-                android:text="@string/help_step_1" />
+                android:layout_gravity="center_vertical"
+                android:text="@string/help_step_1"
+                android:textColor="@color/textColorP" />
         </LinearLayout>
 
         <LinearLayout
@@ -43,14 +44,15 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="30dp"
-                app:srcCompat="@drawable/ic_wallet_gray_32dp" />
+                app:srcCompat="@drawable/ic_wallet_32dp" />
 
             <TextView
+                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_material"
-
-                android:text="@string/enter_pouch_" />
+                android:text="@string/enter_pouch_"
+                android:textColor="@color/textColorP" />
         </LinearLayout>
 
         <LinearLayout
@@ -62,7 +64,7 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                app:srcCompat="@drawable/ic_eye_gray_36dp" />
+                app:srcCompat="@drawable/ic_eye_36dp" />
 
             <TextView
                 android:id="@+id/key_type_lbl"
@@ -70,7 +72,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_material"
                 android:layout_marginTop="6dp"
-                android:text="@string/help_step_3_posting" />
+                android:text="@string/help_step_3_posting"
+                android:textColor="@color/textColorP" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,7 +85,7 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="30dp"
-                app:srcCompat="@drawable/ic_barcode_32dp_gray" />
+                app:srcCompat="@drawable/ic_barcode_32dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -91,7 +94,8 @@
                 android:layout_marginTop="-2dp"
                 android:gravity="start|top"
                 android:includeFontPadding="false"
-                android:text="@string/help_step_4" />
+                android:text="@string/help_step_4"
+                android:textColor="@color/textColorP" />
         </LinearLayout>
 
         <android.support.v7.widget.AppCompatButton

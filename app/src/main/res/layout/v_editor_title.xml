@@ -14,7 +14,8 @@
         android:paddingBottom="4dp"
         android:paddingTop="@dimen/margin_material"
         android:text=""
-        android:textSize="@dimen/text_big" />
+
+        android:textSize="@dimen/font_medium" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/subtitle_text"
@@ -24,7 +25,5 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:text=""
-
-        android:textColor="@color/rat"
         android:visibility="gone" />
 </LinearLayout>

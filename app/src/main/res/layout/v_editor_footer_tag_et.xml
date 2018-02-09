@@ -12,4 +12,6 @@
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
     android:textAllCaps="false"
-    android:textColor="#828282" />
+    android:textSize="15dp"
+    android:paddingBottom="2dp"
+    android:textColor="@color/textColorP" />

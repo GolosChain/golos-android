@@ -9,7 +9,6 @@
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_lo"
         android:animateLayoutChanges="true"
-        android:background="@android:color/white"
         android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
@@ -21,16 +20,16 @@
             <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/white_black_toolbar_color"
                 android:fitsSystemWindows="true"
                 app:collapsedTitleGravity="center_horizontal|top"
-                app:contentScrim="?attr/colorPrimary"
+                app:contentScrim="@color/white_black_toolbar_color"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@android:color/white"
                     android:visibility="visible"
                     app:elevation="1dp"
                     app:navigationIcon="@drawable/ic_clear_gray_24dp"
@@ -47,7 +46,7 @@
                         android:gravity="center"
                         android:text="@string/publish"
                         android:textAllCaps="false"
-                        android:textColor="#333333"
+                        android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_medium"
                         android:textStyle="normal" />
 
@@ -69,6 +68,7 @@
 
                 <io.golos.golos.screens.editor.EditorTitle
                     android:id="@+id/title"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -99,7 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_controls_height"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
+        android:background="@color/white_black_toolbar_color"
         android:gravity="end"
         android:orientation="horizontal">
 
@@ -118,12 +118,12 @@
             android:id="@+id/btn_link"
             style="@style/BottomButtonStyle"
             android:layout_marginEnd="@dimen/margin_material_half"
-            app:srcCompat="@drawable/ic_link_gray_24dp" />
+            app:srcCompat="@drawable/ic_link_24dp" />
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/btn_insert_image"
             style="@style/BottomButtonStyle"
             android:layout_marginEnd="@dimen/margin_material"
-            app:srcCompat="@drawable/ic_image_gray_24dp" />
+            app:srcCompat="@drawable/ic_image_24dp" />
     </LinearLayout>
 </RelativeLayout>
