@@ -3,6 +3,7 @@ package io.golos.golos.screens.stories
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -28,11 +29,8 @@ import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.getColorCompat
 import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 
-
-/**
- * Created by yuri on 31.10.17.
- */
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
@@ -42,6 +40,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
+    private var mSavedPosition: Parcelable? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -152,13 +151,15 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
         if (isVisible) {
             t?.error?.let {
-                if (it.localizedMessage != null) activity
-                        ?.findViewById<View>(android.R.id.content)
-                        ?.showSnackbar(it.localizedMessage)
-                else if (it.nativeMessage != null) activity
-                        ?.findViewById<View>(android.R.id.content)
-                        ?.showSnackbar(it.nativeMessage)
-                else {
+                when {
+                    it.localizedMessage != null -> activity
+                            ?.findViewById<View>(android.R.id.content)
+                            ?.showSnackbar(it.localizedMessage)
+                    it.nativeMessage != null -> activity
+                            ?.findViewById<View>(android.R.id.content)
+                            ?.showSnackbar(it.nativeMessage)
+                    else -> {
+                    }
                 }
             }
         }
@@ -174,6 +175,15 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             mRecycler?.visibility = View.VISIBLE
             mFullscreenMessageLabel.visibility = View.GONE
         }
+      /*  if (t?.items?.size ?: 0 > 0 &&
+                mSavedPosition != null) {
+            mRecycler?.postDelayed({
+                Timber.e("mSavedPosition = $mSavedPosition")
+                mRecycler?.layoutManager?.onRestoreInstanceState(mSavedPosition)
+                mSavedPosition = null
+            }, 3000)
+        }*/
+
     }
 
     companion object {
@@ -206,6 +216,17 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         super.setUserVisibleHint(isVisibleToUser)
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val parc = mRecycler?.layoutManager?.onSaveInstanceState()
+        parc.let { outState.putParcelable("recyclerState", parc) }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        mSavedPosition = savedInstanceState?.getParcelable("recyclerState")
     }
 
     private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,

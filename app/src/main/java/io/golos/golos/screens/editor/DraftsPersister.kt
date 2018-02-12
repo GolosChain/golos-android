@@ -9,13 +9,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.App
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.utils.getString
+import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 import java.util.concurrent.Executors
 
 /**
  * Created by yuri on 29.01.18.
  */
-val version = 1
+val version = 2
 
 object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, version) {
     private val executor = Executors.newSingleThreadExecutor()
@@ -27,13 +28,24 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
     }
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
-
+        if (p1 == 1 && p2 == 2) {
+            p0?.execSQL("alter table ${DraftsTable.tableName} ADD COLUMN ${DraftsTable.titleColumn} text")
+            p0?.execSQL("alter table ${DraftsTable.tableName} ADD COLUMN ${DraftsTable.tagsColumn} text")
+        }
     }
 
-    open fun saveDraft(mode: EditorMode, parts: List<EditorPart>, completionHandler: (Unit) -> Unit) {
+    open fun saveDraft(mode: EditorMode,
+                       parts: List<EditorPart>,
+                       title: String,
+                       tags: List<String>,
+                       completionHandler: (Unit) -> Unit) {
         executor.execute {
             try {
-                DraftsTable.save(mode, parts, writableDatabase)
+                DraftsTable.save(mode,
+                        parts,
+                        title,
+                        tags,
+                        writableDatabase)
                 handler.post { completionHandler.invoke(Unit) }
 
             } catch (e: Exception) {
@@ -45,21 +57,21 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
     }
 
-    open fun getDraft(mode: EditorMode, completionHandler: (List<EditorPart>) -> Unit) {
+    open fun getDraft(mode: EditorMode,
+                      completionHandler: (List<EditorPart>, String, List<String>) -> Unit) {
         executor.execute {
             try {
                 val parts = DraftsTable.get(mode, writableDatabase)
                 handler.post {
-                    completionHandler.invoke(parts)
+                    completionHandler.invoke(parts.first, parts.second, parts.third)
                 }
 
             } catch (e: Exception) {
                 Timber.e(e)
                 e.printStackTrace()
                 handler.post {
-                    completionHandler.invoke(arrayListOf())
+                    completionHandler.invoke(arrayListOf(), "", listOf())
                 }
-
             }
         }
     }
@@ -84,14 +96,20 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
     }
 
 
-    private final object DraftsTable {
-        private val tableName = "drafts"
-        private val modeColumn = "mode"
-        private val partsColunm = "parts"
-        val createDefinition = "create table  if not exists $tableName ($modeColumn text primary key, $partsColunm text)"
+     final object DraftsTable {
+        val tableName = "drafts"
+        val modeColumn = "mode"
+        val partsColunm = "parts"
+        val titleColumn = "titleColumn"
+        val tagsColumn = "tagsColumn"
+        val createDefinition = "create table  if not exists $tableName ($modeColumn text primary key," +
+                " $partsColunm text, $titleColumn text, $tagsColumn text)"
 
-        fun save(mode: EditorMode, parts: List<EditorPart>, db: SQLiteDatabase) {
-            Timber.e("save with $mode")
+        fun save(mode: EditorMode,
+                 parts: List<EditorPart>,
+                 title: String,
+                 tags: List<String>,
+                 db: SQLiteDatabase) {
             val parts = parts.map {
                 if (it is EditorTextPart) {
                     EditorPartDescriptor("text", it.id, null, null, it.text, it.pointerPosition)
@@ -99,17 +117,22 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                     val imagePart = it as EditorImagePart
                     EditorPartDescriptor("image", it.id, imagePart.imageName, imagePart.imageUrl, null, imagePart.pointerPosition)
                 }
-            }
+            }.toArrayList()
+
+
             val cv = ContentValues()
             cv.put(modeColumn, mapper.writeValueAsString(mode))
             cv.put(partsColunm, mapper.writeValueAsString(parts))
+            cv.put(titleColumn, title)
+            cv.put(tagsColumn, mapper.writeValueAsString(tags))
             db.insertWithOnConflict(tableName, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
         }
 
-        fun get(mode: EditorMode, db: SQLiteDatabase): List<EditorPart> {
+        fun get(mode: EditorMode, db: SQLiteDatabase): Triple<List<EditorPart>, String, List<String>> {
             val cursor = db.rawQuery("select * from $tableName where $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
             val out = ArrayList<EditorPart>(2)
-
+            var title = ""
+            var tags = listOf("")
             if (cursor.count != 0) {
                 cursor.moveToFirst()
                 val parts = cursor.getString(partsColunm)
@@ -123,16 +146,22 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                             EditorImagePart(it.id, it.imageName ?: "", it.imageUrl ?: "", it.pointerPosition)
                         }
                     }
+
                     out.addAll(v)
+                }
+                title = cursor.getString(titleColumn) ?: ""
+                val tagsString = cursor.getString(tagsColumn)
+                if (!tagsString.isNullOrEmpty()) {
+                    val type = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+                    tags = mapper.readValue<List<String>>(tagsString, type)
                 }
             }
 
             cursor.close()
-            return out
+            return Triple(out, title, tags)
         }
 
         fun delete(mode: EditorMode, writableDatabase: SQLiteDatabase?) {
-            Timber.e("delete with $mode")
             writableDatabase?.delete(tableName, " $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
         }
 

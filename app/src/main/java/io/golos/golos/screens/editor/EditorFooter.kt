@@ -14,6 +14,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
+import timber.log.Timber
 
 
 data class EditorFooterState(val showTagsEditor: Boolean = false,
@@ -55,6 +56,9 @@ class EditorFooter : FrameLayout {
 
     var state: EditorFooterState = EditorFooterState()
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             value.tagsValidator?.let { mValidator = field.tagsValidator as StringValidator }
             if (value.showTagsEditor) {
@@ -65,43 +69,63 @@ class EditorFooter : FrameLayout {
                 mAddTagsText.visibility = View.GONE
                 mErrorTv.visibility = View.GONE
             }
-            if (mTagsLayout.childCount > value.tags.size) {
-                mTagsLayout.removeViews(value.tags.size, mTagsLayout.childCount - value.tags.size)
-            }
-            mTagsLayout.addView(mAddBtn)
-            mAddBtn.setOnClickListener {
-                if (mTagsLayout.childCount < 6) {
-                    if (mTagsLayout.childCount == 1) {
-                        mTagsLayout.removeView(mAddBtn)
-                        val newView = inflateNewEditText()
-                        mTagsLayout.addView(newView)
-                        mTagsLayout.addView(mAddBtn)
-                        newView.requestFocus()
-                        mErrorTv.text = ""
-                    } else {
-                        val prelast = mTagsLayout.getChildAt(mTagsLayout.childCount - 2) as EditText
-                        if (!prelast.text.isEmpty()) {
-                            val validatorOut = mValidator.validate(prelast.text.toString())
-                            if (validatorOut.first) {
-                                mTagsLayout.removeView(mAddBtn)
-                                val newView = inflateNewEditText()
-                                mTagsLayout.addView(newView)
-                                mTagsLayout.addView(mAddBtn)
-                                newView.requestFocus()
-                                mErrorTv.text = ""
-                            } else {
-                                mErrorTv.text = validatorOut.second
-                            }
-                        }
+            if (value.tags.size != (mTagsLayout.childCount - 1)) {
+                mTagsLayout.removeView(mAddBtn)
+                if (mTagsLayout.childCount > value.tags.size) {
+                    mTagsLayout.removeViews(value.tags.size, mTagsLayout.childCount - value.tags.size)
+                    (0 until mTagsLayout.childCount).forEach {
+                        (mTagsLayout.getChildAt(it) as? EditText)?.setText(value.tags[it])
                     }
                 } else {
-                    mErrorTv.text = resources.getString(R.string.to_much_tags)
+                    (mTagsLayout.childCount until value.tags.size).forEach {
+                        val newView = inflateNewEditText(value.tags[it])
+                        mTagsLayout.addView(newView)
+                    }
+                    (0 until mTagsLayout.childCount).forEach {
+                        val et = (mTagsLayout.getChildAt(it) as EditText)
+                        if (et.text.toString() != value.tags[it]) {
+                            et.setText(value.tags[it])
+                        }
+                    }
                 }
+                mTagsLayout.addView(mAddBtn)
             }
+
+            if (!mAddBtn.hasOnClickListeners())
+                mAddBtn.setOnClickListener {
+                    if (mTagsLayout.childCount < 6) {
+                        if (mTagsLayout.childCount == 1) {
+                            mTagsLayout.removeView(mAddBtn)
+                            val newView = inflateNewEditText()
+                            mTagsLayout.addView(newView)
+                            mTagsLayout.addView(mAddBtn)
+                            newView.requestFocus()
+                            mErrorTv.text = ""
+                        } else {
+                            val prelast = mTagsLayout.getChildAt(mTagsLayout.childCount - 2) as EditText
+                            if (!prelast.text.isEmpty()) {
+                                val validatorOut = mValidator.validate(prelast.text.toString())
+                                if (validatorOut.first) {
+                                    mTagsLayout.removeView(mAddBtn)
+                                    val newView = inflateNewEditText()
+                                    mTagsLayout.addView(newView)
+                                    mTagsLayout.addView(mAddBtn)
+                                    newView.requestFocus()
+                                    mErrorTv.text = ""
+                                } else {
+                                    mErrorTv.text = validatorOut.second
+                                }
+                            }
+                        }
+                    } else {
+                        mErrorTv.text = resources.getString(R.string.to_much_tags)
+                    }
+                }
         }
 
-    private fun inflateNewEditText(): EditText {
+    private fun inflateNewEditText(startText: String? = null): EditText {
         val view = LayoutInflater.from(context).inflate(R.layout.v_editor_footer_tag_et, mTagsLayout, false) as EditText
+        if (startText != null) view.setText(startText)
         view.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 if (p0 != null) onTextChanged(p0.toString())

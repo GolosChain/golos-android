@@ -215,9 +215,10 @@
                 android:background="@color/tab_in_profile"
                 app:layout_collapseMode="pin"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="@color/tab_indicator"
+                app:tabIndicatorColor="@color/tab_indicator_in_profile"
                 app:tabMode="fixed"
-                app:tabTextAppearance="@style/TabTextStyle" />
+                app:tabTextAppearance="@style/TabTextStyle"
+                app:tabTextColor="#b0b0b0" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

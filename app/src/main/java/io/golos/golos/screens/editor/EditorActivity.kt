@@ -27,15 +27,14 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.App
 import io.golos.golos.R
-import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -119,6 +118,17 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                     mProgressDialog = null
                 }
             }
+            if (mMode?.isPostEditor == true) {
+                mTitle.state = EditorTitleState(it?.title ?: "",
+                        mTitle.state.isTitleEditable,
+                        mTitle.state.onTitleChanges,
+                        mTitle.state.subtitle,
+                        mTitle.state.isHidden)
+            }
+            mFooter.state = EditorFooterState(mMode?.isPostEditor == true,
+                    mFooter.state.tagsValidator,
+                    it?.tags?.toArrayList() ?: arrayListOf(),
+                    mFooter.state.tagsListener)
             it?.completeMessage?.let {
                 mRecycler.showSnackbar(it)
                 Handler().postDelayed({
@@ -127,7 +137,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             }
         })
         mTitle.state = EditorTitleState(mMode?.title ?: "", mMode?.isPostEditor ?: false, {
-            mViewModel.onTitileChanges(it)
+            mViewModel.onTitleChanged(it)
         }, mMode?.subtitle ?: "",
                 mMode?.isPostEditor == false
                         && mMode?.rootStoryId == mMode?.commentToAnswerOnId)
@@ -187,13 +197,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Timber.e("onActivityResult data = $data")
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())
             if (data != null) {
                 App.computationExecutor.execute {
                     try {
-                        Timber.e("onActivityResult data.data = ${data.data}")
                         val inputStream = contentResolver.openInputStream(data.data)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
                         if (bitmap == null) handler.post {

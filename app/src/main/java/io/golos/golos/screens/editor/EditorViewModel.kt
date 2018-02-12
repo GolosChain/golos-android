@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.isNullOrEmpty
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -17,7 +18,9 @@ import io.golos.golos.utils.GolosError
 data class EditorState(val error: GolosError? = null,
                        val isLoading: Boolean = false,
                        var completeMessage: Int? = null,
-                       val parts: List<EditorPart>)
+                       val parts: List<EditorPart>,
+                       val title: String,
+                       val tags: List<String>)
 
 data class PostSendStatus(val author: String,
                           val blog: String,
@@ -30,8 +33,6 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     val postMaxLength = 100 * 1024
     val commentMaxLength = 16 * 1024
     private val mTextProcessor = TextProcessor()
-    private var mTitleText: String = ""
-    private var mTags = ArrayList<String>()
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
     private var mItemToAnswerOn: GolosDiscussionItem? = null
@@ -42,9 +43,12 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val feedType = field?.feedType
             val rootStoryId = field?.rootStoryId
             val itemToAnsweronId = field?.commentToAnswerOnId
-            DraftsPersister.getDraft(value ?: return, {
-                if (it.isNotEmpty())
-                    editorLiveData.value = EditorState(null, false, null, it)
+            DraftsPersister.getDraft(value ?: return, { items, title, tags ->
+                if (items.isNotEmpty())
+                    editorLiveData.value = EditorState(null, false, null, items, title, tags)
+                else {
+                    editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
+                }
             })
             if (feedType != null && rootStoryId != null && itemToAnsweronId != null) {
                 Repository
@@ -57,10 +61,6 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         .observeForever(this)
             }
         }
-
-    init {
-        editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState())
-    }
 
 
     override fun onChanged(t: StoriesFeed?) {
@@ -75,19 +75,25 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
     fun onUserInput(action: EditorInputAction) {
         val parts = editorLiveData.value?.parts ?: ArrayList()
-        editorLiveData.value = EditorState(parts = mTextProcessor.processInput(parts, action))
+        editorLiveData.value = EditorState(parts = mTextProcessor.processInput(parts, action),
+                title = editorLiveData.value?.title ?: "",
+                tags = editorLiveData.value?.tags ?: listOf())
     }
 
-    fun onTitileChanges(it: CharSequence) {
-        mTitleText = it.toString()
+    fun onTitleChanged(it: CharSequence) {
+        editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: listOf(), title = it.toString(),
+                tags = editorLiveData.value?.tags ?: listOf())
     }
 
     fun onTagsChanged(it: List<String>) {
-        mTags = ArrayList(it)
+
+        editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: listOf(), title = editorLiveData.value?.title ?: "",
+                tags = it)
     }
 
     fun onTextChanged(parts: List<EditorPart>) {
-        editorLiveData.value = EditorState(parts = parts)
+        editorLiveData.value = EditorState(parts = parts, title = editorLiveData.value?.title ?: "",
+                tags = editorLiveData.value?.tags ?: listOf())
     }
 
     fun onSubmit() {
@@ -96,48 +102,66 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         }
         if (!mRepository.isUserLoggedIn()) return
         if (mode!!.isPostEditor) {
-            if (mTitleText.isEmpty()) {
+            if (editorLiveData.value?.title.isNullOrEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.enter_title))
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.enter_title),
+                        title = editorLiveData.value?.title ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
                 return
             }
             if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
                     (editorLiveData.value?.parts?.size == 1
                             && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.post_body_must_be_not_empty))
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
+                                localizedMessage = R.string.post_body_must_be_not_empty),
+                        title = editorLiveData.value?.title ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
                 return
             }
-            if (mTags.size < 1) {
+            if (editorLiveData.value?.tags.isNullOrEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.at_least_one_tag))
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
+                                localizedMessage = R.string.at_least_one_tag),
+                        title = editorLiveData.value?.title ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
                 return
             }
-            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
-            mRepository.createPost(mTitleText, editorLiveData.value?.parts ?: ArrayList(), mTags, { result, error ->
-                if (error == null) {
-                    wasSent = true
-                    DraftsPersister.deleteDraft(mode ?: return@createPost, {})
-                }
-                editorLiveData.value = EditorState(error = error,
-                        isLoading = false,
-                        parts = editorLiveData.value?.parts ?: ArrayList(),
-                        completeMessage = if (error == null) R.string.send_post_success else null)
-                postStatusLiveData.value = PostSendStatus(result?.author ?: return@createPost,
-                        result.blog,
-                        result.permlink)
+            editorLiveData.value = EditorState(isLoading = true,
+                    parts = editorLiveData.value?.parts ?: ArrayList(),
+                    title = editorLiveData.value?.title ?: "",
+                    tags = editorLiveData.value?.tags ?: listOf())
+            mRepository.createPost(editorLiveData.value?.title ?: return,
+                    editorLiveData.value?.parts ?: ArrayList(),
+                    editorLiveData.value?.tags ?: return,
+                    { result, error ->
+                        if (error == null) {
+                            wasSent = true
+                            DraftsPersister.deleteDraft(mode ?: return@createPost, {})
+                        }
+                        editorLiveData.value = EditorState(error = error,
+                                isLoading = false,
+                                parts = editorLiveData.value?.parts ?: ArrayList(),
+                                completeMessage = if (error == null) R.string.send_post_success else null, title = editorLiveData.value?.title ?: "",
+                                tags = editorLiveData.value?.tags ?: listOf())
+                        postStatusLiveData.value = PostSendStatus(result?.author ?: return@createPost,
+                                result.blog,
+                                result.permlink)
 
-            })
+                    })
         } else {
             if (mRootStory == null || mItemToAnswerOn == null) return
             if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
                     (editorLiveData.value?.parts?.size == 1
                             && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.comment_body_must_be_not_empty))
+                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.comment_body_must_be_not_empty), title = editorLiveData.value?.title ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
                 return
             }
-            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList())
+            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts ?: ArrayList(),
+                    title = editorLiveData.value?.title ?: "",
+                    tags = editorLiveData.value?.tags ?: listOf())
             mRepository.createComment(mRootStory!!,
                     mItemToAnswerOn!!,
                     editorLiveData.value?.parts ?: ArrayList(), { result, error ->
@@ -149,7 +173,9 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 editorLiveData.value = EditorState(error = error,
                         isLoading = false,
                         parts = editorLiveData.value?.parts ?: ArrayList(),
-                        completeMessage = if (error == null) R.string.send_comment_success else null)
+                        completeMessage = if (error == null) R.string.send_comment_success else null,
+                        title = editorLiveData.value?.title ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
 
             })
 
@@ -157,7 +183,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     fun onDestroy() {
-        if (!wasSent) DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts ?: return, {})
+        if (!wasSent) DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts ?: return,
+                title = editorLiveData.value?.title ?: "",
+                tags = editorLiveData.value?.tags ?: listOf(),
+                completionHandler = {})
     }
 }
 

@@ -32,6 +32,7 @@
             android:imeOptions="flagNavigateNext"
             android:inputType="textNoSuggestions"
             android:lines="1"
+            android:digits="qwertyuiopasdfghjklzxcvbnm_-1234567890"
             android:maxLength="16"
             app:backgroundTint="#DBDBDB" />
 

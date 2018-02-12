@@ -245,3 +245,7 @@ fun CommentOperation.getTags(): List<String> {
 fun <E> List<out E>.toArrayList(): ArrayList<E> {
     return ArrayList(this)
 }
+
+
+
+public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0

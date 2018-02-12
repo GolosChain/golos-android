@@ -25,7 +25,7 @@
                 android:layout_height="60dp"
                 android:background="@color/white_black_toolbar_color"
                 app:elevation="1dp"
-                app:navigationIcon="@drawable/ic_chevron_left_gray_32dp" />
+                app:navigationIcon="@drawable/ic_chevron_left_gray_24dp" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -34,11 +34,11 @@
 
                 <com.makeramen.roundedimageview.RoundedImageView
                     android:id="@+id/avatar_iv"
-                    android:layout_width="@dimen/avatar_size_story"
-                    android:layout_height="@dimen/avatar_size_story"
-                    android:layout_marginTop="@dimen/margin_material_half"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:clickable="true"
                     android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:riv_corner_radius="30dp"
@@ -68,7 +68,11 @@
                     android:id="@+id/blog_name_tv"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
                     android:clickable="true"
+                    android:includeFontPadding="false"
+                    android:padding="0dp"
+                    android:textSize="@dimen/font_small"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
+                    android:layout_marginTop="-3dp"
                     app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
                 <android.support.v7.widget.AppCompatImageButton
@@ -105,10 +109,10 @@
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/title_tv"
-                    android:textSize="16sp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_material" />
+                    android:layout_margin="@dimen/margin_material"
+                    android:textSize="16sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler"

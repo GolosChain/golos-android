@@ -47,6 +47,9 @@ class EditorTitle : FrameLayout, TextWatcher {
 
     var state: EditorTitleState = EditorTitleState()
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             mTitleEt.isEnabled = field.isTitleEditable
             if (mTitleEt.text.toString() != value.title.toString()) mTitleEt.setText(value.title.toString())
@@ -59,6 +62,7 @@ class EditorTitle : FrameLayout, TextWatcher {
             } else {
                 this.visibility = View.VISIBLE
             }
+            mTitleEt.setSelection(field.title.length)
         }
 
     override fun afterTextChanged(s: Editable?) {

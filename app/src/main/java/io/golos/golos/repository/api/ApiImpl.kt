@@ -11,14 +11,12 @@ import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.AuthUtils
 import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
-import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
-
 import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.io.File
@@ -310,7 +308,10 @@ class ApiImpl : GolosApi() {
         }
         val response = mGolosApi.golosIoSpecificMethods.uploadFile(AccountName(sendFromAccount), fileLocal)
 
-        if (response.error != null) throw SteemResponseError(response.error, null)
+        if (response.error != null) {
+            Timber.e(response.error)
+            throw SteemResponseError(response.error, null)
+        }
         return response.urlString ?: "error"
     }
 
