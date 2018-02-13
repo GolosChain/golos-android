@@ -218,7 +218,7 @@
                 app:tabIndicatorColor="@color/tab_indicator_in_profile"
                 app:tabMode="fixed"
                 app:tabTextAppearance="@style/TabTextStyle"
-                app:tabTextColor="#b0b0b0" />
+                app:tabTextColor="@color/profile_tabs_color" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

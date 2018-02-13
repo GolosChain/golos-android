@@ -328,4 +328,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
 
+    override fun toString(): String {
+        return "StoriesViewModel(type=$type, isVisibleToUser=$isVisibleToUser, filter=$filter)"
+    }
+
 }

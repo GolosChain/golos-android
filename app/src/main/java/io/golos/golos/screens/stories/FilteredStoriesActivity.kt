@@ -72,7 +72,7 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
 
     override fun onChanged(t: FilteredStoriesViewState?) {
         t?.let {
-            mTagTitle.text = "#${it.mainTag.getLocalizedName()}"
+            mTagTitle.text = "#${it.mainTag.getLocalizedName().capitalize()}"
             if (it.postsCount == null) mPostCountTv.visibility = View.INVISIBLE
             else {
                 mPostCountTv.visibility = View.VISIBLE

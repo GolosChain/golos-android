@@ -130,7 +130,7 @@ class StripeCompactViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.
         mUpvoteValue.setTextColorCompat(R.color.textColorP)
         mCommentsButton.setTextColorCompat(R.color.textColorP)
         mTitleTv.setTextColorCompat(R.color.stripe_title)
-        mUserNameTv.setTextColorCompat(R.color.stripe_subtitle)
+        mUserNameTv.setTextColorCompat(R.color.textColorP)
         mRebloggedByTv.setTextColorCompat(R.color.stripe_subtitle)
         mBlogNameTv.setTextColorCompat(R.color.stripe_subtitle)
         mDelimeter.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))

@@ -1,6 +1,7 @@
 package io.golos.golos.screens.stories.adapters
 
 import android.os.Handler
+import android.support.annotation.NonNull
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
@@ -31,12 +32,13 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Uni
                              private var onTagClick: (StoryWithComments) -> Unit = { print(it) },
                              private var onUserClick: (StoryWithComments) -> Unit = { print(it) },
                              private var onVotersClick: (StoryWithComments) -> Unit = { print(it) },
-                             feedCellSettings:FeedCellSettings = FeedCellSettings())
+                             feedCellSettings: FeedCellSettings = FeedCellSettings())
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         @JvmStatic
-        private val workingExecutor = Executors.newSingleThreadExecutor()
+        @NonNull
+        private val workingExecutor = Executors.newSingleThreadExecutor()!!
     }
 
     var feedCellSettings = feedCellSettings
@@ -50,7 +52,7 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Uni
         }
     private var mStripes = ArrayList<StoryWithComments>()
     private val mItemsMap = HashMap<Long, Int>()
-    private val handler = Handler()
+    val handler = Handler()
 
 
     fun setStripesCustom(newItems: List<StoryWithComments>) {

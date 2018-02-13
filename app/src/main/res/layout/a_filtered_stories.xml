@@ -4,20 +4,18 @@
     android:id="@+id/drawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    >
+    android:animateLayoutChanges="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-       >
+        android:layout_height="wrap_content">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white_black_toolbar_color"
+            android:background="@color/story_toolbar_color"
             android:fitsSystemWindows="true"
-            app:contentScrim="@color/white_black_toolbar_color"
+            app:contentScrim="@color/story_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways"
             app:toolbarId="@+id/toolbar">
 
@@ -35,27 +33,26 @@
                     android:background="?attr/selectableItemBackground"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_chevron_left_gray_24dp_7d" />
+                    app:srcCompat="@drawable/ic_chevron_left_24dp" />
 
                 <LinearLayout
                     android:id="@+id/tag_lo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
+                    android:layout_marginStart="@dimen/margin_material_half"
+                    android:gravity="start"
                     android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/back_ibtn"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/title_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:gravity="center"
+                        android:layout_marginTop="@dimen/margin_material_half"
+                        android:gravity="start"
                         android:includeFontPadding="false"
                         android:lines="1"
-
                         android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_medium" />
 
@@ -63,58 +60,62 @@
                         android:id="@+id/posts_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_material_half"
-                        android:gravity="center"
+                        android:layout_marginTop="@dimen/quater"
+                        android:gravity="start"
                         android:includeFontPadding="false"
-
-                        android:textColor="@color/textColorP" />
-
-                    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/subscribe_btn_lo"
-                        style="@style/FilteredScreenSubButtonLo"
-                        android:visibility="visible">
-
-                        <android.support.v7.widget.AppCompatTextView
-                            android:id="@+id/subscribe_tv"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:background="?selectableItemBackground"
-                            android:clickable="true"
-                            android:gravity="center"
-                            android:paddingBottom="2dp"
-                            android:paddingEnd="@dimen/margin_material"
-                            android:paddingStart="@dimen/margin_material"
-                            android:text="@string/subscribe"
-                            android:textColor="@android:color/white"
-
-                            android:textSize="@dimen/font_small" />
-                    </FrameLayout>
-
-                    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/subsbs_btn_lo"
-                        style="@style/FilteredScreenSubButtonLo"
-                        android:background="@drawable/rect_round_corners_outline_gray"
-                        android:visibility="gone">
-
-                        <android.support.v7.widget.AppCompatTextView
-                            android:id="@+id/subs_tv"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:background="?selectableItemBackground"
-                            android:clickable="true"
-                            android:gravity="center"
-                            android:paddingBottom="2dp"
-                            android:paddingEnd="@dimen/font_regular"
-                            android:paddingStart="@dimen/margin_material"
-                            android:text="@string/subscribes"
-                            android:textColor="@color/text_color_white_black"
-                            android:textSize="@dimen/font_small" />
-                    </FrameLayout>
+                        android:textColor="@color/stripe_subtitle"
+                        android:textSize="@dimen/font_regular" />
 
 
                 </LinearLayout>
+
+                <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/subscribe_btn_lo"
+                    style="@style/FilteredScreenSubButtonLo"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/subscribe_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="?selectableItemBackground"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:paddingBottom="2dp"
+                        android:paddingEnd="@dimen/margin_material"
+                        android:paddingStart="@dimen/margin_material"
+                        android:text="@string/subscribe"
+                        android:textColor="@android:color/white"
+
+                        android:textSize="@dimen/font_small" />
+                </FrameLayout>
+
+                <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/subsbs_btn_lo"
+                    style="@style/FilteredScreenSubButtonLo"
+                    android:background="@drawable/rect_round_corners_outline_gray"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/subs_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="?selectableItemBackground"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:paddingBottom="2dp"
+                        android:paddingEnd="@dimen/font_regular"
+                        android:paddingStart="@dimen/margin_material"
+                        android:text="@string/subscribes"
+                        android:textColor="@color/text_color_white_black"
+                        android:textSize="@dimen/font_small" />
+                </FrameLayout>
 
                 <View
                     android:id="@+id/delimeter"
@@ -125,12 +126,12 @@
                     app:layout_constraintTop_toBottomOf="@id/tag_lo" />
 
                 <HorizontalScrollView
-
+                    android:background="@color/same_tags_ribbon_back"
+                    android:id="@+id/similar_p_lo"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:paddingEnd="@dimen/margin_material"
                     android:paddingStart="@dimen/margin_material"
-                android:id="@+id/similar_p_lo"
                     app:layout_constraintTop_toBottomOf="@id/delimeter">
 
                     <LinearLayout
@@ -144,7 +145,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:text="@string/similar"
-                            android:textColor="@color/textColorP"
+                            android:textColor="@color/stripe_subtitle"
                             android:textSize="@dimen/font_small" />
 
                         <TextView style="@style/TagListStyle" />

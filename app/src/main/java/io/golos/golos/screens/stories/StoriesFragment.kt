@@ -3,7 +3,6 @@ package io.golos.golos.screens.stories
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
-import android.os.Parcelable
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -28,19 +27,19 @@ import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.getColorCompat
+import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.showSnackbar
-import timber.log.Timber
 
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
-    private var mRefreshButton: View? = null
+    private var mRefreshButton: TextView? = null
     private var mRefreshLo: View? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
-    private var mSavedPosition: Parcelable? = null
+    private var mSavedPosition: Int? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -60,6 +59,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         val manager = LinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         mSwipeRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
+        mRefreshButton?.setCompoundDrawablesWithIntrinsicBounds(mRefreshButton?.getVectorDrawable(R.drawable.ic_refresh_white_14dp), null, null, null)
         mSwipeRefresh?.setColorSchemeResources(R.color.blue_light)
         if (arguments?.getSerializable(TYPE_TAG) == null) return
 
@@ -175,15 +175,21 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             mRecycler?.visibility = View.VISIBLE
             mFullscreenMessageLabel.visibility = View.GONE
         }
-      /*  if (t?.items?.size ?: 0 > 0 &&
-                mSavedPosition != null) {
-            mRecycler?.postDelayed({
-                Timber.e("mSavedPosition = $mSavedPosition")
-                mRecycler?.layoutManager?.onRestoreInstanceState(mSavedPosition)
-                mSavedPosition = null
-            }, 3000)
-        }*/
 
+        /*   if (mSavedPosition ?: 0 > 0) {
+               val exec = (mRecycler?.adapter as StoriesRecyclerAdapter).handler
+               exec.postDelayed({
+                   Timber.e("mSavedPosition =  $ ")
+                   Timber.e("t?.items?.size =  ${t?.items?.size}")
+                   if (mSavedPosition ?: 0 > 0) {
+                       Timber.e("changing $mSavedPosition")
+                       if (t?.items?.size ?: 0 > 0) {
+                           mRecycler?.scrollToPosition(mSavedPosition ?: return@postDelayed)
+                         //  mSavedPosition = null
+                       }
+                   }
+               }, 1000)
+           }*/
     }
 
     companion object {
@@ -216,17 +222,21 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         super.setUserVisibleHint(isVisibleToUser)
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val parc = mRecycler?.layoutManager?.onSaveInstanceState()
-        parc.let { outState.putParcelable("recyclerState", parc) }
+        var parc = mSavedPosition
+        if (parc == null) parc = (mRecycler?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
+        if (parc ?: 0 > 0) {
+            outState.putInt("recyclerState${mViewModel}", parc ?: return)
+        }
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        mSavedPosition = savedInstanceState?.getParcelable("recyclerState")
+        mSavedPosition = savedInstanceState?.getInt("recyclerState")
     }
 
     private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,

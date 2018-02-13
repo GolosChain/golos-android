@@ -47,7 +47,6 @@
             android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:drawablePadding="@dimen/margin_material_half"
-            android:drawableStart="@drawable/ic_refresh_white_14dp"
             android:gravity="center_vertical|start"
             android:text="@string/refresh_question"
             android:textAllCaps="false"

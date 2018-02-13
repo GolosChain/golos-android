@@ -70,6 +70,11 @@ class VoteDialog : DialogFragment() {
         return v
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.Theme_AppCompat_Dialog)
+    }
+
     override fun onStart() {
         super.onStart()
         val d = dialog
