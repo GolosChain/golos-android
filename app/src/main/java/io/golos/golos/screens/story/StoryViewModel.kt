@@ -268,4 +268,11 @@ class StoryViewModel : ViewModel() {
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
         UsersListActivity.startToShowVoters(activity, it.story.id)
     }
+
+    fun onDestroy() {
+        mLiveData.removeSource(mRepository.getStories(feedType, filter))
+        mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
+        mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
+        mLiveData.removeSource(mRepository.getUserSubscribedTags())
+    }
 }

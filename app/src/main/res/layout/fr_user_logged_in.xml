@@ -7,6 +7,7 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -17,6 +18,13 @@
             app:collapsedTitleGravity="center_horizontal|top"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+
+            <android.support.v7.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -32,6 +40,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="170dp"
                     android:background="@color/profile_top"
+                    android:focusable="false"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <com.makeramen.roundedimageview.RoundedImageView
@@ -87,18 +96,6 @@
                     android:layout_marginTop="@dimen/margin_material"
                     android:textColor="@color/textColorP"
                     app:layout_constraintTop_toBottomOf="@id/user_backing" />
-
-
-                <android.support.v7.widget.AppCompatImageButton
-                    android:id="@+id/settings_btn"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="@dimen/margin_material"
-                    android:padding="0dp"
-                    app:backgroundTint="@android:color/transparent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_settings_white_24dp" />
 
 
                 <View
@@ -201,11 +198,19 @@
                     android:layout_height="1dp"
                     android:background="@color/profile_divider_color"
                     app:layout_constraintTop_toBottomOf="@+id/subscribers_table" />
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/settings_btn"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="@dimen/margin_material"
+                    android:padding="0dp"
+                    app:backgroundTint="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_settings_white_24dp" />
             </android.support.constraint.ConstraintLayout>
 
-            <android.support.v7.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="46dp" />
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tab_lo_logged_in"

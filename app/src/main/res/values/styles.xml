@@ -337,4 +337,14 @@
         <item name="android:gravity">center_horizontal</item>
         <item name="android:textSize">@dimen/font_small</item>
     </style>
+
+    <style name="Base.Widget.AppCompat.Button.Borderless.VoteDialogButton">
+        <item name="android:layout_gravity">end</item>
+        <item name="android:paddingEnd">@dimen/material_huge</item>
+        <item name="android:gravity">end|center_vertical</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:textColor">@color/textColorP</item>
+    </style>
 </resources>

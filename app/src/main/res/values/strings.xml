@@ -50,7 +50,7 @@
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>
     <string name="you_voted_same_way">You have already voted for the post</string>
-    <string name="login_to_vote">Log in or register to name</string>
+    <string name="login_to_vote">Log in or register to vote</string>
     <string name="login_to_see_feed">Login to view your feed</string>
     <string name="nothing_here">While there is nothing, it will be filled immediately after the appearance of new content</string>
     <string name="wrong_image">Something is wrong with the image,please try another one.</string>
@@ -141,6 +141,7 @@
     <string name="not_now">not now</string>
     <string name="vote_exclamation">Vote!</string>
     <string name="you_must_have_more_repo_for_action">You must have more reputation for this action</string>
+    <string name="never">Never</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

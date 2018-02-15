@@ -234,6 +234,11 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel?.onDestroy()
+    }
+
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         mSavedPosition = savedInstanceState?.getInt("recyclerState")

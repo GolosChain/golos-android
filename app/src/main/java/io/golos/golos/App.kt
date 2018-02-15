@@ -17,6 +17,7 @@ import io.golos.golos.screens.settings.UserSettings
 import timber.log.Timber
 import java.util.concurrent.Executors
 
+
 /**
  * Created by yuri on 30.10.17.
  */
@@ -35,7 +36,6 @@ class App : MultiDexApplication() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
-
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
         UserSettings.setUp()

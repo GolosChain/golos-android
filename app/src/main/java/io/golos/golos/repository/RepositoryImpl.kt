@@ -929,6 +929,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 networkExecutor.execute {
+                    if (!isUserLoggedIn())return@execute
                     val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
@@ -979,7 +980,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     mLastPostLiveData.value = result
                     resultListener.invoke(result, null)
                 }
+
                 networkExecutor.execute {
+                    if (!isUserLoggedIn()) return@execute
                     val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))

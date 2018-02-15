@@ -18,13 +18,19 @@ class VoteForAppDialog : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_vote_for_app, container, false)
-        v.findViewById<View>(R.id.not_now).setOnClickListener { dismiss() }
+        v.findViewById<View>(R.id.not_now).setOnClickListener {
+            dismiss()
+        }
         v.findViewById<View>(R.id.vote).setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=io.golos.golos")))
             } catch (anfe: android.content.ActivityNotFoundException) {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=io.golos.golos")))
             }
+            UserSettings.setUserVotedForApp(true)
+            dismiss()
+        }
+        v.findViewById<View>(R.id.never).setOnClickListener {
             UserSettings.setUserVotedForApp(true)
             dismiss()
         }

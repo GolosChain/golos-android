@@ -345,6 +345,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mSwipeToRefresh.setOnRefreshListener(this)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel.onDestroy()
+    }
+
 
     companion object {
         private val AUTHOR_TAG = "AUTHOR_TAG"

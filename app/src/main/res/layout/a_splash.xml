@@ -20,12 +20,12 @@
         app:srcCompat="@drawable/d_icon" />
 
     <fr.castorflex.android.circularprogressbar.CircularProgressBar
-
         android:id="@+id/progress"
         android:layout_width="180dp"
         android:layout_height="180dp"
         android:layout_marginBottom="8dp"
         android:indeterminate="true"
+
         app:cpb_color="#1b6fb2"
         app:cpb_stroke_width="5dp"
         app:layout_constraintBottom_toBottomOf="@+id/icon"

@@ -332,4 +332,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         return "StoriesViewModel(type=$type, isVisibleToUser=$isVisibleToUser, filter=$filter)"
     }
 
+    fun onDestroy() {
+        mRepository.getStories(type, filter).removeObserver(this)
+    }
+
 }
