@@ -193,7 +193,7 @@ class StoryViewModel : ViewModel() {
                 || feedType == FeedType.UNCLASSIFIED
                 || feedType == FeedType.PROMO) feedType = FeedType.NEW
         if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text)
-        FilteredStoriesActivity.start(context, feedType, text ?: return)
+        FilteredStoriesActivity.start(context, text ?: return)
     }
 
     fun onShareClick(context: Context) {

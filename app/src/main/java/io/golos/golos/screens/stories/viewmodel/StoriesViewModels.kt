@@ -316,7 +316,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                     || feedType == FeedType.PERSONAL_FEED
                     || feedType == FeedType.UNCLASSIFIED
                     || feedType == FeedType.PROMO) feedType = FeedType.NEW
-            FilteredStoriesActivity.start(it, feedType = feedType, tagName = story.rootStory()?.categoryName ?: return)
+            FilteredStoriesActivity.start(it, tagName = story.rootStory()?.categoryName ?: return)
         }
     }
 

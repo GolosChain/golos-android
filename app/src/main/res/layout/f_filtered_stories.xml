@@ -3,19 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-   >
+    android:layout_height="match_parent">
 
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
+
             app:contentScrim="@color/white_black_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
             app:titleEnabled="false">
@@ -23,20 +23,20 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:paddingStart="@dimen/margin_material_half"
                 app:elevation="1dp"
                 app:navigationIcon="@drawable/ic_seacrh_white_20dp"
-                app:subtitle="Поиск в Golos.io"
+                app:subtitle="@string/search_in_golos"
                 app:subtitleTextColor="@android:color/white" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="54dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="52dp"
                 android:background="@color/splash_back"
-                android:orientation="vertical">
-
+                android:orientation="vertical"
+               >
 
                 <android.support.v7.widget.AppCompatTextView
                     android:layout_width="match_parent"
@@ -50,21 +50,26 @@
                     android:id="@+id/tags_recycler"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/tags_reycler_height"
+                    android:layout_marginBottom="@dimen/margin_material_half"
                     android:paddingEnd="@dimen/margin_material"
+                    app:layout_collapseMode="pin"
                     android:paddingStart="@dimen/margin_material"
                     tools:ignore="RtlSymmetry" />
 
-                <android.support.v7.widget.AppCompatTextView
-                    android:id="@+id/popular_now_tv"
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_lo"
+                    app:layout_collapseMode="pin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:padding="@dimen/margin_material"
-                    android:text="@string/popular_now"
+
+                    android:background="@color/white_black_toolbar_color"
                     android:textColor="@color/textColorP"
                     android:visibility="gone"
-                    app:textAllCaps="true" />
-
+                    app:tabIndicatorColor="@color/blue_white_indicator"
+                    app:tabMode="fixed"
+                    app:tabTextAppearance="@style/TabTextStyle"
+                    app:tabTextColor="@color/profile_tabs_color"
+                    app:textAllCaps="false" />
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/no_tags_chosen_tv"
@@ -79,13 +84,15 @@
                     app:textAllCaps="true" />
 
             </LinearLayout>
+
+
         </android.support.design.widget.CollapsingToolbarLayout>
 
 
     </android.support.design.widget.AppBarLayout>
 
-    <FrameLayout
-        android:id="@+id/tags_fragment_frame"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager_lo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"

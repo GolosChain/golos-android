@@ -142,6 +142,7 @@
     <string name="vote_exclamation">Vote!</string>
     <string name="you_must_have_more_repo_for_action">You must have more reputation for this action</string>
     <string name="never">Never</string>
+    <string name="search_in_golos">Search in Golos.io</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

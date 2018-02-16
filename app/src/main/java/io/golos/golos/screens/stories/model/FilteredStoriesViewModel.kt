@@ -76,7 +76,7 @@ class FilteredStoriesViewModel : ViewModel() {
     }
 
     fun onTagClick(context: Context, localizedTag: LocalizedTag) {
-        FilteredStoriesActivity.start(context, FeedType.NEW, localizedTag.tag.name)
+        FilteredStoriesActivity.start(context, localizedTag.tag.name)
     }
 
     fun onDestroy() {

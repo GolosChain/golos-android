@@ -10,10 +10,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.viewmodel.AuthViewModel
-import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
+import timber.log.Timber
 
 
 /**
@@ -31,10 +35,18 @@ class StoriesHolderFragment : GolosFragment() {
         authModel.userAuthState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
             if (it?.isLoggedIn == true) {
                 if (mFab.visibility != View.VISIBLE) mFab.show()
-                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = Pair(true, it.username)
-            } else if (it?.isLoggedIn == false) {
+                if (mPager.adapter == null
+                        || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == false) {
+                    mPager.adapter = createPagerAdapter(true)
+                    mPager.adapter?.notifyDataSetChanged()
+                }
+            } else {
                 mFab.visibility = View.GONE
-                (mPager.adapter as? StoriesPagerAdpater)?.isFeedFragmentShown = Pair(false, it.username)
+                if (mPager.adapter == null
+                        || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == true) {
+                    mPager.adapter = createPagerAdapter(false)
+                    mPager.adapter?.notifyDataSetChanged()
+                }
             }
         })
         return view
@@ -48,10 +60,24 @@ class StoriesHolderFragment : GolosFragment() {
             }
         })
         mPager = root.findViewById(R.id.view_pager)
-        val adapter = StoriesPagerAdpater(root.context, childFragmentManager)
         mPager.offscreenPageLimit = 5
-        mPager.adapter = adapter
         val tabLo: TabLayout = root.findViewById(R.id.tab_lo)
         tabLo.setupWithViewPager(mPager)
     }
+
+
+    private fun createPagerAdapter(isUserLoggedIn: Boolean): StoriesPagerAdapter? {
+        val supportedTypes = ArrayList<Pair<FeedType, StoryFilter?>>(5)
+        supportedTypes.apply {
+            if (isUserLoggedIn) add(Pair(FeedType.PERSONAL_FEED, StoryFilter(null, Repository.get.getCurrentUserDataAsLiveData().value?.userName ?: "")))
+            add(Pair(FeedType.NEW, null))
+            add(Pair(FeedType.ACTUAL, null))
+            add(Pair(FeedType.POPULAR, null))
+            add(Pair(FeedType.PROMO, null))
+        }
+        return StoriesPagerAdapter(activity ?: return null, childFragmentManager, supportedTypes)
+    }
+
+
+
 }

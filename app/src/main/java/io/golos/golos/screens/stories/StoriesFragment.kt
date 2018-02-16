@@ -18,7 +18,7 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.settings.UserSettings
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
-import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
+import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
@@ -108,7 +108,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 }
             }
         })
-        mRecycler?.recycledViewPool = StoriesPagerAdpater.sharedPool
+        mRecycler?.recycledViewPool = StoriesPagerAdapter.sharedPool
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
         view.findViewById<View>(R.id.refresh_lo).setOnClickListener { mRefreshButton?.callOnClick() }
     }
@@ -192,27 +192,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
            }*/
     }
 
-    companion object {
-        private val TYPE_TAG = "TYPE_TAG"
-        private val FILTER_TAG = "FILTER_TAG"
-        fun getInstance(type: FeedType,
-                        filter: StoryFilter? = null): StoriesFragment {
-            val fr = StoriesFragment()
-            val bundle = createArguments(type, filter)
-            fr.arguments = bundle
-            return fr
-        }
-
-        fun createArguments(type: FeedType,
-                            filter: StoryFilter? = null): Bundle {
-            val bundle = Bundle()
-            bundle.putSerializable(TYPE_TAG, type)
-            if (filter != null)
-                bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
-            else bundle.putString(FILTER_TAG, null)
-            return bundle
-        }
-    }
 
     override fun onRefresh() {
         mViewModel?.onSwipeToRefresh()
@@ -246,4 +225,34 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
     private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,
             UserSettings.isImagesShown().value == true)
+
+    fun getArgs(): Pair<FeedType, StoryFilter?> {
+        val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
+        val filterString = arguments!!.getString(FILTER_TAG, null)
+        val filter = if (filterString == null || filterString == "null") null else mapper.readValue(filterString, StoryFilter::class.java)
+
+        return Pair(type, filter)
+    }
+
+    companion object {
+        private val TYPE_TAG = "TYPE_TAG"
+        private val FILTER_TAG = "FILTER_TAG"
+        fun getInstance(type: FeedType,
+                        filter: StoryFilter? = null): StoriesFragment {
+            val fr = StoriesFragment()
+            val bundle = createArguments(type, filter)
+            fr.arguments = bundle
+            return fr
+        }
+
+        fun createArguments(type: FeedType,
+                            filter: StoryFilter? = null): Bundle {
+            val bundle = Bundle()
+            bundle.putSerializable(TYPE_TAG, type)
+            if (filter != null)
+                bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
+            else bundle.putString(FILTER_TAG, null)
+            return bundle
+        }
+    }
 }

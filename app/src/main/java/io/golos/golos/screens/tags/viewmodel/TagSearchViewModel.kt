@@ -9,7 +9,6 @@ import android.content.Intent
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.stories.FilteredStoriesActivity
-import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.TagSearchActivity.Companion.TAG_TAG
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
@@ -71,7 +70,7 @@ class TagSearchViewModel : ViewModel(), Observer<List<Tag>> {
             activity.setResult(Activity.RESULT_OK, i)
             activity.finish()
         } else {
-            FilteredStoriesActivity.start(activity, FeedType.NEW, tag.tag.name)
+            FilteredStoriesActivity.start(activity, tag.tag.name)
         }
 
     }

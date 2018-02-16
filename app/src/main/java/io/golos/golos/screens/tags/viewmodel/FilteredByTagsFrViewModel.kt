@@ -9,7 +9,6 @@ import android.content.Context
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.stories.FilteredStoriesActivity
-import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.TagSearchActivity
 import io.golos.golos.screens.tags.TagsCloudActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
@@ -39,7 +38,7 @@ class FilteredStoriesByTagFragmentViewModel : ViewModel(), Observer<Set<Tag>> {
     }
 
     fun onTagClick(context: Context?, it: LocalizedTag) {
-        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, it.tag.name)
+        FilteredStoriesActivity.start(context ?: return, it.tag.name)
     }
 
     fun onTagDeleteClick(activity: Context?, it: LocalizedTag) {

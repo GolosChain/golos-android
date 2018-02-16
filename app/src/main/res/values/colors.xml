@@ -24,7 +24,7 @@
     <color name="drawer_background">#e9edf2</color>
     <color name="upvote_gray">#3f4346</color>
     <color name="gray_7d">#7D7D7D</color>
-    <color name="tab_indicator_in_profile">@color/blue_light</color>
+    <color name="blue_white_indicator">@color/blue_light</color>
     <color name="profile_divider_color">#dadada</color>
     <color name="black3">#333333</color>
     <color name="background_night">#3c3939</color>
