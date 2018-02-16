@@ -13,8 +13,10 @@ import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.repository.Repository
+import io.golos.golos.screens.settings.UserSettings
 import timber.log.Timber
 import java.util.concurrent.Executors
+
 
 /**
  * Created by yuri on 30.10.17.
@@ -26,16 +28,17 @@ class App : MultiDexApplication() {
     private var aStopped = 0
     private var aDestroyed = 0
 
+
     override fun onCreate() {
+        context = this
         super.onCreate()
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        context = this
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-
         }
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate()
+        UserSettings.setUp()
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
         if (!sharedPrefs.getBoolean("deleteUserData", false)) {
             Repository.get.deleteUserdata()
@@ -75,7 +78,7 @@ class App : MultiDexApplication() {
                 if (aCreated == aDestroyed) Repository.get.onAppDestroy()
             }
         })
-
+        UserSettings.setVoteQuestionMade(false)
     }
 
     companion object get {
@@ -87,6 +90,5 @@ class App : MultiDexApplication() {
         }
 
         val computationExecutor = Executors.newSingleThreadExecutor()
-
     }
 }

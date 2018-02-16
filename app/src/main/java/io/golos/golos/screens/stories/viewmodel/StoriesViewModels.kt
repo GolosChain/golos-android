@@ -222,9 +222,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         //  if (isUpdating.get())return
         isUpdating.set(true)
-        mStoriesLiveData.value = StoriesViewState(true,
-                mStoriesLiveData.value?.showRefreshButton == true,
-                mStoriesLiveData.value?.items ?: ArrayList())
+        if ( mStoriesLiveData.value?.isLoading == false){
+            mStoriesLiveData.value = StoriesViewState(true,
+                    mStoriesLiveData.value?.showRefreshButton == true,
+                    mStoriesLiveData.value?.items ?: ArrayList())
+        }
+
         mRepository.requestStoriesListUpdate(20,
                 type,
                 filter,
@@ -323,6 +326,14 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     fun onVotersClick(context: Context?, it: StoryWithComments) {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
+    }
+
+    override fun toString(): String {
+        return "StoriesViewModel(type=$type, isVisibleToUser=$isVisibleToUser, filter=$filter)"
+    }
+
+    fun onDestroy() {
+        mRepository.getStories(type, filter).removeObserver(this)
     }
 
 }

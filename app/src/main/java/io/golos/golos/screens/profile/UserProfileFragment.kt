@@ -19,6 +19,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.screens.GolosActivity.Companion.CHANGE_THEME
+import io.golos.golos.screens.MainActivity
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
@@ -78,7 +80,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         val settingsButton = v.findViewById<View>(R.id.settings_btn)
         settingsButton.setOnClickListener({
             val i = Intent(activity!!, SettingActivity::class.java)
-            activity?.startActivity(i)
+            activity?.startActivityForResult(i,CHANGE_THEME)
         })
         return v
     }

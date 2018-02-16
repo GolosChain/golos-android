@@ -6,11 +6,13 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.view.View
 import io.golos.golos.R
+
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showSnackbar
 import java.util.*
 
@@ -26,6 +28,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
         pager.offscreenPageLimit = 4
+
         val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
         bottomNavView.setOnNavigationItemSelectedListener {
             when (it.itemId) {
@@ -58,6 +61,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
             }
         }
         Repository.get.lastCreatedPost().observe(this, this)
+
     }
 
     override fun onChanged(it: CreatePostResult?) {
@@ -87,5 +91,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         val STORIES_FRAGMENT_POITION = 0
         val FILTERED_BY_TAG_STORIES = 1
         val PROFILE_FRAGMENT_POITION = 3
+
     }
 }

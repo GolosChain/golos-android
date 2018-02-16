@@ -19,7 +19,6 @@ import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.App
 import io.golos.golos.R
-import io.golos.golos.R.raw.story
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
@@ -185,7 +184,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
                 } else {
                     mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
-                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.gray_4f))
+                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
                 else mFab.hide()
@@ -290,7 +289,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_20dp), null, null, null)
+        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
         mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
         mVotesIv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
         mCommentsCountBtn.visibility = View.INVISIBLE
@@ -301,6 +300,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
         }
+        mSwipeToRefresh.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({
             if (mViewModel.canShowVoteDialog) {
@@ -315,7 +315,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     dialog.show(fragmentManager, null)
                 } else mViewModel.onStoryVote(story, -1)
             } else {
-                mViewModel.onVoteRejected(story)
+                mViewModel.onVoteRejected()
             }
         })
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
@@ -330,7 +330,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     dialog.show(fragmentManager, null)
                 } else mViewModel.onStoryVote(it, -1)
             } else {
-                mViewModel.onVoteRejected(story)
+                mViewModel.onVoteRejected()
             }
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
@@ -343,6 +343,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel.onDestroy()
     }
 
 

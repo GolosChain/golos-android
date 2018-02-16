@@ -6,6 +6,6 @@
     android:minHeight="0dp"
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
-    android:textSize="@dimen/font_medium">
+    android:textSize="@dimen/font_regular">
 
 </TextView>

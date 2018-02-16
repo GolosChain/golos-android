@@ -5,21 +5,26 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
+import android.support.annotation.LayoutRes
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
+import android.support.v7.widget.SearchView
 import android.text.Html
 import android.text.Spanned
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
@@ -53,10 +58,37 @@ fun Cursor.getInt(columnName: String): Int {
     return this.getInt(this.getColumnIndex(columnName))
 }
 
+fun Activity.restart() {
+    this.recreate()
+}
+
+fun <T : View> ViewGroup.inflate(@LayoutRes layoutResId: Int): T {
+    return LayoutInflater.from(this.context).inflate(layoutResId, this, false) as T
+}
+
 fun Cursor.getDouble(columnName: String): Double {
     return this.getDouble(this.getColumnIndex(columnName))
 }
 
+fun String.asIntentToShowUrl(): Intent {
+    val i = Intent(Intent.ACTION_VIEW)
+    i.data = Uri.parse(this);
+    return i
+}
+
+fun TextView.setTextColorCompat(@ColorRes colorId: Int) {
+    this.setTextColor(ContextCompat.getColor(this.context, colorId))
+}
+
+fun Activity.getColorCompat(@ColorRes coloId: Int): Int {
+    return ContextCompat.getColor(this, coloId)
+}
+fun Fragment.getColorCompat(@ColorRes coloId: Int): Int {
+    return ContextCompat.getColor(activity!!, coloId)
+}
+fun View.getColorCompat(@ColorRes coloId: Int): Int {
+    return ContextCompat.getColor(context!!, coloId)
+}
 fun Fragment.showProgressDialog(): ProgressDialog {
     val dialog = ProgressDialog(context, R.style.AppCompatAlertDialogStyle)
     dialog.isIndeterminate = true
@@ -92,6 +124,15 @@ fun ViewGroup.setFullAnimationToViewGroup() {
 fun Context.hideKeyboard(currentFocus: View) {
     val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(currentFocus.windowToken, 0)
+}
+
+fun SearchView.setTextColorHint(@ColorRes coloId: Int){
+    try {
+        (this.findViewById<EditText>(android.support.v7.appcompat.R.id.search_src_text) as EditText)
+                .setHintTextColor(this.getColorCompat(R.color.text_color_white_black))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
 
 val Account.avatarPath: String?
@@ -179,6 +220,7 @@ fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
     return AppCompatResources.getDrawable(context, resId)!!
 }
 
+
 fun CommentOperation.getTags(): List<String> {
     val out = ArrayList<String>()
     try {
@@ -203,3 +245,7 @@ fun CommentOperation.getTags(): List<String> {
 fun <E> List<out E>.toArrayList(): ArrayList<E> {
     return ArrayList(this)
 }
+
+
+
+public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0

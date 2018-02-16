@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
     android:fillViewport="true">
 
     <LinearLayout
@@ -33,6 +32,7 @@
             android:imeOptions="flagNavigateNext"
             android:inputType="textNoSuggestions"
             android:lines="1"
+            android:digits="qwertyuiopasdfghjklzxcvbnm_-1234567890"
             android:maxLength="16"
             app:backgroundTint="#DBDBDB" />
 
@@ -70,7 +70,7 @@
                 style="@style/BarcodeButton"
                 android:layout_marginEnd="@dimen/margin_material_half"
                 android:layout_toLeftOf="@+id/login_help_posting"
-                app:srcCompat="@drawable/ic_barcode_24dp_gray" />
+                app:srcCompat="@drawable/ic_barcode_24dp" />
 
             <ImageButton
                 android:id="@+id/login_help_posting"
@@ -107,7 +107,7 @@
                 style="@style/BarcodeButton"
                 android:layout_marginEnd="@dimen/margin_material_half"
                 android:layout_toLeftOf="@id/login_help_active"
-                app:srcCompat="@drawable/ic_barcode_24dp_gray" />
+                app:srcCompat="@drawable/ic_barcode_24dp" />
 
             <ImageButton
                 android:id="@+id/login_help_active"
@@ -130,7 +130,7 @@
             android:layout_marginTop="32dp"
             android:text="@string/enter_with_active_key"
             android:textAllCaps="false"
-            android:textColor="@color/gray_7d"
+            android:textColor="@color/textColorP"
             android:textSize="@dimen/font_medium" />
 
         <android.support.v7.widget.AppCompatButton
@@ -166,7 +166,7 @@
             android:padding="0dp"
             android:paddingTop="@dimen/material_big"
             android:textAllCaps="false"
-            android:textColor="#7d7d7d"
+            android:textColor="@color/textColorP"
             android:textSize="@dimen/font_regular" />
 
         <android.support.v7.widget.AppCompatButton
@@ -178,6 +178,7 @@
             android:gravity="center_horizontal|top"
             android:minHeight="0dp"
             android:padding="0dp"
+
             android:paddingTop="@dimen/margin_material_half"
             android:textAllCaps="false"
             android:textSize="@dimen/font_regular" />

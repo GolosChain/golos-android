@@ -2,8 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:layout_height="match_parent">
 
 
     <android.support.design.widget.AppBarLayout
@@ -24,9 +23,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:background="@android:color/white"
+                android:background="@color/story_toolbar_color"
                 app:elevation="1dp"
-                app:navigationIcon="@drawable/ic_chevron_left_gray_32dp" />
+                app:navigationIcon="@drawable/ic_chevron_left_24dp" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -35,11 +34,11 @@
 
                 <com.makeramen.roundedimageview.RoundedImageView
                     android:id="@+id/avatar_iv"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="@dimen/margin_material_half"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:clickable="true"
                     android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:riv_corner_radius="30dp"
@@ -49,6 +48,7 @@
                     android:id="@+id/user_name"
                     style="@style/TitleUserNameStyle"
                     android:clickable="true"
+                    android:textSize="@dimen/font_small"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
                     app:layout_constraintTop_toTopOf="@id/avatar_iv" />
 
@@ -58,15 +58,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:drawablePadding="4dp"
+                    android:textColor="@color/textColorP"
+                    android:textSize="@dimen/font_small"
                     android:visibility="invisible"
                     app:layout_constraintStart_toEndOf="@id/user_name"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="@id/user_name" />
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/blog_name_tv"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
                     android:clickable="true"
+                    android:includeFontPadding="false"
+                    android:padding="0dp"
+                    android:textSize="@dimen/font_small"
                     app:layout_constraintStart_toEndOf="@id/avatar_iv"
+                    android:layout_marginTop="-3dp"
                     app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
                 <android.support.v7.widget.AppCompatImageButton
@@ -106,10 +112,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/margin_material"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:textAllCaps="true" />
-
+                    android:textSize="16sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler"
@@ -120,7 +123,7 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/additional_images_recycler"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="64dp"
                     android:visibility="gone" />
 
                 <com.wefika.flowlayout.FlowLayout
@@ -154,22 +157,22 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:paddingBottom="3dp"
                         android:id="@+id/votes_btn"
                         style="@style/StoryBottomControlButton"
-                        android:background="?attr/selectableItemBackground" />
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingBottom="3dp" />
 
                     <TextView
-                        android:layout_marginStart="@dimen/margin_material_half"
                         android:id="@+id/comments_btn"
                         style="@style/StoryBottomControlButton"
+                        android:layout_marginStart="@dimen/margin_material_half"
                         android:background="?attr/selectableItemBackground" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/height_of_gray_break"
-                    android:background="#f0f3f6" />
+                    android:background="@color/delimeter_color_feed" />
 
 
                 <android.support.constraint.ConstraintLayout
@@ -198,7 +201,7 @@
                         android:layout_marginTop="@dimen/material_big"
                         android:paddingEnd="@dimen/margin_material"
                         android:text="@string/published_ib"
-                        android:textColor="@color/gray_7d"
+                        android:textColor="@color/textColorP"
                         android:textSize="@dimen/font_small"
                         app:layout_constraintEnd_toStartOf="@id/subscribe_tag_btn"
                         app:layout_constraintStart_toEndOf="@id/tag_avatar"
@@ -211,8 +214,9 @@
                         android:clickable="true"
                         android:gravity="start"
                         android:paddingEnd="@dimen/margin_material"
-                        android:textColor="#333333"
+                        android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_medium"
+
                         app:layout_constraintEnd_toStartOf="@id/subscribe_tag_btn"
                         app:layout_constraintStart_toStartOf="@id/published_in"
                         app:layout_constraintTop_toBottomOf="@id/published_in" />
@@ -235,15 +239,15 @@
 
                     <com.makeramen.roundedimageview.RoundedImageView
                         android:id="@+id/avatar_in_follow_lo_iv"
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
+                        android:layout_width="@dimen/story_tag_user_avatar_size"
+                        android:layout_height="@dimen/story_tag_user_avatar_size"
                         android:clickable="true"
                         android:scaleType="centerCrop"
                         app:layout_constraintBottom_toTopOf="@id/bottom"
                         app:layout_constraintStart_toStartOf="@id/tag_avatar"
                         app:layout_constraintTop_toTopOf="@id/delimeter"
                         app:riv_oval="true"
-                        app:srcCompat="@drawable/ic_person_gray_80dp" />
+                        app:srcCompat="@drawable/ic_person_gray_52dp" />
 
                     <TextView
                         android:id="@+id/author_name_in_follow_lo"
@@ -252,7 +256,7 @@
                         android:clickable="true"
                         android:gravity="start"
                         android:paddingEnd="@dimen/margin_material"
-                        android:textColor="#333333"
+                        android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_medium"
                         app:layout_constraintBottom_toTopOf="@id/bottom"
                         app:layout_constraintEnd_toStartOf="@id/follow_btn"
@@ -285,7 +289,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/height_of_gray_break"
-                    android:background="#f0f3f6" />
+                    android:background="@color/delimeter_color_feed" />
 
                 <TextView
                     android:id="@+id/comments_tv"
@@ -296,7 +300,7 @@
                     android:layout_marginTop="@dimen/margin_material"
                     android:drawablePadding="@dimen/margin_material_half"
                     android:text="@string/comments"
-                    android:textSize="20sp"
+                    android:textSize="@dimen/font_medium"
                     android:visibility="gone" />
 
                 <android.support.v7.widget.RecyclerView
@@ -316,7 +320,7 @@
                     android:layout_marginTop="@dimen/margin_material"
                     android:text="@string/no_comments"
                     android:textColor="@color/gray_1"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/font_medium"
                     android:visibility="gone" />
             </LinearLayout>
 

@@ -18,7 +18,7 @@ import io.golos.golos.screens.widgets.GolosFragment
 /**
  * Created by yuri on 08.12.17.
  */
-class PurseFragment : GolosFragment(), Observer<UserAccountModel> {
+class WalletFragment : GolosFragment(), Observer<UserAccountModel> {
     private lateinit var mGolosnumTv: TextView
     private lateinit var mGolosPoweNumrTv: TextView
     private lateinit var mGbgNumTv: TextView

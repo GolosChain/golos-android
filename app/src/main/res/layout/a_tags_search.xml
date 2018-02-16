@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@android:color/white"
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
@@ -19,14 +18,14 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:collapsedTitleGravity="center_horizontal|top"
-            app:contentScrim="?attr/colorPrimary"
+            app:contentScrim="@color/white_black_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
+                android:background="@color/white_black_toolbar_color"
                 android:padding="0dp"
                 android:visibility="visible"
                 app:elevation="1dp"
@@ -63,7 +62,8 @@
                         app:iconifiedByDefault="false"
                         app:queryHint="@string/golos_search"
                         app:searchIcon="@null"
-                        app:submitBackground="@color/gray_7d" />
+
+                        app:submitBackground="@color/textColorP" />
                 </LinearLayout>
 
             </android.support.v7.widget.Toolbar>
@@ -89,7 +89,7 @@
                 android:layout_margin="@dimen/margin_material"
                 android:text="@string/recommended"
                 android:textAllCaps="true"
-                android:textColor="@color/gray_7d" />
+                android:textColor="@color/textColorP" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler"

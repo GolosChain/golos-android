@@ -31,8 +31,8 @@ class SplashActivity : GolosActivity(), Observer<ReadyStatus> {
             mProgress.setViewGone()
             if (it.error == null) {
                 val i = Intent(this, MainActivity::class.java)
-                startActivity(i)
                 finish()
+                startActivity(i)
             } else {
                 if (this.isFinishing || this.isDestroyed) return
                 AlertDialog.Builder(this)

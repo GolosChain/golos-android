@@ -180,7 +180,7 @@ class StoryViewModel : ViewModel() {
         }
     }
 
-    fun onVoteRejected(story: Int) {
+    fun onVoteRejected() {
         showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
@@ -267,5 +267,12 @@ class StoryViewModel : ViewModel() {
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
         UsersListActivity.startToShowVoters(activity, it.story.id)
+    }
+
+    fun onDestroy() {
+        mLiveData.removeSource(mRepository.getStories(feedType, filter))
+        mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
+        mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
+        mLiveData.removeSource(mRepository.getUserSubscribedTags())
     }
 }

@@ -14,6 +14,8 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.tags.adapters.SearchTagAdapter
 import io.golos.golos.screens.tags.viewmodel.TagSearchViewModel
 import io.golos.golos.screens.tags.viewmodel.TagSearchViewModelScreenState
+import io.golos.golos.utils.setTextColorHint
+
 
 /**
  * Created by yuri on 10.01.18.
@@ -57,6 +59,7 @@ class TagSearchActivity : GolosActivity(), Observer<TagSearchViewModelScreenStat
     private fun setup() {
         mSearchV = findViewById(R.id.search_view)
         mSearchV.setFocusable(false)
+        mSearchV.setTextColorHint(R.color.textColorP)
         mSearchV.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 return false
@@ -67,6 +70,7 @@ class TagSearchActivity : GolosActivity(), Observer<TagSearchViewModelScreenStat
                 return true
             }
         })
+
         mSearchV.setOnCloseListener {
             mViewModel.onSearchEnd()
             false

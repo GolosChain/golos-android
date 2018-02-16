@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item  android:drawable="@drawable/rect_gray_400dp" />
+    <item
+
+        android:drawable="@drawable/ic_image_black_42dp"
+        android:gravity="center" />
+</layer-list>

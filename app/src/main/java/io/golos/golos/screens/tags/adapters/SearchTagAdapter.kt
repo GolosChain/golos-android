@@ -7,6 +7,7 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.GolosViewHolder
+import io.golos.golos.utils.getVectorDrawable
 
 /**
  * Created by yuri on 06.01.18.
@@ -52,6 +53,9 @@ class SearchTagAdapter(var onTagClick: (LocalizedTag) -> Unit) : RecyclerView.Ad
 class TagWithSearchIconVh(parent: ViewGroup) : GolosViewHolder(R.layout.vh_tag_search, parent) {
     private val mTagNameTv = itemView.findViewById<TextView>(R.id.text)
 
+    init {
+        mTagNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_search_icon_gray_24dp), null, null, null)
+    }
     var state: SearchTagState? = null
         set(value) {
             field = value
@@ -59,6 +63,7 @@ class TagWithSearchIconVh(parent: ViewGroup) : GolosViewHolder(R.layout.vh_tag_s
                 mTagNameTv.setOnClickListener(null)
                 mTagNameTv.text = ""
             } else {
+
                 mTagNameTv.text = field?.tag?.getLocalizedName()?.capitalize() ?: ""
                 mTagNameTv.setOnClickListener { field?.onTagClickListener?.invoke(this) }
             }

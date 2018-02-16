@@ -1,11 +1,9 @@
 package io.golos.golos.screens.widgets
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.v4.app.ActivityOptionsCompat
 import android.view.View
 import android.view.Window
 import android.view.WindowManager

@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:layout_above="@id/bottom_lo"
     android:animateLayoutChanges="true"
-    android:background="@android:color/white"
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
@@ -26,7 +25,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
+                android:background="@color/white_black_toolbar_color"
                 android:visibility="visible"
                 app:elevation="1dp"
                 app:navigationIcon="@drawable/ic_clear_gray_24dp"
@@ -57,13 +56,15 @@
         android:id="@+id/progress"
         style="@style/FullscreenProgressStyle"
         android:visibility="gone" />
+
     <TextView
         android:id="@+id/nothing_tv"
-        android:visibility="gone"
-        android:paddingTop="52dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:padding="@dimen/margin_material"
-        android:text="@string/nothing_here"/>
+        android:paddingTop="52dp"
+        android:text="@string/nothing_here"
+        android:textColor="@color/textColorP"
+        android:visibility="gone" />
 </android.support.design.widget.CoordinatorLayout>

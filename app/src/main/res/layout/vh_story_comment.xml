@@ -8,8 +8,8 @@
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
-        android:layout_width="@dimen/avatar_size_story"
-        android:layout_height="@dimen/avatar_size_story"
+        android:layout_width="@dimen/feed_story_authe_avatar_size"
+        android:layout_height="@dimen/feed_story_authe_avatar_size"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material"
         android:clickable="true"
@@ -27,7 +27,7 @@
         android:layout_marginTop="@dimen/margin_material"
         android:clickable="true"
 
-        android:textColor="#3f4646"
+        android:textColor="@color/textColorP"
         android:textSize="@dimen/font_medium"
         app:layout_constraintLeft_toRightOf="@id/avatar_iv"
         app:layout_constraintTop_toTopOf="parent" />
@@ -73,7 +73,8 @@
             android:layout_marginEnd="@dimen/margin_material"
             android:layout_marginStart="@dimen/margin_material"
             android:layout_marginTop="6dp"
-            android:textSize="@dimen/font_medium"
+            android:textColor="@color/textColorP"
+            android:textSize="@dimen/font_small"
             android:visibility="gone">
 
         </TextView>
@@ -142,8 +143,8 @@
         android:paddingStart="24dp"
         android:text="@string/answer"
         android:textAllCaps="false"
-        android:textColor="@color/gray_4f"
-        android:textSize="@dimen/font_regular"
+        android:textColor="@color/textColorP"
+        android:textSize="@dimen/font_small"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/barrier"
         app:layout_constraintRight_toRightOf="parent"
