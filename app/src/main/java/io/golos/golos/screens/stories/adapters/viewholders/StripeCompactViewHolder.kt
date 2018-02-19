@@ -10,14 +10,22 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.stories.adapters.StripeWrapper
-import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.utils.*
+import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.getVectorDrawable
+import io.golos.golos.utils.setTextColorCompat
+import io.golos.golos.utils.setViewGone
 
-class StripeCompactViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
+class StripeCompactViewHolder(parent: ViewGroup,
+                              private val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onCardClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onShareClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onUserClick: (RecyclerView.ViewHolder) -> Unit,
+                              private val onVotersClick: (RecyclerView.ViewHolder) -> Unit)
+    : StoriesViewHolder(R.layout.vh_stripe_compact_size, parent) {
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
     private val mBlogNameTv: TextView = itemView.findViewById(R.id.blog_name_tv)
@@ -31,116 +39,106 @@ class StripeCompactViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
 
 
-    private val mGlide = Glide.with(parent.context)
-
     init {
         if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
-        if (errorDrawable == null) errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error_jpeg)!!
+        if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error_jpeg)!!
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
+
+        mCommentsButton.setOnClickListener({ onCommentsClick(this) })
+        mCommentsIv.setOnClickListener({ onCommentsClick(this) })
+        mUpvoteValue.setOnClickListener({ onUpvoteClick(this) })
+        mUpvoteIv.setOnClickListener({ onUpvoteClick(this) })
+        mBlogNameTv.setOnClickListener({ onBlogClick(this) })
+        mUserNameTv.setOnClickListener({ onUserClick(this) })
+
+        mTitleTv.setOnClickListener({ onCardClick(this) })
+        mMainImageBig.setOnClickListener({ onCardClick(this) })
+        itemView.setOnClickListener({ onCardClick(this) })
     }
 
-    var state: StripeWrapper? = null
-        set(value) {
-            field = value
-            if (field != null) {
-                val wrapper = field?.stripe?.rootStory() ?: return
+    override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
+        super.handlerStateChange(newState, oldState)
 
-                setUpTheme()
+        val wrapper = newState?.stripe?.rootStory()
 
-                mCommentsButton.setOnClickListener({ field!!.onCommentsClick(this) })
-                mCommentsIv.setOnClickListener({ field!!.onCommentsClick(this) })
-                mUpvoteValue.setOnClickListener({ field!!.onUpvoteClick(this) })
-                mUpvoteIv.setOnClickListener({ field!!.onUpvoteClick(this) })
-                mBlogNameTv.setOnClickListener({ field!!.onBlogClick(this) })
-                mUserNameTv.setOnClickListener({ field!!.onUserClick(this) })
+        if (newState != null && wrapper != null) {
 
-                mTitleTv.setOnClickListener({ field!!.onCardClick(this) })
-                mMainImageBig.setOnClickListener({ field!!.onCardClick(this) })
-                itemView.setOnClickListener({ field!!.onCardClick(this) })
-
-                mUserNameTv.text = wrapper.author
-                if (wrapper.firstRebloggedBy.isNotEmpty()) {
-                    mRebloggedByTv.text = wrapper.firstRebloggedBy
-                } else {
-                    mRebloggedByTv.visibility = View.GONE
-                }
-                if (wrapper.categoryName.startsWith("ru--")) {
-                    mBlogNameTv.text = Translit.lat2Ru(wrapper.categoryName.substring(4))
-                } else {
-                    mBlogNameTv.text = wrapper.categoryName
-                }
-
-                mTitleTv.text = wrapper.title.toLowerCase().capitalize()
-                mUpvoteValue.text = "$${String.format("%.3f", wrapper.payoutInDollars)}"
-
-                mCommentsButton.text = wrapper.commentsCount.toString()
-
-                if (wrapper.isUserUpvotedOnThis) {
-                    mUpvoteIv.setImageDrawable(userVotedvotedDrarawble)
-                    mUpvoteValue.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                } else {
-                    mUpvoteIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp))
-                    mUpvoteValue.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
-                }
-                if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
-                    mVotingProgress.visibility = View.VISIBLE
-                    mUpvoteValue.visibility = View.GONE
-                    mUpvoteIv.visibility = View.GONE
-                } else {
-                    mVotingProgress.visibility = View.GONE
-                    mUpvoteValue.visibility = View.VISIBLE
-                    mUpvoteIv.visibility = View.VISIBLE
-                }
-
-                if (field?.isImagesShown == false) {
-                    mMainImageBig.setViewGone()
-                    return
-                }
-
-                if (field?.stripe?.rootStory()?.images?.isEmpty() != false) {
-                    mMainImageBig.setViewGone()
-                } else {
-                    mMainImageBig.setViewVisible()
-
-                    val image = (if (wrapper.images.size > 0) wrapper.images[0] else (wrapper
-                            .parts
-                            .find { it is ImageRow })
-                            ?.let { (it as ImageRow).src }) ?: return
-
-                    val error = mGlide.load(R.drawable.error_jpeg)
-                    var nextImage: RequestBuilder<Drawable>? = null
-                    if (wrapper.images.size > 1) {
-                        nextImage = mGlide.load(wrapper.images[1]).error(error)
-                    }
-
-                    mGlide.load(image)
-                            .error(nextImage ?: error)
-                            .apply(RequestOptions()
-                                    .placeholder(errorDrawable)
-                                    .centerCrop()
-                            )
-                            .into(mMainImageBig)
-                }
+            if (wrapper.isUserUpvotedOnThis) {
+                mUpvoteIv.setImageDrawable(userVotedvotedDrarawble)
+                mUpvoteValue.setTextColorCompat(R.color.upvote_green)
+            } else {
+                mUpvoteIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp))
+                mUpvoteValue.setTextColorCompat(R.color.textColorP)
+            }
+            if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+                mVotingProgress.visibility = View.VISIBLE
+                mUpvoteValue.visibility = View.GONE
+                mUpvoteIv.visibility = View.GONE
+            } else {
+                mVotingProgress.visibility = View.GONE
+                mUpvoteValue.visibility = View.VISIBLE
+                mUpvoteIv.visibility = View.VISIBLE
             }
         }
+    }
 
-    private fun setUpTheme() {
+    override fun handleImagePlacing(newState: StripeWrapper?, imageView: ImageView) {
+        super.handleImagePlacing(newState, imageView)
+        if (newState?.stripe?.rootStory()?.images?.isEmpty() == true){
+            mMainImageBig.setViewGone()
+        }
+    }
+
+    override fun getErrorDrawable(): Drawable {
+        return errorDrawableS!!
+    }
+
+    override fun getMainImage(): ImageView {
+        return mMainImageBig
+    }
+
+    override fun getTitleTv(): TextView {
+        return mTitleTv
+    }
+
+    override fun getCommentsTv(): TextView {
+        return mCommentsButton
+    }
+
+    override fun getUserNameTv(): TextView {
+        return mUserNameTv
+    }
+
+    override fun getReblogedByTv(): TextView {
+        return mRebloggedByTv
+    }
+
+    override fun getBlogNameTv(): TextView {
+        return mBlogNameTv
+    }
+
+    override fun getDelimeterV(): View {
+        return mDelimeter
+    }
+
+    override fun getUpvoteText(): TextView {
+        return mUpvoteValue
+    }
+
+    override fun showImageIfNotImageFirst(): Boolean {
+        return true
+    }
+
+    override fun setUpTheme() {
+        super.setUpTheme()
         mCommentsIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp))
-        mUpvoteValue.setTextColorCompat(R.color.textColorP)
-        mCommentsButton.setTextColorCompat(R.color.textColorP)
-        mTitleTv.setTextColorCompat(R.color.stripe_title)
-        mUserNameTv.setTextColorCompat(R.color.textColorP)
-        mRebloggedByTv.setTextColorCompat(R.color.stripe_subtitle)
-        mBlogNameTv.setTextColorCompat(R.color.stripe_subtitle)
-        mDelimeter.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))
     }
 
     companion object {
-        fun inflate(parent: ViewGroup): View = LayoutInflater.from(parent.context).inflate(R.layout.vh_stripe_compact_size, parent, false)
-        @JvmStatic
-        var errorDrawable: Drawable? = null
 
+        @JvmStatic
+        var errorDrawableS: Drawable? = null
         @JvmStatic
         var userVotedvotedDrarawble: Drawable? = null
     }

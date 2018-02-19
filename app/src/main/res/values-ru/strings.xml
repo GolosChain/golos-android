@@ -142,6 +142,7 @@
     <string name="you_must_have_more_repo_for_action">У вас недостаточно репутации для действия</string>
     <string name="never">Никогда</string>
     <string name="search_in_golos">Поиск в Golos.io</string>
+    <string name="show_nsfw_images_mode">Контент для взрослых</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

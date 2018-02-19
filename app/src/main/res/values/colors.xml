@@ -21,6 +21,7 @@
     <color name="screen_background">#e8edf1</color>
     <color name="story_btn_green">#3da449</color>
     <color name="corall_red">#ff6464</color>
+    <color name="stripe_image_back">@android:color/transparent</color>
     <color name="drawer_background">#e9edf2</color>
     <color name="upvote_gray">#3f4346</color>
     <color name="gray_7d">#7D7D7D</color>

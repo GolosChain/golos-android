@@ -53,7 +53,7 @@
         <item name="android:lines">1</item>
         <item name="android:textColor">@color/textColorP</item>
         <item name="android:textSize">17sp</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
     </style>
 
@@ -70,7 +70,7 @@
         <item name="android:paddingBottom">4dp</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:textColor">@color/textColorP</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textSize">16sp</item>
     </style>
 

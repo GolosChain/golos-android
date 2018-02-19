@@ -16,11 +16,11 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
-import io.golos.golos.screens.settings.UserSettings
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
@@ -95,7 +95,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 onTagClick = { mViewModel?.onBlogClick(context, it) },
                 onUserClick = { mViewModel?.onUserClick(context, it) },
                 onVotersClick = { mViewModel?.onVotersClick(context, it) },
-                feedCellSettings = getFeedModeSettings())
+                feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
+                        true,
+                        NSFWStrategy(true, Pair(false, ""))))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -121,14 +123,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
         mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
 
-        UserSettings.isStoriesCompactMode().removeObservers(this)
-        UserSettings.isImagesShown().removeObservers(this)
-
-        val observer = Observer<Boolean> { _ ->
-            mAdapter.feedCellSettings = getFeedModeSettings()
+        val observer = Observer<FeedCellSettings> { _ ->
+            mAdapter.feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
+                    true,
+                    NSFWStrategy(true, Pair(false, "")))
         }
-        UserSettings.isStoriesCompactMode().observe(this, observer)
-        UserSettings.isImagesShown().observe(this, observer)
+
+        mViewModel?.cellViewSettingLiveData?.observe(activity as LifecycleOwner, observer)
     }
 
     override fun onChanged(t: StoriesViewState?) {
@@ -222,9 +223,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         super.onViewStateRestored(savedInstanceState)
         mSavedPosition = savedInstanceState?.getInt("recyclerState")
     }
-
-    private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,
-            UserSettings.isImagesShown().value == true)
 
     fun getArgs(): Pair<FeedType, StoryFilter?> {
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType

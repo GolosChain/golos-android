@@ -55,6 +55,7 @@ class SettingActivity : GolosActivity() {
         setUpNighMode()
         setUpCompactMode()
         setUpNoImagesMode()
+        setUpNSFWMode()
 
     }
 
@@ -84,6 +85,14 @@ class SettingActivity : GolosActivity() {
                     startActivity(i)
                 }
             }
+        }
+    }
+
+    private fun setUpNSFWMode(){
+        val switch = findViewById<SwitchCompat>(R.id.show_nsfw_images_switch)
+        if (UserSettings.isNSFWShow().value == true) switch.isChecked = true
+        switch.setOnClickListener {
+            UserSettings.setIsNSFWShown(switch.isChecked)
         }
     }
 

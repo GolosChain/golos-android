@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="52dp"
-                android:background="@color/splash_back"
+                android:background="@color/white_black_toolbar_color"
                 android:orientation="vertical"
                >
 

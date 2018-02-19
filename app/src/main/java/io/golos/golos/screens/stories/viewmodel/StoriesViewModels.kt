@@ -11,8 +11,11 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.ProfileActivity
+import io.golos.golos.screens.settings.UserSettings
 import io.golos.golos.screens.stories.FilteredStoriesActivity
+import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.userslist.UsersListActivity
@@ -136,15 +139,21 @@ class PromoViewModel : StoriesViewModel() {
 abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     protected abstract val type: FeedType
     protected val mStoriesLiveData: MutableLiveData<StoriesViewState> = MutableLiveData()
+    protected val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
     protected var isVisibleToUser: Boolean = false
     protected var filter: StoryFilter? = null
     protected lateinit var internetStatusNotifier: InternetStatusNotifier
+    private var mObserver: Observer<Boolean>? = null
 
     val storiesLiveData: LiveData<StoriesViewState>
         get() {
             return mStoriesLiveData
+        }
+    val cellViewSettingLiveData: LiveData<FeedCellSettings>
+        get() {
+            return mFeedSettingsLiveData
         }
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
@@ -158,6 +167,16 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
         mRepository.getStories(type, filter).observeForever(this)
+
+
+        if (mObserver == null) {
+            mObserver = Observer {
+                mFeedSettingsLiveData.value = getFeedModeSettings()
+            }
+            UserSettings.isStoriesCompactMode().observeForever(mObserver ?: return)
+            UserSettings.isImagesShown().observeForever(mObserver ?: return)
+            UserSettings.isNSFWShow().observeForever(mObserver ?: return)
+        }
     }
 
     override fun onChanged(t: StoriesFeed?) {
@@ -214,6 +233,11 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                         R.string.no_internet_connection))
     }
 
+    private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,
+            UserSettings.isImagesShown().value == true,
+            NSFWStrategy(UserSettings.isNSFWShow().value == true,
+                    Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName ?: "")))
+
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
@@ -222,7 +246,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         //  if (isUpdating.get())return
         isUpdating.set(true)
-        if ( mStoriesLiveData.value?.isLoading == false){
+        if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true,
                     mStoriesLiveData.value?.showRefreshButton == true,
                     mStoriesLiveData.value?.items ?: ArrayList())
@@ -334,6 +358,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     fun onDestroy() {
         mRepository.getStories(type, filter).removeObserver(this)
+        if (mObserver != null) {
+            UserSettings.isStoriesCompactMode().removeObserver(mObserver ?: return)
+            UserSettings.isImagesShown().removeObserver(mObserver ?: return)
+            UserSettings.isNSFWShow().removeObserver(mObserver ?: return)
+            mObserver = null
+        }
     }
 
 }

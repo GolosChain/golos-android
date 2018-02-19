@@ -12,10 +12,12 @@ object UserSettings {
     private val sharedPrefName = "UserSettings"
     private val mCompactLiveData = MutableLiveData<Boolean>()
     private val mShowImageLiveData = MutableLiveData<Boolean>()
+    private val mShowNSFWLiveData = MutableLiveData<Boolean>()
 
     fun setUp() {
         mCompactLiveData.value = App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
         mShowImageLiveData.value = App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isShown", true)
+        mShowNSFWLiveData.value = App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("showNsfw", false)
     }
 
     fun setStoriesCompactMode(isCompact: Boolean) {
@@ -25,6 +27,15 @@ object UserSettings {
 
     fun isStoriesCompactMode(): LiveData<Boolean> {
         return mCompactLiveData
+    }
+
+    fun isNSFWShow(): LiveData<Boolean> {
+        return mShowNSFWLiveData
+    }
+
+    fun setIsNSFWShown(isShown: Boolean) {
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("showNsfw", isShown).apply()
+        mShowNSFWLiveData.value = isShown
     }
 
     fun setUserVotedForApp(isVotedForApp: Boolean) {
@@ -51,6 +62,7 @@ object UserSettings {
     fun isImagesShown(): LiveData<Boolean> {
         return mShowImageLiveData
     }
+
 
     fun setNightMode(isNight: Boolean) {
         App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("isNight", isNight).apply()
