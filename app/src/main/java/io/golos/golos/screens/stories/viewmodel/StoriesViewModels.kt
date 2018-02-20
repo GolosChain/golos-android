@@ -22,6 +22,7 @@ import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -260,6 +261,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     open fun onCardClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
+
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
@@ -331,7 +333,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                 GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
-    fun onBlogClick(context: Context?, story: StoryWithComments) {
+    fun onBlogClick(story: StoryWithComments, context: Context?) {
 
         context?.let {
             var feedType: FeedType = type
@@ -344,11 +346,11 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
-    fun onUserClick(context: Context?, it: StoryWithComments) {
+    fun onUserClick(it: StoryWithComments, context: Context?) {
         ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
 
-    fun onVotersClick(context: Context?, it: StoryWithComments) {
+    fun onVotersClick(it: StoryWithComments, context: Context?) {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
 

@@ -2,7 +2,6 @@ package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -15,16 +14,17 @@ import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.stories.adapters.StripeWrapper
+import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
 
 class StripeFullViewHolder(parent: ViewGroup,
-                           private val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onCardClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onShareClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                           private val onVotersClick: (RecyclerView.ViewHolder) -> Unit
+                           private val onUpvoteClick: HolderClickListener,
+                           private val onCardClick: HolderClickListener,
+                           private val onCommentsClick: HolderClickListener,
+                           private val onShareClick: HolderClickListener,
+                           private val onBlogClick: HolderClickListener,
+                           private val onUserClick: HolderClickListener,
+                           private val onVotersClick: HolderClickListener
 ) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent) {
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
@@ -52,19 +52,19 @@ class StripeFullViewHolder(parent: ViewGroup,
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
         mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
 
-        mCommentsButton.setOnClickListener({ onCommentsClick(this) })
-        mShareBtn.setOnClickListener({ onShareClick(this) })
-        mUpvoteBtn.setOnClickListener({ onUpvoteClick(this) })
-        mBlogNameTv.setOnClickListener({ onBlogClick(this) })
-        mAvatar.setOnClickListener({ onUserClick(this) })
-        mUserNameTv.setOnClickListener({ onUserClick(this) })
-        mUpvoteBtn.setOnClickListener({ onUpvoteClick(this) })
-        mVotersBtn.setOnClickListener({ onVotersClick(this) })
+        mCommentsButton.setOnClickListener({ onCommentsClick.onClick(this) })
+        mShareBtn.setOnClickListener({ onShareClick.onClick(this) })
+        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
+        mAvatar.setOnClickListener({ onUserClick.onClick(this) })
+        mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
+        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mVotersBtn.setOnClickListener({ onVotersClick.onClick(this) })
 
-        mTitleTv.setOnClickListener({ onCardClick(this) })
-        mBodyTextMarkwon.setOnClickListener({ onCardClick(this) })
-        mMainImageBig.setOnClickListener({ onCardClick(this) })
-        itemView.setOnClickListener({ onCardClick(this) })
+        mTitleTv.setOnClickListener({ onCardClick.onClick(this) })
+        mBodyTextMarkwon.setOnClickListener({ onCardClick.onClick(this) })
+        mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
+        itemView.setOnClickListener({ onCardClick.onClick(this) })
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -99,17 +99,24 @@ class StripeFullViewHolder(parent: ViewGroup,
             mVotersBtn.text = wrapper.votesNum.toString()
             if (newState.stripe.rootStory()?.type != ItemType.IMAGE_FIRST) {
                 mBodyTextMarkwon.setViewVisible()
+                mMainImageBig.setViewGone()
+                mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
                 mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
+            } else {
+                mBodyTextMarkwon.setViewGone()
             }
         }
     }
-
 
     override fun setUpTheme() {
         super.setUpTheme()
         mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
         mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
+    }
+
+    override fun getMainText(): TextView? {
+        return mBodyTextMarkwon
     }
 
     override fun getErrorDrawable(): Drawable {

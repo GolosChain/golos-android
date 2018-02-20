@@ -50,8 +50,4 @@ class StoriesPagerAdapter(val context: Context,
     }
 
     override fun getCount() = supportedFeedTypes.size
-
-    companion object {
-        var sharedPool = RecyclerView.RecycledViewPool()
-    }
 }

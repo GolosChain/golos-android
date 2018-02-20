@@ -10,7 +10,9 @@ import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeCompactViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeFullViewHolder
 import io.golos.golos.screens.stories.model.NSFWStrategy
+import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.widgets.HolderClickListener
 import java.util.concurrent.Executors
 
 data class FeedCellSettings(val isFullSize: Boolean,
@@ -22,13 +24,13 @@ data class StripeWrapper(val stripe: StoryWithComments,
                          val isImagesShown: Boolean,
                          val nswfStrategy: NSFWStrategy)
 
-class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onCommentsClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onShareClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onUpvoteClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onTagClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onUserClick: (StoryWithComments) -> Unit = { print(it) },
-                             private var onVotersClick: (StoryWithComments) -> Unit = { print(it) },
+class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickListener,
+                             private var onCommentsClick: StoryWithCommentsClickListener,
+                             private var onShareClick: StoryWithCommentsClickListener,
+                             private var onUpvoteClick: StoryWithCommentsClickListener,
+                             private var onTagClick: StoryWithCommentsClickListener,
+                             private var onUserClick: StoryWithCommentsClickListener,
+                             private var onVotersClick: StoryWithCommentsClickListener,
                              feedCellSettings: FeedCellSettings)
     : RecyclerView.Adapter<StoriesViewHolder>() {
 
@@ -115,21 +117,68 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Uni
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoriesViewHolder {
         return if (viewType == R.layout.vh_stripe_full_size) StripeFullViewHolder(parent,
-                onUpvoteClick = { onUpvoteClick.invoke(mStripes[it.adapterPosition]) },
-                onCardClick = { onCardClick.invoke(mStripes[it.adapterPosition]) },
-                onCommentsClick = { onCommentsClick.invoke(mStripes[it.adapterPosition]) },
-                onShareClick = { onShareClick.invoke(mStripes[it.adapterPosition]) },
-                onBlogClick = { onTagClick.invoke(mStripes[it.adapterPosition]) },
-                onUserClick = { onUserClick.invoke(mStripes[it.adapterPosition]) },
-                onVotersClick = { onVotersClick.invoke(mStripes[it.adapterPosition]) })
+                onUpvoteClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onUpvoteClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onCardClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onCardClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onCommentsClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onShareClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onShareClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onBlogClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onTagClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onUserClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onUserClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onVotersClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                })
         else StripeCompactViewHolder(parent,
-                onUpvoteClick = { onUpvoteClick.invoke(mStripes[it.adapterPosition]) },
-                onCardClick = { onCardClick.invoke(mStripes[it.adapterPosition]) },
-                onCommentsClick = { onCommentsClick.invoke(mStripes[it.adapterPosition]) },
-                onShareClick = { onShareClick.invoke(mStripes[it.adapterPosition]) },
-                onBlogClick = { onTagClick.invoke(mStripes[it.adapterPosition]) },
-                onUserClick = { onUserClick.invoke(mStripes[it.adapterPosition]) },
-                onVotersClick = { onVotersClick.invoke(mStripes[it.adapterPosition]) })
+                onUpvoteClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onUpvoteClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onCardClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onCardClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onCommentsClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+
+                onBlogClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onTagClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onUserClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onUserClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                })
     }
 
     override fun onBindViewHolder(holder: StoriesViewHolder?, position: Int) {
@@ -141,7 +190,13 @@ class StoriesRecyclerAdapter(private var onCardClick: (StoryWithComments) -> Uni
         }
     }
 
+    private fun getStoryForPosition(holder: RecyclerView.ViewHolder): StoryWithComments? {
+        val pos = holder.adapterPosition
+        return if (pos < mStripes.size) return mStripes[pos] else null
+    }
+
     override fun getItemCount() = mStripes.size
+
 }
 
 

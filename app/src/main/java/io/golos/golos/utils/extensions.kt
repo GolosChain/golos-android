@@ -193,7 +193,7 @@ fun View.showSnackbar(message: String) {
 }
 
 fun View.setViewGone() {
-    if (this.visibility != View.GONE) visibility = View.GONE
+    if (this.visibility != View.GONE) this.visibility = View.GONE
 }
 
 fun View.setViewVisible() {

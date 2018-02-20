@@ -17,13 +17,14 @@ import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
-import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
+import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.OnVoteSubmit
 import io.golos.golos.screens.widgets.VoteDialog
 import io.golos.golos.utils.getColorCompat
@@ -72,29 +73,55 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
-                onCardClick = { mViewModel?.onCardClick(it, activity) },
-                onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
-                onShareClick = { mViewModel?.onShareClick(it, activity) },
-                onUpvoteClick = {
-                    if (mViewModel?.canVote() == true) {
-                        if (it.rootStory()?.isUserUpvotedOnThis == true) {
-                            mViewModel?.downVote(it)
-                        } else {
-                            val dialog = VoteDialog.getInstance()
-                            dialog.selectPowerListener = object : OnVoteSubmit {
-                                override fun submitVote(vote: Short) {
-                                    mViewModel?.vote(it, vote)
-                                }
-                            }
-                            dialog.show(activity!!.fragmentManager, null)
-                        }
-                    } else {
-                        mViewModel?.onVoteRejected(it)
+                onCardClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onCardClick(story, activity)
                     }
                 },
-                onTagClick = { mViewModel?.onBlogClick(context, it) },
-                onUserClick = { mViewModel?.onUserClick(context, it) },
-                onVotersClick = { mViewModel?.onVotersClick(context, it) },
+                onCommentsClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onCommentsClick(story, activity)
+                    }
+                },
+                onShareClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onShareClick(story, activity)
+                    }
+                },
+                onUpvoteClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        if (mViewModel?.canVote() == true) {
+                            if (story.rootStory()?.isUserUpvotedOnThis == true) {
+                                mViewModel?.downVote(story)
+                            } else {
+                                val dialog = VoteDialog.getInstance()
+                                dialog.selectPowerListener = object : OnVoteSubmit {
+                                    override fun submitVote(vote: Short) {
+                                        mViewModel?.vote(story, vote)
+                                    }
+                                }
+                                dialog.show(activity!!.fragmentManager, null)
+                            }
+                        } else {
+                            mViewModel?.onVoteRejected(story)
+                        }
+                    }
+                },
+                onTagClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onBlogClick(story, activity)
+                    }
+                },
+                onUserClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onUserClick(story, activity)
+                    }
+                },
+                onVotersClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onVotersClick(story, activity)
+                    }
+                },
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
                         true,
                         NSFWStrategy(true, Pair(false, ""))))
@@ -110,7 +137,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 }
             }
         })
-        mRecycler?.recycledViewPool = StoriesPagerAdapter.sharedPool
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
         view.findViewById<View>(R.id.refresh_lo).setOnClickListener { mRefreshButton?.callOnClick() }
     }

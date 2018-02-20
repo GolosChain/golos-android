@@ -71,12 +71,13 @@ abstract class StoriesViewHolder(resId: Int,
     protected abstract fun getBlogNameTv(): TextView
     protected abstract fun getDelimeterV(): View
     protected abstract fun getUpvoteText(): TextView
+    protected abstract fun getMainText(): TextView?
 
     open fun handleImagePlacing(newState: StripeWrapper?,
                                 imageView: ImageView) {
         val story = newState?.stripe?.rootStory()
 
-        if (newState == null || story == null) {
+        if (story == null) {
             imageView.setImageDrawable(null)
             return
         }
@@ -91,23 +92,21 @@ abstract class StoriesViewHolder(resId: Int,
             val lowerCased = it.toLowerCase() // and there is nsfw tag
             lowerCased == "nsfw" || lowerCased == "nswf"
         } != null) {
-            if (story.images.isNotEmpty()) {
 
-                if (newState.nswfStrategy.makeExceptionForUser.first &&
-                        newState.nswfStrategy.makeExceptionForUser.second == story.author) {
-                } else if (!newState.nswfStrategy.showNSFWImages) {
-                    if (story.images.isNotEmpty()) {
-                        imageView.setViewVisible()
-                        mGlide.load(R.drawable.ic_nswf)
-                                .into(imageView)
-                    } else {
-                        imageView.setViewGone()
-                    }
-                    return
+            if (newState.nswfStrategy.makeExceptionForUser.first &&
+                    newState.nswfStrategy.makeExceptionForUser.second == story.author) {
+            } else if (!newState.nswfStrategy.showNSFWImages) {
+                if (story.images.size != 0) {
+                    imageView.setViewVisible()
+                    mGlide.load(R.drawable.ic_nswf)
+                            .into(imageView)
+                    getMainText()?.setViewGone()
+                } else {
+                    imageView.setViewGone()
+                    getMainText()?.setViewVisible()
                 }
+                return
             }
-
-
         }
 
         if (story.type != ItemType.IMAGE_FIRST) {
@@ -142,7 +141,7 @@ abstract class StoriesViewHolder(resId: Int,
                         .apply(RequestOptions.placeholderOf(getErrorDrawable()))
                         .into(imageView)
             }
-            if (image == null){
+            if (image == null) {
                 imageView.setViewGone()
             }
         }
@@ -150,7 +149,7 @@ abstract class StoriesViewHolder(resId: Int,
 
     protected abstract fun showImageIfNotImageFirst(): Boolean
 
-    protected abstract fun getErrorDrawable():Drawable
+    protected abstract fun getErrorDrawable(): Drawable
 
 
     protected open fun setUpTheme() {

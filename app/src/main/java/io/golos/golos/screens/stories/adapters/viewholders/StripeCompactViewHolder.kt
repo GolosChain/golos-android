@@ -2,29 +2,25 @@ package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.bumptech.glide.Glide
 import io.golos.golos.R
 import io.golos.golos.screens.stories.adapters.StripeWrapper
+import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.setTextColorCompat
 import io.golos.golos.utils.setViewGone
 
 class StripeCompactViewHolder(parent: ViewGroup,
-                              private val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onCardClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onShareClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onBlogClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                              private val onVotersClick: (RecyclerView.ViewHolder) -> Unit)
+                              private val onUpvoteClick: HolderClickListener,
+                              private val onCardClick: HolderClickListener,
+                              private val onCommentsClick: HolderClickListener,
+                              private val onBlogClick: HolderClickListener,
+                              private val onUserClick: HolderClickListener)
     : StoriesViewHolder(R.layout.vh_stripe_compact_size, parent) {
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
@@ -45,16 +41,16 @@ class StripeCompactViewHolder(parent: ViewGroup,
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
 
-        mCommentsButton.setOnClickListener({ onCommentsClick(this) })
-        mCommentsIv.setOnClickListener({ onCommentsClick(this) })
-        mUpvoteValue.setOnClickListener({ onUpvoteClick(this) })
-        mUpvoteIv.setOnClickListener({ onUpvoteClick(this) })
-        mBlogNameTv.setOnClickListener({ onBlogClick(this) })
-        mUserNameTv.setOnClickListener({ onUserClick(this) })
+        mCommentsButton.setOnClickListener({ onCommentsClick.onClick(this) })
+        mCommentsIv.setOnClickListener({ onCommentsClick.onClick(this) })
+        mUpvoteValue.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mUpvoteIv.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
+        mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
 
-        mTitleTv.setOnClickListener({ onCardClick(this) })
-        mMainImageBig.setOnClickListener({ onCardClick(this) })
-        itemView.setOnClickListener({ onCardClick(this) })
+        mTitleTv.setOnClickListener({ onCardClick.onClick(this) })
+        mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
+        itemView.setOnClickListener({ onCardClick.onClick(this) })
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -85,13 +81,17 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
     override fun handleImagePlacing(newState: StripeWrapper?, imageView: ImageView) {
         super.handleImagePlacing(newState, imageView)
-        if (newState?.stripe?.rootStory()?.images?.isEmpty() == true){
+        if (newState?.stripe?.rootStory()?.images?.isEmpty() == true) {
             mMainImageBig.setViewGone()
         }
     }
 
     override fun getErrorDrawable(): Drawable {
         return errorDrawableS!!
+    }
+
+    override fun getMainText(): TextView? {
+        return null
     }
 
     override fun getMainImage(): ImageView {
