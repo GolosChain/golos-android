@@ -67,6 +67,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mNameOfAuthorInFollowLo: TextView
     private lateinit var mAuthorSubscribeButton: Button
     private lateinit var mTagAvatar: View
+    private lateinit var mCommentsLoadingProgress: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,13 +101,18 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 })
 
         mViewModel.liveData.observe(this, Observer {
-            mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
+            //mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
 
             if (it?.storyTree?.rootStory() != null) {
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
                     mtitileTv.visibility = View.GONE
                 }
-                mSwipeToRefresh.isRefreshing = false
+                if (it.isLoading) {
+                    if (!mSwipeToRefresh.isRefreshing) mSwipeToRefresh.isRefreshing = true
+                } else {
+                    mSwipeToRefresh.isRefreshing = false
+                }
+
                 val story = it.storyTree.rootStory() ?: return@Observer
 
                 var ets = if (story.parts.isEmpty()) StoryParserToRows().parse(story).toArrayList() else story.parts
@@ -230,17 +236,25 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mMoneyBtn.visibility = View.VISIBLE
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
-                mCommentsTv.visibility = View.VISIBLE
+
+                if (story.commentsCount > 0 && it.storyTree.comments().isEmpty()) {//if comments not downloaded yet
+                    mCommentsTv.setViewGone()
+                    mNoCommentsTv.setViewGone()
+                    mCommentsLoadingProgress.setViewVisible()
+                    mCommentsRecycler.setViewGone()
+                } else if (story.commentsCount > 0 && it.storyTree.comments().isNotEmpty()) {
+                    mCommentsTv.setViewVisible()
+                    mNoCommentsTv.setViewGone()
+                    mCommentsLoadingProgress.setViewGone()
+                    mCommentsRecycler.setViewVisible()
+                } else if (story.commentsCount == 0) {
+                    mCommentsTv.setViewGone()
+                    mNoCommentsTv.setViewVisible()
+                    mCommentsLoadingProgress.setViewGone()
+                    mCommentsRecycler.setViewGone()
+                }
                 mMoneyBtn.text = String.format("$ %.3f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
-                if (it.storyTree.comments().isEmpty()) {
-                    mCommentsRecycler.visibility = View.GONE
-                    mNoCommentsTv.visibility = View.VISIBLE
-                } else {
-                    mCommentsRecycler.visibility = View.VISIBLE
-                    mNoCommentsTv.visibility = View.GONE
-                }
-
             }
             mtitileTv.text = it?.storyTitle
         })
@@ -269,6 +283,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mVotingProgress = findViewById(R.id.voting_progress)
         mCommentsTv = findViewById(R.id.comments_tv)
         mShareButton = findViewById(R.id.share_btn)
+        mCommentsLoadingProgress = findViewById(R.id.comments_progress)
         mAvatarofAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
         mTagAvatar = findViewById(R.id.tag_avatar)
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)

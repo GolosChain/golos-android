@@ -83,6 +83,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
         super.handleImagePlacing(newState, imageView)
         if (newState?.stripe?.rootStory()?.images?.isEmpty() == true) {
             mMainImageBig.setViewGone()
+
         }
     }
 
@@ -100,6 +101,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
     override fun getTitleTv(): TextView {
         return mTitleTv
+
     }
 
     override fun getCommentsTv(): TextView {

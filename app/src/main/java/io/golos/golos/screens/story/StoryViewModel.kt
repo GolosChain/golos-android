@@ -17,8 +17,8 @@ import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryViewState
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.userslist.UsersListActivity
@@ -62,9 +62,13 @@ class StoryViewModel : ViewModel() {
                                 && it.rootStory()?.permlink == this.permLink
                     }?.
                     let {
+                        val mustHaveComments = it.rootStory()?.commentsCount ?: 0
+                        val commentsSize = it.comments().size
+                        var isLoading = false
+                        if (mustHaveComments > 0 && commentsSize == 0) isLoading = true
 
-                        mLiveData.value = StoryViewState(false,
-                                it.rootStory()?.title ?: "",
+                        mLiveData.value = StoryViewState(isLoading,
+                                it . rootStory ()?.title ?: "",
                                 mRepository.isUserLoggedIn(),
                                 storyItems?.error,
                                 it.rootStory()?.tags ?: arrayListOf(),
