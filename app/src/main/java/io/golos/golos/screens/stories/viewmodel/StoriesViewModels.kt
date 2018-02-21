@@ -274,7 +274,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
                 type,
-                filter)
+                filter,
+                true)
     }
 
     open fun onShareClick(it: StoryWithComments, context: Context?) {

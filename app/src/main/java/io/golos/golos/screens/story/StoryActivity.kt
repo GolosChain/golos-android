@@ -69,9 +69,13 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mTagAvatar: View
     private lateinit var mCommentsLoadingProgress: View
 
+    private var isNeedToScrollToComments = false
+    private var isScrollEventFired = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_story)
+        isNeedToScrollToComments = intent.getBooleanExtra(SCROLL_TO_COMMENTS, false)
         setUpViews()
         setUpViewModel()
     }
@@ -101,8 +105,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 })
 
         mViewModel.liveData.observe(this, Observer {
-            //mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
-
             if (it?.storyTree?.rootStory() != null) {
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
                     mtitileTv.visibility = View.GONE
@@ -242,17 +244,32 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewVisible()
                     mCommentsRecycler.setViewGone()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mCommentsLoadingProgress.post { mCommentsLoadingProgress.requestFocus() }
+
+                    }
                 } else if (story.commentsCount > 0 && it.storyTree.comments().isNotEmpty()) {
                     mCommentsTv.setViewVisible()
                     mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewVisible()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mCommentsRecycler.post { mCommentsRecycler.requestFocus() }
+                        isScrollEventFired = true
+                    }
                 } else if (story.commentsCount == 0) {
                     mCommentsTv.setViewGone()
                     mNoCommentsTv.setViewVisible()
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewGone()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mNoCommentsTv.post {
+                            mNoCommentsTv.requestFocus()
+                        }
+                        isScrollEventFired = true
+                    }
                 }
+
                 mMoneyBtn.text = String.format("$ %.3f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
             }
@@ -372,12 +389,14 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         private val PERMLINK_TAG = "PERMLINK_TAG"
         private val FEED_TYPE = "FEED_TYPE"
         private val STORY_FILTER = "STORY_FILTER"
+        private val SCROLL_TO_COMMENTS = "SCROLL_TO_COMMENTS"
         fun start(ctx: Context,
                   author: String,
                   blog: String?,
                   permlink: String,
                   feedType: FeedType,
-                  filter: StoryFilter?) {
+                  filter: StoryFilter?,
+                  scrollToComments: Boolean = false) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
             intent.putExtra(AUTHOR_TAG, author)
@@ -385,6 +404,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             intent.putExtra(PERMLINK_TAG, permlink)
             intent.putExtra(FEED_TYPE, feedType)
             intent.putExtra(STORY_FILTER, mapper.writeValueAsString(filter))
+            intent.putExtra(SCROLL_TO_COMMENTS, scrollToComments)
             ctx.startActivity(intent)
         }
     }
