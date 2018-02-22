@@ -24,12 +24,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.R
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -83,12 +87,15 @@ fun TextView.setTextColorCompat(@ColorRes colorId: Int) {
 fun Activity.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(this, coloId)
 }
+
 fun Fragment.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(activity!!, coloId)
 }
+
 fun View.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(context!!, coloId)
 }
+
 fun Fragment.showProgressDialog(): ProgressDialog {
     val dialog = ProgressDialog(context, R.style.AppCompatAlertDialogStyle)
     dialog.isIndeterminate = true
@@ -126,7 +133,7 @@ fun Context.hideKeyboard(currentFocus: View) {
     imm.hideSoftInputFromWindow(currentFocus.windowToken, 0)
 }
 
-fun SearchView.setTextColorHint(@ColorRes coloId: Int){
+fun SearchView.setTextColorHint(@ColorRes coloId: Int) {
     try {
         (this.findViewById<EditText>(android.support.v7.appcompat.R.id.search_src_text) as EditText)
                 .setHintTextColor(this.getColorCompat(R.color.text_color_white_black))
@@ -246,6 +253,9 @@ fun <E> List<out E>.toArrayList(): ArrayList<E> {
     return ArrayList(this)
 }
 
+fun File.sizeInKb(): Long {
+    return length() / 1024
+}
 
 
 public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0

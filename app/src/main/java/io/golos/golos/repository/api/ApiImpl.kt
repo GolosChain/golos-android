@@ -301,11 +301,8 @@ class ApiImpl : GolosApi() {
     }
 
     override fun uploadImage(sendFromAccount: String, file: File): String {
-        var fileLocal = file
-        Timber.e(fileLocal.absolutePath)
-        if (fileLocal.absolutePath.matches(Regex("^/file:.*"))) {
-            fileLocal = File(fileLocal.absolutePath.removePrefix("/file:"))
-        }
+        val fileLocal = File(file.absolutePath.removePrefix("/file:"))
+
         val response = mGolosApi.golosIoSpecificMethods.uploadFile(AccountName(sendFromAccount), fileLocal)
 
         if (response.error != null) {

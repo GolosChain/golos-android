@@ -35,8 +35,8 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.OnLinkSubmit
 import io.golos.golos.screens.widgets.SendLinkFragment
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
 
@@ -196,6 +196,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Timber.e("onActivityResult")
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())
@@ -210,12 +211,13 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                         }
                         val f = File(cacheDir, System.currentTimeMillis().toString() + ".jpg")
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(f))
+                        resizeToSize(f)
                         handler.post {
                             mViewModel
                                     .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = f.name,
                                             imageUrl = "file://${f.absolutePath}", pointerPosition = null)))
                         }
-                    } catch (e: FileNotFoundException) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         handler.post {
                             mToolbar.showSnackbar(R.string.wrong_image)
@@ -284,6 +286,20 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val string = jacksonObjectMapper().writeValueAsString(mode)
             intent.putExtra(MODE_TAG, string)
             ctx.startActivity(intent)
+        }
+    }
+
+    private fun resizeToSize(imageFile: File) {
+
+        if (imageFile.sizeInKb() < 800) return
+        val optns = BitmapFactory.Options()
+        optns.inSampleSize = 2
+        val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
+        var step = 1
+        while (imageFile.sizeInKb() > 800) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
+            step++
         }
     }
 }

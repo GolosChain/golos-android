@@ -270,7 +270,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
 
-                mMoneyBtn.text = String.format("$ %.3f", story.payoutInDollars)
+                mMoneyBtn.text = String.format("$%.3f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
             }
             mtitileTv.text = it?.storyTitle

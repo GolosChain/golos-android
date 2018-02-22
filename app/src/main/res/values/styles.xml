@@ -29,7 +29,7 @@
         <item name="android:background">@null</item>
         <item name="android:textSize">@dimen/font_small</item>
         <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textColor">@color/textColorP</item>
     </style>
 
