@@ -1,6 +1,5 @@
 package io.golos.golos.screens.widgets
 
-import android.app.DialogFragment
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,15 +17,15 @@ import io.golos.golos.R
 /**
  * Created by yuri on 13.11.17.
  */
-class VoteDialog : DialogFragment() {
+class VoteDialog : GolosDialog() {
     var selectPowerListener: OnVoteSubmit? = null
     private val mRepeatingPostHandler = Handler(Looper.getMainLooper())
     private var isAutoIncrement: Boolean = false
     private var isAutoDecrements: Boolean = false
     private lateinit var mSeeker: AppCompatSeekBar
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val v = inflater!!.inflate(R.layout.fr_vote, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val v = inflater.inflate(R.layout.fr_vote, container, false)
         val percentTv = v.findViewById<TextView>(R.id.percent_tv)
         val minusBtn = v.findViewById<AppCompatButton>(R.id.minus_btn)
         val plusBtn = v.findViewById<AppCompatButton>(R.id.plus_btn)
@@ -70,10 +69,6 @@ class VoteDialog : DialogFragment() {
         return v
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.Theme_AppCompat_Dialog)
-    }
 
     override fun onStart() {
         super.onStart()
@@ -93,7 +88,7 @@ class VoteDialog : DialogFragment() {
         override fun run() {
             if (isAutoIncrement) mSeeker.progress += 1
             if (isAutoDecrements) mSeeker.progress -= 1
-            mRepeatingPostHandler.postDelayed(UpdateRunnable(), 75 )
+            mRepeatingPostHandler.postDelayed(UpdateRunnable(), 75)
         }
     }
 }

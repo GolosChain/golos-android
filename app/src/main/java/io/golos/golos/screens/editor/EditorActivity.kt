@@ -33,7 +33,7 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.OnLinkSubmit
-import io.golos.golos.screens.widgets.SendLinkFragment
+import io.golos.golos.screens.widgets.SendLinkDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
 import java.io.File
@@ -69,8 +69,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     private lateinit var mViewModel: EditorViewModel
     private lateinit var mSubmitBtn: Button
     private var mMode: EditorMode? = null
-    private val PICK_IMAGE_ID = nextInt()
-    private val READ_EXTERNAL_PERMISSION = nextInt()
     private var mProgressDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -171,7 +169,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             }
         })
         findViewById<View>(R.id.btn_link).setOnClickListener({
-            val fr = SendLinkFragment.getInstance()
+            val fr = SendLinkDialog.getInstance()
             fr.listener = object : OnLinkSubmit {
                 override fun submit(linkName: String, linkAddress: String) {
                     val text = " [$linkName]($linkAddress)"
@@ -245,7 +243,25 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mViewModel.onUserInput(EditorInputAction.DeleteAction(parts.indexOf(image)))
     }
 
+    private fun resizeToSize(imageFile: File) {
+
+        if (imageFile.sizeInKb() < 800) return
+        val optns = BitmapFactory.Options()
+        optns.inSampleSize = 2
+        val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
+        var step = 1
+        while (imageFile.sizeInKb() > 800) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
+            step++
+        }
+    }
+
     companion object {
+        @JvmStatic
+        private val PICK_IMAGE_ID = nextInt()
+        @JvmStatic
+        private val READ_EXTERNAL_PERMISSION = nextInt()
         val MODE_TAG = "MODE_TAG"
         fun startRootCommentEditor(ctx: Context,
                                    rootStory: StoryWithComments,
@@ -286,20 +302,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val string = jacksonObjectMapper().writeValueAsString(mode)
             intent.putExtra(MODE_TAG, string)
             ctx.startActivity(intent)
-        }
-    }
-
-    private fun resizeToSize(imageFile: File) {
-
-        if (imageFile.sizeInKb() < 800) return
-        val optns = BitmapFactory.Options()
-        optns.inSampleSize = 2
-        val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
-        var step = 1
-        while (imageFile.sizeInKb() > 800) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
-            step++
         }
     }
 }

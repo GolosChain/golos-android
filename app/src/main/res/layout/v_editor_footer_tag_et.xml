@@ -12,6 +12,9 @@
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
     android:textAllCaps="false"
-    android:textSize="15dp"
+    android:textSize="13dp"
+    android:scrollHorizontally="true"
+    android:inputType="text"
+    android:maxLines="1"
     android:paddingBottom="2dp"
     android:textColor="@color/textColorP" />

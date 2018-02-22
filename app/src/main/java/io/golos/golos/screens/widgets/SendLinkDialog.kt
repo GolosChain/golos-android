@@ -1,21 +1,17 @@
 package io.golos.golos.screens.widgets
 
-import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import io.golos.golos.R
 import io.golos.golos.utils.showKeyboard
-import timber.log.Timber
 
 /**
  * Created by yuri on 22.11.17.
  */
-class SendLinkFragment : DialogFragment() {
+class SendLinkDialog : GolosDialog() {
     var listener: OnLinkSubmit? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -31,15 +27,15 @@ class SendLinkFragment : DialogFragment() {
     }
 
     companion object {
-        fun getInstance(): SendLinkFragment {
-            return SendLinkFragment()
+        fun getInstance(): SendLinkDialog {
+            return SendLinkDialog()
         }
     }
 
     override fun onResume() {
         super.onResume()
         view!!.findViewById<EditText>(R.id.name).postDelayed({
-            if (view?.requestFocus() == true){
+            if (view?.requestFocus() == true) {
                 view?.showKeyboard()
             }
         }, 500)

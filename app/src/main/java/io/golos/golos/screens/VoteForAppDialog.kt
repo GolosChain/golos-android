@@ -9,12 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.settings.UserSettings
+import io.golos.golos.screens.widgets.GolosDialog
 
 
 /**
  * Created by yuri on 07.02.18.
  */
-class VoteForAppDialog : DialogFragment() {
+class VoteForAppDialog : GolosDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_vote_for_app, container, false)

@@ -33,6 +33,7 @@ import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.R
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
@@ -216,7 +217,7 @@ fun View.hideKeyboard() {
 fun View.showKeyboard() {
     requestFocus()
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    imm.showSoftInputFromInputMethod(windowToken, 0)
 }
 
 fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {

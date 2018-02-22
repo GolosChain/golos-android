@@ -100,7 +100,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                                         mViewModel?.vote(story, vote)
                                     }
                                 }
-                                dialog.show(activity!!.fragmentManager, null)
+                                dialog.show(activity!!.supportFragmentManager, null)
                             }
                         } else {
                             mViewModel?.onVoteRejected(story)

@@ -10,7 +10,9 @@
         <item name="android:windowBackground">@android:color/white</item>
 
     </style>
-
+    <style name="GolosDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
     <style name="LauncherTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash_back</item>
@@ -247,7 +249,7 @@
 
     <style name="Base.Widget.AppCompat.Button.Borderless.AddButtonBluePlus">
         <item name="android:layout_width">44dp</item>
-        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_height">30dp</item>
         <item name="android:layout_marginStart">@dimen/margin_material</item>
         <item name="android:layout_marginTop">@dimen/margin_material_small</item>
         <item name="android:background">@drawable/rect_blue</item>

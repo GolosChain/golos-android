@@ -20,7 +20,7 @@
             android:name=".screens.editor.EditorActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden" />
+             />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
             android:launchMode="singleInstance"

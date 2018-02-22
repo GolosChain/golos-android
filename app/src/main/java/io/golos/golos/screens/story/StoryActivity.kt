@@ -344,7 +344,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                             mViewModel.onStoryVote(story, vote)
                         }
                     }
-                    dialog.show(fragmentManager, null)
+                    dialog.show(supportFragmentManager, null)
                 } else mViewModel.onStoryVote(story, -1)
             } else {
                 mViewModel.onVoteRejected()
@@ -359,7 +359,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                             mViewModel.onStoryVote(it, vote)
                         }
                     }
-                    dialog.show(fragmentManager, null)
+                    dialog.show(supportFragmentManager, null)
                 } else mViewModel.onStoryVote(it, -1)
             } else {
                 mViewModel.onVoteRejected()
