@@ -9,8 +9,6 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.stories.adapters.StripeWrapper
@@ -65,44 +63,53 @@ class StripeFullViewHolder(parent: ViewGroup,
         mBodyTextMarkwon.setOnClickListener({ onCardClick.onClick(this) })
         mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
         itemView.setOnClickListener({ onCardClick.onClick(this) })
+        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
-        super.handlerStateChange(newState, oldState)
 
+        if (mAvatar.drawable != noAvatarDrawable) mAvatar.setImageDrawable(noAvatarDrawable)
+
+        val start = System.currentTimeMillis()
+        super.handlerStateChange(newState, oldState)
         if (newState != null) {
+
             val wrapper = newState.stripe.rootStory() ?: return
 
             if (wrapper.avatarPath != null) mGlide
-                    .load(wrapper.avatarPath)
+                    .load(ImageUriResolver.resolveImageWithSize(
+                            wrapper.avatarPath ?: "",
+                            wantedwidth = mAvatar.width))
                     .error(mGlide.load(noAvatarDrawable))
-                    .apply(RequestOptions.placeholderOf(noAvatarDrawable)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
                     .into(mAvatar)
-            else mAvatar.setImageDrawable(noAvatarDrawable)
-
 
             if (wrapper.isUserUpvotedOnThis) {
-                mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
-                mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
+                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
+                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
+                    mUpvoteBtn.tag = "green"
+                }
+
             } else {
-                mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
-                mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
+                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "gray") {
+                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
+                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
+                    mUpvoteBtn.tag = "gray"
+                }
             }
             if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
-                mVotingProgress.visibility = View.VISIBLE
-                mUpvoteBtn.visibility = View.GONE
+                mVotingProgress.setViewVisible()
+                mUpvoteBtn.setViewGone()
             } else {
-                mVotingProgress.visibility = View.GONE
-                mUpvoteBtn.visibility = View.VISIBLE
+                mVotingProgress.setViewGone()
+                mUpvoteBtn.setViewVisible()
             }
             mVotersBtn.text = wrapper.votesNum.toString()
             if (newState.stripe.rootStory()?.type != ItemType.IMAGE_FIRST) {
+                mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.setViewVisible()
                 mMainImageBig.setViewGone()
-                mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
-                mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
             } else {
                 mBodyTextMarkwon.setViewGone()
             }

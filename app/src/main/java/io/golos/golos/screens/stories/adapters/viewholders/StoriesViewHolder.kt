@@ -15,10 +15,7 @@ import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
-import io.golos.golos.utils.Translit
-import io.golos.golos.utils.setTextColorCompat
-import io.golos.golos.utils.setViewGone
-import io.golos.golos.utils.setViewVisible
+import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 19.02.18.
@@ -98,8 +95,8 @@ abstract class StoriesViewHolder(resId: Int,
             } else if (!newState.nswfStrategy.showNSFWImages) {
                 if (story.images.size != 0) {
                     imageView.setViewVisible()
-                    mGlide.load(R.drawable.ic_nswf)
-                            .into(imageView)
+                    imageView.setImageResource(R.drawable.ic_nswf)
+
                     getMainText()?.setViewGone()
                 } else {
                     imageView.setViewGone()
@@ -126,10 +123,11 @@ abstract class StoriesViewHolder(resId: Int,
         val error = mGlide.load(getErrorDrawable())
         var nextImage: RequestBuilder<Drawable>? = null
         if (story.images.size > 1) {
-            nextImage = mGlide.load(story.images[1]).error(error)
+            nextImage = mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[1], imageView.context.resources.displayMetrics.widthPixels)).error(error)
         }
         if (story.images.size > 0) {
-            mGlide.load(story.images[0])
+            mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[0],
+                    wantedwidth = imageView.width))
                     .error(nextImage ?: error)
                     .apply(RequestOptions.placeholderOf(getErrorDrawable()))
                     .into(imageView)

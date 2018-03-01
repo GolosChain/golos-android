@@ -12,6 +12,7 @@ import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.userslist.model.UserListRowData
 import io.golos.golos.screens.widgets.GolosViewHolder
+import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
@@ -90,7 +91,7 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 if (value.item.avatar != null) {
                     Glide
                             .with(itemView)
-                            .load(value.item.avatar)
+                            .load(ImageUriResolver.resolveImageWithSize(value.item.avatar ?: "", wantedwidth = mAvatar.width))
                             .apply(RequestOptions()
                                     .error(R.drawable.ic_person_gray_80dp)
                                     .placeholder(R.drawable.ic_person_gray_80dp))

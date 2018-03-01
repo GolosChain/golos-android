@@ -11,14 +11,14 @@ import io.golos.golos.utils.showKeyboard
 /**
  * Created by yuri on 22.11.17.
  */
-class SendLinkDialog : GolosDialog() {
+class SendLinkDialog : android.support.v4.app.DialogFragment() {
     var listener: OnLinkSubmit? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater!!.inflate(R.layout.fr_link, container, false)
-        var linkName = v.findViewById<EditText>(R.id.name)
-        var address = v.findViewById<EditText>(R.id.address)
-        var sumbitButton = v.findViewById<View>(R.id.ok_btn)
+        val v = inflater.inflate(R.layout.fr_link, container, false)
+        val linkName = v.findViewById<EditText>(R.id.name)
+        val address = v.findViewById<EditText>(R.id.address)
+        val sumbitButton = v.findViewById<View>(R.id.ok_btn)
         sumbitButton.setOnClickListener({
             listener?.submit(linkName.text.toString(), address.text.toString())
             dismiss()

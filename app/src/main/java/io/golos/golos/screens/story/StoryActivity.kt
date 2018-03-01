@@ -152,12 +152,12 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         val glide = Glide.with(this)
 
                         glide
-                                .load(story.avatarPath)
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath ?: "", wantedwidth = mAvatar.width))
                                 .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatar)
                         glide
-                                .load(story.avatarPath)
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath ?: "", wantedwidth = mAvatarofAuthorInFollowLo.width))
                                 .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatarofAuthorInFollowLo)

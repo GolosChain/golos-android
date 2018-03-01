@@ -207,6 +207,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
+
+
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         this.isVisibleToUser = isVisibleToUser
         if (visibleToUser) {

@@ -19,10 +19,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
-import io.golos.golos.utils.GolosMovementMethod
-import io.golos.golos.utils.UpdatingState
-import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.toHtml
+import io.golos.golos.utils.*
 import java.util.*
 
 /**
@@ -129,7 +126,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
-                    mGlide.load(comment.avatarPath)
+                    mGlide.load(ImageUriResolver.resolveImageWithSize(comment.avatarPath ?: "",wantedwidth = mAvatar.width))
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.ic_person_gray_24dp))
                             .into(mAvatar)
@@ -173,18 +170,19 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
+                    val src = (imagePart as ImageRow).src
                     val error = mGlide.load(R.drawable.error)
-                    mGlide.load((imagePart as ImageRow).src)
+                    mGlide.load(ImageUriResolver.resolveImageWithSize(src, itemView.context.resources.displayMetrics.widthPixels))
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.error))
                             .into(mImage)
                     rows.remove(imagePart)
                 } else {
                     mImage.setImageBitmap(null)
-                    mImage.visibility = View.GONE
+                    mImage.setViewGone()
                 }
                 if (rows.size == 0) {
-                    mText.visibility = View.GONE
+                    mText.setViewGone()
                 } else {
                     mText.visibility = View.VISIBLE
                     val outText = rows.map {

@@ -20,6 +20,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
+import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.toArrayList
 import io.golos.golos.utils.toHtml
 
@@ -111,14 +112,14 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 mImageFullWidth.visibility = View.VISIBLE
 
 
-                if (src.endsWith("/")) src = src.substring(0..src.lastIndex - 1)
+                if (src.endsWith("/")) src = src.substring(0 until src.lastIndex)
+                src = ImageUriResolver.resolveImageWithSize(src)
 
                 mTarget = object : ViewTarget<View, Bitmap>(itemView) {
 
                     override fun getSize(cb: SizeReadyCallback?) {
                         cb?.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                     }
-
 
 
                     override fun onResourceReady(resource: Bitmap?, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>) {

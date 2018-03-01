@@ -194,7 +194,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Timber.e("onActivityResult")
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())

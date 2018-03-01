@@ -656,7 +656,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
         mRequests.add(request)
         networkExecutor.execute {
             try {
-                val discussions = loadStories(limit, type, filter, 1024, startAuthor, startPermlink)
+                val discussions = loadStories(limit + 1, type, filter, 1024, startAuthor, startPermlink)
 
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
@@ -929,7 +929,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     resultListener.invoke(result, null)
                 }
                 networkExecutor.execute {
-                    if (!isUserLoggedIn())return@execute
+                    if (!isUserLoggedIn()) return@execute
                     val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
                             1024, null, null)[0]
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
