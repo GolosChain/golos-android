@@ -909,6 +909,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             if (tags[it].contains(Regex("[а-яА-Я]"))) {
                                 tags[it] = "ru--${Translit.ru2lat(tags[it])}"
                             }
+                            tags[it] = tags[it].toLowerCase().replace(" ", "")
                         }
                 (0 until content.size)
                         .forEach {
@@ -920,9 +921,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                         }
                 val content = content.joinToString(separator = "\n") { it.markdownRepresentation }
 
-                val result = mGolosApi.sendPost(mPersister.getCurrentUserName()!!, title, content, tags.toArray(Array(tags.size, { "" })))
-
-
+                val result = mGolosApi.sendPost(mPersister.getCurrentUserName()!!,
+                        title, content, tags.toArrayList().toArray(Array(tags.size, { "" })))
                 mMainThreadExecutor.execute {
                     result.isPost = true
                     mLastPostLiveData.value = result
@@ -936,7 +936,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                     mMainThreadExecutor.execute {
                         comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
-                                FeedType.BLOG, null, comments.value?.error)
+                                FeedType.BLOG,
+                                StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
+                                comments.value?.error)
+                        val data = mAuthLiveData.value
+                        if (data != null) {
+                            data.postsCount += 1
+                            mAuthLiveData.value = data
+                        }
                     }
                 }
 
@@ -989,7 +996,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                     mMainThreadExecutor.execute {
                         comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
-                                FeedType.COMMENTS, null, comments.value?.error)
+                                FeedType.COMMENTS,
+                                StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
+                                comments.value?.error)
+                        val data = mAuthLiveData.value
+                        if (data != null) {
+                            data.postsCount += 1
+                            mAuthLiveData.value = data
+                        }
                     }
                 }
             } catch (e: Exception) {

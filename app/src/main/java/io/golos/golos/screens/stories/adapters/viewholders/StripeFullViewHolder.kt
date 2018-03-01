@@ -109,7 +109,8 @@ class StripeFullViewHolder(parent: ViewGroup,
                 mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.setViewVisible()
                 mMainImageBig.setViewGone()
-                mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
+                mBodyTextMarkwon.text = wrapper.cleanedFromImages.substring(0,
+                        if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
