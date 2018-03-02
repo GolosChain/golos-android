@@ -22,6 +22,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.SubscribeStatus
+import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.*
 import timber.log.Timber
 import java.io.File
@@ -46,6 +47,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
 
     private val mTags = MutableLiveData<List<Tag>>()
+    private val mLocalizedTags = MutableLiveData<List<LocalizedTag>>()
 
     //feed posts lists
     private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoriesFeed>> = HashMap()
@@ -101,6 +103,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             put(StoryRequest(FeedType.PROMO, null), MutableLiveData())
             put(StoryRequest(FeedType.UNCLASSIFIED, null), MutableLiveData())
         }
+        Transformations.map(mTags, {
+            workerExecutor.execute {
+                val lt = it.map { LocalizedTag(it) }
+                mMainThreadExecutor.execute {
+                    mLocalizedTags.value = lt
+                }
+            }
+        }).observeForever({})
     }
 
     @WorkerThread
@@ -662,7 +672,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
                     var out = discussions
                     if (startAuthor != null && startPermlink != null) {
-                        val current = ArrayList(updatingFeed.value?.items ?: ArrayList<StoryWithComments>())
+                        val current = ArrayList(updatingFeed.value?.items
+                                ?: ArrayList<StoryWithComments>())
                         out = current + out.slice(1..out.lastIndex)
                     }
                     val feed = StoriesFeed(out.toArrayList(), type, filter)
@@ -707,7 +718,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                     val items = convertFeedTypeToLiveData(feedType, filter).value!!.items
                     items.forEach {
-                        if (avatarsMap.containsKey(it.rootStory()?.author ?: "")) it.rootStory()?.avatarPath = avatarsMap[it.rootStory()?.author ?: ""]
+                        if (avatarsMap.containsKey(it.rootStory()?.author
+                                        ?: "")) it.rootStory()?.avatarPath = avatarsMap[it.rootStory()?.author
+                                ?: ""]
                     }
 
                     convertFeedTypeToLiveData(feedType, filter).let {
@@ -742,7 +755,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             val result = replacer.findAndReplace(StoryWrapper(discussionItem, UpdatingState.UPDATING), storiesAll)
             if (result) {
                 mMainThreadExecutor.execute {
-                    it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                    it.value = StoriesFeed(storiesAll, it.value?.type
+                            ?: FeedType.NEW, it.value?.filter)
                 }
             }
         }
@@ -762,14 +776,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             currentStory.isUserUpvotedOnThis = isUpvote
                             votedItem = currentStory
                             mMainThreadExecutor.execute {
-                                it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                                it.value = StoriesFeed(storiesAll, it.value?.type
+                                        ?: FeedType.NEW, it.value?.filter)
                             }
                             isVoted = true
                         } else {
                             votedItem?.let { voteItem ->
                                 replacer.findAndReplace(StoryWrapper(voteItem, UpdatingState.DONE), storiesAll)
                                 mMainThreadExecutor.execute {
-                                    it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW, it.value?.filter)
+                                    it.value = StoriesFeed(storiesAll, it.value?.type
+                                            ?: FeedType.NEW, it.value?.filter)
                                 }
                             }
                         }
@@ -817,7 +833,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                     val allItems = ArrayList(it.value?.items ?: ArrayList())
                     if (replacer.findAndReplace(updatedStory, allItems)) {
                         mMainThreadExecutor.execute {
-                            it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW, it.value?.filter,
+                            it.value = StoriesFeed(allItems, it.value?.type
+                                    ?: FeedType.NEW, it.value?.filter,
                                     isFeedActual = it.value?.isFeedActual == true)
                         }
                     }
@@ -930,12 +947,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 }
                 networkExecutor.execute {
                     if (!isUserLoggedIn()) return@execute
-                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
+                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
+                            ?: "")),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
+                            ?: "")))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items ?: ArrayList())).toArrayList()),
+                        comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items
+                                ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG,
                                 StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
                                 comments.value?.error)
@@ -976,7 +996,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                             }
                         }
                 val contentString = content.joinToString(separator = "\n") { it.markdownRepresentation }
-                val result = mGolosApi.sendComment(mPersister.getCurrentUserName() ?: return@execute,
+                val result = mGolosApi.sendComment(mPersister.getCurrentUserName()
+                        ?: return@execute,
                         to.author,
                         to.permlink,
                         contentString,
@@ -990,12 +1011,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
 
                 networkExecutor.execute {
                     if (!isUserLoggedIn()) return@execute
-                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")),
+                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
+                            ?: "")),
                             1024, null, null)[0]
-                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName ?: "")))
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
+                            ?: "")))
 
                     mMainThreadExecutor.execute {
-                        comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items ?: ArrayList())).toArrayList(),
+                        comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items
+                                ?: ArrayList())).toArrayList(),
                                 FeedType.COMMENTS,
                                 StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
                                 comments.value?.error)
@@ -1052,6 +1076,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
     }
 
     override fun getTrendingTags(): LiveData<List<Tag>> {
+
         if (mTags.value == null || mTags.value?.size == 0) {
             workerExecutor.execute {
                 try {
@@ -1065,6 +1090,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
             }
         }
         return mTags
+    }
+
+    override fun getLocalizedTags(): LiveData<List<LocalizedTag>> {
+        if (mLocalizedTags.value?.size ?: 0 == 0) {
+            getTrendingTags()
+        }
+        return mLocalizedTags
     }
 
     override fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit) {
@@ -1201,7 +1233,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor,
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
-                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = getCurrentUserDataAsLiveData().value?.userName ?: "") else null,
+                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = getCurrentUserDataAsLiveData().value?.userName
+                                    ?: "") else null,
                             complitionHandler = { _, e ->
                                 if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)
                                 else mAppReadyStatusLiveData.value = ReadyStatus(true, null)

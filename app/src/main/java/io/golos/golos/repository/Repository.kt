@@ -15,6 +15,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.Regexps
@@ -146,6 +147,9 @@ abstract class Repository {
     abstract fun unSubscribeOnTag(tag: Tag)
 
     abstract fun getTrendingTags(): LiveData<List<Tag>>
+
+    abstract fun getLocalizedTags(): LiveData<List<LocalizedTag>>
+
     abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
 
     abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
