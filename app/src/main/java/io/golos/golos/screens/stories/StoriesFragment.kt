@@ -25,8 +25,8 @@ import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.widgets.OnVoteSubmit
-import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.getColorCompat
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.showSnackbar

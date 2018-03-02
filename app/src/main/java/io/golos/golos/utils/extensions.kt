@@ -10,6 +10,7 @@ import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.annotation.LayoutRes
@@ -33,7 +34,6 @@ import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.R
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
@@ -260,3 +260,26 @@ fun File.sizeInKb(): Long {
 
 
 public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0
+
+
+public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
+    val b = Bundle()
+    pairs.forEach {
+        val second = it.second
+        when (second) {
+            is Short -> b.putShort(it.first, second)
+            is Int -> b.putInt(it.first, second)
+            is Long -> b.putLong(it.first, second)
+            is String -> b.putString(it.first, second)
+            is ArrayList<*> -> {
+                if (second.isNotEmpty() && second[0] !is String) {
+                    throw IllegalArgumentException("only arraylist of strings supported")
+                } else {
+                    b.putStringArrayList(it.first, second as java.util.ArrayList<String>)
+                }
+            }
+            else -> throw IllegalArgumentException("unsupported")
+        }
+    }
+    return b
+}

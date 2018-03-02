@@ -1,4 +1,4 @@
-package io.golos.golos.screens.widgets
+package io.golos.golos.screens.widgets.dialogs
 
 import android.os.Bundle
 import android.view.LayoutInflater

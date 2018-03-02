@@ -32,10 +32,9 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.widgets.OnLinkSubmit
-import io.golos.golos.screens.widgets.SendLinkDialog
+import io.golos.golos.screens.widgets.dialogs.OnLinkSubmit
+import io.golos.golos.screens.widgets.dialogs.SendLinkDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 

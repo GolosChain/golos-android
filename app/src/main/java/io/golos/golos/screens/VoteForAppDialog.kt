@@ -3,13 +3,12 @@ package io.golos.golos.screens
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.settings.UserSettings
-import io.golos.golos.screens.widgets.GolosDialog
+import io.golos.golos.screens.widgets.dialogs.GolosDialog
 
 
 /**

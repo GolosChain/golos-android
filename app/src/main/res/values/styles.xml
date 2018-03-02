@@ -10,8 +10,14 @@
         <item name="android:windowBackground">@android:color/white</item>
 
     </style>
+
     <style name="GolosDialogTheme" parent="Theme.AppCompat.Dialog">
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="GolosPhotoDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="LauncherTheme" parent="AppTheme">

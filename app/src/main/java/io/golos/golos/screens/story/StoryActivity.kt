@@ -30,8 +30,8 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.screens.widgets.OnVoteSubmit
-import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
 
@@ -49,7 +49,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mTagName: TextView
     private lateinit var mTagSubscribeBtn: Button
     private lateinit var mBlogNameTv: TextView
-    private lateinit var mtitileTv: TextView
+    private lateinit var mTitleTv: TextView
     private lateinit var mVotesIv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
     private lateinit var mNoCommentsTv: TextView
@@ -63,7 +63,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mMoneyBtn: TextView
     private lateinit var mCommentsTv: TextView
     private lateinit var mShareButton: ImageButton
-    private lateinit var mAvatarofAuthorInFollowLo: ImageView
+    private lateinit var mAvatarOfAuthorInFollowLo: ImageView
     private lateinit var mNameOfAuthorInFollowLo: TextView
     private lateinit var mAuthorSubscribeButton: Button
     private lateinit var mTagAvatar: View
@@ -107,7 +107,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mViewModel.liveData.observe(this, Observer {
             if (it?.storyTree?.rootStory() != null) {
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
-                    mtitileTv.visibility = View.GONE
+                    mTitleTv.visibility = View.GONE
                 }
                 if (it.isLoading) {
                     if (!mSwipeToRefresh.isRefreshing) mSwipeToRefresh.isRefreshing = true
@@ -134,7 +134,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         mBottomImagesRecycler.visibility = View.VISIBLE
                         if (mBottomImagesRecycler.adapter == null) {
                             mBottomImagesRecycler.adapter =
-                                    ImagesAdapter({ mViewModel.onMainStoryImageClick(this, it.src, null) },
+                                    ImagesAdapter({ },
                                             list)
                         }
                     }
@@ -152,21 +152,23 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         val glide = Glide.with(this)
 
                         glide
-                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath ?: "", wantedwidth = mAvatar.width))
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
+                                        ?: "", wantedwidth = mAvatar.width))
                                 .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatar)
                         glide
-                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath ?: "", wantedwidth = mAvatarofAuthorInFollowLo.width))
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
+                                        ?: "", wantedwidth = mAvatarOfAuthorInFollowLo.width))
                                 .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
-                                .into(mAvatarofAuthorInFollowLo)
+                                .into(mAvatarOfAuthorInFollowLo)
                     }
 
                     mUserName.setOnClickListener {
                         mViewModel.onUserClick(this, mUserName.text.toString())
                     }
-                    mAvatarofAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
+                    mAvatarOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
@@ -273,7 +275,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 mMoneyBtn.text = String.format("$%.3f", story.payoutInDollars)
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
             }
-            mtitileTv.text = it?.storyTitle
+            mTitleTv.text = it?.storyTitle
         })
     }
 
@@ -288,7 +290,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mTagSubscribeBtn = findViewById(R.id.subscribe_tag_btn)
         mRebloggedBy = findViewById(R.id.reblogged_tv)
         mBlogNameTv = findViewById(R.id.blog_name_tv)
-        mtitileTv = findViewById(R.id.title_tv)
+        mTitleTv = findViewById(R.id.title_tv)
         mNoCommentsTv = findViewById(R.id.no_comments_tv)
         mStoryRecycler = findViewById(R.id.recycler)
         mCommentsRecycler = findViewById(R.id.comments_recycler)
@@ -301,7 +303,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsTv = findViewById(R.id.comments_tv)
         mShareButton = findViewById(R.id.share_btn)
         mCommentsLoadingProgress = findViewById(R.id.comments_progress)
-        mAvatarofAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
+        mAvatarOfAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
         mTagAvatar = findViewById(R.id.tag_avatar)
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
         mAuthorSubscribeButton = findViewById(R.id.follow_btn)
@@ -336,7 +338,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({
             if (mViewModel.canShowVoteDialog) {
-                val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
+                val story = mViewModel.liveData.value?.storyTree?.storyWithState()
+                        ?: return@setOnClickListener
                 if (mViewModel.canUserVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
                     dialog.selectPowerListener = object : OnVoteSubmit {
