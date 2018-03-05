@@ -14,16 +14,15 @@ object Translit {
         if (place >= 0) {
             current.replace(place, place + 3, "ые")
         }
-
         for (i in rusLetters.indices) {
             place = current.indexOf(engLetters[i])
-            if (place >= 0) {
+            while (place >= 0) {
                 current.replace(place, place + engLetters[i].length, rusLetters[i])
+                place = current.indexOf(engLetters[i])
             }
         }
         return current.toString()
     }
-
 
     fun ru2lat(string: String): String {
         var current = string.toLowerCase()
