@@ -11,7 +11,8 @@ import android.support.v7.app.AppCompatDelegate
 import android.text.Html
 import android.widget.Toast
 import io.golos.golos.R
-import io.golos.golos.screens.settings.UserSettings
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsImpl
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.restart
@@ -27,7 +28,7 @@ abstract class GolosActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (UserSettings.isNightMode()) {
+        if (Repository.get.userSettingsRepository.isNightMode()) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_YES))
         }else {
@@ -35,7 +36,7 @@ abstract class GolosActivity : AppCompatActivity() {
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_NO))
         }
         super.onCreate(savedInstanceState)
-        if (!UserSettings.isUserVotedForApp() && !UserSettings.isVoteQuestionMad()) {
+        if (!Repository.get.userSettingsRepository.isUserVotedForApp() && !Repository.get.userSettingsRepository.isVoteQuestionMad()) {
             Handler().postDelayed({
                 if (isResumed) {
                     VoteForAppDialog.getInstance().show(supportFragmentManager, null)
@@ -61,7 +62,6 @@ abstract class GolosActivity : AppCompatActivity() {
         fragments.forEach { it.onActivityResult(requestCode, resultCode, data) }
 
         if (requestCode == CHANGE_THEME && resultCode == Activity.RESULT_OK) {
-            Timber.e(this.toString() + " restarting")
             restart()
         }
     }

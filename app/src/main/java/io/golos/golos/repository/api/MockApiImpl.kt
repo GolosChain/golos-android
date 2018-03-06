@@ -95,8 +95,8 @@ internal class MockApiImpl : GolosApi() {
         return originalService.cancelVote(author, permlink)
     }
 
-    override fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
-        return originalService.upVote(author, permlink, percents)
+    override fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
+        return originalService.vote(author, permlink, percents)
     }
 
     override fun uploadImage(sendFromAccount: String, file: File): String {

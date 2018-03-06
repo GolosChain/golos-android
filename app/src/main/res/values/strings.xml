@@ -46,7 +46,7 @@
     <string name="logout">Log out</string>
     <string name="loading">Loading...</string>
     <string name="choose_vote_power">Choose your name power</string>
-    <string name="user_used_max_comments_chances">You can not name for this post anymore</string>
+    <string name="user_used_max_comments_chances">You can not vote for this post anymore</string>
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>
     <string name="you_voted_same_way">You have already voted for the post</string>
@@ -144,6 +144,8 @@
     <string name="never">Never</string>
     <string name="search_in_golos">Search in Golos.io</string>
     <string name="show_nsfw_images_mode">NSFW content</string>
+    <string name="to_flag">Flag</string>
+    <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

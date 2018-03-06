@@ -5,6 +5,7 @@ import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.persistence.model.AccountInfo
@@ -35,14 +36,16 @@ class RepoGetStoriesTest {
                 MainThreadExecutor,
                 MainThreadExecutor,
                 MainThreadExecutor,
-                MockPersister, ApiImpl(), null
+                MockPersister, ApiImpl(), mLogger = null,
+                mUserSettings = MockUserSettings,
+                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
     }
 
     @Test
     fun getStoriesNotAuthedTest() {
         var stories = repo.getStories(FeedType.NEW)
-        repo.requestStoriesListUpdate(20, FeedType.NEW, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.NEW, completionHandler = { _, _ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         var size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -53,7 +56,7 @@ class RepoGetStoriesTest {
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.ACTUAL)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, completionHandler = { _, _ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -64,7 +67,7 @@ class RepoGetStoriesTest {
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.POPULAR)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, completionHandler = { _, _ ->})
         Assert.assertEquals(20, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -79,7 +82,7 @@ class RepoGetStoriesTest {
     fun testGetAuthedStoiries() {
         repo.authWithActiveWif(userName, privateActive, { _ -> })
         var stories = repo.getStories(FeedType.BLOG)
-        repo.requestStoriesListUpdate(5, FeedType.BLOG, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, completionHandler = { _, _ ->})
         Assert.assertTrue(stories.value!!.items.size > 4)
         var size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -90,7 +93,7 @@ class RepoGetStoriesTest {
         Assert.assertTrue(stories.value!!.items.size > size)
 
         stories = repo.getStories(FeedType.PERSONAL_FEED)
-        repo.requestStoriesListUpdate(10, FeedType.PERSONAL_FEED, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(10, FeedType.PERSONAL_FEED, completionHandler = { _, _ ->})
         Assert.assertTrue(stories.value!!.items.size > 9)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -102,7 +105,7 @@ class RepoGetStoriesTest {
 
 
         stories = repo.getStories(FeedType.COMMENTS)
-        repo.requestStoriesListUpdate(10, FeedType.COMMENTS, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(10, FeedType.COMMENTS, completionHandler = { _, _ ->})
         Assert.assertEquals(10, stories.value!!.items.size)
         size = stories.value!!.items.size
         repo.requestStoriesListUpdate(20,
@@ -118,16 +121,16 @@ class RepoGetStoriesTest {
     fun testGetComments() {
         repo.authWithPostingWif(userName, privatePosting, { _ -> })
         val items = repo.getStories(FeedType.COMMENTS)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, completionHandler = { _, _ ->})
         println(items)
     }
 
     @Test
     fun testGetNewStories() {
         val items = repo.getStories(FeedType.PROMO)
-        repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.PROMO, completionHandler = { _, _ ->})
         (0 until 10).forEach {
-            repo.requestStoriesListUpdate(20, FeedType.PROMO, complitionHandler = {_,_ ->})
+            repo.requestStoriesListUpdate(20, FeedType.PROMO, completionHandler = { _, _ ->})
         }
         println(items)
     }
@@ -138,7 +141,7 @@ class RepoGetStoriesTest {
         Assert.assertNull(items.value)
         repo.requestStoryUpdate("sinte",
                 "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh",
-                null, FeedType.UNCLASSIFIED)
+                null, FeedType.UNCLASSIFIED) { _, e ->}
         Assert.assertNotNull(items.value)
         Assert.assertEquals(1, items.value?.items?.size)
         Assert.assertTrue(items.value?.items!![0].comments().isNotEmpty())
@@ -148,7 +151,7 @@ class RepoGetStoriesTest {
     fun loadAvatartest() {
         val items = repo.getStories(FeedType.POPULAR)
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, complitionHandler = {_,_ ->})
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
     }
@@ -157,17 +160,17 @@ class RepoGetStoriesTest {
     fun laodPersonalizedTest() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
+        repo.requestStoriesListUpdate(5, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad-second"), completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
+        repo.requestStoriesListUpdate(5, FeedType.BLOG, StoryFilter(null, "yuri-vlad-second"), completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
         items = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), complitionHandler = { _, _ ->})
+        repo.requestStoriesListUpdate(5, FeedType.PERSONAL_FEED, StoryFilter(null, "yuri-vlad-second"), completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
 
     }
@@ -176,7 +179,7 @@ class RepoGetStoriesTest {
     fun testloadComments() {
         var items = repo.getStories(FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), complitionHandler = { _, _ ->})
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, StoryFilter(null, "yuri-vlad"), completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
     }
 
@@ -184,7 +187,7 @@ class RepoGetStoriesTest {
     fun testLoadPostsWithFilter() {
         var items = repo.getStories(FeedType.ACTUAL, StoryFilter("psk", null))
         Assert.assertNull(items.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), complitionHandler = { _, _ ->})
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk", null), completionHandler = { _, _ ->})
         Assert.assertNotNull(items.value)
     }
 

@@ -7,7 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
-import io.golos.golos.screens.settings.UserSettings
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsImpl
 import io.golos.golos.screens.widgets.dialogs.GolosDialog
 
 
@@ -27,14 +28,14 @@ class VoteForAppDialog : GolosDialog() {
             } catch (anfe: android.content.ActivityNotFoundException) {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=io.golos.golos")))
             }
-            UserSettings.setUserVotedForApp(true)
+            Repository.get.userSettingsRepository.setUserVotedForApp(true)
             dismiss()
         }
         v.findViewById<View>(R.id.never).setOnClickListener {
-            UserSettings.setUserVotedForApp(true)
+            Repository.get.userSettingsRepository.setUserVotedForApp(true)
             dismiss()
         }
-        UserSettings.setVoteQuestionMade(true)
+        Repository.get.userSettingsRepository.setVoteQuestionMade(true)
         return v
     }
 

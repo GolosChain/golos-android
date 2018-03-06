@@ -143,6 +143,8 @@
     <string name="never">Никогда</string>
     <string name="search_in_golos">Поиск в Golos.io</string>
     <string name="show_nsfw_images_mode">Контент для взрослых</string>
+    <string name="to_flag">Флаговать</string>
+    <string name="cant_vote_after_payout">Cannot vote again on a comment after payout</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

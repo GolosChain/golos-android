@@ -51,7 +51,7 @@ abstract class GolosApi {
 
     abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
 
-    abstract fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem
+    abstract fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem
 
     abstract fun uploadImage(sendFromAccount: String, file: File): String
 

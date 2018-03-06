@@ -13,9 +13,7 @@ import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.repository.Repository
-import io.golos.golos.screens.settings.UserSettings
 import timber.log.Timber
-import java.util.concurrent.Executors
 
 
 /**
@@ -37,8 +35,7 @@ class App : MultiDexApplication() {
             Timber.plant(Timber.DebugTree())
         }
         Fabric.with(this, Crashlytics())
-        Repository.get.onAppCreate()
-        UserSettings.setUp()
+        Repository.get.onAppCreate(this)
         val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
         if (!sharedPrefs.getBoolean("deleteUserData", false)) {
             Repository.get.deleteUserdata()
@@ -78,7 +75,7 @@ class App : MultiDexApplication() {
                 if (aCreated == aDestroyed) Repository.get.onAppDestroy()
             }
         })
-        UserSettings.setVoteQuestionMade(false)
+        Repository.get.userSettingsRepository.setVoteQuestionMade(false)
     }
 
     companion object get {
@@ -88,7 +85,5 @@ class App : MultiDexApplication() {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             return cm?.activeNetworkInfo != null && cm.activeNetworkInfo.isConnected
         }
-
-        val computationExecutor = Executors.newSingleThreadExecutor()
     }
 }

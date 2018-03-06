@@ -2,10 +2,12 @@ package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
-import io.golos.golos.repository.model.UserObject
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.repository.model.UserObject
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
@@ -40,8 +42,13 @@ class RepositoryPostAndVoteTest {
     fun before() {
         repo = RepositoryImpl(
                 executor,
-                executor ,
-                executor, MockPersister, ApiImpl(), null
+                executor,
+                executor,
+                MockPersister,
+                ApiImpl(),
+                mLogger = null,
+                mUserSettings = MockUserSettings,
+                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }
@@ -158,21 +165,21 @@ class RepositoryPostAndVoteTest {
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(2)!!
 
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         repo.requestStoryUpdate(votingItem)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
         Thread.sleep(3000)
         repo.cancelVote(votingItem.rootStory()!!)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
     }
 
 
@@ -183,27 +190,27 @@ class RepositoryPostAndVoteTest {
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(2)!!
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         repo.requestStoryUpdate(votingItem)
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         Thread.sleep(4000L)
 
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName), completionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
-        Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
 
         repo.cancelVote(votingItem.rootStory()!!)
 
-        Assert.assertFalse(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
-        Assert.assertFalse(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertFalse(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        Assert.assertFalse(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
     }
 
     @Test
@@ -217,12 +224,31 @@ class RepositoryPostAndVoteTest {
         assertNotNull(feedItems.value)
         var votingItem = feedItems.value?.items?.get(2)!!
 
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         votingItem = feedItems.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+    }
+
+    @Test
+    fun testFlag() {
+        val feedItems = repo.getStories(FeedType.NEW, null)
+        assertNull(feedItems.value)
+        repo.requestStoriesListUpdate(20, FeedType.NEW,
+                null,
+                null,
+                null)
+        assertNotNull(feedItems.value)
+        val votingItem = feedItems.value?.items?.get(1)!!
+
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+
+        repo.vote(votingItem.rootStory()!!, -100)
+        Thread.sleep(3000)
+        repo.vote(votingItem.rootStory()!!, +100)
+
     }
 
     @Test
@@ -232,11 +258,11 @@ class RepositoryPostAndVoteTest {
         repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(5)!!
-        repo.upVote(votingItem.rootStory()!!, 100)
-        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        repo.vote(votingItem.rootStory()!!, 100)
+        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
 
         repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
-        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
     }
 
     @Test
@@ -251,7 +277,7 @@ class RepositoryPostAndVoteTest {
         val filteredStories = repo.getStories(FeedType.ACTUAL, StoryFilter("psk"))
         assertNotNull(filteredStories)
         assertNull(filteredStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"), completionHandler = { _, _ -> })
         assertNotNull(filteredStories.value)
         Assert.assertEquals(20, filteredStories.value!!.items.size)
         Assert.assertFalse(filteredStories.value!!.items.any { !it.rootStory()!!.tags.contains("psk") })
@@ -269,40 +295,40 @@ class RepositoryPostAndVoteTest {
         val actualStories = repo.getStories(FeedType.POPULAR, null)
         assertNotNull(actualStories)
         assertNull(actualStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, completionHandler = { _, _ -> })
         assertNotNull(actualStories.value)
         Assert.assertEquals(20, actualStories.value!!.items.size)
 
         Assert.assertTrue(actualStories.value!!.items.first().comments().isEmpty())
 
         val firstStory = actualStories.value!!.items.first().rootStory()!!
-        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items.first().comments().isNotEmpty())
 
         var updatingSoty = actualStories.value!!.items[2].rootStory()!!
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName), completionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
 
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items[2].comments().isNotEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isNotEmpty())
 
         actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter("psk"))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"), completionHandler = { _, _ -> })
 
 
         updatingSoty = actualStoriesWithFilter.value!!.items[1].rootStory()!!
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isNotEmpty())
     }
 
@@ -355,7 +381,7 @@ class RepositoryPostAndVoteTest {
         repo.subscribeOnUserBlog(firstInSubscribersList.name, { _, _ -> })
 
         Assert.assertEquals("we subscribed on 2 blogs, so sub count must be +2", userSubsCount + 2, userAcc!!.subscibesCount)
-      //  Assert.assertTrue(vredinkaSubscribers!!.first().subscribeStatus.isCurrentUserSubscribed)
+        //  Assert.assertTrue(vredinkaSubscribers!!.first().subscribeStatus.isCurrentUserSubscribed)
 
         repo.unSubscribeOnUserBlog(firstInSubscribersList.name, { _, _ -> })
 

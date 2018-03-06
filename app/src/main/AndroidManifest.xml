@@ -19,8 +19,7 @@
         <activity
             android:name=".screens.editor.EditorActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-             />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
             android:launchMode="singleInstance"
@@ -83,6 +82,17 @@
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
+
+        <service android:name=".notifications.MyInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".notifications.MyFireBaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

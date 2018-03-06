@@ -3,6 +3,7 @@ package io.golos.golos.repository
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.Tag
 import junit.framework.Assert
@@ -29,7 +30,9 @@ class RepoTagsTest {
                 MainThreadExecutor,
                 MainThreadExecutor ,
                 MainThreadExecutor,
-                MockPersister, ApiImpl(), null
+                MockPersister,  mLogger = null,
+                mUserSettings = MockUserSettings,
+                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
     }
 

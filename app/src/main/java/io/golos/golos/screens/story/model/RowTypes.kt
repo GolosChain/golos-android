@@ -1,6 +1,5 @@
 package io.golos.golos.screens.story.model
 
-import io.golos.golos.repository.model.Format
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
@@ -9,7 +8,6 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.safety.Whitelist
-import timber.log.Timber
 
 data class TextRow(val text: String) : Row() {
 }
@@ -25,7 +23,7 @@ class StoryParserToRows {
         if (story.body.isEmpty()) return out
         var str = story.body
         str = str.replace("<center>", "").replace("</center>", "")
-        if (story.format == Format.MARKDOWN || str.contains(markdownChecker)) {
+        if (story.format == GolosDiscussionItem.Format.MARKDOWN || str.contains(markdownChecker)) {
             str = str.replace(Regexps.imageWithWhitespace) {
                 " ![](${it.value.trim()})"
             }

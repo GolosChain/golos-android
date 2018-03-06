@@ -3,7 +3,6 @@ package io.golos.golos
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
-import io.golos.golos.utils.Regexps
 import org.junit.Assert
 import org.junit.Test
 

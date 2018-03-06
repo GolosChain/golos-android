@@ -50,12 +50,12 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             field = newItems
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == 0) return TextBlockHolder(parent!!)
-        else return ImageBlockHolder(parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == 0) return TextBlockHolder(parent)
+        else return ImageBlockHolder(parent)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
                 if (vh.adapterPosition == -1) return@RowWrapper

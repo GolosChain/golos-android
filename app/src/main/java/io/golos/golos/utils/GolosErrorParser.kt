@@ -41,6 +41,8 @@ object GolosErrorParser {
 
         if (error.message?.contains("Your reputation must be at least") == true)
             return R.string.you_must_have_more_repo_for_action
+        if (error.error.steemErrorDetails.data.toString().contains("Cannot vote again on a comment after payout"))
+            return R.string.cant_vote_after_payout
         if (error.error.steemErrorDetails.data.toString().contains(" Voter has used the maximum number of vote changes on this commen"))
             return R.string.user_used_max_comments_chances
         if (error.error.steemErrorDetails.data.toString().contains(" You have already voted in a similar way"))

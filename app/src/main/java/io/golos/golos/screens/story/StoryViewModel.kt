@@ -58,25 +58,25 @@ class StoryViewModel : ViewModel() {
                 it.rootStory()?.author == this.author
                         && it.rootStory()?.permlink == this.permLink
             }?.let {
-                        val mustHaveComments = it.rootStory()?.commentsCount ?: 0
-                        val commentsSize = it.comments().size
-                        var isLoading = false
-                        if (mustHaveComments > 0 && commentsSize == 0) isLoading = true
+                val mustHaveComments = it.rootStory()?.commentsCount ?: 0
+                val commentsSize = it.comments().size
+                var isLoading = false
+                if (mustHaveComments > 0 && commentsSize == 0) isLoading = true
 
-                        mLiveData.value = StoryViewState(isLoading,
-                                it.rootStory()?.title ?: "",
-                                mRepository.isUserLoggedIn(),
-                                storyItems?.error,
-                                it.rootStory()?.tags ?: arrayListOf(),
-                                it,
-                                mRepository.isUserLoggedIn(),
-                                mLiveData.value?.subscribeOnStoryAuthorStatus
-                                        ?: SubscribeStatus.UnsubscribedStatus,
-                                mLiveData.value?.subscribeOnTagStatus
-                                        ?: SubscribeStatus.UnsubscribedStatus)
+                mLiveData.value = StoryViewState(isLoading,
+                        it.rootStory()?.title ?: "",
+                        mRepository.isUserLoggedIn(),
+                        storyItems?.error,
+                        it.rootStory()?.tags ?: arrayListOf(),
+                        it,
+                        mRepository.isUserLoggedIn(),
+                        mLiveData.value?.subscribeOnStoryAuthorStatus
+                                ?: SubscribeStatus.UnsubscribedStatus,
+                        mLiveData.value?.subscribeOnTagStatus
+                                ?: SubscribeStatus.UnsubscribedStatus)
 
-                        this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
-                    }
+                this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
+            }
         }
         mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
         mLiveData.addSource(mRepository.getCurrentUserDataAsLiveData()) {
@@ -122,7 +122,7 @@ class StoryViewModel : ViewModel() {
                     SubscribeStatus(tagItem != null, UpdatingState.DONE)
             )
         })
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
     }
 
 
@@ -153,20 +153,24 @@ class StoryViewModel : ViewModel() {
                         .supportFragmentManager, "images")
     }
 
-    val canShowVoteDialog: Boolean
+    val canUserVote: Boolean
         get() {
             return mRepository.isUserLoggedIn()
 
         }
 
-    fun canUserVoteOnThis(story: StoryWrapper): Boolean {
-        return !story.story.isUserUpvotedOnThis
+    fun canUserUpVoteOnThis(story: StoryWrapper): Boolean {
+        return story.story.userVotestatus != GolosDiscussionItem.UserVoteType.VOTED
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
-        if (canUserVoteOnThis(story)) mRepository.upVote(story.story, percent)
-        else mRepository.cancelVote(story.story)
+        if (percent == 0.toShort()) mRepository.cancelVote(story.story)
+        else {
+            mRepository.vote(story.story, percent)
+
+        }
     }
+
 
     fun canUserWriteComments(): Boolean {
         return mRepository.isUserLoggedIn()
@@ -198,7 +202,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onVoteRejected() {
-        showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+        showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
     }
 
     fun onTagClick(context: Context, text: String?) {
@@ -223,7 +227,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun requestRefresh() {
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
     }
 
     fun onCommentClick(context: Context, comment: GolosDiscussionItem) {

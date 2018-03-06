@@ -61,14 +61,14 @@ class UserListAdapter(private val onUserClick: (UserListRowData) -> Unit = { _ -
         return listItems.size
     }
 
-    override fun onBindViewHolder(holder: UserListViewHolder?, position: Int) {
-        holder?.state = UserListItemState(listItems[position],
+    override fun onBindViewHolder(holder: UserListViewHolder, position: Int) {
+        holder.state = UserListItemState(listItems[position],
                 { onUserClick.invoke(listItems[it.adapterPosition]) },
                 { onSubscribeClick.invoke(listItems[it.adapterPosition]) })
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): UserListViewHolder {
-        return UserListViewHolder(parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserListViewHolder {
+        return UserListViewHolder(parent)
     }
 }
 

@@ -181,7 +181,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                 })
     }
 
-    override fun onBindViewHolder(holder: StoriesViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: StoriesViewHolder, position: Int) {
         holder?.let {
             val wrapper = StripeWrapper(mStripes[position],
                     feedCellSettings.isImagesShown,

@@ -11,7 +11,6 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.ItemType
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
@@ -73,9 +72,8 @@ abstract class StoriesViewHolder(resId: Int,
     open fun handleImagePlacing(newState: StripeWrapper?,
                                 imageView: ImageView) {
         val story = newState?.stripe?.rootStory()
-
+        getMainImage().setImageDrawable(null)
         if (story == null) {
-            imageView.setImageDrawable(null)
             return
         }
 
@@ -84,11 +82,11 @@ abstract class StoriesViewHolder(resId: Int,
             imageView.setImageDrawable(null)
             return
         }
-        if ((story.type == ItemType.IMAGE_FIRST || showImageIfNotImageFirst())//if we show image at all
+        if ((story.type == GolosDiscussionItem.ItemType.IMAGE_FIRST || showImageIfNotImageFirst())//if we show image at all
                 && story.tags.find {
-            val lowerCased = it.toLowerCase() // and there is nsfw tag
-            lowerCased == "nsfw" || lowerCased == "nswf"
-        } != null) {
+                    val lowerCased = it.toLowerCase() // and there is nsfw tag
+                    lowerCased == "nsfw" || lowerCased == "nswf"
+                } != null) {
 
             if (newState.nswfStrategy.makeExceptionForUser.first &&
                     newState.nswfStrategy.makeExceptionForUser.second == story.author) {
@@ -106,7 +104,7 @@ abstract class StoriesViewHolder(resId: Int,
             }
         }
 
-        if (story.type != ItemType.IMAGE_FIRST) {
+        if (story.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
             if (showImageIfNotImageFirst()) {
                 loadMainImage(story, imageView)
             } else {

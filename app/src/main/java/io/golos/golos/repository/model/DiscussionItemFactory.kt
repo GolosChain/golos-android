@@ -40,9 +40,11 @@ object DiscussionItemFactory {
 
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
-                commentsCount = commentsCount, permlink = permlink, childrenCount = childrenCount, reputation = reputation,
-                lastUpdated = lastUpdated, created = created, parentPermlink = parentPermlink, firstRebloggedBy = firstRebloggedBy,
-                gbgAmount = gbgAmount, body = body, author = author, cleanedFromImages = cleanedFromImages)
+                commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
+                bodyLength = discussion.bodyLength.toLongOrNull()
+                        ?: 0L, author = author, parentPermlink = parentPermlink, childrenCount = childrenCount,
+                reputation = reputation, lastUpdated = lastUpdated, created = created,
+                firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
         setDataFromTagsString(discussion.jsonMetadata, item)
         discussion.activeVotes?.forEach {
             item.activeVotes.add(VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100))
@@ -73,9 +75,9 @@ object DiscussionItemFactory {
         val totalRshares = discussion.voteRshares
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
-                commentsCount = commentsCount, permlink = permlink, childrenCount = childrenCount, reputation = reputation,
-                lastUpdated = lastUpdated, created = created, parentPermlink = parentPermlink, firstRebloggedBy = firstRebloggedBy,
-                gbgAmount = gbgAmount, body = body, author = author, cleanedFromImages = cleanedFromImages)
+                commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
+                bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, childrenCount = childrenCount,
+                reputation = reputation, lastUpdated = lastUpdated, created = created, firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
 
         setDataFromTagsString(discussion.jsonMetadata, item)
         item.activeVotes.addAll(discussion.votes)
@@ -104,7 +106,7 @@ object DiscussionItemFactory {
             try {
                 if (json.has("format")) {
                     val format = json.getString("format")
-                    to.format = if (format.equals("markdown", true)) Format.MARKDOWN else Format.HTML
+                    to.format = if (format.equals("markdown", true)) GolosDiscussionItem.Format.MARKDOWN else GolosDiscussionItem.Format.HTML
                 }
             } catch (e: JSONException) {
                 e.printStackTrace()
@@ -143,9 +145,9 @@ object DiscussionItemFactory {
             Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
         } else {
             if (golosDiscussionItem.parts[0] is ImageRow) {
-                golosDiscussionItem.type = ItemType.IMAGE_FIRST
+                golosDiscussionItem.type = GolosDiscussionItem.ItemType.IMAGE_FIRST
             } else {
-                if (golosDiscussionItem.images.size != 0) golosDiscussionItem.type = ItemType.PLAIN_WITH_IMAGE
+                if (golosDiscussionItem.images.size != 0) golosDiscussionItem.type = GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE
             }
         }
         golosDiscussionItem.cleanedFromImages = if (golosDiscussionItem.parts.isEmpty())

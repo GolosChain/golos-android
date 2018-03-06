@@ -31,7 +31,7 @@ class StoryViewModelTest {
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor ,
-                MainThreadExecutor, MockPersister, ApiImpl(), null
+                MainThreadExecutor, MockPersister, ApiImpl(), mLogger = null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = StoryViewModel()
@@ -45,7 +45,7 @@ class StoryViewModelTest {
         Assert.assertNull(state)
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
         var story = repo.getStories(FeedType.UNCLASSIFIED, null)
-        repo.requestStoryUpdate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED)
+        repo.requestStoryUpdate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED) { _, e ->}
         storyViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true
@@ -58,7 +58,7 @@ class StoryViewModelTest {
     fun requestPersonalPage() {
         val stories = repo.getStories(FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"))
         Assert.assertNull(stories.value)
-        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), completionHandler = { _, _ -> })
         Assert.assertNotNull(stories.value)
         var state: StoryViewState? = null
         storyViewModel.liveData.observeForever { t -> state = t }

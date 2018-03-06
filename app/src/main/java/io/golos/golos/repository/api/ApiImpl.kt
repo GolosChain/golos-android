@@ -295,7 +295,7 @@ class ApiImpl : GolosApi() {
         return story
     }
 
-    override fun upVote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
+    override fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
         mGolosApi.simplifiedOperations.vote(AccountName(author), Permlink(permlink), percents)
         return getRootStoryWithoutComments(author, permlink)
     }

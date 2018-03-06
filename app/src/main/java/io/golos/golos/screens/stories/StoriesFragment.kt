@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
@@ -91,8 +92,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 onUpvoteClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWithComments) {
                         if (mViewModel?.canVote() == true) {
-                            if (story.rootStory()?.isUserUpvotedOnThis == true) {
-                                mViewModel?.downVote(story)
+                            if (story.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                                mViewModel?.cancelVote(story)
                             } else {
                                 val dialog = VoteDialog.getInstance()
                                 dialog.selectPowerListener = object : OnVoteSubmit {

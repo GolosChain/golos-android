@@ -15,6 +15,7 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -59,7 +60,7 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
         return items.size
     }
 
-    override fun onBindViewHolder(holder: CommentViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         holder?.state = CommentHolderState(items[position],
                 onUpvoteClick = { onUpvoteClick.invoke(items[it.adapterPosition]) },
                 onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) },
@@ -68,8 +69,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                 onUserVotesClick = { onUserVotesClick.invoke(items[it.adapterPosition]) })
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CommentViewHolder {
-        return CommentViewHolder(parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
+        return CommentViewHolder(parent)
     }
 }
 
@@ -149,7 +150,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 }
                 mUpvoteBtn.text = "$ ${String.format("%.3f", comment.payoutInDollars)}"
 
-                if (comment.isUserUpvotedOnThis) {
+                if (comment.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_circle_green_outline_20dp, 0, 0, 0)
                 } else {

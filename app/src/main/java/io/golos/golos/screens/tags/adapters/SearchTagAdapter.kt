@@ -35,13 +35,13 @@ class SearchTagAdapter(var onTagClick: (LocalizedTag) -> Unit) : RecyclerView.Ad
             field = value
         }
 
-    override fun onBindViewHolder(holder: TagWithSearchIconVh?, position: Int) {
-        holder?.state = SearchTagState(tags[position],
+    override fun onBindViewHolder(holder: TagWithSearchIconVh, position: Int) {
+        holder.state = SearchTagState(tags[position],
                 { onTagClick.invoke(tags[it.adapterPosition]) })
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): TagWithSearchIconVh {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagWithSearchIconVh {
         return TagWithSearchIconVh(parent!!)
     }
 

@@ -2,14 +2,13 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
-import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
@@ -33,19 +32,18 @@ abstract class Repository {
                         networkExecutor,
                         Executors.newSingleThreadExecutor(),
                         mMainThreadExecutor,
-                        Persister.get,
-                        GolosApi.get, object : ExceptionLogger {
-                    override fun log(t: Throwable) {
-                        try {
-                            if (!Fabric.isInitialized()) {
-                                Fabric.with(App.context, Crashlytics())
+                        mLogger = object : ExceptionLogger {
+                            override fun log(t: Throwable) {
+                                try {
+                                    if (!Fabric.isInitialized()) {
+                                        Fabric.with(App.context, Crashlytics())
+                                    }
+                                    Crashlytics.logException(t)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
                             }
-                            Crashlytics.logException(t)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                })
+                        })
                 return instance!!
             }
         private val networkExecutor: ThreadPoolExecutor by lazy {
@@ -76,7 +74,7 @@ abstract class Repository {
         return tag.length > 2 && !blacklistTags.contains(tag) && !Regexps.wrongTagRegexp.matches(tag)
     }
 
-    open fun onAppCreate() {}
+    open fun onAppCreate(ctx: Context) {}
 
     abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoriesFeed>
 
@@ -85,7 +83,7 @@ abstract class Repository {
                                           filter: StoryFilter? = null,
                                           startAuthor: String? = null,
                                           startPermlink: String? = null,
-                                          complitionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
+                                          completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun authWithMasterKey(userName: String,
                                    masterKey: String,
@@ -111,14 +109,16 @@ abstract class Repository {
 
     abstract fun lastCreatedPost(): LiveData<CreatePostResult>
 
-    abstract fun upVote(comment: GolosDiscussionItem, percents: Short)
+    abstract fun vote(comment: GolosDiscussionItem, percents: Short)
 
     abstract fun cancelVote(comment: GolosDiscussionItem)
 
-    abstract fun requestStoryUpdate(story: StoryWithComments)
+    abstract fun requestStoryUpdate(story: StoryWithComments,
+                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun requestStoryUpdate(author: String, permLink: String,
-                                    blog: String?, feedType: FeedType)
+                                    blog: String?, feedType: FeedType,
+                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
                             resultListener: (CreatePostResult?, GolosError?) -> Unit)
@@ -179,7 +179,9 @@ abstract class Repository {
 
     }
 
+    abstract val userSettingsRepository: UserSettingsRepository
 
+    abstract val notificationsrepository: NotificationsRepository
 }
 
 interface ImageLoadRunnable : Runnable

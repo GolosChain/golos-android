@@ -10,7 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
-import io.golos.golos.repository.model.ItemType
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
@@ -67,10 +67,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
-
         if (mAvatar.drawable != noAvatarDrawable) mAvatar.setImageDrawable(noAvatarDrawable)
-
-        val start = System.currentTimeMillis()
         super.handlerStateChange(newState, oldState)
         if (newState != null) {
 
@@ -83,7 +80,7 @@ class StripeFullViewHolder(parent: ViewGroup,
                     .error(mGlide.load(noAvatarDrawable))
                     .into(mAvatar)
 
-            if (wrapper.isUserUpvotedOnThis) {
+            if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
@@ -105,7 +102,7 @@ class StripeFullViewHolder(parent: ViewGroup,
                 mUpvoteBtn.setViewVisible()
             }
             mVotersBtn.text = wrapper.votesNum.toString()
-            if (newState.stripe.rootStory()?.type != ItemType.IMAGE_FIRST) {
+            if (newState.stripe.rootStory()?.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
                 mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.setViewVisible()
                 mMainImageBig.setViewGone()

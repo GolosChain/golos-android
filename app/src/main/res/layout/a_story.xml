@@ -168,6 +168,14 @@
                         style="@style/StoryBottomControlButton"
                         android:layout_marginStart="@dimen/margin_material_half"
                         android:background="?attr/selectableItemBackground" />
+
+                    <TextView
+                        android:id="@+id/flag_btn"
+                        style="@style/StoryBottomControlButton"
+                        android:layout_marginStart="@dimen/margin_material_half"
+                        android:background="?attr/selectableItemBackground"
+                        android:drawablePadding="@dimen/margin_material_half"
+                        android:text="@string/to_flag" />
                 </LinearLayout>
 
                 <View
@@ -312,8 +320,6 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
                     android:id="@+id/no_comments_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -321,19 +327,21 @@
                     android:layout_marginEnd="@dimen/margin_material"
                     android:layout_marginStart="@dimen/margin_material"
                     android:layout_marginTop="@dimen/margin_material"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:text="@string/no_comments"
                     android:textColor="@color/gray_1"
                     android:textSize="@dimen/font_medium"
                     android:visibility="gone" />
 
                 <ProgressBar
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
                     android:id="@+id/comments_progress"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_marginBottom="@dimen/margin_material"
                     android:layout_marginTop="@dimen/margin_material"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:indeterminate="true"
                     android:visibility="gone" />
             </LinearLayout>

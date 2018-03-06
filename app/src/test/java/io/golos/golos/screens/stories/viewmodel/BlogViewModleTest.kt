@@ -7,6 +7,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.RepositoryImpl
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.api.ApiImpl
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.InternetStatusNotifier
 import org.junit.Assert
 import org.junit.Before
@@ -29,7 +30,7 @@ class BlogViewModleTest {
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor ,
-                MainThreadExecutor, MockPersister, ApiImpl(), null
+                MainThreadExecutor, MockPersister, ApiImpl(), mLogger = null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = BlogViewModel()
@@ -75,9 +76,9 @@ class BlogViewModleTest {
         Assert.assertEquals(20, state!!.items.size)
         repo.cancelVote(state!!.items[3].rootStory()!!)
 
-        Assert.assertTrue(!state!!.items[3].rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(state!!.items[3].rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         storyViewModel.vote(state!!.items[3], 100)
 
-        Assert.assertTrue(state!!.items[3].rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(state!!.items[3].rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
     }
 }

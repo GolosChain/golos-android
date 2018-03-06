@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.UpdatingState
@@ -60,7 +61,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
         if (newState != null && wrapper != null) {
 
-            if (wrapper.isUserUpvotedOnThis) {
+            if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 mUpvoteIv.setImageDrawable(userVotedvotedDrarawble)
                 mUpvoteValue.setTextColorCompat(R.color.upvote_green)
             } else {

@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
@@ -197,7 +196,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())
             if (data != null) {
-                App.computationExecutor.execute {
+               Thread(Runnable {
                     try {
                         val inputStream = contentResolver.openInputStream(data.data)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -219,7 +218,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                             mToolbar.showSnackbar(R.string.wrong_image)
                         }
                     }
-                }
+                }).start()
             }
         }
     }

@@ -68,9 +68,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
             field = value
         }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
-        if (holder == null) return
-
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is EditorEditTextViewHolder -> {
                 val part = parts[position] as EditorTextPart
@@ -103,10 +101,10 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         return parts.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            0 -> EditorEditTextViewHolder(R.layout.vh_edit_text, parent!!)
-            1 -> EditorImageViewHolder(parent!!)
+            0 -> EditorEditTextViewHolder(R.layout.vh_edit_text, parent)
+            1 -> EditorImageViewHolder(parent)
             else -> throw IllegalStateException("unknown view type $viewType")
         }
     }

@@ -29,12 +29,12 @@ class ImagesAdapter(private var onImageClick: (ImageRow) -> Unit = { print(it) }
         return list.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): StoryBottomImagesViewHolder {
-        return StoryBottomImagesViewHolder(R.layout.v_image, parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryBottomImagesViewHolder {
+        return StoryBottomImagesViewHolder(R.layout.v_image, parent)
     }
 
-    override fun onBindViewHolder(holder: StoryBottomImagesViewHolder?, position: Int) {
-        holder?.state = ImageHolderState(list[position], { onImageClick.invoke(list[it.adapterPosition]) })
+    override fun onBindViewHolder(holder: StoryBottomImagesViewHolder, position: Int) {
+        holder.state = ImageHolderState(list[position], { onImageClick.invoke(list[it.adapterPosition]) })
     }
 }
 
