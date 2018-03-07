@@ -1202,7 +1202,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 val payouts = RSharesConverter.convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
                 val voters = it
                         .activeVotes
-                        .filter { it.percent > 0 }
+                        .filter { it.percent != 0 }
                         .mapIndexed { index, voteLight ->
                             VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
                         }

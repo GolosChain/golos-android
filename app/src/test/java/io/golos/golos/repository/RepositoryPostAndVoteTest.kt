@@ -233,6 +233,25 @@ class RepositoryPostAndVoteTest {
     }
 
     @Test
+    fun testDownVote() {
+        val feedItems = repo.getStories(FeedType.NEW, StoryFilter(null, userName))
+        assertNull(feedItems.value)
+        repo.requestStoriesListUpdate(20, FeedType.NEW,
+                null,
+                null,
+                null)
+        assertNotNull(feedItems.value)
+        var votingItem = feedItems.value?.items?.get(1)!!
+
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+
+        repo.vote(votingItem.rootStory()!!, -100)
+
+        votingItem = feedItems.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED)
+    }
+
+    @Test
     fun testFlag() {
         val feedItems = repo.getStories(FeedType.NEW, null)
         assertNull(feedItems.value)

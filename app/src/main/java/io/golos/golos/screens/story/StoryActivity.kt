@@ -332,7 +332,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
         mBottomImagesRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
+        mCommentsRecycler.adapter = CommentsAdapter(
+                onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
                 onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) })
         mStoryRecycler.adapter = StoryAdapter()
@@ -387,6 +388,13 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                     dialog.show(supportFragmentManager, null)
                 } else mViewModel.onStoryVote(it, 0)
+            } else {
+                mViewModel.onVoteRejected()
+            }
+        }
+        (mCommentsRecycler.adapter as CommentsAdapter).onDownVoteClick = {
+            if (mViewModel.canUserVote) {
+                mViewModel.onStoryVote(it, -100)
             } else {
                 mViewModel.onVoteRejected()
             }

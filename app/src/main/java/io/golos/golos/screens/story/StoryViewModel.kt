@@ -166,7 +166,12 @@ class StoryViewModel : ViewModel() {
     fun onStoryVote(story: StoryWrapper, percent: Short) {
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
-            mRepository.vote(story.story, percent)
+            if (story.story.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                    && percent < 0) {
+                mRepository.vote(story.story, 0)
+            } else {
+                mRepository.vote(story.story, percent)
+            }
 
         }
     }

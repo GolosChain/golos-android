@@ -93,9 +93,10 @@
         android:padding="0dp"
         android:text="$ sdg"
         android:textAllCaps="false"
+        android:textSize="@dimen/font_small"
+
         app:layout_constraintStart_toStartOf="@id/username_tv"
-        app:layout_constraintTop_toBottomOf="@+id/content_lo"
-        app:srcCompat="@drawable/ic_keyboard_arrow_up_white_36dp" />
+        app:layout_constraintTop_toBottomOf="@+id/content_lo" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -122,7 +123,7 @@
         style="@style/StoryBottomControlButton"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginStart="@dimen/margin_material"
 
         android:background="?attr/selectableItemBackground"
 
@@ -132,22 +133,36 @@
         app:layout_constraintStart_toEndOf="@+id/upvote_btn"
         app:layout_constraintTop_toTopOf="@+id/upvote_btn" />
 
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/flag_btn"
+        android:layout_width="36dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="@+id/barrier"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/votes_btn"
+        app:layout_constraintTop_toTopOf="@+id/upvote_btn"
+        app:srcCompat="@drawable/ic_flag_20dp_gray" />
+
     <Button
         android:id="@+id/answer_btn"
         style="@style/Base.Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:gravity="center_vertical"
+        android:gravity="center"
+        android:minWidth="48dp"
         android:padding="0dp"
-        android:paddingEnd="24dp"
-        android:paddingStart="24dp"
+        android:paddingEnd="@dimen/margin_material_small"
+        android:paddingStart="@dimen/margin_material_small"
         android:text="@string/answer"
         android:textAllCaps="false"
         android:textColor="@color/textColorP"
-        android:textSize="@dimen/font_small"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/barrier"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/votes_btn"
+        app:layout_constraintStart_toEndOf="@+id/flag_btn"
         app:layout_constraintTop_toTopOf="@+id/upvote_btn" />
 </android.support.constraint.ConstraintLayout>

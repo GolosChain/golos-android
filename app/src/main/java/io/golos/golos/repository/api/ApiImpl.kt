@@ -290,9 +290,7 @@ class ApiImpl : GolosApi() {
     }
 
     private fun getRootStoryWithoutComments(author: String, permlink: String): GolosDiscussionItem {
-        val story = DiscussionItemFactory.create(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
-
-        return story
+        return DiscussionItemFactory.create(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
     }
 
     override fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem {

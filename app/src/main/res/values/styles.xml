@@ -314,7 +314,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:drawablePadding">6dp</item>
-        <item name="android:textColor">@color/textColorP</item>
+        <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:paddingEnd">@dimen/margin_material_half</item>
         <item name="android:paddingStart">@dimen/margin_material_half</item>
         <item name="android:textSize">@dimen/font_small</item>

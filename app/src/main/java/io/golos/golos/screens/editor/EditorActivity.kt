@@ -196,7 +196,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_ID) {
             val handler = Handler(Looper.getMainLooper())
             if (data != null) {
-               Thread(Runnable {
+                Thread(Runnable {
                     try {
                         val inputStream = contentResolver.openInputStream(data.data)
                         val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -267,10 +267,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
-                    rootStory.rootStory()!!.author,
+                    rootStory.rootStory()?.author ?: return,
                     false,
-                    rootStory.rootStory()!!.id,
-                    rootStory.rootStory()!!.id,
+                    rootStory.rootStory()?.id ?: return,
+                    rootStory.rootStory()?.id ?: return,
                     storyFilter,
                     feedType)))
             ctx.startActivity(intent)
@@ -283,10 +283,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                                        storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
-                    rootStory.rootStory()!!.author,
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()?.title
+                    ?: return,
+                    rootStory.rootStory()?.author ?: return,
                     false,
-                    rootStory.rootStory()!!.id,
+                    rootStory.rootStory()?.id ?: return,
                     commentToAnswer.id,
                     storyFilter,
                     feedType)))

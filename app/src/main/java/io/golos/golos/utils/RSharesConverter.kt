@@ -1,6 +1,7 @@
 package io.golos.golos.utils
 
 import eu.bittrade.libs.steemj.base.models.GlobalProperties
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -95,6 +96,10 @@ object RSharesConverter {
     // convert only post & comments gbg, otherwise it will be long overflow
     fun convertRSharesToGbg2(postPayoutInGbg: Double, rshares: List<Long>, totalRshares: Long): List<Double> {
         val total = totalRshares.toDouble()
+        Timber.e("total = $total")
+        if (total == 0.0) {
+            return rshares.map { 0.0 }
+        }
         return rshares.map { long ->
             val percent = long / total
             postPayoutInGbg * percent

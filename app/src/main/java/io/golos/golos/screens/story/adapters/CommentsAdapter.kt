@@ -3,6 +3,7 @@ package io.golos.golos.screens.story.adapters
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
+import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -28,12 +29,15 @@ import java.util.*
  */
 data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
+                              val onDownVoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
                               val onUserClick: (RecyclerView.ViewHolder) -> Unit,
                               val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
                               val onUserVotesClick: (RecyclerView.ViewHolder) -> Unit)
 
+
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onDownVoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onAnswerClick: (StoryWrapper) -> Unit = { print(it) },
                       var onUserClick: (StoryWrapper) -> Unit = { print(it) },
                       var onCommentsClick: (StoryWrapper) -> Unit = { print(it) },
@@ -61,12 +65,13 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
     }
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
-        holder?.state = CommentHolderState(items[position],
+        holder.state = CommentHolderState(items[position],
                 onUpvoteClick = { onUpvoteClick.invoke(items[it.adapterPosition]) },
                 onAnswerClick = { onAnswerClick.invoke(items[it.adapterPosition]) },
                 onUserClick = { onUserClick.invoke(items[it.adapterPosition]) },
                 onCommentsClick = { onCommentsClick.invoke(items[it.adapterPosition]) },
-                onUserVotesClick = { onUserVotesClick.invoke(items[it.adapterPosition]) })
+                onUserVotesClick = { onUserVotesClick.invoke(items[it.adapterPosition]) },
+                onDownVoteClick = { onDownVoteClick.invoke(items[it.adapterPosition]) })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -88,6 +93,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
     private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mVotesIv: TextView = itemView.findViewById(R.id.votes_btn)
+    private val mDownVoteBtn: AppCompatImageView = itemView.findViewById(R.id.flag_btn)
 
     init {
         mText.movementMethod = GolosMovementMethod.instance
@@ -123,11 +129,13 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mImage.setOnClickListener { mText.callOnClick() }
                 mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
                 mVotesIv.setOnClickListener { state?.onUserVotesClick?.invoke(this) }
+                mDownVoteBtn.setOnClickListener { state?.onDownVoteClick?.invoke(this) }
 
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
-                    mGlide.load(ImageUriResolver.resolveImageWithSize(comment.avatarPath ?: "",wantedwidth = mAvatar.width))
+                    mGlide.load(ImageUriResolver.resolveImageWithSize(comment.avatarPath
+                            ?: "", wantedwidth = mAvatar.width))
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.ic_person_gray_24dp))
                             .into(mAvatar)
@@ -156,6 +164,11 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 } else {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_cricle_gray_outline_20dp, 0, 0, 0)
+                }
+                if (comment.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                    mDownVoteBtn.setImageResource(R.drawable.ic_flag_20dp_red)
+                } else {
+                    mDownVoteBtn.setImageResource(R.drawable.ic_flag_20dp_gray)
                 }
                 if (field!!.comment.updatingState == UpdatingState.UPDATING) {
                     mUpvoteBtn.visibility = View.INVISIBLE
