@@ -164,6 +164,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
+        if (story.updatingState == UpdatingState.UPDATING) return
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
             if (story.story.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
@@ -203,6 +204,20 @@ class StoryViewModel : ViewModel() {
             }
         } else {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment))
+        }
+    }
+
+    fun onEditClick(ctx: Context) {
+        if (mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
+            mLiveData.value?.let {
+                EditorActivity.startEditPostOrComent(ctx,
+                        it.storyTree,
+                        it.storyTree.rootStory() ?: return,
+                        feedType,
+                        filter)
+            }
+        } else {
+            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.you_must_have_more_repo_for_action))
         }
     }
 
@@ -304,4 +319,6 @@ class StoryViewModel : ViewModel() {
         mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
         mLiveData.removeSource(mRepository.getUserSubscribedTags())
     }
+
+
 }

@@ -113,7 +113,7 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
 
     private fun setup(tagName: String) {
         val fab: FloatingActionButton = findViewById(R.id.fab)
-        fab.setOnClickListener({ EditorActivity.startPostEditor(this, "") })
+        fab.setOnClickListener({ EditorActivity.startPostCreator(this, "") })
         mTagTitle = findViewById(R.id.title_text)
         mPostCountTv = findViewById(R.id.posts_count)
         mSubscribeBtnLo = findViewById(R.id.subscribe_btn_lo)

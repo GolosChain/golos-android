@@ -139,7 +139,7 @@ object DiscussionItemFactory {
     }
 
     private fun setTypeOfItem(golosDiscussionItem: GolosDiscussionItem) {
-        val toRowsParser = StoryParserToRows()
+        val toRowsParser = StoryParserToRows
         golosDiscussionItem.parts = toRowsParser.parse(golosDiscussionItem).toArrayList()
         if (golosDiscussionItem.parts.size == 0) {
             Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")

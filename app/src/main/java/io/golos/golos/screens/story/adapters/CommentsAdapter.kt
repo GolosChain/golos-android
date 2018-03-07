@@ -180,7 +180,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mProgress.visibility = View.GONE
                 }
                 mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
-                val rows = ArrayList(StoryParserToRows().parse(comment))
+                val rows = ArrayList(StoryParserToRows.parse(comment))
                 var imagePart = rows.findLast { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE

@@ -17,7 +17,6 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
-import timber.log.Timber
 
 
 /**
@@ -56,7 +55,7 @@ class StoriesHolderFragment : GolosFragment() {
         mFab = root.findViewById(R.id.fab)
         mFab.setOnClickListener({
             context?.let {
-                EditorActivity.startPostEditor(it, "")
+                EditorActivity.startPostCreator(it, "")
             }
         })
         mPager = root.findViewById(R.id.view_pager)

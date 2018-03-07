@@ -189,7 +189,7 @@ public class ParseTest {
     @Test
     public void storyParserTest() throws Exception {
         final StoryWithComments tree = Utils.readStoryFromResourse("story4.json");
-        final StoryParserToRows parser = new StoryParserToRows();
+        final StoryParserToRows parser = StoryParserToRows.INSTANCE;
         List<Row> rows = parser.parse(tree.rootStory());
         assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg"), rows.get(0));
         assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(2));

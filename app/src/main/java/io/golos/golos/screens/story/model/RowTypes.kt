@@ -16,7 +16,7 @@ data class ImageRow(val src: String) : Row()
 
 sealed class Row
 
-class StoryParserToRows {
+object StoryParserToRows {
     fun parse(story: GolosDiscussionItem): List<Row> {
 
         val out = ArrayList<Row>()

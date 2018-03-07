@@ -12,7 +12,6 @@ import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
-import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.showSnackbar
 import java.util.*
 
@@ -49,7 +48,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                         bottomNavView.showSnackbar(R.string.must_be_logged_in_for_this_action)
                         false
                     } else {
-                        EditorActivity.startPostEditor(this, "")
+                        EditorActivity.startPostCreator(this, "")
                         false
                     }
                 }

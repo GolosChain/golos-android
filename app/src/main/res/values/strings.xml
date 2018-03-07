@@ -146,6 +146,7 @@
     <string name="show_nsfw_images_mode">NSFW content</string>
     <string name="to_flag">Flag</string>
     <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты</string>
+    <string name="edit">Edit</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -16,7 +16,7 @@ import java.util.concurrent.Executors
 /**
  * Created by yuri on 29.01.18.
  */
-val version = 2
+val version = 3
 
 object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, version) {
     private val executor = Executors.newSingleThreadExecutor()
@@ -27,10 +27,13 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
 
     }
 
-    override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
-        if (p1 == 1 && p2 == 2) {
+    override fun onUpgrade(p0: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        if (oldVersion == 1 && newVersion == 2) {
             p0?.execSQL("alter table ${DraftsTable.tableName} ADD COLUMN ${DraftsTable.titleColumn} text")
             p0?.execSQL("alter table ${DraftsTable.tableName} ADD COLUMN ${DraftsTable.tagsColumn} text")
+        }
+        if (newVersion == 3) {
+            p0?.delete(DraftsTable.tableName, null, null)
         }
     }
 
@@ -96,7 +99,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
     }
 
 
-     final object DraftsTable {
+    final object DraftsTable {
         val tableName = "drafts"
         val modeColumn = "mode"
         val partsColunm = "parts"
@@ -143,7 +146,8 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                         if (it.type == "text") {
                             EditorTextPart(it.id, it.text ?: "", it.pointerPosition)
                         } else {
-                            EditorImagePart(it.id, it.imageName ?: "", it.imageUrl ?: "", it.pointerPosition)
+                            EditorImagePart(it.id, it.imageName ?: "", it.imageUrl
+                                    ?: "", it.pointerPosition)
                         }
                     }
 

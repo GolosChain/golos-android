@@ -139,7 +139,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
             }
         }
         body = discussion.body ?: ""
-        val toRowsParser = StoryParserToRows()
+        val toRowsParser = StoryParserToRows
         parts = toRowsParser.parse(this).toArrayList()
         if (parts.size == 0) {
             Timber.e("fail on story id is ${id}\n body =  ${body}")

@@ -12,6 +12,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
@@ -120,7 +122,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 val story = it.storyTree.rootStory() ?: return@Observer
 
-                var ets = if (story.parts.isEmpty()) StoryParserToRows().parse(story).toArrayList() else story.parts
+                var ets = if (story.parts.isEmpty()) StoryParserToRows.parse(story).toArrayList() else story.parts
                 if (story.parts.isEmpty()) story.parts.addAll(ets)
 
                 if (ets.find { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) } != null) {
@@ -294,7 +296,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setUpViews() {
         mToolbar = findViewById<Toolbar>(R.id.toolbar)
-        mToolbar.setNavigationOnClickListener({ finish() })
+
         mProgressBar = findViewById(R.id.progress)
         mFab = findViewById(R.id.fab)
         mAvatar = findViewById(R.id.avatar_iv)
@@ -409,6 +411,23 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
+        setSupportActionBar(mToolbar)
+        mToolbar.inflateMenu(R.menu.story_menu)
+        mToolbar.setNavigationOnClickListener({ finish() })
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.story_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId){
+            R.id.share -> mViewModel.onShareClick(this)
+            R.id.edit -> mViewModel.onEditClick(this)
+        }
+        return true
     }
 
     override fun onDestroy() {
