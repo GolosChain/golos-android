@@ -5,7 +5,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.LinearLayoutCompat
+import android.support.v7.widget.ListPopupWindow
 import android.support.v7.widget.RecyclerView
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +25,7 @@ import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by yuri on 08.11.17.
@@ -33,7 +36,8 @@ data class CommentHolderState(val comment: StoryWrapper,
                               val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
                               val onUserClick: (RecyclerView.ViewHolder) -> Unit,
                               val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onUserVotesClick: (RecyclerView.ViewHolder) -> Unit)
+                              val onUserVotesClick: (RecyclerView.ViewHolder) -> Unit,
+                              val onEditClick: (RecyclerView.ViewHolder) -> Unit)
 
 
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
@@ -41,7 +45,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onAnswerClick: (StoryWrapper) -> Unit = { print(it) },
                       var onUserClick: (StoryWrapper) -> Unit = { print(it) },
                       var onCommentsClick: (StoryWrapper) -> Unit = { print(it) },
-                      var onUserVotesClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+                      var onUserVotesClick: (StoryWrapper) -> Unit = { print(it) },
+                      var onEditClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
 
     var items = ArrayList<StoryWrapper>()
@@ -71,7 +76,8 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                 onUserClick = { onUserClick.invoke(items[it.adapterPosition]) },
                 onCommentsClick = { onCommentsClick.invoke(items[it.adapterPosition]) },
                 onUserVotesClick = { onUserVotesClick.invoke(items[it.adapterPosition]) },
-                onDownVoteClick = { onDownVoteClick.invoke(items[it.adapterPosition]) })
+                onDownVoteClick = { onDownVoteClick.invoke(items[it.adapterPosition]) },
+                onEditClick = { onEditClick.invoke(items[it.adapterPosition]) })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -93,7 +99,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
     private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mVotesIv: TextView = itemView.findViewById(R.id.votes_btn)
-    private val mDownVoteBtn: AppCompatImageView = itemView.findViewById(R.id.flag_btn)
+    private val mDotsBtn: View = itemView.findViewById(R.id.dots_btn)
 
     init {
         mText.movementMethod = GolosMovementMethod.instance
@@ -129,7 +135,34 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mImage.setOnClickListener { mText.callOnClick() }
                 mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
                 mVotesIv.setOnClickListener { state?.onUserVotesClick?.invoke(this) }
-                mDownVoteBtn.setOnClickListener { state?.onDownVoteClick?.invoke(this) }
+                mDotsBtn.setOnClickListener {
+                    val popup = ListPopupWindow(itemView.context)
+                    popup.anchorView = mDotsBtn
+                    val items = ArrayList<CommentListAdapter.CommentListAdapterItems>()
+                    if (state?.comment?.isStoryEditable == true) {
+                        items.add(CommentListAdapter.CommentListAdapterItems.EDIT)
+                    }
+                    if (state?.comment?.story?.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                        items.add(CommentListAdapter.CommentListAdapterItems.FLAG_RED)
+                    } else {
+                        items.add(CommentListAdapter.CommentListAdapterItems.FLAG_GRAY)
+                    }
+
+                    popup.setAdapter(CommentListAdapter(itemView.context, items))
+                    popup.setContentWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            120.0f,
+                            itemView.context.resources.displayMetrics).toInt())
+                    popup.setOnItemClickListener({ _, _, position, _ ->
+                        val item = items[position]
+                        when (item) {
+                            CommentListAdapter.CommentListAdapterItems.FLAG_GRAY -> state?.onDownVoteClick?.invoke(this)
+                            CommentListAdapter.CommentListAdapterItems.FLAG_RED -> state?.onDownVoteClick?.invoke(this)
+                            CommentListAdapter.CommentListAdapterItems.EDIT -> state?.onEditClick?.invoke(this)
+                        }
+                        popup.dismiss()
+                    })
+                    popup.show()
+                }
 
                 if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
@@ -165,11 +198,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_cricle_gray_outline_20dp, 0, 0, 0)
                 }
-                if (comment.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                    mDownVoteBtn.setImageResource(R.drawable.ic_flag_20dp_red)
-                } else {
-                    mDownVoteBtn.setImageResource(R.drawable.ic_flag_20dp_gray)
-                }
+
                 if (field!!.comment.updatingState == UpdatingState.UPDATING) {
                     mUpvoteBtn.visibility = View.INVISIBLE
                     mUpvoteBtn.isClickable = false
@@ -203,7 +232,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                         if (it is TextRow) "${it.text}\n"
                         else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
                     }.reduce { s1, s2 -> s1 + s2 }
-                    mText.text = outText.trim().toHtml()
+                    mText.text = outText.trim().toHtml().trim()
                 }
 
             }

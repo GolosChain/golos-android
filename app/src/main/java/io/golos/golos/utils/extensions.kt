@@ -291,3 +291,8 @@ public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
     }
     return b
 }
+
+public fun TextView.setVectorDrawableStart(id: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(this.getVectorDrawable(id), null, null, null)
+}
+

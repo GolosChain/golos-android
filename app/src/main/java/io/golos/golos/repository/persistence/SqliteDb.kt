@@ -40,6 +40,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
         if (newVersion == 4 && oldVersion != 4) {
             DiscussionItemsTable.deleteAll(db ?: return)
+            VotesTable.deleteAll(db)
             db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
         }
     }
@@ -114,7 +115,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 .onEach {
                     it.value.items.forEach {
                         val rt = it.rootStory()
-                        rt?.activeVotes?.addAll(votes[rt.id] ?: arrayListOf())
+                        rt?.activeVotes?.addAll(votes[rt.id]?: arrayListOf())
                     }
                 }
 

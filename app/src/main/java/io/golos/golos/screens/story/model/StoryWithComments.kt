@@ -16,7 +16,9 @@ data class StoryWrapper(
         @JsonProperty("story")
         val story: GolosDiscussionItem,
         @JsonProperty("updatingState")
-        var updatingState: UpdatingState)
+        var updatingState: UpdatingState,
+        @JsonProperty("isStoryEditable")
+        var isStoryEditable: Boolean = false)
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {
@@ -159,7 +161,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
 
     fun deepCopy(): StoryWithComments {
         val rootWrapper = if (mRootStoryWrapper != null) {
-            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState)
+            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState, mRootStoryWrapper!!.isStoryEditable)
         } else null
         return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
     }

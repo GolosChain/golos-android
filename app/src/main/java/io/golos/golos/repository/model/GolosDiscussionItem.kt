@@ -8,7 +8,6 @@ import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
-import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.toArrayList
 import org.json.JSONException

@@ -337,7 +337,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsRecycler.adapter = CommentsAdapter(
                 onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
-                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) })
+                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) },
+                onEditClick = { mViewModel.onEditClick(this, it.story) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
@@ -412,7 +413,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
         setSupportActionBar(mToolbar)
-         mToolbar.setNavigationOnClickListener({ finish() })
+        mToolbar.setNavigationOnClickListener({ finish() })
 
     }
 
@@ -425,7 +426,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.share -> mViewModel.onShareClick(this)
-            R.id.edit -> mViewModel.onEditClick(this)
+            R.id.edit -> mViewModel.onEditClick(this, mViewModel.liveData.value?.storyTree?.rootStory()
+                    ?: return true)
         }
         return true
     }

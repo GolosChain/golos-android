@@ -205,12 +205,14 @@ class StoryViewModel : ViewModel() {
         }
     }
 
-    fun onEditClick(ctx: Context) {
-        if (mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
+    fun onEditClick(ctx: Context, item: GolosDiscussionItem) {
+        if (mRepository.isUserLoggedIn()
+                && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
+
             mLiveData.value?.let {
                 EditorActivity.startEditPostOrComment(ctx,
                         it.storyTree,
-                        it.storyTree.rootStory() ?: return,
+                        item,
                         feedType,
                         filter)
             }
@@ -219,7 +221,7 @@ class StoryViewModel : ViewModel() {
         }
     }
 
-    public fun isPostEditable() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == author
+    public fun isPostEditable() = mLiveData.value?.storyTree?.storyWithState()?.isStoryEditable == true
 
     fun onVoteRejected() {
         showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))

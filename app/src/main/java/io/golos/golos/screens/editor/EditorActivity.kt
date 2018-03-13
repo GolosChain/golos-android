@@ -184,9 +184,14 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             val fr = SendLinkDialog.getInstance()
             fr.listener = object : OnLinkSubmit {
                 override fun submit(linkName: String, linkAddress: String) {
-                    val text = " [$linkName]($linkAddress)"
-                    mViewModel.onUserInput(EditorInputAction.InsertAction(
-                            EditorTextPart(text = text, pointerPosition = text.length)))
+                    if (linkAddress.matches(Regexps.anyImageLink)) {
+                        mViewModel.onUserInput(EditorInputAction.InsertAction(
+                                EditorImagePart(imageName = linkName, imageUrl = linkAddress, pointerPosition = null)))
+                    } else {
+                        val text = " [$linkName]($linkAddress)"
+                        mViewModel.onUserInput(EditorInputAction.InsertAction(
+                                EditorTextPart(text = text, pointerPosition = text.length)))
+                    }
                 }
             }
             fr.show(supportFragmentManager, null)
