@@ -48,7 +48,15 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val feedType = field?.feedType
             val rootStoryId = field?.rootStoryId
             val workingItemId = field?.workingItemId
-
+            if (feedType == null && rootStoryId == null && workingItemId == null) {//root story editor
+                DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
+                    if (items.isNotEmpty()) {
+                        editorLiveData.value = EditorState(null, false, null, items, title, tags)
+                    } else {
+                        editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
+                    }
+                })
+            }
             if (feedType != null && rootStoryId != null && workingItemId != null) {
                 Repository
                         .get
