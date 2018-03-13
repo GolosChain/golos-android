@@ -14,9 +14,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-/**
- * Created by yuri on 27.11.17.
- */
 object DiscussionItemFactory {
     fun create(discussion: Discussion, account: ExtendedAccount?): GolosDiscussionItem {
         val url = discussion.url ?: ""
@@ -42,7 +39,8 @@ object DiscussionItemFactory {
                 votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
                 bodyLength = discussion.bodyLength.toLongOrNull()
-                        ?: 0L, author = author, parentPermlink = parentPermlink, childrenCount = childrenCount,
+                        ?: 0L, author = author, parentPermlink = parentPermlink,
+                parentAuthor = discussion.parentAuthor.name ?: "", childrenCount = childrenCount,
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
                 firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
         setDataFromTagsString(discussion.jsonMetadata, item)
@@ -76,8 +74,9 @@ object DiscussionItemFactory {
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
-                bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, childrenCount = childrenCount,
-                reputation = reputation, lastUpdated = lastUpdated, created = created, firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
+                bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, parentAuthor = discussion.parentAuthor
+                ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated, created = created, firstRebloggedBy = firstRebloggedBy,
+                cleanedFromImages = cleanedFromImages)
 
         setDataFromTagsString(discussion.jsonMetadata, item)
         item.activeVotes.addAll(discussion.votes)

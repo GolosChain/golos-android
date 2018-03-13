@@ -3,7 +3,7 @@ package io.golos.golos.screens.editor
 /**
  * Created by yuri yurivladdurain@gmail.com on 26/10/2017.
  */
-class TextProcessor {
+object TextProcessor {
 
     fun processInput(previousState: List<EditorPart>, action: EditorInputAction): List<EditorPart> {
         val parts = previousState

@@ -412,18 +412,18 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
         setSupportActionBar(mToolbar)
-        mToolbar.inflateMenu(R.menu.story_menu)
-        mToolbar.setNavigationOnClickListener({ finish() })
+         mToolbar.setNavigationOnClickListener({ finish() })
 
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.story_menu, menu)
+        if (mViewModel.isPostEditable()) menuInflater.inflate(R.menu.story_menu_editable, menu)
+        else menuInflater.inflate(R.menu.story_menu_not_editable, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId){
+        when (item?.itemId) {
             R.id.share -> mViewModel.onShareClick(this)
             R.id.edit -> mViewModel.onEditClick(this)
         }

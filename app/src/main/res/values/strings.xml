@@ -147,6 +147,7 @@
     <string name="to_flag">Flag</string>
     <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты</string>
     <string name="edit">Edit</string>
+    <string name="you_may_comment_only_tw_sec">You may only comment once every 20 seconds</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -23,8 +23,7 @@ abstract class GolosApi {
             @Synchronized
             get() {
                 if (instance == null) {
-                    if (App.isMocked) instance = MockApiImpl()
-                    else instance = ApiImpl()
+                   instance = ApiImpl()
                 }
                 return instance!!
             }
@@ -57,13 +56,21 @@ abstract class GolosApi {
 
     abstract fun sendPost(sendFromAccount: String, title: String, content: String,
                           tags: Array<String>): CreatePostResult
+    abstract fun editPost(originalComentPermlink: String, sendFromAccount: String, title: String,
+                          content: String,
+                          tags: Array<String>): CreatePostResult
 
     abstract fun sendComment(sendFromAccount: String,
                              authorOfItemToReply: String,
                              permlinkOfItemToReply: String,
                              content: String,
                              categoryName: String): CreatePostResult
-
+    abstract fun editComment(sendFromAccount: String,
+                             authorOfItemToReply: String,
+                             permlinkOfItemToReply: String,
+                             originalComentPermlink: String,
+                             content: String,
+                             categoryName: String): CreatePostResult
     abstract fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject>
 
     abstract fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject>

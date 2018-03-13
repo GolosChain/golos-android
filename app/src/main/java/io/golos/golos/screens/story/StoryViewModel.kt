@@ -22,7 +22,6 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -147,7 +146,6 @@ class StoryViewModel : ViewModel() {
         if (images.isEmpty()) return
 
         val position = images.indexOf(src)
-        Timber.e("position = $position")
         PhotosDialog.getInstance(images, if (position < 0) 0 else position)
                 .show((activity as AppCompatActivity)
                         .supportFragmentManager, "images")
@@ -210,7 +208,7 @@ class StoryViewModel : ViewModel() {
     fun onEditClick(ctx: Context) {
         if (mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
             mLiveData.value?.let {
-                EditorActivity.startEditPostOrComent(ctx,
+                EditorActivity.startEditPostOrComment(ctx,
                         it.storyTree,
                         it.storyTree.rootStory() ?: return,
                         feedType,
@@ -220,6 +218,8 @@ class StoryViewModel : ViewModel() {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.you_must_have_more_repo_for_action))
         }
     }
+
+    public fun isPostEditable() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == author
 
     fun onVoteRejected() {
         showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))

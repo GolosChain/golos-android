@@ -8,6 +8,7 @@ import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
+import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.toArrayList
 import org.json.JSONException
@@ -44,6 +45,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     var avatarPath: String? = null,
                                                     var children: ArrayList<StoryWrapper> = ArrayList(),
                                                     var parentPermlink: String,
+                                                    var parentAuthor: String,
                                                     var childrenCount: Int,
                                                     var level: Int = 0,
                                                     var gbgCostInDollars: Double = 0.04106528,
@@ -62,7 +64,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
         get() = gbgAmount * gbgCostInDollars
 
     val isRootStory: Boolean
-        get() = parentPermlink.isEmpty()
+        get() = tags.contains(parentPermlink)
 
 
     constructor(discussion: Discussion, account: ExtendedAccount?) : this(
@@ -79,6 +81,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
             bodyLength = discussion.bodyLength.toLongOrNull() ?: 0L,
             author = discussion.author?.name ?: "",
             parentPermlink = discussion.parentPermlink.link ?: "",
+            parentAuthor = discussion.parentAuthor.name ?: "",
             childrenCount = discussion.children,
             reputation = discussion.authorReputation,
             lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0,

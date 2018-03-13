@@ -14,7 +14,7 @@ class StoryParserTests {
     @Test
     fun test1() {
         val tree = Utils.readStoryFromResourse("story.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         val rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertEquals(5, rows.size)
         Assert.assertTrue(rows[1] is ImageRow)
@@ -29,7 +29,7 @@ class StoryParserTests {
     @Test
     fun test2() {
         val tree = Utils.readStoryFromResourse("story2.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         val rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         Assert.assertTrue(rows[0] is TextRow)
@@ -45,7 +45,7 @@ class StoryParserTests {
     @Test
     fun test3() {
         val tree = Utils.readStoryFromResourse("story3.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         val rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         Assert.assertTrue(rows[0] is TextRow)
@@ -58,7 +58,7 @@ class StoryParserTests {
     @Test
     fun test4() {
         val tree = Utils.readStoryFromResourse("story7.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         val boosterComment = tree.getFlataned().find { it.story.author == "booster" }!!
@@ -72,7 +72,7 @@ class StoryParserTests {
     @Test
     fun test5() {
         val tree = Utils.readStoryFromResourse("story8.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         Assert.assertTrue(rows[0] is ImageRow)
@@ -96,7 +96,7 @@ class StoryParserTests {
     @Test
     fun test9() {
         val tree = Utils.readStoryFromResourse("story9.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         Assert.assertTrue(rows[0] is ImageRow)
@@ -105,7 +105,7 @@ class StoryParserTests {
     @Test
     fun test11() {
         val tree = Utils.readStoryFromResourse("story11.json")
-        val rowParser = StoryParserToRows()
+        val rowParser = StoryParserToRows
         var rows = rowParser.parse(tree.rootStory()!!)
         Assert.assertTrue(rows.size > 1)
         Assert.assertTrue(rows[1] is ImageRow)

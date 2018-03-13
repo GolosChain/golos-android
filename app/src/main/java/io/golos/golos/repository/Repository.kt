@@ -121,10 +121,18 @@ abstract class Repository {
                                     completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
-                            resultListener: (CreatePostResult?, GolosError?) -> Unit)
+                            resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
-    abstract fun createComment(rootStory: StoryWithComments, to: GolosDiscussionItem, content: List<EditorPart>,
-                               resultListener: (CreatePostResult?, GolosError?) -> Unit)
+    abstract fun editPost(title: String, content: List<EditorPart>, tags: List<String>,
+                          originalPost: GolosDiscussionItem,
+                          resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    abstract fun createComment(toItem: GolosDiscussionItem, content: List<EditorPart>,
+                               resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    abstract fun editComment(originalComment: GolosDiscussionItem,
+                             content: List<EditorPart>,
+                             resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun isUserLoggedIn(): Boolean
 
@@ -182,6 +190,7 @@ abstract class Repository {
     abstract val userSettingsRepository: UserSettingsRepository
 
     abstract val notificationsrepository: NotificationsRepository
+
 }
 
 interface ImageLoadRunnable : Runnable

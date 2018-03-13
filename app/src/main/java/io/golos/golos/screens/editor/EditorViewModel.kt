@@ -5,16 +5,21 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoriesFeed
-import io.golos.golos.screens.story.model.*
+import io.golos.golos.screens.story.model.ImageRow
+import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.utils.*
+import io.golos.golos.utils.ErrorCode
+import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.isNullOrEmpty
+import io.golos.golos.utils.toHtml
 import java.util.*
 
-/**
- * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
- */
+
 data class EditorState(val error: GolosError? = null,
                        val isLoading: Boolean = false,
                        var completeMessage: Int? = null,
@@ -28,11 +33,11 @@ data class PostSendStatus(val author: String,
 
 class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     val editorLiveData = MutableLiveData<EditorState>()
-    val postStatusLiveData = MutableLiveData<PostSendStatus>()
-    val titleMaxLength = 255
-    val postMaxLength = 100 * 1024
-    val commentMaxLength = 16 * 1024
-    private val mTextProcessor = TextProcessor()
+    private val postStatusLiveData = MutableLiveData<PostSendStatus>()
+    /* val titleMaxLength = 255
+     val postMaxLength = 100 * 1024
+     val commentMaxLength = 16 * 1024*/
+    private val mTextProcessor = TextProcessor
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
     private var mWorkingItem: GolosDiscussionItem? = null
@@ -67,34 +72,31 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 it.getFlataned().findLast { it.story.id == mode?.workingItemId }?.story
             }
         }
-        DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
-            if (items.isNotEmpty()) {
-                editorLiveData.value = EditorState(null, false, null, items, title, tags)
-            } else {
-                if (mode?.editorType == EditorActivity.EditorType.CREATE_POST || mode?.editorType == EditorActivity.EditorType.CREATE_COMMENT) {
+        val editorType = mode?.editorType ?: return
+        if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.CREATE_POST) {
+            DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
+                if (items.isNotEmpty()) {
+                    editorLiveData.value = EditorState(null, false, null, items, title, tags)
+                } else {
                     editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
-                } else if (mode?.editorType == EditorActivity.EditorType.EDIT_COMMENT || mode?.editorType == EditorActivity.EditorType.EDIT_POST) {
-                    mWorkingItem?.let {
-                        val parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it) else it.parts)
-                                .map<Row, EditorPart> {
-                                    when (it) {
-                                        is TextRow -> EditorTextPart(UUID.randomUUID().toString(), it.text.toHtml().toString(), null)
-                                        is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src, null)
-                                        else -> EditorTextPart(UUID.randomUUID().toString(), "", null)
-                                    }
-                                }
-                        if (parts.isNotEmpty()) {
-                            val last = parts.last()
-                            if (last is EditorTextPart) last.pointerPosition = last.text.length
-                            else {
-                                parts.toArrayList().add(EditorTextPart(UUID.randomUUID().toString(), "", 0))
+                }
+            })
+        } else if (editorType == EditorActivity.EditorType.EDIT_POST || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
+            mWorkingItem?.let {
+                var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it) else it.parts)
+                        .map {
+                            when (it) {
+                                is TextRow -> EditorTextPart(UUID.randomUUID().toString(), it.text.toHtml().toString(), null)
+                                is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src, null)
                             }
                         }
-                        editorLiveData.value = EditorState(parts = parts, title = "", tags = it.tags.map { LocalizedTag.convertToLocalizedName(it) })
-                    }
-                }
+                parts = TextProcessor.processInput(parts, EditorInputAction.InsertAction(EditorTextPart(UUID.randomUUID().toString(), "", 0)))
+
+                editorLiveData.value = EditorState(parts = parts,
+                        title = if (editorType == EditorActivity.EditorType.EDIT_POST) it.title else "",
+                        tags = it.tags.map { LocalizedTag.convertToLocalizedName(it) })
             }
-        })
+        }
     }
 
     fun onUserInput(action: EditorInputAction) {
@@ -117,6 +119,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 tags = it)
     }
 
+
     fun onTextChanged(parts: List<EditorPart>) {
         editorLiveData.value = EditorState(parts = parts, title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf())
@@ -127,7 +130,21 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (!mRepository.isUserLoggedIn()) return
-        if (mode?.editorType == EditorActivity.EditorType.CREATE_POST) {
+        if (mRootStory == null || mWorkingItem == null) return
+
+        if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
+                (editorLiveData.value?.parts?.size == 1
+                        && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
+            editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
+                    ?: ArrayList(),
+                    error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
+                            localizedMessage = R.string.post_body_must_be_not_empty),
+                    title = editorLiveData.value?.title ?: "",
+                    tags = editorLiveData.value?.tags ?: listOf())
+            return
+        }
+        val editorType = mode?.editorType ?: return
+        if (editorType == EditorActivity.EditorType.CREATE_POST || editorType == EditorActivity.EditorType.EDIT_POST) {
             if (editorLiveData.value?.title.isNullOrEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
                         ?: ArrayList(),
@@ -136,17 +153,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         tags = editorLiveData.value?.tags ?: listOf())
                 return
             }
-            if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
-                    (editorLiveData.value?.parts?.size == 1
-                            && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
-                editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                        ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
-                                localizedMessage = R.string.post_body_must_be_not_empty),
-                        title = editorLiveData.value?.title ?: "",
-                        tags = editorLiveData.value?.tags ?: listOf())
-                return
-            }
+
             if (editorLiveData.value?.tags.isNullOrEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
                         ?: ArrayList(),
@@ -160,48 +167,43 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     parts = editorLiveData.value?.parts ?: ArrayList(),
                     title = editorLiveData.value?.title ?: "",
                     tags = editorLiveData.value?.tags ?: listOf())
-            mRepository.createPost(editorLiveData.value?.title ?: return,
-                    editorLiveData.value?.parts ?: ArrayList(),
-                    editorLiveData.value?.tags ?: return,
-                    { result, error ->
-                        if (error == null) {
-                            wasSent = true
-                            DraftsPersister.deleteDraft(mode ?: return@createPost, {})
-                        }
-                        editorLiveData.value = EditorState(error = error,
-                                isLoading = false,
-                                parts = editorLiveData.value?.parts ?: ArrayList(),
-                                completeMessage = if (error == null) R.string.send_post_success else null, title = editorLiveData.value?.title
-                                ?: "",
-                                tags = editorLiveData.value?.tags ?: listOf())
-                        postStatusLiveData.value = PostSendStatus(result?.author
-                                ?: return@createPost,
-                                result.blog,
-                                result.permlink)
 
-                    })
-        } else if (mode?.editorType == EditorActivity.EditorType.CREATE_COMMENT) {
-            if (mRootStory == null || mWorkingItem == null) return
-            if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
-                    (editorLiveData.value?.parts?.size == 1
-                            && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
-                editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                        ?: ArrayList(),
-                        error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.comment_body_must_be_not_empty), title = editorLiveData.value?.title
-                        ?: "",
-                        tags = editorLiveData.value?.tags ?: listOf())
-                return
-            }
-            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts
-                    ?: ArrayList(),
-                    title = editorLiveData.value?.title ?: "",
-                    tags = editorLiveData.value?.tags ?: listOf())
-            mRepository.createComment(mRootStory!!,
-                    mWorkingItem!!,
-                    editorLiveData.value?.parts ?: ArrayList(), { result, error ->
+            val listener: (CreatePostResult?, GolosError?) -> Unit = { result, error ->
                 if (error == null) {
                     wasSent = true
-                    DraftsPersister.deleteDraft(mode ?: return@createComment, {})
+                    if (mode != null) DraftsPersister.deleteDraft(mode!!, {})
+
+                }
+                editorLiveData.value = EditorState(error = error,
+                        isLoading = false,
+                        parts = editorLiveData.value?.parts ?: ArrayList(),
+                        completeMessage = if (error == null) R.string.send_post_success else null, title = editorLiveData.value?.title
+                        ?: "",
+                        tags = editorLiveData.value?.tags ?: listOf())
+                postStatusLiveData.value = PostSendStatus(result?.author
+                        ?: "",
+                        result?.blog ?: "",
+                        result?.permlink ?: "")
+
+            }
+
+            if (editorType == EditorActivity.EditorType.CREATE_POST) {
+                mRepository.createPost(editorLiveData.value?.title ?: return,
+                        editorLiveData.value?.parts ?: ArrayList(),
+                        editorLiveData.value?.tags ?: return,
+                        listener)
+            } else if (editorType == EditorActivity.EditorType.EDIT_POST) {
+                mRepository.editPost(editorLiveData.value?.title ?: return,
+                        editorLiveData.value?.parts ?: ArrayList(),
+                        editorLiveData.value?.tags ?: return,
+                        mRootStory?.rootStory() ?: return, listener)
+            }
+        } else if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
+            val listener: (CreatePostResult?, GolosError?) -> Unit = { _, error ->
+                if (error == null) {
+                    wasSent = true
+                    if (mode != null)
+                        DraftsPersister.deleteDraft(mode!!, {})
                 }
 
                 editorLiveData.value = EditorState(error = error,
@@ -211,8 +213,21 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         title = editorLiveData.value?.title ?: "",
                         tags = editorLiveData.value?.tags ?: listOf())
 
-            })
+            }
 
+            editorLiveData.value = EditorState(isLoading = true, parts = editorLiveData.value?.parts
+                    ?: ArrayList(),
+                    title = editorLiveData.value?.title ?: "",
+                    tags = editorLiveData.value?.tags ?: listOf())
+            if (editorType == EditorActivity.EditorType.CREATE_COMMENT) {
+                mRepository.createComment(mWorkingItem ?: return,
+                        editorLiveData.value?.parts ?: ArrayList(),
+                        listener)
+            } else if (editorType == EditorActivity.EditorType.EDIT_COMMENT) {
+                mRepository.editComment(mWorkingItem ?: return,
+                        editorLiveData.value?.parts ?: return,
+                        listener)
+            }
         }
     }
 

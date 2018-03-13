@@ -48,18 +48,26 @@ object Counter {
 public fun Any.nextInt() = Counter.counter.incrementAndGet()
 
 fun Cursor.getString(columnName: String): String? {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return null
     return this.getString(this.getColumnIndex(columnName))
 }
 
 fun Cursor.getLong(columnName: String): Long {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return 0L
     return this.getLong(this.getColumnIndex(columnName))
 }
 
 fun Cursor.getBool(columnName: String): Boolean {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return false
     return this.getInt(this.getColumnIndex(columnName)) > 0
 }
 
 fun Cursor.getInt(columnName: String): Int {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return 0
     return this.getInt(this.getColumnIndex(columnName))
 }
 

@@ -52,8 +52,17 @@ class StoryWithComments(rootStory: StoryWrapper?,
         return mRootStoryWrapper
     }
 
-    fun commentsWithState(): List<StoryWrapper> {
+    fun commentsWithState(): ArrayList<StoryWrapper> {
         return mCommentsWithState
+    }
+
+    fun setUpLevels() {
+        setUpLevels(0, mRootStoryWrapper?.story?.children ?: return)
+    }
+
+    private fun setUpLevels(currentDepth: Int, stories: List<StoryWrapper>) {
+        stories.forEach { it.story.level = currentDepth }
+        stories.map { it.story.children }.forEach { setUpLevels(currentDepth + 1, it) }
     }
 
     constructor(discussionWithComments: DiscussionWithComments) : this(null, ArrayList()) {
@@ -67,13 +76,13 @@ class StoryWithComments(rootStory: StoryWrapper?,
                     discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
                 }
             }
-            if (rootStories == null) throw IllegalStateException("not found root story")
+            if (rootStories == null) throw IllegalStateException("root story not found")
             mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
                     .involvedAccounts
                     .find { it.name.name == rootStories!!.author.name }!!),
                     UpdatingState.DONE)
             discussionWithComments.discussions.removeAll { it.permlink.link == rootStories!!.permlink.link }
-            var firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
+            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
             discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
             val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
 

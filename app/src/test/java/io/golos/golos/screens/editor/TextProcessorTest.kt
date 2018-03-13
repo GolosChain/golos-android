@@ -13,7 +13,7 @@ class TextProcessorTest {
 
     @Before
     fun before() {
-        mTextProcessor = TextProcessor()
+        mTextProcessor = TextProcessor
     }
 
     @Test

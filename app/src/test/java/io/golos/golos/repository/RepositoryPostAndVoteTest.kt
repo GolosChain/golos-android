@@ -6,6 +6,7 @@ import io.golos.golos.MockUserSettings
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.UserObject
 import io.golos.golos.repository.persistence.model.AccountInfo
@@ -78,10 +79,23 @@ class RepositoryPostAndVoteTest {
                 pointerPosition = null)
         repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", "test content", pointerPosition = null),
                 image),
-                listOf("ase", "гаврик"), { a, b -> print(b) })
+                listOf("test"), { a, b -> print(b) })
 
+        Thread.sleep(5000)
+
+        var blog: StoriesFeed? = null
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blog = it
+        }
+        assertNull(blog)
+        repo.requestStoriesListUpdate(20, FeedType.BLOG, StoryFilter(null, userName))
+        assertNotNull(blog)
+        val newBody = UUID.randomUUID().toString()
+        repo.editPost(UUID.randomUUID().toString(),
+                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)), listOf("test"),
+                blog!!.items[0].rootStory()!!, { _, e -> if (e != null) println(e.toString()) })
+        assertEquals(newBody, blog!!.items[0].rootStory()!!.body)
     }
-
 
     @Test
     fun testAvatarUpdate() {
@@ -94,47 +108,102 @@ class RepositoryPostAndVoteTest {
 
     @Test
     fun createCommentTest() {
+        Thread.sleep(20_000)
+
         val authData = repo.getCurrentUserDataAsLiveData()
         assertNotNull(authData.value)
-        val newItems = repo.getStories(FeedType.ACTUAL, null)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
-        assertNotNull(newItems.value)
-        assertEquals(20, newItems.value!!.items.size)
-        var notCommentedItem = newItems.value!!.items.first()
+        var blogItems: StoriesFeed? = null
+        var allComments: StoriesFeed? = null
+        val sizeOfItems = 20
+
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blogItems = it
+        }
+        repo.getStories(FeedType.COMMENTS, StoryFilter(null, userName)).observeForever {
+            allComments = it
+        }
+
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.BLOG, StoryFilter(null, userName))
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.COMMENTS, StoryFilter(null, userName))
+
+        assertNotNull(blogItems)
+        assertNotNull(allComments)
+        assertEquals(sizeOfItems, blogItems!!.items.size)
+        assertEquals(sizeOfItems, allComments!!.items.size)
+
+        val notCommentedItem = blogItems!!.items.first().deepCopy()
         repo.requestStoryUpdate(notCommentedItem)
-        notCommentedItem = newItems.value!!.items.first()
-        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
-                pointerPosition = null)
+
+        /*val commentSizeBefore = blogItems!!.items.first().comments().size
+
         val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
-        repo.createComment(notCommentedItem, notCommentedItem.rootStory()!!, listOf(image, text), { _, _ -> })
-        assertEquals(notCommentedItem.comments().size + 1, newItems.value!!.items.first().comments().size)
+        repo.createComment(notCommentedItem.rootStory()!!, listOf(text), { _, _ -> })
+
+        assertEquals("comments size in first story in feed must increase",
+                commentSizeBefore + 1, blogItems!!.items.first().comments().size)
+        assertEquals("there must be 20 + 1 comments in comments feed",
+                sizeOfItems + 1, allComments!!.items.size)
+
 
         assertNotNull(repo.lastCreatedPost().value)
         assertEquals(userName, repo.lastCreatedPost().value!!.author)
+
+        Thread.sleep(3000)*/
+        val newBody = "edited_comment_twicE_" + UUID.randomUUID().toString()
+        val editedComment = blogItems!!.items.first().comments().find { it.author == userName && it.commentsCount == 0 }!!
+        repo.editComment(editedComment,
+                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)))
+
+        assertEquals("new comment must have updated body", newBody,
+                blogItems!!.items.first().comments().find { it.id == editedComment.id }!!.body)
+        assertEquals("comment in comment list body must be also updated", newBody,
+                allComments!!.items.find { it.rootStory()!!.id == editedComment.id }!!.rootStory()!!.body)
     }
 
     @Test
     fun createSecondLevelComment() {
-        Thread.sleep(20000)
+        Thread.sleep(20_000)
+
         val authData = repo.getCurrentUserDataAsLiveData()
         assertNotNull(authData.value)
-        val newItems = repo.getStories(FeedType.POPULAR, null)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null, { _, _ -> })
-        assertNotNull(newItems.value)
-        assertEquals(20, newItems.value!!.items.size)
-        var notCommentedItem = newItems.value!!.items.first()
+        var blogItems: StoriesFeed? = null
+        var allComments: StoriesFeed? = null
+        val sizeOfItems = 1
+
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blogItems = it
+        }
+        repo.getStories(FeedType.COMMENTS, StoryFilter(null, userName)).observeForever {
+            allComments = it
+        }
+
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.BLOG, StoryFilter(null, userName))
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.COMMENTS, StoryFilter(null, userName))
+
+        assertNotNull(blogItems)
+        assertNotNull(allComments)
+        assertEquals(sizeOfItems, blogItems!!.items.size)
+        assertEquals(sizeOfItems, allComments!!.items.size)
+
+        val notCommentedItem =  blogItems!!.items.first()
         repo.requestStoryUpdate(notCommentedItem)
+        val firstLevelComment =  blogItems!!.items.first().comments().first()
+        val updatedItem = blogItems!!.items.first().comments().first().children.size
 
-        notCommentedItem = newItems.value!!.items.first()
-        var lastComment = newItems.value!!.items.first().comments().last()
+        val commentSizeBefore = blogItems!!.items.first().getFlataned().size
 
-        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
-                pointerPosition = null)
-        val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
-        repo.createComment(notCommentedItem, lastComment, listOf(image, text), { _, _ -> })
+        val text = EditorTextPart("sdg", "second_level_comment ${UUID.randomUUID()}", pointerPosition = null)
+        repo.createComment(firstLevelComment, listOf(text), { _, _ -> })
 
-        assertEquals(notCommentedItem.rootStory()!!.commentsCount + 1, newItems.value!!.items.first().rootStory()!!.commentsCount)
-        assertEquals(lastComment.commentsCount + 1, newItems.value!!.items.first().comments().last().commentsCount)
+        assertEquals("comments size in first story in feed must increase",
+                commentSizeBefore + 1, blogItems!!.items.first().getFlataned().size)
+        assertEquals("second level comment must also appear",
+                updatedItem + 1, blogItems!!.items.first().comments().first().children.size)
+
+        assertEquals("there must be 20 + 1 comments in comments feed",
+                sizeOfItems + 1, allComments!!.items.size)
+
+        Thread.sleep(3000)
 
     }
 

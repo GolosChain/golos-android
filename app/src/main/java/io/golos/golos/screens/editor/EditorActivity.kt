@@ -143,9 +143,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 ?: "", mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 {
                     mViewModel.onTitleChanged(it)
-                }, mMode?.subtitle ?: "",
-                (mMode?.editorType == EditorType.CREATE_COMMENT || mMode?.editorType == EditorType.EDIT_COMMENT)
-                        && mMode?.rootStoryId == mMode?.workingItemId)
+                }, if (mMode?.editorType == EditorType.CREATE_COMMENT) mMode?.subtitle
+                ?: "" else "",
+
+                isHidden = (mMode?.editorType == EditorType.CREATE_COMMENT
+                        && mMode?.rootStoryId != mMode?.workingItemId) || mMode?.editorType == EditorType.EDIT_COMMENT)
 
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringSupplier {
@@ -316,16 +318,16 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             ctx.startActivity(intent)
         }
 
-        fun startEditPostOrComent(ctx: Context,
-                                  rootStory: StoryWithComments,
-                                  itemToEdit: GolosDiscussionItem,
-                                  feedType: FeedType,
-                                  storyFilter: StoryFilter?) {
+        fun startEditPostOrComment(ctx: Context,
+                                   rootStory: StoryWithComments,
+                                   itemToEdit: GolosDiscussionItem,
+                                   feedType: FeedType,
+                                   storyFilter: StoryFilter?) {
             val intent = Intent(ctx, EditorActivity::class.java)
             intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()?.title
                     ?: return,
                     rootStory.rootStory()?.author ?: return,
-                    if (rootStory.rootStory()?.id == itemToEdit.id) EditorType.EDIT_POST else EditorType.EDIT_COMMENT,
+                    if (itemToEdit.isRootStory) EditorType.EDIT_POST else EditorType.EDIT_COMMENT,
                     rootStory.rootStory()?.id ?: return,
                     itemToEdit.id,
                     storyFilter,

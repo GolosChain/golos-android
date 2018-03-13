@@ -1,6 +1,5 @@
 package io.golos.golos.repository.api
 
-import android.support.annotation.VisibleForTesting
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.apis.follow.enums.FollowType
 import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
@@ -21,11 +20,8 @@ import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
 import java.io.File
 
-/**
- * Created by yuri on 20.11.17.
- */
-@VisibleForTesting
-class ApiImpl : GolosApi() {
+
+internal class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
     override fun getUserAvatar(username: String, permlink: String?, blog: String?): String? {
         return if (permlink != null && blog != null) mGolosApi.databaseMethods.getAccountAvatar(blog, AccountName(username), Permlink(permlink))
@@ -312,7 +308,18 @@ class ApiImpl : GolosApi() {
 
     override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
         val result = mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
-        return CreatePostResult(true, result.author.name, result.getTags().first() ?: "", result.permlink.link)
+        return CreatePostResult(true, result.author.name, result.getTags().first()
+                ?: "", result.permlink.link)
+    }
+
+    override fun editPost(originalComentPermlink: String, sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
+        val result = mGolosApi.simplifiedOperations.updatePost(
+                AccountName(sendFromAccount),
+                Permlink(originalComentPermlink),
+                title,
+                content,
+                tags)
+        return CreatePostResult(true, result.author.name, result.getTags().first(), result.permlink.link)
     }
 
     override fun sendComment(sendFromAccount: String,
@@ -325,7 +332,22 @@ class ApiImpl : GolosApi() {
                 AccountName(sendFromAccount),
                 content,
                 Array(1, { categoryName }))
-        return CreatePostResult(false, result.author.name, result.getTags().first() ?: "", result.permlink.link)
+        return CreatePostResult(false, result.author.name, result.getTags().first(), result.permlink.link)
+    }
+
+    override fun editComment(sendFromAccount: String,
+                             authorOfItemToReply: String,
+                             permlinkOfItemToReply: String,
+                             originalComentPermlink: String,
+                             content: String,
+                             categoryName: String): CreatePostResult {
+        val result = mGolosApi.simplifiedOperations.updateComment(AccountName(authorOfItemToReply),
+                Permlink(permlinkOfItemToReply),
+                Permlink(originalComentPermlink),
+                AccountName(sendFromAccount),
+                content,
+                Array(1, { categoryName }))
+        return CreatePostResult(false, result.author.name, result.getTags().first(), result.permlink.link)
     }
 
     override fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject> {

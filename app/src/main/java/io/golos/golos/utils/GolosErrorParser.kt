@@ -39,14 +39,17 @@ object GolosErrorParser {
             return R.string.unknown_error
         }
 
+        val message = error.error.steemErrorDetails.data.toString()
         if (error.message?.contains("Your reputation must be at least") == true)
             return R.string.you_must_have_more_repo_for_action
-        if (error.error.steemErrorDetails.data.toString().contains("Cannot vote again on a comment after payout"))
+        if (message.contains("Cannot vote again on a comment after payout"))
             return R.string.cant_vote_after_payout
-        if (error.error.steemErrorDetails.data.toString().contains(" Voter has used the maximum number of vote changes on this commen"))
+        if (message.contains(" Voter has used the maximum number of vote changes on this commen"))
             return R.string.user_used_max_comments_chances
-        if (error.error.steemErrorDetails.data.toString().contains(" You have already voted in a similar way"))
+        if (message.contains(" You have already voted in a similar way"))
             return R.string.you_voted_same_way
+        if (message.contains("You may only comment once every 20 seconds"))
+            return R.string.you_may_comment_only_tw_sec
         else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes"))
             return R.string.you_can_post_only_every_five_minutes
         else if (error.error.steemErrorDetails.message.contains(" <= now + fc::seconds(STEEMIT_MAX_TIME_UNTIL_EXPIRATION): ")
