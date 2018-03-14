@@ -5,6 +5,7 @@ import android.support.annotation.NonNull
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.golos.golos.R
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeCompactViewHolder
@@ -13,6 +14,7 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.HolderClickListener
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 data class FeedCellSettings(val isFullSize: Boolean,
@@ -37,8 +39,15 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
     companion object {
         @JvmStatic
         @NonNull
-        private val workingExecutor = Executors.newSingleThreadExecutor()!!
+        private val workingExecutor: Executor
+
+        init {
+            val namedThreadFactory =
+                    ThreadFactoryBuilder().setNameFormat("stories recycler threads -%d").build()
+            workingExecutor = Executors.newSingleThreadExecutor(namedThreadFactory)
+        }
     }
+
 
     var feedCellSettings = feedCellSettings
         set(value) {
@@ -57,6 +66,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
     fun setStripesCustom(newItems: List<StoryWithComments>) {
         if (mStripes.isEmpty()) {
             handler.post {
+
                 mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
                 notifyDataSetChanged()
                 mStripes.forEach {
@@ -74,8 +84,8 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                                     || newItems == null
                                     || mStripes.isEmpty()
                                     || newItems.isEmpty()
-                                    || mStripes.lastIndex < oldItemPosition
-                                    || newItems.size < newItemPosition) return false
+                                    || mStripes.lastIndex < oldItemPosition) return false
+
                             return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
                         }
 
@@ -96,7 +106,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         result.dispatchUpdatesTo(this)
                         mStripes = ArrayList(newItems)
                         mStripes.forEach {
-                            mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                            mItemsMap.put(it.rootStory()?.id ?: 0L, it.rootStory()?.hashCode() ?: 0)
                         }
                     }
                 } catch (e: Exception) {

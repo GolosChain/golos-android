@@ -50,6 +50,8 @@ object GolosErrorParser {
             return R.string.you_voted_same_way
         if (message.contains("You may only comment once every 20 seconds"))
             return R.string.you_may_comment_only_tw_sec
+        if (message.contains("parent->depth < STEEMIT_MAX_COMMENT_DEPTH"))
+            return R.string.maximum_comment_depth
         else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes"))
             return R.string.you_can_post_only_every_five_minutes
         else if (error.error.steemErrorDetails.message.contains(" <= now + fc::seconds(STEEMIT_MAX_TIME_UNTIL_EXPIRATION): ")

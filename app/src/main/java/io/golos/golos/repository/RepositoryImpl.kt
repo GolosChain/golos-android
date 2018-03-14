@@ -41,7 +41,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mGolosApi: GolosApi = GolosApi.get,
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
-                              private val mNotificationsRepository: NotificationsRepository = NotificationsRepository(Executors.newSingleThreadExecutor(), Persister.get),
+                              private val mNotificationsRepository: NotificationsRepository
+                              = NotificationsRepository(Executors.newSingleThreadExecutor(), Persister.get),
+                              private val mHtmlizer: Htmlizer = object : Htmlizer {
+                                  override fun toHtml(input: String) = input.toHtml()
+                              },
                               private val mLogger: ExceptionLogger?) : Repository() {
 
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
@@ -94,6 +98,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
         out.forEach {
             it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: "_____absent_____"]
+
         }
         setUpWrapperOnDiscussionItems(out)
         return out
@@ -268,7 +273,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             items.forEach {
                 it.storyWithState()?.isStoryEditable = false
                 it.rootStory()?.userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
-
+                it.storyWithState()?.asHtmlString = mHtmlizer.toHtml(it.storyWithState()?.story?.cleanedFromImages
+                        ?: "")
             }
             return
         }
@@ -798,17 +804,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     UpdatingState.UPDATING,
                     canUserEditDiscussionItem(discussionItem)), storiesAll)
             if (result) {
-                if (isOnMainThread()) {
-                    it.value = StoriesFeed(storiesAll, it.value?.type
-                            ?: FeedType.NEW, it.value?.filter, isFeedActual = it.value?.isFeedActual
-                            ?: true)
-                } else {
-                    mMainThreadExecutor.execute {
-                        it.value = StoriesFeed(storiesAll, it.value?.type
-                                ?: FeedType.NEW, it.value?.filter, isFeedActual = it.value?.isFeedActual
-                                ?: true)
-                    }
-                }
+                it.value = StoriesFeed(storiesAll, it.value?.type
+                        ?: FeedType.NEW, it.value?.filter, isFeedActual = it.value?.isFeedActual
+                        ?: true)
             }
         }
         networkExecutor.execute {

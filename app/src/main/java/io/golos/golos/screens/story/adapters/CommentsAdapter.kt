@@ -3,7 +3,6 @@ package io.golos.golos.screens.story.adapters
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
-import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.ListPopupWindow
 import android.support.v7.widget.RecyclerView
@@ -150,7 +149,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
 
                     popup.setAdapter(CommentListAdapter(itemView.context, items))
                     popup.setContentWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                            120.0f,
+                            140.0f,
                             itemView.context.resources.displayMetrics).toInt())
                     popup.setOnItemClickListener({ _, _, position, _ ->
                         val item = items[position]
@@ -200,22 +199,25 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 }
 
                 if (field!!.comment.updatingState == UpdatingState.UPDATING) {
-                    mUpvoteBtn.visibility = View.INVISIBLE
+                    mUpvoteBtn.setViewGone()
                     mUpvoteBtn.isClickable = false
-                    mProgress.visibility = View.VISIBLE
+                    mProgress.setViewVisible()
                 } else {
-                    mUpvoteBtn.visibility = View.VISIBLE
+                    mUpvoteBtn.setViewVisible()
                     mUpvoteBtn.isClickable = true
-                    mProgress.visibility = View.GONE
+                    mProgress.setViewGone()
                 }
                 mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
                 val rows = ArrayList(StoryParserToRows.parse(comment))
-                var imagePart = rows.findLast { it is ImageRow }
+                var imagePart = rows.find { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
                     val src = (imagePart as ImageRow).src
                     val error = mGlide.load(R.drawable.error)
-                    mGlide.load(ImageUriResolver.resolveImageWithSize(src, itemView.context.resources.displayMetrics.widthPixels))
+                    var size = mImage.width
+                    if (size <= 0) size = itemView.context.resources.displayMetrics.widthPixels / 2
+                    if (size <= 0) size = 768
+                    mGlide.load(ImageUriResolver.resolveImageWithSize(src, size))
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.error))
                             .into(mImage)

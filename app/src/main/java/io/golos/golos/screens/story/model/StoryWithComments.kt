@@ -18,7 +18,9 @@ data class StoryWrapper(
         @JsonProperty("updatingState")
         var updatingState: UpdatingState,
         @JsonProperty("isStoryEditable")
-        var isStoryEditable: Boolean = false)
+        var isStoryEditable: Boolean = false,
+        @JsonProperty("asHtmlString")
+        var asHtmlString: CharSequence? = null)
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {

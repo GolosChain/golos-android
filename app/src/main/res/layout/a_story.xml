@@ -371,7 +371,7 @@
         android:focusable="true"
         app:fabSize="normal"
         app:layout_anchorGravity="bottom|right|end"
-
+        app:layout_behavior="io.golos.golos.screens.widgets.FabBeh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_white_24dp" />

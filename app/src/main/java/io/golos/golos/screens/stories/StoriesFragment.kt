@@ -42,6 +42,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
     private var mSavedPosition: Int? = null
+    private var lastSentUpdateRequestTime = System.currentTimeMillis()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -123,9 +124,10 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                         mViewModel?.onVotersClick(story, activity)
                     }
                 },
-                feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
-                        true,
-                        NSFWStrategy(true, Pair(false, ""))))
+                feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
+                        ?: FeedCellSettings(true,
+                                true,
+                                NSFWStrategy(true, Pair(false, ""))))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -133,8 +135,10 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val position = manager.findLastCompletelyVisibleItemPosition()
-                if (position + 10 > mAdapter.itemCount) {
+                if (position + 10 > mAdapter.itemCount
+                        && ((System.currentTimeMillis() - lastSentUpdateRequestTime) > 1_000)) {
                     mViewModel?.onScrollToTheEnd()
+                    lastSentUpdateRequestTime = System.currentTimeMillis()
                 }
             }
         })

@@ -82,7 +82,7 @@ abstract class StoriesViewHolder(resId: Int,
             imageView.setImageDrawable(null)
             return
         }
-        if ((story.type == GolosDiscussionItem.ItemType.IMAGE_FIRST || showImageIfNotImageFirst())//if we show image at all
+        if ((story.type == GolosDiscussionItem.ItemType.IMAGE_FIRST || showImageIfNotImageFirst())
                 && story.tags.find {
                     val lowerCased = it.toLowerCase() // and there is nsfw tag
                     lowerCased == "nsfw" || lowerCased == "nswf"
@@ -98,6 +98,7 @@ abstract class StoriesViewHolder(resId: Int,
                     getMainText()?.setViewGone()
                 } else {
                     imageView.setViewGone()
+                    imageView.setImageDrawable(null)
                     getMainText()?.setViewVisible()
                 }
                 return
@@ -120,19 +121,25 @@ abstract class StoriesViewHolder(resId: Int,
         imageView.setViewVisible()
         val error = mGlide.load(getErrorDrawable())
         var nextImage: RequestBuilder<Drawable>? = null
+
+        var size = imageView.width
+        if (size <= 0) size = imageView.context.resources.displayMetrics.widthPixels
+        if (size <= 0) size = 768
         if (story.images.size > 1) {
-            nextImage = mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[1], imageView.context.resources.displayMetrics.widthPixels)).error(error)
+            nextImage = mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[1], size)).error(error)
         }
         if (story.images.size > 0) {
             mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[0],
-                    wantedwidth = imageView.width))
+                    wantedwidth = size))
                     .error(nextImage ?: error)
                     .apply(RequestOptions.placeholderOf(getErrorDrawable()))
                     .into(imageView)
         } else {
             val image = story.parts.find { it is ImageRow }
             image?.let {
-                mGlide.load((it as ImageRow).src)
+                val src = (it as ImageRow).src
+                mGlide.load(ImageUriResolver.resolveImageWithSize(src,
+                        wantedwidth = size))
                         .error(nextImage ?: error)
                         .apply(RequestOptions.placeholderOf(getErrorDrawable()))
                         .into(imageView)

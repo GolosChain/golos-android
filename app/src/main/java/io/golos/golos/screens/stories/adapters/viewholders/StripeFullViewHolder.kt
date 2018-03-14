@@ -14,6 +14,7 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,
@@ -67,6 +68,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
+        val start = System.currentTimeMillis()
         if (mAvatar.drawable != noAvatarDrawable) mAvatar.setImageDrawable(noAvatarDrawable)
         super.handlerStateChange(newState, oldState)
         if (newState != null) {
@@ -106,11 +108,20 @@ class StripeFullViewHolder(parent: ViewGroup,
                 mMainImageBig.setImageDrawable(null)
                 mBodyTextMarkwon.setViewVisible()
                 mMainImageBig.setViewGone()
-                mBodyTextMarkwon.text = wrapper.cleanedFromImages.substring(0,
-                        if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
+                var htmlString = newState.stripe.storyWithState()?.asHtmlString
+                if (htmlString != null) {
+                    if (htmlString.length > 400) htmlString.substring(0..400)
+                    mBodyTextMarkwon.text = htmlString
+                } else {
+                    htmlString = wrapper.cleanedFromImages.substring(0,
+                            if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
+                    newState.stripe.storyWithState()?.asHtmlString = htmlString
+                    mBodyTextMarkwon.text = htmlString
+                }
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
+            Timber.e("elapsed = ${System.currentTimeMillis() - start}")
         }
     }
 

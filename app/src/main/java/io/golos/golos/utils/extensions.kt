@@ -10,7 +10,6 @@ import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.support.annotation.ColorRes

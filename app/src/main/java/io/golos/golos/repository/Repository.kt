@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.crashlytics.android.Crashlytics
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.repository.model.*
@@ -30,7 +31,7 @@ abstract class Repository {
             get() {
                 if (instance == null) instance = RepositoryImpl(
                         networkExecutor,
-                        Executors.newSingleThreadExecutor(),
+                        Executors.newSingleThreadExecutor(ThreadFactoryBuilder().setNameFormat("worker executor thread -%d").build()),
                         mMainThreadExecutor,
                         mLogger = object : ExceptionLogger {
                             override fun log(t: Throwable) {
@@ -52,11 +53,13 @@ abstract class Repository {
                 else if (o1 is Runnable) Int.MIN_VALUE
                 else 0
             })
+
             ThreadPoolExecutor(1, 1,
-                    Long.MAX_VALUE, TimeUnit.MILLISECONDS, queu)
+                    Long.MAX_VALUE, TimeUnit.MILLISECONDS, queu, ThreadFactoryBuilder().setNameFormat("network executor thread -%d").build())
         }
         private val mMainThreadExecutor: Executor
             get() {
+
                 val handler = Handler(Looper.getMainLooper())
                 return Executor { command -> handler.post(command) }
             }

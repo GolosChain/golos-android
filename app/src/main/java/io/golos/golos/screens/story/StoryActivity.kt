@@ -144,9 +144,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         }
                     }
                 }
-                mStoryRecycler.visibility = View.VISIBLE
-                (mStoryRecycler.adapter as StoryAdapter).items = ArrayList(ets)
-
+                mStoryRecycler.setViewVisible()
+                val adapter = mStoryRecycler.adapter as StoryAdapter
+                if (adapter.itemCount != ets.size) {
+                    adapter.items = ArrayList(ets)
+                }
                 if (mAvatar.drawable == null) {
                     mAvatar.visibility = View.VISIBLE
                     mUserName.text = story.author
@@ -244,13 +246,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 if (it.storyTree.storyWithState()?.updatingState == UpdatingState.UPDATING) {
-                    mVotingProgress.visibility = View.VISIBLE
-                    mMoneyBtn.visibility = View.GONE
-
+                    mVotingProgress.setViewVisible()
+                    mMoneyBtn.setViewGone()
                 } else {
-                    mVotingProgress.visibility = View.GONE
-
-                    mMoneyBtn.visibility = View.VISIBLE
+                    mVotingProgress.setViewGone()
+                    mMoneyBtn.setViewVisible()
                 }
                 findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
 
