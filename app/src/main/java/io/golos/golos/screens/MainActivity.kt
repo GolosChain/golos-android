@@ -26,7 +26,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
-        pager.offscreenPageLimit = 4
+        pager.offscreenPageLimit = 5
 
         val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
         bottomNavView.setOnNavigationItemSelectedListener {

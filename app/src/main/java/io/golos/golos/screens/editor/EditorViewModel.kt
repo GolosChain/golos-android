@@ -138,7 +138,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (!mRepository.isUserLoggedIn()) return
-        if (mRootStory == null || mWorkingItem == null) return
+
+        val editorType = mode?.editorType ?: return
+
+
 
         if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
                 (editorLiveData.value?.parts?.size == 1
@@ -151,7 +154,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     tags = editorLiveData.value?.tags ?: listOf())
             return
         }
-        val editorType = mode?.editorType ?: return
+
         if (editorType == EditorActivity.EditorType.CREATE_POST || editorType == EditorActivity.EditorType.EDIT_POST) {
             if (editorLiveData.value?.title.isNullOrEmpty()) {
                 editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
@@ -201,12 +204,18 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         editorLiveData.value?.tags ?: return,
                         listener)
             } else if (editorType == EditorActivity.EditorType.EDIT_POST) {
+
+                if (mRootStory == null || mWorkingItem == null) return
+
                 mRepository.editPost(editorLiveData.value?.title ?: return,
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
                         mRootStory?.rootStory() ?: return, listener)
             }
         } else if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
+
+            if (mRootStory == null || mWorkingItem == null) return
+
             val listener: (CreatePostResult?, GolosError?) -> Unit = { _, error ->
                 if (error == null) {
                     wasSent = true

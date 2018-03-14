@@ -146,8 +146,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 }, if (mMode?.editorType == EditorType.CREATE_COMMENT) mMode?.subtitle
                 ?: "" else "",
 
-                isHidden = (mMode?.editorType == EditorType.CREATE_COMMENT
-                        && mMode?.rootStoryId != mMode?.workingItemId) || mMode?.editorType == EditorType.EDIT_COMMENT)
+                isHidden = isTitleHidden())
 
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringSupplier {
@@ -200,6 +199,15 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
         })
+    }
+
+    private fun isTitleHidden(): Boolean {
+        if (mMode?.editorType == EditorType.CREATE_COMMENT && mMode?.rootStoryId != mMode?.workingItemId)//it is reply on some content
+            return true
+        if (mMode?.editorType == EditorType.EDIT_COMMENT) return true//it is edit of comment
+        if (mMode?.editorType == EditorType.CREATE_COMMENT && mMode?.title?.isEmpty() == true)//it is create root comment, but title is empty
+            return true
+        return false
     }
 
     override fun onTagsSubmit(tags: List<String>) {

@@ -18,19 +18,19 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".screens.editor.EditorActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.tags.TagSearchActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.tags.TagsCloudActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <activity
@@ -38,7 +38,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.widgets.PhotoActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.userslist.UsersListActivity"
@@ -49,7 +49,7 @@
         <activity
             android:name=".screens.SplashActivity"
             android:label="@string/app_name"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/LauncherTheme">
             <intent-filter>
@@ -70,16 +70,16 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.webview.WebViewActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.settings.SettingActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 

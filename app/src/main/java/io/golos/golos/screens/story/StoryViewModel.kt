@@ -22,6 +22,7 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -182,12 +183,21 @@ class StoryViewModel : ViewModel() {
 
     fun onWriteRootComment(ctx: Context) {
         if (canUserWriteComments()) {
-            mLiveData.value?.let {
+            val story = mLiveData.value?.storyTree ?: return
+            if (story.rootStory()?.isRootStory == true) {
                 EditorActivity.startRootCommentEditor(ctx,
-                        it.storyTree,
+                        story,
                         feedType,
                         filter)
+
+            } else {
+                EditorActivity.startAnswerOnCommentEditor(ctx,
+                        rootStory = story,
+                        commentToAnswer = story.rootStory() ?: return,
+                        feedType = feedType,
+                        storyFilter = filter)
             }
+
         }
     }
 
@@ -321,6 +331,4 @@ class StoryViewModel : ViewModel() {
         mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
         mLiveData.removeSource(mRepository.getUserSubscribedTags())
     }
-
-
 }

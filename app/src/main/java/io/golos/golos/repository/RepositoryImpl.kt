@@ -798,10 +798,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     UpdatingState.UPDATING,
                     canUserEditDiscussionItem(discussionItem)), storiesAll)
             if (result) {
-                mMainThreadExecutor.execute {
+                if (isOnMainThread()) {
                     it.value = StoriesFeed(storiesAll, it.value?.type
                             ?: FeedType.NEW, it.value?.filter, isFeedActual = it.value?.isFeedActual
                             ?: true)
+                } else {
+                    mMainThreadExecutor.execute {
+                        it.value = StoriesFeed(storiesAll, it.value?.type
+                                ?: FeedType.NEW, it.value?.filter, isFeedActual = it.value?.isFeedActual
+                                ?: true)
+                    }
                 }
             }
         }

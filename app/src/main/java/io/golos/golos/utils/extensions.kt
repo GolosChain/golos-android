@@ -10,7 +10,9 @@ import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.annotation.LayoutRes
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
+import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import java.io.File
 import java.io.IOException
@@ -296,3 +299,7 @@ public fun TextView.setVectorDrawableStart(id: Int) {
     this.setCompoundDrawablesWithIntrinsicBounds(this.getVectorDrawable(id), null, null, null)
 }
 
+fun isOnMainThread(): Boolean {
+    if (BuildConfig.DEBUG) return true
+    return (Looper.getMainLooper() == Looper.myLooper())
+}
