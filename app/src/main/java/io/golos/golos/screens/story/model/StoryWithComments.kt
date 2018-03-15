@@ -20,7 +20,12 @@ data class StoryWrapper(
         @JsonProperty("isStoryEditable")
         var isStoryEditable: Boolean = false,
         @JsonProperty("asHtmlString")
-        var asHtmlString: CharSequence? = null)
+        var asHtmlString: CharSequence? = null) {
+
+    fun copyChangingUpdatingState(newState: UpdatingState): StoryWrapper {
+        return StoryWrapper(story, newState, isStoryEditable, asHtmlString)
+    }
+}
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {

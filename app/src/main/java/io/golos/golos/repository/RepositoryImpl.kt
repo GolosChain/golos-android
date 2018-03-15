@@ -887,7 +887,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 val updatedStory = getStory(story.categoryName,
                         story.author,
                         story.permlink)
+
+                setUpWrapperOnDiscussionItems(Collections.singletonList(updatedStory))
+
                 val avatars = updatedStory.getFlataned()
+
                         .filter {
                             it.story.avatarPath != null
                         }
@@ -1337,6 +1341,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             })
 
                 } else {
+
+                    savedStories.onEach { setUpWrapperOnDiscussionItems(it.value.items) }
+
                     mMainThreadExecutor.execute {
                         val stories = savedStories
                                 .mapValues {
@@ -1375,8 +1382,17 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                             it.key.filter!!.userNameFilter.size == 1 &&
                                             it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.userName)
                         }
-                        .mapValues { it.value.value!!.copy() }
+                        .mapValues {
+                            val out = it.value.value!!.copy()
+                            if (out.items.size > 40) {
+                                val copy = out.items.slice(0.. 40)
+                                out.items.clear()
+                                out.items.addAll(copy)
+                            }
+                            out
+                        }
                 storiesToSave
+
                         .flatMap { it.value.items }
                         .filter { it.rootStory() != null }
                         .map { it.rootStory()!! }

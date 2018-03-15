@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/filtered_tags_fragment"
     android:layout_height="match_parent">
 
 
@@ -92,7 +93,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/pager_lo"
+        android:id="@+id/filtered_pager_lo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"

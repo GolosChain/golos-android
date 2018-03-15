@@ -40,7 +40,7 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_filtered_stories, container, false)
         mTagsReycler = v.findViewById(R.id.tags_recycler)
-        mViewPager = v.findViewById(R.id.pager_lo)
+        mViewPager = v.findViewById(R.id.filtered_pager_lo)
         mNoTagsTv = v.findViewById(R.id.no_tags_chosen_tv)
         mPopularNowTv = v.findViewById<TabLayout>(R.id.tab_lo)
         mViewPager.offscreenPageLimit = 3

@@ -3,6 +3,7 @@ package io.golos.golos.screens.stories
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -41,7 +42,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
-    private var mSavedPosition: Int? = null
     private var lastSentUpdateRequestTime = System.currentTimeMillis()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -238,11 +238,11 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        var parc = mSavedPosition
-        if (parc == null) parc = (mRecycler?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-        if (parc ?: 0 > 0) {
-            outState.putInt("recyclerState${mViewModel}", parc ?: return)
+        val parc = mRecycler?.layoutManager as? LinearLayoutManager
+        parc?.onSaveInstanceState().let {
+            outState.putParcelable("recyclerState", it)
         }
+
     }
 
     override fun onDestroy() {
@@ -252,7 +252,12 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        mSavedPosition = savedInstanceState?.getInt("recyclerState")
+        val parc = savedInstanceState?.getParcelable<Parcelable>("recyclerState")
+        parc?.let {
+            (mRecycler?.layoutManager as? LinearLayoutManager)?.let {
+                it.onRestoreInstanceState(parc)
+            }
+        }
     }
 
     fun getArgs(): Pair<FeedType, StoryFilter?> {
@@ -266,6 +271,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     companion object {
         private val TYPE_TAG = "TYPE_TAG"
         private val FILTER_TAG = "FILTER_TAG"
+
         fun getInstance(type: FeedType,
                         filter: StoryFilter? = null): StoriesFragment {
             val fr = StoriesFragment()

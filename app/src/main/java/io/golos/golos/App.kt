@@ -36,11 +36,7 @@ class App : MultiDexApplication() {
         }
         Fabric.with(this, Crashlytics())
         Repository.get.onAppCreate(this)
-        val sharedPrefs = getSharedPreferences("App", Context.MODE_PRIVATE)
-        if (!sharedPrefs.getBoolean("deleteUserData", false)) {
-            Repository.get.deleteUserdata()
-            sharedPrefs.edit().putBoolean("deleteUserData", true).commit()
-        }
+
         val ce = if (resources.getBoolean(R.bool.isTablet)) CustomEvent("app launched on tablet")
         else CustomEvent("app launched on phone")
         Answers.getInstance().logCustom(ce)

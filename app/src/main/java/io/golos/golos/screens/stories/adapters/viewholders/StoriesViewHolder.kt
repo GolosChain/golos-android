@@ -15,6 +15,7 @@ import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
+import java.lang.StringBuilder
 
 /**
  * Created by yuri on 19.02.18.
@@ -22,6 +23,7 @@ import io.golos.golos.utils.*
 abstract class StoriesViewHolder(resId: Int,
                                  parent: ViewGroup) : GolosViewHolder(resId, parent) {
     private val mGlide = Glide.with(parent.context)
+    private val mStringBuilder: StringBuilder = StringBuilder("")
 
     init {
 
@@ -37,7 +39,6 @@ abstract class StoriesViewHolder(resId: Int,
 
     protected open fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
         val story = newState?.stripe?.rootStory()
-
         if (newState == null || story == null) return
 
         if (story.categoryName.startsWith("ru--")) {
@@ -53,10 +54,16 @@ abstract class StoriesViewHolder(resId: Int,
         } else {
             getReblogedByTv().setViewGone()
         }
-        getTitleTv().text = story.title.toLowerCase().capitalize()
+        if (story.title.length > 2) {
+            mStringBuilder.delete(0, mStringBuilder.length)
+            mStringBuilder.append(story.title.toLowerCase())
+            mStringBuilder.replace(0, 1, story.title.substring(0, 1).toUpperCase())
+            getTitleTv().text = mStringBuilder.toString()
+        } else {
+            getTitleTv().text = ""
+        }
         getUpvoteText().text = "$${String.format("%.3f", story.payoutInDollars)}"
         getCommentsTv().text = story.commentsCount.toString()
-
     }
 
     protected abstract fun getMainImage(): ImageView

@@ -68,8 +68,6 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
-        val start = System.currentTimeMillis()
-        if (mAvatar.drawable != noAvatarDrawable) mAvatar.setImageDrawable(noAvatarDrawable)
         super.handlerStateChange(newState, oldState)
         if (newState != null) {
 
@@ -81,7 +79,7 @@ class StripeFullViewHolder(parent: ViewGroup,
                             wantedwidth = mAvatar.width))
                     .error(mGlide.load(noAvatarDrawable))
                     .into(mAvatar)
-
+            else mAvatar.setImageDrawable(noAvatarDrawable)
             if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
@@ -96,6 +94,7 @@ class StripeFullViewHolder(parent: ViewGroup,
                     mUpvoteBtn.tag = "gray"
                 }
             }
+
             if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
                 mVotingProgress.setViewVisible()
                 mUpvoteBtn.setViewGone()
@@ -105,23 +104,23 @@ class StripeFullViewHolder(parent: ViewGroup,
             }
             mVotersBtn.text = wrapper.votesNum.toString()
             if (newState.stripe.rootStory()?.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
-                mMainImageBig.setImageDrawable(null)
-                mBodyTextMarkwon.setViewVisible()
                 mMainImageBig.setViewGone()
+                mMainImageBig.setImageDrawable(null)
                 var htmlString = newState.stripe.storyWithState()?.asHtmlString
                 if (htmlString != null) {
                     if (htmlString.length > 400) htmlString.substring(0..400)
                     mBodyTextMarkwon.text = htmlString
+
                 } else {
                     htmlString = wrapper.cleanedFromImages.substring(0,
                             if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
                     newState.stripe.storyWithState()?.asHtmlString = htmlString
                     mBodyTextMarkwon.text = htmlString
                 }
+                mBodyTextMarkwon.setViewVisible()
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
-            Timber.e("elapsed = ${System.currentTimeMillis() - start}")
         }
     }
 
