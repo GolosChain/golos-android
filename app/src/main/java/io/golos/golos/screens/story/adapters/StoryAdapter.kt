@@ -31,10 +31,7 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onRowClick: ((Row, ImageView?) -> Unit)? = null
     var items = ArrayList<Row>()
         set(value) {
-            val newItems = value.filter {
-                it is ImageRow
-                        || (it is TextRow && it.text.toHtml().isNotEmpty())
-            }.toArrayList()
+            val newItems = value
 
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

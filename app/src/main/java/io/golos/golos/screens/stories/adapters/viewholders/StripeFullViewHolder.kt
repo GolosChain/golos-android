@@ -14,7 +14,6 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,

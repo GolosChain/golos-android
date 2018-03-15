@@ -23,6 +23,7 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -208,7 +209,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     mProgress.setViewGone()
                 }
                 mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
-                val rows = ArrayList(StoryParserToRows.parse(comment))
+                val rows = ArrayList(StoryParserToRows.parse(comment, true))
                 var imagePart = rows.find { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
@@ -236,7 +237,6 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     }.reduce { s1, s2 -> s1 + s2 }
                     mText.text = outText.trim().toHtml().trim()
                 }
-
             }
         }
 

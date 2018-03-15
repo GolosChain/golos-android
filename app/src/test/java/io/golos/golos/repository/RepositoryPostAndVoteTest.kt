@@ -14,6 +14,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.utils.Htmlizer
 import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Before
@@ -49,6 +50,11 @@ class RepositoryPostAndVoteTest {
                 ApiImpl(),
                 mLogger = null,
                 mUserSettings = MockUserSettings,
+                mHtmlizer = object : Htmlizer {
+                    override fun toHtml(input: String): CharSequence {
+                        return input
+                    }
+                },
                 mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
@@ -114,7 +120,7 @@ class RepositoryPostAndVoteTest {
         assertNotNull(authData.value)
         var blogItems: StoriesFeed? = null
         var allComments: StoriesFeed? = null
-        val sizeOfItems = 20
+        val sizeOfItems = 1
 
         repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
             blogItems = it
@@ -134,7 +140,7 @@ class RepositoryPostAndVoteTest {
         val notCommentedItem = blogItems!!.items.first().deepCopy()
         repo.requestStoryUpdate(notCommentedItem)
 
-        /*val commentSizeBefore = blogItems!!.items.first().comments().size
+        val commentSizeBefore = blogItems!!.items.first().comments().size
 
         val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
         repo.createComment(notCommentedItem.rootStory()!!, listOf(text), { _, _ -> })
@@ -148,7 +154,7 @@ class RepositoryPostAndVoteTest {
         assertNotNull(repo.lastCreatedPost().value)
         assertEquals(userName, repo.lastCreatedPost().value!!.author)
 
-        Thread.sleep(3000)*/
+        Thread.sleep(3000)
         val newBody = "edited_comment_twicE_" + UUID.randomUUID().toString()
         val editedComment = blogItems!!.items.first().comments().find { it.author == userName && it.commentsCount == 0 }!!
         repo.editComment(editedComment,
@@ -185,14 +191,15 @@ class RepositoryPostAndVoteTest {
         assertEquals(sizeOfItems, blogItems!!.items.size)
         assertEquals(sizeOfItems, allComments!!.items.size)
 
-        val notCommentedItem =  blogItems!!.items.first()
+        val notCommentedItem = blogItems!!.items.first()
         repo.requestStoryUpdate(notCommentedItem)
-        val firstLevelComment =  blogItems!!.items.first().comments().first()
+        val firstLevelComment = blogItems!!.items.first().comments().first()
         val updatedItem = blogItems!!.items.first().comments().first().children.size
 
         val commentSizeBefore = blogItems!!.items.first().getFlataned().size
 
-        val text = EditorTextPart("sdg", "second_level_comment ${UUID.randomUUID()}", pointerPosition = null)
+        val commentText = "second_level_comment ${UUID.randomUUID()}"
+        var text = EditorTextPart("sdg", commentText, pointerPosition = null)
         repo.createComment(firstLevelComment, listOf(text), { _, _ -> })
 
         assertEquals("comments size in first story in feed must increase",
@@ -203,7 +210,17 @@ class RepositoryPostAndVoteTest {
         assertEquals("there must be 20 + 1 comments in comments feed",
                 sizeOfItems + 1, allComments!!.items.size)
 
-        Thread.sleep(3000)
+        val item = blogItems!!.items.first().getFlataned().find { it.story.body.contains(commentText) }!!
+        assertEquals("second level comment level 1", 1, item.story.level)
+
+        Thread.sleep(20_000)
+
+
+        val thirdLevelCommentTextcommentText = "third_level_comment ${UUID.randomUUID()}"
+        text = EditorTextPart("sdg", thirdLevelCommentTextcommentText, pointerPosition = null)
+        repo.createComment(item.story, listOf(text), { _, _ -> })
+        val thirdLevelitem = blogItems!!.items.first().getFlataned().find { it.story.body.contains(thirdLevelCommentTextcommentText) }!!
+        assertEquals("third level comment  level 2", 2, thirdLevelitem.story.level)
 
     }
 

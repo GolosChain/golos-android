@@ -262,31 +262,37 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     .map { it?.items }
                     .filter { it != null }
                     .map { it!! }
-                    .flatMap { it })
+                    .flatMap { it }, skipHtmlizer = true)
         }
         return response
     }
 
-    private fun setUpWrapperOnDiscussionItems(items: List<StoryWithComments>) {
+    private fun setUpWrapperOnDiscussionItems(items: List<StoryWithComments>,
+                                              skipVoteStatusTest: Boolean = false,
+                                              skipEditableTest: Boolean = false,
+                                              skipHtmlizer: Boolean = false) {
         val name = mAuthLiveData.value?.userName
         if (!isUserLoggedIn() || name == null) {
             items.forEach {
-                it.storyWithState()?.isStoryEditable = false
-                it.rootStory()?.userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
-                it.storyWithState()?.asHtmlString = mHtmlizer.toHtml(it.storyWithState()?.story?.cleanedFromImages
+                if (!skipEditableTest) it.storyWithState()?.isStoryEditable = false
+                if (!skipVoteStatusTest) it.rootStory()?.userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
+                if (!skipHtmlizer) it.storyWithState()?.asHtmlString = mHtmlizer.toHtml(it.storyWithState()?.story?.cleanedFromImages
                         ?: "")
+
             }
             return
         }
         items.forEach {
-            it.rootStory()?.userVotestatus = it.rootStory()?.isUserVotedOnThis(name) ?: GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
+            if (!skipVoteStatusTest) it.rootStory()?.userVotestatus = it.rootStory()?.isUserVotedOnThis(name) ?: GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
 
-            it.storyWithState()?.isStoryEditable = canUserEditDiscussionItem(it.rootStory()
+            if (!skipEditableTest) it.storyWithState()?.isStoryEditable = canUserEditDiscussionItem(it.rootStory()
                     ?: return@forEach)
-            it.getFlataned().forEach {
+            if (!skipEditableTest) it.getFlataned().forEach {
                 it.isStoryEditable = canUserEditDiscussionItem(it.story)
                 it.story.userVotestatus = it.story.isUserVotedOnThis(name)
             }
+            if (!skipHtmlizer) it.storyWithState()?.asHtmlString = mHtmlizer.toHtml(it.storyWithState()?.story?.cleanedFromImages
+                    ?: "")
         }
     }
 
@@ -888,10 +894,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         story.author,
                         story.permlink)
 
-                setUpWrapperOnDiscussionItems(Collections.singletonList(updatedStory))
-
                 val avatars = updatedStory.getFlataned()
-
                         .filter {
                             it.story.avatarPath != null
                         }
@@ -902,6 +905,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                 val listOfList = allLiveData()
                 val replacer = StorySearcherAndReplacer()
+
+                setUpWrapperOnDiscussionItems(Collections.singletonList(updatedStory))
+
                 listOfList.forEach {
                     val allItems = ArrayList(it.value?.items ?: ArrayList())
                     if (replacer.findAndReplace(updatedStory, allItems)) {
@@ -1134,8 +1140,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     override val notificationsrepository: NotificationsRepository = mNotificationsRepository
 
     override fun isUserLoggedIn(): Boolean {
-        val userData = mPersister.getActiveUserData()
-        return userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)
+        return mAuthLiveData.value != null &&
+                mAuthLiveData.value?.userName != null &&
+                (mAuthLiveData.value?.privateActiveWif != null || mAuthLiveData.value?.privatePostingWif != null)
+        /*val userData = mPersister.getActiveUserData()
+        return userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)*/
     }
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
@@ -1342,8 +1351,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                 } else {
 
-                    savedStories.onEach { setUpWrapperOnDiscussionItems(it.value.items) }
-
+                    savedStories.map { it.value.items }
+                            .forEach { setUpWrapperOnDiscussionItems(it, skipVoteStatusTest = true, skipEditableTest = true) }
                     mMainThreadExecutor.execute {
                         val stories = savedStories
                                 .mapValues {
@@ -1385,7 +1394,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         .mapValues {
                             val out = it.value.value!!.copy()
                             if (out.items.size > 40) {
-                                val copy = out.items.slice(0.. 40)
+                                val copy = out.items.slice(0..40)
                                 out.items.clear()
                                 out.items.addAll(copy)
                             }

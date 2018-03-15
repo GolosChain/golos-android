@@ -46,7 +46,8 @@ public class Utils {
         discussions.forEach(new Consumer<Discussion>() {
             @Override
             public void accept(Discussion discussion) {
-                stories.add(new StoryWithComments(new StoryWrapper(new GolosDiscussionItem(discussion, null), UpdatingState.DONE, false),
+                stories.add(new StoryWithComments(new StoryWrapper(new GolosDiscussionItem(discussion, null),
+                        UpdatingState.DONE, false, ""),
                         new ArrayList()
                 ));
             }

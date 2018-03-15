@@ -3,6 +3,7 @@ package io.golos.golos.screens.story.model
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
+import io.golos.golos.utils.toHtml
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
@@ -17,7 +18,7 @@ data class ImageRow(val src: String) : Row()
 sealed class Row
 
 object StoryParserToRows {
-    fun parse(story: GolosDiscussionItem): List<Row> {
+    fun parse(story: GolosDiscussionItem, checkEmptyHtml: Boolean = false): List<Row> {
 
         val out = ArrayList<Row>()
         if (story.body.isEmpty()) return out
@@ -40,7 +41,11 @@ object StoryParserToRows {
         try {
             val whiteList = Whitelist.basicWithImages()
             whiteList.addTags("h1", "h2", "h3", "h4")
-            str = Jsoup.clean(str, whiteList)
+            try {
+                str = Jsoup.clean(str, whiteList)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))\\b".toRegex()) {
                 if (!it.value.contains("a href")) " <a href =\"https://golos.io/${it.value.trim()}\">${it.value.trim()}</a>"
                 else it.value
@@ -168,7 +173,11 @@ object StoryParserToRows {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return out
+        return if (checkEmptyHtml) out.filter {
+            it is ImageRow || (it is TextRow && it.text.toHtml().isNotEmpty())
+        } else
+            out
+
     }
 
 

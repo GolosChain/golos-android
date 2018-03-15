@@ -79,7 +79,6 @@
             android:layout_marginStart="@dimen/margin_material"
             android:layout_marginTop="6dp"
             android:ellipsize="end"
-            android:lines="1"
             android:textColor="@color/textColorP"
             android:textSize="@dimen/font_small"
             android:visibility="gone">

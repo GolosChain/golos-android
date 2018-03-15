@@ -134,6 +134,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
     }
 
     fun getFlataned(): List<StoryWrapper> {
+        setUpLevels()
         return mCommentsWithState.flatMap { listOf(it) + getChildren(it) }
     }
 

@@ -15,6 +15,7 @@ import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.lang.StringBuilder
 
 /**
@@ -120,12 +121,12 @@ abstract class StoriesViewHolder(resId: Int,
                 imageView.setImageDrawable(null)
             }
         } else {
+            imageView.setViewVisible()
             loadMainImage(story, imageView)
         }
     }
 
     private fun loadMainImage(story: GolosDiscussionItem, imageView: ImageView) {
-        imageView.setViewVisible()
         val error = mGlide.load(getErrorDrawable())
         var nextImage: RequestBuilder<Drawable>? = null
 
@@ -152,7 +153,7 @@ abstract class StoriesViewHolder(resId: Int,
                         .into(imageView)
             }
             if (image == null) {
-                imageView.setViewGone()
+                imageView.setImageResource(R.drawable.error)
             }
         }
     }
