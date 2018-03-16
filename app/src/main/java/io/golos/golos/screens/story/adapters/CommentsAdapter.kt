@@ -3,7 +3,6 @@ package io.golos.golos.screens.story.adapters
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
-import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.ListPopupWindow
 import android.support.v7.widget.RecyclerView
 import android.util.TypedValue
@@ -23,13 +22,10 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 
-/**
- * Created by yuri on 08.11.17.
- */
+
 data class CommentHolderState(val comment: StoryWrapper,
                               val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
                               val onDownVoteClick: (RecyclerView.ViewHolder) -> Unit,
@@ -95,7 +91,6 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
     private val mImage: ImageView = itemView.findViewById(R.id.image)
     private val mAnswerIbtn: Button = itemView.findViewById(R.id.answer_btn)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
-    private val mLayout: LinearLayoutCompat = itemView.findViewById(R.id.content_lo)
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
     private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mVotesIv: TextView = itemView.findViewById(R.id.votes_btn)
@@ -117,7 +112,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 mText.text = ""
                 mUsernameTv.text = ""
                 mTimeTv.text = ""
-                mUpvoteBtn.text = "$ "
+                mUpvoteBtn.text = ""
                 mImage.setImageBitmap(null)
                 mAvatar.setImageBitmap(null)
                 mProgress.visibility = View.GONE
@@ -210,7 +205,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                 }
                 mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
                 val rows = ArrayList(StoryParserToRows.parse(comment, true))
-                var imagePart = rows.find { it is ImageRow }
+                val imagePart = rows.find { it is ImageRow }
                 if (imagePart != null) {
                     mImage.visibility = View.VISIBLE
                     val src = (imagePart as ImageRow).src
