@@ -20,6 +20,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
+import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.toArrayList
 import io.golos.golos.utils.toHtml
 
@@ -30,10 +31,7 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onRowClick: ((Row, ImageView?) -> Unit)? = null
     var items = ArrayList<Row>()
         set(value) {
-            val newItems = value.filter {
-                it is ImageRow
-                        || (it is TextRow && it.text.toHtml().isNotEmpty())
-            }.toArrayList()
+            val newItems = value
 
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
@@ -49,12 +47,12 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             field = newItems
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == 0) return TextBlockHolder(parent!!)
-        else return ImageBlockHolder(parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == 0) return TextBlockHolder(parent)
+        else return ImageBlockHolder(parent)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
                 if (vh.adapterPosition == -1) return@RowWrapper
@@ -111,14 +109,14 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
                 mImageFullWidth.visibility = View.VISIBLE
 
 
-                if (src.endsWith("/")) src = src.substring(0..src.lastIndex - 1)
+                if (src.endsWith("/")) src = src.substring(0 until src.lastIndex)
+                src = ImageUriResolver.resolveImageWithSize(src)
 
                 mTarget = object : ViewTarget<View, Bitmap>(itemView) {
 
                     override fun getSize(cb: SizeReadyCallback?) {
                         cb?.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                     }
-
 
 
                     override fun onResourceReady(resource: Bitmap?, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>) {

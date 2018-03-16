@@ -2,6 +2,7 @@ package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.R
 import io.golos.golos.repository.api.ApiImpl
 import junit.framework.Assert
@@ -32,7 +33,10 @@ class RepoAuthTest {
         repo = RepositoryImpl(
                 executor,
                 executor ,
-                executor, MockPersister, ApiImpl(), null
+                executor, MockPersister, ApiImpl(),
+                mLogger = null,
+                mUserSettings = MockUserSettings,
+                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
     }
 

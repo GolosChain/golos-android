@@ -37,7 +37,7 @@ class UserListViewModelTest {
         repo = RepositoryImpl(
                 executor,
                 executor ,
-                executor, MockPersister, ApiImpl(), null
+                executor, MockPersister, ApiImpl(), mLogger = null
         )
         Repository.setSingletoneInstance(repo)
         mViewModel = UserListViewModel()

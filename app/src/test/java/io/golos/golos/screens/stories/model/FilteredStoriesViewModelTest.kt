@@ -25,7 +25,7 @@ class FilteredStoriesViewModelTest {
         repo = RepositoryImpl(
                 MainThreadExecutor,
                 MainThreadExecutor ,
-                MainThreadExecutor, MockPersister, ApiImpl(), null
+                MainThreadExecutor, MockPersister, ApiImpl(), mLogger = null
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = FilteredStoriesViewModel()

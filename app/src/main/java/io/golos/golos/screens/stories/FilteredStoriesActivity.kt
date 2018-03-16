@@ -6,15 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.TabLayout
+import android.support.v4.view.ViewPager
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
+import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.FilteredStoriesViewModel
 import io.golos.golos.screens.stories.model.FilteredStoriesViewState
@@ -27,7 +29,7 @@ import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 
 class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewState>, TagSubscriptionCancelDialogFr.ResultListener {
-    private lateinit var mContentFrameLo: FrameLayout
+    private lateinit var mViewPager: ViewPager
     private lateinit var mPostCountTv: TextView
     private lateinit var mTagTitle: TextView
     private lateinit var mSubscribeBtnLo: View
@@ -42,9 +44,8 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_filtered_stories)
-        mContentFrameLo = findViewById(R.id.content_lo)
+        mViewPager = findViewById(R.id.content_lo)
 
-        val type: FeedType = intent.getSerializableExtra(TAG_FEED) as FeedType
         val tagName = intent.getStringExtra(TAG_FILTER)
 
         if (tagName == null) {
@@ -56,15 +57,19 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
         mViewModel = ViewModelProviders.of(this).get(FilteredStoriesViewModel::class.java)
         mViewModel.getLiveData().observe(this, this)
         mViewModel.onCreate(tagName)
-        val fragment = StoriesFragment.getInstance(type, StoryFilter(tagName))
-        supportFragmentManager
-                .beginTransaction()
-                .replace(mContentFrameLo.id, fragment, FRAGMENT_TAG)
-                .commit()
+        mViewPager.offscreenPageLimit = 3
+        val title = findViewById<TabLayout>(R.id.tab_lo)
+        title.setupWithViewPager(mViewPager)
+        val filter = StoryFilter(tagName)
+        mViewPager.adapter = StoriesPagerAdapter(this,
+                supportFragmentManager,
+                listOf(Pair(FeedType.POPULAR, filter),
+                        Pair(FeedType.NEW, filter),
+                        Pair(FeedType.ACTUAL, filter)))
     }
 
     override fun onCancelConfirm() {
-       mViewModel.onTagUnsubscribe()
+        mViewModel.onTagUnsubscribe()
     }
 
     override fun onCancelCancel() {
@@ -108,7 +113,7 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
 
     private fun setup(tagName: String) {
         val fab: FloatingActionButton = findViewById(R.id.fab)
-        fab.setOnClickListener({ EditorActivity.startPostEditor(this, "") })
+        fab.setOnClickListener({ EditorActivity.startPostCreator(this, "") })
         mTagTitle = findViewById(R.id.title_text)
         mPostCountTv = findViewById(R.id.posts_count)
         mSubscribeBtnLo = findViewById(R.id.subscribe_btn_lo)
@@ -125,31 +130,16 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
                 } else "#${tagName.capitalize()}"
     }
 
-    override fun onResume() {
-        super.onResume()
-        supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)?.let {
-            it.userVisibleHint = true
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         mViewModel.onDestroy()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-    }
-
     companion object {
-        private val TAG_FEED = "TAG_FEED"
         private val TAG_FILTER = "TAG_FILTER"
         fun start(context: Context,
-                  feedType: FeedType,
                   tagName: String) {
             val intent = Intent(context, FilteredStoriesActivity::class.java)
-            intent.putExtra(TAG_FEED, feedType)
             intent.putExtra(TAG_FILTER, tagName)
             context.startActivity(intent)
         }

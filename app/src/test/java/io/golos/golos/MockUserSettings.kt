@@ -1,0 +1,58 @@
+package io.golos.golos
+
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import io.golos.golos.repository.UserSettingsRepository
+
+/**
+ * Created by yuri on 05.03.18.
+ */
+object MockUserSettings : UserSettingsRepository{
+    override fun setStoriesCompactMode(isCompact: Boolean) {
+
+    }
+
+    override fun isStoriesCompactMode(): LiveData<Boolean> {
+       return MutableLiveData<Boolean>()
+    }
+
+    override fun isNSFWShow(): LiveData<Boolean> {
+        return MutableLiveData<Boolean>()
+    }
+
+    override fun setIsNSFWShown(isShown: Boolean) {
+
+    }
+
+    override fun setUserVotedForApp(isVotedForApp: Boolean) {
+
+    }
+
+    override fun isUserVotedForApp(): Boolean {
+       return true
+    }
+
+    override fun setVoteQuestionMade(isMade: Boolean) {
+
+    }
+
+    override fun isVoteQuestionMad(): Boolean {
+        return true
+    }
+
+    override fun setShowImages(isShown: Boolean) {
+
+    }
+
+    override fun isImagesShown(): LiveData<Boolean> {
+        return MutableLiveData<Boolean>()
+    }
+
+    override fun setNightMode(isNight: Boolean) {
+
+    }
+
+    override fun isNightMode(): Boolean {
+       return false
+    }
+}

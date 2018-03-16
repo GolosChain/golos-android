@@ -6,10 +6,9 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.content.Intent
+import io.golos.golos.App
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.stories.FilteredStoriesActivity
-import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.TagSearchActivity.Companion.TAG_TAG
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
@@ -23,15 +22,15 @@ data class TagSearchViewModelScreenState(
         val error: GolosError?
 )
 
-class TagSearchViewModel : ViewModel(), Observer<List<Tag>> {
+class TagSearchViewModel : ViewModel(), Observer<List<LocalizedTag>> {
     private val mData = MutableLiveData<TagSearchViewModelScreenState>()
-    private var mAllTags = ArrayList<LocalizedTag>()
+    private val mAllTags = ArrayList<LocalizedTag>()
     private val mRepo = Repository.get
     private var lastLookupString: String? = null
     private var isSearchInProgress = false
 
     fun onCreate() {
-        mRepo.getTrendingTags().observeForever(this)
+        mRepo.getLocalizedTags().observeForever(this)
         mRepo.requestTrendingTagsUpdate({ l, e ->
             if (e != null) {
                 mData.value = TagSearchViewModelScreenState(false,
@@ -41,13 +40,15 @@ class TagSearchViewModel : ViewModel(), Observer<List<Tag>> {
         })
     }
 
-    override fun onChanged(it: List<Tag>?) {
-        mAllTags = ArrayList(it?.map { LocalizedTag(it) } ?: ArrayList())
+    override fun onChanged(it: List<LocalizedTag>?) {
+
         if (it?.size ?: 0 == 0) {
             mData.value = TagSearchViewModelScreenState(true,
                     ArrayList(),
                     null)
         } else {
+            mAllTags.clear()
+            mAllTags.addAll(it ?: listOf())
             mData.value = TagSearchViewModelScreenState(false,
                     shownTags = getFilteredTags(lastLookupString),
                     error = null)
@@ -71,7 +72,7 @@ class TagSearchViewModel : ViewModel(), Observer<List<Tag>> {
             activity.setResult(Activity.RESULT_OK, i)
             activity.finish()
         } else {
-            FilteredStoriesActivity.start(activity, FeedType.NEW, tag.tag.name)
+            FilteredStoriesActivity.start(activity, tag.tag.name)
         }
 
     }
@@ -92,7 +93,7 @@ class TagSearchViewModel : ViewModel(), Observer<List<Tag>> {
     }
 
     fun onDestroy() {
-        mRepo.getTrendingTags().removeObserver(this)
+        mRepo.getLocalizedTags().removeObserver(this)
     }
 
     private fun getFilteredTags(lookup: String?): List<LocalizedTag> {

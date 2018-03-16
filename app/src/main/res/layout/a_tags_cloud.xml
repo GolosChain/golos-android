@@ -48,7 +48,7 @@
                             android:layout_width="12dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="start"
-                            android:background="?selectableItemBackground"
+                            android:background="@null"
                             android:clickable="false"
                             app:srcCompat="@drawable/ic_chevron_left_gray_24dp_7d" />
                     </FrameLayout>

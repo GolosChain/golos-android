@@ -13,10 +13,9 @@ import eu.bittrade.libs.steemj.base.models.Discussion;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.Utils;
-import io.golos.golos.screens.stories.model.StripeItem;
+import io.golos.golos.repository.model.DiscussionItemFactory;
 import io.golos.golos.repository.model.GolosDiscussionItem;
 import io.golos.golos.screens.story.model.ImageRow;
-import io.golos.golos.repository.model.ItemType;
 import io.golos.golos.screens.story.model.Row;
 import io.golos.golos.screens.story.model.StoryParserToRows;
 import io.golos.golos.screens.story.model.StoryWithComments;
@@ -25,7 +24,6 @@ import kotlin.text.Regex;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -51,49 +49,49 @@ public class ParseTest {
             items.add(new GolosDiscussionItem(d, null));
         }
         HashMap<Long, Discussion> map = sort(discussions);
-        assertTrue(items.get(0).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(1).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(2).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(3).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(4).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(5).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(6).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(7).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(8).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(9).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(10).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(11).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(12).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(13).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(14).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(15).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(16).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(17).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(18).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(19).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(20).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(21).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(22).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(23).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(24).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(25).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(26).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(27).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(28).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(29).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(30).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(31).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(32).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(33).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(34).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(35).getType() == ItemType.PLAIN_WITH_IMAGE);
-        assertTrue(items.get(36).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(37).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(38).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(items.get(39).getType() == ItemType.IMAGE_FIRST);
-        StripeItem item = new StripeItem(map.get(2339567L));
+        assertTrue(items.get(0).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(1).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(2).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(3).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(4).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(5).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(6).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(7).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(8).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(9).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(10).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(11).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(12).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(13).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(14).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(15).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(16).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(17).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(18).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(19).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(20).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(21).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(22).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(23).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(24).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(25).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(26).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(27).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(28).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(29).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(30).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(31).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(32).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(33).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(34).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(35).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(items.get(36).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(37).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(38).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(items.get(39).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        GolosDiscussionItem item = DiscussionItemFactory.INSTANCE.create(map.get(2339567L), null);
         assertTrue(item.getBody().contains("Задание фотолаборатории оказалось для меня легким и в тоже время сложным для выбора фотографий"));
-        item = new StripeItem(map.get(2337481L));
+        item = DiscussionItemFactory.INSTANCE.create(map.get(2337481L), null);
         assertFalse(item.getBody().contains("*"));
     }
 
@@ -106,11 +104,11 @@ public class ParseTest {
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
         HashMap<Long, Discussion> map = sort(discussions);
 
-        assertTrue(new StripeItem(map.get(2363255L)).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(new StripeItem(map.get(2363250L)).getType() == ItemType.IMAGE_FIRST);
-        assertTrue(new StripeItem(map.get(2359922L)).getType() == ItemType.IMAGE_FIRST);
-        StripeItem item = new StripeItem(map.get(2346156L));
-        assertTrue(item.getType() == ItemType.PLAIN_WITH_IMAGE);
+        assertTrue(DiscussionItemFactory.INSTANCE.create(map.get(2363255L), null).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(DiscussionItemFactory.INSTANCE.create(map.get(2363250L), null).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        assertTrue(DiscussionItemFactory.INSTANCE.create(map.get(2359922L), null).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
+        GolosDiscussionItem item = DiscussionItemFactory.INSTANCE.create(map.get(2346156L), null);
+        assertTrue(item.getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
         assertTrue(item.getBody().length() > 0);
 
         assertFalse(item.getBody().contains("https://i.imgsafe.org/86/8656e3d010.jpeg"));
@@ -124,8 +122,8 @@ public class ParseTest {
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
         HashMap<Long, Discussion> map = sort(discussions);
-        List<StripeItem> items = new ArrayList<>();
-        assertTrue(new StripeItem(map.get(2420647L)).getType() == ItemType.PLAIN);
+        List<GolosDiscussionItem> items = new ArrayList<>();
+        assertTrue(DiscussionItemFactory.INSTANCE.create(map.get(2420647L), null).getType() == GolosDiscussionItem.ItemType.PLAIN);
     }
 
 
@@ -137,38 +135,7 @@ public class ParseTest {
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
         HashMap<Long, Discussion> map = sort(discussions);
-        assertTrue(new StripeItem(map.get(2418408L)).getType() == ItemType.IMAGE_FIRST);
-    }
-
- /*   @Test//2415858
-    public void testFifth() throws Exception {
-        ObjectMapper mapper = CommunicationHandler.getObjectMapper();
-        File f = new File(this.getClass().getClassLoader().getResource("stripe5.json").getPath());
-        ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
-        List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
-        HashMap<Long, Discussion> map = sort(discussions);
-        List<StoryTree> stories = new ArrayList<StoryTree>();
-
-        StoryTree story = new StoryTree(map.get(2516636L),null);
-      //  assertTrue(new story.getType() == ItemType.IMAGE_FIRST);
-        //2516636
-        System.out.println(story);
-    }
-*/
-
-    @Test
-    public void copyTest() throws Exception {
-        ObjectMapper mapper = CommunicationHandler.getObjectMapper();
-        File f = new File(this.getClass().getClassLoader().getResource("stripe2.json").getPath());
-        ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
-        List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
-        StripeItem original = new StripeItem(discussions.get(0));
-        StripeItem copy = original.makeCopy();
-        assertEquals(original, copy);
-        original.setAvatarPath("https://i.imgsafe.org/86/8656e3d010.jpeg");
-        assertNotSame(original.makeCopy(), copy);
+        assertTrue(DiscussionItemFactory.INSTANCE.create(map.get(2418408L), null).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
     }
 
     private HashMap<Long, Discussion> sort(List<Discussion> discussions) {
@@ -222,8 +189,8 @@ public class ParseTest {
     @Test
     public void storyParserTest() throws Exception {
         final StoryWithComments tree = Utils.readStoryFromResourse("story4.json");
-        final StoryParserToRows parser = new StoryParserToRows();
-        List<Row> rows = parser.parse(tree.rootStory());
+        final StoryParserToRows parser = StoryParserToRows.INSTANCE;
+        List<Row> rows = parser.parse(tree.rootStory(),false);
         assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg"), rows.get(0));
         assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(2));
     }

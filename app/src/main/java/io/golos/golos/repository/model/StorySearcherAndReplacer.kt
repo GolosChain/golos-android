@@ -25,6 +25,7 @@ class StorySearcherAndReplacer {
     }
 
     fun findAndReplace(newState: StoryWithComments, source: ArrayList<StoryWithComments>): Boolean {
+        if (source.size == 0) return false
         var isChanged = false
         (0..source.lastIndex)
                 .filter { i -> source[i].rootStory()?.id == newState.rootStory()?.id }
@@ -32,15 +33,43 @@ class StorySearcherAndReplacer {
                     source[i] = newState
                     isChanged = true
                 }
+        if (!isChanged) {
+            val root = newState.storyWithState()
+            root?.let {
+                root.story.children.clear()
+                root.story.children.addAll(newState.commentsWithState())
+                source.forEach { storyWithComments ->
+                    val firstLevelComments = storyWithComments.commentsWithState()
 
+                    val isChangedSecondLevel = findAndReplaceInternal(it, firstLevelComments)
+                    if (isChangedSecondLevel) {
+                        isChanged = true
+                        storyWithComments.rootStory()?.children?.clear()
+                        storyWithComments.rootStory()?.children?.addAll(firstLevelComments)
+                    }
+                }
+            }
+        }
+        if (isChanged) source.forEach { it.setUpLevels() }
         return isChanged
     }
 
-    private fun findAndReplace(newState: GolosDiscussionItem, source: ArrayList<GolosDiscussionItem>): ArrayList<GolosDiscussionItem> {
+    private fun findAndReplaceInternal(newState: StoryWrapper, source: ArrayList<StoryWrapper>): Boolean {
+        var isChanged = false
+        if (source.size == 0) return false
         (0..source.lastIndex)
-                .filter { i -> source[i].id == newState.id }
-                .forEach { i -> source[i] = newState }
+                .filter { i -> source[i].story.id == newState.story.id }
+                .forEach { i ->
+                    source[i] = newState
+                    isChanged = true
+                }
+        if (!isChanged) {
 
-        return ArrayList(source)
+            source.forEach {
+                val isChildChanged = findAndReplaceInternal(newState, it.story.children)
+                if (isChildChanged) isChanged = true
+            }
+        }
+        return isChanged;
     }
 }

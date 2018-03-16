@@ -11,4 +11,18 @@ data class VotedUserObject(val name: String,
     override fun compareTo(other: VotedUserObject): Int {
         return Doubles.compare(other.gbgValue, this.gbgValue)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is VotedUserObject) return false
+
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
 }

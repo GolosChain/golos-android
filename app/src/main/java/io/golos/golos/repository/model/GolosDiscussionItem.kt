@@ -25,43 +25,45 @@ val mapper by lazy {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GolosDiscussionItem(val url: String,
-                               val id: Long,
-                               val title: String,
-                               val categoryName: String,
-                               val tags: ArrayList<String> = ArrayList(),
-                               val images: ArrayList<String> = ArrayList(),
-                               val links: ArrayList<String> = ArrayList(),
-                               val votesNum: Int,
-                               val votesRshares: Long,
-                               val commentsCount: Int,
-                               val permlink: String,
-                               var gbgAmount: Double,
-                               var body: String,
-                               val author: String,
-                               var format: Format = Format.HTML,
-                               var avatarPath: String? = null,
-                               var children: ArrayList<StoryWrapper> = ArrayList(),
-                               var parentPermlink: String,
-                               var childrenCount: Int,
-                               var level: Int = 0,
-                               var gbgCostInDollars: Double = 0.04106528,
-                               val reputation: Long,
-                               val lastUpdated: Long,
-                               val created: Long,
-                               var isUserUpvotedOnThis: Boolean = false,
-                               val activeVotes: ArrayList<VoteLight> = arrayListOf(),
-                               var type: ItemType = ItemType.PLAIN,
-                               val firstRebloggedBy: String,
-                               var cleanedFromImages: String,
-                               var parts: ArrayList<Row> = ArrayList()) : Cloneable {
+data class GolosDiscussionItem internal constructor(val url: String,
+                                                    val id: Long,
+                                                    val title: String,
+                                                    val categoryName: String,
+                                                    val tags: ArrayList<String> = ArrayList(),
+                                                    val images: ArrayList<String> = ArrayList(),
+                                                    val links: ArrayList<String> = ArrayList(),
+                                                    val votesNum: Int,
+                                                    val votesRshares: Long,
+                                                    val commentsCount: Int,
+                                                    val permlink: String,
+                                                    var gbgAmount: Double,
+                                                    var body: String,
+                                                    var bodyLength: Long,
+                                                    val author: String,
+                                                    var format: Format = Format.HTML,
+                                                    var avatarPath: String? = null,
+                                                    var children: ArrayList<StoryWrapper> = ArrayList(),
+                                                    var parentPermlink: String,
+                                                    var parentAuthor: String,
+                                                    var childrenCount: Int,
+                                                    var level: Int = 0,
+                                                    var gbgCostInDollars: Double = 0.04106528,
+                                                    val reputation: Long,
+                                                    val lastUpdated: Long,
+                                                    val created: Long,
+                                                    var userVotestatus: UserVoteType = UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
+                                                    val activeVotes: ArrayList<VoteLight> = arrayListOf(),
+                                                    var type: ItemType = ItemType.PLAIN,
+                                                    val firstRebloggedBy: String,
+                                                    var cleanedFromImages: String,
+                                                    var parts: ArrayList<Row> = ArrayList()) : Cloneable {
 
 
     val payoutInDollars: Double
         get() = gbgAmount * gbgCostInDollars
 
     val isRootStory: Boolean
-        get() = parentPermlink.isEmpty()
+        get() = tags.contains(parentPermlink)
 
 
     constructor(discussion: Discussion, account: ExtendedAccount?) : this(
@@ -73,15 +75,17 @@ data class GolosDiscussionItem(val url: String,
             votesRshares = discussion.voteRshares,
             commentsCount = discussion.children,
             permlink = discussion.permlink?.link ?: "",
+            gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
+            body = discussion.body ?: "",
+            bodyLength = discussion.bodyLength.toLongOrNull() ?: 0L,
+            author = discussion.author?.name ?: "",
+            parentPermlink = discussion.parentPermlink.link ?: "",
+            parentAuthor = discussion.parentAuthor.name ?: "",
             childrenCount = discussion.children,
             reputation = discussion.authorReputation,
             lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0,
             created = discussion.created?.dateTimeAsTimestamp ?: 0,
-            parentPermlink = discussion.parentPermlink.link ?: "",
             firstRebloggedBy = discussion.firstRebloggedBy?.name ?: "",
-            gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
-            body = discussion.body ?: "",
-            author = discussion.author?.name ?: "",
             cleanedFromImages = "") {
 
 
@@ -137,7 +141,7 @@ data class GolosDiscussionItem(val url: String,
             }
         }
         body = discussion.body ?: ""
-        val toRowsParser = StoryParserToRows()
+        val toRowsParser = StoryParserToRows
         parts = toRowsParser.parse(this).toArrayList()
         if (parts.size == 0) {
             Timber.e("fail on story id is ${id}\n body =  ${body}")
@@ -179,9 +183,12 @@ data class GolosDiscussionItem(val url: String,
         return "Comment(id=$id, title='$title', permlink='$permlink')"
     }
 
-    fun isUserVotedOnThis(userName: String): Boolean {
+
+    fun isUserVotedOnThis(userName: String): UserVoteType {
         val item = activeVotes.find { it.name == userName }
-        return item != null && item.percent > 0
+        return if (item != null && item.percent > 0) UserVoteType.VOTED
+        else if (item != null && item.percent < 0) UserVoteType.FLAGED_DOWNVOTED
+        else UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
     }
 
 
@@ -208,7 +215,7 @@ data class GolosDiscussionItem(val url: String,
         if (reputation != other.reputation) return false
         if (lastUpdated != other.lastUpdated) return false
         if (created != other.created) return false
-        if (isUserUpvotedOnThis != other.isUserUpvotedOnThis) return false
+        if (userVotestatus != other.userVotestatus) return false
 
         return true
     }
@@ -233,17 +240,22 @@ data class GolosDiscussionItem(val url: String,
         result = 31 * result + reputation.hashCode()
         result = 31 * result + lastUpdated.hashCode()
         result = 31 * result + created.hashCode()
-        result = 31 * result + isUserUpvotedOnThis.hashCode()
+        result = 31 * result + userVotestatus.hashCode()
         return result
     }
 
+    enum class Format {
+        HTML, MARKDOWN
+    }
 
+    enum class ItemType {
+        PLAIN, PLAIN_WITH_IMAGE, IMAGE_FIRST
+    }
+
+    enum class UserVoteType {
+        VOTED, NOT_VOTED_OR_ZERO_WEIGHT, FLAGED_DOWNVOTED
+    }
 }
 
-enum class Format {
-    HTML, MARKDOWN
-}
 
-enum class ItemType {
-    PLAIN, PLAIN_WITH_IMAGE, IMAGE_FIRST
-}
+

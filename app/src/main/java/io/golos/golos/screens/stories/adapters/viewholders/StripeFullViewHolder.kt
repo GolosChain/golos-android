@@ -2,8 +2,6 @@ package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -11,16 +9,21 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.repository.model.ItemType
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
-import io.golos.golos.screens.story.model.ImageRow
+import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
 
-class StripeFullViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
+class StripeFullViewHolder(parent: ViewGroup,
+                           private val onUpvoteClick: HolderClickListener,
+                           private val onCardClick: HolderClickListener,
+                           private val onCommentsClick: HolderClickListener,
+                           private val onShareClick: HolderClickListener,
+                           private val onBlogClick: HolderClickListener,
+                           private val onUserClick: HolderClickListener,
+                           private val onVotersClick: HolderClickListener
+) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent) {
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
@@ -41,139 +44,142 @@ class StripeFullViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inf
         if (noAvatarDrawable == null) noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_32dp)
 
         if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
-        if (errorDrawable == null) errorDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
+        if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
 
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
         mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
 
+        mCommentsButton.setOnClickListener({ onCommentsClick.onClick(this) })
+        mShareBtn.setOnClickListener({ onShareClick.onClick(this) })
+        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
+        mAvatar.setOnClickListener({ onUserClick.onClick(this) })
+        mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
+        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
+        mVotersBtn.setOnClickListener({ onVotersClick.onClick(this) })
+
+        mTitleTv.setOnClickListener({ onCardClick.onClick(this) })
+        mBodyTextMarkwon.setOnClickListener({ onCardClick.onClick(this) })
+        mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
+        itemView.setOnClickListener({ onCardClick.onClick(this) })
+        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
     }
 
-    var state: StripeWrapper? = null
-        set(value) {
-            field = value
-            if (field != null) {
-                val wrapper = field?.stripe?.rootStory() ?: return
-                setUpTheme()
-                mCommentsButton.setOnClickListener({ field!!.onCommentsClick(this) })
-                mShareBtn.setOnClickListener({ field!!.onShareClick(this) })
-                mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
-                mBlogNameTv.setOnClickListener({ field!!.onBlogClick(this) })
-                mAvatar.setOnClickListener({ field!!.onUserClick(this) })
-                mUserNameTv.setOnClickListener({ field!!.onUserClick(this) })
-                mUpvoteBtn.setOnClickListener({ field!!.onUpvoteClick(this) })
-                mVotersBtn.setOnClickListener({ field!!.onVotersClick(this) })
+    override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
+        super.handlerStateChange(newState, oldState)
+        if (newState != null) {
 
-                mTitleTv.setOnClickListener({ field!!.onCardClick(this) })
-                mBodyTextMarkwon.setOnClickListener({ field!!.onCardClick(this) })
-                mMainImageBig.setOnClickListener({ field!!.onCardClick(this) })
-                itemView.setOnClickListener({ field!!.onCardClick(this) })
+            val wrapper = newState.stripe.rootStory() ?: return
 
-                mUserNameTv.text = wrapper.author
-                if (wrapper.firstRebloggedBy.isNotEmpty()) {
-                    mRebloggedByTv.text = wrapper.firstRebloggedBy
-                } else {
-                    mRebloggedByTv.visibility = View.GONE
-                }
-                if (wrapper.categoryName.startsWith("ru--")) {
-                    mBlogNameTv.text = Translit.lat2Ru(wrapper.categoryName.substring(4))
-                } else {
-                    mBlogNameTv.text = wrapper.categoryName
-                }
-
-                mTitleTv.text = wrapper.title.toLowerCase().capitalize()
-                mUpvoteBtn.text = "$ ${String.format("%.3f", wrapper.payoutInDollars)}"
-
-                mCommentsButton.text = wrapper.commentsCount.toString()
-
-                if (wrapper.avatarPath != null) mGlide
-                        .load(wrapper.avatarPath)
-                        .error(mGlide.load(noAvatarDrawable))
-                        .apply(RequestOptions.placeholderOf(noAvatarDrawable)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
-                        .into(mAvatar)
-                else mAvatar.setImageDrawable(noAvatarDrawable)
-
-
-                if (wrapper.isUserUpvotedOnThis) {
+            if (wrapper.avatarPath != null) mGlide
+                    .load(ImageUriResolver.resolveImageWithSize(
+                            wrapper.avatarPath ?: "",
+                            wantedwidth = mAvatar.width))
+                    .error(mGlide.load(noAvatarDrawable))
+                    .into(mAvatar)
+            else mAvatar.setImageDrawable(noAvatarDrawable)
+            if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                } else {
+                    mUpvoteBtn.tag = "green"
+                }
+
+            } else {
+                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "gray") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
+                    mUpvoteBtn.tag = "gray"
                 }
-                if (field?.stripe?.storyWithState()?.updatingState == UpdatingState.UPDATING) {
-                    mVotingProgress.visibility = View.VISIBLE
-                    mUpvoteBtn.visibility = View.GONE
+            }
+
+            if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+                mVotingProgress.setViewVisible()
+                mUpvoteBtn.setViewGone()
+            } else {
+                mVotingProgress.setViewGone()
+                mUpvoteBtn.setViewVisible()
+            }
+            mVotersBtn.text = wrapper.votesNum.toString()
+            if (newState.stripe.rootStory()?.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
+                mMainImageBig.setViewGone()
+                mMainImageBig.setImageDrawable(null)
+                var htmlString = newState.stripe.storyWithState()?.asHtmlString
+                if (htmlString != null) {
+                    if (htmlString.length > 400) htmlString.substring(0..400)
+                    mBodyTextMarkwon.text = htmlString
+
                 } else {
-                    mVotingProgress.visibility = View.GONE
-                    mUpvoteBtn.visibility = View.VISIBLE
+                    htmlString = wrapper.cleanedFromImages.substring(0,
+                            if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
+                    newState.stripe.storyWithState()?.asHtmlString = htmlString
+                    mBodyTextMarkwon.text = htmlString
                 }
-                mVotersBtn.text = value?.stripe?.rootStory()?.votesNum?.toString() ?: ""
-
-                if (field?.isImagesShown == false){
-                    mMainImageBig.setViewGone()
-                    mBodyTextMarkwon.setViewVisible()
-                    mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
-                    mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
-                    return
-                }
-
-                if (wrapper.type == ItemType.PLAIN || wrapper.type == ItemType.PLAIN_WITH_IMAGE) {
-                    mMainImageBig.visibility = View.GONE
-                    mBodyTextMarkwon.visibility = View.VISIBLE
-                    mBodyTextMarkwon.text = wrapper.cleanedFromImages.toHtml()
-                    mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
-                } else if (wrapper.type == ItemType.IMAGE_FIRST) {
-                    val error = mGlide.load(R.drawable.error)
-                    mBodyTextMarkwon.setViewGone()
-                    var nextImage: RequestBuilder<Drawable>? = null
-                    if (wrapper.images.size > 1) {
-                        nextImage = mGlide.load(wrapper.images[1]).error(error)
-                    }
-                    mMainImageBig.scaleType = ImageView.ScaleType.FIT_CENTER
-                    mMainImageBig.visibility = View.VISIBLE
-
-                    mBodyTextMarkwon.visibility = View.GONE
-                    if (wrapper.images.size > 0) {
-                        mGlide.load(wrapper.images[0])
-                                .error(nextImage ?: error)
-                                .apply(RequestOptions.placeholderOf(errorDrawable))
-                                .into(mMainImageBig)
-                    } else {
-                        val image = wrapper.parts.find { it is ImageRow }
-                        image?.let {
-                            mGlide.load((it as ImageRow).src)
-                                    .error(nextImage ?: error)
-                                    .apply(RequestOptions.placeholderOf(errorDrawable))
-                                    .into(mMainImageBig)
-                        }
-                    }
-                }
-
+                mBodyTextMarkwon.setViewVisible()
+            } else {
+                mBodyTextMarkwon.setViewGone()
             }
         }
+    }
 
-    private fun setUpTheme() {
+    override fun setUpTheme() {
+        super.setUpTheme()
         mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
-        mVotersBtn.setTextColorCompat(R.color.textColorP)
-        mCommentsButton.setTextColorCompat(R.color.textColorP)
-        mTitleTv.setTextColorCompat(R.color.stripe_title)
-        mBodyTextMarkwon.setTextColorCompat(R.color.stripe_text_color)
-        mUserNameTv.setTextColorCompat(R.color.textColorP)
-        mRebloggedByTv.setTextColorCompat(R.color.stripe_subtitle)
-        mBlogNameTv.setTextColorCompat(R.color.stripe_subtitle)
-        mDelimeter.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))
+        mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
+    }
+
+    override fun getMainText(): TextView? {
+        return mBodyTextMarkwon
+    }
+
+    override fun getErrorDrawable(): Drawable {
+        return errorDrawableS!!
+    }
+
+    override fun getMainImage(): ImageView {
+        return mMainImageBig
+    }
+
+    override fun getTitleTv(): TextView {
+        return mTitleTv
+    }
+
+    override fun getCommentsTv(): TextView {
+        return mCommentsButton
+    }
+
+    override fun getUserNameTv(): TextView {
+        return mUserNameTv
+    }
+
+    override fun getReblogedByTv(): TextView {
+        return mRebloggedByTv
+    }
+
+    override fun getBlogNameTv(): TextView {
+        return mBlogNameTv
+    }
+
+    override fun getDelimeterV(): View {
+        return mDelimeter
+    }
+
+    override fun getUpvoteText(): TextView {
+        return mUpvoteBtn
+    }
+
+    override fun showImageIfNotImageFirst(): Boolean {
+        return false
     }
 
     companion object {
-        fun inflate(parent: ViewGroup): View = LayoutInflater.from(parent.context).inflate(R.layout.vh_stripe_full_size, parent, false)
+
         @JvmStatic
         var noAvatarDrawable: Drawable? = null
-
         @JvmStatic
         var userVotedvotedDrarawble: Drawable? = null
         @JvmStatic
-        var errorDrawable: Drawable? = null
+        var errorDrawableS: Drawable? = null
     }
 }

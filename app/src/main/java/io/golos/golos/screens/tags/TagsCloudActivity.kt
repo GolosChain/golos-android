@@ -112,7 +112,7 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
         t?.shownTags?.let {
             val lastIndexOfButton = mALltagsLo.childCount - 1
             it.forEachIndexed { index, tag ->
-                if (index < 31) {
+                if (index < 21) {
                     if (index > lastIndexOfButton) {
                         mALltagsLo.addView(createCloudTag(tag))
                     } else {

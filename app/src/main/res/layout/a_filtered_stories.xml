@@ -13,7 +13,7 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/story_toolbar_color"
+            android:background="@color/white_black_toolbar_color"
             android:fitsSystemWindows="true"
             app:contentScrim="@color/story_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways"
@@ -49,7 +49,7 @@
                         android:id="@+id/title_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_material_half"
+                        android:layout_marginTop="@dimen/margin_material_small"
                         android:gravity="start"
                         android:includeFontPadding="false"
                         android:lines="1"
@@ -69,8 +69,7 @@
 
                 </LinearLayout>
 
-                <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                <FrameLayout
                     android:id="@+id/subscribe_btn_lo"
                     style="@style/FilteredScreenSubButtonLo"
                     android:visibility="visible"
@@ -93,8 +92,7 @@
                         android:textSize="@dimen/font_small" />
                 </FrameLayout>
 
-                <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                <FrameLayout
                     android:id="@+id/subsbs_btn_lo"
                     style="@style/FilteredScreenSubButtonLo"
                     android:background="@drawable/rect_round_corners_outline_gray"
@@ -125,14 +123,35 @@
                     android:background="@color/delimeter_color_feed"
                     app:layout_constraintTop_toBottomOf="@id/tag_lo" />
 
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_lo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white_black_toolbar_color"
+                    android:textColor="@color/textColorP"
+
+                    app:layout_constraintTop_toBottomOf="@id/delimeter"
+                    app:tabIndicatorColor="@color/blue_white_indicator"
+                    app:tabMode="fixed"
+                    app:tabTextAppearance="@style/TabTextStyle"
+                    app:tabTextColor="@color/profile_tabs_color"
+                    app:textAllCaps="false" />
+
+                <View
+                    android:id="@+id/delimeter_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/delimeter_color_feed"
+                    app:layout_constraintTop_toBottomOf="@id/tab_lo" />
+
                 <HorizontalScrollView
-                    android:background="@color/same_tags_ribbon_back"
                     android:id="@+id/similar_p_lo"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
+                    android:background="@color/same_tags_ribbon_back"
                     android:paddingEnd="@dimen/margin_material"
                     android:paddingStart="@dimen/margin_material"
-                    app:layout_constraintTop_toBottomOf="@id/delimeter">
+                    app:layout_constraintTop_toBottomOf="@id/delimeter_2">
 
                     <LinearLayout
                         android:id="@+id/similar_tags_lo"
@@ -163,13 +182,13 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <FrameLayout
+    <android.support.v4.view.ViewPager
         android:id="@+id/content_lo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
-    </FrameLayout>
+    </android.support.v4.view.ViewPager>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

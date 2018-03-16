@@ -26,30 +26,35 @@
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material"
         android:clickable="true"
-
         android:textColor="@color/textColorP"
-        android:textSize="@dimen/font_medium"
+        android:textSize="@dimen/font_regular"
         app:layout_constraintLeft_toRightOf="@id/avatar_iv"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/time_tv"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material_half"
         android:layout_marginTop="@dimen/margin_material"
         android:drawablePadding="6dp"
+        android:ellipsize="end"
         android:gravity="center_vertical"
+        android:lines="1"
+        android:paddingEnd="@dimen/margin_material"
         android:textColor="@color/gray_1"
+        android:textSize="@dimen/font_small"
         app:layout_constraintBottom_toBottomOf="@id/username_tv"
-
-        app:layout_constraintLeft_toRightOf="@id/username_tv" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/username_tv" />
 
     <android.support.v7.widget.LinearLayoutCompat
         android:id="@+id/content_lo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingEnd="@dimen/margin_material"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@+id/username_tv">
@@ -73,6 +78,7 @@
             android:layout_marginEnd="@dimen/margin_material"
             android:layout_marginStart="@dimen/margin_material"
             android:layout_marginTop="6dp"
+            android:ellipsize="end"
             android:textColor="@color/textColorP"
             android:textSize="@dimen/font_small"
             android:visibility="gone">
@@ -80,74 +86,106 @@
         </TextView>
     </android.support.v7.widget.LinearLayoutCompat>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/upvote_btn"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginTop="6dp"
-        android:background="?selectableItemBackgroundBorderless"
-        android:drawablePadding="@dimen/margin_material_half"
-        android:gravity="center_vertical"
-        android:minWidth="40dp"
-        android:padding="0dp"
-        android:text="$ sdg"
-        android:textAllCaps="false"
-        app:layout_constraintStart_toStartOf="@id/username_tv"
-        app:layout_constraintTop_toBottomOf="@+id/content_lo"
-        app:srcCompat="@drawable/ic_keyboard_arrow_up_white_36dp" />
 
-    <ProgressBar
-        android:id="@+id/progress"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginTop="6dp"
-        android:drawablePadding="@dimen/margin_material_half"
-        android:gravity="center_vertical"
-        android:minWidth="40dp"
-        android:padding="0dp"
-        app:layout_constraintStart_toStartOf="@id/username_tv"
-        app:layout_constraintTop_toBottomOf="@+id/content_lo" />
-
-    <android.support.constraint.Barrier
-        android:id="@+id/barrier"
+    <com.wefika.flowlayout.FlowLayout
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="progress,upvote_btn" />
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/margin_material"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/username_tv"
+        app:layout_constraintTop_toBottomOf="@id/content_lo">
 
-    <TextView
-        android:id="@+id/votes_btn"
-        style="@style/StoryBottomControlButton"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/material_big"
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/upvote_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginTop="2dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:drawablePadding="@dimen/margin_material_half"
+            android:gravity="center_vertical"
+            android:minWidth="40dp"
+            android:padding="0dp"
+            android:text="$ sdg"
+            android:textAllCaps="false"
+            android:textSize="@dimen/font_small"
 
-        android:background="?attr/selectableItemBackground"
+            app:layout_constraintStart_toStartOf="@id/username_tv"
+            app:layout_constraintTop_toBottomOf="@+id/content_lo" />
 
-        app:layout_constraintBottom_toBottomOf="@+id/barrier"
-        app:layout_constraintRight_toRightOf="parent"
+        <ProgressBar
+            android:id="@+id/progress"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginTop="2dp"
+            android:drawablePadding="@dimen/margin_material_half"
+            android:gravity="center_vertical"
+            android:minWidth="40dp"
+            android:padding="0dp"
+            app:layout_constraintStart_toStartOf="@id/username_tv"
+            app:layout_constraintTop_toBottomOf="@+id/content_lo" />
 
-        app:layout_constraintStart_toEndOf="@+id/upvote_btn"
-        app:layout_constraintTop_toTopOf="@+id/upvote_btn" />
+        <android.support.constraint.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="progress,upvote_btn" />
 
-    <Button
-        android:id="@+id/answer_btn"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:padding="0dp"
-        android:paddingEnd="24dp"
-        android:paddingStart="24dp"
-        android:text="@string/answer"
-        android:textAllCaps="false"
-        android:textColor="@color/textColorP"
-        android:textSize="@dimen/font_small"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/barrier"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/votes_btn"
-        app:layout_constraintTop_toTopOf="@+id/upvote_btn" />
+        <TextView
+            android:id="@+id/votes_btn"
+            style="@style/StoryBottomControlButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+
+            android:layout_marginStart="@dimen/margin_material"
+            android:background="?attr/selectableItemBackground"
+
+            />
+
+        <Button
+            android:id="@+id/answer_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:minWidth="48dp"
+            android:padding="0dp"
+            android:paddingEnd="@dimen/margin_material_small"
+            android:paddingStart="@dimen/margin_material_half"
+            android:text="@string/answer"
+            android:textAllCaps="false"
+            android:textColor="@color/textColorP"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/barrier"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/votes_btn"
+            app:layout_constraintTop_toTopOf="@+id/upvote_btn" />
+
+        <ImageButton
+            android:id="@+id/dots_btn"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:minWidth="48dp"
+            android:padding="0dp"
+            android:paddingEnd="@dimen/margin_material_small"
+            android:paddingStart="@dimen/margin_material_half"
+            android:text="@string/answer"
+            android:textAllCaps="false"
+            android:textColor="@color/textColorP"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/barrier"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/answer_btn"
+            app:layout_constraintTop_toTopOf="@+id/upvote_btn"
+            app:srcCompat="@drawable/ic_dots_horizontal_20dp_gray" />
+    </com.wefika.flowlayout.FlowLayout>
+
+
 </android.support.constraint.ConstraintLayout>

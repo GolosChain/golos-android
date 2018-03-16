@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/stories_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
@@ -31,13 +32,13 @@
         android:visibility="gone" />
 
     <FrameLayout
-        android:visibility="gone"
         android:id="@+id/refresh_lo"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@color/colorAccent"
         android:gravity="center"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.AppCompatTextView

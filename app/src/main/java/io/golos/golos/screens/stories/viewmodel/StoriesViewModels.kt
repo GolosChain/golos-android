@@ -12,7 +12,9 @@ import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
+import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.userslist.UsersListActivity
@@ -136,15 +138,21 @@ class PromoViewModel : StoriesViewModel() {
 abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     protected abstract val type: FeedType
     protected val mStoriesLiveData: MutableLiveData<StoriesViewState> = MutableLiveData()
+    protected val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
     protected val mRepository = Repository.get
     protected val isUpdating = AtomicBoolean(false)
     protected var isVisibleToUser: Boolean = false
     protected var filter: StoryFilter? = null
     protected lateinit var internetStatusNotifier: InternetStatusNotifier
+    private var mObserver: Observer<Boolean>? = null
 
     val storiesLiveData: LiveData<StoriesViewState>
         get() {
             return mStoriesLiveData
+        }
+    val cellViewSettingLiveData: LiveData<FeedCellSettings>
+        get() {
+            return mFeedSettingsLiveData
         }
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
@@ -158,6 +166,16 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
         mRepository.getStories(type, filter).observeForever(this)
+
+
+        if (mObserver == null) {
+            mObserver = Observer {
+                mFeedSettingsLiveData.value = getFeedModeSettings()
+            }
+            Repository.get.userSettingsRepository.isStoriesCompactMode().observeForever(mObserver ?: return)
+            Repository.get.userSettingsRepository.isImagesShown().observeForever(mObserver ?: return)
+            Repository.get.userSettingsRepository.isNSFWShow().observeForever(mObserver ?: return)
+        }
     }
 
     override fun onChanged(t: StoriesFeed?) {
@@ -187,6 +205,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
+
+
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         this.isVisibleToUser = isVisibleToUser
         if (visibleToUser) {
@@ -214,6 +234,11 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                         R.string.no_internet_connection))
     }
 
+    private fun getFeedModeSettings() = FeedCellSettings( Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
+            Repository.get.userSettingsRepository.isImagesShown().value == true,
+            NSFWStrategy( Repository.get.userSettingsRepository.isNSFWShow().value == true,
+                    Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName ?: "")))
+
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
@@ -222,7 +247,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
         //  if (isUpdating.get())return
         isUpdating.set(true)
-        if ( mStoriesLiveData.value?.isLoading == false){
+        if (mStoriesLiveData.value?.isLoading == false) {
             mStoriesLiveData.value = StoriesViewState(true,
                     mStoriesLiveData.value?.showRefreshButton == true,
                     mStoriesLiveData.value?.items ?: ArrayList())
@@ -236,6 +261,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     open fun onCardClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
+
         StoryActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
@@ -248,7 +274,8 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
                 type,
-                filter)
+                filter,
+                true)
     }
 
     open fun onShareClick(it: StoryWithComments, context: Context?) {
@@ -270,7 +297,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
         if (mRepository.isUserLoggedIn()) {
             val story = it.rootStory() ?: return
-            mRepository.upVote(story, vote)
+            mRepository.vote(story, vote)
         } else {
             mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
                     mStoriesLiveData.value?.showRefreshButton == true,
@@ -280,7 +307,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     }
 
-    open fun downVote(it: StoryWithComments) {
+    open fun cancelVote(it: StoryWithComments) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -307,7 +334,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                 GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
-    fun onBlogClick(context: Context?, story: StoryWithComments) {
+    fun onBlogClick(story: StoryWithComments, context: Context?) {
 
         context?.let {
             var feedType: FeedType = type
@@ -316,15 +343,15 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                     || feedType == FeedType.PERSONAL_FEED
                     || feedType == FeedType.UNCLASSIFIED
                     || feedType == FeedType.PROMO) feedType = FeedType.NEW
-            FilteredStoriesActivity.start(it, feedType = feedType, tagName = story.rootStory()?.categoryName ?: return)
+            FilteredStoriesActivity.start(it, tagName = story.rootStory()?.categoryName ?: return)
         }
     }
 
-    fun onUserClick(context: Context?, it: StoryWithComments) {
+    fun onUserClick(it: StoryWithComments, context: Context?) {
         ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
 
-    fun onVotersClick(context: Context?, it: StoryWithComments) {
+    fun onVotersClick(it: StoryWithComments, context: Context?) {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
 
@@ -334,6 +361,12 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
     fun onDestroy() {
         mRepository.getStories(type, filter).removeObserver(this)
+        if (mObserver != null) {
+            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver ?: return)
+            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver ?: return)
+            Repository.get.userSettingsRepository.isNSFWShow().removeObserver(mObserver ?: return)
+            mObserver = null
+        }
     }
 
 }

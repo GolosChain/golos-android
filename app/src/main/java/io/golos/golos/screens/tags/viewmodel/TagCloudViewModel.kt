@@ -6,7 +6,6 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.stories.FilteredStoriesActivity
-import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
 
@@ -72,7 +71,7 @@ class AddTagTofilterViewModel : ViewModel() {
     }
 
     fun onTagClick(context: Context?, tag: LocalizedTag) {
-        FilteredStoriesActivity.start(context ?: return, FeedType.NEW, tag.tag.name)
+        FilteredStoriesActivity.start(context ?: return, tag.tag.name)
     }
 
     fun onTagUnSubscribe(tag: LocalizedTag) {

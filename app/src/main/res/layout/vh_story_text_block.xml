@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="0dp"
+    android:textColorHint="@color/text_color_white_black"
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material"
     android:textSize="@dimen/font_regular">

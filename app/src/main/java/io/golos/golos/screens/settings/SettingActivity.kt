@@ -55,29 +55,30 @@ class SettingActivity : GolosActivity() {
         setUpNighMode()
         setUpCompactMode()
         setUpNoImagesMode()
+        setUpNSFWMode()
 
     }
 
     private fun setUpNoImagesMode() {
         val switch = findViewById<SwitchCompat>(R.id.show_images_switch)
-        if (UserSettings.isImagesShown().value == true) switch.isChecked = true
+        if (Repository.get.userSettingsRepository.isImagesShown().value == true) switch.isChecked = true
         switch.setOnClickListener {
-            UserSettings.setShowImages(switch.isChecked)
+            Repository.get.userSettingsRepository.setShowImages(switch.isChecked)
         }
     }
 
     private fun setUpNighMode() {
         val spinner = findViewById<Spinner>(R.id.mode_spinner)
         spinner.adapter = DayNightSpinnerAdapter(this)
-        spinner.setSelection(if (UserSettings.isNightMode()) 1 else 0)
+        spinner.setSelection(if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0)
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val currentMode = if (UserSettings.isNightMode()) 1 else 0
+                val currentMode = if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0
                 if (currentMode != p2) {
-                    UserSettings.setNightMode(p2 == 1)
+                    Repository.get.userSettingsRepository.setNightMode(p2 == 1)
                     val i = Intent(this@SettingActivity, SettingActivity::class.java)
                     setResult(Activity.RESULT_OK)
                     finish()
@@ -87,11 +88,19 @@ class SettingActivity : GolosActivity() {
         }
     }
 
+    private fun setUpNSFWMode() {
+        val switch = findViewById<SwitchCompat>(R.id.show_nsfw_images_switch)
+        if (Repository.get.userSettingsRepository.isNSFWShow().value == true) switch.isChecked = true
+        switch.setOnClickListener {
+            Repository.get.userSettingsRepository.setIsNSFWShown(switch.isChecked)
+        }
+    }
+
     private fun setUpCompactMode() {
         val switch = findViewById<SwitchCompat>(R.id.compact_mode_switch)
-        if (UserSettings.isStoriesCompactMode().value == true) switch.isChecked = true
+        if (Repository.get.userSettingsRepository.isStoriesCompactMode().value == true) switch.isChecked = true
         switch.setOnClickListener {
-            UserSettings.setStoriesCompactMode(switch.isChecked)
+            Repository.get.userSettingsRepository.setStoriesCompactMode(switch.isChecked)
         }
     }
 }

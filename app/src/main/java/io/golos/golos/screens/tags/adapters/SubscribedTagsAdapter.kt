@@ -38,7 +38,7 @@ class SubscribedTagsAdapter(var onAddClick: (Unit) -> Unit,
             field = value
         }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is AddButtonVh) {
             holder.state = AddButtonState(clickListener = { onAddClick.invoke(Unit) })
         } else if (holder is TagVh) {
@@ -49,7 +49,7 @@ class SubscribedTagsAdapter(var onAddClick: (Unit) -> Unit,
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == R.layout.vh_add_btn) return AddButtonVh(parent!!)
         else return TagVh(parent!!)
     }

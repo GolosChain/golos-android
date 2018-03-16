@@ -21,5 +21,6 @@ object Regexps {
     val storyLinkNoBlog = Regex("@([a-zA-Z.\\-]{3,16}[0-9]{0,6})/([a-z0-9-]+)[/]?")
     val linkToGolosBoard = Regex("https://imgp.golos.io/.+/http://golosboard.com/.+/.+.png")
     val wrongTagRegexp = Regex("(u\\w{1,4}){6,}")
+    val imgpFindRegexp = Regex("https://imgp.golos.io/.*(?=http)")
 
 }

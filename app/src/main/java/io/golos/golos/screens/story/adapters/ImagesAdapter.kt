@@ -8,6 +8,7 @@ import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
+import io.golos.golos.utils.ImageUriResolver
 
 /**
  * Created by yuri on 26.12.17.
@@ -15,24 +16,25 @@ import io.golos.golos.screens.widgets.GolosViewHolder
 data class ImageHolderState(val imageRow: ImageRow,
                             val onImageClick: (RecyclerView.ViewHolder) -> Unit)
 
-class ImagesAdapter(var onImageClick: (ImageRow) -> Unit = { print(it) },
+class ImagesAdapter(private var onImageClick: (ImageRow) -> Unit = { print(it) },
                     images: ArrayList<ImageRow>) : RecyclerView.Adapter<StoryBottomImagesViewHolder>() {
 
-   private var list = ArrayList<ImageRow>()
+    private var list = ArrayList<ImageRow>()
 
     init {
         this.list = ArrayList(images)
     }
+
     override fun getItemCount(): Int {
         return list.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): StoryBottomImagesViewHolder {
-        return StoryBottomImagesViewHolder(R.layout.v_image, parent!!)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryBottomImagesViewHolder {
+        return StoryBottomImagesViewHolder(R.layout.v_image, parent)
     }
 
-    override fun onBindViewHolder(holder: StoryBottomImagesViewHolder?, position: Int) {
-        holder?.state = ImageHolderState(list[position], { onImageClick.invoke(list[it.adapterPosition]) })
+    override fun onBindViewHolder(holder: StoryBottomImagesViewHolder, position: Int) {
+        holder.state = ImageHolderState(list[position], { onImageClick.invoke(list[it.adapterPosition]) })
     }
 }
 
@@ -46,7 +48,7 @@ class StoryBottomImagesViewHolder(resId: Int, parent: ViewGroup) : GolosViewHold
                 mImage.setImageResource(R.drawable.error)
             } else {
                 Glide.with(mImage)
-                        .load(value.imageRow.src)
+                        .load(ImageUriResolver.resolveImageWithSize(value.imageRow.src, wantedwidth = mImage.width))
                         .apply(RequestOptions().placeholder(R.drawable.error).error(R.drawable.error))
                         .into(mImage)
                 mImage.setOnClickListener { value.onImageClick.invoke(this) }

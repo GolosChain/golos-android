@@ -14,7 +14,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
-import timber.log.Timber
+import io.golos.golos.utils.nextInt
 
 
 data class EditorFooterState(val showTagsEditor: Boolean = false,
@@ -125,6 +125,7 @@ class EditorFooter : FrameLayout {
 
     private fun inflateNewEditText(startText: String? = null): EditText {
         val view = LayoutInflater.from(context).inflate(R.layout.v_editor_footer_tag_et, mTagsLayout, false) as EditText
+        view.id = nextInt()
         if (startText != null) view.setText(startText)
         view.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -132,7 +133,6 @@ class EditorFooter : FrameLayout {
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -141,6 +141,13 @@ class EditorFooter : FrameLayout {
                 }
             }
         })
+        view.setOnEditorActionListener({ _, _, _ ->
+            if (view.text.isNotEmpty()) {
+                mAddBtn.callOnClick()
+            }
+            true
+        })
+        view.isFocusableInTouchMode = true
         return view
     }
 

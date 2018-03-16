@@ -1,15 +1,14 @@
 package io.golos.golos.screens.story.model
 
-import io.golos.golos.repository.model.Format
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
+import io.golos.golos.utils.toHtml
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.safety.Whitelist
-import timber.log.Timber
 
 data class TextRow(val text: String) : Row() {
 }
@@ -18,14 +17,14 @@ data class ImageRow(val src: String) : Row()
 
 sealed class Row
 
-class StoryParserToRows {
-    fun parse(story: GolosDiscussionItem): List<Row> {
+object StoryParserToRows {
+    fun parse(story: GolosDiscussionItem, checkEmptyHtml: Boolean = false): List<Row> {
 
         val out = ArrayList<Row>()
         if (story.body.isEmpty()) return out
         var str = story.body
         str = str.replace("<center>", "").replace("</center>", "")
-        if (story.format == Format.MARKDOWN || str.contains(markdownChecker)) {
+        if (story.format == GolosDiscussionItem.Format.MARKDOWN || str.contains(markdownChecker)) {
             str = str.replace(Regexps.imageWithWhitespace) {
                 " ![](${it.value.trim()})"
             }
@@ -42,7 +41,11 @@ class StoryParserToRows {
         try {
             val whiteList = Whitelist.basicWithImages()
             whiteList.addTags("h1", "h2", "h3", "h4")
-            str = Jsoup.clean(str, whiteList)
+            try {
+                str = Jsoup.clean(str, whiteList)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))\\b".toRegex()) {
                 if (!it.value.contains("a href")) " <a href =\"https://golos.io/${it.value.trim()}\">${it.value.trim()}</a>"
                 else it.value
@@ -170,7 +173,11 @@ class StoryParserToRows {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return out
+        return if (checkEmptyHtml) out.filter {
+            it is ImageRow || (it is TextRow && it.text.toHtml().isNotEmpty())
+        } else
+            out
+
     }
 
 

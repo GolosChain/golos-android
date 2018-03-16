@@ -1,28 +1,24 @@
-package io.golos.golos.screens.widgets
+package io.golos.golos.screens.widgets.dialogs
 
-import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import io.golos.golos.R
 import io.golos.golos.utils.showKeyboard
-import timber.log.Timber
 
 /**
  * Created by yuri on 22.11.17.
  */
-class SendLinkFragment : DialogFragment() {
+class SendLinkDialog : android.support.v4.app.DialogFragment() {
     var listener: OnLinkSubmit? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater!!.inflate(R.layout.fr_link, container, false)
-        var linkName = v.findViewById<EditText>(R.id.name)
-        var address = v.findViewById<EditText>(R.id.address)
-        var sumbitButton = v.findViewById<View>(R.id.ok_btn)
+        val v = inflater.inflate(R.layout.fr_link, container, false)
+        val linkName = v.findViewById<EditText>(R.id.name)
+        val address = v.findViewById<EditText>(R.id.address)
+        val sumbitButton = v.findViewById<View>(R.id.ok_btn)
         sumbitButton.setOnClickListener({
             listener?.submit(linkName.text.toString(), address.text.toString())
             dismiss()
@@ -31,15 +27,15 @@ class SendLinkFragment : DialogFragment() {
     }
 
     companion object {
-        fun getInstance(): SendLinkFragment {
-            return SendLinkFragment()
+        fun getInstance(): SendLinkDialog {
+            return SendLinkDialog()
         }
     }
 
     override fun onResume() {
         super.onResume()
         view!!.findViewById<EditText>(R.id.name).postDelayed({
-            if (view?.requestFocus() == true){
+            if (view?.requestFocus() == true) {
                 view?.showKeyboard()
             }
         }, 500)

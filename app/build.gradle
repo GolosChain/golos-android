@@ -9,8 +9,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 35
-        versionName "0.52"
+        versionCode 40
+        versionName "0.57"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -55,20 +55,21 @@ android {
 
 
 dependencies {
+    implementation 'com.google.firebase:firebase-messaging:11.8.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:27.0.1'
+    compile 'com.android.support:appcompat-v7:27.1.0'
 
-    compile 'com.android.support.constraint:constraint-layout:1.1.0-beta3'
-    compile 'com.android.support:design:27.0.1'
-    compile 'com.android.support:recyclerview-v7:27.0.1'
-    compile 'android.arch.lifecycle:extensions:1.0.0'
-    testCompile 'android.arch.lifecycle:extensions:1.0.0'
+    compile 'com.android.support.constraint:constraint-layout:1.1.0-beta5'
+    compile 'com.android.support:design:27.1.0'
+    compile 'com.android.support:recyclerview-v7:27.1.0'
+    compile 'android.arch.lifecycle:extensions:1.1.0'
+    testCompile 'android.arch.lifecycle:extensions:1.1.0'
     testCompile group: 'com.nhaarman', name: 'mockito-kotlin-kt1.1', version: '1.5.0'
-    testImplementation 'android.arch.core:core-testing:1.0.0'
+    testImplementation 'android.arch.core:core-testing:1.1.0'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.json:json:20160810'
@@ -87,7 +88,7 @@ dependencies {
     compile('com.wefika:flowlayout:+') {
         exclude group: 'com.intellij'
     }
-    compile 'com.android.support:multidex:1.0.2'
+    compile 'com.android.support:multidex:1.0.3'
     compile 'com.github.ittianyu:BottomNavigationViewEx:1.2.4'
     compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
@@ -97,3 +98,4 @@ dependencies {
 
 
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'

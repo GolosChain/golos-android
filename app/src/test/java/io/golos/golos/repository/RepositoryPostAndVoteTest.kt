@@ -2,15 +2,19 @@ package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.Utils
 import io.golos.golos.repository.api.ApiImpl
-import io.golos.golos.repository.model.UserObject
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.repository.model.UserObject
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.utils.Htmlizer
 import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Before
@@ -40,8 +44,18 @@ class RepositoryPostAndVoteTest {
     fun before() {
         repo = RepositoryImpl(
                 executor,
-                executor ,
-                executor, MockPersister, ApiImpl(), null
+                executor,
+                executor,
+                MockPersister,
+                ApiImpl(),
+                mLogger = null,
+                mUserSettings = MockUserSettings,
+                mHtmlizer = object : Htmlizer {
+                    override fun toHtml(input: String): CharSequence {
+                        return input
+                    }
+                },
+                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }
@@ -71,10 +85,23 @@ class RepositoryPostAndVoteTest {
                 pointerPosition = null)
         repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", "test content", pointerPosition = null),
                 image),
-                listOf("ase", "гаврик"), { a, b -> print(b) })
+                listOf("test"), { a, b -> print(b) })
 
+        Thread.sleep(5000)
+
+        var blog: StoriesFeed? = null
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blog = it
+        }
+        assertNull(blog)
+        repo.requestStoriesListUpdate(20, FeedType.BLOG, StoryFilter(null, userName))
+        assertNotNull(blog)
+        val newBody = UUID.randomUUID().toString()
+        repo.editPost(UUID.randomUUID().toString(),
+                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)), listOf("test"),
+                blog!!.items[0].rootStory()!!, { _, e -> if (e != null) println(e.toString()) })
+        assertEquals(newBody, blog!!.items[0].rootStory()!!.body)
     }
-
 
     @Test
     fun testAvatarUpdate() {
@@ -87,47 +114,113 @@ class RepositoryPostAndVoteTest {
 
     @Test
     fun createCommentTest() {
+        Thread.sleep(20_000)
+
         val authData = repo.getCurrentUserDataAsLiveData()
         assertNotNull(authData.value)
-        val newItems = repo.getStories(FeedType.ACTUAL, null)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
-        assertNotNull(newItems.value)
-        assertEquals(20, newItems.value!!.items.size)
-        var notCommentedItem = newItems.value!!.items.first()
+        var blogItems: StoriesFeed? = null
+        var allComments: StoriesFeed? = null
+        val sizeOfItems = 1
+
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blogItems = it
+        }
+        repo.getStories(FeedType.COMMENTS, StoryFilter(null, userName)).observeForever {
+            allComments = it
+        }
+
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.BLOG, StoryFilter(null, userName))
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.COMMENTS, StoryFilter(null, userName))
+
+        assertNotNull(blogItems)
+        assertNotNull(allComments)
+        assertEquals(sizeOfItems, blogItems!!.items.size)
+        assertEquals(sizeOfItems, allComments!!.items.size)
+
+        val notCommentedItem = blogItems!!.items.first().deepCopy()
         repo.requestStoryUpdate(notCommentedItem)
-        notCommentedItem = newItems.value!!.items.first()
-        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
-                pointerPosition = null)
+
+        val commentSizeBefore = blogItems!!.items.first().comments().size
+
         val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
-        repo.createComment(notCommentedItem, notCommentedItem.rootStory()!!, listOf(image, text), { _, _ -> })
-        assertEquals(notCommentedItem.comments().size + 1, newItems.value!!.items.first().comments().size)
+        repo.createComment(notCommentedItem.rootStory()!!, listOf(text), { _, _ -> })
+
+        assertEquals("comments size in first story in feed must increase",
+                commentSizeBefore + 1, blogItems!!.items.first().comments().size)
+        assertEquals("there must be 20 + 1 comments in comments feed",
+                sizeOfItems + 1, allComments!!.items.size)
+
 
         assertNotNull(repo.lastCreatedPost().value)
         assertEquals(userName, repo.lastCreatedPost().value!!.author)
+
+        Thread.sleep(3000)
+        val newBody = "edited_comment_twicE_" + UUID.randomUUID().toString()
+        val editedComment = blogItems!!.items.first().comments().find { it.author == userName && it.commentsCount == 0 }!!
+        repo.editComment(editedComment,
+                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)))
+
+        assertEquals("new comment must have updated body", newBody,
+                blogItems!!.items.first().comments().find { it.id == editedComment.id }!!.body)
+        assertEquals("comment in comment list body must be also updated", newBody,
+                allComments!!.items.find { it.rootStory()!!.id == editedComment.id }!!.rootStory()!!.body)
     }
 
     @Test
     fun createSecondLevelComment() {
-        Thread.sleep(20000)
+        Thread.sleep(20_000)
+
         val authData = repo.getCurrentUserDataAsLiveData()
         assertNotNull(authData.value)
-        val newItems = repo.getStories(FeedType.POPULAR, null)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null, { _, _ -> })
-        assertNotNull(newItems.value)
-        assertEquals(20, newItems.value!!.items.size)
-        var notCommentedItem = newItems.value!!.items.first()
+        var blogItems: StoriesFeed? = null
+        var allComments: StoriesFeed? = null
+        val sizeOfItems = 1
+
+        repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
+            blogItems = it
+        }
+        repo.getStories(FeedType.COMMENTS, StoryFilter(null, userName)).observeForever {
+            allComments = it
+        }
+
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.BLOG, StoryFilter(null, userName))
+        repo.requestStoriesListUpdate(sizeOfItems, FeedType.COMMENTS, StoryFilter(null, userName))
+
+        assertNotNull(blogItems)
+        assertNotNull(allComments)
+        assertEquals(sizeOfItems, blogItems!!.items.size)
+        assertEquals(sizeOfItems, allComments!!.items.size)
+
+        val notCommentedItem = blogItems!!.items.first()
         repo.requestStoryUpdate(notCommentedItem)
+        val firstLevelComment = blogItems!!.items.first().comments().first()
+        val updatedItem = blogItems!!.items.first().comments().first().children.size
 
-        notCommentedItem = newItems.value!!.items.first()
-        var lastComment = newItems.value!!.items.first().comments().last()
+        val commentSizeBefore = blogItems!!.items.first().getFlataned().size
 
-        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
-                pointerPosition = null)
-        val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
-        repo.createComment(notCommentedItem, lastComment, listOf(image, text), { _, _ -> })
+        val commentText = "second_level_comment ${UUID.randomUUID()}"
+        var text = EditorTextPart("sdg", commentText, pointerPosition = null)
+        repo.createComment(firstLevelComment, listOf(text), { _, _ -> })
 
-        assertEquals(notCommentedItem.rootStory()!!.commentsCount + 1, newItems.value!!.items.first().rootStory()!!.commentsCount)
-        assertEquals(lastComment.commentsCount + 1, newItems.value!!.items.first().comments().last().commentsCount)
+        assertEquals("comments size in first story in feed must increase",
+                commentSizeBefore + 1, blogItems!!.items.first().getFlataned().size)
+        assertEquals("second level comment must also appear",
+                updatedItem + 1, blogItems!!.items.first().comments().first().children.size)
+
+        assertEquals("there must be 20 + 1 comments in comments feed",
+                sizeOfItems + 1, allComments!!.items.size)
+
+        val item = blogItems!!.items.first().getFlataned().find { it.story.body.contains(commentText) }!!
+        assertEquals("second level comment level 1", 1, item.story.level)
+
+        Thread.sleep(20_000)
+
+
+        val thirdLevelCommentTextcommentText = "third_level_comment ${UUID.randomUUID()}"
+        text = EditorTextPart("sdg", thirdLevelCommentTextcommentText, pointerPosition = null)
+        repo.createComment(item.story, listOf(text), { _, _ -> })
+        val thirdLevelitem = blogItems!!.items.first().getFlataned().find { it.story.body.contains(thirdLevelCommentTextcommentText) }!!
+        assertEquals("third level comment  level 2", 2, thirdLevelitem.story.level)
 
     }
 
@@ -158,21 +251,21 @@ class RepositoryPostAndVoteTest {
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(2)!!
 
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         repo.requestStoryUpdate(votingItem)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
         Thread.sleep(3000)
         repo.cancelVote(votingItem.rootStory()!!)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
     }
 
 
@@ -183,27 +276,27 @@ class RepositoryPostAndVoteTest {
         repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(2)!!
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         repo.requestStoryUpdate(votingItem)
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
-        assert(!votingItem.comments().first().isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         Thread.sleep(4000L)
 
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(votingItem.rootStory()!!.categoryName), completionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
-        Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
 
         repo.cancelVote(votingItem.rootStory()!!)
 
-        Assert.assertFalse(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
-        Assert.assertFalse(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertFalse(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+        Assert.assertFalse(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
     }
 
     @Test
@@ -217,12 +310,50 @@ class RepositoryPostAndVoteTest {
         assertNotNull(feedItems.value)
         var votingItem = feedItems.value?.items?.get(2)!!
 
-        assert(!votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        repo.upVote(votingItem.rootStory()!!, 100)
+        repo.vote(votingItem.rootStory()!!, 100)
 
         votingItem = feedItems.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
-        assert(votingItem.rootStory()!!.isUserUpvotedOnThis)
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
+    }
+
+    @Test
+    fun testDownVote() {
+        val feedItems = repo.getStories(FeedType.NEW, StoryFilter(null, userName))
+        assertNull(feedItems.value)
+        repo.requestStoriesListUpdate(20, FeedType.NEW,
+                null,
+                null,
+                null)
+        assertNotNull(feedItems.value)
+        var votingItem = feedItems.value?.items?.get(1)!!
+
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+
+        repo.vote(votingItem.rootStory()!!, -100)
+
+        votingItem = feedItems.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED)
+    }
+
+    @Test
+    fun testFlag() {
+        val feedItems = repo.getStories(FeedType.NEW, null)
+        assertNull(feedItems.value)
+        repo.requestStoriesListUpdate(20, FeedType.NEW,
+                null,
+                null,
+                null)
+        assertNotNull(feedItems.value)
+        val votingItem = feedItems.value?.items?.get(1)!!
+
+        assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+
+        repo.vote(votingItem.rootStory()!!, -100)
+        Thread.sleep(3000)
+        repo.vote(votingItem.rootStory()!!, +100)
+
     }
 
     @Test
@@ -232,11 +363,11 @@ class RepositoryPostAndVoteTest {
         repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
         assertNotNull(popular.value)
         var votingItem = popular.value?.items?.get(5)!!
-        repo.upVote(votingItem.rootStory()!!, 100)
-        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        repo.vote(votingItem.rootStory()!!, 100)
+        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
 
         repo.requestStoriesListUpdate(20, FeedType.ACTUAL, null, null, null)
-        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.isUserUpvotedOnThis)
+        Assert.assertTrue(popular.value!!.items.find { it.rootStory()!!.id == votingItem.rootStory()!!.id }!!.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
     }
 
     @Test
@@ -251,7 +382,7 @@ class RepositoryPostAndVoteTest {
         val filteredStories = repo.getStories(FeedType.ACTUAL, StoryFilter("psk"))
         assertNotNull(filteredStories)
         assertNull(filteredStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.ACTUAL, StoryFilter("psk"), completionHandler = { _, _ -> })
         assertNotNull(filteredStories.value)
         Assert.assertEquals(20, filteredStories.value!!.items.size)
         Assert.assertFalse(filteredStories.value!!.items.any { !it.rootStory()!!.tags.contains("psk") })
@@ -269,40 +400,40 @@ class RepositoryPostAndVoteTest {
         val actualStories = repo.getStories(FeedType.POPULAR, null)
         assertNotNull(actualStories)
         assertNull(actualStories.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, completionHandler = { _, _ -> })
         assertNotNull(actualStories.value)
         Assert.assertEquals(20, actualStories.value!!.items.size)
 
         Assert.assertTrue(actualStories.value!!.items.first().comments().isEmpty())
 
         val firstStory = actualStories.value!!.items.first().rootStory()!!
-        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items.first().comments().isNotEmpty())
 
         var updatingSoty = actualStories.value!!.items[2].rootStory()!!
         var actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter(updatingSoty.categoryName))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter(updatingSoty.categoryName), completionHandler = { _, _ -> })
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.size > 2)
 
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items[2].comments().isNotEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isNotEmpty())
 
         actualStoriesWithFilter = repo.getStories(FeedType.POPULAR, StoryFilter("psk"))
         assertNotNull(actualStoriesWithFilter)
         assertNull(actualStoriesWithFilter.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"), complitionHandler = { _, _ -> })
+        repo.requestStoriesListUpdate(20, FeedType.POPULAR, StoryFilter("psk"), completionHandler = { _, _ -> })
 
 
         updatingSoty = actualStoriesWithFilter.value!!.items[1].rootStory()!!
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR)
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isNotEmpty())
     }
 
@@ -355,7 +486,7 @@ class RepositoryPostAndVoteTest {
         repo.subscribeOnUserBlog(firstInSubscribersList.name, { _, _ -> })
 
         Assert.assertEquals("we subscribed on 2 blogs, so sub count must be +2", userSubsCount + 2, userAcc!!.subscibesCount)
-      //  Assert.assertTrue(vredinkaSubscribers!!.first().subscribeStatus.isCurrentUserSubscribed)
+        //  Assert.assertTrue(vredinkaSubscribers!!.first().subscribeStatus.isCurrentUserSubscribed)
 
         repo.unSubscribeOnUserBlog(firstInSubscribersList.name, { _, _ -> })
 

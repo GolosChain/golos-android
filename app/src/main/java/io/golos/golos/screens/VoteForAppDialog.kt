@@ -3,18 +3,19 @@ package io.golos.golos.screens
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
-import io.golos.golos.screens.settings.UserSettings
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsImpl
+import io.golos.golos.screens.widgets.dialogs.GolosDialog
 
 
 /**
  * Created by yuri on 07.02.18.
  */
-class VoteForAppDialog : DialogFragment() {
+class VoteForAppDialog : GolosDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_vote_for_app, container, false)
@@ -27,14 +28,14 @@ class VoteForAppDialog : DialogFragment() {
             } catch (anfe: android.content.ActivityNotFoundException) {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=io.golos.golos")))
             }
-            UserSettings.setUserVotedForApp(true)
+            Repository.get.userSettingsRepository.setUserVotedForApp(true)
             dismiss()
         }
         v.findViewById<View>(R.id.never).setOnClickListener {
-            UserSettings.setUserVotedForApp(true)
+            Repository.get.userSettingsRepository.setUserVotedForApp(true)
             dismiss()
         }
-        UserSettings.setVoteQuestionMade(true)
+        Repository.get.userSettingsRepository.setVoteQuestionMade(true)
         return v
     }
 

@@ -161,7 +161,7 @@
                     <View
                         android:layout_width="1dp"
                         android:layout_height="match_parent"
-                        android:background="@color/profile_bottom" />
+                        android:background="@color/profile_divider_color" />
 
                     <android.support.v7.widget.LinearLayoutCompat
                         android:id="@+id/subscriptions_lo"
@@ -220,7 +220,7 @@
                 android:background="@color/tab_in_profile"
                 app:layout_collapseMode="pin"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="@color/tab_indicator_in_profile"
+                app:tabIndicatorColor="@color/blue_white_indicator"
                 app:tabMode="fixed"
                 app:tabTextAppearance="@style/TabTextStyle"
                 app:tabTextColor="@color/profile_tabs_color" />

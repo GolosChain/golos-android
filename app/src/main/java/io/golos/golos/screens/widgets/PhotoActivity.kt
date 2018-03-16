@@ -38,6 +38,7 @@ class PhotoActivity : GolosActivity() {
                 .apply(RequestOptions().error(R.drawable.error).centerInside())
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                        mProgress.visibility = View.GONE
                         return false
                     }
 

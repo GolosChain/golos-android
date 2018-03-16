@@ -20,11 +20,11 @@ import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity.Companion.CHANGE_THEME
-import io.golos.golos.screens.MainActivity
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingActivity
+import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.showSnackbar
 
@@ -80,7 +80,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         val settingsButton = v.findViewById<View>(R.id.settings_btn)
         settingsButton.setOnClickListener({
             val i = Intent(activity!!, SettingActivity::class.java)
-            activity?.startActivityForResult(i,CHANGE_THEME)
+            activity?.startActivityForResult(i, CHANGE_THEME)
         })
         return v
     }
@@ -113,7 +113,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         val glide = Glide.with(view ?: return)
         if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
-            glide.load(it.avatarPath)
+            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth =  mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)

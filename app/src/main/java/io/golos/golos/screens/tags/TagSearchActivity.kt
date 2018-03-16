@@ -83,6 +83,7 @@ class TagSearchActivity : GolosActivity(), Observer<TagSearchViewModelScreenStat
         mProgress = findViewById(R.id.progress)
         mRecycler = findViewById(R.id.recycler)
         mScrollLO = findViewById(R.id.scroll_lo)
+        mRecycler.isNestedScrollingEnabled = false
         mRecomendedLabel = findViewById(R.id.recommended_tv)
         mRecycler.layoutManager = LinearLayoutManager(this)
         mRecycler.adapter = SearchTagAdapter({ mViewModel.onTagClick(this, it, callingActivity != null) })

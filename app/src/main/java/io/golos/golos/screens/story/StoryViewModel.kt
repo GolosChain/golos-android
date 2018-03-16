@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
+import android.support.v7.app.AppCompatActivity
 import android.widget.ImageView
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -17,13 +18,11 @@ import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.ProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.story.model.StoryViewState
-import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.story.model.SubscribeStatus
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
-import io.golos.golos.screens.widgets.PhotoActivity
+import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -55,26 +54,29 @@ class StoryViewModel : ViewModel() {
         mLiveData.removeSource(mRepository.getStories(feedType, filter))
         mLiveData.addSource(mRepository.getStories(feedType, filter)) {
             val storyItems = it
-            it?.
-                    items?.
-                    find {
-                        it.rootStory()?.author == this.author
-                                && it.rootStory()?.permlink == this.permLink
-                    }?.
-                    let {
+            it?.items?.find {
+                it.rootStory()?.author == this.author
+                        && it.rootStory()?.permlink == this.permLink
+            }?.let {
+                val mustHaveComments = it.rootStory()?.commentsCount ?: 0
+                val commentsSize = it.comments().size
+                var isLoading = false
+                if (mustHaveComments > 0 && commentsSize == 0) isLoading = true
 
-                        mLiveData.value = StoryViewState(false,
-                                it.rootStory()?.title ?: "",
-                                mRepository.isUserLoggedIn(),
-                                storyItems?.error,
-                                it.rootStory()?.tags ?: ArrayList(),
-                                it,
-                                mRepository.isUserLoggedIn(),
-                                mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
-                                mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
+                mLiveData.value = StoryViewState(isLoading,
+                        it.rootStory()?.title ?: "",
+                        mRepository.isUserLoggedIn(),
+                        storyItems?.error,
+                        it.rootStory()?.tags ?: arrayListOf(),
+                        it,
+                        mRepository.isUserLoggedIn(),
+                        mLiveData.value?.subscribeOnStoryAuthorStatus
+                                ?: SubscribeStatus.UnsubscribedStatus,
+                        mLiveData.value?.subscribeOnTagStatus
+                                ?: SubscribeStatus.UnsubscribedStatus)
 
-                        this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
-                    }
+                this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
+            }
         }
         mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
         mLiveData.addSource(mRepository.getCurrentUserDataAsLiveData()) {
@@ -82,10 +84,11 @@ class StoryViewModel : ViewModel() {
                     mLiveData.value?.storyTitle ?: "",
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.errorCode,
-                    mLiveData.value?.tags ?: ArrayList(),
+                    mLiveData.value?.tags ?: arrayListOf(),
                     mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                     mRepository.isUserLoggedIn(),
-                    mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                    mLiveData.value?.subscribeOnStoryAuthorStatus
+                            ?: SubscribeStatus.UnsubscribedStatus,
                     mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus
             )
         }
@@ -97,7 +100,7 @@ class StoryViewModel : ViewModel() {
                         mLiveData.value?.storyTitle ?: "",
                         mRepository.isUserLoggedIn(),
                         mLiveData.value?.errorCode,
-                        mLiveData.value?.tags ?: ArrayList(),
+                        mLiveData.value?.tags ?: arrayListOf(),
                         mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                         mRepository.isUserLoggedIn(),
                         followItem.status,
@@ -111,14 +114,15 @@ class StoryViewModel : ViewModel() {
                     mLiveData.value?.storyTitle ?: "",
                     mRepository.isUserLoggedIn(),
                     mLiveData.value?.errorCode,
-                    mLiveData.value?.tags ?: ArrayList(),
+                    mLiveData.value?.tags ?: arrayListOf(),
                     mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                     mRepository.isUserLoggedIn(),
-                    mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
+                    mLiveData.value?.subscribeOnStoryAuthorStatus
+                            ?: SubscribeStatus.UnsubscribedStatus,
                     SubscribeStatus(tagItem != null, UpdatingState.DONE)
             )
         })
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
     }
 
 
@@ -132,24 +136,46 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onMainStoryImageClick(activity: Activity, src: String, iv: ImageView?) {
-        if (iv == null) PhotoActivity.startActivity(context = activity, imageSrc = src)
-        else PhotoActivity.startActivityUsingTransition(activity, iv, src)
+        val images = mLiveData.value?.storyTree?.rootStory()?.parts
+                ?.filter { it is ImageRow }
+                ?.map { it as ImageRow }
+                ?.map { it.src } ?: listOf()
+        if (images.isEmpty()) images
+                .toArrayList()
+                .addAll(mLiveData.value?.storyTree?.rootStory()?.images
+                        ?: arrayListOf())
+        if (images.isEmpty()) return
+
+        val position = images.indexOf(src)
+        PhotosDialog.getInstance(images, if (position < 0) 0 else position)
+                .show((activity as AppCompatActivity)
+                        .supportFragmentManager, "images")
     }
 
-    val canShowVoteDialog: Boolean
+    val canUserVote: Boolean
         get() {
             return mRepository.isUserLoggedIn()
 
         }
 
-    fun canUserVoteOnThis(story: StoryWrapper): Boolean {
-        return !story.story.isUserUpvotedOnThis
+    fun canUserUpVoteOnThis(story: StoryWrapper): Boolean {
+        return story.story.userVotestatus != GolosDiscussionItem.UserVoteType.VOTED
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
-        if (canUserVoteOnThis(story)) mRepository.upVote(story.story, percent)
-        else mRepository.cancelVote(story.story)
+        if (story.updatingState == UpdatingState.UPDATING) return
+        if (percent == 0.toShort()) mRepository.cancelVote(story.story)
+        else {
+            if (story.story.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                    && percent < 0) {
+                mRepository.vote(story.story, 0)
+            } else {
+                mRepository.vote(story.story, percent)
+            }
+
+        }
     }
+
 
     fun canUserWriteComments(): Boolean {
         return mRepository.isUserLoggedIn()
@@ -157,12 +183,21 @@ class StoryViewModel : ViewModel() {
 
     fun onWriteRootComment(ctx: Context) {
         if (canUserWriteComments()) {
-            mLiveData.value?.let {
+            val story = mLiveData.value?.storyTree ?: return
+            if (story.rootStory()?.isRootStory == true) {
                 EditorActivity.startRootCommentEditor(ctx,
-                        it.storyTree,
+                        story,
                         feedType,
                         filter)
+
+            } else {
+                EditorActivity.startAnswerOnCommentEditor(ctx,
+                        rootStory = story,
+                        commentToAnswer = story.rootStory() ?: return,
+                        feedType = feedType,
+                        storyFilter = filter)
             }
+
         }
     }
 
@@ -180,8 +215,26 @@ class StoryViewModel : ViewModel() {
         }
     }
 
+    fun onEditClick(ctx: Context, item: GolosDiscussionItem) {
+        if (mRepository.isUserLoggedIn()
+                && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
+
+            mLiveData.value?.let {
+                EditorActivity.startEditPostOrComment(ctx,
+                        it.storyTree,
+                        item,
+                        feedType,
+                        filter)
+            }
+        } else {
+            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.you_must_have_more_repo_for_action))
+        }
+    }
+
+    public fun isPostEditable() = mLiveData.value?.storyTree?.storyWithState()?.isStoryEditable == true
+
     fun onVoteRejected() {
-        showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+        showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
     }
 
     fun onTagClick(context: Context, text: String?) {
@@ -193,7 +246,7 @@ class StoryViewModel : ViewModel() {
                 || feedType == FeedType.UNCLASSIFIED
                 || feedType == FeedType.PROMO) feedType = FeedType.NEW
         if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text)
-        FilteredStoriesActivity.start(context, feedType, text ?: return)
+        FilteredStoriesActivity.start(context, text ?: return)
     }
 
     fun onShareClick(context: Context) {
@@ -206,7 +259,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun requestRefresh() {
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType)
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
     }
 
     fun onCommentClick(context: Context, comment: GolosDiscussionItem) {
@@ -228,11 +281,13 @@ class StoryViewModel : ViewModel() {
         }
 
         if (mLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == true)
-            mRepository.unSubscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+            mRepository.unSubscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author
+                    ?: return, { _, e ->
                 showError(e ?: return@unSubscribeOnUserBlog)
             })
         else if (mLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == false) {
-            mRepository.subscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author ?: return, { _, e ->
+            mRepository.subscribeOnUserBlog(mLiveData.value?.storyTree?.rootStory()?.author
+                    ?: return, { _, e ->
                 showError(e ?: return@subscribeOnUserBlog)
             })
         }
@@ -254,7 +309,7 @@ class StoryViewModel : ViewModel() {
                 mLiveData.value?.storyTitle ?: "",
                 mRepository.isUserLoggedIn(),
                 error,
-                mLiveData.value?.tags ?: ArrayList(),
+                mLiveData.value?.tags ?: arrayListOf(),
                 mLiveData.value?.storyTree ?: StoryWithComments(null, ArrayList()),
                 mRepository.isUserLoggedIn(),
                 mLiveData.value?.subscribeOnStoryAuthorStatus ?: SubscribeStatus.UnsubscribedStatus,
@@ -262,7 +317,8 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onStoryVotesClick(context: Context) {
-        UsersListActivity.startToShowVoters(context, mLiveData.value?.storyTree?.rootStory()?.id ?: return)
+        UsersListActivity.startToShowVoters(context, mLiveData.value?.storyTree?.rootStory()?.id
+                ?: return)
     }
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {

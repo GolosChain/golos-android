@@ -109,6 +109,25 @@
                         android:layout_weight="0.9"
                         android:gravity="end|center_vertical" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/show_nsfw_images_mode" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/show_nsfw_images_switch"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9"
+                        android:gravity="end|center_vertical" />
+                </LinearLayout>
             </LinearLayout>
 
             <View

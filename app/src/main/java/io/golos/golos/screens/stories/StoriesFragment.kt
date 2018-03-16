@@ -3,6 +3,7 @@ package io.golos.golos.screens.stories
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
@@ -14,18 +15,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
-import io.golos.golos.screens.settings.UserSettings
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
-import io.golos.golos.screens.stories.adapters.StoriesPagerAdpater
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.model.NSFWStrategy
+import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
-import io.golos.golos.screens.widgets.OnVoteSubmit
-import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.getColorCompat
 import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.showSnackbar
@@ -39,7 +42,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
-    private var mSavedPosition: Int? = null
+    private var lastSentUpdateRequestTime = System.currentTimeMillis()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -72,30 +75,59 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
-                onCardClick = { mViewModel?.onCardClick(it, activity) },
-                onCommentsClick = { mViewModel?.onCommentsClick(it, activity) },
-                onShareClick = { mViewModel?.onShareClick(it, activity) },
-                onUpvoteClick = {
-                    if (mViewModel?.canVote() == true) {
-                        if (it.rootStory()?.isUserUpvotedOnThis == true) {
-                            mViewModel?.downVote(it)
-                        } else {
-                            val dialog = VoteDialog.getInstance()
-                            dialog.selectPowerListener = object : OnVoteSubmit {
-                                override fun submitVote(vote: Short) {
-                                    mViewModel?.vote(it, vote)
-                                }
-                            }
-                            dialog.show(activity!!.fragmentManager, null)
-                        }
-                    } else {
-                        mViewModel?.onVoteRejected(it)
+                onCardClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onCardClick(story, activity)
                     }
                 },
-                onTagClick = { mViewModel?.onBlogClick(context, it) },
-                onUserClick = { mViewModel?.onUserClick(context, it) },
-                onVotersClick = { mViewModel?.onVotersClick(context, it) },
-                feedCellSettings = getFeedModeSettings())
+                onCommentsClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onCommentsClick(story, activity)
+                    }
+                },
+                onShareClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onShareClick(story, activity)
+                    }
+                },
+                onUpvoteClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        if (mViewModel?.canVote() == true) {
+                            if (story.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                                mViewModel?.cancelVote(story)
+                            } else {
+                                val dialog = VoteDialog.getInstance()
+                                dialog.selectPowerListener = object : OnVoteSubmit {
+                                    override fun submitVote(vote: Short) {
+                                        mViewModel?.vote(story, vote)
+                                    }
+                                }
+                                dialog.show(activity!!.supportFragmentManager, null)
+                            }
+                        } else {
+                            mViewModel?.onVoteRejected(story)
+                        }
+                    }
+                },
+                onTagClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onBlogClick(story, activity)
+                    }
+                },
+                onUserClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onUserClick(story, activity)
+                    }
+                },
+                onVotersClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWithComments) {
+                        mViewModel?.onVotersClick(story, activity)
+                    }
+                },
+                feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
+                        ?: FeedCellSettings(true,
+                                true,
+                                NSFWStrategy(true, Pair(false, ""))))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -103,12 +135,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val position = manager.findLastCompletelyVisibleItemPosition()
-                if (position + 10 > mAdapter.itemCount) {
+                if (position + 10 > mAdapter.itemCount
+                        && ((System.currentTimeMillis() - lastSentUpdateRequestTime) > 1_000)) {
                     mViewModel?.onScrollToTheEnd()
+                    lastSentUpdateRequestTime = System.currentTimeMillis()
                 }
             }
         })
-        mRecycler?.recycledViewPool = StoriesPagerAdpater.sharedPool
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
         view.findViewById<View>(R.id.refresh_lo).setOnClickListener { mRefreshButton?.callOnClick() }
     }
@@ -121,14 +154,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
         mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
 
-        UserSettings.isStoriesCompactMode().removeObservers(this)
-        UserSettings.isImagesShown().removeObservers(this)
-
-        val observer = Observer<Boolean> { _ ->
-            mAdapter.feedCellSettings = getFeedModeSettings()
+        val observer = Observer<FeedCellSettings> { _ ->
+            mAdapter.feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
+                    true,
+                    NSFWStrategy(true, Pair(false, "")))
         }
-        UserSettings.isStoriesCompactMode().observe(this, observer)
-        UserSettings.isImagesShown().observe(this, observer)
+
+        mViewModel?.cellViewSettingLiveData?.observe(activity as LifecycleOwner, observer)
     }
 
     override fun onChanged(t: StoriesViewState?) {
@@ -192,9 +224,54 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
            }*/
     }
 
+
+    override fun onRefresh() {
+        mViewModel?.onSwipeToRefresh()
+    }
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        isVisibleBacking = isVisibleToUser
+        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val parc = mRecycler?.layoutManager as? LinearLayoutManager
+        parc?.onSaveInstanceState().let {
+            outState.putParcelable("recyclerState", it)
+        }
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel?.onDestroy()
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        val parc = savedInstanceState?.getParcelable<Parcelable>("recyclerState")
+        parc?.let {
+            (mRecycler?.layoutManager as? LinearLayoutManager)?.let {
+                it.onRestoreInstanceState(parc)
+            }
+        }
+    }
+
+    fun getArgs(): Pair<FeedType, StoryFilter?> {
+        val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
+        val filterString = arguments!!.getString(FILTER_TAG, null)
+        val filter = if (filterString == null || filterString == "null") null else mapper.readValue(filterString, StoryFilter::class.java)
+
+        return Pair(type, filter)
+    }
+
     companion object {
         private val TYPE_TAG = "TYPE_TAG"
         private val FILTER_TAG = "FILTER_TAG"
+
         fun getInstance(type: FeedType,
                         filter: StoryFilter? = null): StoriesFragment {
             val fr = StoriesFragment()
@@ -213,37 +290,4 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             return bundle
         }
     }
-
-    override fun onRefresh() {
-        mViewModel?.onSwipeToRefresh()
-    }
-
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        isVisibleBacking = isVisibleToUser
-        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
-
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        var parc = mSavedPosition
-        if (parc == null) parc = (mRecycler?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-        if (parc ?: 0 > 0) {
-            outState.putInt("recyclerState${mViewModel}", parc ?: return)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mViewModel?.onDestroy()
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        mSavedPosition = savedInstanceState?.getInt("recyclerState")
-    }
-
-    private fun getFeedModeSettings() = FeedCellSettings(UserSettings.isStoriesCompactMode().value == false,
-            UserSettings.isImagesShown().value == true)
 }

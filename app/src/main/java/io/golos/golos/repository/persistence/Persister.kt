@@ -3,7 +3,6 @@ package io.golos.golos.repository.persistence
 import android.content.Context
 import android.util.Base64
 import com.crashlytics.android.Crashlytics
-import com.crashlytics.android.answers.Answers
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
@@ -25,7 +24,6 @@ import kotlin.collections.HashMap
  */
 abstract class Persister {
 
-
     abstract fun saveAvatarPathForUser(userAvatar: UserAvatar)
 
     abstract fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>)
@@ -41,10 +39,6 @@ abstract class Persister {
     abstract fun getActiveUserData(): UserData?
 
     abstract fun saveUserData(userData: UserData)
-
-    /* abstract fun saveStory(story: StoryTree)
-
-     abstract fun getStory(id: Long): StoryTree?*/
 
     abstract fun saveTags(tags: List<Tag>)
 
@@ -110,10 +104,10 @@ private class OnDevicePersister(private val context: Context) : Persister() {
             if (it.value == null) {
                 try {
                     if (keyStore.containsAlias(keyAlias.name))
-                    keyStore.deleteEntry(keyAlias.name)
+                        keyStore.deleteEntry(keyAlias.name)
                 } catch (e: KeyStoreException) {
                     Timber.e(e)
-                    if (Fabric.isInitialized())Crashlytics.logException(e)
+                    if (Fabric.isInitialized()) Crashlytics.logException(e)
                 }
 
             } else {

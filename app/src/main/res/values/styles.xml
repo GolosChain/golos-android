@@ -11,6 +11,14 @@
 
     </style>
 
+    <style name="GolosDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="GolosPhotoDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 
     <style name="LauncherTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splash_back</item>
@@ -27,8 +35,9 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@null</item>
+        <item name="android:textSize">@dimen/font_small</item>
         <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textColor">@color/textColorP</item>
     </style>
 
@@ -53,7 +62,7 @@
         <item name="android:lines">1</item>
         <item name="android:textColor">@color/textColorP</item>
         <item name="android:textSize">17sp</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textCursorDrawable">@drawable/cursor_blue</item>
     </style>
 
@@ -70,7 +79,7 @@
         <item name="android:paddingBottom">4dp</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:textColor">@color/textColorP</item>
-        <item name="android:textColorHint">@color/textColorP</item>
+        <item name="android:textColorHint">@color/gray_82</item>
         <item name="android:textSize">16sp</item>
     </style>
 
@@ -109,7 +118,6 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:background">@color/white_black_toolbar_color</item>
     </style>
 
     <style name="Base.Widget.AppCompat.Button.Borderless.StoryButtons">
@@ -246,7 +254,7 @@
 
     <style name="Base.Widget.AppCompat.Button.Borderless.AddButtonBluePlus">
         <item name="android:layout_width">44dp</item>
-        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_height">30dp</item>
         <item name="android:layout_marginStart">@dimen/margin_material</item>
         <item name="android:layout_marginTop">@dimen/margin_material_small</item>
         <item name="android:background">@drawable/rect_blue</item>
@@ -305,9 +313,9 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:drawablePadding">6dp</item>
-        <item name="android:textColor">@color/textColorP</item>
+        <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:paddingEnd">@dimen/margin_material_half</item>
-        <item name="android:paddingStart">@dimen/margin_material_half</item>
+        <item name="android:paddingStart">4dp</item>
         <item name="android:textSize">@dimen/font_small</item>
     </style>
 
@@ -317,7 +325,7 @@
     </style>
 
     <style name="LoginAdviceTextStyle">
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">@dimen/quater</item>
@@ -328,7 +336,8 @@
         <item name="android:clickable">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="ControlsTextStyle">

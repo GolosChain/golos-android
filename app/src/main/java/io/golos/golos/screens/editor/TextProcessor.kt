@@ -1,14 +1,11 @@
 package io.golos.golos.screens.editor
 
-import timber.log.Timber
-
 /**
  * Created by yuri yurivladdurain@gmail.com on 26/10/2017.
  */
-class TextProcessor {
+object TextProcessor {
 
     fun processInput(previousState: List<EditorPart>, action: EditorInputAction): List<EditorPart> {
-        Timber.e("process input $previousState")
         val parts = previousState
         val selectedPart = parts.findLast { it.isFocused() }
 

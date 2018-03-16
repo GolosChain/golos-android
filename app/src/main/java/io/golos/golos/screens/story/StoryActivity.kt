@@ -12,6 +12,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
@@ -19,6 +21,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
 import io.golos.golos.screens.GolosActivity
@@ -30,8 +33,8 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.screens.widgets.OnVoteSubmit
-import io.golos.golos.screens.widgets.VoteDialog
+import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
 
@@ -49,8 +52,9 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mTagName: TextView
     private lateinit var mTagSubscribeBtn: Button
     private lateinit var mBlogNameTv: TextView
-    private lateinit var mtitileTv: TextView
+    private lateinit var mTitleTv: TextView
     private lateinit var mVotesIv: TextView
+    private lateinit var mFlagTv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
     private lateinit var mNoCommentsTv: TextView
     private lateinit var mStoryRecycler: RecyclerView
@@ -63,14 +67,20 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mMoneyBtn: TextView
     private lateinit var mCommentsTv: TextView
     private lateinit var mShareButton: ImageButton
-    private lateinit var mAvatarofAuthorInFollowLo: ImageView
+    private lateinit var mAvatarOfAuthorInFollowLo: ImageView
     private lateinit var mNameOfAuthorInFollowLo: TextView
     private lateinit var mAuthorSubscribeButton: Button
     private lateinit var mTagAvatar: View
+    private lateinit var mCommentsLoadingProgress: View
+    private lateinit var mAppBar: View
+    private lateinit var mVoteLo: View
+    private var isNeedToScrollToComments = false
+    private var isScrollEventFired = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_story)
+        isNeedToScrollToComments = intent.getBooleanExtra(SCROLL_TO_COMMENTS, false)
         setUpViews()
         setUpViewModel()
     }
@@ -100,16 +110,20 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 })
 
         mViewModel.liveData.observe(this, Observer {
-            mProgressBar.visibility = if (it?.isLoading == true) View.VISIBLE else View.GONE
-
             if (it?.storyTree?.rootStory() != null) {
+                setFullscreenProgress(false)
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
-                    mtitileTv.visibility = View.GONE
+                    mTitleTv.setViewGone()
                 }
-                mSwipeToRefresh.isRefreshing = false
+                if (it.isLoading) {
+                    if (!mSwipeToRefresh.isRefreshing) mSwipeToRefresh.isRefreshing = true
+                } else {
+                    mSwipeToRefresh.isRefreshing = false
+                }
+
                 val story = it.storyTree.rootStory() ?: return@Observer
 
-                var ets = if (story.parts.isEmpty()) StoryParserToRows().parse(story).toArrayList() else story.parts
+                val ets = if (story.parts.isEmpty()) StoryParserToRows.parse(story, true).toArrayList() else story.parts
                 if (story.parts.isEmpty()) story.parts.addAll(ets)
 
                 if (ets.find { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) } != null) {
@@ -123,18 +137,25 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         list.forEach {
                             ets.remove(it)
                         }
-                        mBottomImagesRecycler.visibility = View.VISIBLE
                         if (mBottomImagesRecycler.adapter == null) {
+                            mBottomImagesRecycler.visibility = View.VISIBLE
                             mBottomImagesRecycler.adapter =
-                                    ImagesAdapter({ mViewModel.onMainStoryImageClick(this, it.src, null) },
+                                    ImagesAdapter({ },
                                             list)
                         }
                     }
                 }
-                mStoryRecycler.visibility = View.VISIBLE
-                (mStoryRecycler.adapter as StoryAdapter).items = ArrayList(ets)
 
+                mStoryRecycler.setViewVisible()
+                val adapter = mStoryRecycler.adapter as StoryAdapter
+
+                if (adapter.itemCount != ets.size) {
+                    adapter.items = ArrayList(ets)
+                    Timber.e("size not matches")
+                }
                 if (mAvatar.drawable == null) {
+                    mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+
                     mAvatar.visibility = View.VISIBLE
                     mUserName.text = story.author
                     mBlogNameTv.visibility = View.VISIBLE
@@ -144,58 +165,97 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         val glide = Glide.with(this)
 
                         glide
-                                .load(story.avatarPath)
-                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
+                                        ?: "", wantedwidth = mAvatar.width))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatar)
                         glide
-                                .load(story.avatarPath)
-                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_24dp))
-                                .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
-                                .into(mAvatarofAuthorInFollowLo)
+                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
+                                        ?: "", wantedwidth = mAvatarOfAuthorInFollowLo.width))
+                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_52dp))
+                                .error(Glide.with(this).load(R.drawable.ic_person_gray_52dp))
+                                .into(mAvatarOfAuthorInFollowLo)
                     }
-
+                    if (story.avatarPath == null) {
+                        mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+                        mAvatarOfAuthorInFollowLo.setImageResource(R.drawable.ic_person_gray_52dp)
+                    }
                     mUserName.setOnClickListener {
                         mViewModel.onUserClick(this, mUserName.text.toString())
                     }
-                    mAvatarofAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
+                    mAvatarOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
-                mAuthorSubscribeButton.text = if (it.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
+
+                val subscribeText = if (it.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
                 else getString(R.string.follow)
-                mAuthorSubscribeButton.visibility = if (it.subscribeOnStoryAuthorStatus.updatingState != UpdatingState.UPDATING) View.VISIBLE
-                else View.GONE
 
-                mAuthorSubscribeProgress.visibility = if (mAuthorSubscribeButton.visibility == View.GONE) View.VISIBLE else View.GONE
+                if (subscribeText != mAuthorSubscribeButton.text) {
+                    mAuthorSubscribeButton.text = subscribeText
+                }
 
-                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
+                if (it.subscribeOnStoryAuthorStatus.updatingState == UpdatingState.UPDATING) {
+                    mAuthorSubscribeButton.setViewGone()
+                    mAuthorSubscribeProgress.setViewVisible()
+                } else {
+                    mAuthorSubscribeButton.setViewVisible()
+                    mAuthorSubscribeProgress.setViewGone()
+                }
 
+                if (!mAuthorSubscribeButton.hasOnClickListeners()) {
+                    mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
+                }
 
                 if (it.subscribeOnTagStatus.isCurrentUserSubscribed) {
                     mTagSubscribeBtn.setText(R.string.unfollow)
                 } else {
                     mTagSubscribeBtn.setText(R.string.follow)
                 }
-
-                mCommentsCountBtn.visibility = View.VISIBLE
-                if (it.storyTree.rootStory()?.isUserUpvotedOnThis == true) {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp), null, null, null)
+                mCommentsCountBtn.setViewVisible()
+                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED
+                        && mMoneyBtn.tag ?: "" != "green") {
+                    mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_circle_green_outline_20dp)
                     mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
+                    mMoneyBtn.tag = "green"
                 } else {
-                    mMoneyBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
-                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
+                    if (mMoneyBtn.tag ?: "" != "gray") {
+                        mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_cricle_gray_outline_20dp)
+                        mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.textColorP))
+                        mMoneyBtn.tag = "gray"
+                    }
+                }
+                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                        && mFlagTv.tag ?: "" != "red") {
+
+                    mFlagTv.setVectorDrawableStart(R.drawable.ic_flag_20dp_red)
+                    mFlagTv.tag = "red"
+                } else {
+                    if (mFlagTv.tag ?: "" != "gray") {
+                        mFlagTv.setVectorDrawableStart(R.drawable.ic_flag_20dp_gray)
+                        mFlagTv.tag = "gray"
+                    }
                 }
                 if (it.isStoryCommentButtonShown) mFab.show()
                 else mFab.hide()
 
                 val tagName = LocalizedTag.convertToLocalizedName(story.categoryName)
-                mBlogNameTv.text = tagName
-                mTagName.text = tagName.capitalize()
-                mTagAvatar.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
-                mTagName.setOnClickListener { mTagAvatar.callOnClick() }
+                if (mBlogNameTv.text.isEmpty()) {
+                    mBlogNameTv.text = tagName
+                }
+                if (mTagName.text.isEmpty()) {
+                    mTagName.text = tagName.capitalize()
+                }
 
-                mBlogNameTv.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
+                if (!mTagAvatar.hasOnClickListeners()) {
+                    mTagAvatar.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
+                }
+                if (!mTagName.hasOnClickListeners()) {
+                    mTagName.setOnClickListener { mTagAvatar.callOnClick() }
+                }
+                if (!mBlogNameTv.hasOnClickListeners()) {
+                    mBlogNameTv.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
+                }
                 if (it.errorCode != null) {
                     if (it.errorCode.localizedMessage != null) it.errorCode.localizedMessage.let {
                         findViewById<View>(android.R.id.content).showSnackbar(it)
@@ -206,9 +266,17 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
 
-                mCommentsCountBtn.text = it.storyTree.rootStory()?.commentsCount?.toString()
-                mVotesIv.text = it.storyTree.rootStory()?.votesNum?.toString() ?: ""
-                mVotesIv.setOnClickListener { mViewModel.onStoryVotesClick(this) }
+                val commentsCountString = it.storyTree.rootStory()?.commentsCount?.toString()
+                if (commentsCountString != mCommentsCountBtn.text.toString()) {
+                    mCommentsCountBtn.text = commentsCountString
+                }
+                val votesCountString = it.storyTree.rootStory()?.votesNum?.toString() ?: ""
+                if (mVotesIv.text != votesCountString) {
+                    mVotesIv.text = votesCountString
+                }
+                if (!mVotesIv.hasOnClickListeners()) {
+                    mVotesIv.setOnClickListener { mViewModel.onStoryVotesClick(this) }
+                }
                 if (mFlow.childCount != story.tags.count()) {
                     mFlow.removeAllViews()
                     story.tags.forEach {
@@ -221,34 +289,61 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 if (it.storyTree.storyWithState()?.updatingState == UpdatingState.UPDATING) {
-                    mVotingProgress.visibility = View.VISIBLE
-                    mMoneyBtn.visibility = View.GONE
-
+                    mVotingProgress.setViewVisible()
+                    mMoneyBtn.setViewGone()
                 } else {
-                    mVotingProgress.visibility = View.GONE
-
-                    mMoneyBtn.visibility = View.VISIBLE
+                    mVotingProgress.setViewGone()
+                    mMoneyBtn.setViewVisible()
                 }
-                findViewById<View>(R.id.vote_lo).visibility = View.VISIBLE
-                mCommentsTv.visibility = View.VISIBLE
-                mMoneyBtn.text = String.format("$ %.3f", story.payoutInDollars)
+                mVoteLo.setViewVisible()
+                if (story.commentsCount > 0 && it.storyTree.comments().isEmpty()) {//if comments not downloaded yet
+                    mCommentsTv.setViewGone()
+                    mNoCommentsTv.setViewGone()
+                    mCommentsLoadingProgress.setViewVisible()
+                    mCommentsRecycler.setViewGone()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mCommentsLoadingProgress.post { mCommentsLoadingProgress.requestFocus() }
+
+                    }
+                } else if (story.commentsCount > 0 && it.storyTree.comments().isNotEmpty()) {
+                    mCommentsTv.setViewVisible()
+                    mNoCommentsTv.setViewGone()
+                    mCommentsLoadingProgress.setViewGone()
+                    mCommentsRecycler.setViewVisible()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mCommentsRecycler.post { mCommentsRecycler.requestFocus() }
+                        isScrollEventFired = true
+                    }
+                } else if (story.commentsCount == 0) {
+                    mCommentsTv.setViewGone()
+                    mNoCommentsTv.setViewVisible()
+                    mCommentsLoadingProgress.setViewGone()
+                    mCommentsRecycler.setViewGone()
+                    if (isNeedToScrollToComments && !isScrollEventFired) {
+                        mNoCommentsTv.post {
+                            mNoCommentsTv.requestFocus()
+                        }
+                        isScrollEventFired = true
+                    }
+                }
+
+                val payout = String.format("$%.3f", story.payoutInDollars)
+                if (payout != mMoneyBtn.text) {
+                    mMoneyBtn.text = payout
+                }
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
-                if (it.storyTree.comments().isEmpty()) {
-                    mCommentsRecycler.visibility = View.GONE
-                    mNoCommentsTv.visibility = View.VISIBLE
-                } else {
-                    mCommentsRecycler.visibility = View.VISIBLE
-                    mNoCommentsTv.visibility = View.GONE
-                }
-
+            } else {
+                setFullscreenProgress(true)
             }
-            mtitileTv.text = it?.storyTitle
+            if (it?.storyTitle != mTitleTv.text) {
+                mTitleTv.text = it?.storyTitle
+            }
         })
     }
 
     private fun setUpViews() {
         mToolbar = findViewById<Toolbar>(R.id.toolbar)
-        mToolbar.setNavigationOnClickListener({ finish() })
+
         mProgressBar = findViewById(R.id.progress)
         mFab = findViewById(R.id.fab)
         mAvatar = findViewById(R.id.avatar_iv)
@@ -257,9 +352,10 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mTagSubscribeBtn = findViewById(R.id.subscribe_tag_btn)
         mRebloggedBy = findViewById(R.id.reblogged_tv)
         mBlogNameTv = findViewById(R.id.blog_name_tv)
-        mtitileTv = findViewById(R.id.title_tv)
+        mTitleTv = findViewById(R.id.title_tv)
         mNoCommentsTv = findViewById(R.id.no_comments_tv)
         mStoryRecycler = findViewById(R.id.recycler)
+        mFlagTv = findViewById(R.id.flag_btn)
         mCommentsRecycler = findViewById(R.id.comments_recycler)
         mFlow = findViewById(R.id.tags_lo)
         mMoneyBtn = findViewById(R.id.money_btn)
@@ -269,12 +365,15 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mVotingProgress = findViewById(R.id.voting_progress)
         mCommentsTv = findViewById(R.id.comments_tv)
         mShareButton = findViewById(R.id.share_btn)
-        mAvatarofAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
+        mCommentsLoadingProgress = findViewById(R.id.comments_progress)
+        mAvatarOfAuthorInFollowLo = findViewById(R.id.avatar_in_follow_lo_iv)
         mTagAvatar = findViewById(R.id.tag_avatar)
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
         mAuthorSubscribeButton = findViewById(R.id.follow_btn)
         mAuthorSubscribeProgress = findViewById(R.id.user_subscribe_progress)
         mBottomImagesRecycler = findViewById(R.id.additional_images_recycler)
+        mVoteLo = findViewById(R.id.vote_lo)
+        mAppBar = findViewById(R.id.appbar)
 
         mAuthorSubscribeButton.visibility = View.GONE
         mStoryRecycler.isNestedScrollingEnabled = false
@@ -284,9 +383,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mStoryRecycler.layoutManager = LinearLayoutManager(this)
         mCommentsRecycler.layoutManager = LinearLayoutManager(this)
         mBottomImagesRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        mCommentsRecycler.adapter = CommentsAdapter(onUserClick = { mViewModel.onUserClick(this, it.story.author) },
+        mCommentsRecycler.adapter = CommentsAdapter(
+                onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
-                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) })
+                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) },
+                onEditClick = { mViewModel.onEditClick(this, it.story) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
@@ -303,32 +404,49 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mSwipeToRefresh.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({
-            if (mViewModel.canShowVoteDialog) {
-                val story = mViewModel.liveData.value?.storyTree?.storyWithState() ?: return@setOnClickListener
-                if (mViewModel.canUserVoteOnThis(story)) {
+            if (mViewModel.canUserVote) {
+                val story = mViewModel.liveData.value?.storyTree?.storyWithState()
+                        ?: return@setOnClickListener
+                if (mViewModel.canUserUpVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
                     dialog.selectPowerListener = object : OnVoteSubmit {
                         override fun submitVote(vote: Short) {
                             mViewModel.onStoryVote(story, vote)
                         }
                     }
-                    dialog.show(fragmentManager, null)
-                } else mViewModel.onStoryVote(story, -1)
+                    dialog.show(supportFragmentManager, null)
+                } else mViewModel.onStoryVote(story, 0)
+            } else {
+                mViewModel.onVoteRejected()
+            }
+        })
+        mFlagTv.setOnClickListener({
+            if (mViewModel.canUserVote) {
+                val story = mViewModel.liveData.value?.storyTree?.storyWithState()
+                        ?: return@setOnClickListener
+                mViewModel.onStoryVote(story, -100)
             } else {
                 mViewModel.onVoteRejected()
             }
         })
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
-            if (mViewModel.canShowVoteDialog) {
-                if (mViewModel.canUserVoteOnThis(it)) {
+            if (mViewModel.canUserVote) {
+                if (mViewModel.canUserUpVoteOnThis(it)) {
                     val dialog = VoteDialog.getInstance()
                     dialog.selectPowerListener = object : OnVoteSubmit {
                         override fun submitVote(vote: Short) {
                             mViewModel.onStoryVote(it, vote)
                         }
                     }
-                    dialog.show(fragmentManager, null)
-                } else mViewModel.onStoryVote(it, -1)
+                    dialog.show(supportFragmentManager, null)
+                } else mViewModel.onStoryVote(it, 0)
+            } else {
+                mViewModel.onVoteRejected()
+            }
+        }
+        (mCommentsRecycler.adapter as CommentsAdapter).onDownVoteClick = {
+            if (mViewModel.canUserVote) {
+                mViewModel.onStoryVote(it, -100)
             } else {
                 mViewModel.onVoteRejected()
             }
@@ -343,11 +461,43 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
         mSwipeToRefresh.setOnRefreshListener(this)
+        setSupportActionBar(mToolbar)
+        mToolbar.setNavigationOnClickListener({ finish() })
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (mViewModel.isPostEditable()) menuInflater.inflate(R.menu.story_menu_editable, menu)
+        else menuInflater.inflate(R.menu.story_menu_not_editable, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.share -> mViewModel.onShareClick(this)
+            R.id.edit -> mViewModel.onEditClick(this, mViewModel.liveData.value?.storyTree?.rootStory()
+                    ?: return true)
+        }
+        return true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mViewModel.onDestroy()
+    }
+
+    private fun setFullscreenProgress(isShown: Boolean) {
+        if (isShown) {
+            mAppBar.setViewGone()
+            mSwipeToRefresh.setViewGone()
+            mFab.setViewGone()
+            mProgressBar.setViewVisible()
+        } else {
+            mAppBar.setViewVisible()
+            mSwipeToRefresh.setViewVisible()
+            if (mViewModel.canUserWriteComments()) mFab.setViewVisible()
+            mProgressBar.setViewGone()
+        }
     }
 
 
@@ -357,12 +507,14 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         private val PERMLINK_TAG = "PERMLINK_TAG"
         private val FEED_TYPE = "FEED_TYPE"
         private val STORY_FILTER = "STORY_FILTER"
+        private val SCROLL_TO_COMMENTS = "SCROLL_TO_COMMENTS"
         fun start(ctx: Context,
                   author: String,
                   blog: String?,
                   permlink: String,
                   feedType: FeedType,
-                  filter: StoryFilter?) {
+                  filter: StoryFilter?,
+                  scrollToComments: Boolean = false) {
 
             val intent = Intent(ctx, StoryActivity::class.java)
             intent.putExtra(AUTHOR_TAG, author)
@@ -370,6 +522,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             intent.putExtra(PERMLINK_TAG, permlink)
             intent.putExtra(FEED_TYPE, feedType)
             intent.putExtra(STORY_FILTER, mapper.writeValueAsString(filter))
+            intent.putExtra(SCROLL_TO_COMMENTS, scrollToComments)
             ctx.startActivity(intent)
         }
     }

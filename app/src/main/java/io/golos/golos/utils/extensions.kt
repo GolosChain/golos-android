@@ -10,6 +10,8 @@ import android.database.Cursor
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
+import android.os.Looper
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.annotation.LayoutRes
@@ -24,12 +26,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
+import io.golos.golos.BuildConfig
 import io.golos.golos.R
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -43,18 +50,26 @@ object Counter {
 public fun Any.nextInt() = Counter.counter.incrementAndGet()
 
 fun Cursor.getString(columnName: String): String? {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return null
     return this.getString(this.getColumnIndex(columnName))
 }
 
 fun Cursor.getLong(columnName: String): Long {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return 0L
     return this.getLong(this.getColumnIndex(columnName))
 }
 
 fun Cursor.getBool(columnName: String): Boolean {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return false
     return this.getInt(this.getColumnIndex(columnName)) > 0
 }
 
 fun Cursor.getInt(columnName: String): Int {
+    val columnNumber = this.getColumnIndex(columnName)
+    if (columnNumber < 0) return 0
     return this.getInt(this.getColumnIndex(columnName))
 }
 
@@ -83,12 +98,15 @@ fun TextView.setTextColorCompat(@ColorRes colorId: Int) {
 fun Activity.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(this, coloId)
 }
+
 fun Fragment.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(activity!!, coloId)
 }
+
 fun View.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(context!!, coloId)
 }
+
 fun Fragment.showProgressDialog(): ProgressDialog {
     val dialog = ProgressDialog(context, R.style.AppCompatAlertDialogStyle)
     dialog.isIndeterminate = true
@@ -126,7 +144,7 @@ fun Context.hideKeyboard(currentFocus: View) {
     imm.hideSoftInputFromWindow(currentFocus.windowToken, 0)
 }
 
-fun SearchView.setTextColorHint(@ColorRes coloId: Int){
+fun SearchView.setTextColorHint(@ColorRes coloId: Int) {
     try {
         (this.findViewById<EditText>(android.support.v7.appcompat.R.id.search_src_text) as EditText)
                 .setHintTextColor(this.getColorCompat(R.color.text_color_white_black))
@@ -193,7 +211,7 @@ fun View.showSnackbar(message: String) {
 }
 
 fun View.setViewGone() {
-    if (this.visibility != View.GONE) visibility = View.GONE
+    if (this.visibility != View.GONE) this.visibility = View.GONE
 }
 
 fun View.setViewVisible() {
@@ -209,7 +227,7 @@ fun View.hideKeyboard() {
 fun View.showKeyboard() {
     requestFocus()
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    imm.showSoftInputFromInputMethod(windowToken, 0)
 }
 
 fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {
@@ -246,6 +264,41 @@ fun <E> List<out E>.toArrayList(): ArrayList<E> {
     return ArrayList(this)
 }
 
+fun File.sizeInKb(): Long {
+    return length() / 1024
+}
 
 
 public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0
+
+
+public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
+    val b = Bundle()
+    pairs.forEach {
+        val second = it.second
+        when (second) {
+            is Short -> b.putShort(it.first, second)
+            is Int -> b.putInt(it.first, second)
+            is Long -> b.putLong(it.first, second)
+            is String -> b.putString(it.first, second)
+            is ArrayList<*> -> {
+                if (second.isNotEmpty() && second[0] !is String) {
+                    throw IllegalArgumentException("only arraylist of strings supported")
+                } else {
+                    b.putStringArrayList(it.first, second as java.util.ArrayList<String>)
+                }
+            }
+            else -> throw IllegalArgumentException("unsupported")
+        }
+    }
+    return b
+}
+
+public fun TextView.setVectorDrawableStart(id: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(this.getVectorDrawable(id), null, null, null)
+}
+
+fun isOnMainThread(): Boolean {
+    if (BuildConfig.DEBUG) return true
+    return (Looper.getMainLooper() == Looper.myLooper())
+}

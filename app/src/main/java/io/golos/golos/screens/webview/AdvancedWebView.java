@@ -563,7 +563,7 @@ public class AdvancedWebView extends WebView {
                             match.getBlog(),
                             match.getPermlink(),
                             FeedType.UNCLASSIFIED,
-                            null);
+                            null,false);
                 }
             }
 

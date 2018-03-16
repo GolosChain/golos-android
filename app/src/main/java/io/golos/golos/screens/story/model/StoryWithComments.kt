@@ -16,7 +16,16 @@ data class StoryWrapper(
         @JsonProperty("story")
         val story: GolosDiscussionItem,
         @JsonProperty("updatingState")
-        var updatingState: UpdatingState)
+        var updatingState: UpdatingState,
+        @JsonProperty("isStoryEditable")
+        var isStoryEditable: Boolean = false,
+        @JsonProperty("asHtmlString")
+        var asHtmlString: CharSequence? = null) {
+
+    fun copyChangingUpdatingState(newState: UpdatingState): StoryWrapper {
+        return StoryWrapper(story, newState, isStoryEditable, asHtmlString)
+    }
+}
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {
@@ -52,8 +61,17 @@ class StoryWithComments(rootStory: StoryWrapper?,
         return mRootStoryWrapper
     }
 
-    fun commentsWithState(): List<StoryWrapper> {
+    fun commentsWithState(): ArrayList<StoryWrapper> {
         return mCommentsWithState
+    }
+
+    fun setUpLevels() {
+        setUpLevels(0, mRootStoryWrapper?.story?.children ?: return)
+    }
+
+    private fun setUpLevels(currentDepth: Int, stories: List<StoryWrapper>) {
+        stories.forEach { it.story.level = currentDepth }
+        stories.map { it.story.children }.forEach { setUpLevels(currentDepth + 1, it) }
     }
 
     constructor(discussionWithComments: DiscussionWithComments) : this(null, ArrayList()) {
@@ -67,13 +85,13 @@ class StoryWithComments(rootStory: StoryWrapper?,
                     discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
                 }
             }
-            if (rootStories == null) throw IllegalStateException("not found root story")
+            if (rootStories == null) throw IllegalStateException("root story not found")
             mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
                     .involvedAccounts
                     .find { it.name.name == rootStories!!.author.name }!!),
                     UpdatingState.DONE)
             discussionWithComments.discussions.removeAll { it.permlink.link == rootStories!!.permlink.link }
-            var firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
+            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
             discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
             val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
 
@@ -116,6 +134,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
     }
 
     fun getFlataned(): List<StoryWrapper> {
+        setUpLevels()
         return mCommentsWithState.flatMap { listOf(it) + getChildren(it) }
     }
 
@@ -150,7 +169,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
 
     fun deepCopy(): StoryWithComments {
         val rootWrapper = if (mRootStoryWrapper != null) {
-            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState)
+            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState, mRootStoryWrapper!!.isStoryEditable)
         } else null
         return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
     }

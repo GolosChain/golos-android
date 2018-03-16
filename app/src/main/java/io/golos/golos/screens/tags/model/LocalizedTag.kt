@@ -13,7 +13,7 @@ class LocalizedTag(val tag: Tag) : Comparable<LocalizedTag>, Parcelable {
 
     init {
         mLocalizedName = if (tag.name.startsWith("ru--"))
-            Translit.lat2Ru(tag.name.removePrefix("ru--"))
+            Translit.lat2Ru(tag.name.substring(4))
         else tag.name
     }
 
@@ -54,8 +54,8 @@ class LocalizedTag(val tag: Tag) : Comparable<LocalizedTag>, Parcelable {
 
     companion object {
 
-        fun convertToLocalizedName(tagName: String) : String {
-           return if (tagName.startsWith("ru--")) Translit.lat2Ru(tagName.substring(4)) else tagName
+        fun convertToLocalizedName(tagName: String): String {
+            return if (tagName.startsWith("ru--")) Translit.lat2Ru(tagName.substring(4)) else tagName
         }
 
         @JvmField

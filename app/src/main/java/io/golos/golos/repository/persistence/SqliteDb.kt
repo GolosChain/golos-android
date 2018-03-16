@@ -14,7 +14,7 @@ import io.golos.golos.utils.*
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 3
+private val dbVersion = 4
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
 
@@ -28,12 +28,21 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+
         db?.execSQL(TagsTable.createTableString)
         db?.execSQL(AvatarsTable.createTableString)
         db?.execSQL(UserFilterTable.createTableString)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
         db?.execSQL(DiscussionItemsTable.createTableString)
+        if (oldVersion == 3) {
+            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
+        }
+        if (newVersion == 4 && oldVersion != 4) {
+            DiscussionItemsTable.deleteAll(db ?: return)
+            VotesTable.deleteAll(db)
+            db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
+        }
     }
 
     fun saveAvatar(avatar: UserAvatar) {
@@ -88,17 +97,28 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         StoriesRequestsTable.save(storiesIds, writableDatabase)
     }
 
+
     fun getStories(): Map<StoryRequest, StoriesFeed> {
+
         val storiesIds = StoriesRequestsTable.get(writableDatabase)
+
+        val votes = VotesTable.getAll(writableDatabase)
         return storiesIds
                 .groupBy { it }
                 .mapValues {
-                    StoriesFeed(DiscussionItemsTable.get(it.key.storyIds, VotesTable, AvatarsTable, writableDatabase)
+                    StoriesFeed(DiscussionItemsTable.get(it.key.storyIds, AvatarsTable, writableDatabase)
                             .map { StoryWithComments(StoryWrapper(it, UpdatingState.DONE), arrayListOf()) }.toArrayList(),
                             it.key.request.feedType,
                             it.key.request.filter,
                             null)
                 }
+                .onEach {
+                    it.value.items.forEach {
+                        val rt = it.rootStory()
+                        rt?.activeVotes?.addAll(votes[rt.id]?: arrayListOf())
+                    }
+                }
+
                 .mapKeys { it.key.request }
     }
 
@@ -204,33 +224,35 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
 
     private object DiscussionItemsTable {
-        private val databaseName = "discussion_item_table"
-        private val url = "url"
-        private val title = "title"
-        private val id = "id"
-        private val categoryName = "categoryName"
-        private val tags = "tags"
-        private val images = "images"
-        private val links = "links"
-        private val votesNum = "votesNum"
-        private val votesRshares = "votesRshares"
-        private val commentsCount = "commentsCount"
-        private val permlink = "permlink"
-        private val gbgAmount = "gbgAmount"
-        private val body = "body"
-        private val author = "author"
-        private val format = "format"
-        private val parentPermlink = "parentPermlink"
-        private val level = "level"
-        private val gbgCostInDollars = "gbgCostInDollars"
-        private val reputation = "reputation"
-        private val lastUpdated = "lastUpdated"
-        private val created = "created"
-        private val isUserUpvotedOnThis = "isUserUpvotedOnThis"
-        private val type = "type"
-        private val firstRebloggedBy = "firstRebloggedBy"
-        private val cleanedFromImages = "cleanedFromImages"
-        private val childrenCount = "childrenCount"
+        const val databaseName = "discussion_item_table"
+        private const val url = "url"
+        private const val title = "title"
+        private const val id = "id"
+        private const val categoryName = "categoryName"
+        private const val tags = "tags"
+        private const val images = "images"
+        private const val links = "links"
+        private const val votesNum = "votesNum"
+        private const val votesRshares = "votesRshares"
+        private const val commentsCount = "commentsCount"
+        private const val permlink = "permlink"
+        private const val gbgAmount = "gbgAmount"
+        private const val body = "body"
+        private const val author = "author"
+        private const val format = "format"
+        private const val parentPermlink = "parentPermlink"
+        private const val level = "level"
+        private const val gbgCostInDollars = "gbgCostInDollars"
+        private const val reputation = "reputation"
+        private const val lastUpdated = "lastUpdated"
+        private const val created = "created"
+        private const val isUserUpvotedOnThis = "isUserUpvotedOnThis"
+        private const val type = "type"
+        private const val firstRebloggedBy = "firstRebloggedBy"
+        private const val cleanedFromImages = "cleanedFromImages"
+        private const val childrenCount = "childrenCount"
+        const val bodyLength = "bodyLength"
+        const val parentAuthor = "parentAuthor"
 
 
         val createTableString = "create table if not exists $databaseName ( $id integer primary key ," +
@@ -239,7 +261,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +
                 "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
                 "$created integer, $isUserUpvotedOnThis integer, $type text, $firstRebloggedBy text," +
-                "$cleanedFromImages text, $childrenCount integer)"
+                "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text)"
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
@@ -269,14 +291,20 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.reputation, it.reputation)
                 values.put(this.lastUpdated, it.lastUpdated)
                 values.put(this.created, it.created)
-                values.put(this.isUserUpvotedOnThis, it.isUserUpvotedOnThis)
+                values.put(this.isUserUpvotedOnThis, when {
+                    it.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED -> 1
+                    it.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED -> -1
+                    else -> 0
+                })
                 values.put(this.type, it.type.name)
+                values.put(this.bodyLength, it.bodyLength)
                 values.put(this.firstRebloggedBy, it.firstRebloggedBy)
                 values.put(this.cleanedFromImages, it.cleanedFromImages)
                 values.put(this.childrenCount, it.childrenCount)
                 values.put(this.votesNum, it.votesNum)
                 values.put(this.votesRshares, it.votesRshares)
                 values.put(this.commentsCount, it.commentsCount)
+                values.put(this.parentAuthor, it.parentAuthor)
 
                 voteTable.save(it.activeVotes, it.id, db)
 
@@ -291,33 +319,37 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
 
         fun get(ids: List<Long>,
-                voteTable: VotesTable,
                 avatarTable: AvatarsTable,
                 db: SQLiteDatabase): List<GolosDiscussionItem> {
             if (ids.isEmpty()) return listOf()
 
             val workingIds = if (ids.size > 100) ids.subList(0, 100) else ids
 
-            val idBuilder = StringBuilder("( ")
-            workingIds.forEachIndexed { index, item ->
-                if (index != workingIds.lastIndex)
-                    idBuilder.append(" $id = $item or ")
-                else idBuilder.append("$id = $item ) ")
-            }
-            val cursor = db.rawQuery("select * from $databaseName where $idBuilder", null)
+            val cursor = db.rawQuery("select * from $databaseName where $id in ${ids.joinToString(prefix = "(", postfix = ")")}", null)
             val out = ArrayList<GolosDiscussionItem>(cursor.count)
 
             if (cursor.count != 0) {
                 cursor.moveToFirst()
                 val temp = ArrayList<GolosDiscussionItem>(cursor.count)
                 val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+
+
+
                 while (!cursor.isAfterLast) {
-                    val tags = mapper.readValue<List<String>>(cursor.getString(tags) ?: "", stringListType).toArrayList()
-                    val images = mapper.readValue<List<String>>(cursor.getString(images) ?: "", stringListType).toArrayList()
-                    val links = mapper.readValue<List<String>>(cursor.getString(links) ?: "", stringListType).toArrayList()
+
+                    var start = System.currentTimeMillis()
+
+                    val tags = mapper.readValue<List<String>>(cursor.getString(tags)
+                            ?: "", stringListType).toArrayList()
+                    val images = mapper.readValue<List<String>>(cursor.getString(images)
+                            ?: "", stringListType).toArrayList()
+                    val links = mapper.readValue<List<String>>(cursor.getString(links)
+                            ?: "", stringListType).toArrayList()
+
+
                     val format = cursor.getString(format)
                     val itemType = cursor.getString(type)
-
+                    val voteType = cursor.getInt(isUserUpvotedOnThis)
                     val discussionItem = GolosDiscussionItem(cursor.getString(url) ?: "",
                             cursor.getLong(id),
                             cursor.getString(title) ?: "",
@@ -331,29 +363,32 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(permlink) ?: "",
                             cursor.getDouble(gbgAmount),
                             cursor.getString(body) ?: "",
+                            cursor.getLong(bodyLength),
                             cursor.getString(author) ?: "",
-                            if (format != null) Format.valueOf(format) else Format.HTML,
+                            if (format != null) GolosDiscussionItem.Format.valueOf(format) else GolosDiscussionItem.Format.HTML,
                             null,
                             arrayListOf(),
                             cursor.getString(parentPermlink) ?: "",
+                            cursor.getString(parentAuthor) ?: "",
                             cursor.getInt(childrenCount),
                             cursor.getInt(level),
                             cursor.getDouble(gbgCostInDollars),
                             cursor.getLong(reputation),
                             cursor.getLong(lastUpdated),
                             cursor.getLong(created),
-                            cursor.getBool(isUserUpvotedOnThis),
+                            when {
+                                voteType > 0 -> GolosDiscussionItem.UserVoteType.VOTED
+                                voteType < 0 -> GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                                else -> GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
+                            },
                             arrayListOf(),
-                            if (itemType != null) ItemType.valueOf(itemType) else ItemType.PLAIN,
+                            if (itemType != null) GolosDiscussionItem.ItemType.valueOf(itemType) else GolosDiscussionItem.ItemType.PLAIN,
                             cursor.getString(firstRebloggedBy) ?: "",
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
 
-                    //   discussionItem.parts = rowsParser.parse(discussionItem)
                     discussionItem.avatarPath = avatarTable.get(discussionItem.author, db)?.avatarPath
-                    discussionItem.activeVotes.addAll(voteTable.get(discussionItem.id, db))
                     temp.add(discussionItem)
-
                     cursor.moveToNext()
                 }
                 workingIds.forEach { id ->
@@ -368,6 +403,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         fun deleteAll(db: SQLiteDatabase) {
             db.delete(databaseName, null, null)
         }
+
     }
 
     private object StoriesRequestsTable {
@@ -450,6 +486,31 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getLong(rshares),
                             cursor.getInt(percent)
                     ))
+                    cursor.moveToNext()
+                }
+            }
+            cursor.close()
+            return out
+        }
+
+        fun getAll(db: SQLiteDatabase): Map<Long, List<VoteLight>> {
+
+            val statement = "select * from $databaseName"
+            val cursor = db.rawQuery(statement, null)
+            val out = HashMap<Long, ArrayList<VoteLight>>(100)
+
+            if (cursor.count != 0) {
+                cursor.moveToFirst()
+                while (!cursor.isAfterLast) {
+                    val vote = VoteLight(
+                            cursor.getString(userName) ?: "",
+                            cursor.getLong(rshares),
+                            cursor.getInt(percent)
+                    )
+                    val id = cursor.getLong(storyId)
+                    if (!out.containsKey(id)) out[id] = ArrayList(100)
+                    out[id]?.add(vote)
+
                     cursor.moveToNext()
                 }
             }
