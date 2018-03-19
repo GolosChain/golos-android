@@ -5,19 +5,38 @@ import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.App
 
-/**
- * Created by yuri on 05.02.18.
- */
+
 internal class UserSettingsImpl : UserSettingsRepository {
     private val sharedPrefName = "UserSettings"
     private val mCompactLiveData = MutableLiveData<Boolean>()
     private val mShowImageLiveData = MutableLiveData<Boolean>()
     private val mShowNSFWLiveData = MutableLiveData<Boolean>()
+    private val mCurrencyLiveData = MutableLiveData<UserSettingsRepository.GolosCurrency>()
 
-    fun setUp(context: Context) {
-        mCompactLiveData.value = context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
-        mShowImageLiveData.value = context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isShown", true)
-        mShowNSFWLiveData.value = context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("showNsfw", false)
+    override fun setUp(ctx: Context) {
+        mCompactLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
+        mShowImageLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isShown", true)
+        mShowNSFWLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("showNsfw", false)
+
+        val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)
+
+        if (currencyString != null) {
+            mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.valueOf(currencyString)
+        } else {
+            mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.DOLL
+        }
+
+    }
+
+    override fun setCurrency(currency: UserSettingsRepository.GolosCurrency) {
+        if (currency != mCurrencyLiveData.value) {
+            mCurrencyLiveData.value = currency
+        }
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putString("goloscurrency", currency.name).apply()
+    }
+
+    override fun getCurrency(): LiveData<UserSettingsRepository.GolosCurrency> {
+        return mCurrencyLiveData
     }
 
     override fun setStoriesCompactMode(isCompact: Boolean) {

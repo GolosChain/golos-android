@@ -12,7 +12,7 @@ import eu.bittrade.libs.steemj.base.models.Discussion;
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
-import io.golos.golos.repository.model.GolosDiscussionItem;
+import io.golos.golos.repository.model.DiscussionItemFactory;
 import io.golos.golos.screens.story.model.StoryWithComments;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import io.golos.golos.utils.UpdatingState;
@@ -42,11 +42,13 @@ public class Utils {
         ResponseWrapperDTO wrapperDTO = mapper.readValue(f, ResponseWrapperDTO.class);
         JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, Discussion.class);
         List<Discussion> discussions = mapper.convertValue(wrapperDTO.getResult(), type);
+        final DiscussionItemFactory factory = DiscussionItemFactory.INSTANCE;
         final List<StoryWithComments> stories = new ArrayList();
+
         discussions.forEach(new Consumer<Discussion>() {
             @Override
             public void accept(Discussion discussion) {
-                stories.add(new StoryWithComments(new StoryWrapper(new GolosDiscussionItem(discussion, null),
+                stories.add(new StoryWithComments(new StoryWrapper(factory.create(discussion, null),
                         UpdatingState.DONE, false, ""),
                         new ArrayList()
                 ));

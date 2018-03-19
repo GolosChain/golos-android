@@ -50,8 +50,8 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
                 if (intent.hasExtra(STORY_ID_TAG)) intent.getLongExtra(STORY_ID_TAG, 0L) else null,
                 type,
                 object : StringSupplier {
-                    override fun get(id: Int): String {
-                        return getString(id)
+                    override fun get(resId: Int, args: String?): String {
+                        return getString(resId, args)
                     }
                 },
                 object : InternetStatusNotifier {
@@ -80,7 +80,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         }
 
         mProgress.setViewGone()
-        if (t.users.isNotEmpty()){
+        if (t.users.isNotEmpty()) {
             mRecycler.setViewVisible()
             mNothigHereLabel.setViewGone()
         } else {
@@ -100,9 +100,9 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
     }
 
     companion object {
-        private val USERNAME_TAG = "USERNAME_TAG"
-        private val TYPE_TAG = "TYPE_TAG"
-        private val STORY_ID_TAG = "STORY_ID_TAG"
+        private const val USERNAME_TAG = "USERNAME_TAG"
+        private const val TYPE_TAG = "TYPE_TAG"
+        private const val STORY_ID_TAG = "STORY_ID_TAG"
         fun startForSubscribersOrSubscriptions(ctx: Context,
                                                userNameFor: String,
                                                listType: ListType) {

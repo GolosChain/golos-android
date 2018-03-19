@@ -9,6 +9,7 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.safety.Whitelist
+import java.util.*
 
 data class TextRow(val text: String) : Row() {
 }
@@ -22,6 +23,8 @@ object StoryParserToRows {
 
         val out = ArrayList<Row>()
         if (story.body.isEmpty()) return out
+        if (story.body.matches(Regexps.anyImageLink)) return Collections.singletonList(ImageRow(story.body))
+
         var str = story.body
         str = str.replace("<center>", "").replace("</center>", "")
         if (story.format == GolosDiscussionItem.Format.MARKDOWN || str.contains(markdownChecker)) {

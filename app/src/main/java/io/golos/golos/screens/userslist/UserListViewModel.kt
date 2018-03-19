@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.UserBlogSubscription
 import io.golos.golos.repository.model.UserObject
 import io.golos.golos.screens.profile.ProfileActivity
@@ -58,8 +59,11 @@ class UserListViewModel : ViewModel() {
         }
         mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
 
-        mTitle = mStringSupplier.get(if (mListType == ListType.SUBSCRIPTIONS) R.string.subscriptions
-        else if (mListType == ListType.SUBSCRIBERS) R.string.subscribers else R.string.voted)
+        mTitle = mStringSupplier.get(when (mListType) {
+            ListType.SUBSCRIPTIONS -> R.string.subscriptions
+            ListType.SUBSCRIBERS -> R.string.subscribers
+            else -> R.string.voted
+        }, null)
 
         if (mListType == ListType.SUBSCRIPTIONS || mListType == ListType.SUBSCRIBERS) {
             if (userName == null) {
@@ -80,12 +84,14 @@ class UserListViewModel : ViewModel() {
                                     it.name,
                                     it.avatar,
                                     null,
-                                    mCurrentUsersubscriptions.find { it.user.name == currentWorkingItem.name }?.status ?: SubscribeStatus.UnsubscribedStatus)
+                                    mCurrentUsersubscriptions.find { it.user.name == currentWorkingItem.name }?.status
+                                            ?: SubscribeStatus.UnsubscribedStatus)
                         } ?: ArrayList(), null)
             })
             val handler: (List<UserObject>, GolosError?) -> Unit = { _, e ->
                 e?.let {
-                    mLiveData.value = UserListViewState(mTitle, mLiveData.value?.users ?: ArrayList(), it)
+                    mLiveData.value = UserListViewState(mTitle, mLiveData.value?.users
+                            ?: ArrayList(), it)
                 }
             }
             if (mListType == ListType.SUBSCRIBERS) mRepository.requestSubscribersUpdate(userName, handler)
@@ -101,13 +107,29 @@ class UserListViewModel : ViewModel() {
                     mLiveData.value = null
                     return@addSource
                 }
+                val exchangeValues = mRepository.getExchangeLiveData().value
+
+                val chosenCurrency = mRepository.userSettingsRepository.getCurrency().value
+                        ?: UserSettingsRepository.GolosCurrency.DOLL
+
                 mLiveData.value = UserListViewState(mTitle, it.map {
                     val currentVotingObject = it
-                    val excheangeCourse = mRepository.getExchangeLiveData()
+                    val gbgCost = it.gbgValue.toFloat()
+                    val outString = if (exchangeValues == null) {
+                        mStringSupplier.get(R.string.gbg_format, String.format("%.3f", gbgCost))
+                    } else when (chosenCurrency) {
+                        UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, String.format("%.3f", gbgCost
+                                * exchangeValues.rublesPerGbg))
+                        UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, String.format("%.3f", gbgCost))
+                        else -> mStringSupplier.get(R.string.dollars_format, String.format("%.3f", gbgCost
+                                * exchangeValues.dollarsPerGbg))
+
+                    }
                     UserListRowData(it.name,
                             it.avatar,
-                            "$ ${String.format("%.3f", it.gbgValue * (excheangeCourse.value?.dollarsPerGbg ?: 1.0))}",
-                            mCurrentUsersubscriptions.find { it.user.name == currentVotingObject.name }?.status ?: SubscribeStatus.UnsubscribedStatus)
+                            outString,
+                            mCurrentUsersubscriptions.find { it.user.name == currentVotingObject.name }?.status
+                                    ?: SubscribeStatus.UnsubscribedStatus)
                 }
                         , null)
             })
@@ -145,7 +167,8 @@ class UserListViewModel : ViewModel() {
 
         } else {
             val handler: (Unit, GolosError?) -> Unit = { _, e ->
-                if (e != null) mLiveData.value = UserListViewState(mTitle, mLiveData.value?.users ?: ArrayList(), e)
+                if (e != null) mLiveData.value = UserListViewState(mTitle, mLiveData.value?.users
+                        ?: ArrayList(), e)
             }
             if (it.subscribeStatus.isCurrentUserSubscribed) Repository.get.unSubscribeOnUserBlog(it.name, handler)
             else Repository.get.subscribeOnUserBlog(it.name, handler)

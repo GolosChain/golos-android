@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.golos.golos.R
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeCompactViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeFullViewHolder
@@ -19,12 +20,14 @@ import java.util.concurrent.Executors
 
 data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
-                            val nswfStrategy: NSFWStrategy)
+                            val nswfStrategy: NSFWStrategy,
+                            val shownCurrency:UserSettingsRepository.GolosCurrency)
 
 
 data class StripeWrapper(val stripe: StoryWithComments,
                          val isImagesShown: Boolean,
-                         val nswfStrategy: NSFWStrategy)
+                         val nswfStrategy: NSFWStrategy,
+                         val feedCellSettings: FeedCellSettings)
 
 class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickListener,
                              private var onCommentsClick: StoryWithCommentsClickListener,
@@ -70,7 +73,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                 mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
                 notifyDataSetChanged()
                 mStripes.forEach {
-                    mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                    mItemsMap[it.rootStory()?.id ?: 0L] = it.hashCode()
                 }
             }
 
@@ -99,14 +102,14 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                                     || mStripes.lastIndex < oldItemPosition
                                     || newItems.size < newItemPosition) return false
                             val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                            return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
+                            return oldHash == newItems[newItemPosition].storyWithState()?.hashCode()
                         }
                     })
                     handler.post {
                         result.dispatchUpdatesTo(this)
                         mStripes = ArrayList(newItems)
                         mStripes.forEach {
-                            mItemsMap.put(it.rootStory()?.id ?: 0L, it.rootStory()?.hashCode() ?: 0)
+                            mItemsMap[it.rootStory()?.id ?: 0L] = it.storyWithState()?.hashCode() ?: 0
                         }
                     }
                 } catch (e: Exception) {
@@ -192,10 +195,11 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
     }
 
     override fun onBindViewHolder(holder: StoriesViewHolder, position: Int) {
-        holder?.let {
+        holder.let {
             val wrapper = StripeWrapper(mStripes[position],
                     feedCellSettings.isImagesShown,
-                    feedCellSettings.nswfStrategy)
+                    feedCellSettings.nswfStrategy,
+                    feedCellSettings)
             it.state = wrapper
         }
     }

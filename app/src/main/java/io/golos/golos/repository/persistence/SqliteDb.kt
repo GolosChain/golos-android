@@ -287,7 +287,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.format, it.format.name)
                 values.put(this.parentPermlink, it.parentPermlink)
                 values.put(this.level, it.level)
-                values.put(this.gbgCostInDollars, it.gbgCostInDollars)
                 values.put(this.reputation, it.reputation)
                 values.put(this.lastUpdated, it.lastUpdated)
                 values.put(this.created, it.created)
@@ -372,7 +371,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(parentAuthor) ?: "",
                             cursor.getInt(childrenCount),
                             cursor.getInt(level),
-                            cursor.getDouble(gbgCostInDollars),
                             cursor.getLong(reputation),
                             cursor.getLong(lastUpdated),
                             cursor.getLong(created),

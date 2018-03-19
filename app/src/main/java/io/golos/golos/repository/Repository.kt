@@ -15,6 +15,7 @@ import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
@@ -112,9 +113,9 @@ abstract class Repository {
 
     abstract fun lastCreatedPost(): LiveData<CreatePostResult>
 
-    abstract fun vote(comment: GolosDiscussionItem, percents: Short)
+    abstract fun vote(comment: StoryWrapper, percents: Short)
 
-    abstract fun cancelVote(comment: GolosDiscussionItem)
+    abstract fun cancelVote(comment: StoryWrapper)
 
     abstract fun requestStoryUpdate(story: StoryWithComments,
                                     completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
@@ -127,13 +128,13 @@ abstract class Repository {
                             resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     abstract fun editPost(title: String, content: List<EditorPart>, tags: List<String>,
-                          originalPost: GolosDiscussionItem,
+                          originalPost: StoryWrapper,
                           resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
-    abstract fun createComment(toItem: GolosDiscussionItem, content: List<EditorPart>,
+    abstract fun createComment(toItem: StoryWrapper, content: List<EditorPart>,
                                resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
-    abstract fun editComment(originalComment: GolosDiscussionItem,
+    abstract fun editComment(originalComment: StoryWrapper,
                              content: List<EditorPart>,
                              resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
@@ -171,7 +172,7 @@ abstract class Repository {
 
     open fun getExchangeLiveData(): LiveData<ExchangeValues> {
         val liveData = MutableLiveData<ExchangeValues>()
-        liveData.value = ExchangeValues(00.04106528)
+        liveData.value = ExchangeValues(00.04106528f, 00.04106528f * 56)
         return liveData
     }
 

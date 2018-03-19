@@ -13,6 +13,7 @@ import android.widget.Toast
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
@@ -56,6 +57,7 @@ class SettingActivity : GolosActivity() {
         setUpCompactMode()
         setUpNoImagesMode()
         setUpNSFWMode()
+        setUpCurrency()
 
     }
 
@@ -84,6 +86,31 @@ class SettingActivity : GolosActivity() {
                     finish()
                     startActivity(i)
                 }
+            }
+        }
+    }
+
+    private fun setUpCurrency() {
+        val spinner = findViewById<Spinner>(R.id.currency_spinner)
+        spinner.adapter = CurrencySpinnerAdapter(this)
+        spinner.setSelection(when (Repository.get.userSettingsRepository.getCurrency().value) {
+            UserSettingsRepository.GolosCurrency.DOLL -> 1
+            UserSettingsRepository.GolosCurrency.RUB -> 0
+            UserSettingsRepository.GolosCurrency.GBG -> 2
+            else -> 0
+        })
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val currency = when (p2) {
+                    0 -> UserSettingsRepository.GolosCurrency.RUB
+                    1 -> UserSettingsRepository.GolosCurrency.DOLL
+                    2 -> UserSettingsRepository.GolosCurrency.GBG
+                    else -> UserSettingsRepository.GolosCurrency.DOLL
+                }
+               Repository.get.userSettingsRepository.setCurrency(currency)
             }
         }
     }

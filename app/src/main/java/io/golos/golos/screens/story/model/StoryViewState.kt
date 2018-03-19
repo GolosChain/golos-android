@@ -1,6 +1,7 @@
 package io.golos.golos.screens.story.model
 
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.utils.GolosError
 
 /**

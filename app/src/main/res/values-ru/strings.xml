@@ -148,8 +148,17 @@
     <string name="edit">Редактировать</string>
     <string name="you_may_comment_only_tw_sec">Вы можете комментировать только раз в 20 секунд</string>
     <string name="maximum_comment_depth">Достигнута максимальная глубина дерева коментирования</string>
+    <string name="currency">Выберите валюту</string>
+    <string name="rubles_format">₽%s</string>
+    <string name="dollars_format">$%s</string>
+    <string name="gbg_format">GBG%s</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
+    </string-array>
+    <string-array name="currency">
+        <item>Рубль</item>
+        <item>Доллар</item>
+        <item>GBG</item>
     </string-array>
 </resources>

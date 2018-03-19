@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.mapper
@@ -29,9 +30,7 @@ import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
-import io.golos.golos.utils.getColorCompat
-import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.showSnackbar
+import io.golos.golos.utils.*
 
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
@@ -127,7 +126,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
                         ?: FeedCellSettings(true,
                                 true,
-                                NSFWStrategy(true, Pair(false, ""))))
+                                NSFWStrategy(true, Pair(false, "")), UserSettingsRepository.GolosCurrency.DOLL))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -154,12 +153,11 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
         mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
 
-        val observer = Observer<FeedCellSettings> { _ ->
-            mAdapter.feedCellSettings = mViewModel?.cellViewSettingLiveData?.value ?: FeedCellSettings(true,
+        val observer = Observer<FeedCellSettings> { it ->
+            mAdapter.feedCellSettings = it ?: FeedCellSettings(true,
                     true,
-                    NSFWStrategy(true, Pair(false, "")))
+                    NSFWStrategy(true, Pair(false, "")), UserSettingsRepository.GolosCurrency.DOLL)
         }
-
         mViewModel?.cellViewSettingLiveData?.observe(activity as LifecycleOwner, observer)
     }
 
@@ -178,8 +176,20 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (t?.items != null) {
             mRecycler?.post { mAdapter.setStripesCustom(t.items) }
         }
-        mRefreshLo?.visibility = if (t?.showRefreshButton == true) View.VISIBLE else View.GONE
-        mRefreshButton?.visibility = if (t?.showRefreshButton == true) View.VISIBLE else View.GONE
+
+        if (t?.showRefreshButton == true) {
+            mRefreshLo?.setViewVisible()
+            mRefreshButton?.setViewVisible()
+            if (mSwipeRefresh?.paddingTop == 0) {
+                mSwipeRefresh?.setPadding(0, resources.getDimension(R.dimen.refresh_lo_height).toInt(), 0, 0)
+            }
+        } else {
+            mRefreshLo?.setViewGone()
+            mRefreshButton?.setViewGone()
+            if (mSwipeRefresh?.paddingTop != 0) {
+                mSwipeRefresh?.setPadding(0, 0, 0, 0)
+            }
+        }
 
         if (isVisible) {
             t?.error?.let {

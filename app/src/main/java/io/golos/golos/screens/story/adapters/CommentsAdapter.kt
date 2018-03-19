@@ -24,6 +24,7 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 data class CommentHolderState(val comment: StoryWrapper,
@@ -45,6 +46,7 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onEditClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
 
 
+    private val mHashes: HashMap<Long, Int> = HashMap()
     var items = ArrayList<StoryWrapper>()
         set(value) {
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -55,10 +57,15 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                 override fun getOldListSize() = field.size
                 override fun getNewListSize() = value.size
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
+                    val oldItem = items[oldItemPosition].story
+                    val oldHashCode = if (mHashes.containsKey(oldItem.id)) mHashes[oldItem.id] else 0
+                    return oldHashCode == value[newItemPosition].hashCode()
                 }
             }).dispatchUpdatesTo(this)
             field = value
+            field.forEach {
+                mHashes[it.story.id] = it.hashCode()
+            }
         }
 
     override fun getItemCount(): Int {
@@ -184,7 +191,7 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                     val daysAgo = hoursAgo / 24
                     mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
                 }
-                mUpvoteBtn.text = "$ ${String.format("%.3f", comment.payoutInDollars)}"
+                mUpvoteBtn.text = calculateShownReward(state!!.comment, ctx = itemView.context)
 
                 if (comment.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))

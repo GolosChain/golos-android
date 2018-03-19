@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentActivity
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.ProfileActivity
@@ -53,8 +54,8 @@ object StoriesModelFactory {
             else -> throw IllegalStateException(" $type is unsupported")
         }
         if ((viewModel is FeedViewModel
-                || viewModel is CommentsViewModel
-                || viewModel is BlogViewModel) && filter == null) {
+                        || viewModel is CommentsViewModel
+                        || viewModel is BlogViewModel) && filter == null) {
         } else {
             viewModel.onCreate(object : InternetStatusNotifier {
                 override fun isAppOnline(): Boolean {
@@ -172,9 +173,15 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             mObserver = Observer {
                 mFeedSettingsLiveData.value = getFeedModeSettings()
             }
-            Repository.get.userSettingsRepository.isStoriesCompactMode().observeForever(mObserver ?: return)
-            Repository.get.userSettingsRepository.isImagesShown().observeForever(mObserver ?: return)
+            Repository.get.userSettingsRepository.isStoriesCompactMode().observeForever(mObserver
+                    ?: return)
+            Repository.get.userSettingsRepository.isImagesShown().observeForever(mObserver
+                    ?: return)
             Repository.get.userSettingsRepository.isNSFWShow().observeForever(mObserver ?: return)
+
+            Repository.get.userSettingsRepository.getCurrency().observeForever {
+                mFeedSettingsLiveData.value = getFeedModeSettings()
+            }
         }
     }
 
@@ -206,7 +213,6 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
 
-
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         this.isVisibleToUser = isVisibleToUser
         if (visibleToUser) {
@@ -225,7 +231,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
-    protected fun setAppOffline() {
+    private fun setAppOffline() {
         mStoriesLiveData.value = StoriesViewState(false,
                 mStoriesLiveData.value?.showRefreshButton == true,
                 mStoriesLiveData.value?.items ?: ArrayList(),
@@ -234,10 +240,13 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                         R.string.no_internet_connection))
     }
 
-    private fun getFeedModeSettings() = FeedCellSettings( Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
+    private fun getFeedModeSettings() = FeedCellSettings(Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
             Repository.get.userSettingsRepository.isImagesShown().value == true,
-            NSFWStrategy( Repository.get.userSettingsRepository.isNSFWShow().value == true,
-                    Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName ?: "")))
+            NSFWStrategy(Repository.get.userSettingsRepository.isNSFWShow().value == true,
+                    Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName
+                            ?: "")),
+            Repository.get.userSettingsRepository.getCurrency().value
+                    ?: UserSettingsRepository.GolosCurrency.DOLL)
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {
@@ -296,7 +305,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (mRepository.isUserLoggedIn()) {
-            val story = it.rootStory() ?: return
+            val story = it.storyWithState() ?: return
             mRepository.vote(story, vote)
         } else {
             mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
@@ -313,7 +322,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (mRepository.isUserLoggedIn()) {
-            val story = it.rootStory() ?: return
+            val story = it.storyWithState() ?: return
             mRepository.cancelVote(story)
         } else {
             mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
@@ -362,8 +371,10 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     fun onDestroy() {
         mRepository.getStories(type, filter).removeObserver(this)
         if (mObserver != null) {
-            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver ?: return)
-            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver ?: return)
+            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
+                    ?: return)
+            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver
+                    ?: return)
             Repository.get.userSettingsRepository.isNSFWShow().removeObserver(mObserver ?: return)
             mObserver = null
         }

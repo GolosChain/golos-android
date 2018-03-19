@@ -151,7 +151,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 if (adapter.itemCount != ets.size) {
                     adapter.items = ArrayList(ets)
-                    Timber.e("size not matches")
                 }
                 if (mAvatar.drawable == null) {
                     mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
@@ -326,12 +325,12 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         isScrollEventFired = true
                     }
                 }
-
-                val payout = String.format("$%.3f", story.payoutInDollars)
-                if (payout != mMoneyBtn.text) {
-                    mMoneyBtn.text = payout
-                }
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
+
+                mMoneyBtn.text = calculateShownReward(it.storyTree.storyWithState()
+                        ?: return@Observer,
+                        ctx = this)
+
             } else {
                 setFullscreenProgress(true)
             }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/stories_root"
     android:layout_width="match_parent"
@@ -9,10 +9,10 @@
 
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh"
+
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/refresh_lo">
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler"
@@ -34,12 +34,12 @@
     <FrameLayout
         android:id="@+id/refresh_lo"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/refresh_lo_height"
+        android:animateLayoutChanges="true"
         android:background="@color/colorAccent"
         android:gravity="center"
         android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="gone">
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/refresh_btn"
@@ -54,5 +54,4 @@
             android:textColor="@android:color/white"
             app:backgroundTint="@color/blue_dark" />
     </FrameLayout>
-
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>

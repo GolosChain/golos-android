@@ -22,11 +22,7 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
-/**
- * Created by yuri on 06.11.17.
- */
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
     @VisibleForTesting
@@ -122,7 +118,7 @@ class StoryViewModel : ViewModel() {
                     SubscribeStatus(tagItem != null, UpdatingState.DONE)
             )
         })
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, _ -> }
     }
 
 
@@ -164,13 +160,13 @@ class StoryViewModel : ViewModel() {
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
         if (story.updatingState == UpdatingState.UPDATING) return
-        if (percent == 0.toShort()) mRepository.cancelVote(story.story)
+        if (percent == 0.toShort()) mRepository.cancelVote(story)
         else {
             if (story.story.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
                     && percent < 0) {
-                mRepository.vote(story.story, 0)
+                mRepository.vote(story, 0)
             } else {
-                mRepository.vote(story.story, percent)
+                mRepository.vote(story, percent)
             }
 
         }
@@ -238,15 +234,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onTagClick(context: Context, text: String?) {
-        var text = text
-        var feedType: FeedType = feedType
-        if (feedType == FeedType.BLOG
-                || feedType == FeedType.COMMENTS
-                || feedType == FeedType.PERSONAL_FEED
-                || feedType == FeedType.UNCLASSIFIED
-                || feedType == FeedType.PROMO) feedType = FeedType.NEW
-        if (text?.contains(Regex("[а-яА-Я]")) == true) text = "ru--" + Translit.ru2lat(text)
-        FilteredStoriesActivity.start(context, text ?: return)
+         FilteredStoriesActivity.start(context, text ?: return)
     }
 
     fun onShareClick(context: Context) {

@@ -36,6 +36,10 @@ import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
@@ -301,4 +305,24 @@ public fun TextView.setVectorDrawableStart(id: Int) {
 fun isOnMainThread(): Boolean {
     if (BuildConfig.DEBUG) return true
     return (Looper.getMainLooper() == Looper.myLooper())
+}
+
+fun calculateShownReward(wrapper: StoryWrapper,
+                         chosenCurrency: UserSettingsRepository.GolosCurrency = Repository.get.userSettingsRepository.getCurrency().value
+                                 ?: UserSettingsRepository.GolosCurrency.DOLL,
+                         ctx: Context): String {
+    val gbgCost = wrapper.story.gbgAmount
+    val resources = ctx.resources
+    val exchangeValues = wrapper.exchangeValues
+    if (exchangeValues == ExchangeValues.nullValues) {
+        return resources.getString(R.string.gbg_format, String.format("%0.3f", gbgCost))
+    } else {
+        return when (chosenCurrency) {
+            UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, String.format("%.3f", gbgCost
+                    * exchangeValues.rublesPerGbg))
+            UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, String.format("%.3f", gbgCost))
+            else -> resources.getString(R.string.dollars_format, String.format("%.3f", gbgCost
+                    * exchangeValues.dollarsPerGbg))
+        }
+    }
 }

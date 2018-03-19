@@ -47,7 +47,6 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     var parentAuthor: String,
                                                     var childrenCount: Int,
                                                     var level: Int = 0,
-                                                    var gbgCostInDollars: Double = 0.04106528,
                                                     val reputation: Long,
                                                     val lastUpdated: Long,
                                                     val created: Long,
@@ -58,9 +57,6 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     var cleanedFromImages: String,
                                                     var parts: ArrayList<Row> = ArrayList()) : Cloneable {
 
-
-    val payoutInDollars: Double
-        get() = gbgAmount * gbgCostInDollars
 
     val isRootStory: Boolean
         get() = tags.contains(parentPermlink)
@@ -211,7 +207,6 @@ data class GolosDiscussionItem internal constructor(val url: String,
         if (parentPermlink != other.parentPermlink) return false
         if (childrenCount != other.childrenCount) return false
         if (level != other.level) return false
-        if (gbgCostInDollars != other.gbgCostInDollars) return false
         if (reputation != other.reputation) return false
         if (lastUpdated != other.lastUpdated) return false
         if (created != other.created) return false
@@ -236,7 +231,6 @@ data class GolosDiscussionItem internal constructor(val url: String,
         result = 31 * result + parentPermlink.hashCode()
         result = 31 * result + childrenCount
         result = 31 * result + level
-        result = 31 * result + gbgCostInDollars.hashCode()
         result = 31 * result + reputation.hashCode()
         result = 31 * result + lastUpdated.hashCode()
         result = 31 * result + created.hashCode()

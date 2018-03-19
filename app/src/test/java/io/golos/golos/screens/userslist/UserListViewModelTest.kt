@@ -103,9 +103,10 @@ class UserListViewModelTest {
         }
         Assert.assertNull(status)
         mViewModel.onCreate(null, story.id, ListType.VOTERS, object : StringSupplier {
-            override fun get(id: Int): String {
+            override fun get(id: Int, vararg arguments: String): String {
                 return "stub"
             }
+
         }, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true

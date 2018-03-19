@@ -6,6 +6,7 @@ import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import io.golos.golos.repository.model.DiscussionItemFactory
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.UpdatingState
 
@@ -17,15 +18,12 @@ data class StoryWrapper(
         val story: GolosDiscussionItem,
         @JsonProperty("updatingState")
         var updatingState: UpdatingState,
+        @JsonProperty("exchangeValues")
+        var exchangeValues: ExchangeValues = ExchangeValues.nullValues,
         @JsonProperty("isStoryEditable")
         var isStoryEditable: Boolean = false,
         @JsonProperty("asHtmlString")
-        var asHtmlString: CharSequence? = null) {
-
-    fun copyChangingUpdatingState(newState: UpdatingState): StoryWrapper {
-        return StoryWrapper(story, newState, isStoryEditable, asHtmlString)
-    }
-}
+        var asHtmlString: CharSequence? = null)
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {
@@ -169,7 +167,11 @@ class StoryWithComments(rootStory: StoryWrapper?,
 
     fun deepCopy(): StoryWithComments {
         val rootWrapper = if (mRootStoryWrapper != null) {
-            StoryWrapper(mRootStoryWrapper!!.story.copy(), mRootStoryWrapper!!.updatingState, mRootStoryWrapper!!.isStoryEditable)
+            StoryWrapper(mRootStoryWrapper!!.story.copy(),
+                    mRootStoryWrapper!!.updatingState,
+                    mRootStoryWrapper!!.exchangeValues,
+                    mRootStoryWrapper!!.isStoryEditable,
+                    mRootStoryWrapper!!.asHtmlString)
         } else null
         return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
     }

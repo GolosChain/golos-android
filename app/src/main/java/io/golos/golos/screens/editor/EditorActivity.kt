@@ -150,8 +150,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringSupplier {
-                    override fun get(id: Int): String {
-                        return getString(id)
+                    override fun get(resId: Int, args: String?): String {
+                        return getString(resId, args)
                     }
                 }),
                 ArrayList(),

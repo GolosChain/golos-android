@@ -1,5 +1,6 @@
 package io.golos.golos
 
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
@@ -118,6 +119,16 @@ class StoryParserTests {
         Assert.assertTrue((rows[5] as ImageRow).src == "http://storage1.static.itmages.ru/i/17/1226/h_1514289332_9104582_07de855c1c.jpg")
 
         Assert.assertTrue(rows[7] is ImageRow)
-        Assert.assertTrue((rows[3] as ImageRow).src == "http://storage1.static.itmages.ru/i/17/0923/h_1506198219_3111825_717fa89727.jpg")
+        Assert.assertTrue((rows[7] as ImageRow).src == "http://storage1.static.itmages.ru/i/17/0923/h_1506198219_3111825_717fa89727.jpg")
     }
+
+    @Test
+    fun testStories7(){
+        val stories = Utils.readStoriesFromResourse("stripe7.json")
+        Assert.assertTrue(stories.size > 1)
+        Assert.assertTrue(stories[2].rootStory()!!.type == GolosDiscussionItem.ItemType.IMAGE_FIRST)
+        Assert.assertTrue(stories[3].rootStory()!!.type == GolosDiscussionItem.ItemType.IMAGE_FIRST)
+
+    }
+
 }

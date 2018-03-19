@@ -6,12 +6,8 @@ import android.arch.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoriesFeed
-import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
@@ -40,7 +36,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     private val mTextProcessor = TextProcessor
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
-    private var mWorkingItem: GolosDiscussionItem? = null
+    private var mWorkingItem: StoryWrapper? = null
     private var wasSent = false
     var mode: EditorMode? = null
         set(value) {
@@ -75,9 +71,9 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
         mRootStory = t.items.findLast { it.rootStory()?.id == mode?.rootStoryId }
         mRootStory?.let {
-            mWorkingItem = if (it.rootStory()?.id == mode?.workingItemId) it.rootStory()!!
+            mWorkingItem = if (it.rootStory()?.id == mode?.workingItemId) it.storyWithState()!!
             else {
-                it.getFlataned().findLast { it.story.id == mode?.workingItemId }?.story
+                it.getFlataned().findLast { it.story.id == mode?.workingItemId }
             }
         }
         val editorType = mode?.editorType ?: return
@@ -90,7 +86,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 }
             })
         } else if (editorType == EditorActivity.EditorType.EDIT_POST || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
-            mWorkingItem?.let {
+            mWorkingItem?.story?.let {
                 var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it) else it.parts)
                         .map {
                             when (it) {
@@ -210,7 +206,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 mRepository.editPost(editorLiveData.value?.title ?: return,
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
-                        mRootStory?.rootStory() ?: return, listener)
+                        mRootStory?.storyWithState() ?: return, listener)
             }
         } else if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
 

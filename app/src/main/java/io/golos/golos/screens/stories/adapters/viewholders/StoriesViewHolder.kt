@@ -10,12 +10,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
+import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.lang.StringBuilder
 
 /**
@@ -63,8 +64,26 @@ abstract class StoriesViewHolder(resId: Int,
         } else {
             getTitleTv().text = ""
         }
-        getUpvoteText().text = "$${String.format("%.3f", story.payoutInDollars)}"
+        val gbgCost = story.gbgAmount
+        val resources = itemView.resources
+        val exchangeValues = newState.stripe.storyWithState()?.exchangeValues
+                ?: ExchangeValues.nullValues
+        if (exchangeValues == ExchangeValues.nullValues) {
+            getUpvoteText().text = resources.getString(R.string.gbg_format, String.format("%0.3f", gbgCost))
+        } else {
+            getUpvoteText().text = when (newState.feedCellSettings.shownCurrency) {
+                UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, String.format("%.3f", gbgCost
+                        * exchangeValues.rublesPerGbg))
+                UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, String.format("%.3f", gbgCost))
+                else -> resources.getString(R.string.dollars_format, String.format("%.3f", gbgCost
+                        * exchangeValues.dollarsPerGbg))
+            }
+        }
         getCommentsTv().text = story.commentsCount.toString()
+        getUpvoteText().text = calculateShownReward(newState.stripe.storyWithState() ?: return,
+                newState.feedCellSettings.shownCurrency,
+                itemView.context)
+
     }
 
     protected abstract fun getMainImage(): ImageView
