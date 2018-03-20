@@ -2,18 +2,19 @@ package io.golos.golos
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.content.Context
 import io.golos.golos.repository.UserSettingsRepository
 
 /**
  * Created by yuri on 05.03.18.
  */
-object MockUserSettings : UserSettingsRepository{
+object MockUserSettings : UserSettingsRepository {
     override fun setStoriesCompactMode(isCompact: Boolean) {
 
     }
 
     override fun isStoriesCompactMode(): LiveData<Boolean> {
-       return MutableLiveData<Boolean>()
+        return MutableLiveData<Boolean>()
     }
 
     override fun isNSFWShow(): LiveData<Boolean> {
@@ -29,7 +30,7 @@ object MockUserSettings : UserSettingsRepository{
     }
 
     override fun isUserVotedForApp(): Boolean {
-       return true
+        return true
     }
 
     override fun setVoteQuestionMade(isMade: Boolean) {
@@ -53,6 +54,20 @@ object MockUserSettings : UserSettingsRepository{
     }
 
     override fun isNightMode(): Boolean {
-       return false
+        return false
+    }
+
+    override fun setCurrency(currency: UserSettingsRepository.GolosCurrency) {
+
+    }
+
+    override fun getCurrency(): LiveData<UserSettingsRepository.GolosCurrency> {
+        val out = MutableLiveData<UserSettingsRepository.GolosCurrency>()
+        out.value = UserSettingsRepository.GolosCurrency.USD
+        return out
+    }
+
+    override fun setUp(ctx: Context) {
+
     }
 }

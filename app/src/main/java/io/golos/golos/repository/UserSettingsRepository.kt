@@ -24,6 +24,6 @@ interface UserSettingsRepository {
     fun setUp(ctx: Context)
 
     enum class GolosCurrency {
-        DOLL, RUB, GBG
+        USD, RUB, GBG
     }
 }

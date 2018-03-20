@@ -110,7 +110,7 @@ class UserListViewModel : ViewModel() {
                 val exchangeValues = mRepository.getExchangeLiveData().value
 
                 val chosenCurrency = mRepository.userSettingsRepository.getCurrency().value
-                        ?: UserSettingsRepository.GolosCurrency.DOLL
+                        ?: UserSettingsRepository.GolosCurrency.USD
 
                 mLiveData.value = UserListViewState(mTitle, it.map {
                     val currentVotingObject = it

@@ -13,6 +13,7 @@ import eu.bittrade.libs.steemj.base.models.DiscussionWithComments;
 import eu.bittrade.libs.steemj.communication.CommunicationHandler;
 import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.repository.model.DiscussionItemFactory;
+import io.golos.golos.repository.model.ExchangeValues;
 import io.golos.golos.screens.story.model.StoryWithComments;
 import io.golos.golos.screens.story.model.StoryWrapper;
 import io.golos.golos.utils.UpdatingState;
@@ -49,7 +50,7 @@ public class Utils {
             @Override
             public void accept(Discussion discussion) {
                 stories.add(new StoryWithComments(new StoryWrapper(factory.create(discussion, null),
-                        UpdatingState.DONE, false, ""),
+                        UpdatingState.DONE, ExchangeValues.getNullValues(), false, ""),
                         new ArrayList()
                 ));
             }

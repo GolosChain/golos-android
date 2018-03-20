@@ -246,7 +246,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                     Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName
                             ?: "")),
             Repository.get.userSettingsRepository.getCurrency().value
-                    ?: UserSettingsRepository.GolosCurrency.DOLL)
+                    ?: UserSettingsRepository.GolosCurrency.USD)
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {

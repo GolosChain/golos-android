@@ -23,7 +23,7 @@ internal class UserSettingsImpl : UserSettingsRepository {
         if (currencyString != null) {
             mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.valueOf(currencyString)
         } else {
-            mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.DOLL
+            mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.USD
         }
 
     }

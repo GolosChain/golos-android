@@ -74,7 +74,7 @@ class BlogViewModleTest {
         Assert.assertEquals(null, state!!.fullscreenMessage)
         Assert.assertEquals(null, state!!.popupMessage)
         Assert.assertEquals(20, state!!.items.size)
-        repo.cancelVote(state!!.items[3].rootStory()!!)
+        repo.cancelVote(state!!.items[3].storyWithState()!!)
 
         Assert.assertTrue(state!!.items[3].rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         storyViewModel.vote(state!!.items[3], 100)

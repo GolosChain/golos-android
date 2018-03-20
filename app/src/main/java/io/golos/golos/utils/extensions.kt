@@ -309,7 +309,7 @@ fun isOnMainThread(): Boolean {
 
 fun calculateShownReward(wrapper: StoryWrapper,
                          chosenCurrency: UserSettingsRepository.GolosCurrency = Repository.get.userSettingsRepository.getCurrency().value
-                                 ?: UserSettingsRepository.GolosCurrency.DOLL,
+                                 ?: UserSettingsRepository.GolosCurrency.USD,
                          ctx: Context): String {
     val gbgCost = wrapper.story.gbgAmount
     val resources = ctx.resources

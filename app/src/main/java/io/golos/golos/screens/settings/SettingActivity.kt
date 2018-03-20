@@ -94,7 +94,7 @@ class SettingActivity : GolosActivity() {
         val spinner = findViewById<Spinner>(R.id.currency_spinner)
         spinner.adapter = CurrencySpinnerAdapter(this)
         spinner.setSelection(when (Repository.get.userSettingsRepository.getCurrency().value) {
-            UserSettingsRepository.GolosCurrency.DOLL -> 1
+            UserSettingsRepository.GolosCurrency.USD -> 1
             UserSettingsRepository.GolosCurrency.RUB -> 0
             UserSettingsRepository.GolosCurrency.GBG -> 2
             else -> 0
@@ -106,9 +106,9 @@ class SettingActivity : GolosActivity() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val currency = when (p2) {
                     0 -> UserSettingsRepository.GolosCurrency.RUB
-                    1 -> UserSettingsRepository.GolosCurrency.DOLL
+                    1 -> UserSettingsRepository.GolosCurrency.USD
                     2 -> UserSettingsRepository.GolosCurrency.GBG
-                    else -> UserSettingsRepository.GolosCurrency.DOLL
+                    else -> UserSettingsRepository.GolosCurrency.USD
                 }
                Repository.get.userSettingsRepository.setCurrency(currency)
             }

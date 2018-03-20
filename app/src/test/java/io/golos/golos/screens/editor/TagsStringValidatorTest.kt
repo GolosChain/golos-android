@@ -16,7 +16,7 @@ class TagsStringValidatorTest {
     @Test
     fun validate() {
         val validator = TagsStringValidator(object : StringSupplier {
-            override fun get(id: Int): String {
+            override fun get(id: Int, args: String?): String {
                 return when (id) {
                     R.string.use_only_one_dash -> use_only_one_dash
                     R.string.to_much_tags -> to_much_tags
