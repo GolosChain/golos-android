@@ -70,7 +70,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                 mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
                 notifyDataSetChanged()
                 mStripes.forEach {
-                    mItemsMap.put(it.rootStory()?.id ?: 0L, it.hashCode())
+                    mItemsMap[it.rootStory()?.id ?: 0L] = it.hashCode()
                 }
             }
 
@@ -99,14 +99,14 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                                     || mStripes.lastIndex < oldItemPosition
                                     || newItems.size < newItemPosition) return false
                             val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                            return oldHash == newItems[newItemPosition].rootStory()?.hashCode()
+                            return oldHash == newItems[newItemPosition].storyWithState()?.hashCode()
                         }
                     })
                     handler.post {
                         result.dispatchUpdatesTo(this)
                         mStripes = ArrayList(newItems)
                         mStripes.forEach {
-                            mItemsMap.put(it.rootStory()?.id ?: 0L, it.rootStory()?.hashCode() ?: 0)
+                            mItemsMap[it.rootStory()?.id ?: 0L] = it.storyWithState()?.hashCode() ?: 0
                         }
                     }
                 } catch (e: Exception) {
