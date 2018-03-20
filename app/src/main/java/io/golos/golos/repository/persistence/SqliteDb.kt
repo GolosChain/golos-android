@@ -35,10 +35,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
         db?.execSQL(DiscussionItemsTable.createTableString)
+
         if (oldVersion == 3) {
             db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
-        }
-        if (newVersion == 4 && oldVersion != 4) {
             DiscussionItemsTable.deleteAll(db ?: return)
             VotesTable.deleteAll(db)
             db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
