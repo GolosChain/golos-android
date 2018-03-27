@@ -192,12 +192,7 @@ class ApiImplTest {
         service.getAccountData("yuri-vlad-second")
     }
 
-    @Test
-    fun testGetAvatar() {
-        val avatar = service.getUserAvatar("masterokst", "stoit-li-smotret-legendu-o-kolovrate", "ru----kino")
-        Assert.assertNull(avatar)
-        service.getUserAvatar("compress", "predchuvstvie-revolyucii-mirovogo-masshtaba", "ru----apvot50--50")
-    }
+
 
     @Test
     fun filteredStoriesTest() {

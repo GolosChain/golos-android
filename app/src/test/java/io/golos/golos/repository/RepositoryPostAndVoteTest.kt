@@ -23,11 +23,10 @@ import org.junit.Test
 import java.util.*
 import java.util.concurrent.Executor
 
-/**
- * Created by yuri on 23.11.17.
- */
+
 class RepositoryPostAndVoteTest {
     val userName = "yuri-vlad-second"
+    //  val userName = "yuri-vlad"
     val publicActive = "GLS7feysP2A87x4uNwn68q13rF3bchD6AKhJWf4CmPWjqQF8vCb5G"
     val privateActive = "5K7YbhJZqGnw3hYzsmH5HbDixWP5ByCBdnJxM5uoe9LuMX5rcZV"
     val publicPosting = "GLS75PefYywHJtG1cDtd4JoF7NRMT7tJig69zn1YytFdbsDHatLju"
@@ -57,6 +56,7 @@ class RepositoryPostAndVoteTest {
                 },
                 mNotificationsRepository = NotificationsRepository(executor, MockPersister)
         )
+        //  repo.authWithMasterKey("yuri-vlad", masterKey = "P5JPwfpSsi6fw7fXUeokW8aNudvadpF8aYXZSnZ8oLvLgxfqoWQZ", listener = { _ -> })
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
     }
 
@@ -81,6 +81,7 @@ class RepositoryPostAndVoteTest {
 
     @Test
     fun createPost() {
+
         val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
                 pointerPosition = null)
         repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", "test content", pointerPosition = null),
@@ -93,7 +94,7 @@ class RepositoryPostAndVoteTest {
         repo.getStories(FeedType.BLOG, StoryFilter(null, userName)).observeForever {
             blog = it
         }
-        assertNull(blog)
+
         repo.requestStoriesListUpdate(20, FeedType.BLOG, StoryFilter(null, userName))
         assertNotNull(blog)
         val newBody = UUID.randomUUID().toString()

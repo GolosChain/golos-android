@@ -1,20 +1,13 @@
 package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
-import io.golos.golos.App
-import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.Tag
-import io.golos.golos.repository.model.UserAuthResponse
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import java.io.File
 
-/**
- * Created by yuri on 20.11.17.
- */
+
 abstract class GolosApi {
 
     companion object {
@@ -23,17 +16,14 @@ abstract class GolosApi {
             @Synchronized
             get() {
                 if (instance == null) {
-                   instance = ApiImpl()
+                    instance = ApiImpl()
                 }
                 return instance!!
             }
     }
 
-    abstract fun getUserAvatar(username: String, permlink: String?, blog: String?): String?
 
     abstract fun getUserAvatars(names: List<String>): Map<String, String?>
-
-    abstract fun getUserFeed(userName: String, type: FeedType, limit: Int, truncateBody: Int, startAuthor: String?, startPermlink: String?): List<StoryWithComments>
 
     abstract fun getStory(blog: String,
                           author: String,
@@ -56,6 +46,7 @@ abstract class GolosApi {
 
     abstract fun sendPost(sendFromAccount: String, title: String, content: String,
                           tags: Array<String>): CreatePostResult
+
     abstract fun editPost(originalComentPermlink: String, sendFromAccount: String, title: String,
                           content: String,
                           tags: Array<String>): CreatePostResult
@@ -65,12 +56,14 @@ abstract class GolosApi {
                              permlinkOfItemToReply: String,
                              content: String,
                              categoryName: String): CreatePostResult
+
     abstract fun editComment(sendFromAccount: String,
                              authorOfItemToReply: String,
                              permlinkOfItemToReply: String,
                              originalComentPermlink: String,
                              content: String,
                              categoryName: String): CreatePostResult
+
     abstract fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject>
 
     abstract fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject>

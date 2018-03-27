@@ -23,73 +23,38 @@ import java.io.File
 
 internal class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
-    override fun getUserAvatar(username: String, permlink: String?, blog: String?): String? {
-        return if (permlink != null && blog != null) mGolosApi.databaseMethods.getAccountAvatar(blog, AccountName(username), Permlink(permlink))
-        else mGolosApi.databaseMethods.getAccountAvatar(AccountName(username))
-    }
 
-    override fun getUserFeed(userName: String,
-                             type: FeedType,
-                             limit: Int,
-                             truncateBody: Int,
-                             startAuthor: String?, startPermlink: String?): List<StoryWithComments> {
-        var discussionSortType =
-                when (type) {
-                    FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
-                    FeedType.BLOG -> DiscussionSortType.GET_DISCUSSIONS_BY_BLOG
-                    FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
-                    else -> throw IllegalArgumentException("use getStories( for $type type of feed")
-                }
 
-        val query = DiscussionQuery()
-        query.limit = limit
-        query.truncateBody = truncateBody
-        if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
-        else if (startAuthor == null && (type == FeedType.COMMENTS)) query.startAuthor = AccountName(userName)
-
-        if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
-        query.selectAuthors = listOf(AccountName(userName))
-        val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
-        val out = ArrayList<StoryWithComments>()
-        discussions.forEach {
-            if (it != null) {
-                val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
-                out.add(story)
-            }
-        }
-        return out
-    }
-
-    override fun getStory(blog: String, author: String,
+    override fun getStory(blog: String,
+                          author: String,
                           permlink: String,
                           accountDataHandler: (List<AccountInfo>) -> Unit): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink))
-        var story = StoryWithComments(rawStory)
+        val story = StoryWithComments(rawStory!!)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story
     }
 
     override fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments {
-        val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
+        return StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
                 mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
                 null), UpdatingState.DONE), ArrayList())
-        return story
     }
 
     override fun getUserAvatars(names: List<String>): Map<String, String?> {
         val out = HashMap<String, String?>()
-        val extendedAccs = mGolosApi.databaseMethods.getAccounts(names.map { AccountName(it) })
-        extendedAccs.forEach {
-            out[it?.name?.name ?: ""] = it?.avatarPath
+        names.forEach {
+            out[it] = null
         }
-        return out
+
+        return mGolosApi.databaseMethods.getAccountAvatar(names.map { AccountName(it) }) ?: out
     }
 
     override fun getStories(limit: Int, type: FeedType,
                             truncateBody: Int, filter: StoryFilter?,
                             startAuthor: String?,
                             startPermlink: String?): List<StoryWithComments> {
-        var discussionSortType =
+        val discussionSortType =
                 when (type) {
                     FeedType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
                     FeedType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
@@ -261,8 +226,8 @@ internal class ApiImpl : GolosApi() {
             followingCount = followObject.followingCount.toLong()
         }
 
-        var postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
-        var activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+        val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+        val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
 
         return AccountInfo(acc.name.name,
                 acc.moto,
@@ -308,8 +273,7 @@ internal class ApiImpl : GolosApi() {
 
     override fun sendPost(sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
         val result = mGolosApi.simplifiedOperations.createPost(AccountName(sendFromAccount), title, content, tags)
-        return CreatePostResult(true, result.author.name, result.getTags().first()
-                ?: "", result.permlink.link)
+        return CreatePostResult(true, result.author.name, result.getTags().first(), result.permlink.link)
     }
 
     override fun editPost(originalComentPermlink: String, sendFromAccount: String, title: String, content: String, tags: Array<String>): CreatePostResult {
@@ -358,9 +322,11 @@ internal class ApiImpl : GolosApi() {
         return getSubscribesOrSubscribers(true, forUser, startFrom)
     }
 
+    @Suppress("NAME_SHADOWING")
     private fun getSubscribesOrSubscribers(isSubscribers: Boolean,
                                            forUser: String,
                                            startFrom: String?): List<FollowApiObject> {
+
         val forUser = AccountName(forUser)
         if (startFrom == null) {
             val followObject = Golos4J.getInstance().followApiMethods.getFollowCount(forUser)
@@ -390,7 +356,6 @@ internal class ApiImpl : GolosApi() {
                             new = new.subList(1, new.size)
                             frs = frs + new
                         }
-                val last = count - (99 * times)
                 var new = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
                         frs.last().follower,
                         FollowType.BLOG, 100)

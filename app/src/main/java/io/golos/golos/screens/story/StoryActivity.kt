@@ -149,9 +149,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 mStoryRecycler.setViewVisible()
                 val adapter = mStoryRecycler.adapter as StoryAdapter
 
-                if (adapter.itemCount != ets.size) {
-                    adapter.items = ArrayList(ets)
-                }
+                adapter.items = ArrayList(ets)
                 if (mAvatar.drawable == null) {
                     mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
 

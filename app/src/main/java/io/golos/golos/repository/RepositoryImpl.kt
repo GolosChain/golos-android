@@ -1276,7 +1276,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
 
         workerExecutor.execute {
-            item?.let {
+            item.let {
 
                 val avatars = getUserAvatarsFromDb(it.activeVotes.map { it.name })
                 val payouts = RSharesConverter.convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)

@@ -114,7 +114,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 .onEach {
                     it.value.items.forEach {
                         val rt = it.rootStory()
-                        rt?.activeVotes?.addAll(votes[rt.id]?: arrayListOf())
+                        rt?.activeVotes?.addAll(votes[rt.id] ?: arrayListOf())
                     }
                 }
 
@@ -172,7 +172,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         fun getAvatarsFromDb(db: SQLiteDatabase, usernames: List<String>): Map<String, UserAvatar?> {
             if (usernames.isEmpty()) return hashMapOf()
 
-            val users = usernames.distinct()
+            val users = usernames.distinct().filter { it.isNotEmpty() }
+            if (users.isEmpty()) return hashMapOf()
+
             val map = HashMap<String, UserAvatar?>(users.size)
 
             val numberOfLists = users.size / 500 + 1
