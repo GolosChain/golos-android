@@ -1,5 +1,7 @@
 package io.golos.golos.screens.profile
 
+import android.animation.ObjectAnimator
+import android.animation.TypeEvaluator
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -11,10 +13,8 @@ import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.App
@@ -24,9 +24,7 @@ import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingActivity
-import io.golos.golos.utils.ImageUriResolver
-import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.showSnackbar
+import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 10.11.17.
@@ -47,6 +45,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mFollowProgress: View
     private lateinit var mSubscribersBtn: View
     private lateinit var mSubscriptionsBtn: View
+    private lateinit var mAvatarOverlay: View
+    private lateinit var mVotingPowerLo: View
+    private lateinit var mVotingPowerTv: TextView
+    private lateinit var mVotingPowerIndicator: ProgressBar
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -65,6 +67,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mFollowProgress = v.findViewById(R.id.progress)
         mSubscriptionsBtn = v.findViewById(R.id.subscriptions_lo)
         mSubscribersBtn = v.findViewById(R.id.subscribers_lo)
+        mAvatarOverlay = v.findViewById(R.id.avatar_overlay)
+        mVotingPowerLo = v.findViewById(R.id.voting_power_lo)
+        mVotingPowerTv = v.findViewById(R.id.voting_power_tv)
+        mVotingPowerIndicator = v.findViewById(R.id.voting_power_progress)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
@@ -82,6 +88,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val i = Intent(activity!!, SettingActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         })
+
+
         return v
     }
 
@@ -97,13 +105,53 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
                         }
                     })
             mSubscribersBtn.setOnClickListener {
-                mViewModel.onSubscriberClick(activity ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
+                mViewModel.onSubscriberClick(activity
+                        ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
             }
             mSubscriptionsBtn.setOnClickListener {
-                mViewModel.onSubscriptionsClick(activity ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
+                mViewModel.onSubscriptionsClick(activity
+                        ?: return@setOnClickListener, (arguments!!.getString(USERNAME_TAG)))
             }
         }
         mFollowBtn.setOnClickListener({ mViewModel.onFollowBtnClick() })
+        mSettingButton.visibility = if (mViewModel.isSettingButtonShown()) View.VISIBLE else View.GONE
+        mFollowBtn.visibility = if (mViewModel.isFollowButtonVisible()) View.VISIBLE else View.GONE
+
+
+        mUserAvatar.setOnClickListener {
+            mVotingPowerIndicator.progress = 0
+            mAvatarOverlay.setViewVisible()
+            mVotingPowerIndicator.setViewVisible()
+            mVotingPowerTv.text = ""
+            mVotingPowerLo.setViewVisible()
+            val votingPower: Double = (mViewModel.getLiveData().value?.accountInfo?.votingPower
+                    ?: 0) / 100.0
+
+            val delay = 300L
+            val duration = 600L
+
+            ObjectAnimator
+                    .ofInt(mVotingPowerIndicator, "progress", 0, votingPower.toInt())
+                    .setDuration(duration)
+                    .setStartDelayB(delay)
+                    .setInterpolatorB(AccelerateDecelerateInterpolator())
+                    .start()
+            ObjectAnimator
+                    .ofObject(TypeEvaluator<Float> { p0, _, p2 ->
+                        mVotingPowerTv.text = "${String.format("%.2f", p0 * p2)}%"
+                        p0
+                    },
+                            0.0f, votingPower.toFloat()).setDuration(duration)
+                    .setStartDelayB(delay)
+                    .setInterpolatorB(AccelerateDecelerateInterpolator())
+                    .start()
+
+        }
+        mVotingPowerIndicator.setOnClickListener {
+            mAvatarOverlay.setViewGone()
+            mVotingPowerIndicator.setViewGone()
+            mVotingPowerLo.setViewGone()
+        }
     }
 
     override fun onChanged(t: UserAccountModel?) {
@@ -113,7 +161,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         val glide = Glide.with(view ?: return)
         if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
-            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth =  mUserAvatar.width))
+            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth = mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)
@@ -121,7 +169,6 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
 
         if (it.isCurrentUserSubscribed) mFollowBtn.text = getString(R.string.unfollow)
         else mFollowBtn.text = getString(R.string.follow)
-        mSettingButton.visibility = if (t.isActiveUserPage) View.VISIBLE else View.GONE
         mFollowBtn.visibility = if (t.isFollowButtonVisible && !t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mFollowProgress.visibility = if (t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mMotoTv.text = it.userMotto
@@ -134,6 +181,12 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         t.error?.let {
             view?.showSnackbar(it.localizedMessage ?: 0)
         }
+        mUserAvatar.isClickable = mViewModel.canUserSeeVotingPower()
+    }
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        mViewModel.onUserVisibilityChange(isVisibleToUser)
     }
 
     companion object {

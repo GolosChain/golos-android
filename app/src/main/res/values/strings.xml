@@ -153,6 +153,7 @@
     <string name="rubles_format">₽%s</string>
     <string name="dollars_format">$%s</string>
     <string name="gbg_format">GBG%s</string>
+    <string name="voting_power">Voting power</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -8,7 +8,6 @@ import android.support.annotation.WorkerThread
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
-import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
@@ -360,14 +359,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
 
 
-                val accinfo = mGolosApi.getAccountData(userName)
+                val accinfo = mGolosApi.getAccountInfo(userName)
                 if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {//if we updating current user
                     mMainThreadExecutor.execute {
                         mAuthLiveData.value = UserData(true, accinfo.userMotto, accinfo.avatarPath,
                                 accinfo.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
-                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos)
+                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {
@@ -507,9 +506,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             } catch (e: Exception) {
                 logException(e)
-                if (e is SteemResponseError) {
-                    Timber.e(e.message)
-                }
+
                 mMainThreadExecutor.execute {
                     if (isFollow) {
                         mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value?.filter {
@@ -857,9 +854,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             } catch (e: Exception) {
                 logException(e)
-                if (e is SteemResponseError) {
-                    Timber.e(e.error?.steemErrorDetails?.toString())
-                }
+
                 mMainThreadExecutor.execute {
                     discussionItem.updatingState = UpdatingState.DONE
                     listOfList.forEach {
@@ -1104,9 +1099,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             } catch (e: Exception) {
                 logException(e)
-                if (e is SteemResponseError) {
-                    Timber.e(e.message)
-                }
+
                 mMainThreadExecutor.execute {
                     resultListener(null, GolosErrorParser.parse(e))
                 }

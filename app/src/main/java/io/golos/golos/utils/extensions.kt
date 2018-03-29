@@ -1,6 +1,8 @@
 package io.golos.golos.utils
 
 import android.animation.LayoutTransition
+import android.animation.TimeInterpolator
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
@@ -325,4 +327,14 @@ fun calculateShownReward(wrapper: StoryWrapper,
                     * exchangeValues.dollarsPerGbg))
         }
     }
+}
+
+fun ValueAnimator.setStartDelayB(delay: Long): ValueAnimator {
+    startDelay = delay
+    return this
+}
+
+fun ValueAnimator.setInterpolatorB(interpolator: TimeInterpolator): ValueAnimator {
+    this.interpolator = interpolator
+    return this
 }

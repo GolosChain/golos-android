@@ -36,7 +36,7 @@ abstract class GolosApi {
 
     abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
 
-    abstract fun getAccountData(of: String): AccountInfo
+    abstract fun getAccountInfo(of: String): AccountInfo
 
     abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
 

@@ -1,9 +1,12 @@
 package io.golos.golos
 
+import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.utils.Regexps
+import junit.framework.Assert.fail
 import org.junit.Assert
 import org.junit.Test
 
@@ -43,6 +46,7 @@ class StoryParserTests {
         Assert.assertTrue(rows[3] is ImageRow)
         Assert.assertTrue(rows[5] is ImageRow)
     }
+
     @Test
     fun test3() {
         val tree = Utils.readStoryFromResourse("story3.json")
@@ -56,6 +60,7 @@ class StoryParserTests {
         Assert.assertTrue(rows[1] is ImageRow)
         Assert.assertTrue(rows[5] is ImageRow)
     }
+
     @Test
     fun test4() {
         val tree = Utils.readStoryFromResourse("story7.json")
@@ -70,6 +75,7 @@ class StoryParserTests {
         rows = rowParser.parse(upvoteComment.story)
         //todo support clickable images
     }
+
     @Test
     fun test5() {
         val tree = Utils.readStoryFromResourse("story8.json")
@@ -87,13 +93,14 @@ class StoryParserTests {
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.blog/@arcange\">@arcange</a>"))
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017\">https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017</a>"))
 
-        val kitComments  = tree.getFlataned().find { it.story.author == "dobryj.kit" }!!
+        val kitComments = tree.getFlataned().find { it.story.author == "dobryj.kit" }!!
         rows = rowParser.parse(kitComments.story)
         Assert.assertTrue((rows[0] as TextRow).text.contains(" <a href=\"https://golos.io/@litrbooh\" rel=\"nofollow\">litrbooh</a>"))
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.io/@vika-teplo\" rel=\"nofollow\">vika-teplo</a>"))
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.blog/ru--delegaty/@dobryj.kit/dobryi-kit-delegat\" rel=\"nofollow\">"))
         println(rows)
     }
+
     @Test
     fun test9() {
         val tree = Utils.readStoryFromResourse("story9.json")
@@ -103,6 +110,7 @@ class StoryParserTests {
         Assert.assertTrue(rows[0] is ImageRow)
         Assert.assertTrue(rows[2] is ImageRow)
     }
+
     @Test
     fun test11() {
         val tree = Utils.readStoryFromResourse("story11.json")
@@ -123,12 +131,23 @@ class StoryParserTests {
     }
 
     @Test
-    fun testStories7(){
+    fun testStories7() {
         val stories = Utils.readStoriesFromResourse("stripe7.json")
         Assert.assertTrue(stories.size > 1)
         Assert.assertTrue(stories[2].rootStory()!!.type == GolosDiscussionItem.ItemType.IMAGE_FIRST)
         Assert.assertTrue(stories[3].rootStory()!!.type == GolosDiscussionItem.ItemType.IMAGE_FIRST)
 
+    }
+
+    @Test
+    fun nicksParseTest() {
+        val subscribers = GolosApi.get.getSubscribers("arcange", null)
+        println(subscribers.size)
+        subscribers
+                .map { "@${it.follower.name}" }
+                .forEach {
+            if (!it.matches(Regexps.userRegexp)) fail("regexps not matched $it")
+        }
     }
 
 }

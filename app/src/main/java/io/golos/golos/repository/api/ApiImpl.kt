@@ -111,7 +111,7 @@ internal class ApiImpl : GolosApi() {
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.enter_private_key),
                     accountInfo = AccountInfo(userName))
         }
-        val acc = getAccountData(userName)
+        val acc = getAccountInfo(userName)
         if (acc.activePublicKey.isEmpty()) return UserAuthResponse(false, null, null,
                 error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
                 accountInfo = AccountInfo(userName))
@@ -204,7 +204,7 @@ internal class ApiImpl : GolosApi() {
                 accountInfo = AccountInfo(username))
     }
 
-    override fun getAccountData(of: String): AccountInfo {
+    override fun getAccountInfo(of: String): AccountInfo {
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
         if (accs.size == 0 || accs[0] == null) return AccountInfo(of)
         return convertExtendedAccountToAccountInfo(accs[0], true)
@@ -242,7 +242,8 @@ internal class ApiImpl : GolosApi() {
                 safeGbg,
                 safeGolos,
                 postingPublicOuter,
-                activePublicOuter)
+                activePublicOuter,
+                votingPower = acc.votingPower)
     }
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {

@@ -54,4 +54,12 @@ class ProfileRootFragment : GolosFragment(), Observer<AuthState> {
             }
         }
     }
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        if (isAdded) {
+            val fragment = childFragmentManager.findFragmentByTag(mUserProfileFTag)
+            if (fragment?.isVisible == true) fragment.userVisibleHint = isVisibleToUser
+        }
+    }
 }

@@ -49,7 +49,7 @@ object StoryParserToRows {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            str = str.replace("(?<!/)(@[a-zA-Z.\\-]{3,16}[0-9]{0,6}){1}(?!(/))(?!(</a>))\\b".toRegex()) {
+            str = str.replace(Regexps.userRegexp) {
                 if (!it.value.contains("a href")) " <a href =\"https://golos.io/${it.value.trim()}\">${it.value.trim()}</a>"
                 else it.value
             }

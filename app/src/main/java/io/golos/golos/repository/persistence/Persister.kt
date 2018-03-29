@@ -195,7 +195,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         val copy = userData.clone() as UserData
         copy.privateActiveWif = null
         copy.privatePostingWif = null
-        mPreference.edit().putString("userdata", mapper.writeValueAsString(copy)).apply()
+        mPreference.edit().putString("userdata", mapper.writeValueAsString(copy)).commit()
     }
 
     override fun deleteUserData() {

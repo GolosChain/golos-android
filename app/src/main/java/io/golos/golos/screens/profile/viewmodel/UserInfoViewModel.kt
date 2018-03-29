@@ -32,10 +32,7 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
         mRepository
                 .getUserInfo(userName)
                 .observeForever(this)
-        mRepository.requestUserInfoUpdate(userName, { a, e ->
-            showError(e ?: return@requestUserInfoUpdate)
-        }
-        )
+
     }
 
     private fun showError(error: GolosError) {
@@ -48,10 +45,21 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
 
     private fun isActiveUserPage() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == userName
 
-    private fun isFollowButtonVisible() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName != userName
+    fun isSettingButtonShown() = isActiveUserPage()
+
+    fun canUserSeeVotingPower() = isActiveUserPage()
+
+    fun isFollowButtonVisible() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName != userName
 
     fun getLiveData(): LiveData<UserAccountModel> {
         return mLiveData
+    }
+
+    fun onUserVisibilityChange(isVisible: Boolean) {
+        if (isVisible) mRepository.requestUserInfoUpdate(userName, { _, e ->
+            showError(e ?: return@requestUserInfoUpdate)
+        }
+        )
     }
 
     override fun onChanged(t: AccountInfo?) {
@@ -74,9 +82,11 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
                     }
                 }
                 if (it.accountInfo.isCurrentUserSubscribed) {
-                    mRepository.unSubscribeOnUserBlog(it.accountInfo.userName ?: return@let, resultHandler)
+                    mRepository.unSubscribeOnUserBlog(it.accountInfo.userName
+                            ?: return@let, resultHandler)
                 } else {
-                    mRepository.subscribeOnUserBlog(it.accountInfo.userName ?: return@let, resultHandler)
+                    mRepository.subscribeOnUserBlog(it.accountInfo.userName
+                            ?: return@let, resultHandler)
                 }
             }
         } else {
@@ -85,10 +95,12 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
     }
 
     fun onSubscriberClick(ctx: Context, string: String?) {
-        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string ?: return, ListType.SUBSCRIBERS)
+        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string
+                ?: return, ListType.SUBSCRIBERS)
     }
 
     fun onSubscriptionsClick(ctx: Context, string: String?) {
-        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string ?: return, ListType.SUBSCRIPTIONS)
+        UsersListActivity.startForSubscribersOrSubscriptions(ctx, string
+                ?: return, ListType.SUBSCRIPTIONS)
     }
 }

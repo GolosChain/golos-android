@@ -17,4 +17,5 @@ data class AccountInfo(val userName: String?,
                        val safeGolos: Double = 0.0,
                        val postingPublicKey: String = "",
                        val activePublicKey: String = "",
-                       var isCurrentUserSubscribed: Boolean = false)
+                       var isCurrentUserSubscribed: Boolean = false,
+                       val votingPower: Int = 0)

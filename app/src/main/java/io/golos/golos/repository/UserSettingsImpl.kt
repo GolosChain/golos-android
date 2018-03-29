@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.App
+import timber.log.Timber
 
 
 internal class UserSettingsImpl : UserSettingsRepository {
@@ -21,7 +22,12 @@ internal class UserSettingsImpl : UserSettingsRepository {
         val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)
 
         if (currencyString != null) {
-            mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.valueOf(currencyString)
+            Timber.e(currencyString)
+            when (currencyString) {
+                "DOLL" -> mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.USD
+                else -> mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.valueOf(currencyString)
+            }
+
         } else {
             mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.USD
         }

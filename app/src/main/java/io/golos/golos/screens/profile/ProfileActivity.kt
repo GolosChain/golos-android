@@ -10,14 +10,21 @@ import io.golos.golos.screens.GolosActivity
  * Created by yuri on 15.12.17.
  */
 class ProfileActivity : GolosActivity() {
+    private var fragment: UserProfileFragment? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_profile)
         if (intent.hasExtra(USERNAME_TAG)) {
-            val fragment = UserProfileFragment.getInstance(intent.getStringExtra(USERNAME_TAG))
+            fragment = UserProfileFragment.getInstance(intent.getStringExtra(USERNAME_TAG))
             supportFragmentManager.beginTransaction()
                     .replace(R.id.root_lo, fragment).commit()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fragment?.userVisibleHint = true
     }
 
     companion object {

@@ -1,5 +1,7 @@
 package io.golos.golos.repository.persistence.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import javax.annotation.Nullable;
 
 import io.golos.golos.repository.model.UserAuthResponse;
@@ -7,7 +9,8 @@ import io.golos.golos.repository.model.UserAuthResponse;
 /**
  * Created by yuri on 13.11.17.
  */
-
+@SuppressWarnings("unused")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserData implements Cloneable {
     private boolean isUserLoggedIn;
     @Nullable
@@ -34,6 +37,7 @@ public class UserData implements Cloneable {
     private long postsCount;
     private double safeGbg;
     private double safeGolos;
+    private int votingPower;
 
 
     public UserData(boolean isUserLoggedIn,
@@ -52,7 +56,8 @@ public class UserData implements Cloneable {
                     double accountWorth,
                     long postsCount,
                     double safeGbg,
-                    double safeGolos) {
+                    double safeGolos,
+                    int votingPower) {
         this.isUserLoggedIn = isUserLoggedIn;
         this.mMoto = mMoto;
         this.avatarPath = avatarPath;
@@ -70,6 +75,7 @@ public class UserData implements Cloneable {
         this.safeGolos = safeGolos;
         this.publicActiveWif = publicActiveWif;
         this.publicPostingWif = publicPostingWif;
+        this.votingPower = votingPower;
     }
 
     public UserData() {
@@ -89,6 +95,14 @@ public class UserData implements Cloneable {
 
     public void setPublicPostingWif(String publicPostingWif) {
         this.publicPostingWif = publicPostingWif;
+    }
+
+    public int getVotingPower() {
+        return votingPower;
+    }
+
+    public void setVotingPower(int votingPower) {
+        this.votingPower = votingPower;
     }
 
     public double getSafeGolos() {
@@ -246,7 +260,8 @@ public class UserData implements Cloneable {
                 response.getAccountInfo().getAccountWorth(),
                 response.getAccountInfo().getPostsCount(),
                 response.getAccountInfo().getSafeGbg(),
-                response.getAccountInfo().getSafeGolos());
+                response.getAccountInfo().getSafeGolos(),
+                response.getAccountInfo().getVotingPower());
     }
 
     public AccountInfo toAccountInfo() {
@@ -254,7 +269,7 @@ public class UserData implements Cloneable {
         return new AccountInfo(userName, mMoto, avatarPath,
                 postsCount, accountWorth, subscibesCount, subscribersCount,
                 gbgAmount, golosAmount, golosPower, safeGbg,
-                safeGolos, publicPostingWif, publicActiveWif, false);
+                safeGolos, publicPostingWif, publicActiveWif, false, votingPower);
     }
 
     @Override
@@ -265,7 +280,9 @@ public class UserData implements Cloneable {
                 ", avatarPath='" + avatarPath + '\'' +
                 ", userName='" + userName + '\'' +
                 ", privateActiveWif='" + privateActiveWif + '\'' +
+                ", publicActiveWif='" + publicActiveWif + '\'' +
                 ", privatePostingWif='" + privatePostingWif + '\'' +
+                ", publicPostingWif='" + publicPostingWif + '\'' +
                 ", subscibesCount=" + subscibesCount +
                 ", subscribersCount=" + subscribersCount +
                 ", gbgAmount=" + gbgAmount +
@@ -273,6 +290,9 @@ public class UserData implements Cloneable {
                 ", golosPower=" + golosPower +
                 ", accountWorth=" + accountWorth +
                 ", postsCount=" + postsCount +
+                ", safeGbg=" + safeGbg +
+                ", safeGolos=" + safeGolos +
+                ", votingPower=" + votingPower +
                 '}';
     }
 }

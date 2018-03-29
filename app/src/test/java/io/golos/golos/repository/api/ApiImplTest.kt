@@ -189,7 +189,7 @@ class ApiImplTest {
 
     @Test
     fun getAccountDataTest() {
-        service.getAccountData("yuri-vlad-second")
+        service.getAccountInfo("yuri-vlad-second")
     }
 
 

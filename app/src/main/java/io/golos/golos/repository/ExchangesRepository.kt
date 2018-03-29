@@ -40,7 +40,7 @@ internal class ExchangesRepository(private val worker: Executor,
                 Timber.e(usdPerGbg.toString())
 
                 val rublePerGbgNew = usdPerGbg * rublesPerUsd
-                Timber.e(rublePerGbgNew.toString())
+
                 if (usdPerGbg != 0.0f) {
                     sp.edit().putFloat(dollarsTag, usdPerGbg).apply()
                 }
