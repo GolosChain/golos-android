@@ -182,6 +182,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             Repository.get.userSettingsRepository.getCurrency().observeForever {
                 mFeedSettingsLiveData.value = getFeedModeSettings()
             }
+            Repository.get.userSettingsRepository.getBountDisplay().observeForever {
+                mFeedSettingsLiveData.value = getFeedModeSettings()
+            }
         }
     }
 
@@ -246,7 +249,10 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                     Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName
                             ?: "")),
             Repository.get.userSettingsRepository.getCurrency().value
-                    ?: UserSettingsRepository.GolosCurrency.USD)
+                    ?: UserSettingsRepository.GolosCurrency.USD,
+            Repository.get.userSettingsRepository.getBountDisplay().value
+                    ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+    )
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {

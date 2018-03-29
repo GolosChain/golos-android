@@ -312,18 +312,20 @@ fun isOnMainThread(): Boolean {
 fun calculateShownReward(wrapper: StoryWrapper,
                          chosenCurrency: UserSettingsRepository.GolosCurrency = Repository.get.userSettingsRepository.getCurrency().value
                                  ?: UserSettingsRepository.GolosCurrency.USD,
+                         bountyDisplay: UserSettingsRepository.GolosBountyDisplay = Repository.get.userSettingsRepository.getBountDisplay().value
+                                 ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES,
                          ctx: Context): String {
     val gbgCost = wrapper.story.gbgAmount
     val resources = ctx.resources
     val exchangeValues = wrapper.exchangeValues
     if (exchangeValues == ExchangeValues.nullValues) {
-        return resources.getString(R.string.gbg_format, String.format("%0.3f", gbgCost))
+        return resources.getString(R.string.gbg_format, bountyDisplay.formatNumber(gbgCost))
     } else {
         return when (chosenCurrency) {
-            UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, String.format("%.3f", gbgCost
+            UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, bountyDisplay.formatNumber(gbgCost
                     * exchangeValues.rublesPerGbg))
-            UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, String.format("%.3f", gbgCost))
-            else -> resources.getString(R.string.dollars_format, String.format("%.3f", gbgCost
+            UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, bountyDisplay.formatNumber(gbgCost))
+            else -> resources.getString(R.string.dollars_format, bountyDisplay.formatNumber(gbgCost
                     * exchangeValues.dollarsPerGbg))
         }
     }

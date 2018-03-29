@@ -20,10 +20,26 @@ interface UserSettingsRepository {
     fun setNightMode(isNight: Boolean)
     fun setCurrency(currency: GolosCurrency)
     fun getCurrency(): LiveData<GolosCurrency>
+    fun setBountDisplay(display: GolosBountyDisplay)
+    fun getBountDisplay(): LiveData<GolosBountyDisplay>
     fun isNightMode(): Boolean
     fun setUp(ctx: Context)
 
     enum class GolosCurrency {
         USD, RUB, GBG
+    }
+
+    enum class GolosBountyDisplay {
+
+        INTEGER, ONE_PLACE, TWO_PLACES, THREE_PLACES;
+
+        fun formatNumber(double: Double): String {
+            return when (this) {
+                INTEGER -> String.format("%.0f", double)
+                ONE_PLACE -> String.format("%.1f", double)
+                TWO_PLACES -> String.format("%.2f", double)
+                THREE_PLACES -> String.format("%.3f", double)
+            }
+        }
     }
 }

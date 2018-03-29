@@ -114,16 +114,17 @@ class UserListViewModel : ViewModel() {
 
                 mLiveData.value = UserListViewState(mTitle, it.map {
                     val currentVotingObject = it
-                    val gbgCost = it.gbgValue.toFloat()
+                    val gbgCost = it.gbgValue
+                    val displayFormatter = Repository.get.userSettingsRepository.getBountDisplay().value
+                            ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
                     val outString = if (exchangeValues == null) {
-                        mStringSupplier.get(R.string.gbg_format, String.format("%.3f", gbgCost))
+                        mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
                     } else when (chosenCurrency) {
-                        UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, String.format("%.3f", gbgCost
+                        UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, displayFormatter.formatNumber(gbgCost
                                 * exchangeValues.rublesPerGbg))
-                        UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, String.format("%.3f", gbgCost))
-                        else -> mStringSupplier.get(R.string.dollars_format, String.format("%.3f", gbgCost
+                        UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
+                        else -> mStringSupplier.get(R.string.dollars_format, displayFormatter.formatNumber(gbgCost
                                 * exchangeValues.dollarsPerGbg))
-
                     }
                     UserListRowData(it.name,
                             it.avatar,

@@ -37,8 +37,6 @@ internal class ExchangesRepository(private val worker: Executor,
                 val body = JSONObject(resp.body().string()).getJSONObject("rates")
                 val rublesPerUsd = body.get("RUB").toString().toFloat()
                 val usdPerGbg = (((1 / body.get("XAU").toString().toFloat()) / 31.1034768) / 1000).toFloat()
-                Timber.e(usdPerGbg.toString())
-
                 val rublePerGbgNew = usdPerGbg * rublesPerUsd
 
                 if (usdPerGbg != 0.0f) {

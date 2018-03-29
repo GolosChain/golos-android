@@ -4,6 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="center"
+    android:gravity="center_horizontal"
     android:background="@color/white_black_toolbar_color"
     android:orientation="vertical">
 
@@ -41,7 +42,6 @@
     <Button
         android:id="@+id/not_now"
         style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
-        android:gravity="end|center_vertical"
         android:text="@string/not_now"
         android:textSize="13sp"
         app:layout_constraintEnd_toStartOf="@+id/vote"

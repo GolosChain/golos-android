@@ -126,7 +126,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
                         ?: FeedCellSettings(true,
                                 true,
-                                NSFWStrategy(true, Pair(false, "")), UserSettingsRepository.GolosCurrency.USD))
+                                NSFWStrategy(true, Pair(false, "")),
+                                UserSettingsRepository.GolosCurrency.USD,
+                                UserSettingsRepository.GolosBountyDisplay.THREE_PLACES))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -156,7 +158,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         val observer = Observer<FeedCellSettings> { it ->
             mAdapter.feedCellSettings = it ?: FeedCellSettings(true,
                     true,
-                    NSFWStrategy(true, Pair(false, "")), UserSettingsRepository.GolosCurrency.USD)
+                    NSFWStrategy(true, Pair(false, "")),
+                    UserSettingsRepository.GolosCurrency.USD,
+                    UserSettingsRepository.GolosBountyDisplay.THREE_PLACES)
         }
         mViewModel?.cellViewSettingLiveData?.observe(activity as LifecycleOwner, observer)
     }

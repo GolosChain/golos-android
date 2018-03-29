@@ -154,6 +154,8 @@
     <string name="dollars_format">$%s</string>
     <string name="gbg_format">GBG%s</string>
     <string name="voting_power">Voting power</string>
+    <string name="general_settings">General settings</string>
+    <string name="currency_precision">Bounty display</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>
@@ -162,6 +164,12 @@
         <item>Ruble</item>
         <item>Dollar</item>
         <item>GBG</item>
+    </string-array>
+    <string-array name="precision">
+        <item>Round to integer</item>
+        <item>One decimal place</item>
+        <item>Two decimal place</item>
+        <item>Three decimal places</item>
     </string-array>
 </resources>
 

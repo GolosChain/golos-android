@@ -15,13 +15,15 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.HolderClickListener
+import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
                             val nswfStrategy: NSFWStrategy,
-                            val shownCurrency:UserSettingsRepository.GolosCurrency)
+                            val shownCurrency: UserSettingsRepository.GolosCurrency,
+                            val bountyDisplay: UserSettingsRepository.GolosBountyDisplay)
 
 
 data class StripeWrapper(val stripe: StoryWithComments,
@@ -109,7 +111,8 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         result.dispatchUpdatesTo(this)
                         mStripes = ArrayList(newItems)
                         mStripes.forEach {
-                            mItemsMap[it.rootStory()?.id ?: 0L] = it.storyWithState()?.hashCode() ?: 0
+                            mItemsMap[it.rootStory()?.id
+                                    ?: 0L] = it.storyWithState()?.hashCode() ?: 0
                         }
                     }
                 } catch (e: Exception) {

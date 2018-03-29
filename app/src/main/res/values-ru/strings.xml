@@ -153,6 +153,8 @@
     <string name="dollars_format">$%s</string>
     <string name="gbg_format">GBG%s</string>
     <string name="voting_power">Сила голоса</string>
+    <string name="general_settings">Общие</string>
+    <string name="currency_precision">Отображение наград</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
@@ -161,5 +163,11 @@
         <item>Рубль</item>
         <item>Доллар</item>
         <item>GBG</item>
+    </string-array>
+    <string-array name="precision">
+        <item>Округлять до целых чисел</item>
+        <item>Один знак после запятой</item>
+        <item>Два знака после запятой</item>
+        <item>Три знака после запятой</item>
     </string-array>
 </resources>

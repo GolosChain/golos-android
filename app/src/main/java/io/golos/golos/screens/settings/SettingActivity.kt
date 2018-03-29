@@ -58,7 +58,7 @@ class SettingActivity : GolosActivity() {
         setUpNoImagesMode()
         setUpNSFWMode()
         setUpCurrency()
-
+        setUpBountyDisplay()
     }
 
     private fun setUpNoImagesMode() {
@@ -71,7 +71,7 @@ class SettingActivity : GolosActivity() {
 
     private fun setUpNighMode() {
         val spinner = findViewById<Spinner>(R.id.mode_spinner)
-        spinner.adapter = DayNightSpinnerAdapter(this)
+        spinner.adapter = SettingsSpinnerAdapter(this, R.array.daynight)
         spinner.setSelection(if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0)
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -92,7 +92,7 @@ class SettingActivity : GolosActivity() {
 
     private fun setUpCurrency() {
         val spinner = findViewById<Spinner>(R.id.currency_spinner)
-        spinner.adapter = CurrencySpinnerAdapter(this)
+        spinner.adapter = SettingsSpinnerAdapter(this, R.array.currency)
         spinner.setSelection(when (Repository.get.userSettingsRepository.getCurrency().value) {
             UserSettingsRepository.GolosCurrency.USD -> 1
             UserSettingsRepository.GolosCurrency.RUB -> 0
@@ -110,7 +110,34 @@ class SettingActivity : GolosActivity() {
                     2 -> UserSettingsRepository.GolosCurrency.GBG
                     else -> UserSettingsRepository.GolosCurrency.USD
                 }
-               Repository.get.userSettingsRepository.setCurrency(currency)
+                Repository.get.userSettingsRepository.setCurrency(currency)
+            }
+        }
+    }
+
+    private fun setUpBountyDisplay() {
+        val spinner = findViewById<Spinner>(R.id.precision_spinner)
+        spinner.adapter = SettingsSpinnerAdapter(this, R.array.precision)
+        spinner.setSelection(when (Repository.get.userSettingsRepository.getBountDisplay().value) {
+            UserSettingsRepository.GolosBountyDisplay.INTEGER -> 0
+            UserSettingsRepository.GolosBountyDisplay.ONE_PLACE -> 1
+            UserSettingsRepository.GolosBountyDisplay.TWO_PLACES -> 2
+            UserSettingsRepository.GolosBountyDisplay.THREE_PLACES -> 3
+            else -> 0
+        })
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val bountyDisplay = when (p2) {
+                    0 -> UserSettingsRepository.GolosBountyDisplay.INTEGER
+                    1 -> UserSettingsRepository.GolosBountyDisplay.ONE_PLACE
+                    2 -> UserSettingsRepository.GolosBountyDisplay.TWO_PLACES
+                    3 -> UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                    else -> UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                }
+                Repository.get.userSettingsRepository.setBountDisplay(bountyDisplay)
             }
         }
     }

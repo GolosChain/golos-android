@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
@@ -39,7 +37,8 @@ abstract class StoriesViewHolder(resId: Int,
             field = value
         }
 
-    protected open fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
+    protected open fun handlerStateChange(newState: StripeWrapper?,
+                                          oldState: StripeWrapper?) {
         val story = newState?.stripe?.rootStory()
         if (newState == null || story == null) return
 
@@ -64,25 +63,13 @@ abstract class StoriesViewHolder(resId: Int,
         } else {
             getTitleTv().text = ""
         }
-        val gbgCost = story.gbgAmount
-        val resources = itemView.resources
-        val exchangeValues = newState.stripe.storyWithState()?.exchangeValues
-                ?: ExchangeValues.nullValues
-        if (exchangeValues == ExchangeValues.nullValues) {
-            getUpvoteText().text = resources.getString(R.string.gbg_format, String.format("%0.3f", gbgCost))
-        } else {
-            getUpvoteText().text = when (newState.feedCellSettings.shownCurrency) {
-                UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, String.format("%.3f", gbgCost
-                        * exchangeValues.rublesPerGbg))
-                UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, String.format("%.3f", gbgCost))
-                else -> resources.getString(R.string.dollars_format, String.format("%.3f", gbgCost
-                        * exchangeValues.dollarsPerGbg))
-            }
-        }
+        val bountyDisplay = newState.feedCellSettings.bountyDisplay
         getCommentsTv().text = story.commentsCount.toString()
         getUpvoteText().text = calculateShownReward(newState.stripe.storyWithState() ?: return,
                 newState.feedCellSettings.shownCurrency,
+                bountyDisplay,
                 itemView.context)
+
 
     }
 

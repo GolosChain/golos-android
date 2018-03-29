@@ -861,8 +861,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         val storiesAll = it.value?.items ?: ArrayList()
                         val replaced = replacer.findAndReplace(discussionItem, storiesAll)
                         if (replaced) {
-                            replacer.findAndReplace(discussionItem,
-                                    storiesAll)
+
                             it.value = StoriesFeed(storiesAll, it.value?.type ?: FeedType.NEW,
                                     error = GolosErrorParser.parse(e), filter = it.value?.filter, isFeedActual = it.value?.isFeedActual
                                     ?: true)
@@ -1279,7 +1278,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         .mapIndexed { index, voteLight ->
                             VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
                         }
-                        //    .distinct()
+                        .distinct()
                         .sorted()
 
                 mMainThreadExecutor.execute {

@@ -250,9 +250,9 @@ class RepositoryPostAndVoteTest {
     fun testVoting() {
         val popular = repo.getStories(FeedType.POPULAR, null)
         assertNull(popular.value)
-        repo.requestStoriesListUpdate(20, FeedType.POPULAR, null, null, null)
+        repo.requestStoriesListUpdate(1, FeedType.POPULAR, null, null, null)
         assertNotNull(popular.value)
-        var votingItem = popular.value?.items?.get(2)!!
+        var votingItem = popular.value?.items?.get(0)!!
 
         assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
         repo.requestStoryUpdate(votingItem)
@@ -262,6 +262,7 @@ class RepositoryPostAndVoteTest {
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!
         assert(votingItem.rootStory()!!.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED)
         assert(votingItem.comments().first().userVotestatus == GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+        assertTrue(votingItem.rootStory()!!.activeVotes.find { it.name == userName } != null)
 
         Thread.sleep(3000)
         repo.cancelVote(votingItem.storyWithState()!!)

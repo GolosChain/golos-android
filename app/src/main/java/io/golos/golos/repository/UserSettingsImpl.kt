@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.App
-import timber.log.Timber
 
 
 internal class UserSettingsImpl : UserSettingsRepository {
@@ -13,6 +12,7 @@ internal class UserSettingsImpl : UserSettingsRepository {
     private val mShowImageLiveData = MutableLiveData<Boolean>()
     private val mShowNSFWLiveData = MutableLiveData<Boolean>()
     private val mCurrencyLiveData = MutableLiveData<UserSettingsRepository.GolosCurrency>()
+    private val mBountyDisplay = MutableLiveData<UserSettingsRepository.GolosBountyDisplay>()
 
     override fun setUp(ctx: Context) {
         mCompactLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
@@ -22,7 +22,6 @@ internal class UserSettingsImpl : UserSettingsRepository {
         val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)
 
         if (currencyString != null) {
-            Timber.e(currencyString)
             when (currencyString) {
                 "DOLL" -> mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.USD
                 else -> mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.valueOf(currencyString)
@@ -30,6 +29,15 @@ internal class UserSettingsImpl : UserSettingsRepository {
 
         } else {
             mCurrencyLiveData.value = UserSettingsRepository.GolosCurrency.USD
+        }
+
+        val bountyDisplayString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("bountyDisplayString", null)
+
+        if (bountyDisplayString != null) {
+
+            mBountyDisplay.value = UserSettingsRepository.GolosBountyDisplay.valueOf(bountyDisplayString)
+        } else {
+            mBountyDisplay.value = UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
         }
 
     }
@@ -43,6 +51,17 @@ internal class UserSettingsImpl : UserSettingsRepository {
 
     override fun getCurrency(): LiveData<UserSettingsRepository.GolosCurrency> {
         return mCurrencyLiveData
+    }
+
+    override fun setBountDisplay(display: UserSettingsRepository.GolosBountyDisplay) {
+        if (display != mBountyDisplay.value) {
+            mBountyDisplay.value = display
+        }
+        App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putString("bountyDisplayString", display.name).apply()
+    }
+
+    override fun getBountDisplay(): LiveData<UserSettingsRepository.GolosBountyDisplay> {
+        return mBountyDisplay
     }
 
     override fun setStoriesCompactMode(isCompact: Boolean) {

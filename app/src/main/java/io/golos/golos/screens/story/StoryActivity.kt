@@ -210,11 +210,14 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mTagSubscribeBtn.setText(R.string.follow)
                 }
                 mCommentsCountBtn.setViewVisible()
-                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED
-                        && mMoneyBtn.tag ?: "" != "green") {
-                    mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_circle_green_outline_20dp)
-                    mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
-                    mMoneyBtn.tag = "green"
+                Timber.e("it.storyTree.rootStory()?.userVotestatus = ${it.storyTree.rootStory()?.userVotestatus}")
+                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                    if (mMoneyBtn.tag ?: "" != "green") {
+                        mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_circle_green_outline_20dp)
+                        mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
+                        mMoneyBtn.tag = "green"
+                    }
+
                 } else {
                     if (mMoneyBtn.tag ?: "" != "gray") {
                         mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_cricle_gray_outline_20dp)

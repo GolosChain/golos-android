@@ -182,6 +182,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             view?.showSnackbar(it.localizedMessage ?: 0)
         }
         mUserAvatar.isClickable = mViewModel.canUserSeeVotingPower()
+        if (mVotingPowerLo.visibility == View.VISIBLE) {
+            val value = it.votingPower / 100.0
+            mVotingPowerTv.text = "${String.format("%.2f", value)}%"
+        }
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
