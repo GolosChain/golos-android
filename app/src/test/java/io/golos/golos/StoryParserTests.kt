@@ -140,14 +140,21 @@ class StoryParserTests {
     }
 
     @Test
+    fun testStory8() {
+        val stories = Utils.readStoryFromResourse("blog_rout.json")
+        println(stories)
+
+    }
+
+    @Test
     fun nicksParseTest() {
         val subscribers = GolosApi.get.getSubscribers("arcange", null)
         println(subscribers.size)
         subscribers
                 .map { "@${it.follower.name}" }
                 .forEach {
-            if (!it.matches(Regexps.userRegexp)) fail("regexps not matched $it")
-        }
+                    if (!it.matches(Regexps.userRegexp)) fail("regexps not matched $it")
+                }
     }
 
 }

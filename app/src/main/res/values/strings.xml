@@ -45,7 +45,7 @@
     <string name="wrong_credentials">Incorrect login or password</string>
     <string name="logout">Log out</string>
     <string name="loading">Loading…</string>
-    <string name="choose_vote_power">Choose your name power</string>
+    <string name="choose_vote_power">Choose your vote power</string>
     <string name="user_used_max_comments_chances">You can not vote for this post anymore</string>
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>

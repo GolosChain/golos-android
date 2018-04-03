@@ -193,7 +193,6 @@ class ApiImplTest {
     }
 
 
-
     @Test
     fun filteredStoriesTest() {
         val stories = service.getStories(20, FeedType.ACTUAL, 10, StoryFilter("psk"), null, null)
@@ -376,10 +375,18 @@ class ApiImplTest {
     }
 
     @Test
-    fun getStory(){
-        val story =   Golos4J.getInstance().databaseMethods.getContent(AccountName("vp-golos-est"), Permlink("golos-est-ragu-s-gribami-postnoe-blyudo"))
-        val rows = StoryParserToRows.parse(DiscussionItemFactory.create(story!!,null))
+    fun getStory() {
+        val story = Golos4J
+                .getInstance().databaseMethods
+                .getContent(AccountName("vp-golos-est"), Permlink("golos-est-ragu-s-gribami-postnoe-blyudo"))
+        val rows = StoryParserToRows.parse(DiscussionItemFactory.create(story!!, null))
         println(story)
     }
 
+    @Test
+    fun getStoryWithManycommentsText() {
+        val story = Golos4J.getInstance().databaseMethods.getStoryByRoute("ru--russkoezarubezhxe",
+                AccountName("vp-zarubezhje"),
+                Permlink("lichnyi-opyt-kak-ya-vengerskii-yazyk-uchila"))
+    }
 }

@@ -6,29 +6,59 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.makeramen.roundedimageview.RoundedImageView
 import io.golos.golos.R
-import io.golos.golos.utils.bundleOf
-import io.golos.golos.utils.toArrayList
+import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 08.02.18.
  */
 class PhotosDialog : DialogFragment() {
     private lateinit var mPager: ViewPager
+    private lateinit var mIndicatorHosts: ViewGroup
+    private val mImages: ArrayList<String> = arrayListOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_photos, container, false)
         mPager = v.findViewById(R.id.pager)
-        mPager.adapter = PhotosAdapter(childFragmentManager, arguments?.getStringArrayList("images")
+        mImages.addAll(arguments?.getStringArrayList("images")
                 ?: arrayListOf())
-        arguments?.getInt("position")?.let {
-            mPager.post { mPager.setCurrentItem(it, false) }
-        }
+        mPager.adapter = PhotosAdapter(childFragmentManager, mImages)
+        val position = arguments?.getInt("position") ?: 0
+        mPager.post { mPager.setCurrentItem(position, false) }
         v.findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { dismiss() }
+        v.findViewById<View>(R.id.share).setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                val url = mImages.getOrNull(mPager.currentItem)
+                activity?.startActivity(url?.asIntentToShowUrl() ?: return)
+            }
+        })
+        mIndicatorHosts = v.findViewById(R.id.indicator_host)
+        (0 until mImages.size).forEach { mIndicatorHosts.addView(createIndicator()) }
+        if (mImages.size > 0) (mIndicatorHosts[0] as? RoundedImageView)?.setImageResource(android.R.color.white)
+        mPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {
+
+            }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+
+            }
+
+            override fun onPageSelected(position: Int) {
+                val child = mIndicatorHosts[position] as? RoundedImageView ?: return
+                child.setImageResource(android.R.color.white)
+                mIndicatorHosts.iterator()
+                        .forEach {
+                            if (it != child && it is RoundedImageView) it.setImageResource(R.color.gray_7d)
+                        }
+            }
+        })
         return v
     }
 
@@ -40,6 +70,17 @@ class PhotosDialog : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.GolosPhotoDialogTheme)
         super.onCreate(savedInstanceState)
+    }
+
+
+    private fun createIndicator(): View? {
+        val roundImageView = RoundedImageView(this.context)
+        roundImageView.layoutParams = LinearLayoutCompat.LayoutParams(getDimension(R.dimen.six_dp),
+                getDimension(R.dimen.six_dp))
+        roundImageView.isOval = true
+        (roundImageView.layoutParams as LinearLayoutCompat.LayoutParams).marginEnd = getDimension(R.dimen.six_dp)
+        roundImageView.setImageResource(R.color.gray_7d)
+        return roundImageView
     }
 
 

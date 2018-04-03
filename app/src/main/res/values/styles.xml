@@ -17,7 +17,7 @@
 
     <style name="GolosPhotoDialogTheme" parent="Theme.AppCompat.Dialog">
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/semi_black</item>
     </style>
 
     <style name="LauncherTheme" parent="AppTheme">

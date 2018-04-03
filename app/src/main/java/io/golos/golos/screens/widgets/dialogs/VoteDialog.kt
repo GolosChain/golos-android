@@ -27,9 +27,9 @@ class VoteDialog : GolosDialog() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fr_vote, container, false)
         val percentTv = v.findViewById<TextView>(R.id.percent_tv)
-        val minusBtn = v.findViewById<AppCompatButton>(R.id.minus_btn)
-        val plusBtn = v.findViewById<AppCompatButton>(R.id.plus_btn)
-        mSeeker = v.findViewById<AppCompatSeekBar>(R.id.seeker)
+        val minusBtn = v.findViewById<View>(R.id.minus_btn)
+        val plusBtn = v.findViewById<View>(R.id.plus_btn)
+        mSeeker = v.findViewById(R.id.seeker)
         val voteBtn = v.findViewById<Button>(R.id.vote_btn)
         minusBtn.setOnClickListener({ mSeeker.progress -= 1 })
         minusBtn.setOnLongClickListener {

@@ -21,6 +21,16 @@ object MockUserSettings : UserSettingsRepository {
         return MutableLiveData<Boolean>()
     }
 
+    override fun setBountDisplay(display: UserSettingsRepository.GolosBountyDisplay) {
+
+    }
+
+    override fun getBountDisplay(): LiveData<UserSettingsRepository.GolosBountyDisplay> {
+        val v = MutableLiveData<UserSettingsRepository.GolosBountyDisplay>()
+        v.value = UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+        return v
+    }
+
     override fun setIsNSFWShown(isShown: Boolean) {
 
     }

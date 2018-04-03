@@ -854,7 +854,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             } catch (e: Exception) {
                 logException(e)
-
+                Timber.e("error $e")
                 mMainThreadExecutor.execute {
                     discussionItem.updatingState = UpdatingState.DONE
                     listOfList.forEach {

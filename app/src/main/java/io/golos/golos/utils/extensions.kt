@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.support.annotation.ColorRes
+import android.support.annotation.DimenRes
 import android.support.annotation.DrawableRes
 import android.support.annotation.LayoutRes
 import android.support.design.widget.Snackbar
@@ -340,3 +341,25 @@ fun ValueAnimator.setInterpolatorB(interpolator: TimeInterpolator): ValueAnimato
     this.interpolator = interpolator
     return this
 }
+
+fun Fragment.getDimension(@DimenRes dimen: Int): Int {
+    return context?.resources?.getDimension(dimen)?.toInt() ?: 0
+}
+
+public fun ViewGroup.iterator(): Iterator<View> {
+    return object : Iterator<View> {
+        private var currentPosition = 0
+
+        override fun hasNext(): Boolean {
+            return currentPosition < childCount
+        }
+
+        override fun next(): View {
+            val v = getChildAt(currentPosition)
+            currentPosition++
+            return v
+        }
+    }
+}
+
+public operator fun ViewGroup.get(position: Int) = if (position < childCount) getChildAt(position) else null

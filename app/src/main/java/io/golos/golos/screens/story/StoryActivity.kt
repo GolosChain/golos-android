@@ -210,7 +210,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mTagSubscribeBtn.setText(R.string.follow)
                 }
                 mCommentsCountBtn.setViewVisible()
-                Timber.e("it.storyTree.rootStory()?.userVotestatus = ${it.storyTree.rootStory()?.userVotestatus}")
                 if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     if (mMoneyBtn.tag ?: "" != "green") {
                         mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_circle_green_outline_20dp)

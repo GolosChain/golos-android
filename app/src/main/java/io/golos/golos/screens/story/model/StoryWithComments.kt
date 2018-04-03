@@ -86,9 +86,9 @@ class StoryWithComments(rootStory: StoryWrapper?,
             if (rootStories == null) throw IllegalStateException("root story not found")
             mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
                     .involvedAccounts
-                    .find { it.name.name == rootStories!!.author.name }!!),
+                    .find { it.name.name == rootStories.author.name }!!),
                     UpdatingState.DONE)
-            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories!!.permlink.link }
+            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories.permlink.link }
             val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
             discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
             val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
