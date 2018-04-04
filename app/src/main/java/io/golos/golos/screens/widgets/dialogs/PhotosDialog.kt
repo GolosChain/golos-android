@@ -1,5 +1,6 @@
 package io.golos.golos.screens.widgets.dialogs
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
@@ -35,7 +36,11 @@ class PhotosDialog : DialogFragment() {
         v.findViewById<View>(R.id.share).setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
                 val url = mImages.getOrNull(mPager.currentItem)
-                activity?.startActivity(url?.asIntentToShowUrl() ?: return)
+                val sendIntent = Intent()
+                sendIntent.action = Intent.ACTION_SEND
+                sendIntent.putExtra(Intent.EXTRA_TEXT, url)
+                sendIntent.type = "text/plain"
+                activity?.startActivity(sendIntent)
             }
         })
         mIndicatorHosts = v.findViewById(R.id.indicator_host)

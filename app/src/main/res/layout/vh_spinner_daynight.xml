@@ -13,7 +13,10 @@
         android:layout_marginBottom="@dimen/margin_material_half"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material"
-        android:textColor="@color/textColorP" />
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/textColorP"
+        android:textSize="@dimen/font_small" />
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/down_button"
