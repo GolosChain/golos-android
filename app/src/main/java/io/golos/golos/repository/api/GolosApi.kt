@@ -2,7 +2,8 @@ package io.golos.golos.repository.api
 
 import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import java.io.File
@@ -27,7 +28,7 @@ abstract class GolosApi {
 
     abstract fun getStory(blog: String,
                           author: String,
-                          permlink: String, accountDataHandler: (List<AccountInfo>) -> Unit = { _ -> }): StoryWithComments
+                          permlink: String, accountDataHandler: (List<GolosUserAccountInfo>) -> Unit = { _ -> }): StoryWithComments
 
     abstract fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments
 
@@ -36,7 +37,7 @@ abstract class GolosApi {
 
     abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
 
-    abstract fun getAccountInfo(of: String): AccountInfo
+    abstract fun getAccountInfo(of: String): GolosUserAccountInfo
 
     abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
 
@@ -74,4 +75,6 @@ abstract class GolosApi {
 
     // empty startForSubscribersOrSubscriptions from to startForSubscribersOrSubscriptions from beginning, maxCount 1 - 1000
     abstract fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag>
+
+    abstract fun getGolosUsers(nick: String): List<GolosUser>
 }

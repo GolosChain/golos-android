@@ -2,15 +2,15 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="62dp">
+    android:layout_height="48dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="@dimen/material_big"
+        android:background="?selectableItemBackgroundBorderless"
         android:scaleType="centerCrop"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,12 +27,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:background="?selectableItemBackground"
             android:id="@+id/name_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_color_white_black" />
 
         <TextView
+            android:background="?selectableItemBackground"
             android:id="@+id/sub_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

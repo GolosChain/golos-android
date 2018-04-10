@@ -25,7 +25,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.tags.TagSearchActivity"
+            android:name=".screens.tags.TagAndUsersSearchActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
@@ -44,7 +44,7 @@
             android:name=".screens.userslist.UsersListActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.profile.ProfileActivity"
+            android:name=".screens.profile.UserProfileActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.SplashActivity"

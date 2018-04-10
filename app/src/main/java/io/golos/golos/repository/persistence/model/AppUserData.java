@@ -11,7 +11,7 @@ import io.golos.golos.repository.model.UserAuthResponse;
  */
 @SuppressWarnings("unused")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserData implements Cloneable {
+public class AppUserData implements Cloneable {
     private boolean isUserLoggedIn;
     @Nullable
     private String mMoto;
@@ -40,24 +40,24 @@ public class UserData implements Cloneable {
     private int votingPower;
 
 
-    public UserData(boolean isUserLoggedIn,
-                    @Nullable String mMoto,
-                    @Nullable String avatarPath,
-                    @Nullable String userName,
-                    @Nullable String privateActiveWif,
-                    @Nullable String privatePostingWif,
-                    @Nullable String publicActiveWif,
-                    @Nullable String publicPostingWif,
-                    long subscibesCount,
-                    long subscribersCount,
-                    double gbgAmount,
-                    double golosAmount,
-                    double golosPower,
-                    double accountWorth,
-                    long postsCount,
-                    double safeGbg,
-                    double safeGolos,
-                    int votingPower) {
+    public AppUserData(boolean isUserLoggedIn,
+                       @Nullable String mMoto,
+                       @Nullable String avatarPath,
+                       @Nullable String userName,
+                       @Nullable String privateActiveWif,
+                       @Nullable String privatePostingWif,
+                       @Nullable String publicActiveWif,
+                       @Nullable String publicPostingWif,
+                       long subscibesCount,
+                       long subscribersCount,
+                       double gbgAmount,
+                       double golosAmount,
+                       double golosPower,
+                       double accountWorth,
+                       long postsCount,
+                       double safeGbg,
+                       double safeGolos,
+                       int votingPower) {
         this.isUserLoggedIn = isUserLoggedIn;
         this.mMoto = mMoto;
         this.avatarPath = avatarPath;
@@ -78,7 +78,7 @@ public class UserData implements Cloneable {
         this.votingPower = votingPower;
     }
 
-    public UserData() {
+    public AppUserData() {
     }
 
     public String getPublicActiveWif() {
@@ -243,11 +243,11 @@ public class UserData implements Cloneable {
         this.privatePostingWif = privatePostingWif;
     }
 
-    public static UserData fromPositiveAuthResponse(UserAuthResponse response) {
-        return new UserData(true,
+    public static AppUserData fromPositiveAuthResponse(UserAuthResponse response) {
+        return new AppUserData(true,
                 response.getAccountInfo().getUserMotto(),
-                response.getAccountInfo().getAvatarPath(),
-                response.getAccountInfo().getUserName(),
+                response.getAccountInfo().getGolosUser().getAvatarPath(),
+                response.getAccountInfo().getGolosUser().getUserName(),
                 response.getActiveAuth().getSecond(),
                 response.getPostingAuth().getSecond(),
                 response.getAccountInfo().getActivePublicKey(),
@@ -264,9 +264,9 @@ public class UserData implements Cloneable {
                 response.getAccountInfo().getVotingPower());
     }
 
-    public AccountInfo toAccountInfo() {
+    public GolosUserAccountInfo toAccountInfo() {
 
-        return new AccountInfo(userName, mMoto, avatarPath,
+        return new GolosUserAccountInfo(new GolosUser(userName,avatarPath), mMoto,
                 postsCount, accountWorth, subscibesCount, subscribersCount,
                 gbgAmount, golosAmount, golosPower, safeGbg,
                 safeGolos, publicPostingWif, publicActiveWif, false, votingPower);
@@ -275,6 +275,7 @@ public class UserData implements Cloneable {
     @Override
     public String toString() {
         return "UserData{" +
+
                 "isUserLoggedIn=" + isUserLoggedIn +
                 ", mMoto='" + mMoto + '\'' +
                 ", avatarPath='" + avatarPath + '\'' +

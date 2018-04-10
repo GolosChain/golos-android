@@ -49,6 +49,13 @@
         <item name="colorAccent">@color/blue_dark</item>
     </style>
 
+    <style name="TagsAndUserTabTextStyle">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">#c5d1e5</item>
+        <item name="android:textSize">14dp</item>
+        <item name="colorAccent">@color/blue_dark</item>
+    </style>
+
     <style name="HelperDialogStyle">
         <item name="android:windowNoTitle">true</item>
     </style>

@@ -1,28 +1,17 @@
 package io.golos.golos.repository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Discussion
 import eu.bittrade.libs.steemj.base.models.ExtendedAccount
 import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-
-/**
- * Created by yuri on 06.11.17.
- */
-val mapper by lazy {
-    val mapper = jacksonObjectMapper()
-    mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-    mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
-    mapper
-}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosDiscussionItem internal constructor(val url: String,

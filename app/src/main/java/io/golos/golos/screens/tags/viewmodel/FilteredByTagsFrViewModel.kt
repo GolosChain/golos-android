@@ -9,7 +9,7 @@ import android.content.Context
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.stories.FilteredStoriesActivity
-import io.golos.golos.screens.tags.TagSearchActivity
+import io.golos.golos.screens.tags.TagAndUsersSearchActivity
 import io.golos.golos.screens.tags.TagsCloudActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
@@ -47,6 +47,6 @@ class FilteredStoriesByTagFragmentViewModel : ViewModel(), Observer<Set<Tag>> {
     }
 
     fun onTagSearchClick(context: Activity?) {
-        TagSearchActivity.startt(context ?: return)
+        TagAndUsersSearchActivity.start(context ?: return)
     }
 }

@@ -7,20 +7,21 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
 
-data class UserAccountModel(val accountInfo: AccountInfo,
+data class UserAccountModel(val accountInfo: GolosUserAccountInfo,
                             val error: GolosError?,
                             val isActiveUserPage: Boolean,
                             val isFollowButtonVisible: Boolean,
                             val isSubscriptionInProgress: Boolean = false)
 
-class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
+class UserInfoViewModel : ViewModel(), Observer<GolosUserAccountInfo> {
     private lateinit var userName: String
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private val mRepository = Repository.get
@@ -36,7 +37,8 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
     }
 
     private fun showError(error: GolosError) {
-        mLiveData.value = UserAccountModel(mLiveData.value?.accountInfo ?: AccountInfo(""),
+        mLiveData.value = UserAccountModel(mLiveData.value?.accountInfo
+                ?: GolosUserAccountInfo(GolosUser("")),
                 error,
                 isActiveUserPage(),
                 isFollowButtonVisible(),
@@ -62,8 +64,8 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
         )
     }
 
-    override fun onChanged(t: AccountInfo?) {
-        val accInfo = t ?: AccountInfo("")
+    override fun onChanged(t: GolosUserAccountInfo?) {
+        val accInfo = t ?: GolosUserAccountInfo(GolosUser(""))
         mLiveData.value = UserAccountModel(accInfo,
                 null,
                 isActiveUserPage(),
@@ -82,10 +84,10 @@ class UserInfoViewModel : ViewModel(), Observer<AccountInfo> {
                     }
                 }
                 if (it.accountInfo.isCurrentUserSubscribed) {
-                    mRepository.unSubscribeOnUserBlog(it.accountInfo.userName
+                    mRepository.unSubscribeOnUserBlog(it.accountInfo.golosUser.userName
                             ?: return@let, resultHandler)
                 } else {
-                    mRepository.subscribeOnUserBlog(it.accountInfo.userName
+                    mRepository.subscribeOnUserBlog(it.accountInfo.golosUser.userName
                             ?: return@let, resultHandler)
                 }
             }

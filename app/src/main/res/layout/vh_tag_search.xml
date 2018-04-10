@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_material"
+        android:textColor="@color/text_color_white_black"
         android:background="?attr/selectableItemBackground"
         android:drawablePadding="@dimen/margin_material" />
 </FrameLayout>

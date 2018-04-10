@@ -13,9 +13,10 @@ import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
-import io.golos.golos.repository.persistence.model.UserData
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -64,12 +65,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
 
     //users data
-    private val mUsersAccountInfo: HashMap<String, MutableLiveData<AccountInfo>> = HashMap()
+    private val mUsersAccountInfo: HashMap<String, MutableLiveData<GolosUserAccountInfo>> = HashMap()
     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
 
     //current user data
-    private val mAuthLiveData = MutableLiveData<UserData>()
+    private val mAuthLiveData = MutableLiveData<AppUserData>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
     private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
@@ -157,11 +158,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
         val story = if (blog != null) mGolosApi.getStory(blog, author, permlink, { list ->
             list.forEach {
-                if (!mUsersAccountInfo.containsKey(it.userName)) {
-                    val liveData = MutableLiveData<AccountInfo>()
+                if (!mUsersAccountInfo.containsKey(it.golosUser.userName)) {
+                    val liveData = MutableLiveData<GolosUserAccountInfo>()
                     mMainThreadExecutor.execute {
                         liveData.value = it
-                        mUsersAccountInfo[it.userName ?: ""] = liveData
+                        mUsersAccountInfo[it.golosUser.userName] = liveData
                     }
                 }
             }
@@ -185,7 +186,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = AccountInfo(userName)))
+                            accountInfo = GolosUserAccountInfo(GolosUser(userName))))
                 }
             }
         }
@@ -203,7 +204,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = AccountInfo(login)))
+                            accountInfo = GolosUserAccountInfo(GolosUser(login))))
                 }
             }
         }
@@ -222,7 +223,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = AccountInfo(login)))
+                            accountInfo = GolosUserAccountInfo(GolosUser(login))))
                 }
             }
         }
@@ -241,11 +242,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
-            if (response.accountInfo.avatarPath != null) {
-                mPersister.saveAvatarPathForUser(UserAvatar(userName, response.accountInfo.avatarPath, System.currentTimeMillis()))
+            if (response.accountInfo.golosUser.avatarPath != null) {
+                mPersister.saveAvatarPathForUser(UserAvatar(userName,
+                        response.accountInfo.golosUser.avatarPath,
+                        System.currentTimeMillis()))
             }
 
-            val userData = UserData.fromPositiveAuthResponse(response)
+            val userData = AppUserData.fromPositiveAuthResponse(response)
 
             mPersister.saveUserData(userData)
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
@@ -328,7 +331,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override fun getUserInfo(userName: String): LiveData<AccountInfo> {
+    override fun getUserInfo(userName: String): LiveData<GolosUserAccountInfo> {
         return if (isUserLoggedIn()
                 && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData, {
             it?.toAccountInfo()
@@ -341,7 +344,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     override fun requestUserInfoUpdate(userName: String,
-                                       completionHandler: (AccountInfo, GolosError?) -> Unit) {
+                                       completionHandler: (GolosUserAccountInfo, GolosError?) -> Unit) {
         networkExecutor.execute {
             try {
                 loadSubscribersIfNeeded()
@@ -354,7 +357,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     val userInfo = mUsersAccountInfo[userName]!!
                     mMainThreadExecutor.execute {
-                        userInfo.value = AccountInfo(userName, isCurrentUserSubscribed = isUserSubscribedOn(userName))
+                        userInfo.value = GolosUserAccountInfo(GolosUser(userName),
+                                isCurrentUserSubscribed = isUserSubscribedOn(userName))
                     }
                 }
 
@@ -362,15 +366,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 val accinfo = mGolosApi.getAccountInfo(userName)
                 if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {//if we updating current user
                     mMainThreadExecutor.execute {
-                        mAuthLiveData.value = UserData(true, accinfo.userMotto, accinfo.avatarPath,
-                                accinfo.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
+                        mAuthLiveData.value = AppUserData(true, accinfo.userMotto, accinfo.golosUser.avatarPath,
+                                accinfo.golosUser.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
                                 accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {
-                    accinfo.isCurrentUserSubscribed = isUserSubscribedOn(accinfo.userName ?: "")
+                    accinfo.isCurrentUserSubscribed = isUserSubscribedOn(accinfo.golosUser.userName)
                     if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo[userName] = MutableLiveData()
                     val userInfo = mUsersAccountInfo[userName]!!
 
@@ -382,7 +386,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             } catch (e: Exception) {
                 logException(e)
                 mMainThreadExecutor.execute {
-                    completionHandler.invoke(AccountInfo(userName), GolosErrorParser.parse(e))
+                    completionHandler.invoke(GolosUserAccountInfo(GolosUser(userName)), GolosErrorParser.parse(e))
                 }
             }
         }
@@ -986,7 +990,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override fun getCurrentUserDataAsLiveData(): LiveData<UserData> {
+    override fun getCurrentUserDataAsLiveData(): LiveData<AppUserData> {
         return mAuthLiveData
     }
 
@@ -1313,6 +1317,43 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
         return liveData
     }
+
+    override fun getGolosUsers(nick: String): LiveData<List<GolosUser>> {
+        val golosUsers = MutableLiveData<List<GolosUser>>()
+        networkExecutor.execute {
+            val users = mGolosApi
+                    .getGolosUsers(nick)
+                    .toArrayList()
+            var avatars = getUserAvatarsFromDb(users.map { it.userName })
+            (0 until users.size)
+                    .forEach {
+                        val userName = users[it].userName
+                        users[it] = users[it].setAvatar(avatars.getOrDefault(userName, null))
+                    }
+            mMainThreadExecutor.execute {
+                golosUsers.value = users
+            }
+            avatars = mGolosApi.getUserAvatars(users
+                    .filter { it.avatarPath == null }
+                    .map { it.userName }
+                    .distinct())
+            if (avatars.isNotEmpty()) {
+                (0 until users.size)
+                        .forEach {
+                            val userName = users[it].userName
+                            if (avatars.containsKey(userName)) {
+                                users[it] = users[it].setAvatar(avatars.getOrDefault(userName, null))
+                            }
+                        }
+                mMainThreadExecutor.execute {
+                    golosUsers.value = users
+                }
+            }
+        }
+
+        return golosUsers
+    }
+
 
     override fun onAppCreate(ctx: Context) {
         super.onAppCreate(ctx)

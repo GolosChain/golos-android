@@ -12,7 +12,7 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.*
 import android.widget.TextView
-import io.golos.golos.screens.profile.ProfileActivity
+import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.screens.webview.WebViewActivity
@@ -42,7 +42,7 @@ class GolosMovementMethod protected constructor() : LinkMovementMethod() {
                         null)
                 return true
             } else if (matchResult is UserLinkMatch) {
-                ProfileActivity.start(textView.context, matchResult.user)
+                UserProfileActivity.start(textView.context, matchResult.user)
                 return true
             } else {
                 WebViewActivity.start(textView.context, url)

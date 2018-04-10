@@ -11,7 +11,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.screens.profile.ProfileActivity
+import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
@@ -363,7 +363,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     fun onUserClick(it: StoryWithComments, context: Context?) {
-        ProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
+        UserProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
     }
 
     fun onVotersClick(it: StoryWithComments, context: Context?) {

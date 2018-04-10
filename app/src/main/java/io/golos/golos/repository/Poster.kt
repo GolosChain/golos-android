@@ -81,7 +81,7 @@ internal class Poster(private val mRepository: Repository,
                         if (tags[it].contains(Regex("[а-яА-Я]"))) {
                             tags[it] = "ru--${Translit.ru2lat(tags[it])}"
                         }
-                        tags[it] = tags[it].toLowerCase().replace(" ", "").removePrefix("ru--")
+                        tags[it] = tags[it].toLowerCase().replace(" ", "")
                     }
             (0 until content.size)
                     .forEach {

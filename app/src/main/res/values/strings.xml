@@ -111,7 +111,9 @@
     <string name="no_tags_chose">no tags chosen</string>
     <string name="subscribed">subscribed</string>
     <string name="tags">tags</string>
-    <string name="tags_search">Tags search</string>
+    <string name="users">users</string>
+    <string name="tags_search">Tag search</string>
+    <string name="users_search">User search</string>
     <string name="golos_search">Search in Golos.io</string>
     <string name="recommended">Recommended</string>
     <string name="similar">Similar:</string>

@@ -33,7 +33,7 @@ internal class ExchangesRepository(private val worker: Executor,
             try {
                 val resp = OkHttpClient().newCall(Request.Builder()
                         .url("https://golos.io/api/v1/rates/")
-                        .method("GET", null).build()).execute()
+                         .method("GET", null).build()).execute()
                 val body = JSONObject(resp.body().string()).getJSONObject("rates")
                 val rublesPerUsd = body.get("RUB").toString().toFloat()
                 val usdPerGbg = (((1 / body.get("XAU").toString().toFloat()) / 31.1034768) / 1000).toFloat()

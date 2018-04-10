@@ -8,7 +8,7 @@ import android.arch.lifecycle.Transformations
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.UserAuthResponse
-import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 
@@ -38,7 +38,7 @@ data class AuthUserInput(val login: String,
                          val postingWif: String = "",
                          val activeWif: String = "")
 
-class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData> {
+class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserData> {
     val userProfileState = MutableLiveData<UserProfileState>()
     val userAuthState = Transformations.map(userProfileState,
             {
@@ -54,7 +54,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
         mRepository.requestActiveUserDataUpdate()
     }
 
-    override fun onChanged(t: UserData?) {
+    override fun onChanged(t: AppUserData?) {
         if (t == null || !t.isUserLoggedIn) {
             userProfileState.value = UserProfileState(isLoggedIn = false,
                     isPostingKeyVisible = true,
@@ -135,8 +135,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
             }
         } else {
             userProfileState.value = UserProfileState(isLoggedIn = true,
-                    userName = resp.accountInfo.userName ?: "",
-                    avatarPath = resp.accountInfo.avatarPath,
+                    userName = resp.accountInfo.golosUser.userName,
+                    avatarPath = resp.accountInfo.golosUser.avatarPath,
                     userPostsCount = resp.accountInfo.postsCount,
                     userAccountWorth = resp.accountInfo.accountWorth,
                     isLoading = false,
@@ -153,7 +153,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<UserData
         }
     }
 
-    private fun initUser(userData: UserData) {
+    private fun initUser(userData: AppUserData) {
         if (userData.privateActiveWif != null || userData.privatePostingWif != null) {
             userProfileState.value = UserProfileState(isLoggedIn = true,
                     isLoading = false,

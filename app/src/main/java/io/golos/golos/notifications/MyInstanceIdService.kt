@@ -7,6 +7,7 @@ import timber.log.Timber
 
 /**
  * Created by yuri on 05.03.18.
+ * frGUvdd3Hpg:APA91bF6gz5U_cWY6V0uWSIe_GLI5pHFnfMy8gPEbDm3eoGekoDtMuxjbBJl_Ps55CllWF1nE5QZm70nxftxURzwowZ2q_0_oTRJDw9cgcZBpaZgp4Fuos4KdAxHNG-GlOPS_kUOCmRF
  */
 class MyInstanceIdService : FirebaseInstanceIdService() {
     override fun onTokenRefresh() {

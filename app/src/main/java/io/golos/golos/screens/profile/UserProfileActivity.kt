@@ -9,7 +9,7 @@ import io.golos.golos.screens.GolosActivity
 /**
  * Created by yuri on 15.12.17.
  */
-class ProfileActivity : GolosActivity() {
+class UserProfileActivity : GolosActivity() {
     private var fragment: UserProfileFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +31,7 @@ class ProfileActivity : GolosActivity() {
         private val USERNAME_TAG = "USERNAME_TAG"
         fun start(ctx: Context,
                   username: String) {
-            val i = Intent(ctx, ProfileActivity::class.java)
+            val i = Intent(ctx, UserProfileActivity::class.java)
             i.putExtra(USERNAME_TAG, username)
             ctx.startActivity(i)
         }

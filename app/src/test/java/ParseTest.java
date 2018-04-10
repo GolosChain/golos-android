@@ -195,4 +195,5 @@ public class ParseTest {
         assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(2));
     }
 
+
 }

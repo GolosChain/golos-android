@@ -33,7 +33,9 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Account
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
@@ -363,3 +365,12 @@ public fun ViewGroup.iterator(): Iterator<View> {
 }
 
 public operator fun ViewGroup.get(position: Int) = if (position < childCount) getChildAt(position) else null
+/**
+ * Created by yuri on 06.11.17.
+ */
+val mapper by lazy {
+    val mapper = jacksonObjectMapper()
+    mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
+    mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+    mapper
+}

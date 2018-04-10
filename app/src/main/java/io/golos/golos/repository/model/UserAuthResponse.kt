@@ -1,6 +1,6 @@
 package io.golos.golos.repository.model
 
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.GolosError
 
 /**
@@ -10,5 +10,5 @@ data class UserAuthResponse(val isKeyValid: Boolean,
                             val postingAuth: Pair<String, String?>? = null,
                             val activeAuth: Pair<String, String?>? = null,
                             val error: GolosError? = null,
-                            val accountInfo: AccountInfo)
+                            val accountInfo: GolosUserAccountInfo)
 

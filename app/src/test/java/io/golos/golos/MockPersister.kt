@@ -5,7 +5,7 @@ import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.UserAvatar
-import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.utils.toArrayList
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -16,7 +16,7 @@ import kotlin.collections.HashMap
 object MockPersister : Persister() {
     var users = ArrayList<UserAvatar>()
     var tags = ArrayList<Tag>()
-    var userData: UserData? = null
+    var userData: AppUserData? = null
     var name: String? = null
     var userSubscribedTags = ArrayList<Tag>()
     override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
@@ -34,9 +34,9 @@ object MockPersister : Persister() {
 
     }
 
-    override fun getActiveUserData(): UserData? = userData
+    override fun getActiveUserData(): AppUserData? = userData
 
-    override fun saveUserData(userData: UserData) {
+    override fun saveUserData(userData: AppUserData) {
         this.userData = userData
     }
 

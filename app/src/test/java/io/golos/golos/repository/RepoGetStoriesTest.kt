@@ -8,7 +8,7 @@ import io.golos.golos.MockPersister
 import io.golos.golos.MockUserSettings
 import io.golos.golos.repository.api.ApiImpl
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import org.junit.Assert
 import org.junit.Before
@@ -195,7 +195,7 @@ class RepoGetStoriesTest {
     fun getAccountInfo() {
         var items = repo.getUserInfo("yuri-vlad")
         Assert.assertNull(items.value)
-        var userInfo: AccountInfo? = null
+        var userInfo: GolosUserAccountInfo? = null
         repo.requestUserInfoUpdate("yuri-vlad", { a, _ ->
             userInfo = a
         })

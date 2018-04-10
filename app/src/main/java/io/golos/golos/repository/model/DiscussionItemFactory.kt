@@ -9,6 +9,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
 import org.json.JSONException
 import org.json.JSONObject

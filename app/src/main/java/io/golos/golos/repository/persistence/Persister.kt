@@ -9,7 +9,7 @@ import io.golos.golos.App
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.Tag
-import io.golos.golos.repository.model.mapper
+import io.golos.golos.utils.mapper
 import io.golos.golos.repository.persistence.model.*
 import io.golos.golos.utils.toArrayList
 import timber.log.Timber
@@ -36,9 +36,9 @@ abstract class Persister {
 
     abstract fun saveCurrentUserName(name: String?)
 
-    abstract fun getActiveUserData(): UserData?
+    abstract fun getActiveUserData(): AppUserData?
 
-    abstract fun saveUserData(userData: UserData)
+    abstract fun saveUserData(userData: AppUserData)
 
     abstract fun saveTags(tags: List<Tag>)
 
@@ -179,20 +179,20 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mPreference.edit().putString("username", name).apply()
     }
 
-    override fun getActiveUserData(): UserData? {
+    override fun getActiveUserData(): AppUserData? {
         val userDataString = mPreference.getString("userdata", "") ?: return null
         if (userDataString.isEmpty()) return null
-        val userData = mapper.readValue(userDataString, UserData::class.java)
+        val userData = mapper.readValue(userDataString, AppUserData::class.java)
         val keys = getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
         userData.privateActiveWif = keys[PrivateKeyType.ACTIVE]
         userData.privatePostingWif = keys[PrivateKeyType.POSTING]
         return userData
     }
 
-    override fun saveUserData(userData: UserData) {
+    override fun saveUserData(userData: AppUserData) {
         saveKeys(mapOf(Pair(PrivateKeyType.POSTING, userData.privatePostingWif),
                 Pair(PrivateKeyType.ACTIVE, userData.privateActiveWif)))
-        val copy = userData.clone() as UserData
+        val copy = userData.clone() as AppUserData
         copy.privateActiveWif = null
         copy.privatePostingWif = null
         mPreference.edit().putString("userdata", mapper.writeValueAsString(copy)).commit()
@@ -207,7 +207,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
 
 
 private class MockPersister : Persister() {
-    private var userData: UserData? = null
+    private var userData: AppUserData? = null
     private var currentUserName: String? = null
     override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
 
@@ -264,11 +264,11 @@ private class MockPersister : Persister() {
         currentUserName = name
     }
 
-    override fun getActiveUserData(): UserData? {
+    override fun getActiveUserData(): AppUserData? {
         return userData
     }
 
-    override fun saveUserData(userData: UserData) {
+    override fun saveUserData(userData: AppUserData) {
         this.userData = userData
     }
 

@@ -2,7 +2,7 @@ package io.golos.golos
 
 import eu.bittrade.libs.steemj.Golos4J
 import io.golos.golos.repository.ImageLoadRunnable
-import io.golos.golos.repository.model.mapper
+import io.golos.golos.utils.mapper
 import io.golos.golos.screens.editor.DraftsPersister
 import org.junit.Test
 import java.util.*

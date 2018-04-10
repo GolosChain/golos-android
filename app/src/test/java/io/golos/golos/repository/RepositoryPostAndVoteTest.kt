@@ -9,8 +9,8 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.UserObject
-import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
+import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
@@ -445,8 +445,8 @@ class RepositoryPostAndVoteTest {
     @Test
     fun testFollowAndUnfollow() {
         val vredinkaAccount = "vredinka2345"
-        var vredinkaAccountInfo: AccountInfo? = null
-        var userAcc: UserData? = null
+        var vredinkaAccountInfo: GolosUserAccountInfo? = null
+        var userAcc: AppUserData? = null
         var vredinkaSubscribers: List<UserObject>? = null
 
         repo.getSubscribersToBlog(vredinkaAccount).observeForever {

@@ -107,9 +107,11 @@
     <string name="enter_private_key">Необходимо ввести приватный, а не публичный ключ</string>
     <string name="tags_you_subscribed">теги, на которые вы подписаны</string>
     <string name="popular_now">популярное сейчас</string>
-    <string name="no_tags_chose">Ни один тэг не выбран</string>
+    <string name="no_tags_chose">Ни один тег не выбран</string>
     <string name="subscribed">подписанные</string>
     <string name="tags">теги</string>
+    <string name="users">пользователи</string>
+    <string name="users_search">Поиск по пользователям</string>
     <string name="tags_search">Поиск по тегам</string>
     <string name="golos_search">Поиск в  Golos.io</string>
     <string name="recommended">Рекомендуемые</string>
@@ -154,7 +156,7 @@
     <string name="gbg_format">GBG%s</string>
     <string name="voting_power">Сила голоса</string>
     <string name="general_settings">Общие</string>
-    <string name="currency_precision">Отображение наград</string>
+    <string name="currency_precision">Отображение наград,\nокругление</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
@@ -165,9 +167,9 @@
         <item>GBG</item>
     </string-array>
     <string-array name="precision">
-        <item>Округлять до целых чисел</item>
-        <item>Один знак после запятой</item>
-        <item>Два знака после запятой</item>
-        <item>Три знака после запятой</item>
+        <item>До целых</item>
+        <item>Один знак</item>
+        <item>Два знака</item>
+        <item>Три знака</item>
     </string-array>
 </resources>

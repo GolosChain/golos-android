@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.screens.tags.model.LocalizedTag
+import io.golos.golos.screens.tags.views.TagsAndUsersPager
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.getVectorDrawable
 
@@ -17,7 +18,7 @@ import io.golos.golos.utils.getVectorDrawable
 data class SearchTagState(val tag: LocalizedTag,
                           val onTagClickListener: (RecyclerView.ViewHolder) -> Unit)
 
-class SearchTagAdapter(var onTagClick: (LocalizedTag) -> Unit) : RecyclerView.Adapter<TagWithSearchIconVh>() {
+class SearchTagAdapter(var onTagClick: TagsAndUsersPager.OnTagClickListener?) : RecyclerView.Adapter<TagWithSearchIconVh>() {
 
     var tags: List<LocalizedTag> = ArrayList()
         set(value) {
@@ -37,7 +38,7 @@ class SearchTagAdapter(var onTagClick: (LocalizedTag) -> Unit) : RecyclerView.Ad
 
     override fun onBindViewHolder(holder: TagWithSearchIconVh, position: Int) {
         holder.state = SearchTagState(tags[position],
-                { onTagClick.invoke(tags[it.adapterPosition]) })
+                { onTagClick?.onClick(tags[it.adapterPosition]) })
 
     }
 
@@ -56,6 +57,7 @@ class TagWithSearchIconVh(parent: ViewGroup) : GolosViewHolder(R.layout.vh_tag_s
     init {
         mTagNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_search_icon_gray_24dp), null, null, null)
     }
+
     var state: SearchTagState? = null
         set(value) {
             field = value

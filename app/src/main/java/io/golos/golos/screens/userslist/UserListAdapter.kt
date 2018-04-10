@@ -24,8 +24,8 @@ data class UserListItemState(val item: UserListRowData,
                              val onUserClick: (RecyclerView.ViewHolder) -> Unit,
                              val onSubscribeClick: (RecyclerView.ViewHolder) -> Unit)
 
-class UserListAdapter(private val onUserClick: (UserListRowData) -> Unit = { _ -> },
-                      private val onSubscribeClick: (UserListRowData) -> Unit = { _ -> }) : RecyclerView.Adapter<UserListViewHolder>() {
+class UserListAdapter(private var onUserClick: (UserListRowData) -> Unit = { _ -> },
+                      private var onSubscribeClick: (UserListRowData) -> Unit = { _ -> }) : RecyclerView.Adapter<UserListViewHolder>() {
     private val mHashes = HashMap<String, Int>()
     var listItems: List<UserListRowData> = ArrayList()
         set(value) {
@@ -56,6 +56,11 @@ class UserListAdapter(private val onUserClick: (UserListRowData) -> Unit = { _ -
 
         }
 
+
+    fun setUserClickListener(listener: (UserListRowData) -> Unit = { _ -> }) {
+        onUserClick = listener
+        notifyDataSetChanged()
+    }
 
     override fun getItemCount(): Int {
         return listItems.size
@@ -91,7 +96,8 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 if (value.item.avatar != null) {
                     Glide
                             .with(itemView)
-                            .load(ImageUriResolver.resolveImageWithSize(value.item.avatar ?: "", wantedwidth = mAvatar.width))
+                            .load(ImageUriResolver.resolveImageWithSize(value.item.avatar
+                                    ?: "", wantedwidth = mAvatar.width))
                             .apply(RequestOptions()
                                     .error(R.drawable.ic_person_gray_80dp)
                                     .placeholder(R.drawable.ic_person_gray_80dp))
@@ -105,17 +111,31 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 if (value.item.shownValue == null) mSubTitleTv.setViewGone()
                 else mSubTitleTv.setViewVisible()
 
-                mSubscibeButton.text = if (value.item.subscribeStatus.isCurrentUserSubscribed) itemView.context.getString(R.string.unfollow)
-                else itemView.context.getString(R.string.follow)
+                val subscriptionState = value.item.subscribeStatus?.isCurrentUserSubscribed
+                if (subscriptionState == null) {
+                    mSubscibeButton.setViewGone()
+                } else {
+                    mSubscibeButton.setViewVisible()
+                    mSubscibeButton.text = if (subscriptionState) itemView.context.getString(R.string.unfollow)
+                    else itemView.context.getString(R.string.follow)
+                }
+
                 mSubscibeButton.setOnClickListener { value.onSubscribeClick.invoke(this) }
                 mAvatar.setOnClickListener { value.onUserClick.invoke(this) }
                 mTitleText.setOnClickListener { value.onUserClick.invoke(this) }
-                if (value.item.subscribeStatus.updatingState == UpdatingState.UPDATING) {
-                    mProgress.visibility = View.VISIBLE
-                    mSubscibeButton.visibility = View.GONE
+
+                val updatingState = value.item.subscribeStatus?.updatingState
+                if (updatingState == null) {
+                    mProgress.setViewGone()
+                    mSubscibeButton.setViewGone()
                 } else {
-                    mProgress.visibility = View.GONE
-                    mSubscibeButton.visibility = View.VISIBLE
+                    if (updatingState == UpdatingState.UPDATING) {
+                        mProgress.setViewVisible()
+                        mSubscibeButton.setViewGone()
+                    } else {
+                        mProgress.setViewGone()
+                        mSubscibeButton.setViewVisible()
+                    }
                 }
             }
         }

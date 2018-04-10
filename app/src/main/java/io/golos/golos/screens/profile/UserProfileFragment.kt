@@ -157,11 +157,11 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     override fun onChanged(t: UserAccountModel?) {
         if (view == null) return
         val it = t?.accountInfo ?: return
-        mUserName.text = it.userName?.capitalize()
+        mUserName.text = it.golosUser.userName.capitalize()
         val glide = Glide.with(view ?: return)
-        if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
+        if (it.golosUser.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
-            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth = mUserAvatar.width))
+            glide.load(ImageUriResolver.resolveImageWithSize(it.golosUser.avatarPath, wantedwidth = mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)

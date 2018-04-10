@@ -15,7 +15,7 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.screens.editor.EditorActivity
-import io.golos.golos.screens.profile.ProfileActivity
+import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
@@ -289,7 +289,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onUserClick(context: Context, userName: String?) {
-        ProfileActivity.start(context, userName?.toLowerCase() ?: return)
+        UserProfileActivity.start(context, userName?.toLowerCase() ?: return)
     }
 
     private fun showError(error: GolosError) {

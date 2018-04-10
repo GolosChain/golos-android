@@ -10,8 +10,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.AccountInfo
-import io.golos.golos.repository.persistence.model.UserData
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
+import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -101,13 +102,13 @@ abstract class Repository {
                                     postingWif: String,
                                     listener: (UserAuthResponse) -> Unit)
 
-    abstract fun getCurrentUserDataAsLiveData(): LiveData<UserData>
+    abstract fun getCurrentUserDataAsLiveData(): LiveData<AppUserData>
 
     abstract fun requestActiveUserDataUpdate()
 
-    abstract fun getUserInfo(userName: String): LiveData<AccountInfo>
+    abstract fun getUserInfo(userName: String): LiveData<GolosUserAccountInfo>
 
-    abstract fun requestUserInfoUpdate(userName: String, completionHandler: (AccountInfo, GolosError?) -> Unit)
+    abstract fun requestUserInfoUpdate(userName: String, completionHandler: (GolosUserAccountInfo, GolosError?) -> Unit)
 
     abstract fun deleteUserdata()
 
@@ -195,6 +196,7 @@ abstract class Repository {
 
     abstract val notificationsrepository: NotificationsRepository
 
+    abstract fun getGolosUsers(nick: String): LiveData<List<GolosUser>>
 }
 
 interface ImageLoadRunnable : Runnable

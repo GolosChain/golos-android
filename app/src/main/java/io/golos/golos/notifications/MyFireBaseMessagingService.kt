@@ -6,6 +6,7 @@ import timber.log.Timber
 
 /**
  * Created by yuri on 05.03.18.
+ * AIzaSyAY0spUFCuG2oTYlyTjJrrUKg93A6B62aQ
  */
 class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {

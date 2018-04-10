@@ -1,11 +1,16 @@
 package io.golos.golos
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.mapper
+import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
 import org.junit.Assert
 import org.junit.Test
@@ -157,4 +162,33 @@ class StoryParserTests {
                 }
     }
 
+    @Test
+    fun testSerialization() {
+        val list = listOf(TestDataA("test"), TestDataB(100L), TestDataA("test1"))
+
+        val string = jacksonObjectMapper().writeValueAsString(list)
+
+        val type = mapper.typeFactory.constructCollectionType(List::class.java, TestData::class.java)
+        val out = jacksonObjectMapper().readValue<List<TestData>>(string, type)
+
+        assertEquals(out[0], TestDataA("test"))
+        assertEquals(out[1], TestDataB(100L))
+        assertEquals(out[2], TestDataA("test1"))
+        println(string)
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+    @JsonSubTypes(value = [(JsonSubTypes.Type(value = TestDataA::class, name = "objectOfTypeA")),
+        (JsonSubTypes.Type(value = TestDataB::class, name = "objectOfTypeB"))]
+    )
+    abstract class TestData
+
+    data class TestDataA(val stringProperty: String) : TestData() {
+        val type = "objectOfTypeA"
+    }
+
+    data class TestDataB(val longProperty: Long) : TestData() {
+        val type = "objectOfTypeB"
+    }
 }
+

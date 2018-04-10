@@ -11,7 +11,8 @@ import eu.bittrade.libs.steemj.util.AuthUtils
 import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.AccountInfo
+import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -28,7 +29,7 @@ internal class ApiImpl : GolosApi() {
     override fun getStory(blog: String,
                           author: String,
                           permlink: String,
-                          accountDataHandler: (List<AccountInfo>) -> Unit): StoryWithComments {
+                          accountDataHandler: (List<GolosUserAccountInfo>) -> Unit): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink))
         val story = StoryWithComments(rawStory!!)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
@@ -98,23 +99,23 @@ internal class ApiImpl : GolosApi() {
         if (masterKey == null && activeWif == null && postingWif == null)
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                    accountInfo = AccountInfo(userName))
+                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
 
         if (userName.length < 3 || userName.length > 16) {
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                    accountInfo = AccountInfo(userName))
+                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
         }
         if (activeWif?.startsWith("GLS") == true
                 || postingWif?.startsWith("GLS") == true) {
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.enter_private_key),
-                    accountInfo = AccountInfo(userName))
+                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
         }
         val acc = getAccountInfo(userName)
         if (acc.activePublicKey.isEmpty()) return UserAuthResponse(false, null, null,
                 error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                accountInfo = AccountInfo(userName))
+                accountInfo = GolosUserAccountInfo(GolosUser(userName)))
 
         if (masterKey != null) {
             val keys = AuthUtils.generatePublicWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
@@ -201,16 +202,16 @@ internal class ApiImpl : GolosApi() {
                 null,
                 null,
                 error = error,
-                accountInfo = AccountInfo(username))
+                accountInfo = GolosUserAccountInfo(GolosUser(username)))
     }
 
-    override fun getAccountInfo(of: String): AccountInfo {
+    override fun getAccountInfo(of: String): GolosUserAccountInfo {
         val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
-        if (accs.size == 0 || accs[0] == null) return AccountInfo(of)
+        if (accs.size == 0 || accs[0] == null) return GolosUserAccountInfo(GolosUser(of))
         return convertExtendedAccountToAccountInfo(accs[0], true)
     }
 
-    private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount, fetchSubscribersInfo: Boolean): AccountInfo {
+    private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount, fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
         val votePower = acc.vestingShares.amount * 0.000268379
         val golosNum = acc.balance.amount
         val gbgAmount = acc.sbdBalance.amount
@@ -229,9 +230,8 @@ internal class ApiImpl : GolosApi() {
         val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
         val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
 
-        return AccountInfo(acc.name.name,
+        return GolosUserAccountInfo(GolosUser(acc.name.name, acc.avatarPath),
                 acc.moto,
-                acc.avatarPath,
                 acc.postCount,
                 accWorth,
                 followingCount,
@@ -433,5 +433,11 @@ internal class ApiImpl : GolosApi() {
 
             return out
         }
+    }
+
+    override fun getGolosUsers(nick: String): List<GolosUser> {
+        return mGolosApi.databaseMethods.lookupAccounts(nick, 10)
+                .filter { it != null }
+                .map { GolosUser(it) }
     }
 }

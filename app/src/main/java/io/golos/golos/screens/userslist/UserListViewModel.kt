@@ -9,7 +9,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.UserBlogSubscription
 import io.golos.golos.repository.model.UserObject
-import io.golos.golos.screens.profile.ProfileActivity
+import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.screens.userslist.model.UserListRowData
@@ -155,7 +155,7 @@ class UserListViewModel : ViewModel() {
     }
 
     fun onUserClick(ctx: Context, it: UserListRowData) {
-        ProfileActivity.start(ctx, it.name)
+        UserProfileActivity.start(ctx, it.name)
     }
 
     fun onSubscribeClick(it: UserListRowData) {
@@ -171,8 +171,8 @@ class UserListViewModel : ViewModel() {
                 if (e != null) mLiveData.value = UserListViewState(mTitle, mLiveData.value?.users
                         ?: ArrayList(), e)
             }
-            if (it.subscribeStatus.isCurrentUserSubscribed) Repository.get.unSubscribeOnUserBlog(it.name, handler)
-            else Repository.get.subscribeOnUserBlog(it.name, handler)
+            if (it.subscribeStatus?.isCurrentUserSubscribed == true) Repository.get.unSubscribeOnUserBlog(it.name, handler)
+            else if (it.subscribeStatus?.isCurrentUserSubscribed == false) Repository.get.subscribeOnUserBlog(it.name, handler)
         }
     }
 

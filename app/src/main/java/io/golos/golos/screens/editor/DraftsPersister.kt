@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.App
-import io.golos.golos.repository.model.mapper
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.getString
 import io.golos.golos.utils.toArrayList
 import timber.log.Timber
