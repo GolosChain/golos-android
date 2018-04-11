@@ -14,6 +14,8 @@ import io.golos.golos.R
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.setVectorDrawableEnd
+import io.golos.golos.utils.setVectorDrawableStart
 
 /**
  * Created by yuri on 08.12.17.
@@ -34,6 +36,13 @@ class WalletFragment : GolosFragment(), Observer<UserAccountModel> {
         mGolosSafeNumTV = view.findViewById(R.id.safe_golos_num_tv)
         mGolosSafeGbgNum = view.findViewById(R.id.safe_gbg_num_tv)
         mAccWorthNumTv = view.findViewById(R.id.account_worth_num_tv)
+
+        mGolosnumTv.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
+        mGolosPoweNumrTv.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
+        mGbgNumTv.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
+        mGolosSafeNumTV.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
+        mGolosSafeGbgNum.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
+        mAccWorthNumTv.setVectorDrawableEnd(R.drawable.ic_chevron_down_gray_12dp_7d)
 
         return view
     }
@@ -60,8 +69,8 @@ class WalletFragment : GolosFragment(), Observer<UserAccountModel> {
         if (activity == null) return ""
         val mainSpannable = TextAppearanceSpan(activity!!, R.style.ProfileNumberStyle)
         val currnecySpannable = TextAppearanceSpan(activity!!, R.style.ProfileCurrensyStyle)
-        val number = String.format("%.2f", to)
-        val currency = if (isGolosCurrency) "  golos" else "  GBG"
+        val number = String.format("%.3f", to)
+        val currency = if (isGolosCurrency) "  Golos" else "  GBG"
         val spannableString = SpannableString.valueOf(number + " " + currency)
         spannableString.setSpan(mainSpannable, 0, number.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannableString.setSpan(currnecySpannable,

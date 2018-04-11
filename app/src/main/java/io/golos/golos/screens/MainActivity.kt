@@ -2,27 +2,65 @@ package io.golos.golos.screens
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.os.Handler
+import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.view.View
+import android.widget.TextView
 import io.golos.golos.R
-
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.utils.asIntentToShareString
 import io.golos.golos.utils.showSnackbar
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
+    private lateinit var mInstanceIdTv: TextView
+    private lateinit var mLastMessageTv: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_tabs)
+
+       /* mInstanceIdTv = findViewById(R.id.i_id_tv)
+        mLastMessageTv = findViewById(R.id.last_m_tv)
+        mLastMessageTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("data", "")
+        mInstanceIdTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
+
+
+        fun makeHadler(){
+            Handler().postDelayed({
+                mLastMessageTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("data", "")
+                mInstanceIdTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
+                makeHadler()
+            }, 5000)
+        }
+        makeHadler()*/
+
+      /*  mInstanceIdTv.setOnLongClickListener(object : View.OnLongClickListener {
+            override fun onLongClick(p0: View?): Boolean {
+                val text = mInstanceIdTv.text.toString()
+                startActivity(text.asIntentToShareString())
+                return true
+            }
+
+        })
+
+        mLastMessageTv.setOnLongClickListener(object : View.OnLongClickListener {
+            override fun onLongClick(p0: View?): Boolean {
+                val text = mLastMessageTv.text.toString()
+                startActivity(text.asIntentToShareString())
+                startActivity(text.asIntentToShareString())
+                return true
+            }
+        })*/
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)

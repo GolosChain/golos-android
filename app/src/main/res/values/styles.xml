@@ -194,9 +194,10 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/textColorP</item>
-        <item name="android:background">@drawable/rect_round_corners_outline_gray</item>
+        <item name="android:drawablePadding">10dp</item>
+
         <item name="android:paddingStart">@dimen/material_big</item>
-        <item name="android:paddingEnd">@dimen/material_big</item>
+        <item name="android:paddingEnd">0dp</item>
         <item name="android:gravity">center</item>
     </style>
 

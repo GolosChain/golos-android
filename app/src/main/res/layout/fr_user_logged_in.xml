@@ -266,9 +266,9 @@
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/settings_btn"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="@dimen/margin_material"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_margin="@dimen/margin_material"
                     android:padding="0dp"
                     app:backgroundTint="@android:color/transparent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -281,6 +281,7 @@
                     android:layout_height="44dp"
                     android:background="?selectableItemBackground"
                     android:clickable="true"
+                    android:paddingEnd="@dimen/margin_material"
                     app:layout_constraintTop_toBottomOf="@+id/subscribers_table">
 
                     <ImageView
@@ -314,17 +315,17 @@
                             android:textSize="@dimen/font_medium" />
 
                         <TextView
-                            android:textColor="@color/gray_7d"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_marginEnd="@dimen/margin_material_half"
                             android:gravity="center_vertical"
-                            android:text="Golos" />
+                            android:text="Golos"
+                            android:textColor="@color/gray_7d" />
 
                         <ImageButton
+                            android:id="@+id/proceed_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_marginEnd="@dimen/margin_material"
                             android:background="@null"
                             app:srcCompat="@drawable/ic_chevron_right_gray_14dp" />
                     </LinearLayout>

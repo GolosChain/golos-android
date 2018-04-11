@@ -1,5 +1,6 @@
 package io.golos.golos.notifications
 
+import android.preference.PreferenceManager
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.iid.FirebaseInstanceIdService
 import com.google.firebase.messaging.FirebaseMessaging
@@ -16,5 +17,6 @@ class MyInstanceIdService : FirebaseInstanceIdService() {
         Timber.e("token is $token")
         FirebaseMessaging.getInstance().subscribeToTopic("all")
         FirebaseMessaging.getInstance().subscribeToTopic("all_android")
+        PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("token", token).commit()
     }
 }

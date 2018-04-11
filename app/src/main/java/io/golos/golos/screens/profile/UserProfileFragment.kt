@@ -44,12 +44,14 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mFollowBtn: Button
     private lateinit var mFollowProgress: View
     private lateinit var mSubscribersBtn: View
+    private lateinit var mWalletBalanceLo: View
     private lateinit var mSubscriptionsBtn: View
     private lateinit var mAvatarOverlay: View
     private lateinit var mVotingPowerLo: View
     private lateinit var mVotingPowerTv: TextView
     private lateinit var mVotingPowerIndicator: ProgressBar
     private lateinit var mGolosCountTV: TextView
+    private lateinit var mProceedButton: View
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -62,11 +64,13 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mSubscriptionsNum = v.findViewById(R.id.subscriptions_num_tv)
         mSubscribers = v.findViewById(R.id.subscribers_tv)
         mSubscriptions = v.findViewById(R.id.subscribes_tv)
+        mProceedButton = v.findViewById(R.id.proceed_btn)
         mPostsTv = v.findViewById(R.id.posts_tv)
         mPostsCountTv = v.findViewById(R.id.posts_num_tv)
         mFollowBtn = v.findViewById(R.id.follow_btn)
         mFollowProgress = v.findViewById(R.id.progress)
         mSubscriptionsBtn = v.findViewById(R.id.subscriptions_lo)
+        mWalletBalanceLo = v.findViewById(R.id.wallet_balance_lo)
         mSubscribersBtn = v.findViewById(R.id.subscribers_lo)
         mAvatarOverlay = v.findViewById(R.id.avatar_overlay)
         mVotingPowerLo = v.findViewById(R.id.voting_power_lo)
@@ -90,7 +94,6 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val i = Intent(activity!!, SettingActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         })
-
 
         return v
     }
@@ -153,6 +156,12 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             mAvatarOverlay.setViewGone()
             mVotingPowerIndicator.setViewGone()
             mVotingPowerLo.setViewGone()
+        }
+        if (!mViewModel.canUserSeeVotingPower()) mProceedButton.setViewGone()
+        else {
+            mWalletBalanceLo.setOnClickListener {
+                WalletActivity.start(activity ?: return@setOnClickListener)
+            }
         }
     }
 

@@ -100,6 +100,14 @@ fun String.asIntentToShowUrl(): Intent {
     return i
 }
 
+fun String.asIntentToShareString(): Intent {
+    val sendIntent = Intent()
+    sendIntent.action = Intent.ACTION_SEND
+    sendIntent.putExtra(Intent.EXTRA_TEXT, this)
+    sendIntent.type = "text/plain"
+    return sendIntent
+}
+
 fun TextView.setTextColorCompat(@ColorRes colorId: Int) {
     this.setTextColor(ContextCompat.getColor(this.context, colorId))
 }
@@ -305,6 +313,10 @@ public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
 
 public fun TextView.setVectorDrawableStart(id: Int) {
     this.setCompoundDrawablesWithIntrinsicBounds(this.getVectorDrawable(id), null, null, null)
+}
+
+public fun TextView.setVectorDrawableEnd(id: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(null, null, this.getVectorDrawable(id), null)
 }
 
 fun isOnMainThread(): Boolean {

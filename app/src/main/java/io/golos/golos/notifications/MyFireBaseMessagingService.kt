@@ -1,5 +1,6 @@
 package io.golos.golos.notifications
 
+import android.preference.PreferenceManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber
@@ -13,6 +14,9 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(p0)
         Timber.e("onMessageReceived $p0")
         Timber.e("onMessageReceived ${p0?.data}")
+
+        PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("data", p0?.data?.toString()
+                ?: "").commit()
     }
 
     override fun onMessageSent(p0: String?) {
@@ -23,5 +27,6 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onDeletedMessages() {
         super.onDeletedMessages()
         Timber.e("onDeletedMessages")
+
     }
 }
