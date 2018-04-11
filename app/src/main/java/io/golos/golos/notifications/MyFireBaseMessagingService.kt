@@ -12,6 +12,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {
         super.onMessageReceived(p0)
         Timber.e("onMessageReceived $p0")
+        Timber.e("onMessageReceived ${p0?.data}")
     }
 
     override fun onMessageSent(p0: String?) {

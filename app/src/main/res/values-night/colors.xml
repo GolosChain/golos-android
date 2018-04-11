@@ -22,4 +22,5 @@
     <color name="profile_divider_color">@android:color/black</color>
     <color name="same_tags_ribbon_back">@android:color/black</color>
     <color name="profile_tabs_color">#b0b0b0</color>
+    <color name="profile_gap_color">#000000</color>
 </resources>

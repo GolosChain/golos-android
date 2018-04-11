@@ -45,4 +45,5 @@
     <color name="text_color_white_black">#333333</color>
     <color name="story_toolbar_color">@android:color/white</color>
     <color name="semi_white">#99ffffff</color>
+    <color name="profile_gap_color">#F2F4F7</color>
 </resources>

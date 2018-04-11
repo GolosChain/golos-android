@@ -77,28 +77,27 @@
                     android:layout_width="@dimen/avatar_size"
                     android:layout_height="@dimen/avatar_size"
                     android:gravity="center"
-                    android:visibility="gone"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@id/avatar_iv"
                     app:layout_constraintEnd_toEndOf="@id/avatar_iv"
                     app:layout_constraintStart_toStartOf="@id/avatar_iv"
                     app:layout_constraintTop_toTopOf="@id/avatar_iv">
 
                     <TextView
-                        android:textColor="@android:color/black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/voting_power"
+                        android:textColor="@android:color/black"
                         android:textSize="@dimen/font_small" />
 
                     <TextView
-                        android:textColor="@android:color/black"
                         android:id="@+id/voting_power_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_material_half"
-                        android:textSize="@dimen/font_medium"
-                        />
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/font_medium" />
                 </LinearLayout>
 
                 <ProgressBar
@@ -275,6 +274,67 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_settings_white_24dp" />
+
+                <LinearLayout
+                    android:id="@+id/wallet_balance_lo"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    app:layout_constraintTop_toBottomOf="@+id/subscribers_table">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="26dp"
+                        app:srcCompat="@drawable/ic_wallet_18dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/margin_material_small"
+                        android:gravity="center_vertical"
+                        android:text="@string/tv_wallet_balance"
+                        android:textColor="@color/textColorP" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="end">
+
+                        <TextView
+                            android:id="@+id/tv_wallet_balance_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="@dimen/margin_material_half"
+                            android:gravity="center_vertical"
+
+                            android:textAllCaps="true"
+                            android:textColor="@color/text_color_white_black"
+                            android:textSize="@dimen/font_medium" />
+
+                        <TextView
+                            android:textColor="@color/gray_7d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="@dimen/margin_material_half"
+                            android:gravity="center_vertical"
+                            android:text="Golos" />
+
+                        <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="@dimen/margin_material"
+                            android:background="@null"
+                            app:srcCompat="@drawable/ic_chevron_right_gray_14dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:background="@color/profile_gap_color"
+                    app:layout_constraintTop_toBottomOf="@+id/wallet_balance_lo" />
             </android.support.constraint.ConstraintLayout>
 
 

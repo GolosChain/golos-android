@@ -49,6 +49,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mVotingPowerLo: View
     private lateinit var mVotingPowerTv: TextView
     private lateinit var mVotingPowerIndicator: ProgressBar
+    private lateinit var mGolosCountTV: TextView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -71,6 +72,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mVotingPowerLo = v.findViewById(R.id.voting_power_lo)
         mVotingPowerTv = v.findViewById(R.id.voting_power_tv)
         mVotingPowerIndicator = v.findViewById(R.id.voting_power_progress)
+        mGolosCountTV = v.findViewById(R.id.tv_wallet_balance_count)
         val pager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
@@ -181,6 +183,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         t.error?.let {
             view?.showSnackbar(it.localizedMessage ?: 0)
         }
+        mGolosCountTV.text = "${String.format("%.3f", t?.accountInfo?.golosAmount ?: 0.0)}"
         mUserAvatar.isClickable = mViewModel.canUserSeeVotingPower()
         if (mVotingPowerLo.visibility == View.VISIBLE) {
             val value = it.votingPower / 100.0

@@ -158,6 +158,7 @@
     <string name="voting_power">Voting power</string>
     <string name="general_settings">General settings</string>
     <string name="currency_precision">Bounty display</string>
+    <string name="tv_wallet_balance">Wallet balance</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

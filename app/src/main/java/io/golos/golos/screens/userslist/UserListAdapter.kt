@@ -123,6 +123,7 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 mSubscibeButton.setOnClickListener { value.onSubscribeClick.invoke(this) }
                 mAvatar.setOnClickListener { value.onUserClick.invoke(this) }
                 mTitleText.setOnClickListener { value.onUserClick.invoke(this) }
+                itemView.setOnClickListener { value.onUserClick.invoke(this) }
 
                 val updatingState = value.item.subscribeStatus?.updatingState
                 if (updatingState == null) {

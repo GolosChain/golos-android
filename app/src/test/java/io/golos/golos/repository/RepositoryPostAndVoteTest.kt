@@ -9,8 +9,8 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.UserObject
-import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
@@ -233,8 +233,8 @@ class RepositoryPostAndVoteTest {
             assertNotNull(resp)
             assertNotNull(resp.postingAuth?.second)
             assertNull(resp.activeAuth?.second)
-            assertEquals(userName, resp.accountInfo.userName)
-            assertNotNull(resp.accountInfo.avatarPath)
+            assertEquals(userName, resp.accountInfo.golosUser.userName)
+            assertNotNull(resp.accountInfo.golosUser.avatarPath)
             assertNotNull(resp.accountInfo.userMotto)
             assertTrue(resp.accountInfo.postsCount != 0L)
             assertTrue(resp.accountInfo.subscibesCount != 0L)
