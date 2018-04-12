@@ -159,6 +159,11 @@
     <string name="general_settings">General settings</string>
     <string name="currency_precision">Bounty display</string>
     <string name="tv_wallet_balance">Wallet balance</string>
+    <string name="city">City</string>
+    <string name="site">Site</string>
+    <string name="registrationDate">Registration date</string>
+    <string name="yeat_with_dor">%s y.</string>
+    <string name="information" >Information</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

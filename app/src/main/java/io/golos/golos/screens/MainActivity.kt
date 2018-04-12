@@ -8,14 +8,19 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.view.View
 import android.widget.TextView
+import com.google.firebase.messaging.FirebaseMessaging
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
+import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.asIntentToShareString
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 import io.golos.golos.utils.showSnackbar
+import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult> {
@@ -23,28 +28,41 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var mDoubleBack = false
     private lateinit var mInstanceIdTv: TextView
     private lateinit var mLastMessageTv: TextView
-
+    private lateinit var mTopicTV: TextView
+    private val mHandler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_tabs)
 
-       /* mInstanceIdTv = findViewById(R.id.i_id_tv)
+        mInstanceIdTv = findViewById(R.id.i_id_tv)
         mLastMessageTv = findViewById(R.id.last_m_tv)
+        mTopicTV = findViewById(R.id.topic_tv)
         mLastMessageTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("data", "")
         mInstanceIdTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
-
-
-        fun makeHadler(){
-            Handler().postDelayed({
-                mLastMessageTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("data", "")
-                mInstanceIdTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
+        mTopicTV.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("topic", "")
+        findViewById<View>(R.id.show_modal).setOnClickListener {
+            val modalLo: View = findViewById(R.id.modal_win)
+            if (modalLo.visibility == View.VISIBLE) {
+                mHandler.removeCallbacksAndMessages(null)
+                modalLo.setViewGone()
+            } else {
+                modalLo.setViewVisible()
+                fun makeHadler() {
+                    mHandler.postDelayed({
+                        mLastMessageTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("data", "")
+                        mInstanceIdTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
+                        mTopicTV.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("topic", "")
+                        makeHadler()
+                    }, 5000)
+                }
                 makeHadler()
-            }, 5000)
+            }
         }
-        makeHadler()*/
 
-      /*  mInstanceIdTv.setOnLongClickListener(object : View.OnLongClickListener {
+
+
+        mInstanceIdTv.setOnLongClickListener(object : View.OnLongClickListener {
             override fun onLongClick(p0: View?): Boolean {
                 val text = mInstanceIdTv.text.toString()
                 startActivity(text.asIntentToShareString())
@@ -57,10 +75,32 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
             override fun onLongClick(p0: View?): Boolean {
                 val text = mLastMessageTv.text.toString()
                 startActivity(text.asIntentToShareString())
+                return true
+            }
+        })
+        mTopicTV.setOnLongClickListener(object : View.OnLongClickListener {
+            override fun onLongClick(p0: View?): Boolean {
+                val text = mTopicTV.text.toString()
                 startActivity(text.asIntentToShareString())
                 return true
             }
-        })*/
+        })
+        Repository.get.getCurrentUserDataAsLiveData().observeForever(object : Observer<AppUserData> {
+            override fun onChanged(t: AppUserData?) {
+                val userName = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("topic", null)
+                if (t?.isUserLoggedIn == true) {
+                    if (userName != null) return
+                    FirebaseMessaging.getInstance().subscribeToTopic(t.userName)
+                    PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("topic", (t.userName)).commit()
+                } else if (t?.isUserLoggedIn == false) {
+                    val userName = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("topic", null)
+                    if (userName != null) {
+                        FirebaseMessaging.getInstance().unsubscribeFromTopic(userName)
+                        PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("topic", null).commit()
+                    }
+                }
+            }
+        })
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
@@ -123,6 +163,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         }
 
     }
+
+
+
 
     companion object {
         val STORIES_FRAGMENT_POITION = 0

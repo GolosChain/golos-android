@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.screens.profile.UserInformationFragment
 import io.golos.golos.screens.profile.WalletFragment
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.model.FeedType
@@ -22,7 +23,7 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
         return when (position) {
             0 -> StoriesFragment.getInstance(FeedType.BLOG, StoryFilter(userNameFilter = profileUserName))
             1 -> StoriesFragment.getInstance(FeedType.COMMENTS, StoryFilter(userNameFilter = profileUserName))
-            2 -> WalletFragment()
+            2 -> UserInformationFragment()
             else -> GolosFragment()
         }
     }
@@ -31,7 +32,7 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
         return when (position) {
             0 -> context.getString(R.string.blog)
             1 -> context.getString(R.string.answers)
-            2 -> context.getString(R.string.pouch)
+            2 -> context.getString(R.string.information)
             else -> ""
         }
     }

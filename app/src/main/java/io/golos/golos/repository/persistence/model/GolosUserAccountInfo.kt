@@ -25,4 +25,7 @@ data class GolosUserAccountInfo(val golosUser: GolosUser,
                                 val postingPublicKey: String = "",
                                 val activePublicKey: String = "",
                                 var isCurrentUserSubscribed: Boolean = false,
-                                val votingPower: Int = 0)
+                                val votingPower: Int = 0,
+                                val location: String = "",
+                                val website: String = "",
+                                val registrationDate: Long = 0)

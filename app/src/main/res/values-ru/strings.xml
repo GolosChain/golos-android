@@ -158,6 +158,11 @@
     <string name="general_settings">Общие</string>
     <string name="currency_precision">Отображение наград,\nокругление</string>
     <string name="tv_wallet_balance">Баланс кошелька</string>
+    <string name="city">Город</string>
+    <string name="site">Сайт</string>
+    <string name="yeat_with_dor">%s г.</string>
+    <string name="registrationDate">Дата регистрации</string>
+    <string name="information" >Информация</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

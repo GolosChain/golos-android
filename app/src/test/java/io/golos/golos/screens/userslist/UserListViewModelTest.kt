@@ -67,7 +67,7 @@ class UserListViewModelTest {
         Assert.assertNotNull(status)
         Assert.assertTrue(status!!.users.size > 4)
         val currentSubscriptionsNumber = status!!.users.size
-        Assert.assertTrue(status!!.users.find { !it.subscribeStatus.isCurrentUserSubscribed } == null)
+        Assert.assertTrue(status!!.users.find { it.subscribeStatus?.isCurrentUserSubscribed  == false} == null)
 
         mViewModel.onSubscribeClick(UserListRowData("med", "", "", SubscribeStatus(true, UpdatingState.DONE)))
         Assert.assertEquals("we unsubscribed, so size must decrease ", currentSubscriptionsNumber - 1, status!!.users.size)
@@ -84,10 +84,11 @@ class UserListViewModelTest {
             }
         })
         Assert.assertTrue(status!!.users.size > 4)
-        Assert.assertFalse(status!!.users[3].subscribeStatus.isCurrentUserSubscribed)
+        Assert.assertFalse(status!!.users[3].subscribeStatus?.isCurrentUserSubscribed == false)
 
-        mViewModel.onSubscribeClick(UserListRowData(status!!.users[3].name, "", "", SubscribeStatus(false, UpdatingState.DONE)))
-        Assert.assertTrue(status!!.users[3].subscribeStatus.isCurrentUserSubscribed)
+        mViewModel.onSubscribeClick(UserListRowData(status!!.users[3].name, "", "",
+                SubscribeStatus(false, UpdatingState.DONE)))
+        Assert.assertTrue(status!!.users[3].subscribeStatus?.isCurrentUserSubscribed == true)
         repo.unSubscribeOnUserBlog(status!!.users[3].name, { _, _ -> })
 
     }
@@ -115,15 +116,17 @@ class UserListViewModelTest {
         Assert.assertNotNull(status)
         Assert.assertTrue(status!!.users.size > 1)
 
-        Assert.assertFalse(status!!.users.first().subscribeStatus.isCurrentUserSubscribed)
+        Assert.assertFalse(status!!.users.first().subscribeStatus?.isCurrentUserSubscribed == false)
 
-        mViewModel.onSubscribeClick(UserListRowData(status!!.users.first().name, "", "", SubscribeStatus(false, UpdatingState.DONE)))
+        mViewModel.onSubscribeClick(UserListRowData(status!!.users.first().name, "", "",
+                SubscribeStatus(false, UpdatingState.DONE)))
 
-        Assert.assertTrue(status!!.users.first().subscribeStatus.isCurrentUserSubscribed)
+        Assert.assertTrue(status!!.users.first().subscribeStatus?.isCurrentUserSubscribed == true)
 
-        mViewModel.onSubscribeClick(UserListRowData(status!!.users.first().name, "", "", SubscribeStatus(true, UpdatingState.DONE)))
+        mViewModel.onSubscribeClick(UserListRowData(status!!.users.first().name, "", "",
+                SubscribeStatus(true, UpdatingState.DONE)))
 
-        Assert.assertFalse(status!!.users.first().subscribeStatus.isCurrentUserSubscribed)
+        Assert.assertFalse(status!!.users.first().subscribeStatus?.isCurrentUserSubscribed == false)
     }
 
 }

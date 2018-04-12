@@ -370,7 +370,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 accinfo.golosUser.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
-                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower)
+                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower,
+                                accinfo.location,accinfo.website,accinfo.registrationDate)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {

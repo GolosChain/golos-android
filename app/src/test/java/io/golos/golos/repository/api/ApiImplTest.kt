@@ -59,9 +59,9 @@ class ApiImplTest {
         assertTrue(AuthUtils.isWiFsValid(privatePosting, publicPosting))
 
         var resp = service.auth(accname, masterPassword, null, null)
-        assertNotNull(resp.accountInfo.avatarPath)
+        assertNotNull(resp.accountInfo.golosUser.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
@@ -73,9 +73,9 @@ class ApiImplTest {
         assertTrue(resp.accountInfo.accountWorth > 0.1)
 
         resp = service.auth(accname, null, privateActive, null)
-        assertNotNull(resp.accountInfo.avatarPath)
+        assertNotNull(resp.accountInfo.golosUser.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertNull(resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
@@ -90,9 +90,9 @@ class ApiImplTest {
 
         resp = service.auth(accname, null, null, privatePosting)
 
-        assertNotNull(resp.accountInfo.avatarPath)
+        assertNotNull(resp.accountInfo.golosUser.avatarPath)
         assertTrue(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertEquals(publicPosting, resp.postingAuth!!.first)
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
@@ -107,14 +107,14 @@ class ApiImplTest {
         resp = service.auth(accname, null, "dasgsdg", null)
 
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
 
         resp = service.auth(accname, null, null, "sdgsdg")
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -122,7 +122,7 @@ class ApiImplTest {
         resp = service.auth(accname, null, "sdgsdg", "sdgsdg")
 
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -130,20 +130,20 @@ class ApiImplTest {
         resp = service.auth(accname + "afsafs", null, privateActive, privatePosting)
 
         assertFalse(resp.isKeyValid)
-        assertEquals(accname + "afsafs", resp.accountInfo.userName)
+        assertEquals(accname + "afsafs", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
 
         resp = service.auth(accname, null, null, null)
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
         resp = service.auth(accname, "asasgasgasg", null, null)
         assertFalse(resp.isKeyValid)
-        assertEquals("yuri-vlad-second", resp.accountInfo.userName)
+        assertEquals("yuri-vlad-second", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
 
@@ -152,7 +152,7 @@ class ApiImplTest {
         resp = service.auth("fair", null, privateActive, privatePosting)
 
         assertFalse(resp.isKeyValid)
-        assertEquals("fair", resp.accountInfo.userName)
+        assertEquals("fair", resp.accountInfo.golosUser.userName)
         assertNull(resp.postingAuth)
         assertNull(resp.activeAuth)
     }
@@ -388,5 +388,11 @@ class ApiImplTest {
         val story = Golos4J.getInstance().databaseMethods.getStoryByRoute("ru--russkoezarubezhxe",
                 AccountName("vp-zarubezhje"),
                 Permlink("lichnyi-opyt-kak-ya-vengerskii-yazyk-uchila"))
+    }
+
+    @Test
+    fun getAccountAdditionalDataTest(){
+        val account = service.getAccountInfo("yuri-vlad")
+        println(account)
     }
 }

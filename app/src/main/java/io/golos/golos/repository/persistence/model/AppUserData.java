@@ -28,6 +28,11 @@ public class AppUserData implements Cloneable {
     @Nullable
     private String publicPostingWif;
     @Nullable
+    private String location;
+    @Nullable
+    private String webSite;
+
+    private long registerDate;
     private long subscibesCount;
     private long subscribersCount;
     private double gbgAmount;
@@ -57,7 +62,12 @@ public class AppUserData implements Cloneable {
                        long postsCount,
                        double safeGbg,
                        double safeGolos,
-                       int votingPower) {
+                       int votingPower,
+                       @Nullable
+                               String location,
+                       @Nullable
+                               String webSite,
+                       long registerDate) {
         this.isUserLoggedIn = isUserLoggedIn;
         this.mMoto = mMoto;
         this.avatarPath = avatarPath;
@@ -76,6 +86,9 @@ public class AppUserData implements Cloneable {
         this.publicActiveWif = publicActiveWif;
         this.publicPostingWif = publicPostingWif;
         this.votingPower = votingPower;
+        this.location = location;
+        this.webSite = webSite;
+        this.registerDate = registerDate;
     }
 
     public AppUserData() {
@@ -261,15 +274,20 @@ public class AppUserData implements Cloneable {
                 response.getAccountInfo().getPostsCount(),
                 response.getAccountInfo().getSafeGbg(),
                 response.getAccountInfo().getSafeGolos(),
-                response.getAccountInfo().getVotingPower());
+                response.getAccountInfo().getVotingPower(),
+                response.getAccountInfo().getLocation(),
+                response.getAccountInfo().getWebsite(),
+                response.getAccountInfo().getRegistrationDate());
     }
 
     public GolosUserAccountInfo toAccountInfo() {
 
-        return new GolosUserAccountInfo(new GolosUser(userName,avatarPath), mMoto,
+        return new GolosUserAccountInfo(new GolosUser(userName == null ? "" : userName, avatarPath), mMoto,
                 postsCount, accountWorth, subscibesCount, subscribersCount,
                 gbgAmount, golosAmount, golosPower, safeGbg,
-                safeGolos, publicPostingWif, publicActiveWif, false, votingPower);
+                safeGolos, publicPostingWif == null ? "" : publicPostingWif,
+                publicActiveWif == null ? "" : publicActiveWif, false, votingPower,
+                location == null ? "" : location, webSite == null ? "" : webSite, registerDate);
     }
 
     @Override

@@ -175,7 +175,7 @@ val Account.avatarPath: String?
         var avatarPath: String? = null
         try {
             if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
-                var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                val node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
                 node?.let {
                     avatarPath = node.get("profile")?.get("profile_image")?.asText()
                 }
@@ -193,9 +193,43 @@ val Account.moto: String?
         var moto: String? = null
         try {
             if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
-                var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                val node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
                 node?.let {
                     moto = node.get("profile")?.get("about")?.asText()
+                }
+            }
+
+        } catch (e: IOException) {
+            println("error parsing metadata " + jsonMetadata)
+            e.printStackTrace()
+        }
+        return moto
+    }
+val Account.location: String?
+    get() {
+        var moto: String? = null
+        try {
+            if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+                var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                node?.let {
+                    moto = node.get("profile")?.get("location")?.asText()
+                }
+            }
+
+        } catch (e: IOException) {
+            println("error parsing metadata " + jsonMetadata)
+            e.printStackTrace()
+        }
+        return moto
+    }
+val Account.webSite: String?
+    get() {
+        var moto: String? = null
+        try {
+            if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+                var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                node?.let {
+                    moto = node.get("profile")?.get("website")?.asText()
                 }
             }
 
