@@ -17,7 +17,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.App
 import io.golos.golos.R
-import io.golos.golos.repository.Repository
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
@@ -56,12 +55,13 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_wallet)
-        if (!Repository.get.isUserLoggedIn()) finish()
-        setUpViews()
         mViewModel = ViewModelProviders.of(this).get(UserInfoViewModel::class.java)
+        setUpViews()
+
         mViewModel.getLiveData().observe(this, this)
-        mViewModel.onCreate(Repository.get.getCurrentUserDataAsLiveData().value?.userName
-                ?: return, object : InternetStatusNotifier {
+        val userName = intent.getStringExtra("userName") ?: return
+
+        mViewModel.onCreate(userName, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return App.isAppOnline()
             }
@@ -86,35 +86,8 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
             mVotingPowerIndicator.setViewGone()
             mVotingPowerLo.setViewGone()
         }
-        mUserAvatar.setOnClickListener {
-            mVotingPowerIndicator.progress = 0
-            mAvatarOverlay.setViewVisible()
-            mVotingPowerIndicator.setViewVisible()
-            mVotingPowerTv.text = ""
-            mVotingPowerLo.setViewVisible()
-            val votingPower: Double = (mViewModel.getLiveData().value?.accountInfo?.votingPower
-                    ?: 0) / 100.0
 
-            val delay = 300L
-            val duration = 600L
 
-            ObjectAnimator
-                    .ofInt(mVotingPowerIndicator, "progress", 0, votingPower.toInt())
-                    .setDuration(duration)
-                    .setStartDelayB(delay)
-                    .setInterpolatorB(AccelerateDecelerateInterpolator())
-                    .start()
-            ObjectAnimator
-                    .ofObject(TypeEvaluator<Float> { p0, _, p2 ->
-                        mVotingPowerTv.text = "${String.format("%.2f", p0 * p2)}%"
-                        p0
-                    },
-                            0.0f, votingPower.toFloat()).setDuration(duration)
-                    .setStartDelayB(delay)
-                    .setInterpolatorB(AccelerateDecelerateInterpolator())
-                    .start()
-
-        }
         mSettingButton.setOnClickListener({
             val i = Intent(this, SettingActivity::class.java)
             startActivityForResult(i, CHANGE_THEME)
@@ -122,9 +95,47 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
         findViewById<View>(R.id.back_btn).setOnClickListener { onBackPressed() }
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (mViewModel.canUserSeeVotingPower()) {
+            mUserAvatar.setOnClickListener {
+                mVotingPowerIndicator.progress = 0
+                mAvatarOverlay.setViewVisible()
+                mVotingPowerIndicator.setViewVisible()
+                mVotingPowerTv.text = ""
+                mVotingPowerLo.setViewVisible()
+                val votingPower: Double = (mViewModel.getLiveData().value?.accountInfo?.votingPower
+                        ?: 0) / 100.0
+
+                val delay = 300L
+                val duration = 600L
+
+                ObjectAnimator
+                        .ofInt(mVotingPowerIndicator, "progress", 0, votingPower.toInt())
+                        .setDuration(duration)
+                        .setStartDelayB(delay)
+                        .setInterpolatorB(AccelerateDecelerateInterpolator())
+                        .start()
+                ObjectAnimator
+                        .ofObject(TypeEvaluator<Float> { p0, _, p2 ->
+                            mVotingPowerTv.text = "${String.format("%.2f", p0 * p2)}%"
+                            p0
+                        },
+                                0.0f, votingPower.toFloat()).setDuration(duration)
+                        .setStartDelayB(delay)
+                        .setInterpolatorB(AccelerateDecelerateInterpolator())
+                        .start()
+
+            }
+        }
+        if (mViewModel.isSettingButtonShown()) mSettingButton.setViewVisible()
+        else mSettingButton.setViewGone()
+    }
+
     companion object {
-        fun start(fromActivity: Activity) {
+        fun start(fromActivity: Activity, userName: String) {
             val i = Intent(fromActivity, WalletActivity::class.java)
+            i.putExtra("userName", userName)
             fromActivity.startActivity(i)
         }
     }

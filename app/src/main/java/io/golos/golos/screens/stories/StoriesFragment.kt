@@ -183,15 +183,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (t?.showRefreshButton == true) {
             mRefreshLo?.setViewVisible()
             mRefreshButton?.setViewVisible()
-            if (mSwipeRefresh?.paddingTop == 0) {
-                mSwipeRefresh?.setPadding(0, resources.getDimension(R.dimen.refresh_lo_height).toInt(), 0, 0)
-            }
         } else {
             mRefreshLo?.setViewGone()
             mRefreshButton?.setViewGone()
-            if (mSwipeRefresh?.paddingTop != 0) {
-                mSwipeRefresh?.setPadding(0, 0, 0, 0)
-            }
         }
 
         if (isVisible) {

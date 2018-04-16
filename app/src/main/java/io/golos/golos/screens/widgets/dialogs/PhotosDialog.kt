@@ -19,7 +19,7 @@ import io.golos.golos.utils.*
 /**
  * Created by yuri on 08.02.18.
  */
-class PhotosDialog : DialogFragment() {
+class  PhotosDialog : DialogFragment() {
     private lateinit var mPager: ViewPager
     private lateinit var mIndicatorHosts: ViewGroup
     private val mImages: ArrayList<String> = arrayListOf()

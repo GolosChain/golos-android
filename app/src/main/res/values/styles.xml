@@ -185,7 +185,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/font_regular</item>
-        <item name="android:textColor">@color/textColorP</item>
+        <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:layout_marginTop">@dimen/material_huge</item>
     </style>
 

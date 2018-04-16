@@ -157,12 +157,13 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             mVotingPowerIndicator.setViewGone()
             mVotingPowerLo.setViewGone()
         }
-        if (!mViewModel.canUserSeeVotingPower()) mProceedButton.setViewGone()
-        else {
-            mWalletBalanceLo.setOnClickListener {
-                WalletActivity.start(activity ?: return@setOnClickListener)
-            }
+
+        mWalletBalanceLo.setOnClickListener {
+            WalletActivity.start(activity
+                    ?: return@setOnClickListener, arguments?.getString(USERNAME_TAG)
+                    ?: return@setOnClickListener)
         }
+
     }
 
     override fun onChanged(t: UserAccountModel?) {

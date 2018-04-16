@@ -371,7 +371,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
                                 accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower,
-                                accinfo.location,accinfo.website,accinfo.registrationDate)
+                                accinfo.location, accinfo.website, accinfo.registrationDate)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {
@@ -1329,7 +1329,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             (0 until users.size)
                     .forEach {
                         val userName = users[it].userName
-                        users[it] = users[it].setAvatar(avatars.getOrDefault(userName, null))
+                        if (avatars.containsKey(userName)) users[it] = users[it].setAvatar(avatars[userName])
+
                     }
             mMainThreadExecutor.execute {
                 golosUsers.value = users
@@ -1343,7 +1344,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         .forEach {
                             val userName = users[it].userName
                             if (avatars.containsKey(userName)) {
-                                users[it] = users[it].setAvatar(avatars.getOrDefault(userName, null))
+                                users[it] = users[it].setAvatar(avatars[userName])
                             }
                         }
                 mMainThreadExecutor.execute {

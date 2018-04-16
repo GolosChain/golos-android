@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/stories_root"
     android:layout_width="match_parent"
@@ -7,12 +7,11 @@
     android:animateLayoutChanges="true">
 
 
-
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh"
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/refresh_lo"
         android:animateLayoutChanges="true">
 
         <android.support.v7.widget.RecyclerView
@@ -26,6 +25,7 @@
         android:id="@+id/fullscreen_label"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerInParent="true"
         android:gravity="top|center_horizontal"
         android:padding="@dimen/margin_material"
         android:paddingTop="100dp"
@@ -33,6 +33,7 @@
         android:visibility="gone" />
 
     <FrameLayout
+
         android:id="@+id/refresh_lo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/refresh_lo_height"
@@ -55,4 +56,4 @@
             android:textColor="@android:color/white"
             app:backgroundTint="@color/blue_dark" />
     </FrameLayout>
-</FrameLayout>
+</RelativeLayout>
