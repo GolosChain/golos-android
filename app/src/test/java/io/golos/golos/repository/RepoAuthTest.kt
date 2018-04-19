@@ -35,8 +35,7 @@ class RepoAuthTest {
                 executor ,
                 executor, MockPersister, ApiImpl(),
                 mLogger = null,
-                mUserSettings = MockUserSettings,
-                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
+                mUserSettings = MockUserSettings
         )
     }
 

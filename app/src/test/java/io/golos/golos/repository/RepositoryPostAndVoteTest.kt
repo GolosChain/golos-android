@@ -53,8 +53,7 @@ class RepositoryPostAndVoteTest {
                     override fun toHtml(input: String): CharSequence {
                         return input
                     }
-                },
-                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
+                }
         )
         //  repo.authWithMasterKey("yuri-vlad", masterKey = "P5JPwfpSsi6fw7fXUeokW8aNudvadpF8aYXZSnZ8oLvLgxfqoWQZ", listener = { _ -> })
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })

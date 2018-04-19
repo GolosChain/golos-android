@@ -24,6 +24,10 @@
         <item name="android:windowBackground">@drawable/splash_back</item>
     </style>
 
+    <style name="BoldTextStyle">
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="BottomButtonStyle">
         <item name="android:layout_width">@dimen/standart_size_button</item>
         <item name="android:layout_gravity">center</item>

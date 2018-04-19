@@ -1,16 +1,18 @@
 package io.golos.golos.repository.persistence
 
 import android.content.Context
+import android.preference.PreferenceManager
 import android.util.Base64
 import com.crashlytics.android.Crashlytics
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
+import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.Tag
-import io.golos.golos.utils.mapper
 import io.golos.golos.repository.persistence.model.*
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 import java.security.KeyStore
@@ -22,7 +24,7 @@ import kotlin.collections.HashMap
 /**
  * Created by yuri on 06.11.17.
  */
-abstract class Persister {
+abstract class Persister : NotificationsPersister {
 
     abstract fun saveAvatarPathForUser(userAvatar: UserAvatar)
 
@@ -179,6 +181,14 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mPreference.edit().putString("username", name).apply()
     }
 
+    override fun saveSubscribedOnTopic(topic: String?) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("topic", topic).apply()
+    }
+
+    override fun getSubscribeOnTopic(): String? {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString("topic", null)
+    }
+
     override fun getActiveUserData(): AppUserData? {
         val userDataString = mPreference.getString("userdata", "") ?: return null
         if (userDataString.isEmpty()) return null
@@ -215,6 +225,14 @@ private class MockPersister : Persister() {
 
     override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
 
+    }
+
+    override fun saveSubscribedOnTopic(topic: String?) {
+
+    }
+
+    override fun getSubscribeOnTopic(): String? {
+        return ""
     }
 
     override fun getStories(): Map<StoryRequest, StoriesFeed> {

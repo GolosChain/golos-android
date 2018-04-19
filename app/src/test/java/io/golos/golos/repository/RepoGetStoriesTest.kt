@@ -37,8 +37,8 @@ class RepoGetStoriesTest {
                 MainThreadExecutor,
                 MainThreadExecutor,
                 MockPersister, ApiImpl(), mLogger = null,
-                mUserSettings = MockUserSettings,
-                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
+                mUserSettings = MockUserSettings
+
         )
     }
 

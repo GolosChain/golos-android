@@ -57,4 +57,12 @@
         <item quantity="zero">Top posts</item>
         <item quantity="other">Top posts</item>
     </plurals>
+    <plurals name="times" >
+        <item quantity="few">times</item>
+        <item quantity="many">times</item>
+        <item quantity="one">time</item>
+        <item quantity="two">times</item>
+        <item quantity="zero">times</item>
+        <item quantity="other">times</item>
+    </plurals>
 </resources>

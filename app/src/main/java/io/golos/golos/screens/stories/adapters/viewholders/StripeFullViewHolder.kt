@@ -71,14 +71,18 @@ class StripeFullViewHolder(parent: ViewGroup,
         if (newState != null) {
 
             val wrapper = newState.stripe.rootStory() ?: return
+            val newAvatar = wrapper.avatarPath
+            val oldAvatar = oldState?.stripe?.rootStory()?.avatarPath
 
-            if (wrapper.avatarPath != null) mGlide
-                    .load(ImageUriResolver.resolveImageWithSize(
-                            wrapper.avatarPath ?: "",
-                            wantedwidth = mAvatar.width))
-                    .error(mGlide.load(noAvatarDrawable))
-                    .into(mAvatar)
-            else mAvatar.setImageDrawable(noAvatarDrawable)
+            if (wrapper.avatarPath != null) {
+                if ( newAvatar != oldAvatar)
+                mGlide
+                        .load(ImageUriResolver.resolveImageWithSize(
+                                wrapper.avatarPath ?: "",
+                                wantedwidth = mAvatar.width))
+                        .error(mGlide.load(noAvatarDrawable))
+                        .into(mAvatar)
+            } else mAvatar.setImageDrawable(noAvatarDrawable)
             if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)

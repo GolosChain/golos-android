@@ -24,6 +24,12 @@ object MockPersister : Persister() {
 
     }
 
+    override fun saveSubscribedOnTopic(topic: String?) {
+
+    }
+
+    override fun getSubscribeOnTopic(): String?  = ""
+
     override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
         users.addAll(userAvatars)
     }

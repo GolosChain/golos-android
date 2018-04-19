@@ -52,6 +52,8 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
  */
+
+val siteUrl = "https://golos.io"
 object Counter {
     val counter = AtomicInteger(-1)
 }

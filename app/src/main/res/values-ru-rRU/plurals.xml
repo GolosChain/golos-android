@@ -56,4 +56,12 @@
         <item quantity="zero">Постов в топе</item>
         <item quantity="other">Постов в топе</item>
     </plurals>
+    <plurals name="times" >
+        <item quantity="few">раз</item>
+        <item quantity="many">раз</item>
+        <item quantity="one">раз</item>
+        <item quantity="two">раза</item>
+        <item quantity="zero">раз</item>
+        <item quantity="other">раза</item>
+    </plurals>
 </resources>

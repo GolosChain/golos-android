@@ -164,6 +164,11 @@
     <string name="registrationDate">Registration date</string>
     <string name="yeat_with_dor">%s y.</string>
     <string name="information" >Information</string>
+    <string name="users_voted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was voted %s %s</string>
+    <string name="user_voted_on_post">%s voted your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_answered_on_post">%s answered on your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
+    <string name="user_transferred_you">%s transferred your %s</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

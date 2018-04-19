@@ -163,6 +163,11 @@
     <string name="yeat_with_dor">%s г.</string>
     <string name="registrationDate">Дата регистрации</string>
     <string name="information" >Информация</string>
+    <string name="users_voted_on_post">За ваш <![CDATA[<a href = "%s">пост</>]]> проголосовали %s %s</string>
+    <string name="user_voted_on_post">%s поддержал(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_answered_on_post">%s ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_answered_on_comment">%s ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_transferred_you">%s перевел(а) вам  %s</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

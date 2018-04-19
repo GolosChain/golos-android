@@ -33,4 +33,5 @@
     <dimen name="post_bottom_controls_height">20dp</dimen>
     <dimen name="feed_story_authe_avatar_size">32dp</dimen>
     <dimen name="refresh_lo_height">40dp</dimen>
+    <dimen name="notification_height">60dp</dimen>
 </resources>

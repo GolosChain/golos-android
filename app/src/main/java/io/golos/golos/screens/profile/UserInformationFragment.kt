@@ -59,7 +59,7 @@ class UserInformationFragment : GolosFragment(), Observer<UserAccountModel> {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val viewModel = ViewModelProviders.of(activity!!).get(UserInfoViewModel::class.java)
-        viewModel.getLiveData().observe(activity!!, this)
+        viewModel.getLiveData().observe(this, this)
     }
 }
 
