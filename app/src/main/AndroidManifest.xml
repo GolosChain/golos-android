@@ -76,6 +76,10 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".screens.settings.NotificationsSettingActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".screens.main_activity.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"

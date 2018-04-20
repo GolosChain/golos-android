@@ -59,6 +59,13 @@ class SettingActivity : GolosActivity() {
         setUpNSFWMode()
         setUpCurrency()
         setUpBountyDisplay()
+        setUpNotifications()
+    }
+
+    private fun setUpNotifications() {
+        findViewById<View>(R.id.notifications_tv).setOnClickListener {
+            startActivity(Intent(this, NotificationsSettingActivity::class.java))
+        }
     }
 
     private fun setUpNoImagesMode() {

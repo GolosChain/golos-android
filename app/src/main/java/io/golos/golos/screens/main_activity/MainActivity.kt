@@ -79,9 +79,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         }
         Repository.get.lastCreatedPost().observe(this, this)
 
-        val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
+       /* val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
         val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-        Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+        Repository.get.notificationsRepository.onReceiveNotifications(notifications)*/
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
 

@@ -169,6 +169,14 @@
     <string name="user_answered_on_post">%s answered on your <![CDATA[<a href = "%s">post</>]]></string>
     <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
     <string name="user_transferred_you">%s transferred your %s</string>
+    <string name="notifications">Online notifications on Golos.io</string>
+    <string name="mention">Mentions</string>
+    <string name="upvote">Upvote</string>
+    <string name="transfer">Transfer</string>
+    <string name="answer_on_post">Reply on post</string>
+    <string name="reply_on_comment">Reply on comment</string>
+    <string name="sound">Sound</string>
+    <string name="play_sound">Notifications sound</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -42,6 +42,7 @@
         android:layout_gravity="end|top"
         android:layout_marginTop="44dp"
         app:cardCornerRadius="16dp"
+        android:visibility="gone"
         app:cardElevation="6dp">
 
 
