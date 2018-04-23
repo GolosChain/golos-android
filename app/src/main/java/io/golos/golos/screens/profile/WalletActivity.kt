@@ -20,7 +20,7 @@ import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
-import io.golos.golos.screens.settings.SettingActivity
+import io.golos.golos.screens.settings.SettingsActivity
 import io.golos.golos.utils.*
 
 class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
@@ -89,7 +89,7 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
 
 
         mSettingButton.setOnClickListener({
-            val i = Intent(this, SettingActivity::class.java)
+            val i = Intent(this, SettingsActivity::class.java)
             startActivityForResult(i, CHANGE_THEME)
         })
         findViewById<View>(R.id.back_btn).setOnClickListener { onBackPressed() }

@@ -2,6 +2,7 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.content.Context
+import io.golos.golos.repository.model.NotificationsDisplaySetting
 
 /**
  * Created by yuri on 05.03.18.
@@ -14,7 +15,7 @@ interface UserSettingsRepository {
     fun setUserVotedForApp(isVotedForApp: Boolean)
     fun isUserVotedForApp(): Boolean
     fun setVoteQuestionMade(isMade: Boolean)
-    fun isVoteQuestionMad(): Boolean
+    fun isVoteQuestionMade(): Boolean
     fun setShowImages(isShown: Boolean)
     fun isImagesShown(): LiveData<Boolean>
     fun setNightMode(isNight: Boolean)
@@ -22,6 +23,8 @@ interface UserSettingsRepository {
     fun getCurrency(): LiveData<GolosCurrency>
     fun setBountDisplay(display: GolosBountyDisplay)
     fun getBountDisplay(): LiveData<GolosBountyDisplay>
+    fun getNotificationsSettings(): LiveData<NotificationsDisplaySetting>
+    fun setNotificationSettings(newSettings: NotificationsDisplaySetting)
     fun isNightMode(): Boolean
     fun setUp(ctx: Context)
 

@@ -22,8 +22,7 @@ import io.golos.golos.utils.asIntentToShowUrl
 /**
  * Created by yuri on 12.12.17.
  */
-class SettingActivity : GolosActivity() {
-    private var starter: Intent? = null
+class SettingsActivity : GolosActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,7 +87,7 @@ class SettingActivity : GolosActivity() {
                 val currentMode = if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0
                 if (currentMode != p2) {
                     Repository.get.userSettingsRepository.setNightMode(p2 == 1)
-                    val i = Intent(this@SettingActivity, SettingActivity::class.java)
+                    val i = Intent(this@SettingsActivity, SettingsActivity::class.java)
                     setResult(Activity.RESULT_OK)
                     finish()
                     startActivity(i)

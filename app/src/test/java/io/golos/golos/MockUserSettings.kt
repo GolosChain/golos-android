@@ -47,7 +47,7 @@ object MockUserSettings : UserSettingsRepository {
 
     }
 
-    override fun isVoteQuestionMad(): Boolean {
+    override fun isVoteQuestionMade(): Boolean {
         return true
     }
 

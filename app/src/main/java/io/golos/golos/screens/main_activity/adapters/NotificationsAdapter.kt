@@ -14,7 +14,7 @@ import io.golos.golos.repository.model.GolosTransferNotification
 import io.golos.golos.repository.model.GolosUpVoteNotification
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
-import timber.log.Timber
+
 
 internal data class NotificationWrapper(val notification: GolosNotification,
                                         val clickListener: (GolosViewHolder) -> Unit,
@@ -102,7 +102,6 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                             setAvatar(voteNotification.from.avatar)
                             val text = itemView.resources.getString(R.string.user_voted_on_post,
                                     "<b>${voteNotification.from.name.capitalize()}</b>", "$siteUrl${voteNotification.parentUrl}").toHtml()
-                            Timber.e("$siteUrl${voteNotification.parentUrl}")
                             mText.text = text
                         }
                     }
@@ -122,7 +121,7 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                         val text = itemView.resources.getString(textId,
                                 "<b>${commentNotification.author.name.capitalize()}</b>",
                                 "$siteUrl${commentNotification.parentUrl}").toHtml()
-                        Timber.e("$siteUrl${commentNotification.parentUrl}")
+
                         mText.text = text
 
                     }

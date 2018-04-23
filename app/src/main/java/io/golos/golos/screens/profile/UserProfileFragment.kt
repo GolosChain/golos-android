@@ -23,7 +23,7 @@ import io.golos.golos.screens.GolosActivity.Companion.CHANGE_THEME
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
-import io.golos.golos.screens.settings.SettingActivity
+import io.golos.golos.screens.settings.SettingsActivity
 import io.golos.golos.utils.*
 
 /**
@@ -91,7 +91,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         tabbar.setupWithViewPager(pager)
         val settingsButton = v.findViewById<View>(R.id.settings_btn)
         settingsButton.setOnClickListener({
-            val i = Intent(activity!!, SettingActivity::class.java)
+            val i = Intent(activity!!, SettingsActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         })
 

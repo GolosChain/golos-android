@@ -177,6 +177,7 @@
     <string name="reply_on_comment">Reply on comment</string>
     <string name="sound">Sound</string>
     <string name="play_sound">Notifications sound</string>
+    <string name="new_comment">New comment</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>
