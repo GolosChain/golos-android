@@ -165,8 +165,10 @@
     <string name="yeat_with_dor">%s y.</string>
     <string name="information" >Information</string>
     <string name="users_voted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was voted %s %s</string>
-    <string name="user_voted_on_post">%s voted your <![CDATA[<a href = "%s">post</>]]></string>
-    <string name="user_answered_on_post">%s answered on your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="users_downvoted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was flagged %s %s</string>
+    <string name="user_voted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_downvoted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_answered_on_post">%s flagged your <![CDATA[<a href = "%s">post</>]]></string>
     <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
     <string name="user_transferred_you">%s transferred your %s</string>
     <string name="notifications">Online notifications on Golos.io</string>
@@ -178,6 +180,11 @@
     <string name="sound">Sound</string>
     <string name="play_sound">Notifications sound</string>
     <string name="new_comment">New comment</string>
+    <string name="notifications_channel_main">Main notifications</string>
+    <string name="new_upvote">New upvote</string>
+    <string name="new_flag">New flag</string>
+    <string name="new_transfer">New transfer</string>
+
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

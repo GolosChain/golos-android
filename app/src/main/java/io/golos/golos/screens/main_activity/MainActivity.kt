@@ -29,6 +29,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
     private lateinit var mNotificationsIndicator: TextView
+    private lateinit var mNotifsContainer: View
 
     private lateinit var mNotificationsRecycler: RecyclerView
 
@@ -41,6 +42,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         mNotificationsRecycler = findViewById(R.id.notification_recycler)
         mNotificationsIndicator = findViewById(R.id.notifications_count_tv)
+        mNotifsContainer = findViewById(R.id.notifs_container)
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
@@ -118,9 +120,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         Repository.get.notificationsRepository.notifications.observe(this, Observer<GolosNotifications> {
             (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification = it?.notifications ?: listOf()
-            if (it?.notifications?.isEmpty() != false) mNotificationsIndicator.setViewGone()
+            if (it?.notifications?.isEmpty() != false) mNotifsContainer.setViewGone()
             else {
-                mNotificationsIndicator.setViewVisible()
+                mNotifsContainer.setViewVisible()
                 mNotificationsIndicator.text = it.notifications.size.toString()
             }
         })

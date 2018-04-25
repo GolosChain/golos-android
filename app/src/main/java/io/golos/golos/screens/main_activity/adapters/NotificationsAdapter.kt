@@ -8,10 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
-import io.golos.golos.repository.model.GolosCommentNotification
-import io.golos.golos.repository.model.GolosNotification
-import io.golos.golos.repository.model.GolosTransferNotification
-import io.golos.golos.repository.model.GolosUpVoteNotification
+import io.golos.golos.repository.model.*
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
 
@@ -91,7 +88,7 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
                             mImage.setViewGone()
                             mImageS.setViewVisible()
-
+                            mImageS.setImageResource(R.drawable.ic_double_arrow_up_18dp_white)
                             mText.text = itemView.resources.getString(R.string.users_voted_on_post,
                                     "$siteUrl${voteNotification.parentUrl}",
                                     voteNotification.count.toString(),
@@ -101,6 +98,28 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                         } else if (voteNotification.count == 1) {
                             setAvatar(voteNotification.from.avatar)
                             val text = itemView.resources.getString(R.string.user_voted_on_post,
+                                    "<b>${voteNotification.from.name.capitalize()}</b>", "$siteUrl${voteNotification.parentUrl}").toHtml()
+                            mText.text = text
+                        }
+                    }
+                    is GolosDownVoteNotification -> {
+                        val voteNotification = notification.voteNotification
+
+                        if (voteNotification.count > 1) {
+
+                            mImage.setViewGone()
+                            mImageS.setViewVisible()
+                            mImageS.setImageResource(R.drawable.ic_downvote_18dp_white)
+
+                            mText.text = itemView.resources.getString(R.string.users_downvoted_on_post,
+                                    "$siteUrl${voteNotification.parentUrl}",
+                                    Math.abs(voteNotification.count).toString(),
+                                    itemView.resources.getQuantityString(R.plurals.users, Math.abs(voteNotification.count))).toHtml()
+
+
+                        } else if (voteNotification.count == 1) {
+                            setAvatar(voteNotification.from.avatar)
+                            val text = itemView.resources.getString(R.string.user_downvoted_on_post,
                                     "<b>${voteNotification.from.name.capitalize()}</b>", "$siteUrl${voteNotification.parentUrl}").toHtml()
                             mText.text = text
                         }

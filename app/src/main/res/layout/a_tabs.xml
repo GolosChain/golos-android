@@ -43,6 +43,7 @@
         android:layout_marginTop="44dp"
         app:cardCornerRadius="16dp"
         android:visibility="gone"
+        android:id="@+id/notifs_container"
         app:cardElevation="6dp">
 
 

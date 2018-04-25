@@ -2,7 +2,6 @@ package io.golos.golos.notifications
 
 import android.os.Handler
 import android.os.Looper
-import android.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -19,17 +18,15 @@ import timber.log.Timber
 class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {
         super.onMessageReceived(p0)
-        Timber.e("onMessageReceived $p0")
         Timber.e("onMessageReceived ${p0?.data}")
 
-        PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("data", p0?.data?.toString()
-                ?: "").commit()
         try {
             val notification = mapper.readValue<Notification>(p0?.data?.get("message")
                     ?: return, Notification::class.java)
             Handler(Looper.getMainLooper()).post {
                 Repository.get.notificationsRepository.onReceiveNotifications(listOf(notification))
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
             Timber.e(e)

@@ -65,4 +65,12 @@
         <item quantity="zero">times</item>
         <item quantity="other">times</item>
     </plurals>
+    <plurals name="users" >
+        <item quantity="few">users</item>
+        <item quantity="many">users</item>
+        <item quantity="one">user</item>
+        <item quantity="two">users</item>
+        <item quantity="zero">users</item>
+        <item quantity="other">users</item>
+    </plurals>
 </resources>

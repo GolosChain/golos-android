@@ -64,4 +64,12 @@
         <item quantity="zero">раз</item>
         <item quantity="other">раза</item>
     </plurals>
+    <plurals name="users" >
+        <item quantity="few">пользователей</item>
+        <item quantity="many">пользователей</item>
+        <item quantity="one">пользователь</item>
+        <item quantity="two">пользователя</item>
+        <item quantity="zero">пользователей</item>
+        <item quantity="other">пользователей</item>
+    </plurals>
 </resources>

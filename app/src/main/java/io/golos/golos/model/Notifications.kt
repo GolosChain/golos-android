@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(value = [(JsonSubTypes.Type(value = CommentNotification::class, name = "comment")),
     (JsonSubTypes.Type(value = VoteNotification::class, name = "upvote")),
-    (JsonSubTypes.Type(value = TransferNotification::class, name = "transfer"))]
+    (JsonSubTypes.Type(value = TransferNotification::class, name = "transfer")),
+    (JsonSubTypes.Type(value = DownVoteNotification::class, name = "downvote"))]
 )
 sealed class Notification(val type: String)
 

@@ -164,7 +164,9 @@
     <string name="registrationDate">Дата регистрации</string>
     <string name="information" >Информация</string>
     <string name="users_voted_on_post">За ваш <![CDATA[<a href = "%s">пост</>]]> проголосовали %s %s</string>
-    <string name="user_voted_on_post">%s поддержал(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="users_downvoted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> вызвал негативную реакцию у %s %s</string>
+    <string name="user_voted_on_post">%s лайкнул(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_downvoted_on_post">%s поставил(а) флаг вашему <![CDATA[<a href = "%s">посту</>]]></string>
     <string name="user_answered_on_post">%s ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
     <string name="user_answered_on_comment">%s ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
     <string name="user_transferred_you">%s перевел(а) вам  %s</string>
@@ -177,6 +179,10 @@
     <string name="sound">Звук</string>
     <string name="play_sound">Звук уведомлений</string>
     <string name="new_comment">Новый комментарий</string>
+    <string name="notifications_channel_main">Основные нотификации</string>
+    <string name="new_upvote">Новый лайк</string>
+    <string name="new_flag">Новый флаг</string>
+    <string name="new_transfer">Новый трансфер</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
