@@ -49,5 +49,32 @@
     "type": "comment",
     "parent_body": "sgsdgsdgsdgsdgsdfgsdgsdg2",
     "permlink": "re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z"
+  },
+  {
+    "parent_author": "yuri-vlad-second",
+    "parent_permlink": "73f6a95e-b346-49d3-b411-8556b9b8f906",
+    "parent_url": "\/test\/@yuri-vlad-second\/73f6a95e-b346-49d3-b411-8556b9b8f906",
+    "count": 1,
+    "voter": {
+      "account": "yuri-vlad"
+    },
+    "parent_depth": 0,
+    "parent_title": "235235235",
+    "type": "upvote",
+    "parent_body": "edited"
+  },
+  {
+    "parent_author": "yuri-vlad-second",
+    "parent_permlink": "sdgsdgsdg234234",
+    "parent_url": "\/test\/@yuri-vlad-second\/sdgsdgsdg234234",
+    "count": 1,
+    "weight": -10000,
+    "voter": {
+      "account": "yuri-vlad"
+    },
+    "parent_depth": 0,
+    "parent_title": "sdgsdgsdg234234",
+    "type": "downvote",
+    "parent_body": "sgsdgsdgsdgsdgsdfgsdgsdg2"
   }
 ]

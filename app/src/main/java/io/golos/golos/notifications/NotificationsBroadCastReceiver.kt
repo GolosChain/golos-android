@@ -11,7 +11,6 @@ const val NOTIFICATION_KEY = "NOTIFICATION_KEY"
 class NotificationsBroadCastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Timber.e("onReceive $intent")
         if (intent.hasExtra(NOTIFICATION_KEY)) {
             val hashCode = intent.getIntExtra(NOTIFICATION_KEY, 0)
             val notification = Repository.get.notificationsRepository.notifications.value?.notifications?.find { it.hashCode() == hashCode }

@@ -40,22 +40,6 @@ data class CommentNotification(
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 data class VoteNotification(@JsonProperty("voter")
-                       val from: NotificationUser,
-                       @JsonProperty("parent_permlink")
-                       val parentPermlink: String,
-                       @JsonProperty("parent_author")
-                       val parentAuthor: String,
-                       @JsonProperty("parent_depth")
-                       val parentDepth: Int?,
-                       @JsonProperty("parent_title")
-                       val parentTitle: String,
-                       @JsonProperty("parent_body")
-                       val parentBody: String,
-                       @JsonProperty("parent_url")
-                       val parentUrl: String,
-                       @JsonProperty("count")
-                       val count: Int) : Notification("upvote")
-data class DownVoteNotification(@JsonProperty("voter")
                             val from: NotificationUser,
                             @JsonProperty("parent_permlink")
                             val parentPermlink: String,
@@ -70,7 +54,26 @@ data class DownVoteNotification(@JsonProperty("voter")
                             @JsonProperty("parent_url")
                             val parentUrl: String,
                             @JsonProperty("count")
-                            val count: Int) : Notification("downvote")
+                            val count: Int) : Notification("upvote")
+
+data class DownVoteNotification(@JsonProperty("voter")
+                                val from: NotificationUser,
+                                @JsonProperty("parent_permlink")
+                                val parentPermlink: String,
+                                @JsonProperty("parent_author")
+                                val parentAuthor: String,
+                                @JsonProperty("parent_depth")
+                                val parentDepth: Int?,
+                                @JsonProperty("parent_title")
+                                val parentTitle: String,
+                                @JsonProperty("parent_body")
+                                val parentBody: String,
+                                @JsonProperty("parent_url")
+                                val parentUrl: String,
+                                @JsonProperty("count")
+                                val count: Int,
+                                @JsonProperty("weight")
+                                val weight: Int) : Notification("downvote")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TransferNotification(

@@ -298,7 +298,7 @@ fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
 
 fun Context.getVectorAsBitmap(@DrawableRes resId: Int): Bitmap {
 
-    var drawable = ContextCompat.getDrawable(this, resId)!!
+    var drawable = AppCompatResources.getDrawable(this, resId)!!
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
         drawable = (DrawableCompat.wrap(drawable)).mutate()
     }

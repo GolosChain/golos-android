@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.NotificationsDisplaySetting
 
 /**
  * Created by yuri on 05.03.18.
@@ -32,6 +33,14 @@ object MockUserSettings : UserSettingsRepository {
     }
 
     override fun setIsNSFWShown(isShown: Boolean) {
+
+    }
+
+    override fun getNotificationsSettings(): LiveData<NotificationsDisplaySetting> {
+       return MutableLiveData<NotificationsDisplaySetting>()
+    }
+
+    override fun setNotificationSettings(newSettings: NotificationsDisplaySetting) {
 
     }
 

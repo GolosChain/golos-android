@@ -1,6 +1,5 @@
 package io.golos.golos.screens.main_activity.adapters
 
-import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -23,25 +22,8 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
     var notification = notifications
         set(value) {
-            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition].id == value[newItemPosition].id
-                }
-
-                override fun getOldListSize(): Int {
-                    return if (field.isNotEmpty()) 1 else 0
-                }
-
-                override fun getNewListSize(): Int {
-                    return if (value.isNotEmpty()) 1 else 0
-                }
-
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
-                }
-            }).dispatchUpdatesTo(this)
             field = value
-
+            notifyDataSetChanged()
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationsViewHolder {

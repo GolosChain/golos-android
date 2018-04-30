@@ -20,9 +20,27 @@ sealed class GolosNotification(
     }
 }
 
-data class GolosUpVoteNotification(val voteNotification: VoteNotification) : GolosNotification(null)
-data class GolosDownVoteNotification(val voteNotification: DownVoteNotification) : GolosNotification(null)
-data class GolosCommentNotification(val commentNotification: CommentNotification) : GolosNotification(null) {
+data class GolosUpVoteNotification(val voteNotification: VoteNotification) : GolosNotification(null), PostLinkable {
+    override fun getLink(): PostLinkExtractedData? {
+        val fullLink = voteNotification.parentUrl
+        val parts = fullLink.split("/")
+        return if (parts.size == 4) {
+            return PostLinkExtractedData(parts[2].substring(1), parts[1], parts[3])
+        } else null
+    }
+}
+
+data class GolosDownVoteNotification(val voteNotification: DownVoteNotification) : GolosNotification(null), PostLinkable {
+    override fun getLink(): PostLinkExtractedData? {
+        val fullLink = voteNotification.parentUrl
+        val parts = fullLink.split("/")
+        return if (parts.size == 4) {
+            return PostLinkExtractedData(parts[2].substring(1), parts[1], parts[3])
+        } else null
+    }
+}
+
+data class GolosCommentNotification(val commentNotification: CommentNotification) : GolosNotification(null), PostLinkable {
     fun isCommentToPost() = commentNotification.parentDepth == 0
     fun parentUrlCleared(): String {
         val strings = commentNotification.commentUrl.split("#")
@@ -32,12 +50,26 @@ data class GolosCommentNotification(val commentNotification: CommentNotification
         val pathParts = commentNotification.commentUrl.split("/")
         if (pathParts.size < 2) return commentNotification.parentUrl
         val out = "/${pathParts[1]}/$secondPart"
-        Timber.e(out)
         return out
+    }
+
+    override fun getLink(): PostLinkExtractedData? {
+        val fullLink = parentUrlCleared()
+        val parts = fullLink.split("/")
+        return if (parts.size == 4) {
+            return PostLinkExtractedData(parts[2].substring(1), parts[1], parts[3])
+        } else null
     }
 }
 
 data class GolosTransferNotification(val transferNotification: TransferNotification) : GolosNotification(null)
 
 
-class GolosNotifications(val notifications: List<GolosNotification>)
+data class GolosNotifications(val notifications: List<GolosNotification>)
+
+data class PostLinkExtractedData(val author: String, val blog: String, val permlink: String)
+
+interface PostLinkable {
+    fun getLink(): PostLinkExtractedData?
+}
+

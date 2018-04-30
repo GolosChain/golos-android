@@ -142,6 +142,7 @@ abstract class StoriesViewHolder(resId: Int,
         if (story.images.size > 1) {
             nextImage = mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[1], size)).error(error)
         }
+
         if (story.images.size > 0) {
             mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[0],
                     wantedwidth = size))
@@ -149,7 +150,9 @@ abstract class StoriesViewHolder(resId: Int,
                     .apply(RequestOptions.placeholderOf(getErrorDrawable()))
                     .into(imageView)
         } else {
+
             val image = story.parts.find { it is ImageRow }
+
             image?.let {
                 val src = (it as ImageRow).src
                 mGlide.load(ImageUriResolver.resolveImageWithSize(src,

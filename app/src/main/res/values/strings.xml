@@ -165,11 +165,17 @@
     <string name="yeat_with_dor">%s y.</string>
     <string name="information" >Information</string>
     <string name="users_voted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was voted %s %s</string>
+    <string name="users_voted_on_post_for_notification">Your post was voted %s %s</string>
     <string name="users_downvoted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was flagged %s %s</string>
+    <string name="users_downvoted_on_post_for_notification">Your post was flagged %s %s</string>
     <string name="user_voted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_voted_on_post_for_notification">%s liked your post</string>
     <string name="user_downvoted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_downvoted_on_post_for_notification">%s liked your post</string>
     <string name="user_answered_on_post">%s flagged your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_answered_on_post_or_notification">%s flagged your post</string>
     <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
+    <string name="user_answered_on_comment_or_notification">%s answered on your  comment</string>
     <string name="user_transferred_you">%s transferred your %s</string>
     <string name="notifications">Online notifications on Golos.io</string>
     <string name="mention">Mentions</string>

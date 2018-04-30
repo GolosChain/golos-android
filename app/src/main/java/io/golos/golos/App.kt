@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -31,9 +32,10 @@ import io.golos.golos.repository.LifeCycleEvent
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.*
 import io.golos.golos.screens.main_activity.MainActivity
+import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.getVectorAsBitmap
-import io.golos.golos.utils.siteUrl
 import io.golos.golos.utils.toHtml
 import timber.log.Timber
 
@@ -112,6 +114,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         Repository.get.notificationsRepository.notifications.observeForever(this)
     }
 
+
     override fun onChanged(t: GolosNotifications?) {
         t?.let { notifications ->
             val notification = notifications.notifications.firstOrNull() ?: return
@@ -127,10 +130,14 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
                 val builder = NotificationCompat
                         .Builder(this, getString(R.string.notifications_channel_main))
-                        .setSmallIcon(R.drawable.d_icon_18dp)
                         .setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                         .setDeleteIntent(PendingIntent.getBroadcast(this, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                         .setAutoCancel(true)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    builder.setSmallIcon(R.drawable.d_icon_18dp)
+                } else builder.setSmallIcon(R.mipmap.ic_launcher)
+
                 if (Repository.get.userSettingsRepository.getNotificationsSettings().value?.playSoundWhenAppStopped == true) {
                     builder.setDefaults(Notification.DEFAULT_SOUND)
                 } else {
@@ -138,23 +145,31 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 }
                 var isBuilt = false
 
+                (notification as? PostLinkable)?.getLink()?.let {
+                    builder.setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent,
+                            StoryActivity.getStartIntent(this, it.author, it.blog, it.permlink,
+                                    FeedType.UNCLASSIFIED, null)), PendingIntent.FLAG_UPDATE_CURRENT))
+                }
+
                 when (notification) {
                     is GolosUpVoteNotification -> {
                         val voteNotification = notification.voteNotification
+
+
+
                         builder.setContentTitle(getString(R.string.new_upvote))
                         if (voteNotification.count > 1) {
 
                             builder
                                     .setLargeIcon(getVectorAsBitmap(R.drawable.ic_double_arrows_on_blue))
-                                    .setContentText(getString(R.string.users_voted_on_post,
-                                            "${siteUrl}${voteNotification.parentUrl}",
+                                    .setContentText(getString(R.string.users_voted_on_post_for_notification,
                                             voteNotification.count.toString(),
                                             resources.getQuantityString(R.plurals.times, voteNotification.count)).toHtml())
 
                         } else if (voteNotification.count == 1) {
 
-                            val text = getString(R.string.user_voted_on_post,
-                                    "<b>${voteNotification.from.name.capitalize()}</b>", "${siteUrl}${voteNotification.parentUrl}").toHtml()
+                            val text = getString(R.string.user_voted_on_post_for_notification,
+                                    "<b>${voteNotification.from.name.capitalize()}</b>").toHtml()
 
                             if (voteNotification.from.avatar == null) builder
                                     .setContentText(text)
@@ -173,13 +188,12 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
                             builder.setLargeIcon(getVectorAsBitmap(R.drawable.ic_dislike_on_blue))
 
-                            builder.setContentText(getString(R.string.users_downvoted_on_post,
-                                    "${siteUrl}${voteNotification.parentUrl}",
+                            builder.setContentText(getString(R.string.users_downvoted_on_post_for_notification,
                                     Math.abs(voteNotification.count).toString(),
                                     resources.getQuantityString(R.plurals.users, Math.abs(voteNotification.count))).toHtml())
                         } else if (voteNotification.count == 1) {
-                            val text = getString(R.string.user_downvoted_on_post,
-                                    "<b>${voteNotification.from.name.capitalize()}</b>", "${siteUrl}${voteNotification.parentUrl}").toHtml()
+                            val text = getString(R.string.user_downvoted_on_post_for_notification,
+                                    "<b>${voteNotification.from.name.capitalize()}</b>").toHtml()
 
                             if (voteNotification.from.avatar == null) builder.setContentText(text)
                                     .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
@@ -206,10 +220,10 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                     is GolosCommentNotification -> {
                         builder.setContentTitle(getString(R.string.new_comment))
                         val commentNotification = notification.commentNotification
-                        val textId = if (notification.isCommentToPost()) R.string.user_answered_on_post else R.string.user_answered_on_comment
+                        val textId = if (notification.isCommentToPost()) R.string.user_answered_on_post_or_notification
+                        else R.string.user_answered_on_comment_or_notification
                         val text = getString(textId,
-                                "<b>${commentNotification.author.name.capitalize()}</b>",
-                                "$siteUrl${commentNotification.parentUrl}").toHtml()
+                                "<b>${commentNotification.author.name.capitalize()}</b>").toHtml()
 
                         if (commentNotification.author.avatar == null) builder.setContentText(text)
                                 .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
@@ -237,10 +251,11 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         val wantedSize = resources.getDimension(R.dimen.notification_big_icon_size).toInt()
         Glide.with(this)
                 .asBitmap()
+                .apply(RequestOptions().centerCrop())
                 .load(ImageUriResolver
                         .resolveImageWithSize(avatarPath, wantedwidth = wantedSize))
 
-                .apply(RequestOptions.circleCropTransform())
+
                 .listener(object : RequestListener<Bitmap> {
                     override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Bitmap>?, p3: Boolean): Boolean {
                         return true

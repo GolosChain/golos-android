@@ -200,6 +200,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
         if (lastUpdated != other.lastUpdated) return false
         if (created != other.created) return false
         if (userVotestatus != other.userVotestatus) return false
+        if (images != other.images) return false
 
         return true
     }
@@ -224,6 +225,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
         result = 31 * result + lastUpdated.hashCode()
         result = 31 * result + created.hashCode()
         result = 31 * result + userVotestatus.hashCode()
+        result = 31 * result + images.hashCode()
         return result
     }
 

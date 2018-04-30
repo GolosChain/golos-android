@@ -13,9 +13,8 @@ import io.golos.golos.R
 import io.golos.golos.model.Notification
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.GolosCommentNotification
 import io.golos.golos.repository.model.GolosNotifications
-import io.golos.golos.repository.model.GolosUpVoteNotification
+import io.golos.golos.repository.model.PostLinkable
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_activity.adapters.MainPagerAdapter
@@ -29,7 +28,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
     private lateinit var mNotificationsIndicator: TextView
-    private lateinit var mNotifsContainer: View
 
     private lateinit var mNotificationsRecycler: RecyclerView
 
@@ -42,7 +40,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         mNotificationsRecycler = findViewById(R.id.notification_recycler)
         mNotificationsIndicator = findViewById(R.id.notifications_count_tv)
-        mNotifsContainer = findViewById(R.id.notifs_container)
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
@@ -83,16 +80,11 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
         val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-        Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+       // Repository.get.notificationsRepository.onReceiveNotifications(notifications)
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
-
-                    if (it is GolosUpVoteNotification || it is GolosCommentNotification) {
-                        val link = "$siteUrl${if (it is GolosUpVoteNotification) it.voteNotification.parentUrl
-                        else (it as? GolosCommentNotification)?.parentUrlCleared()
-                                ?: ""}"
-                        val matchResult = GolosLinkMatcher.match(link)
-                        (matchResult as? StoryLinkMatch)?.let {
+                    if (it is PostLinkable) {
+                        it.getLink()?.let {
                             StoryActivity.start(this, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
                     }
@@ -120,9 +112,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         Repository.get.notificationsRepository.notifications.observe(this, Observer<GolosNotifications> {
             (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification = it?.notifications ?: listOf()
-            if (it?.notifications?.isEmpty() != false) mNotifsContainer.setViewGone()
+            if (it?.notifications?.isEmpty() != false) mNotificationsIndicator.setViewGone()
             else {
-                mNotifsContainer.setViewVisible()
+                mNotificationsIndicator.setViewVisible()
                 mNotificationsIndicator.text = it.notifications.size.toString()
             }
         })
@@ -211,5 +203,32 @@ val ntfns = "[\n" +
         "    \"type\": \"comment\",\n" +
         "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\",\n" +
         "    \"permlink\": \"re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\"\n" +
+        "  },\n" +
+        "  {\n" +
+        "    \"parent_author\": \"yuri-vlad-second\",\n" +
+        "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
+        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
+        "    \"count\": 1,\n" +
+        "    \"voter\": {\n" +
+        "      \"account\": \"yuri-vlad\"\n" +
+        "    },\n" +
+        "    \"parent_depth\": 0,\n" +
+        "    \"parent_title\": \"235235235\",\n" +
+        "    \"type\": \"upvote\",\n" +
+        "    \"parent_body\": \"edited\"\n" +
+        "  },\n" +
+        "  {\n" +
+        "    \"parent_author\": \"yuri-vlad-second\",\n" +
+        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
+        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
+        "    \"count\": 1,\n" +
+        "    \"weight\": -10000,\n" +
+        "    \"voter\": {\n" +
+        "      \"account\": \"yuri-vlad\"\n" +
+        "    },\n" +
+        "    \"parent_depth\": 0,\n" +
+        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
+        "    \"type\": \"downvote\",\n" +
+        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\"\n" +
         "  }\n" +
         "]"

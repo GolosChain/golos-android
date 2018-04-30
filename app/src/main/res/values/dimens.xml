@@ -8,6 +8,7 @@
     <dimen name="six_dp">6dp</dimen>
     <dimen name="text_big">20sp</dimen>
     <dimen name="material_big">20dp</dimen>
+    <dimen name="notif_button_size">36dp</dimen>
     <dimen name="material_huge">28dp</dimen>
     <dimen name="tag_buttons_height">30dp</dimen>
     <dimen name="font_biggest">34dp</dimen>
@@ -34,5 +35,6 @@
     <dimen name="feed_story_authe_avatar_size">32dp</dimen>
     <dimen name="refresh_lo_height">40dp</dimen>
     <dimen name="notification_height">60dp</dimen>
-    <dimen name="notification_big_icon_size">48dp</dimen>
+    <dimen name="notification_big_icon_size">64dp</dimen>
+    <dimen name="notification_button_elevation">0dp</dimen>
 </resources>

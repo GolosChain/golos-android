@@ -50,6 +50,7 @@ object DiscussionItemFactory {
         }
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
+        checkImages(item)
         return item
     }
 
@@ -83,6 +84,7 @@ object DiscussionItemFactory {
         item.activeVotes.addAll(discussion.votes)
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
+        checkImages(item)
         return item
     }
 
@@ -135,6 +137,12 @@ object DiscussionItemFactory {
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private fun checkImages(golosDiscussionItem: GolosDiscussionItem) {
+        if (golosDiscussionItem.images.isEmpty()) {
+            golosDiscussionItem.images.addAll(golosDiscussionItem.parts.filter { it is ImageRow }.map { it as ImageRow }.map { it.src })
         }
     }
 

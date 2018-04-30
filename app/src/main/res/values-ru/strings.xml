@@ -164,11 +164,17 @@
     <string name="registrationDate">Дата регистрации</string>
     <string name="information" >Информация</string>
     <string name="users_voted_on_post">За ваш <![CDATA[<a href = "%s">пост</>]]> проголосовали %s %s</string>
+    <string name="users_voted_on_post_for_notification">За ваш пост проголосовали %s %s</string>
     <string name="users_downvoted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> вызвал негативную реакцию у %s %s</string>
+    <string name="users_downvoted_on_post_for_notification">Ваш пост вызвал негативную реакцию у %s %s</string>
     <string name="user_voted_on_post">%s лайкнул(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_voted_on_post_for_notification">%s лайкнул(а) ваш пост</string>
     <string name="user_downvoted_on_post">%s поставил(а) флаг вашему <![CDATA[<a href = "%s">посту</>]]></string>
+    <string name="user_downvoted_on_post_for_notification">%s поставил(а) флаг вашему посту</string>
     <string name="user_answered_on_post">%s ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_answered_on_post_or_notification">%s ответил(а) на ваш пост</string>
     <string name="user_answered_on_comment">%s ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_answered_on_comment_or_notification">%s ответил(а) на ваш комментарий</string>
     <string name="user_transferred_you">%s перевел(а) вам  %s</string>
     <string name="notifications">Онлайн уведомления на Golos.io</string>
     <string name="mention">Упоминания</string>

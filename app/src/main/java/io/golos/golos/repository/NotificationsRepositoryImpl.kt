@@ -8,6 +8,7 @@ import android.support.annotation.MainThread
 import io.golos.golos.model.Notification
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.utils.toArrayList
 
 interface NotificationsRepository {
     val notifications: LiveData<GolosNotifications>
@@ -47,6 +48,7 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
                         mNotificationTopicSubscription.unsubscribeOf(userName)
                         mNotificationsPersister.saveSubscribedOnTopic(null)
                         mFilteredNotifications.value = null
+                        mNotifications.value = null
                     }
                 }
             }
@@ -62,8 +64,9 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
 
     @MainThread
     override fun onReceiveNotifications(notifications: List<Notification>) {
-        val newNotifications = ArrayList(mNotifications.value?.notifications
-                ?: listOf()) + notifications.map { GolosNotification.fromNotification(it) }
+        if (!mRepository.isUserLoggedIn()) return
+        val newNotifications = ArrayList(notifications.map { GolosNotification.fromNotification(it) }) + (mNotifications.value?.notifications
+                ?: listOf()).toArrayList()
         mNotifications.value = GolosNotifications(newNotifications)
     }
 
