@@ -41,7 +41,7 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
     class NotificationsViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.vh_notification, parent) {
         private val mImage: ImageView = itemView.findViewById(R.id.image_iv)
-        private val mImageS: ImageView = itemView.findViewById(R.id.image_iv_second)
+        private val mSecondaryImage: ImageView = itemView.findViewById(R.id.secondary_icon)
         private val mText: TextView = itemView.findViewById(R.id.text)
         private val mCancelBtn = itemView.findViewById<View>(R.id.cancel_ibtn)
         private val mGlide = Glide.with(itemView)
@@ -67,10 +67,7 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                         val voteNotification = notification.voteNotification
 
                         if (voteNotification.count > 1) {
-
-                            mImage.setViewGone()
-                            mImageS.setViewVisible()
-                            mImageS.setImageResource(R.drawable.ic_double_arrow_up_18dp_white)
+                            mImage.setImageResource(R.drawable.ic_like_40dp_blue_on_white)
                             mText.text = itemView.resources.getString(R.string.users_voted_on_post,
                                     "$siteUrl${voteNotification.parentUrl}",
                                     voteNotification.count.toString(),
@@ -86,12 +83,8 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                     }
                     is GolosDownVoteNotification -> {
                         val voteNotification = notification.voteNotification
-
                         if (voteNotification.count > 1) {
-
-                            mImage.setViewGone()
-                            mImageS.setViewVisible()
-                            mImageS.setImageResource(R.drawable.ic_downvote_18dp_white)
+                            mImage.setImageResource(R.drawable.ic_downvote_white_on_blue_40dp)
 
                             mText.text = itemView.resources.getString(R.string.users_downvoted_on_post,
                                     "$siteUrl${voteNotification.parentUrl}",
@@ -131,16 +124,15 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
         private fun setAvatar(path: String?) {
             mImage.setViewVisible()
-            mImageS.setViewGone()
             if (path != null) {
                 mImage.scaleType = ImageView.ScaleType.CENTER_CROP
                 mGlide
                         .load(ImageUriResolver.resolveImageWithSize(
                                 path,
                                 wantedwidth = mImage.width))
-                        .error(mGlide.load(itemView.getVectorDrawable(R.drawable.ic_person_gray_32dp)))
+                        .error(mGlide.load(itemView.getVectorDrawable(R.drawable.ic_person_gray_52dp)))
                         .into(mImage)
-            } else mImage.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_person_gray_32dp))
+            } else mImage.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_person_gray_52dp))
         }
     }
 }

@@ -6,31 +6,24 @@
     android:layout_height="wrap_content"
     android:background="@drawable/shape_shadow_gray">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_height"
+        android:layout_marginBottom="6dp"
         android:background="@color/white_black_toolbar_color"
         android:gravity="center_vertical"
-        android:layout_marginBottom="4dp"
         android:orientation="horizontal">
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/image_iv"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="@dimen/material_big"
-
-
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top"
+            android:layout_marginStart="@dimen/margin_material"
+            android:layout_marginTop="@dimen/margin_material"
             app:riv_oval="true" />
 
-        <ImageView
-            android:id="@+id/image_iv_second"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="@dimen/material_big"
-            android:background="@drawable/shape_round_36dp_dark_blue"
-            android:scaleType="center"
-            android:src="@drawable/ic_double_arrow_up_18dp_white" />
 
         <TextView
             android:id="@+id/text"
@@ -55,4 +48,15 @@
             android:background="?selectableItemBackgroundBorderless"
             app:srcCompat="@drawable/ic_clear_gray_24dp" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/secondary_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="42dp"
+        android:background="@drawable/shape_round_20dp_white"
+        android:scaleType="center"
+        android:src="@drawable/ic_answer_on_comment_14dp_white_on_blue"
+        android:visibility="gone" />
 </FrameLayout>

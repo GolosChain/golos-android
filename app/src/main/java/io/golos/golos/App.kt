@@ -15,6 +15,7 @@ import android.os.Looper
 import android.support.multidex.MultiDexApplication
 import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatDelegate
+import android.widget.RemoteViews
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -127,6 +128,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 val dismissIntent = Intent(this, NotificationsBroadCastReceiver::class.java)
 
                 dismissIntent.putExtra(NOTIFICATION_KEY, notification.hashCode())
+
 
                 val builder = NotificationCompat
                         .Builder(this, getString(R.string.notifications_channel_main))

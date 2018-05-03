@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/material_big">
+
+    <ImageView
+        android:id="@+id/small_icon_golos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_golos_icon_16dp" />
+
+    <TextView
+        android:id="@+id/app_name_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/quater"
+        android:layout_toEndOf="@id/small_icon_golos"
+        android:text="@string/app_name"
+        android:textColor="@color/blue_dark"
+        android:textSize="@dimen/font_small" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/app_name_l"
+        android:layout_marginStart="@dimen/quater"
+        android:layout_toEndOf="@id/app_name_l"
+        android:drawableEnd="@drawable/ic_chevron_down_12dp_blue"
+        android:drawablePadding="@dimen/quater"
+        android:text="sdgsdgsgdsgd"
+        android:textColor="#6a696a"
+        android:textSize="11sp" />
+</RelativeLayout>
