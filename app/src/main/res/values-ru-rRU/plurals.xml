@@ -41,7 +41,7 @@
         <item quantity="other">Подписчиков</item>
     </plurals>
     <plurals name="posts" >
-        <item quantity="few">Постов</item>
+        <item quantity="few">Поста</item>
         <item quantity="many">Постов</item>
         <item quantity="one">Пост</item>
         <item quantity="two">Поста</item>
@@ -49,7 +49,7 @@
         <item quantity="other">Постов</item>
     </plurals>
     <plurals name="top_posts" >
-        <item quantity="few">Постов в топе</item>
+        <item quantity="few">Поста в топе</item>
         <item quantity="many">Постов в топе</item>
         <item quantity="one">Пост в топе</item>
         <item quantity="two">Поста в топе</item>
@@ -65,11 +65,19 @@
         <item quantity="other">раза</item>
     </plurals>
     <plurals name="users" >
-        <item quantity="few">пользователей</item>
+        <item quantity="few">пользователя</item>
         <item quantity="many">пользователей</item>
         <item quantity="one">пользователь</item>
         <item quantity="two">пользователя</item>
         <item quantity="zero">пользователей</item>
         <item quantity="other">пользователей</item>
+    </plurals>
+    <plurals name="notifications" >
+        <item quantity="few">нотификации</item>
+        <item quantity="many">нотификаций</item>
+        <item quantity="one">нотификация</item>
+        <item quantity="two">нотификации</item>
+        <item quantity="zero">нотификаций</item>
+        <item quantity="other">нотификаций</item>
     </plurals>
 </resources>

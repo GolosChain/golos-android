@@ -173,10 +173,10 @@
     <string name="user_downvoted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
     <string name="user_downvoted_on_post_for_notification">%s liked your post</string>
     <string name="user_answered_on_post">%s flagged your <![CDATA[<a href = "%s">post</>]]></string>
-    <string name="user_answered_on_post_or_notification">%s flagged your post</string>
+    <string name="user_answered_on_post_for_notification">%s flagged your post</string>
     <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
-    <string name="user_answered_on_comment_or_notification">%s answered on your  comment</string>
-    <string name="user_transferred_you">%s transferred your %s</string>
+    <string name="user_answered_on_comment_for_notification">%s answered on your  comment</string>
+    <string name="user_transferred_you">Transferred your %s</string>
     <string name="notifications">Online notifications on Golos.io</string>
     <string name="mention">Mentions</string>
     <string name="upvote">Upvote</string>
@@ -190,6 +190,7 @@
     <string name="new_upvote">New upvote</string>
     <string name="new_flag">New flag</string>
     <string name="new_transfer">New transfer</string>
+    <string name="show_more_notifications">show %s more %s</string>
 
     <string-array name="daynight">
         <item>Day</item>

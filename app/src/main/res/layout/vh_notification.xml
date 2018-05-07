@@ -1,53 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/shape_shadow_gray">
+    android:layout_height="@dimen/notification_height"
+    android:background="@color/white_black_toolbar_color">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/image_iv"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material"
+        android:background="@color/gray"
+        app:riv_oval="true" />
 
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_height"
-        android:layout_marginBottom="6dp"
-        android:background="@color/white_black_toolbar_color"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:id="@+id/text_lo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/margin_material"
+        android:layout_toEndOf="@id/image_iv"
+        android:layout_toStartOf="@+id/cancel_ibtn"
+        android:gravity="top"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/margin_material_half">
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/image_iv"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="top"
-            android:layout_marginStart="@dimen/margin_material"
-            android:layout_marginTop="@dimen/margin_material"
-            app:riv_oval="true" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_color_white_black"
+            android:textSize="@dimen/font_medium"
+            android:textStyle="bold"
 
+            android:visibility="visible" />
 
         <TextView
             android:id="@+id/text"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/margin_material"
-            android:layout_weight="0.6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
             android:background="?selectableItemBackgroundBorderless"
             android:ellipsize="end"
-            android:gravity="center_vertical|start"
-            android:maxLines="3"
-
-            android:textColor="@color/text_color_white_black" />
-
-        <ImageButton
-            android:id="@+id/cancel_ibtn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-
-            android:layout_marginEnd="@dimen/material_big"
-            android:layout_marginStart="@dimen/margin_material"
-            android:background="?selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_clear_gray_24dp" />
+            android:maxLines="2"
+            android:textColor="@color/notification_text_color" />
     </LinearLayout>
+
+
+    <ImageButton
+        android:id="@+id/cancel_ibtn"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/material_big"
+        android:background="?selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/ic_clear_gray_24dp" />
 
     <ImageView
         android:id="@+id/secondary_icon"
@@ -55,8 +69,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="42dp"
-        android:background="@drawable/shape_round_20dp_white"
         android:scaleType="center"
-        android:src="@drawable/ic_answer_on_comment_14dp_white_on_blue"
         android:visibility="gone" />
-</FrameLayout>
+</RelativeLayout>
+

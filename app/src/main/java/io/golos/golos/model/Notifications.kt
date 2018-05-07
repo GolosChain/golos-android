@@ -35,6 +35,7 @@ data class CommentNotification(
         val parentUrl: String,
         @JsonProperty("count")
         val parentCommentsCount: Int
+
 ) : Notification("comment")
 
 @JsonIgnoreProperties(ignoreUnknown = true)

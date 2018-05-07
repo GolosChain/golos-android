@@ -73,4 +73,12 @@
         <item quantity="zero">users</item>
         <item quantity="other">users</item>
     </plurals>
+    <plurals name="notifications" >
+        <item quantity="few">notifications</item>
+        <item quantity="many">notifications</item>
+        <item quantity="one">notification</item>
+        <item quantity="two">notifications</item>
+        <item quantity="zero">notifications</item>
+        <item quantity="other">notifications</item>
+    </plurals>
 </resources>

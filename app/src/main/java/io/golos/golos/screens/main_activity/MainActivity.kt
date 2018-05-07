@@ -1,11 +1,11 @@
 package io.golos.golos.screens.main_activity
 
+import android.animation.Animator
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -17,6 +17,7 @@ import io.golos.golos.repository.model.GolosNotifications
 import io.golos.golos.repository.model.PostLinkable
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
+import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper
 import io.golos.golos.screens.main_activity.adapters.MainPagerAdapter
 import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
@@ -28,6 +29,8 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
     private lateinit var mNotificationsIndicator: TextView
+    private lateinit var mButtonContainer: ViewGroup
+    private lateinit var mNotificationsContainer: ViewGroup
 
     private lateinit var mNotificationsRecycler: RecyclerView
 
@@ -39,7 +42,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         findViewById<ViewGroup>(R.id.main_a_frame).setFullAnimationToViewGroup()
 
         mNotificationsRecycler = findViewById(R.id.notification_recycler)
+        mButtonContainer = findViewById(R.id.button_container)
         mNotificationsIndicator = findViewById(R.id.notifications_count_tv)
+        mNotificationsContainer = findViewById(R.id.notifications_container)
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
@@ -80,7 +85,9 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
         val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-       // Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+
+        Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
                     if (it is PostLinkable) {
@@ -89,35 +96,45 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                         }
                     }
                 },
-                { Repository.get.notificationsRepository.dismissNotification(it) })
+                { Repository.get.notificationsRepository.dismissNotification(it) },
+                true)
         mNotificationsRecycler.overScrollMode = View.OVER_SCROLL_NEVER
-        val swiper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
-            override fun getMovementFlags(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?): Int {
-                return ItemTouchHelper.Callback.makeMovementFlags(0, ItemTouchHelper.END)
-            }
 
-            override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, target: RecyclerView.ViewHolder?): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
-                val position = viewHolder?.adapterPosition ?: -1
-                val adapter = (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification
-                        ?: return
-                if (position > -1) Repository.get.notificationsRepository.dismissNotification(adapter[position])
-            }
-        })
-
-        swiper.attachToRecyclerView(mNotificationsRecycler)
+        val adapter = mNotificationsRecycler.adapter as? NotificationsAdapter
+        adapter?.let {
+            DissmissTouchHelper(it).attachToRecyclerView(mNotificationsRecycler)
+        }
 
         Repository.get.notificationsRepository.notifications.observe(this, Observer<GolosNotifications> {
             (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification = it?.notifications ?: listOf()
-            if (it?.notifications?.isEmpty() != false) mNotificationsIndicator.setViewGone()
+            if (it?.notifications?.isEmpty() != false) mNotificationsContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
+                override fun onAnimationEnd(p0: Animator?) {
+                    mNotificationsContainer.setViewGone()
+                }
+            })
             else {
-                mNotificationsIndicator.setViewVisible()
-                mNotificationsIndicator.text = it.notifications.size.toString()
+                if (it.notifications.size == 1) {
+                    mButtonContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
+                        override fun onAnimationEnd(p0: Animator?) {
+                            mButtonContainer.setViewGone()
+                        }
+                    })
+                } else {
+                    mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
+                        override fun onAnimationEnd(p0: Animator?) {
+                            mButtonContainer.setViewVisible()
+                        }
+                    })
+                    mNotificationsIndicator.text = getString(R.string.show_more_notifications,
+                            it.notifications.count().toString(),
+                            resources.getQuantityString(R.plurals.notifications, it.notifications.count()))
+                }
+
             }
         })
+        mNotificationsIndicator.setOnClickListener {
+            NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
+        }
 
     }
 

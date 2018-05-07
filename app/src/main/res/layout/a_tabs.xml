@@ -29,14 +29,45 @@
         app:itemIconTint="@color/tabbar_icon_colors"
         app:menu="@menu/bottom_menu" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/notification_recycler"
-
+    <LinearLayout
+        android:id="@+id/notifications_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+        android:orientation="vertical">
 
-    <include layout="@layout/include_notifications_indicator"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/notification_recycler"
 
-        />
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_height"
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+        <LinearLayout
+            android:id="@+id/button_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white_black_toolbar_color"
+            android:orientation="vertical">
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/notification_delimeter" />
+
+            <Button
+                android:id="@+id/notifications_count_tv"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:textColor="@color/blue_light" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@drawable/shape_shadow_gray" />
+    </LinearLayout>
+
 </FrameLayout>

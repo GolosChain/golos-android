@@ -15,7 +15,6 @@ import android.os.Looper
 import android.support.multidex.MultiDexApplication
 import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatDelegate
-import android.widget.RemoteViews
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -222,8 +221,8 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                     is GolosCommentNotification -> {
                         builder.setContentTitle(getString(R.string.new_comment))
                         val commentNotification = notification.commentNotification
-                        val textId = if (notification.isCommentToPost()) R.string.user_answered_on_post_or_notification
-                        else R.string.user_answered_on_comment_or_notification
+                        val textId = if (notification.isCommentToPost()) R.string.user_answered_on_post_for_notification
+                        else R.string.user_answered_on_comment_for_notification
                         val text = getString(textId,
                                 "<b>${commentNotification.author.name.capitalize()}</b>").toHtml()
 

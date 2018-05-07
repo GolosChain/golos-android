@@ -6,14 +6,16 @@
     android:layout_marginTop="44dp"
     android:visibility="visible"
     app:cardCornerRadius="16dp"
+    android:background="@color/corall_red"
     app:cardElevation="6dp">
 
 
     <TextView
+
         android:id="@+id/notifications_count_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/notifications_indicator_circle_back"
+        android:background="@color/corall_red"
         android:gravity="center"
         android:textColor="@color/text_color_white_black"
         android:textSize="@dimen/font_small"

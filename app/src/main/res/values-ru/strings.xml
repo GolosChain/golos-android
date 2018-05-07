@@ -172,10 +172,10 @@
     <string name="user_downvoted_on_post">%s поставил(а) флаг вашему <![CDATA[<a href = "%s">посту</>]]></string>
     <string name="user_downvoted_on_post_for_notification">%s поставил(а) флаг вашему посту</string>
     <string name="user_answered_on_post">%s ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
-    <string name="user_answered_on_post_or_notification">%s ответил(а) на ваш пост</string>
+    <string name="user_answered_on_post_for_notification">%s ответил(а) на ваш пост</string>
     <string name="user_answered_on_comment">%s ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
-    <string name="user_answered_on_comment_or_notification">%s ответил(а) на ваш комментарий</string>
-    <string name="user_transferred_you">%s перевел(а) вам  %s</string>
+    <string name="user_answered_on_comment_for_notification">%s ответил(а) на ваш комментарий</string>
+    <string name="user_transferred_you">Перевел(а) на ваш счет %s</string>
     <string name="notifications">Онлайн уведомления на Golos.io</string>
     <string name="mention">Упоминания</string>
     <string name="upvote">Апвоут</string>
@@ -189,6 +189,7 @@
     <string name="new_upvote">Новый лайк</string>
     <string name="new_flag">Новый флаг</string>
     <string name="new_transfer">Новый трансфер</string>
+    <string name="show_more_notifications">показать еще %s %s</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
