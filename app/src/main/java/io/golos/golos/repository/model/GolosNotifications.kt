@@ -41,7 +41,6 @@ data class GolosDownVoteNotification(val voteNotification: DownVoteNotification)
 }
 
 data class GolosCommentNotification(val commentNotification: CommentNotification) : GolosNotification(null), PostLinkable {
-    fun isCommentToPost() = commentNotification.parentDepth == 0
     fun parentUrlCleared(): String {
         val strings = commentNotification.commentUrl.split("#")
 

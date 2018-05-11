@@ -103,16 +103,21 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                 mImage.background = null
                 when (notification) {
                     is GolosUpVoteNotification -> {
-                        mSecondaryImage.setViewGone()
+
                         val voteNotification = notification.voteNotification
-                        mTextLinearLo.gravity = Gravity.TOP
-                        mTitle.text = voteNotification.from.name.capitalize()
-                        mTitle.setViewVisible()
-                        mTitle
+                        mText.maxLines = 2
+                        mTextLinearLo.setPadding(0, 0, 0, itemView.resources.getDimension(R.dimen.material_big).toInt())
                         if (voteNotification.count > 1) {
 
+                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
+                            mTitle.setViewGone()
+                            mSecondaryImage.setViewGone()
+
                             mImage.setImageResource(R.drawable.ic_like_40dp_white_on_blue)
-                            mText.text = itemView.resources.getString(R.string.users_voted_on_post,
+
+                            val textId = if (isCommentToPost(notification)) R.string.users_voted_on_post else R.string.users_voted_on_comment
+
+                            mText.text = itemView.resources.getString(textId,
                                     "$siteUrl${voteNotification.parentUrl}",
                                     voteNotification.count.toString(),
                                     itemView.resources.getQuantityString(R.plurals.times, voteNotification.count)).toHtml()
@@ -122,33 +127,43 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                             mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
                             mTitle.setViewGone()
                             setAvatar(voteNotification.from.avatar)
-                            val text = itemView.resources.getString(R.string.user_voted_on_post,
-                                    "<b>${voteNotification.from.name.capitalize()}</b>", "$siteUrl${voteNotification.parentUrl}").toHtml()
+                            val textId = if (isCommentToPost(notification)) R.string.user_voted_on_post else R.string.user_voted_on_comment
+
+                            val text = itemView.resources.getString(textId, voteNotification.from.name.capitalize(),
+                                    "$siteUrl${voteNotification.parentUrl}").toHtml()
                             mText.text = text
                         }
                     }
                     is GolosDownVoteNotification -> {
                         mSecondaryImage.setViewGone()
                         val voteNotification = notification.voteNotification
-
+                        mText.maxLines = 2
+                        mTextLinearLo.setPadding(0, 0, 0, itemView.resources.getDimension(R.dimen.material_big).toInt())
                         if (voteNotification.count > 1) {
-                            mTextLinearLo.gravity = Gravity.TOP
-                            mTitle.text = voteNotification.from.name.capitalize()
-                            mTitle.setViewVisible()
+
+                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
+                            mTitle.setViewGone()
+                            val textId = if (isCommentToPost(notification)) R.string.users_downvoted_on_post else R.string.users_downvoted_on_comment
+
                             mImage.setImageResource(R.drawable.ic_downvote_white_on_blue_40dp)
 
-                            mText.text = itemView.resources.getString(R.string.users_downvoted_on_post,
+                            mText.text = itemView.resources.getString(textId,
                                     "$siteUrl${voteNotification.parentUrl}",
                                     Math.abs(voteNotification.count).toString(),
-                                    itemView.resources.getQuantityString(R.plurals.users, Math.abs(voteNotification.count))).toHtml()
+                                    itemView.resources.getQuantityString(R.plurals.plural_for_downvoted, Math.abs(voteNotification.count))).toHtml()
 
 
                         } else if (voteNotification.count == 1) {
                             mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
                             mTitle.setViewGone()
+
                             setAvatar(voteNotification.from.avatar)
-                            val text = itemView.resources.getString(R.string.user_downvoted_on_post,
-                                    "<b>${voteNotification.from.name.capitalize()}</b>", "$siteUrl${voteNotification.parentUrl}").toHtml()
+
+                            val textId = if (isCommentToPost(notification)) R.string.user_downvoted_on_post else R.string.user_downvoted_on_comment
+
+                            val text = itemView.resources.getString(textId,
+                                    voteNotification.from.name.capitalize(),
+                                    "$siteUrl${voteNotification.parentUrl}").toHtml()
                             mText.text = text
                         }
                     }
@@ -156,10 +171,14 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
                         val transferNotification = notification.transferNotification
                         mTextLinearLo.gravity = Gravity.TOP
-                        mTitle.text = transferNotification.from.name.capitalize()
+                        val title = itemView.resources.getString(R.string.transfer_income, transferNotification.from.name.capitalize()).toHtml()
+                        mTitle.text = title
                         mTitle.setViewVisible()
+                        mText.maxLines = 1
+                        mTextLinearLo.setPadding(0, 0, 0, 0)
 
                         mSecondaryImage.background = ContextCompat.getDrawable(itemView.context, R.drawable.shape_notifications_small_icon_back)
+
                         mSecondaryImage.setImageResource(R.drawable.ic_coins_14dp)
                         mSecondaryImage.setViewVisible()
 
@@ -171,21 +190,22 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                     }
                     is GolosCommentNotification -> {
                         mSecondaryImage.background = ContextCompat.getDrawable(itemView.context, R.drawable.shape_notifications_small_icon_back)
-                        mSecondaryImage.setImageResource(if (notification.isCommentToPost()) R.drawable.ic_comment_small else R.drawable.ic_answer_on_comment)
+                        mSecondaryImage.setImageResource(if (isCommentToPost(notification)) R.drawable.ic_comment_small else R.drawable.ic_answer_on_comment)
                         mSecondaryImage.setViewVisible()
-
+                        mTextLinearLo.setPadding(0, 0, 0, 0)
+                        mTextLinearLo.gravity = Gravity.TOP
+                        mTitle.setViewVisible()
+                        mTitle.text = notification.commentNotification.parentAuthor.capitalize()
+                        mText.maxLines = 1
 
                         val commentNotification = notification.commentNotification
                         setAvatar(commentNotification.author.avatar)
-                        val textId = if (notification.isCommentToPost()) R.string.user_answered_on_post else R.string.user_answered_on_comment
+                        val textId = if (isCommentToPost(notification)) R.string.user_answered_on_post else R.string.user_answered_on_comment
                         val text = itemView.resources.getString(textId,
-                                "<b>${commentNotification.author.name.capitalize()}</b>",
+                                commentNotification.author.name.capitalize(),
                                 "$siteUrl${commentNotification.parentUrl}").toHtml()
 
                         mText.text = text
-                        mTitle.text = commentNotification.author.name.capitalize()
-                        mTextLinearLo.gravity = Gravity.TOP
-                        mSecondaryImage.setViewVisible()
                     }
                 }
             }

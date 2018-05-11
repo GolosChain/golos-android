@@ -163,21 +163,30 @@
     <string name="yeat_with_dor">%s г.</string>
     <string name="registrationDate">Дата регистрации</string>
     <string name="information" >Информация</string>
-    <string name="users_voted_on_post">За ваш <![CDATA[<a href = "%s">пост</>]]> проголосовали %s %s</string>
-    <string name="users_voted_on_post_for_notification">За ваш пост проголосовали %s %s</string>
-    <string name="users_downvoted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> вызвал негативную реакцию у %s %s</string>
-    <string name="users_downvoted_on_post_for_notification">Ваш пост вызвал негативную реакцию у %s %s</string>
-    <string name="user_voted_on_post">%s лайкнул(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
-    <string name="user_voted_on_post_for_notification">%s лайкнул(а) ваш пост</string>
-    <string name="user_downvoted_on_post">%s поставил(а) флаг вашему <![CDATA[<a href = "%s">посту</>]]></string>
-    <string name="user_downvoted_on_post_for_notification">%s поставил(а) флаг вашему посту</string>
-    <string name="user_answered_on_post">%s ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
-    <string name="user_answered_on_post_for_notification">%s ответил(а) на ваш пост</string>
-    <string name="user_answered_on_comment">%s ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
-    <string name="user_answered_on_comment_for_notification">%s ответил(а) на ваш комментарий</string>
-    <string name="user_transferred_you">Перевел(а) на ваш счет %s</string>
+    <string name="users_voted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> поддержали %s %s</string>
+    <string name="users_voted_on_comment">Ваш <![CDATA[<a href = "%s">комментарий</>]]> поддержали %s %s</string>
+    <string name="users_voted_on_post_for_notification">Ваш пост поддержали %s %s</string>
+    <string name="users_voted_on_comment_for_notification">Ваш комментарий поддержали %s %s</string>
+    <string name="users_downvoted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> получил %s %s</string>
+    <string name="users_downvoted_on_comment">Ваш <![CDATA[<a href = "%s">комментарий</>]]> получил %s %s</string>
+    <string name="users_downvoted_on_post_for_notification">Ваш пост получил %s %s</string>
+    <string name="users_downvoted_on_comment_for_notification">Ваш комментарий получил %s %s</string>
+    <string name="user_voted_on_post">&lt;b>%s&lt;/b> поддержал(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_voted_on_comment">&lt;b>%s&lt;/b> поддержал(а) ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_voted_on_post_for_notification">&lt;b>%s&lt;/b> поддержал(а) ваш пост</string>
+    <string name="user_voted_on_comment_for_notification">&lt;b>%s&lt;/b> поддержал(а) ваш комментарий</string>
+    <string name="user_downvoted_on_post">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_downvoted_on_comment">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_downvoted_on_post_for_notification">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш пост</string>
+    <string name="user_downvoted_on_comment_for_notification">&lt;>%s&lt;/b> негативно отреагировал(а) на ваш комментарий</string>
+    <string name="user_answered_on_post">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_answered_on_post_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш пост</string>
+    <string name="user_answered_on_comment">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш комментарий</string>
+    <string name="user_transferred_you">На ваш счет поступило %s</string>
     <string name="notifications">Онлайн уведомления на Golos.io</string>
     <string name="mention">Упоминания</string>
+    <string name="transfer_income">Пришел перевод от &lt;b>%s&lt;/b></string>
     <string name="upvote">Апвоут</string>
     <string name="transfer">Трансфер</string>
     <string name="answer_on_post">Ответ на пост</string>

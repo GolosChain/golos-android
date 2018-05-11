@@ -48,6 +48,9 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.repository.model.GolosCommentNotification
+import io.golos.golos.repository.model.GolosDownVoteNotification
+import io.golos.golos.repository.model.GolosUpVoteNotification
 import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
 import java.io.IOException
@@ -432,6 +435,10 @@ public fun ViewGroup.iterator(): Iterator<View> {
         }
     }
 }
+
+fun isCommentToPost(notification: GolosCommentNotification) = notification.commentNotification.parentDepth == 0
+fun isCommentToPost(notification: GolosDownVoteNotification) = notification.voteNotification.parentDepth == 0
+fun isCommentToPost(notification: GolosUpVoteNotification) = notification.voteNotification.parentDepth == 0
 
 public operator fun ViewGroup.get(position: Int) = if (position < childCount) getChildAt(position) else null
 /**

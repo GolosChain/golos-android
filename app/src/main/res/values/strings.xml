@@ -163,20 +163,28 @@
     <string name="site">Site</string>
     <string name="registrationDate">Registration date</string>
     <string name="yeat_with_dor">%s y.</string>
-    <string name="information" >Information</string>
-    <string name="users_voted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was voted %s %s</string>
+    <string name="information">Information</string>
+    <string name="users_voted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was upvoted %s %s</string>
+    <string name="users_voted_on_comment">Your <![CDATA[<a href = "%s">comment</>]]> was upvoted %s %s</string>
     <string name="users_voted_on_post_for_notification">Your post was voted %s %s</string>
-    <string name="users_downvoted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was flagged %s %s</string>
-    <string name="users_downvoted_on_post_for_notification">Your post was flagged %s %s</string>
-    <string name="user_voted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
-    <string name="user_voted_on_post_for_notification">%s liked your post</string>
-    <string name="user_downvoted_on_post">%s liked your <![CDATA[<a href = "%s">post</>]]></string>
-    <string name="user_downvoted_on_post_for_notification">%s liked your post</string>
-    <string name="user_answered_on_post">%s flagged your <![CDATA[<a href = "%s">post</>]]></string>
-    <string name="user_answered_on_post_for_notification">%s flagged your post</string>
-    <string name="user_answered_on_comment">%s answered on your  <![CDATA[<a href = "%s">comment</>]]></string>
-    <string name="user_answered_on_comment_for_notification">%s answered on your  comment</string>
-    <string name="user_transferred_you">Transferred your %s</string>
+    <string name="users_voted_on_comment_for_notification">Your comment was voted %s %s</string>
+    <string name="users_downvoted_on_post">Your <![CDATA[<a href = "%s">post</>]]> was downvoted by %s %s</string>
+    <string name="users_downvoted_on_comment">Your <![CDATA[<a href = "%s">comment</>]]> was downvoted by %s %s</string>
+    <string name="users_downvoted_on_comment_for_notification">Your comment was downvoted by %s %s</string>
+    <string name="users_downvoted_on_post_for_notification">Your post was downvoted by %s %s</string>
+    <string name="user_voted_on_post">&lt;b>%s&lt;/b> voted for your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_voted_on_comment">&lt;b>%s&lt;/b> voted for your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_voted_on_post_for_notification">&lt;b>%s&lt;/b> voted for your post</string>
+    <string name="user_voted_on_comment_for_notification">&lt;b>%s&lt;/b> voted for your comment</string>
+    <string name="user_downvoted_on_post">&lt;b>%s&lt;/b> downvoted your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_downvoted_on_comment">&lt;b>%s&lt;/b> downvoted your <![CDATA[<a href = "%s">comment</>]]></string>
+    <string name="user_downvoted_on_post_for_notification">&lt;b>%s&lt;/b> downvoted your post</string>
+    <string name="user_downvoted_on_comment_for_notification">&lt;b>%s&lt;/b> downvoted your comment</string>
+    <string name="user_answered_on_post">&lt;b>%s&lt;/b> answered on your <![CDATA[<a href = "%s">post</>]]></string>
+    <string name="user_answered_on_post_for_notification">&lt;b>%s&lt;/b> answered on you post</string>
+    <string name="user_answered_on_comment">&lt;b>%s&lt;/b> answered on your <![CDATA[<a href = "%s">comment</>]]></string>
+    <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> answered on your comment</string>
+    <string name="user_transferred_you">You received %s</string>
     <string name="notifications">Online notifications on Golos.io</string>
     <string name="mention">Mentions</string>
     <string name="upvote">Upvote</string>
@@ -191,6 +199,7 @@
     <string name="new_flag">New flag</string>
     <string name="new_transfer">New transfer</string>
     <string name="show_more_notifications">show %s more %s</string>
+    <string name="transfer_income">Transfer from &lt;b>%s&lt;/b></string>
 
     <string-array name="daynight">
         <item>Day</item>

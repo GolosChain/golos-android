@@ -86,7 +86,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
         val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
 
-        Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+       // Repository.get.notificationsRepository.onReceiveNotifications(notifications)
 
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
@@ -126,7 +126,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                         }
                     })
                     mNotificationsIndicator.text = getString(R.string.show_more_notifications,
-                            it.notifications.count().toString(),
+                            (it.notifications.count() - 1).toString(),
                             resources.getQuantityString(R.plurals.notifications, it.notifications.count()))
                 }
 
@@ -174,7 +174,7 @@ val ntfns = "[\n" +
         "    \"parent_author\": \"yuri-vlad-second\",\n" +
         "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
         "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
-        "    \"count\": 1,\n" +
+        "    \"count\": 57,\n" +
         "    \"voter\": {\n" +
         "      \"account\": \"yuri-vlad\"\n" +
         "    },\n" +
@@ -223,6 +223,21 @@ val ntfns = "[\n" +
         "  },\n" +
         "  {\n" +
         "    \"parent_author\": \"yuri-vlad-second\",\n" +
+        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
+        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
+        "    \"author\": {\n" +
+        "      \"account\": \"yuri-vlad\"\n" +
+        "    },\n" +
+        "    \"count\": 1,\n" +
+        "    \"comment_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234#@yuri-vlad\\/re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\",\n" +
+        "    \"parent_depth\": 1,\n" +
+        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
+        "    \"type\": \"comment\",\n" +
+        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\",\n" +
+        "    \"permlink\": \"re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\"\n" +
+        "  },"+
+        "  {\n" +
+        "    \"parent_author\": \"yuri-vlad-second\",\n" +
         "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
         "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
         "    \"count\": 1,\n" +
@@ -239,6 +254,20 @@ val ntfns = "[\n" +
         "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
         "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
         "    \"count\": 1,\n" +
+        "    \"weight\": -10000,\n" +
+        "    \"voter\": {\n" +
+        "      \"account\": \"yuri-vlad\"\n" +
+        "    },\n" +
+        "    \"parent_depth\": 0,\n" +
+        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
+        "    \"type\": \"downvote\",\n" +
+        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\"\n" +
+        "  },\n" +
+        "  {\n" +
+        "    \"parent_author\": \"yuri-vlad-second\",\n" +
+        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
+        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
+        "    \"count\": 7,\n" +
         "    \"weight\": -10000,\n" +
         "    \"voter\": {\n" +
         "      \"account\": \"yuri-vlad\"\n" +

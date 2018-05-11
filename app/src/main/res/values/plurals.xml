@@ -65,7 +65,7 @@
         <item quantity="zero">times</item>
         <item quantity="other">times</item>
     </plurals>
-    <plurals name="users" >
+    <plurals name="plural_for_downvoted" >
         <item quantity="few">users</item>
         <item quantity="many">users</item>
         <item quantity="one">user</item>

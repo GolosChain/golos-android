@@ -64,13 +64,13 @@
         <item quantity="zero">раз</item>
         <item quantity="other">раза</item>
     </plurals>
-    <plurals name="users" >
-        <item quantity="few">пользователя</item>
-        <item quantity="many">пользователей</item>
-        <item quantity="one">пользователь</item>
-        <item quantity="two">пользователя</item>
-        <item quantity="zero">пользователей</item>
-        <item quantity="other">пользователей</item>
+    <plurals name="plural_for_downvoted">
+        <item quantity="few">негативных реакции</item>
+        <item quantity="many">негативных реакций</item>
+        <item quantity="one">негативную реакцию</item>
+        <item quantity="two">негативных реакций</item>
+        <item quantity="zero">негативных реакций</item>
+        <item quantity="other">негативных реакций</item>
     </plurals>
     <plurals name="notifications" >
         <item quantity="few">нотификации</item>

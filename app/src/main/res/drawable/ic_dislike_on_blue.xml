@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/shape_round_36dp_dark_blue" />
-    <item
-        android:drawable="@drawable/ic_downvote_18dp_white"
-        android:gravity="center" />
-</layer-list>
