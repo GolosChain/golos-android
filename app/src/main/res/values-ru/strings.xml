@@ -163,6 +163,43 @@
     <string name="yeat_with_dor">%s г.</string>
     <string name="registrationDate">Дата регистрации</string>
     <string name="information" >Информация</string>
+    <string name="users_voted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> поддержали %s %s</string>
+    <string name="users_voted_on_comment">Ваш <![CDATA[<a href = "%s">комментарий</>]]> поддержали %s %s</string>
+    <string name="users_voted_on_post_for_notification">Ваш пост поддержали %s %s</string>
+    <string name="users_voted_on_comment_for_notification">Ваш комментарий поддержали %s %s</string>
+    <string name="users_downvoted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> получил %s %s</string>
+    <string name="users_downvoted_on_comment">Ваш <![CDATA[<a href = "%s">комментарий</>]]> получил %s %s</string>
+    <string name="users_downvoted_on_post_for_notification">Ваш пост получил %s %s</string>
+    <string name="users_downvoted_on_comment_for_notification">Ваш комментарий получил %s %s</string>
+    <string name="user_voted_on_post">&lt;b>%s&lt;/b> поддержал(а) ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_voted_on_comment">&lt;b>%s&lt;/b> поддержал(а) ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_voted_on_post_for_notification">&lt;b>%s&lt;/b> поддержал(а) ваш пост</string>
+    <string name="user_voted_on_comment_for_notification">&lt;b>%s&lt;/b> поддержал(а) ваш комментарий</string>
+    <string name="user_downvoted_on_post">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_downvoted_on_comment">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_downvoted_on_post_for_notification">&lt;b>%s&lt;/b> негативно отреагировал(а) на ваш пост</string>
+    <string name="user_downvoted_on_comment_for_notification">&lt;>%s&lt;/b> негативно отреагировал(а) на ваш комментарий</string>
+    <string name="user_answered_on_post">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">пост</>]]></string>
+    <string name="user_answered_on_post_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш пост</string>
+    <string name="user_answered_on_comment">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
+    <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш комментарий</string>
+    <string name="user_transferred_you">На ваш счет поступило %s</string>
+    <string name="notifications">Онлайн уведомления на Golos.io</string>
+    <string name="mention">Упоминания</string>
+    <string name="transfer_income">Пришел перевод от &lt;b>%s&lt;/b></string>
+    <string name="upvote">Апвоут</string>
+    <string name="transfer">Трансфер</string>
+    <string name="answer_on_post">Ответ на пост</string>
+    <string name="reply_on_comment">Ответ на комментарий</string>
+    <string name="sound">Звук</string>
+    <string name="play_sound">Звук уведомлений</string>
+    <string name="new_comment">Новый комментарий</string>
+    <string name="notifications_channel_main">Основные нотификации</string>
+    <string name="new_upvote">Новый лайк</string>
+    <string name="new_flag">Новый флаг</string>
+    <string name="new_transfer">Новый трансфер</string>
+    <string name="show_more_notifications">показать еще %s %s</string>
+    <string name="error_discussion_is_frozen">Нелья комментировать дискуссию после выплаты</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

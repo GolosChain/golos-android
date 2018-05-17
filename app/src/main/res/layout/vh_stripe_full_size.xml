@@ -97,7 +97,7 @@
         android:layout_height="wrap_content"
         android:visibility="visible"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="text, image_main " />
+        app:constraint_referenced_ids="text, image_main, title " />
 
     <android.support.v7.widget.LinearLayoutCompat
         android:id="@+id/bottom_buttons_lo"

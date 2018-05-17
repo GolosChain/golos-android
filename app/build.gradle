@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 
+
+
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
@@ -9,8 +11,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 44
-        versionName "0.62"
+        versionCode 47
+        versionName "0.63"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -55,17 +57,18 @@ android {
 
 
 dependencies {
-    implementation 'com.google.firebase:firebase-messaging:12.0.0'
+    implementation 'com.google.firebase:firebase-messaging:12.0.1'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta6'
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.android.support:recyclerview-v7:27.1.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     testImplementation 'android.arch.lifecycle:extensions:1.1.1'
     testImplementation group: 'com.nhaarman', name: 'mockito-kotlin-kt1.1', version: '1.5.0'

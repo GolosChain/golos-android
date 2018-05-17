@@ -33,7 +33,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-@Suppress("NAME_SHADOWING")
+@Suppress("NAME_SHADOWING", "LABEL_NAME_CLASH")
 internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val mMainThreadExecutor: Executor,
@@ -41,8 +41,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mGolosApi: GolosApi = GolosApi.get,
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
-                              private val mNotificationsRepository: NotificationsRepository
-                              = NotificationsRepository(Executors.newSingleThreadExecutor(), Persister.get),
+                              notificationsRepository: NotificationsRepositoryImpl? = null,
                               private val mHtmlizer: Htmlizer = object : Htmlizer {
                                   override fun toHtml(input: String) = input.toHtml()
                               },
@@ -76,6 +75,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
+    private val mNotificationsRepository: NotificationsRepositoryImpl
 
     @WorkerThread
     private fun loadStories(limit: Int,
@@ -124,6 +124,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             }
         }).observeForever({})
+        mNotificationsRepository =
+                notificationsRepository ?: NotificationsRepositoryImpl(this, FCMTopicSubscriber, mPersister)
+    }
+
+    override fun onAppCreate(ctx: Context) {
+        super.onAppCreate(ctx)
+        mUserSettings.setUp(ctx)
+        mExchangesRepository.setUp(ctx)
+        mNotificationsRepository.setUp(ctx)
+        prepareForLaunch()
     }
 
     @WorkerThread
@@ -1134,14 +1144,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override val userSettingsRepository: UserSettingsRepository = mUserSettings
 
-    override val notificationsrepository: NotificationsRepository = mNotificationsRepository
+    override val notificationsRepository: NotificationsRepositoryImpl = mNotificationsRepository
 
     override fun isUserLoggedIn(): Boolean {
         return mAuthLiveData.value != null &&
                 mAuthLiveData.value?.userName != null &&
                 (mAuthLiveData.value?.privateActiveWif != null || mAuthLiveData.value?.privatePostingWif != null)
-        /*val userData = mPersister.getActiveUserData()
-        return userData != null && (userData.privateActiveWif != null || userData.privatePostingWif != null)*/
     }
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
@@ -1356,13 +1364,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return golosUsers
     }
 
-
-    override fun onAppCreate(ctx: Context) {
-        super.onAppCreate(ctx)
-        mUserSettings.setUp(ctx)
-        mExchangesRepository.setUp(ctx)
-        prepareForLaunch()
-    }
 
     override fun requestInitRetry() {
         mPersister.deleteAllStories()

@@ -18,6 +18,7 @@
     <color name="same_tags_ribbon_back">@android:color/white</color>
     <color name="upvote_green">#3da449</color>
     <color name="semi_black">#99000000</color>
+    <color name="semi_semi_black">#39000000</color>
     <color name="profile_tabs_color">@color/gray_7d</color>
     <color name="screen_background">#e8edf1</color>
     <color name="story_btn_green">#3da449</color>
@@ -46,4 +47,6 @@
     <color name="story_toolbar_color">@android:color/white</color>
     <color name="semi_white">#99ffffff</color>
     <color name="profile_gap_color">#F2F4F7</color>
+    <color name="notification_text_color">@color/gray_4f</color>
+    <color name="notification_delimeter">#eeeeee</color>
 </resources>

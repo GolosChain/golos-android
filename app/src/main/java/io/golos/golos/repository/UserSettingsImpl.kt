@@ -4,6 +4,8 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.App
+import io.golos.golos.repository.model.NotificationsDisplaySetting
+import io.golos.golos.utils.mapper
 
 
 internal class UserSettingsImpl : UserSettingsRepository {
@@ -13,11 +15,16 @@ internal class UserSettingsImpl : UserSettingsRepository {
     private val mShowNSFWLiveData = MutableLiveData<Boolean>()
     private val mCurrencyLiveData = MutableLiveData<UserSettingsRepository.GolosCurrency>()
     private val mBountyDisplay = MutableLiveData<UserSettingsRepository.GolosBountyDisplay>()
+    private val mNotificationsSettings = MutableLiveData<NotificationsDisplaySetting>()
 
     override fun setUp(ctx: Context) {
         mCompactLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isCompact", false)
         mShowImageLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isShown", true)
         mShowNSFWLiveData.value = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("showNsfw", false)
+
+        val notificainsSerialized: String? = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("notifications_settings", null)
+        mNotificationsSettings.value = if (notificainsSerialized != null) mapper.readValue(notificainsSerialized, NotificationsDisplaySetting::class.java)
+        else NotificationsDisplaySetting(false, false, true, true)
 
         val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)
 
@@ -94,7 +101,7 @@ internal class UserSettingsImpl : UserSettingsRepository {
         App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).edit().putBoolean("setVoteQuestionMade", isMade).apply()
     }
 
-    override fun isVoteQuestionMad(): Boolean {
+    override fun isVoteQuestionMade(): Boolean {
         return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("setVoteQuestionMade", false)
     }
 
@@ -114,5 +121,17 @@ internal class UserSettingsImpl : UserSettingsRepository {
 
     override fun isNightMode(): Boolean {
         return App.context.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getBoolean("isNight", false)
+    }
+
+    override fun getNotificationsSettings(): LiveData<NotificationsDisplaySetting> {
+        return mNotificationsSettings
+    }
+
+    override fun setNotificationSettings(newSettings: NotificationsDisplaySetting) {
+        if (newSettings != mNotificationsSettings.value) {
+            mNotificationsSettings.value = newSettings
+            App.context.getSharedPreferences(sharedPrefName,
+                    Context.MODE_PRIVATE).edit().putString("notifications_settings", mapper.writeValueAsString(newSettings)).apply()
+        }
     }
 }

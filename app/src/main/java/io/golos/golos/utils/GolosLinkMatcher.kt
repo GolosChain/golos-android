@@ -31,6 +31,8 @@ object GolosLinkMatcher {
         }
         return NoMatch()
     }
+
+
 }
 
 data class StoryLinkMatch(val author: String,

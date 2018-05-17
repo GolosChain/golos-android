@@ -53,8 +53,7 @@ class RepositoryPostAndVoteTest {
                     override fun toHtml(input: String): CharSequence {
                         return input
                     }
-                },
-                mNotificationsRepository = NotificationsRepository(executor, MockPersister)
+                }
         )
         //  repo.authWithMasterKey("yuri-vlad", masterKey = "P5JPwfpSsi6fw7fXUeokW8aNudvadpF8aYXZSnZ8oLvLgxfqoWQZ", listener = { _ -> })
         repo.authWithActiveWif(userName, activeWif = privateActive, listener = { _ -> })
@@ -258,6 +257,7 @@ class RepositoryPostAndVoteTest {
         repo.requestStoryUpdate(votingItem)
 
         repo.vote(votingItem.storyWithState()!!, 100)
+        Thread.sleep(3000)
         repo.vote(popular.value?.items?.get(1)!!.storyWithState()!!, 100)
 
         votingItem = popular.value?.items?.find { it.rootStory()?.id == votingItem.rootStory()?.id }!!

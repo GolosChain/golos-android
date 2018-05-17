@@ -22,6 +22,7 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
@@ -54,6 +55,7 @@ class StoryViewModel : ViewModel() {
                 it.rootStory()?.author == this.author
                         && it.rootStory()?.permlink == this.permLink
             }?.let {
+
                 val mustHaveComments = it.rootStory()?.commentsCount ?: 0
                 val commentsSize = it.comments().size
                 var isLoading = false
@@ -234,7 +236,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onTagClick(context: Context, text: String?) {
-         FilteredStoriesActivity.start(context, text ?: return)
+        FilteredStoriesActivity.start(context, text ?: return)
     }
 
     fun onShareClick(context: Context) {

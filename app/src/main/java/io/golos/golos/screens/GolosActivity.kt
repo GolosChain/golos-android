@@ -12,11 +12,9 @@ import android.text.Html
 import android.widget.Toast
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsImpl
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.restart
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -36,7 +34,7 @@ abstract class GolosActivity : AppCompatActivity() {
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_NO))
         }
         super.onCreate(savedInstanceState)
-        if (!Repository.get.userSettingsRepository.isUserVotedForApp() && !Repository.get.userSettingsRepository.isVoteQuestionMad()) {
+        if (!Repository.get.userSettingsRepository.isUserVotedForApp() && !Repository.get.userSettingsRepository.isVoteQuestionMade()) {
             Handler().postDelayed({
                 if (isResumed) {
                     VoteForAppDialog.getInstance().show(supportFragmentManager, null)

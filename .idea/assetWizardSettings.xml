@@ -28,12 +28,13 @@
                         </option>
                         <option name="values">
                           <map>
+                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="d1d1d6" />
-                            <entry key="height" value="14" />
-                            <entry key="outputName" value="ic_chevron_right_black_14dp" />
+                            <entry key="height" value="12" />
+                            <entry key="outputName" value="ic_comment_small" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="$USER_HOME$" />
-                            <entry key="width" value="14" />
+                            <entry key="sourceFile" value="$PROJECT_DIR$/../../ic_comment_small (5).svg" />
+                            <entry key="width" value="12" />
                           </map>
                         </option>
                       </PersistentState>

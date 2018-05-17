@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_a_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:orientation="vertical">
 
     <io.golos.golos.screens.widgets.UnScrollableViewPager
         android:id="@+id/content_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="top"
         android:layout_marginBottom="56dp" />
 
     <View
@@ -27,73 +30,52 @@
         app:menu="@menu/bottom_menu" />
 
     <LinearLayout
-        android:id="@+id/modal_win"
+        android:id="@+id/notifications_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@android:color/white"
         android:orientation="vertical"
-        android:padding="@dimen/margin_material"
         android:visibility="gone">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="FCM ID"
-            android:textStyle="bold" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/notification_recycler"
 
-        <TextView
-            android:id="@+id/i_id_tv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_material_half"
-            android:textColor="@color/black3" />
+            android:layout_height="@dimen/notification_height"
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_material_half"
-            android:text="topic"
-            android:textStyle="bold" />
+        <LinearLayout
 
-        <TextView
-            android:id="@+id/topic_tv"
+            android:id="@+id/button_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_material_half"
-            android:textColor="@color/black3" />
+            android:layout_height="match_parent"
+            android:background="@color/white_black_toolbar_color"
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last received message"
-            android:textStyle="bold" />
 
-        <TextView
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/notification_delimeter" />
 
-            android:id="@+id/last_m_tv"
+            <Button
+                android:id="@+id/notifications_count_tv"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:textColor="@color/blue_light" />
+
+        </LinearLayout>
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:textColor="@color/black3"
-
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_material_half"
-            android:gravity="center"
-            android:text="long tap on text to share!"
-            android:textStyle="bold" />
+            android:layout_height="4dp"
+            android:background="@drawable/shape_shadow_gray" />
     </LinearLayout>
 
     <Button
-        android:visibility="gone"
-        android:id="@+id/show_modal"
+        android:id="@+id/add_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|top"
-        android:text="Show modal window"
-        android:textAllCaps="false" />
+        android:layout_gravity="center_vertical"
+        android:visibility="gone" />
 </FrameLayout>

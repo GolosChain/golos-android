@@ -15,10 +15,8 @@ class MyInstanceIdService : FirebaseInstanceIdService() {
     override fun onTokenRefresh() {
         super.onTokenRefresh()
         val token = FirebaseInstanceId.getInstance().token
-        Timber.e("token is $token")
         FirebaseMessaging.getInstance().subscribeToTopic("all")
         FirebaseMessaging.getInstance().subscribeToTopic("all_android")
         PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("token", token).commit()
-
     }
 }

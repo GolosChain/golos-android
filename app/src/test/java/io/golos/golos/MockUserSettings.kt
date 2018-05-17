@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.NotificationsDisplaySetting
 
 /**
  * Created by yuri on 05.03.18.
@@ -35,6 +36,14 @@ object MockUserSettings : UserSettingsRepository {
 
     }
 
+    override fun getNotificationsSettings(): LiveData<NotificationsDisplaySetting> {
+       return MutableLiveData<NotificationsDisplaySetting>()
+    }
+
+    override fun setNotificationSettings(newSettings: NotificationsDisplaySetting) {
+
+    }
+
     override fun setUserVotedForApp(isVotedForApp: Boolean) {
 
     }
@@ -47,7 +56,7 @@ object MockUserSettings : UserSettingsRepository {
 
     }
 
-    override fun isVoteQuestionMad(): Boolean {
+    override fun isVoteQuestionMade(): Boolean {
         return true
     }
 

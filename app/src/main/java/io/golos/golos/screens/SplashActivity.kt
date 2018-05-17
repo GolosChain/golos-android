@@ -8,6 +8,7 @@ import fr.castorflex.android.circularprogressbar.CircularProgressBar
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ReadyStatus
+import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
 

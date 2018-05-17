@@ -23,7 +23,6 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.utils.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
@@ -514,7 +513,16 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                   feedType: FeedType,
                   filter: StoryFilter?,
                   scrollToComments: Boolean = false) {
+            ctx.startActivity(getStartIntent(ctx, author, blog, permlink, feedType, filter, scrollToComments))
+        }
 
+        fun getStartIntent(ctx: Context,
+                           author: String,
+                           blog: String?,
+                           permlink: String,
+                           feedType: FeedType,
+                           filter: StoryFilter?,
+                           scrollToComments: Boolean = false): Intent {
             val intent = Intent(ctx, StoryActivity::class.java)
             intent.putExtra(AUTHOR_TAG, author)
             intent.putExtra(BLOG_TAG, blog)
@@ -522,7 +530,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             intent.putExtra(FEED_TYPE, feedType)
             intent.putExtra(STORY_FILTER, mapper.writeValueAsString(filter))
             intent.putExtra(SCROLL_TO_COMMENTS, scrollToComments)
-            ctx.startActivity(intent)
+            return intent
         }
     }
 }

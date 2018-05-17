@@ -392,7 +392,8 @@ class ApiImplTest {
 
     @Test
     fun getAccountAdditionalDataTest(){
-        val account = service.getAccountInfo("yuri-vlad")
+        val account = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("yuri-vlad-second")))
         println(account)
     }
+
 }

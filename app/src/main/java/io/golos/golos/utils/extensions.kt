@@ -9,11 +9,15 @@ import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.os.Parcelable
 import android.support.annotation.ColorRes
 import android.support.annotation.DimenRes
 import android.support.annotation.DrawableRes
@@ -21,6 +25,7 @@ import android.support.annotation.LayoutRes
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.SearchView
 import android.text.Html
@@ -44,14 +49,21 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.repository.model.GolosCommentNotification
+import io.golos.golos.repository.model.GolosDownVoteNotification
+import io.golos.golos.repository.model.GolosUpVoteNotification
 import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
 import java.io.IOException
+import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
  */
+
+val siteUrl = "https://golos.io"
+
 object Counter {
     val counter = AtomicInteger(-1)
 }
@@ -98,6 +110,38 @@ fun String.asIntentToShowUrl(): Intent {
     val i = Intent(Intent.ACTION_VIEW)
     i.data = Uri.parse(this);
     return i
+}
+
+inline fun <reified T : Any> createIntent(vararg pairs: Pair<String, T>): Intent {
+    val out = Intent()
+    pairs.forEach {
+        out.putExtra(it.first, when (it.second) {
+            is Boolean -> it
+            is Byte -> it
+            is Char -> it
+            is Short -> it
+            is Int -> it
+            is Long -> it
+            is Float -> it
+            is Double -> it
+            is String -> it
+            is CharSequence -> it
+            is Parcelable -> it
+            is Serializable -> it
+            is BooleanArray -> it
+            is ByteArray -> it
+            is CharArray -> it
+            is ShortArray -> it
+            is IntArray -> it
+            is LongArray -> it
+            is FloatArray -> it
+            is DoubleArray -> it
+            is Bundle -> it
+            is Array<*> -> it
+            else -> throw IllegalArgumentException("cannot pu argiment of type ${it.second::class.java}")
+        })
+    }
+    return out
 }
 
 fun String.asIntentToShareString(): Intent {
@@ -289,6 +333,22 @@ fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
     return AppCompatResources.getDrawable(context, resId)!!
 }
 
+fun Context.getVectorAsBitmap(@DrawableRes resId: Int): Bitmap {
+
+    var drawable = AppCompatResources.getDrawable(this, resId)!!
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        drawable = (DrawableCompat.wrap(drawable)).mutate()
+    }
+
+    val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth,
+            drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap);
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+
+    return bitmap
+
+}
 
 fun CommentOperation.getTags(): List<String> {
     val out = ArrayList<String>()
@@ -409,6 +469,10 @@ public fun ViewGroup.iterator(): Iterator<View> {
         }
     }
 }
+
+fun isCommentToPost(notification: GolosCommentNotification) = notification.commentNotification.parentDepth == 0
+fun isCommentToPost(notification: GolosDownVoteNotification) = notification.voteNotification.parentDepth == 0
+fun isCommentToPost(notification: GolosUpVoteNotification) = notification.voteNotification.parentDepth == 0
 
 public operator fun ViewGroup.get(position: Int) = if (position < childCount) getChildAt(position) else null
 /**

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title_tv"
+    style="@style/SettingTitleTextView"
+    android:layout_height="42dp"
+    android:gravity="center_vertical|start"
+    android:paddingEnd="@dimen/material_big"
+    android:paddingStart="@dimen/material_big"
+    android:paddingTop="@dimen/margin_material_half" />
