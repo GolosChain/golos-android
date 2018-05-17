@@ -18,6 +18,8 @@
 
 
     <LinearLayout
+        android:clickable="true"
+        android:background="?selectableItemBackgroundBorderless"
         android:id="@+id/text_lo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

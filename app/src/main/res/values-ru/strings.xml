@@ -199,6 +199,7 @@
     <string name="new_flag">Новый флаг</string>
     <string name="new_transfer">Новый трансфер</string>
     <string name="show_more_notifications">показать еще %s %s</string>
+    <string name="error_discussion_is_frozen">Нелья комментировать дискуссию после выплаты</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

@@ -46,6 +46,8 @@ object GolosErrorParser {
             return R.string.you_must_have_more_repo_for_action
         if (message.contains("Cannot vote again on a comment after payout"))
             return R.string.cant_vote_after_payout
+        if (message.contains("Discussion is frozen"))
+            return R.string.error_discussion_is_frozen
         if (message.contains(" Voter has used the maximum number of vote changes on this commen"))
             return R.string.user_used_max_comments_chances
         if (message.contains(" You have already voted in a similar way"))

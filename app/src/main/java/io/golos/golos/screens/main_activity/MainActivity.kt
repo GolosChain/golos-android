@@ -2,15 +2,19 @@ package io.golos.golos.screens.main_activity
 
 import android.animation.Animator
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.model.Notification
+import io.golos.golos.notifications.NOTIFICATION_KEY
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.GolosNotifications
@@ -33,6 +37,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     private lateinit var mNotificationsContainer: ViewGroup
 
     private lateinit var mNotificationsRecycler: RecyclerView
+    private val mHandler = Handler()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,10 +88,14 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         }
         Repository.get.lastCreatedPost().observe(this, this)
 
-        val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
-        val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
+        checkStartArgsForNotification(intent)
 
-       // Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+        findViewById<Button>(R.id.add_btn).setOnClickListener {
+            val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
+            val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
+            val rand = Random()
+            Repository.get.notificationsRepository.onReceiveNotifications(notifications)
+        }
 
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
@@ -94,7 +103,11 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
                         it.getLink()?.let {
                             StoryActivity.start(this, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
+                        mHandler.postDelayed({ Repository.get.notificationsRepository.dismissNotification(it) }, 1000)
+                    } else {
+                        mHandler.post { Repository.get.notificationsRepository.dismissNotification(it) }
                     }
+
                 },
                 { Repository.get.notificationsRepository.dismissNotification(it) },
                 true)
@@ -110,26 +123,33 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
             if (it?.notifications?.isEmpty() != false) mNotificationsContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
                 override fun onAnimationEnd(p0: Animator?) {
                     mNotificationsContainer.setViewGone()
+                    mButtonContainer.setViewGone()
                 }
             })
             else {
                 if (it.notifications.size == 1) {
-                    mButtonContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
-                        override fun onAnimationEnd(p0: Animator?) {
-                            mButtonContainer.setViewGone()
-                        }
-                    })
+                    mNotificationsContainer.setViewVisible()
+                    if (mButtonContainer.visibility == View.VISIBLE) {
+                        mButtonContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
+                            override fun onAnimationEnd(p0: Animator?) {
+                                mButtonContainer.setViewGone()
+                            }
+                        })
+                    }
+
                 } else {
-                    mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
-                        override fun onAnimationEnd(p0: Animator?) {
-                            mButtonContainer.setViewVisible()
-                        }
-                    })
+                    mNotificationsContainer.setViewVisible()
+                    if (mButtonContainer.visibility != View.VISIBLE) {
+                        mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
+                            override fun onAnimationEnd(p0: Animator?) {
+                                mButtonContainer.setViewVisible()
+                            }
+                        })
+                    }
                     mNotificationsIndicator.text = getString(R.string.show_more_notifications,
                             (it.notifications.count() - 1).toString(),
                             resources.getQuantityString(R.plurals.notifications, it.notifications.count()))
                 }
-
             }
         })
         mNotificationsIndicator.setOnClickListener {
@@ -138,10 +158,25 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        checkStartArgsForNotification(intent)
+    }
+
     override fun onChanged(it: CreatePostResult?) {
         if (it?.isPost == true) {
             StoryActivity.start(this,
                     it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
+        }
+    }
+
+    private fun checkStartArgsForNotification(intent: Intent?) {
+        if (intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) != 0) {
+            val intentHashCode = intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) ?: 0
+            val broadcasterIntent = Intent(NOTIFICATION_KEY)
+            broadcasterIntent.putExtra(NOTIFICATION_KEY, intentHashCode)
+            sendBroadcast(broadcasterIntent)
         }
     }
 
@@ -166,6 +201,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         const val STORIES_FRAGMENT_POSITION = 0
         const val FILTERED_BY_TAG_STORIES = 1
         const val PROFILE_FRAGMENT_POSITION = 3
+        const val STARTED_FROM_NOTIFICATION = "STARTED_FROM_NOTIFICATION"
     }
 }
 
@@ -235,7 +271,7 @@ val ntfns = "[\n" +
         "    \"type\": \"comment\",\n" +
         "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\",\n" +
         "    \"permlink\": \"re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\"\n" +
-        "  },"+
+        "  }," +
         "  {\n" +
         "    \"parent_author\": \"yuri-vlad-second\",\n" +
         "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +

@@ -6,7 +6,7 @@ import android.content.Intent
 import io.golos.golos.repository.Repository
 import timber.log.Timber
 
-const val NOTIFICATION_KEY = "NOTIFICATION_KEY"
+const val NOTIFICATION_KEY = "io.golos.golos.notifications.NOTIFICATION_KEY"
 
 class NotificationsBroadCastReceiver : BroadcastReceiver() {
 

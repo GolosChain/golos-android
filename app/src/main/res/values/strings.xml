@@ -200,6 +200,7 @@
     <string name="new_transfer">New transfer</string>
     <string name="show_more_notifications">show %s more %s</string>
     <string name="transfer_income">Transfer from &lt;b>%s&lt;/b></string>
+    <string name="error_discussion_is_frozen">Discussion is frozen</string>
 
     <string-array name="daynight">
         <item>Day</item>

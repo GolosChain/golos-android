@@ -95,9 +95,10 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                 if (value == null) return
 
                 mCancelBtn.setOnClickListener { value.onCancelClickListener.invoke(this) }
+                mTextLinearLo.setOnClickListener { value.clickListener.invoke(this) }
                 mText.setOnClickListener { value.clickListener.invoke(this) }
+                mTitle.setOnClickListener { value.clickListener.invoke(this) }
                 mImage.setOnClickListener { value.clickListener.invoke(this) }
-                itemView.setOnClickListener { value.clickListener.invoke(this) }
 
                 val notification = value.notification
                 mImage.background = null

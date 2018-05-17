@@ -129,7 +129,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 val dismissIntent = Intent(this, NotificationsBroadCastReceiver::class.java)
 
                 dismissIntent.putExtra(NOTIFICATION_KEY, notification.hashCode())
-
+                resultIntent.putExtra(MainActivity.STARTED_FROM_NOTIFICATION, notification.hashCode())
 
                 val builder = NotificationCompat
                         .Builder(this, getString(R.string.notifications_channel_main))
@@ -155,7 +155,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 (notification as? PostLinkable)?.getLink()?.let {
                     builder.setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent,
                             StoryActivity.getStartIntent(this, it.author, it.blog, it.permlink,
-                                    FeedType.UNCLASSIFIED, null)), PendingIntent.FLAG_UPDATE_CURRENT))
+                                    FeedType.UNCLASSIFIED, null), dismissIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                 }
 
                 when (notification) {

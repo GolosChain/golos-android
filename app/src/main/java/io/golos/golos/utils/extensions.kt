@@ -17,6 +17,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.os.Parcelable
 import android.support.annotation.ColorRes
 import android.support.annotation.DimenRes
 import android.support.annotation.DrawableRes
@@ -54,6 +55,7 @@ import io.golos.golos.repository.model.GolosUpVoteNotification
 import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
 import java.io.IOException
+import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -108,6 +110,38 @@ fun String.asIntentToShowUrl(): Intent {
     val i = Intent(Intent.ACTION_VIEW)
     i.data = Uri.parse(this);
     return i
+}
+
+inline fun <reified T : Any> createIntent(vararg pairs: Pair<String, T>): Intent {
+    val out = Intent()
+    pairs.forEach {
+        out.putExtra(it.first, when (it.second) {
+            is Boolean -> it
+            is Byte -> it
+            is Char -> it
+            is Short -> it
+            is Int -> it
+            is Long -> it
+            is Float -> it
+            is Double -> it
+            is String -> it
+            is CharSequence -> it
+            is Parcelable -> it
+            is Serializable -> it
+            is BooleanArray -> it
+            is ByteArray -> it
+            is CharArray -> it
+            is ShortArray -> it
+            is IntArray -> it
+            is LongArray -> it
+            is FloatArray -> it
+            is DoubleArray -> it
+            is Bundle -> it
+            is Array<*> -> it
+            else -> throw IllegalArgumentException("cannot pu argiment of type ${it.second::class.java}")
+        })
+    }
+    return out
 }
 
 fun String.asIntentToShareString(): Intent {

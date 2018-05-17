@@ -2,6 +2,7 @@ package io.golos.golos.screens.main_activity
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.DividerItemDecoration
@@ -21,6 +22,7 @@ import io.golos.golos.screens.story.StoryActivity
 
 class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
     private lateinit var mRecyclerView: RecyclerView
+    private val mHandler = Handler()
 
     override fun onChanged(t: GolosNotifications?) {
         if (t?.notifications?.size ?: 0 == 0) dismiss()
@@ -53,7 +55,11 @@ class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
                             StoryActivity.start(context
                                     ?: return@NotificationsAdapter, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
+                        mHandler.postDelayed({ Repository.get.notificationsRepository.dismissNotification(it) }, 1000)
+                    } else {
+                        mHandler.post { Repository.get.notificationsRepository.dismissNotification(it) }
                     }
+
                 },
                 { Repository.get.notificationsRepository.dismissNotification(it) }, false)
 
