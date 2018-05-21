@@ -18,8 +18,6 @@ import timber.log.Timber
 class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {
         super.onMessageReceived(p0)
-        Timber.e("onMessageReceived ${p0?.data}")
-
         try {
             val notification = mapper.readValue<Notification>(p0?.data?.get("message")
                     ?: return, Notification::class.java)

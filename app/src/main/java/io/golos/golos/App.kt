@@ -132,7 +132,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 resultIntent.putExtra(MainActivity.STARTED_FROM_NOTIFICATION, notification.hashCode())
 
                 val builder = NotificationCompat
-                        .Builder(this, getString(R.string.notifications_channel_main))
+                        .Builder(this, getNotificationChannel())
                         .setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                         .setDeleteIntent(PendingIntent.getBroadcast(this, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                         .setAutoCancel(true)
@@ -268,6 +268,19 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
     override fun getLifeCycleLiveData() = mLiveData
 
+    private fun getNotificationChannel(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = this.packageName
+            val channelName = "Main Channel"
+            val chan = NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_HIGH)
+            chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            service.createNotificationChannel(chan)
+            return channelId
+        } else this.packageName
+    }
+
     private fun loadImageThenShowNotification(builder: NotificationCompat.Builder,
                                               text: CharSequence,
                                               title: CharSequence?,
@@ -310,7 +323,5 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             return cm?.activeNetworkInfo != null && cm.activeNetworkInfo.isConnected
         }
-
-        fun getLifeCycleRespository(): AppLifecycleRepository = this as App
     }
 }

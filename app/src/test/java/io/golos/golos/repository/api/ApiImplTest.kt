@@ -203,13 +203,15 @@ class ApiImplTest {
     @Test
     fun createPostTest() {
         service.auth(accname, null, null, privatePosting)
-        val tags = arrayOf<String>("first", "second", "third")
+        val tags = arrayOf<String>("test", "second", "third")
         val result = service.sendPost(accname,
                 "Test Title" + UUID.randomUUID().toString().substring(8),
                 " ewtwetwetwet",
                 tags)
         assertEquals(accname, result.author)
-        assertEquals("first", result.blog)
+        assertEquals("test", result.blog)
+
+
     }
 
     @Test
@@ -391,7 +393,7 @@ class ApiImplTest {
     }
 
     @Test
-    fun getAccountAdditionalDataTest(){
+    fun getAccountAdditionalDataTest() {
         val account = Golos4J.getInstance().databaseMethods.getAccounts(listOf(AccountName("yuri-vlad-second")))
         println(account)
     }

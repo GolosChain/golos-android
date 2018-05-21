@@ -30,7 +30,7 @@ data class CommentNotification(
         @JsonProperty("parent_title")
         val parentTitle: String,
         @JsonProperty("parent_body")
-        val parentBody: String,
+        val parentBody: String?,
         @JsonProperty("parent_url")
         val parentUrl: String,
         @JsonProperty("count")
@@ -51,7 +51,7 @@ data class VoteNotification(@JsonProperty("voter")
                             @JsonProperty("parent_title")
                             val parentTitle: String,
                             @JsonProperty("parent_body")
-                            val parentBody: String,
+                            val parentBody: String?,
                             @JsonProperty("parent_url")
                             val parentUrl: String,
                             @JsonProperty("count")
@@ -68,7 +68,7 @@ data class DownVoteNotification(@JsonProperty("voter")
                                 @JsonProperty("parent_title")
                                 val parentTitle: String,
                                 @JsonProperty("parent_body")
-                                val parentBody: String,
+                                val parentBody: String?,
                                 @JsonProperty("parent_url")
                                 val parentUrl: String,
                                 @JsonProperty("count")
