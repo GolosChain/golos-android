@@ -9,6 +9,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.isNullOrEmpty
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
 import org.json.JSONException
@@ -17,10 +18,13 @@ import timber.log.Timber
 
 object DiscussionItemFactory {
     fun create(discussion: Discussion, account: ExtendedAccount?): GolosDiscussionItem {
+        val metadata = getMetadataFromItem(discussion.jsonMetadata)
+
         val url = discussion.url ?: ""
         val id = discussion.id
         val title = discussion.title ?: ""
-        val categoryName = discussion.category ?: ""
+        val categoryName = discussion.category?:""
+
         val votesNum = discussion.netVotes
         val commentsCount = discussion.children
         val permlink = discussion.permlink?.link ?: ""
@@ -44,10 +48,16 @@ object DiscussionItemFactory {
                 parentAuthor = discussion.parentAuthor.name ?: "", childrenCount = childrenCount,
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
                 firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
-        setDataFromTagsString(discussion.jsonMetadata, item)
+
         discussion.activeVotes?.forEach {
             item.activeVotes.add(VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100))
         }
+
+        item.format = metadata.format
+        item.links.addAll(metadata.links)
+        item.images.addAll(metadata.images)
+        item.tags.addAll(metadata.tags)
+
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
         checkImages(item)
@@ -55,10 +65,14 @@ object DiscussionItemFactory {
     }
 
     fun create(discussion: DiscussionLight, account: ExtendedAccount?): GolosDiscussionItem {
+        val metadata = getMetadataFromItem(discussion.jsonMetadata)
+
         val url = discussion.url ?: ""
         val id = discussion.id
         val title = discussion.title ?: ""
-        val categoryName = discussion.category ?: ""
+
+        val categoryName = discussion.category?:""
+
         val votesNum = discussion.netVotes
         val commentsCount = discussion.children
         val permlink = discussion.permlink ?: ""
@@ -80,7 +94,11 @@ object DiscussionItemFactory {
                 ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated, created = created, firstRebloggedBy = firstRebloggedBy,
                 cleanedFromImages = cleanedFromImages)
 
-        setDataFromTagsString(discussion.jsonMetadata, item)
+        item.format = metadata.format
+        item.links.addAll(metadata.links)
+        item.images.addAll(metadata.images)
+        item.tags.addAll(metadata.tags)
+
         item.activeVotes.addAll(discussion.votes)
         setTypeOfItem(item)
         account?.let { setAvatar(item, it) }
@@ -88,7 +106,8 @@ object DiscussionItemFactory {
         return item
     }
 
-    private fun setDataFromTagsString(tags: String, to: GolosDiscussionItem) {
+    private fun getMetadataFromItem(tags: String): GolosDiscussionItemMetadata {
+        val metadata = GolosDiscussionItemMetadata()
         var json: JSONObject? = null
         try {
             json = JSONObject(tags)
@@ -96,7 +115,7 @@ object DiscussionItemFactory {
                 val tagsArray = json.getJSONArray("tags")
                 if (tagsArray.length() > 0) {
                     (0 until tagsArray.length())
-                            .mapTo(to.tags)
+                            .mapTo(metadata.tags)
                             { tagsArray[it].toString() }
                 }
             }
@@ -108,7 +127,7 @@ object DiscussionItemFactory {
             try {
                 if (json.has("format")) {
                     val format = json.getString("format")
-                    to.format = if (format.equals("markdown", true)) GolosDiscussionItem.Format.MARKDOWN else GolosDiscussionItem.Format.HTML
+                    metadata.format = if (format.equals("markdown", true)) GolosDiscussionItem.Format.MARKDOWN else GolosDiscussionItem.Format.HTML
                 }
             } catch (e: JSONException) {
                 e.printStackTrace()
@@ -119,7 +138,7 @@ object DiscussionItemFactory {
                 if (json.has("image")) {
                     val imageArray = json.getJSONArray("image")
                     if (imageArray.length() > 0) {
-                        (0 until imageArray.length()).mapTo(to.images) { imageArray[it].toString() }
+                        (0 until imageArray.length()).mapTo(metadata.images) { imageArray[it].toString() }
                     }
                 }
             } catch (e: JSONException) {
@@ -131,13 +150,14 @@ object DiscussionItemFactory {
                 if (json.has("links")) {
                     val linksArray = json.getJSONArray("links")
                     if (linksArray.length() > 0) {
-                        (0 until linksArray.length()).mapTo(to.links) { linksArray[it].toString() }
+                        (0 until linksArray.length()).mapTo(metadata.links) { linksArray[it].toString() }
                     }
                 }
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
         }
+        return metadata
     }
 
     private fun checkImages(golosDiscussionItem: GolosDiscussionItem) {
@@ -182,4 +202,9 @@ object DiscussionItemFactory {
 
     }
 
+    private data class GolosDiscussionItemMetadata(
+            val tags: MutableList<String> = arrayListOf(),
+            val images: MutableList<String> = arrayListOf(),
+            val links: MutableList<String> = arrayListOf(),
+            var format: GolosDiscussionItem.Format = GolosDiscussionItem.Format.HTML)
 }

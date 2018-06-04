@@ -18,9 +18,9 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     val id: Long,
                                                     val title: String,
                                                     val categoryName: String,
-                                                    val tags: ArrayList<String> = ArrayList(),
-                                                    val images: ArrayList<String> = ArrayList(),
-                                                    val links: ArrayList<String> = ArrayList(),
+                                                    val tags: MutableList<String> = ArrayList(),
+                                                    val images: MutableList<String> = ArrayList(),
+                                                    val links: MutableList<String> = ArrayList(),
                                                     val votesNum: Int,
                                                     val votesRshares: Long,
                                                     val commentsCount: Int,
@@ -31,7 +31,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     val author: String,
                                                     var format: Format = Format.HTML,
                                                     var avatarPath: String? = null,
-                                                    var children: ArrayList<StoryWrapper> = ArrayList(),
+                                                    var children: MutableList<StoryWrapper> = ArrayList(),
                                                     var parentPermlink: String,
                                                     var parentAuthor: String,
                                                     var childrenCount: Int,
@@ -40,11 +40,11 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     val lastUpdated: Long,
                                                     val created: Long,
                                                     var userVotestatus: UserVoteType = UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
-                                                    val activeVotes: ArrayList<VoteLight> = arrayListOf(),
+                                                    val activeVotes: MutableList<VoteLight> = arrayListOf(),
                                                     var type: ItemType = ItemType.PLAIN,
                                                     val firstRebloggedBy: String,
                                                     var cleanedFromImages: String,
-                                                    var parts: ArrayList<Row> = ArrayList()) : Cloneable {
+                                                    var parts: MutableList<Row> = ArrayList()) : Cloneable {
 
 
     val isRootStory: Boolean
@@ -150,10 +150,10 @@ data class GolosDiscussionItem internal constructor(val url: String,
         }
         if (account != null) {
             try {
-                val node: JsonNode? = mapper.readTree(account?.jsonMetadata)
+                val node: JsonNode? = mapper.readTree(account.jsonMetadata)
                 avatarPath = node?.get("profile")?.get("profile_image")?.asText()
             } catch (e: Exception) {
-                Timber.e("error parsing string ${account?.jsonMetadata}")
+                Timber.e("error parsing string ${account.jsonMetadata}")
                 e.printStackTrace()
             }
         }

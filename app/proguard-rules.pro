@@ -56,6 +56,7 @@ public static ** valueOf(java.lang.String);
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }
 
 -keep,includedescriptorclasses class org.commonmark.** { *; }
+-keep,includedescriptorclasses class com.fasterxml.jackson.databind.** { *; }
 -keepclassmembers class org.commonmark.internal.util.Html5Entities {
     <fields>;
 }

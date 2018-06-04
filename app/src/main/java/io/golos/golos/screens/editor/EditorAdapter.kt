@@ -90,7 +90,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
             }
             is EditorImageViewHolder -> {
                 val part = parts[position] as EditorImagePart
-                holder.state = EditorAdapterImagePart(part, false, { a, b, c ->
+                holder.state = EditorAdapterImagePart(part, false, { a, _, _ ->
                     interactor?.onPhotoDelete(parts[a.adapterPosition] as EditorImagePart, parts)
                 })
             }

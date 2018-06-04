@@ -93,7 +93,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         findViewById<Button>(R.id.add_btn).setOnClickListener {
             val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
             val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-            val rand = Random()
             Repository.get.notificationsRepository.onReceiveNotifications(notifications)
         }
 

@@ -20,7 +20,7 @@ internal class ExchangesRepository(private val worker: Executor,
 
     private val mExchangesLiveData: MutableLiveData<ExchangeValues> = MutableLiveData()
 
-    open fun getExchangeLiveData(): LiveData<ExchangeValues> {
+    fun getExchangeLiveData(): LiveData<ExchangeValues> {
         return mExchangesLiveData
     }
 

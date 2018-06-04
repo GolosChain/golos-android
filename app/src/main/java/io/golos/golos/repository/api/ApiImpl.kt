@@ -30,7 +30,7 @@ internal class ApiImpl : GolosApi() {
                           author: String,
                           permlink: String,
                           accountDataHandler: (List<GolosUserAccountInfo>) -> Unit): StoryWithComments {
-        val rawStory = mGolosApi.databaseMethods.getStoryByRoute(blog, AccountName(author), Permlink(permlink))
+        val rawStory = mGolosApi.databaseMethods.getStoryWithRepliesAndInvolvedAccounts(AccountName(author), Permlink(permlink), -1)
         val story = StoryWithComments(rawStory!!)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story

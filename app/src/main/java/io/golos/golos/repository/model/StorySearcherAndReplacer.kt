@@ -54,7 +54,7 @@ class StorySearcherAndReplacer {
         return isChanged
     }
 
-    private fun findAndReplaceInternal(newState: StoryWrapper, source: ArrayList<StoryWrapper>): Boolean {
+    private fun findAndReplaceInternal(newState: StoryWrapper, source: MutableList<StoryWrapper>): Boolean {
         var isChanged = false
         if (source.size == 0) return false
         (0..source.lastIndex)

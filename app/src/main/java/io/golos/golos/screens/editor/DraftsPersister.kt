@@ -37,7 +37,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
     }
 
-    open fun saveDraft(mode: EditorMode,
+    fun saveDraft(mode: EditorMode,
                        parts: List<EditorPart>,
                        title: String,
                        tags: List<String>,
@@ -60,7 +60,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
     }
 
-    open fun getDraft(mode: EditorMode,
+    fun getDraft(mode: EditorMode,
                       completionHandler: (List<EditorPart>, String, List<String>) -> Unit) {
         executor.execute {
             try {
@@ -79,7 +79,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
     }
 
-    open fun deleteDraft(mode: EditorMode, completionHandler: (Unit) -> Unit) {
+    fun deleteDraft(mode: EditorMode, completionHandler: (Unit) -> Unit) {
         executor.execute {
             try {
                 DraftsTable.delete(mode, writableDatabase)

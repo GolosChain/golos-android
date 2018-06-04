@@ -192,7 +192,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 val selection = StringBuilder()
                 selection.append("( ")
                 var disabled = false
-                it.forEachIndexed { index, username ->
+                it.forEachIndexed { _, username ->
                     if (disabled) {
                         selection.append(" or ")
                     } else {
@@ -336,8 +336,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
 
                 while (!cursor.isAfterLast) {
-
-                    var start = System.currentTimeMillis()
 
                     val tags = mapper.readValue<List<String>>(cursor.getString(tags)
                             ?: "", stringListType).toArrayList()

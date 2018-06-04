@@ -105,7 +105,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
         return replaceComment(replaceWith, mCommentsWithState)
     }
 
-    private fun replaceComment(replaceWith: StoryWrapper, src: ArrayList<StoryWrapper>): Boolean {
+    private fun replaceComment(replaceWith: StoryWrapper, src: MutableList<StoryWrapper>): Boolean {
         var changes = false
         (0..src.lastIndex)
                 .forEach {

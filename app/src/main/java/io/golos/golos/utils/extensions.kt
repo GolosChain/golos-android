@@ -42,6 +42,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import eu.bittrade.libs.steemj.base.models.Account
+import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
 import eu.bittrade.libs.steemj.communication.CommunicationHandler
 import io.golos.golos.BuildConfig
@@ -468,6 +469,10 @@ public fun ViewGroup.iterator(): Iterator<View> {
             return v
         }
     }
+}
+
+fun AccountName?.isNullOrEmpty():Boolean{
+    return this?.name.isNullOrEmpty()
 }
 
 fun isCommentToPost(notification: GolosCommentNotification) = notification.commentNotification.parentDepth == 0

@@ -29,7 +29,7 @@ abstract class GolosActivity : AppCompatActivity() {
         if (Repository.get.userSettingsRepository.isNightMode()) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_YES))
-        }else {
+        } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_NO))
         }
@@ -83,12 +83,10 @@ abstract class GolosActivity : AppCompatActivity() {
     }
 
     open fun showErrorMessage(code: ErrorCode) {
-        var message = R.string.unknown_error
-
-        when (code) {
-            ErrorCode.ERROR_SLOW_CONNECTION -> message = R.string.slow_internet_connection
-            ErrorCode.ERROR_NO_CONNECTION -> message = R.string.slow_internet_connection
-            else -> message = R.string.unknown_error
+       val message = when (code) {
+            ErrorCode.ERROR_SLOW_CONNECTION -> R.string.slow_internet_connection
+            ErrorCode.ERROR_NO_CONNECTION -> R.string.slow_internet_connection
+            else -> R.string.unknown_error
         }
         Snackbar.make(findViewById(android.R.id.content),
                 Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
