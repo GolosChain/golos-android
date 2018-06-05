@@ -28,4 +28,5 @@ data class GolosUserAccountInfo(val golosUser: GolosUser,
                                 val votingPower: Int = 0,
                                 val location: String = "",
                                 val website: String = "",
-                                val registrationDate: Long = 0)
+                                val registrationDate: Long = 0,
+                                val userCover: String? = null)

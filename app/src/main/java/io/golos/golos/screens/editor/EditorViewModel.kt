@@ -12,7 +12,6 @@ import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.isNullOrEmpty
-import io.golos.golos.utils.toHtml
 import java.util.*
 
 
@@ -87,10 +86,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             })
         } else if (editorType == EditorActivity.EditorType.EDIT_POST || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
             mWorkingItem?.story?.let {
-                var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it) else it.parts)
+                var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it, skipHtmlClean = true) else it.parts)
                         .map {
                             when (it) {
-                                is TextRow -> EditorTextPart(UUID.randomUUID().toString(), it.text.toHtml().toString(), null)
+                                is TextRow -> EditorTextPart(UUID.randomUUID().toString(), it.text, null)
                                 is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src, null)
                             }
                         }

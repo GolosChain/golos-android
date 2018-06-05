@@ -74,7 +74,7 @@ class StoryParserTests {
         Assert.assertTrue(rows.size > 1)
         val boosterComment = tree.getFlataned().find { it.story.author == "booster" }!!
         rows = rowParser.parse(boosterComment.story)
-        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.blog/@Booster\">@Booster</a>"))
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.io/@Booster\">@Booster</a>"))
 
         val upvoteComment = tree.getFlataned().find { it.story.author == "upvote50-50" }!!
         rows = rowParser.parse(upvoteComment.story)
@@ -91,11 +91,11 @@ class StoryParserTests {
         Assert.assertTrue(rows[1] is TextRow)
 
         val text = (rows[1] as TextRow).text
-        Assert.assertTrue(text.contains("<a href =\"https://golos.blog/@kotbegemot\">@kotbegemot</a>"))
+        Assert.assertTrue(text.contains("<a href =\"https://golos.io/@kotbegemot\">@kotbegemot</a>"))
 
         val marinaComment = tree.getFlataned().find { it.story.author == "marina" }!!
         rows = rowParser.parse(marinaComment.story)
-        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.blog/@arcange\">@arcange</a>"))
+        Assert.assertTrue((rows[0] as TextRow).text.contains("<a href =\"https://golos.io/@arcange\">@arcange</a>"))
         Assert.assertTrue((rows[0] as TextRow).text.contains("<a href=\"https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017\">https://golos.io/ru--golos/@golos/anons-khf-0-2-aka-17-18-29-05-2017</a>"))
 
         val kitComments = tree.getFlataned().find { it.story.author == "dobryj.kit" }!!

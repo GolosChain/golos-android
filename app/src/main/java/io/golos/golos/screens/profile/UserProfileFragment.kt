@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.GolosActivity.Companion.CHANGE_THEME
 import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
@@ -52,6 +53,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mVotingPowerIndicator: ProgressBar
     private lateinit var mGolosCountTV: TextView
     private lateinit var mProceedButton: View
+    private lateinit var mUserCoverIv: ImageView
+    private var mLastAccountInfo: GolosUserAccountInfo? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -62,6 +65,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mMotoTv = v.findViewById(R.id.moto)
         mSubscribersNumTv = v.findViewById(R.id.subscribers_num_tv)
         mSubscriptionsNum = v.findViewById(R.id.subscriptions_num_tv)
+        mUserCoverIv = v.findViewById(R.id.user_backing)
         mSubscribers = v.findViewById(R.id.subscribers_tv)
         mSubscriptions = v.findViewById(R.id.subscribes_tv)
         mProceedButton = v.findViewById(R.id.proceed_btn)
@@ -172,7 +176,8 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mUserName.text = it.golosUser.userName.capitalize()
         val glide = Glide.with(view ?: return)
         if (it.golosUser.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
-        else {
+        else if (mLastAccountInfo?.golosUser?.avatarPath != t.accountInfo.golosUser.avatarPath) {
+
             glide.load(ImageUriResolver.resolveImageWithSize(it.golosUser.avatarPath, wantedwidth = mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
@@ -199,6 +204,13 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val value = it.votingPower / 100.0
             mVotingPowerTv.text = "${String.format("%.2f", value)}%"
         }
+        if (mLastAccountInfo?.userCover != t.accountInfo.userCover){
+            t.accountInfo.userCover?.let {
+                glide.load(it).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
+            }
+        }
+
+        mLastAccountInfo = t.accountInfo.copy()
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {

@@ -381,7 +381,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
                                 accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower,
-                                accinfo.location, accinfo.website, accinfo.registrationDate)
+                                accinfo.location, accinfo.website, accinfo.registrationDate,accinfo.userCover)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {

@@ -246,7 +246,8 @@ internal class ApiImpl : GolosApi() {
                 votingPower = acc.votingPower,
                 location = acc.location ?: "",
                 website = acc.webSite ?: "",
-                registrationDate = acc.created.dateTimeAsTimestamp)
+                registrationDate = acc.created.dateTimeAsTimestamp,
+                userCover = acc.cover)
     }
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {

@@ -387,9 +387,8 @@ class ApiImplTest {
 
     @Test
     fun getStoryWithManycommentsText() {
-        val story = Golos4J.getInstance().databaseMethods.getStoryByRoute("ru--russkoezarubezhxe",
-                AccountName("vp-zarubezhje"),
-                Permlink("lichnyi-opyt-kak-ya-vengerskii-yazyk-uchila"))
+        val story = Golos4J.getInstance().databaseMethods.getStoryWithRepliesAndInvolvedAccounts(AccountName("vp-zarubezhje"),
+                Permlink("lichnyi-opyt-kak-ya-vengerskii-yazyk-uchila"), -1)
     }
 
     @Test

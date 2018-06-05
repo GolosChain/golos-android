@@ -233,6 +233,24 @@ val Account.avatarPath: String?
         return avatarPath
     }
 
+val Account.cover: String?
+    get() {
+        var avatarPath: String? = null
+        try {
+            if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+                val node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                node?.let {
+                    avatarPath = node.get("profile")?.get("cover_image")?.asText()
+                }
+            }
+
+        } catch (e: IOException) {
+            println("error parsing metadata " + jsonMetadata)
+            e.printStackTrace()
+        }
+        return avatarPath
+    }
+
 val Account.moto: String?
     get() {
         var moto: String? = null
@@ -471,7 +489,7 @@ public fun ViewGroup.iterator(): Iterator<View> {
     }
 }
 
-fun AccountName?.isNullOrEmpty():Boolean{
+fun AccountName?.isNullOrEmpty(): Boolean {
     return this?.name.isNullOrEmpty()
 }
 
@@ -488,4 +506,25 @@ val mapper by lazy {
     mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
     mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
     mapper
+}
+
+fun StringBuilder.removeString(str: String): StringBuilder {
+    val index = indexOf(str)
+    if (index > -1) {
+        delete(index, index + str.length)
+        removeString(str)
+    }
+    return this
+}
+
+public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchResult) -> CharSequence): StringBuilder {
+    var match: kotlin.text.MatchResult? = regex.find(this) ?: return this
+    do {
+        val foundMatch = match!!
+        replace(foundMatch.range.start, foundMatch.range.endInclusive + 1, transform.invoke(foundMatch).toString())
+        match = foundMatch.next()
+    } while (match != null)
+
+
+    return this
 }

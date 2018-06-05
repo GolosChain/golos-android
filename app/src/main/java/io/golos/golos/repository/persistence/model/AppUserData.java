@@ -31,6 +31,8 @@ public class AppUserData implements Cloneable {
     private String location;
     @Nullable
     private String webSite;
+    @Nullable
+    private String cover;
 
     private long registerDate;
     private long subscibesCount;
@@ -67,7 +69,9 @@ public class AppUserData implements Cloneable {
                                String location,
                        @Nullable
                                String webSite,
-                       long registerDate) {
+                       long registerDate,
+                       @Nullable
+                               String cover) {
         this.isUserLoggedIn = isUserLoggedIn;
         this.mMoto = mMoto;
         this.avatarPath = avatarPath;
@@ -89,9 +93,45 @@ public class AppUserData implements Cloneable {
         this.location = location;
         this.webSite = webSite;
         this.registerDate = registerDate;
+        this.cover = cover;
     }
 
     public AppUserData() {
+    }
+
+    @Nullable
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(@Nullable String location) {
+        this.location = location;
+    }
+
+    @Nullable
+    public String getWebSite() {
+        return webSite;
+    }
+
+    public void setWebSite(@Nullable String webSite) {
+        this.webSite = webSite;
+    }
+
+    @Nullable
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(@Nullable String cover) {
+        this.cover = cover;
+    }
+
+    public long getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(long registerDate) {
+        this.registerDate = registerDate;
     }
 
     public String getPublicActiveWif() {
@@ -277,7 +317,8 @@ public class AppUserData implements Cloneable {
                 response.getAccountInfo().getVotingPower(),
                 response.getAccountInfo().getLocation(),
                 response.getAccountInfo().getWebsite(),
-                response.getAccountInfo().getRegistrationDate());
+                response.getAccountInfo().getRegistrationDate(),
+                response.getAccountInfo().getUserCover());
     }
 
     public GolosUserAccountInfo toAccountInfo() {
@@ -287,7 +328,7 @@ public class AppUserData implements Cloneable {
                 gbgAmount, golosAmount, golosPower, safeGbg,
                 safeGolos, publicPostingWif == null ? "" : publicPostingWif,
                 publicActiveWif == null ? "" : publicActiveWif, false, votingPower,
-                location == null ? "" : location, webSite == null ? "" : webSite, registerDate);
+                location == null ? "" : location, webSite == null ? "" : webSite, registerDate, cover);
     }
 
     @Override
