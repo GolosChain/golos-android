@@ -32,6 +32,7 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
     private lateinit var mVotingPowerTv: TextView
     private lateinit var mVotingPowerIndicator: ProgressBar
     private lateinit var mViewModel: UserInfoViewModel
+    private lateinit var mUserCoverIv: ImageView
 
     override fun onChanged(t: UserAccountModel?) {
         val it = t?.accountInfo ?: return
@@ -48,6 +49,10 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
         if (mVotingPowerLo.visibility == View.VISIBLE) {
             val value = it.votingPower / 100.0
             mVotingPowerTv.text = "${String.format("%.2f", value)}%"
+        }
+        if (it.userCover != null) {
+            glide.load(ImageUriResolver.resolveImageWithSize(it.userCover)).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
+            mUserName.setTextColor(getColorCompat(android.R.color.white))
         }
     }
 
@@ -81,6 +86,7 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
         mVotingPowerLo = findViewById(R.id.voting_power_lo)
         mVotingPowerTv = findViewById(R.id.voting_power_tv)
         mVotingPowerIndicator = findViewById(R.id.voting_power_progress)
+        mUserCoverIv = findViewById(R.id.cover_iv)
         mVotingPowerIndicator.setOnClickListener {
             mAvatarOverlay.setViewGone()
             mVotingPowerIndicator.setViewGone()

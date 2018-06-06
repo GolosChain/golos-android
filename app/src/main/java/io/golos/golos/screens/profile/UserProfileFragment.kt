@@ -210,7 +210,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
 
         if (mLastAccountInfo?.userCover != t.accountInfo.userCover) {
             t.accountInfo.userCover?.let {
-                glide.load(it).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
+                glide.load(ImageUriResolver.resolveImageWithSize(it)).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
             }
             if (t.accountInfo.userCover == null) mUserCoverIv.setImageBitmap(null)
         }

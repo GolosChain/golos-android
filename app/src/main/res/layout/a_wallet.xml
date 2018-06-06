@@ -36,6 +36,10 @@
 
 
                 app:layout_collapseMode="parallax">
+                <ImageView
+                    android:id="@+id/cover_iv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
 
                 <com.makeramen.roundedimageview.RoundedImageView
