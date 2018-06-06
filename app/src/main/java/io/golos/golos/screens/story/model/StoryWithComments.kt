@@ -9,6 +9,7 @@ import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.toArrayList
 
 /**
  * Created by yuri on 06.11.17.
@@ -45,6 +46,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
     @JsonProperty("comments")
     private var mCommentsWithState: ArrayList<StoryWrapper> = ArrayList(comments)
 
+
     fun rootStory(): GolosDiscussionItem? {
         return mRootStoryWrapper?.story
     }
@@ -64,7 +66,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
     }
 
     fun setUpLevels() {
-        setUpLevels(0, mRootStoryWrapper?.story?.children ?: return)
+        setUpLevels(0, mRootStoryWrapper?.story?.children ?.filter { it?.story != null }?.toArrayList()?: return)
     }
 
     private fun setUpLevels(currentDepth: Int, stories: List<StoryWrapper>) {

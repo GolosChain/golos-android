@@ -8,6 +8,7 @@ import android.support.annotation.WorkerThread
 import eu.bittrade.libs.steemj.Golos4J
 import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
@@ -362,13 +363,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 if (isUserLoggedIn()//if we updating state of user, that is cashed in current user subscriptions
                         && mCurrentUserSubscriptions.value?.find { it.user.name == userName } != null
                         && userName != mAuthLiveData.value?.userName) {
-
                     if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo[userName] = MutableLiveData()
 
                     val userInfo = mUsersAccountInfo[userName]!!
-                    mMainThreadExecutor.execute {
-                        userInfo.value = GolosUserAccountInfo(GolosUser(userName),
-                                isCurrentUserSubscribed = isUserSubscribedOn(userName))
+                    if (userInfo.value == null) {
+                        mMainThreadExecutor.execute {
+                            userInfo.value = GolosUserAccountInfo(GolosUser(userName),
+                                    isCurrentUserSubscribed = isUserSubscribedOn(userName))
+                        }
                     }
                 }
 
@@ -381,7 +383,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
                                 accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
                                 accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower,
-                                accinfo.location, accinfo.website, accinfo.registrationDate,accinfo.userCover)
+                                accinfo.location, accinfo.website, accinfo.registrationDate, accinfo.userCover)
                         completionHandler.invoke(accinfo, null)
                     }
                 } else {
@@ -1022,7 +1024,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     if (!isUserLoggedIn()) return@execute
                     val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
                             ?: "")),
-                            1024, null, null)[0]
+                            1024, null, null).firstOrNull() ?: return@execute
+
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
                             ?: "")))
 
@@ -1040,6 +1043,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     }
                 }
             } catch (e: Exception) {
+                logException(e)
+                mMainThreadExecutor.execute {
+                    resultListener(null, GolosErrorParser.parse(e))
+                }
+            } catch (e: SteemResponseError) {
                 logException(e)
                 mMainThreadExecutor.execute {
                     resultListener(null, GolosErrorParser.parse(e))
@@ -1094,7 +1102,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
                             ?: "")),
-                            1024, null, null)[0]
+                            1024, null, null).firstOrNull() ?: return@execute
+
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
                             ?: "")))
 

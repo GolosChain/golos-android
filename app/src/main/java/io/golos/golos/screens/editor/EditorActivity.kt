@@ -93,6 +93,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mapper.registerModule(KotlinModule())
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         val modeString = intent.getStringExtra(MODE_TAG)
+        if (modeString == null)finish()
         mMode = jacksonObjectMapper().readValue(modeString, EditorMode::class.java)
 
         if (mMode?.editorType == EditorType.CREATE_POST) {

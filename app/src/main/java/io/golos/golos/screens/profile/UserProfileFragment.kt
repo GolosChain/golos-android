@@ -173,8 +173,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     override fun onChanged(t: UserAccountModel?) {
         if (view == null) return
         val it = t?.accountInfo ?: return
+        if (mLastAccountInfo?.hashCode() ?: 0 == t.accountInfo.hashCode()) return
         mUserName.text = it.golosUser.userName.capitalize()
         val glide = Glide.with(view ?: return)
+
         if (it.golosUser.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else if (mLastAccountInfo?.golosUser?.avatarPath != t.accountInfo.golosUser.avatarPath) {
 
@@ -204,10 +206,13 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val value = it.votingPower / 100.0
             mVotingPowerTv.text = "${String.format("%.2f", value)}%"
         }
-        if (mLastAccountInfo?.userCover != t.accountInfo.userCover){
+
+
+        if (mLastAccountInfo?.userCover != t.accountInfo.userCover) {
             t.accountInfo.userCover?.let {
                 glide.load(it).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
             }
+            if (t.accountInfo.userCover == null) mUserCoverIv.setImageBitmap(null)
         }
 
         mLastAccountInfo = t.accountInfo.copy()

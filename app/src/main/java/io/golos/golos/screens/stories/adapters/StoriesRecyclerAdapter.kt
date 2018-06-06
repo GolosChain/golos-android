@@ -15,7 +15,6 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.HolderClickListener
-import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -209,6 +208,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
 
     private fun getStoryForPosition(holder: RecyclerView.ViewHolder): StoryWithComments? {
         val pos = holder.adapterPosition
+        if (pos < 0) return null
         return if (pos < mStripes.size) return mStripes[pos] else null
     }
 

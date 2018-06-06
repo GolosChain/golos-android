@@ -227,8 +227,10 @@ internal class ApiImpl : GolosApi() {
             followingCount = followObject.followingCount.toLong()
         }
 
-        val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
-        val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray()[0] as PublicKey).addressFromPublicKey
+        val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray().firstOrNull() as? PublicKey)?.addressFromPublicKey
+                ?: ""
+        val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray().firstOrNull() as? PublicKey)?.addressFromPublicKey
+                ?: ""
 
         return GolosUserAccountInfo(GolosUser(acc.name.name, acc.avatarPath),
                 acc.moto,

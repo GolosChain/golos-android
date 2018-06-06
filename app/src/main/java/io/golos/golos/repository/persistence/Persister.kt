@@ -60,10 +60,11 @@ abstract class Persister : NotificationsPersister {
 
     companion
     object {
+        private val mOnDevicePersister = OnDevicePersister(App.context)
         val get: Persister
             @Synchronized get() {
                 if (App.isMocked) return MockPersister() else {
-                    return OnDevicePersister(App.context)
+                    return mOnDevicePersister
                 }
             }
     }
