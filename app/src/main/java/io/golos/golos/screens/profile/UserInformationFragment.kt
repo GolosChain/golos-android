@@ -15,6 +15,7 @@ import io.golos.golos.screens.profile.adapters.KeyValueAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.MyLinearLayoutManager
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -50,7 +51,7 @@ class UserInformationFragment : GolosFragment(), Observer<UserAccountModel> {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_information, container, false)
         mRecyclerView = v as RecyclerView
-        mRecyclerView.layoutManager = LinearLayoutManager(activity!!)
+        mRecyclerView.layoutManager = MyLinearLayoutManager(activity!!)
         mRecyclerView.adapter = KeyValueAdapter(listOf(), {})
 
         return v

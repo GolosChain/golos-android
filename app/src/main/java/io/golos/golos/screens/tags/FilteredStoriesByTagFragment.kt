@@ -23,6 +23,7 @@ import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagFragmentViewModel
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagViewModel
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.MyLinearLayoutManager
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
 import io.golos.golos.utils.toArrayList
@@ -45,7 +46,7 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
         mPopularNowTv = v.findViewById<TabLayout>(R.id.tab_lo)
         mViewPager.offscreenPageLimit = 3
         mPopularNowTv.setupWithViewPager(mViewPager)
-        mTagsReycler.layoutManager = LinearLayoutManager(inflater.context, LinearLayoutManager.HORIZONTAL, false)
+        mTagsReycler.layoutManager = MyLinearLayoutManager(inflater.context, LinearLayoutManager.HORIZONTAL, false)
         (mTagsReycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         val viewModel = ViewModelProviders.of(this).get(FilteredStoriesByTagFragmentViewModel::class.java)
         viewModel.getTagsLiveData().observe(this, this)

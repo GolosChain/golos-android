@@ -57,7 +57,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
-        val manager = LinearLayoutManager(view.context)
+        val manager = MyLinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         mSwipeRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mRefreshButton?.setCompoundDrawablesWithIntrinsicBounds(mRefreshButton?.getVectorDrawable(R.drawable.ic_refresh_white_14dp), null, null, null)

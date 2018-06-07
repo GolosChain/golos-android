@@ -12,6 +12,7 @@ import io.golos.golos.screens.tags.views.TagsAndUsersPager
 import io.golos.golos.screens.userslist.UserListAdapter
 import io.golos.golos.screens.userslist.model.UserListRowData
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.MyLinearLayoutManager
 import kotlin.reflect.KProperty
 
 class UserListFragment : GolosFragment() {
@@ -21,7 +22,7 @@ class UserListFragment : GolosFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_user_list, container, false)
         mRecycler = v.findViewById(R.id.user_list_recycler)
-        mRecycler?.layoutManager = LinearLayoutManager(activity)
+        mRecycler?.layoutManager = MyLinearLayoutManager(activity)
         mRecycler?.adapter = UserListAdapter()
         if (userClickListener != null) {
             (mRecycler?.adapter as? UserListAdapter)?.setUserClickListener {

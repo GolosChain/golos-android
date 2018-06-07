@@ -11,6 +11,7 @@ import io.golos.golos.screens.tags.adapters.SearchTagAdapter
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.views.TagsAndUsersPager
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.MyLinearLayoutManager
 import kotlin.reflect.KProperty
 
 class TagsListFragment : GolosFragment() {
@@ -19,7 +20,7 @@ class TagsListFragment : GolosFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_tags_list, container, false)
         mRecycler = v.findViewById(R.id.tags_search_recycler)
-        mRecycler?.layoutManager = LinearLayoutManager(activity!!)
+        mRecycler?.layoutManager = MyLinearLayoutManager(activity!!)
         mRecycler?.adapter = SearchTagAdapter(onTagClickListener)
         if (tags.isNotEmpty()) {
             (mRecycler?.adapter as? SearchTagAdapter)?.tags = tags

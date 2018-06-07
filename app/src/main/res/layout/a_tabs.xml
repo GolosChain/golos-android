@@ -41,7 +41,7 @@
 
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_height"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager" />
 
         <LinearLayout
 

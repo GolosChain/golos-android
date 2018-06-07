@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
@@ -62,7 +61,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mProgress.setViewVisible()
         mRecycler.setViewGone()
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
-        mRecycler.layoutManager = LinearLayoutManager(this)
+        mRecycler.layoutManager = MyLinearLayoutManager(this)
         (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mRecycler.adapter = UserListAdapter({
             mViewModel.onUserClick(this, it)
