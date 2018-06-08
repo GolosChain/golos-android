@@ -518,13 +518,7 @@ fun StringBuilder.removeString(str: String): StringBuilder {
 }
 
 public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchResult) -> CharSequence): StringBuilder {
-    var match: kotlin.text.MatchResult? = regex.find(this) ?: return this
-    do {
-        val foundMatch = match!!
-        replace(foundMatch.range.start, foundMatch.range.endInclusive + 1, transform.invoke(foundMatch).toString())
-        match = foundMatch.next()
-    } while (match != null)
-
-
+    val str = replace(regex, transform)
+    this.replace(0, length, str)
     return this
 }

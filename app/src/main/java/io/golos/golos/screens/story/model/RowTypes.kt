@@ -23,6 +23,9 @@ object StoryParserToRows {
     private const val centerStart = "<center>"
     private const val centerEnd = "</center>"
     private const val nbsp = "&nbsp;"
+    private val newLine = "\n".toRegex()
+    private val newLineReplaserRegexp = "$#$".toRegex()
+    private val newLineReplaser = "$#$"
 
 
     fun parse(story: GolosDiscussionItem,
@@ -58,6 +61,11 @@ object StoryParserToRows {
         }
         try {
             if (!skipHtmlClean) {
+                str.replaceSb("(\n)+".toRegex()) {
+                    //workaround, for jsoup cleaner deleting \n
+                    "<br>"
+                }
+
                 val whiteList = Whitelist.basicWithImages()
                 whiteList.addTags("h1", "h2", "h3", "h4")
                 try {
@@ -67,6 +75,10 @@ object StoryParserToRows {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+
+              /* str.replaceSb("#!!".toRegex()) {
+                    "\n"
+                }*/
             }
 
             if (!skipHtmlClean) {
@@ -82,9 +94,11 @@ object StoryParserToRows {
                     " <img src=\"${it.value.trim()}\">"
                 else it.value
             }
+
             str.replaceSb(Regexps.imageWithCenterTage) {
                 " <img src=\"${it.value
                         .trim()
+
                         .replace("<center>", "")
                         .replace("</center>", "")}\">"
             }
@@ -99,6 +113,9 @@ object StoryParserToRows {
             }
 
             str.removeString(nbsp)
+            str.replace("(<br>)+".toRegex(),"<br>")
+            if (str.startsWith("<br>"))str.delete(0,5)
+
             var strings = str.split(Regex("<img.+?>"))
             val stringsCleaned = ArrayList<String>()
             val images = Regexps.imageExtract.findAll(str)
@@ -109,10 +126,10 @@ object StoryParserToRows {
                 else if (it.groupValues.size == 2) imagesList.add(it.groupValues[1])
             }
             var isFirstImage = false
-            stringsCleaned.add(strings[0])
+            stringsCleaned.add(strings[0])/*.replace(("(\n)+".toRegex()), "<br>"))*/
             (1 until strings.size).forEach {
                 if (!strings[it].isEmpty() && !strings[it].matches(Regexps.trashTags)) {
-                    stringsCleaned.add(strings[it])
+                    stringsCleaned.add(strings[it])/*.replace(("(\n)+".toRegex()), "<br>")*/
                 }
             }
             strings = stringsCleaned
@@ -143,9 +160,11 @@ object StoryParserToRows {
                         }
                     }
 
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
         return if (checkEmptyHtml) out.filter {
             it is ImageRow || (it is TextRow && it.text.toHtml().isNotEmpty())
         } else

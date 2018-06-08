@@ -14,12 +14,13 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
+import android.text.Html
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -28,7 +29,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.utils.mapper
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -93,7 +93,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mapper.registerModule(KotlinModule())
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         val modeString = intent.getStringExtra(MODE_TAG)
-        if (modeString == null)finish()
+        if (modeString == null) finish()
         mMode = jacksonObjectMapper().readValue(modeString, EditorMode::class.java)
 
         if (mMode?.editorType == EditorType.CREATE_POST) {
@@ -180,6 +180,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
             }
         })
+
         findViewById<View>(R.id.btn_link).setOnClickListener({
             val fr = SendLinkDialog.getInstance()
             fr.listener = object : OnLinkSubmit {
@@ -188,7 +189,12 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                         mViewModel.onUserInput(EditorInputAction.InsertAction(
                                 EditorImagePart(imageName = linkName, imageUrl = linkAddress, pointerPosition = null)))
                     } else {
-                        val text = " [$linkName]($linkAddress)"
+                        var shownLink = linkAddress
+                        if (!shownLink.startsWith("http") && !shownLink.contains("www."))shownLink = "https://www.$shownLink"
+                        else if (shownLink.startsWith("www."))shownLink = "https://$shownLink"
+                        val text =
+                                "[${linkName.replace("\n", "")}]" +
+                                        "($shownLink)"
                         mViewModel.onUserInput(EditorInputAction.InsertAction(
                                 EditorTextPart(text = text, pointerPosition = text.length)))
                     }

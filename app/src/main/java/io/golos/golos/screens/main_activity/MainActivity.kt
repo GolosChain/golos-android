@@ -119,17 +119,16 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         Repository.get.notificationsRepository.notifications.observe(this, Observer<GolosNotifications> {
             (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification = it?.notifications ?: listOf()
-            if (it?.notifications?.isEmpty() != false) mNotificationsContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
-                override fun onAnimationEnd(p0: Animator?) {
-                    mNotificationsContainer.setViewGone()
-                    mButtonContainer.setViewGone()
-                }
-            })
-            else {
+            if (it?.notifications?.isEmpty() != false) {
+                mNotificationsContainer.setViewGone()
+                mButtonContainer.setViewGone()
+                mButtonContainer.animate().alpha(0f)
+
+            } else {
                 if (it.notifications.size == 1) {
                     mNotificationsContainer.setViewVisible()
-                    if (mButtonContainer.visibility == View.VISIBLE) {
-                        mButtonContainer.animate().alpha(0f).setDuration(200).setListener(object : EndAnimationListener() {
+                    if (mButtonContainer.alpha > 0f) {
+                        mButtonContainer.animate().alpha(0f).setDuration(200L).setListener(object : EndAnimationListener() {
                             override fun onAnimationEnd(p0: Animator?) {
                                 mButtonContainer.setViewGone()
                             }
@@ -138,7 +137,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
                 } else {
                     mNotificationsContainer.setViewVisible()
-                    if (mButtonContainer.visibility != View.VISIBLE) {
+                    if (mButtonContainer.alpha == 0f) {
                         mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
                             override fun onAnimationEnd(p0: Animator?) {
                                 mButtonContainer.setViewVisible()

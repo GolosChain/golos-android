@@ -29,8 +29,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:layout_marginEnd="64dp"
+                    android:gravity="center"
                     android:text="@string/settings"
                     android:textColor="@color/text_color_white_black" />
 
@@ -287,4 +287,9 @@
 
     </android.support.v4.widget.NestedScrollView>
 
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 </android.support.design.widget.CoordinatorLayout>

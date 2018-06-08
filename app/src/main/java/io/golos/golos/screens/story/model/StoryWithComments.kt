@@ -66,7 +66,11 @@ class StoryWithComments(rootStory: StoryWrapper?,
     }
 
     fun setUpLevels() {
-        setUpLevels(0, mRootStoryWrapper?.story?.children ?.filter { it?.story != null }?.toArrayList()?: return)
+        setUpLevels(0, mRootStoryWrapper
+                ?.story
+                ?.children
+                ?.filter { it?.story != null }
+                ?.toArrayList() ?: return)
     }
 
     private fun setUpLevels(currentDepth: Int, stories: List<StoryWrapper>) {

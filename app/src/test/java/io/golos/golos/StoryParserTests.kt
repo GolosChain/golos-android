@@ -10,8 +10,8 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.mapper
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.fail
+import io.golos.golos.utils.replaceSb
+import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Test
 
@@ -146,10 +146,30 @@ class StoryParserTests {
 
     @Test
     fun testStory8() {
-        val stories = Utils.readStoryFromResourse("blog_rout.json")
-        println(stories)
+        val stories = Utils.readStoriesFromResourse("story_two_lines.json").first()
+        val rowParser = StoryParserToRows
+        var rows = rowParser.parse(stories.rootStory()!!)
+        Assert.assertTrue(rows.size == 1)
+        Assert.assertTrue("parser must not swallow new lines", (rows.first() as TextRow).text.contains("<br>"))
+
 
     }
+
+    @Test
+    fun testStory9() {
+        val story = Utils.readStoriesFromResourse("story12.json").first()
+        var rows = StoryParserToRows.parse(story.rootStory()!!)
+        println()
+    }
+
+    @Test
+    fun testStory10() {
+        val str = "sdgsdg<br><br>sdg<br>vbsg<br>"
+        val result = StringBuilder(str)
+        result.replaceSb("<br>".toRegex(), { "\n" })
+        assertTrue(!result.toString().contains("<br>"))
+    }
+
 
     @Test
     fun nicksParseTest() {
