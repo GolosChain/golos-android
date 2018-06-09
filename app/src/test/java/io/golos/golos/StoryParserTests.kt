@@ -157,9 +157,13 @@ class StoryParserTests {
 
     @Test
     fun testStory9() {
-        val story = Utils.readStoriesFromResourse("story12.json").first()
-        var rows = StoryParserToRows.parse(story.rootStory()!!)
-        println()
+        val story = Utils.readStoriesFromResourse("story13.json").first()
+        val rows = StoryParserToRows.parse(story.rootStory()!!)
+        assertEquals("there must be 4 photos",4,rows.size)
+        rows.forEach {
+            if (it is TextRow) fail("there is no text")
+        }
+
     }
 
     @Test

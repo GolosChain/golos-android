@@ -57,7 +57,8 @@ object StoryParserToRows {
         }
         try {
             if (!skipHtmlClean) {
-                str.replaceSb("(?<!p>)(\n)+".toRegex()) {//jsoup cleaner swallows \n,
+                str.replaceSb("(?<!p>)(\n)+".toRegex()) {
+                    //jsoup cleaner swallows \n,
                     // so i replace new lines with <br>, if it not prescends by <p>
                     "<br>"
                 }
@@ -125,6 +126,8 @@ object StoryParserToRows {
                     stringsCleaned.add(strings[it])
                 }
             }
+            val imageRows = imagesList.map { ImageRow(it) }
+
             strings = stringsCleaned
             (0 until strings.size)
                     .forEach {
@@ -133,33 +136,42 @@ object StoryParserToRows {
                             if ((isEmpty
                                             || strings[0].matches(Regexps.trashTags))
                                     && imagesList.isNotEmpty()) {
-                                out.add(ImageRow(imagesList[0]))
+                                out.add(imageRows[0])
                                 isFirstImage = true
                             } else {
                                 out.add(TextRow(strings[0]))
                                 if (imagesList.lastIndex >= it) {
-                                    out.add(ImageRow(imagesList[it]))
+                                    out.add(imageRows[it])
                                 }
                             }
                         } else {
                             if (!isFirstImage) {
                                 out.add(TextRow(strings[it]))
                                 if (imagesList.lastIndex >= it) {
-                                    out.add(ImageRow(imagesList[it]))
+                                    out.add(imageRows[it])
                                 }
                             } else {
                                 out.add(TextRow(strings[it]))
                                 if (imagesList.lastIndex >= it) {
-                                    out.add(ImageRow(imagesList[it]))
+                                    out.add(imageRows[it])
                                 }
                             }
                         }
                     }
 
 
+            if (out.size != (imagesList.size + strings.size)) {
+                imageRows.forEach {
+                    if (!out.contains(it))out.add(it)
+                }
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+
+
 
         return if (checkEmptyHtml) out.filter {
             it is ImageRow || (it is TextRow && it.text.toHtml().isNotEmpty())
