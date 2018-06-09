@@ -23,10 +23,6 @@ object StoryParserToRows {
     private const val centerStart = "<center>"
     private const val centerEnd = "</center>"
     private const val nbsp = "&nbsp;"
-    private val newLine = "\n".toRegex()
-    private val newLineReplaserRegexp = "$#$".toRegex()
-    private val newLineReplaser = "$#$"
-
 
     fun parse(story: GolosDiscussionItem,
               checkEmptyHtml: Boolean = false,
@@ -61,8 +57,8 @@ object StoryParserToRows {
         }
         try {
             if (!skipHtmlClean) {
-                str.replaceSb("(\n)+".toRegex()) {
-                    //workaround, for jsoup cleaner deleting \n
+                str.replaceSb("(?<!p>)(\n)+".toRegex()) {//jsoup cleaner swallows \n,
+                    // so i replace new lines with <br>, if it not prescends by <p>
                     "<br>"
                 }
 
@@ -76,9 +72,6 @@ object StoryParserToRows {
                     e.printStackTrace()
                 }
 
-              /* str.replaceSb("#!!".toRegex()) {
-                    "\n"
-                }*/
             }
 
             if (!skipHtmlClean) {
@@ -113,10 +106,10 @@ object StoryParserToRows {
             }
 
             str.removeString(nbsp)
-            str.replace("(<br>)+".toRegex(),"<br>")
-            if (str.startsWith("<br>"))str.delete(0,5)
+            str.replace("(<br>)+".toRegex(), "<br>")
+            if (str.startsWith("<br>")) str.delete(0, 4)
 
-            var strings = str.split(Regex("<img.+?>"))
+            var strings = str.split(Regex("(<p>)?<img.+?>(</p>)?"))
             val stringsCleaned = ArrayList<String>()
             val images = Regexps.imageExtract.findAll(str)
             val iter = images.iterator()
@@ -126,17 +119,20 @@ object StoryParserToRows {
                 else if (it.groupValues.size == 2) imagesList.add(it.groupValues[1])
             }
             var isFirstImage = false
-            stringsCleaned.add(strings[0])/*.replace(("(\n)+".toRegex()), "<br>"))*/
+            stringsCleaned.add(strings[0])
             (1 until strings.size).forEach {
                 if (!strings[it].isEmpty() && !strings[it].matches(Regexps.trashTags)) {
-                    stringsCleaned.add(strings[it])/*.replace(("(\n)+".toRegex()), "<br>")*/
+                    stringsCleaned.add(strings[it])
                 }
             }
             strings = stringsCleaned
             (0 until strings.size)
                     .forEach {
                         if (it == 0) {
-                            if ((strings[0].isEmpty() || strings[0].matches(Regexps.trashTags)) && imagesList.isNotEmpty()) {
+                            val isEmpty = strings[0].isEmpty() || (strings[0] == " ")
+                            if ((isEmpty
+                                            || strings[0].matches(Regexps.trashTags))
+                                    && imagesList.isNotEmpty()) {
                                 out.add(ImageRow(imagesList[0]))
                                 isFirstImage = true
                             } else {

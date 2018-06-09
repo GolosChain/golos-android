@@ -54,10 +54,13 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
             }
         })
         mNotifications.observeForever {
-            mFilteredNotifications.value = GolosNotifications(getFiteredNotificaitons())
+            val new = GolosNotifications(getFiteredNotificaitons())
+            if (new != mFilteredNotifications.value) mFilteredNotifications.value = new
+
         }
         Repository.get.userSettingsRepository.getNotificationsSettings().observeForever {
-            mFilteredNotifications.value = GolosNotifications(getFiteredNotificaitons())
+            val new = GolosNotifications(getFiteredNotificaitons())
+            if (new != mFilteredNotifications.value) mFilteredNotifications.value = new
         }
     }
 

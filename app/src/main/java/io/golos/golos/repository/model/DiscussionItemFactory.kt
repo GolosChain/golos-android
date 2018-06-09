@@ -108,6 +108,8 @@ object DiscussionItemFactory {
 
     private fun getMetadataFromItem(tags: String): GolosDiscussionItemMetadata {
         val metadata = GolosDiscussionItemMetadata()
+        if (tags.isNullOrEmpty())return metadata
+
         var json: JSONObject? = null
         try {
             json = JSONObject(tags)

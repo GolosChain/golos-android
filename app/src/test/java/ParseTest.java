@@ -49,9 +49,14 @@ public class ParseTest {
             items.add(new GolosDiscussionItem(d, null));
         }
         HashMap<Long, Discussion> map = sort(discussions);
+
         assertTrue(items.get(0).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
         assertTrue(items.get(1).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(2).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
+        Discussion discussion = discussions.get(3);
+        GolosDiscussionItem item3 = DiscussionItemFactory.INSTANCE.create(discussion, null);
+
+
         assertTrue(items.get(3).getType() == GolosDiscussionItem.ItemType.IMAGE_FIRST);
         assertTrue(items.get(4).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
         assertTrue(items.get(5).getType() == GolosDiscussionItem.ItemType.PLAIN_WITH_IMAGE);
@@ -190,7 +195,7 @@ public class ParseTest {
     public void storyParserTest() throws Exception {
         final StoryWithComments tree = Utils.readStoryFromResourse("story4.json");
         final StoryParserToRows parser = StoryParserToRows.INSTANCE;
-        List<Row> rows = parser.parse(tree.rootStory(),false,false);
+        List<Row> rows = parser.parse(tree.rootStory(), false, false);
         assertEquals(new ImageRow("https://i.imgsafe.org/89e23bed21.jpg"), rows.get(0));
         assertEquals(new ImageRow("https://arcange.eu/golos-images/2017-11-06-AccountsNew.png"), rows.get(2));
     }
