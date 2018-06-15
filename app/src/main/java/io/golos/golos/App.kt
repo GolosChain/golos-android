@@ -58,6 +58,8 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
     override fun onCreate() {
         context = this
         super.onCreate()
+        if (isRoboUnitTest()) return
+
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -314,6 +316,10 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                     }
                 })
                 .submit(wantedSize, wantedSize)
+    }
+
+    fun isRoboUnitTest(): Boolean {
+        return "robolectric" == Build.FINGERPRINT
     }
 
     companion object get {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="standart_size_button">48dp</dimen>
+    <dimen name="standart_size_button">42dp</dimen>
     <dimen name="bottom_controls_height">52dp</dimen>
     <dimen name="margin_material">16dp</dimen>
     <dimen name="margin_material_small">12dp</dimen>

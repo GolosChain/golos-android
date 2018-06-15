@@ -17,10 +17,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
-import android.text.Html
-import android.view.View
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.widget.Button
-import android.widget.TextView
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -29,12 +28,17 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.screens.ButtonState
+import io.golos.golos.screens.EditorBottomButton
+import io.golos.golos.screens.EditorBottomViewHolder
 import io.golos.golos.screens.GolosActivity
+import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnLinkSubmit
 import io.golos.golos.screens.widgets.dialogs.SendLinkDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 
@@ -57,7 +61,7 @@ data class EditorMode(@JsonProperty("title")
                       @JsonProperty("feedType")
                       val feedType: FeedType? = null)
 
-class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener {
+class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener, EditorBottomViewHolder.BottomButtonClickListener {
     enum class EditorType {
         CREATE_POST, CREATE_COMMENT, EDIT_POST, EDIT_COMMENT
     }
@@ -67,9 +71,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     private lateinit var mAdapter: EditorAdapter
     private lateinit var mTitle: EditorTitle
     private lateinit var mFooter: EditorFooter
-    private lateinit var mRequestImageButton: View
     private lateinit var mViewModel: EditorViewModel
     private lateinit var mSubmitBtn: Button
+    private lateinit var mBottomButtons: EditorBottomViewHolder
     private var mMode: EditorMode? = null
     private var mProgressDialog: Dialog? = null
 
@@ -87,6 +91,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mRecycler.adapter = mAdapter
         mRecycler.isNestedScrollingEnabled = false
         (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        mBottomButtons = EditorBottomViewHolder(this)
+        mBottomButtons.bottomButtonClickListener = this
+
         mViewModel = ViewModelProviders.of(this)[EditorViewModel::class.java]
         val mapper = ObjectMapper()
         mSubmitBtn.setCompoundDrawablesWithIntrinsicBounds(null, null, getVectorDrawable(R.drawable.ic_send_blue_white_24dp), null)
@@ -107,6 +114,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         } else if (mMode?.editorType == EditorType.EDIT_POST) {
             mSubmitBtn.text = getString(R.string.edit)
         }
+
+
         mViewModel.mode = mMode
         mViewModel.editorLiveData.observe(this, android.arch.lifecycle.Observer {
             mAdapter.parts = ArrayList(it?.parts ?: ArrayList())
@@ -160,52 +169,58 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         mToolbar.title = if (mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.CREATE_COMMENT)
             resources.getString(R.string.text) else resources.getString(R.string.comment)
 
-        mRequestImageButton = findViewById(R.id.btn_insert_image)
-        mRequestImageButton.setOnClickListener({
-            val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                    PackageManager.PERMISSION_GRANTED
-            if (readExternalPermission) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                    intent.addCategory(Intent.CATEGORY_OPENABLE)
-                    intent.type = "image/jpeg"
-                    startActivityForResult(intent, PICK_IMAGE_ID)
-                } else {
-                    val intent = Intent(Intent.ACTION_GET_CONTENT)
-                    intent.type = "image/*"
-                    startActivityForResult(intent, PICK_IMAGE_ID)
-                }
 
-            } else {
-                ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
-            }
-        })
-
-        findViewById<View>(R.id.btn_link).setOnClickListener({
-            val fr = SendLinkDialog.getInstance()
-            fr.listener = object : OnLinkSubmit {
-                override fun submit(linkName: String, linkAddress: String) {
-                    if (linkAddress.matches(Regexps.anyImageLink)) {
-                        mViewModel.onUserInput(EditorInputAction.InsertAction(
-                                EditorImagePart(imageName = linkName, imageUrl = linkAddress, pointerPosition = null)))
-                    } else {
-                        var shownLink = linkAddress
-                        if (!shownLink.startsWith("http") && !shownLink.contains("www."))shownLink = "https://www.$shownLink"
-                        else if (shownLink.startsWith("www."))shownLink = "https://$shownLink"
-                        val text =
-                                "[${linkName.replace("\n", "")}]" +
-                                        "($shownLink)"
-                        mViewModel.onUserInput(EditorInputAction.InsertAction(
-                                EditorTextPart(text = text, pointerPosition = text.length)))
-                    }
-                }
-            }
-            fr.show(supportFragmentManager, null)
-        })
         mSubmitBtn.setOnClickListener({
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
         })
+    }
+
+    override fun onClick(clickedButton: ButtonState, allButtons: Map<EditorBottomButton, ButtonState>) {
+        Timber.e("clickedButton = $clickedButton, allButtons = $allButtons")
+        when (clickedButton.type) {
+            EditorBottomButton.ADD_LINK -> {
+                val fr = SendLinkDialog.getInstance()
+                fr.listener = object : OnLinkSubmit {
+                    override fun submit(linkName: String, linkAddress: String) {
+                        if (linkAddress.matches(Regexps.anyImageLink)) {
+                            mViewModel.onUserInput(EditorInputAction.InsertAction(
+                                    EditorImagePart(imageName = linkName, imageUrl = linkAddress)))
+                        } else {
+                            if (linkAddress.isNullOrEmpty()) return
+                            val spannableString = SpannableStringBuilder.valueOf(linkName)
+                            spannableString.setSpan(KnifeURLSpan(formatUrl(linkAddress),
+                                    getColorCompat(R.color.blue_light), true),
+                                    0,
+                                    linkAddress.length,
+                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            mViewModel.onUserInput(EditorInputAction.InsertAction(
+                                    EditorTextPart(text = spannableString)))
+                        }
+                    }
+                }
+                fr.show(supportFragmentManager, null)
+            }
+            EditorBottomButton.INSERT_IMAGE -> {
+                val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                        PackageManager.PERMISSION_GRANTED
+                if (readExternalPermission) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        intent.addCategory(Intent.CATEGORY_OPENABLE)
+                        intent.type = "image/jpeg"
+                        startActivityForResult(intent, PICK_IMAGE_ID)
+                    } else {
+                        val intent = Intent(Intent.ACTION_GET_CONTENT)
+                        intent.type = "image/*"
+                        startActivityForResult(intent, PICK_IMAGE_ID)
+                    }
+
+                } else {
+                    ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
+                }
+            }
+        }
     }
 
     private fun isTitleHidden(): Boolean {
@@ -244,7 +259,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                         handler.post {
                             mViewModel
                                     .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = f.name,
-                                            imageUrl = "file://${f.absolutePath}", pointerPosition = null)))
+                                            imageUrl = "file://${f.absolutePath}")))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -265,27 +280,13 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == READ_EXTERNAL_PERMISSION &&
-                grantResults.size > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) mRequestImageButton.performClick()
+                grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) mBottomButtons.performClick(EditorBottomButton.INSERT_IMAGE)
     }
 
 
     override fun onPhotoDelete(image: EditorImagePart, parts: List<EditorPart>) {
         mViewModel.onUserInput(EditorInputAction.DeleteAction(parts.indexOf(image)))
-    }
-
-    private fun resizeToSize(imageFile: File) {
-
-        if (imageFile.sizeInKb() < 800) return
-        val optns = BitmapFactory.Options()
-        optns.inSampleSize = 2
-        val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
-        var step = 1
-        while (imageFile.sizeInKb() > 800) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
-            step++
-        }
     }
 
     companion object {

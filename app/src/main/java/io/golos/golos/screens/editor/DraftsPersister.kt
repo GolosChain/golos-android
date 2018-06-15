@@ -5,10 +5,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableStringBuilder
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.App
-import io.golos.golos.utils.mapper
+import io.golos.golos.screens.editor.knife.KnifeParser
 import io.golos.golos.utils.getString
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 import java.util.concurrent.Executors
@@ -38,10 +41,10 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
     }
 
     fun saveDraft(mode: EditorMode,
-                       parts: List<EditorPart>,
-                       title: String,
-                       tags: List<String>,
-                       completionHandler: (Unit) -> Unit) {
+                  parts: List<EditorPart>,
+                  title: String,
+                  tags: List<String>,
+                  completionHandler: (Unit) -> Unit) {
         executor.execute {
             try {
                 DraftsTable.save(mode,
@@ -61,7 +64,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
     }
 
     fun getDraft(mode: EditorMode,
-                      completionHandler: (List<EditorPart>, String, List<String>) -> Unit) {
+                 completionHandler: (List<EditorPart>, String, List<String>) -> Unit) {
         executor.execute {
             try {
                 val parts = DraftsTable.get(mode, writableDatabase)
@@ -115,10 +118,10 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                  db: SQLiteDatabase) {
             val parts = parts.map {
                 if (it is EditorTextPart) {
-                    EditorPartDescriptor("text", it.id, null, null, it.text, it.pointerPosition)
+                    EditorPartDescriptor("text", it.id, null, null, it.htmlRepresentation, it.startPointer, it.endPointer)
                 } else {
                     val imagePart = it as EditorImagePart
-                    EditorPartDescriptor("image", it.id, imagePart.imageName, imagePart.imageUrl, null, imagePart.pointerPosition)
+                    EditorPartDescriptor("image", it.id, imagePart.imageName, imagePart.imageUrl, null, imagePart.startPointer, imagePart.endPointer)
                 }
             }.toArrayList()
 
@@ -144,10 +147,12 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                     val descriptors = mapper.readValue<List<EditorPartDescriptor>>(it, type)
                     val v = descriptors.map {
                         if (it.type == "text") {
-                            EditorTextPart(it.id, it.text ?: "", it.pointerPosition)
+                            EditorTextPart(it.id, SpannableStringBuilder.valueOf(KnifeParser.fromHtml(it.text
+                                    ?: "")), it.pointerPosition
+                                    ?: EditorPart.CURSOR_POINTER_NOT_SELECTED,
+                                    it.pointerPositionEnd ?: EditorPart.CURSOR_POINTER_NOT_SELECTED)
                         } else {
-                            EditorImagePart(it.id, it.imageName ?: "", it.imageUrl
-                                    ?: "", it.pointerPosition)
+                            EditorImagePart(it.id, it.imageName ?: "", it.imageUrl ?: "")
                         }
                     }
 
@@ -169,6 +174,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
             writableDatabase?.delete(tableName, " $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
         }
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         data class EditorPartDescriptor constructor(
                 @JsonProperty("type")
                 val type: String,
@@ -181,8 +187,8 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                 @JsonProperty("text")
                 val text: String?,
                 @JsonProperty("pointerPosition")
-                val pointerPosition: Int?)
-
-
+                val pointerPosition: Int?,
+                @JsonProperty("pointerPositionEnd")
+                val pointerPositionEnd: Int?)
     }
 }

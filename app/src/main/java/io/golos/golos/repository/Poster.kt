@@ -90,10 +90,10 @@ internal class Poster(private val mRepository: Repository,
                             val newUrl = if (part.imageUrl.startsWith("/") || part.imageUrl.startsWith("file")) mGolosApi.uploadImage(mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
                                     File(part.imageUrl))
                             else part.imageUrl
-                            content[it] = EditorImagePart(part.id, part.imageName, newUrl, pointerPosition = part.pointerPosition)
+                            content[it] = EditorImagePart(part.id, part.imageName, newUrl)
                         }
                     }
-            val content = content.joinToString(separator = "\n") { it.markdownRepresentation }
+            val content = content.joinToString(separator = "\n") { it.htmlRepresentation }
 
             val result = when (type) {
 

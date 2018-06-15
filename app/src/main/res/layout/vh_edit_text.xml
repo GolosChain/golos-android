@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.golos.golos.screens.widgets.SelectionAwareEditText xmlns:android="http://schemas.android.com/apk/res/android"
+<io.golos.golos.screens.editor.knife.KnifeText xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/et"
     style="@style/EditTextWithPinkCursor"
     android:layout_width="match_parent"
@@ -9,4 +9,4 @@
     android:paddingEnd="@dimen/margin_material"
     android:paddingStart="@dimen/margin_material">
 
-</io.golos.golos.screens.widgets.SelectionAwareEditText>
+</io.golos.golos.screens.editor.knife.KnifeText>

@@ -10,6 +10,7 @@ import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -18,10 +19,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
-import android.support.annotation.ColorRes
-import android.support.annotation.DimenRes
-import android.support.annotation.DrawableRes
-import android.support.annotation.LayoutRes
+import android.support.annotation.*
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -55,6 +53,7 @@ import io.golos.golos.repository.model.GolosDownVoteNotification
 import io.golos.golos.repository.model.GolosUpVoteNotification
 import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
@@ -522,3 +521,29 @@ public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchRe
     this.replace(0, length, str)
     return this
 }
+
+@WorkerThread
+public fun resizeToSize(imageFile: File) {
+
+    if (imageFile.sizeInKb() < 800) return
+    val optns = BitmapFactory.Options()
+    optns.inSampleSize = 2
+    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
+    var step = 1
+    while (imageFile.sizeInKb() > 800) {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
+        step++
+    }
+}
+
+public fun formatUrl(rawUrl: String): String {
+    if (rawUrl.isNullOrEmpty()) return rawUrl
+    var shownLink = rawUrl
+    if (!shownLink.startsWith("http") && !shownLink.contains("www.")) shownLink = "https://www.$shownLink"
+    else if (shownLink.startsWith("www.")) shownLink = "https://$shownLink"
+    return shownLink
+}
+
+public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V>
+        = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }

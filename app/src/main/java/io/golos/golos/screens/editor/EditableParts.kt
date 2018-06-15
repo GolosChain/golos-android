@@ -1,7 +1,8 @@
 package io.golos.golos.screens.editor
 
+import android.text.Editable
+import io.golos.golos.screens.editor.knife.KnifeParser
 import java.util.*
-import java.util.regex.Pattern
 
 
 /**
@@ -9,75 +10,74 @@ import java.util.regex.Pattern
  */
 
 abstract class EditorPart(open val id: String = UUID.randomUUID().toString()) {
-    abstract val markdownRepresentation: CharSequence
-    abstract var pointerPosition: Int?
-    abstract fun clearCursor(): EditorPart
-    fun isFocused() = pointerPosition != null
-    abstract fun setCursor(position: Int?): EditorPart
+    abstract val htmlRepresentation: String
+    open var startPointer: Int = CURSOR_POINTER_NOT_SELECTED
+    open var endPointer: Int = CURSOR_POINTER_NOT_SELECTED
+
+
+    fun isFocused() = endPointer > CURSOR_POINTER_NOT_SELECTED
+
 
     companion object {
         val CURSOR_POINTER_BEGIN = 0
+        val CURSOR_POINTER_NOT_SELECTED = -1
     }
 }
 
 data class EditorImagePart(override val id: String = UUID.randomUUID().toString(),
                            val imageName: String,
-                           val imageUrl: String,
-                           override var pointerPosition: Int?) : EditorPart(id) {
-    override val markdownRepresentation
-        get() = "<center>![$imageName]($imageUrl)</center>"
+                           val imageUrl: String) : EditorPart(id) {
+    override val htmlRepresentation
+        get() = "<center> <a href =\"$imageUrl\">$imageName</a> </center>"
 
-    override fun clearCursor() = EditorImagePart(id, imageName, imageUrl, null)
-    override fun setCursor(position: Int?): EditorPart = EditorImagePart(id, imageName, imageUrl, null)
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is EditorImagePart) return false
 
-        if (imageName != other.imageName) return false
-        if (imageUrl != other.imageUrl) return false
-        if (pointerPosition != other.pointerPosition) return false
+    override var startPointer = CURSOR_POINTER_NOT_SELECTED
+        set(value) {
+            throw IllegalStateException("not supported")
+        }
 
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = imageName.hashCode()
-        result = 31 * result + imageUrl.hashCode()
-        result = 31 * result + (pointerPosition ?: 0)
-        return result
-    }
-
+    override var endPointer = CURSOR_POINTER_NOT_SELECTED
+        set(value) {
+            throw IllegalStateException("not supported")
+        }
 
 }
 
-data class EditorTextPart(override val id: String = UUID.randomUUID().toString(),
-                          var text: String,
-                          override var pointerPosition: Int?) : EditorPart(id) {
 
-    override val markdownRepresentation: CharSequence
+data class EditorTextPart(override val id: String = UUID.randomUUID().toString(),
+                          var text: Editable,
+                          override var startPointer: Int = CURSOR_POINTER_NOT_SELECTED,
+                          override var endPointer: Int = CURSOR_POINTER_NOT_SELECTED) : EditorPart(id) {
+
+    override val htmlRepresentation: String
         get() {
-            var out = text
+            var out = KnifeParser.toHtml(text)
             val scriptRegex = "<(/)?[ ]*script[^>]*>"
             out = out.replace(Regex(scriptRegex), "")
 
-            val linkregexp = "\\b((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
-            val pattern = Pattern.compile(linkregexp, Pattern.CASE_INSENSITIVE)
-            val urlMatcher = pattern.matcher(out)
+            val linkregexp = "\\b((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])".toRegex()
 
-            while (urlMatcher.find()) {
-                val foundString = urlMatcher.group()
-                //val foundString = out.substring(urlMatcher.startForSubscribersOrSubscriptions(0), urlMatcher.end(0))
+
+            out.replace(linkregexp, { string ->
+                val foundString = string.value
                 if (foundString.endsWith("zip", true)
                         || foundString.endsWith("rar", true)
                         || foundString.endsWith("exe", true)
                         || foundString.endsWith("bat", true)
-                        || foundString.endsWith("7z", true)) {
-                    out = out.replace(foundString, "*[link removed]*")
-                }
-            }
+                        || foundString.endsWith("7z", true))
+                    "*[link removed]*"
+                else foundString
+            })
+
             return out
         }
 
-    override fun clearCursor() = EditorTextPart(id = this.id, text = text, pointerPosition = null)
-    override fun setCursor(position: Int?): EditorPart = EditorTextPart(id, text, position)
+    fun setText(newText: Editable): EditorTextPart {
+        return EditorTextPart(id, newText, startPointer, endPointer)
+    }
+
+    companion object {
+        fun emptyTextPart() = EditorTextPart(UUID.randomUUID().toString(), emptySpan)
+    }
+
 }

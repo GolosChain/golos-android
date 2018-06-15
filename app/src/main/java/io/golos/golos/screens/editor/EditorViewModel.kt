@@ -3,10 +3,13 @@ package io.golos.golos.screens.editor
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import android.support.annotation.MainThread
+import android.text.SpannableStringBuilder
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.StoriesFeed
+import io.golos.golos.screens.editor.knife.KnifeParser
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ErrorCode
@@ -89,12 +92,11 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it, skipHtmlClean = true) else it.parts)
                         .map {
                             when (it) {
-                                is TextRow -> EditorTextPart(UUID.randomUUID().toString(), it.text, null)
-                                is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src, null)
+                                is TextRow -> EditorTextPart(UUID.randomUUID().toString(),
+                                        SpannableStringBuilder.valueOf(KnifeParser.fromHtml(it.text)))
+                                is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src)
                             }
                         }
-                parts = TextProcessor.processInput(parts, EditorInputAction.InsertAction(EditorTextPart(UUID.randomUUID().toString(), "", 0)))
-
                 editorLiveData.value = EditorState(parts = parts,
                         title = if (editorType == EditorActivity.EditorType.EDIT_POST) it.title else "",
                         tags = it.tags.map { LocalizedTag.convertToLocalizedName(it) })
@@ -102,6 +104,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
+    @MainThread
     fun onUserInput(action: EditorInputAction) {
         val parts = editorLiveData.value?.parts ?: ArrayList()
         editorLiveData.value = EditorState(parts = mTextProcessor.processInput(parts, action),
@@ -109,12 +112,14 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 tags = editorLiveData.value?.tags ?: listOf())
     }
 
+    @MainThread
     fun onTitleChanged(it: CharSequence) {
         editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
                 ?: listOf(), title = it.toString(),
                 tags = editorLiveData.value?.tags ?: listOf())
     }
 
+    @MainThread
     fun onTagsChanged(it: List<String>) {
 
         editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
@@ -122,12 +127,13 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 tags = it)
     }
 
-
+    @MainThread
     fun onTextChanged(parts: List<EditorPart>) {
         editorLiveData.value = EditorState(parts = parts, title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf())
     }
 
+    @MainThread
     fun onSubmit() {
         if (mode == null) {
             return
@@ -135,14 +141,14 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         if (!mRepository.isUserLoggedIn()) return
 
         val editorType = mode?.editorType ?: return
+        val parts = editorLiveData.value?.parts ?: return
 
 
 
-        if (editorLiveData.value?.parts?.size ?: 0 == 0 ||
-                (editorLiveData.value?.parts?.size == 1
-                        && editorLiveData.value!!.parts[0].markdownRepresentation.isEmpty())) {
-            editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                    ?: ArrayList(),
+        if (parts.isEmpty() ||
+                (parts.size == 1
+                        && parts[0].htmlRepresentation.isEmpty())) {
+            editorLiveData.value = EditorState(parts = parts,
                     error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
                             localizedMessage = R.string.post_body_must_be_not_empty),
                     title = editorLiveData.value?.title ?: "",
@@ -152,8 +158,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
         if (editorType == EditorActivity.EditorType.CREATE_POST || editorType == EditorActivity.EditorType.EDIT_POST) {
             if (editorLiveData.value?.title.isNullOrEmpty()) {
-                editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                        ?: ArrayList(),
+                editorLiveData.value = EditorState(parts = parts,
                         error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null, localizedMessage = R.string.enter_title),
                         title = editorLiveData.value?.title ?: "",
                         tags = editorLiveData.value?.tags ?: listOf())
@@ -161,8 +166,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             }
 
             if (editorLiveData.value?.tags.isNullOrEmpty()) {
-                editorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                        ?: ArrayList(),
+                editorLiveData.value = EditorState(parts = parts,
                         error = GolosError(ErrorCode.WRONG_STATE, nativeMessage = null,
                                 localizedMessage = R.string.at_least_one_tag),
                         title = editorLiveData.value?.title ?: "",
@@ -170,7 +174,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 return
             }
             editorLiveData.value = EditorState(isLoading = true,
-                    parts = editorLiveData.value?.parts ?: ArrayList(),
+                    parts = parts,
                     title = editorLiveData.value?.title ?: "",
                     tags = editorLiveData.value?.tags ?: listOf())
 

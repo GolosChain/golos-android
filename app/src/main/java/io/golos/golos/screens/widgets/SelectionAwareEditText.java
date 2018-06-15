@@ -31,11 +31,11 @@ public class SelectionAwareEditText extends AppCompatEditText {
     protected void onSelectionChanged(int selStart, int selEnd) {
         super.onSelectionChanged(selStart, selEnd);
         if (null != mSelectionListener) {
-            mSelectionListener.onSelectionChanged(selEnd);
+            mSelectionListener.onSelectionChanged(selStart, selEnd);
         }
     }
 
-  public   interface SelectionListener {
-        void onSelectionChanged(int end);
+    public interface SelectionListener {
+        void onSelectionChanged(int selStart, int end);
     }
 }

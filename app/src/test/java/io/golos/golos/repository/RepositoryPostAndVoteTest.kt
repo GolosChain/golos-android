@@ -1,6 +1,7 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import android.text.SpannableStringBuilder
 import io.golos.golos.MockPersister
 import io.golos.golos.MockUserSettings
 import io.golos.golos.Utils
@@ -81,9 +82,8 @@ class RepositoryPostAndVoteTest {
     @Test
     fun createPost() {
 
-        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath,
-                pointerPosition = null)
-        repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", "test content", pointerPosition = null),
+        val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath)
+        repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content")),
                 image),
                 listOf("test"), { a, b -> print(b) })
 
@@ -98,7 +98,7 @@ class RepositoryPostAndVoteTest {
         assertNotNull(blog)
         val newBody = UUID.randomUUID().toString()
         repo.editPost(UUID.randomUUID().toString(),
-                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)), listOf("test"),
+                listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf(newBody))), listOf("test"),
                 blog!!.items[0].storyWithState()!!, { _, e -> if (e != null) println(e.toString()) })
         assertEquals(newBody, blog!!.items[0].rootStory()!!.body)
     }
@@ -142,7 +142,7 @@ class RepositoryPostAndVoteTest {
 
         val commentSizeBefore = blogItems!!.items.first().comments().size
 
-        val text = EditorTextPart("sdg", "test content ${UUID.randomUUID()}", pointerPosition = null)
+        val text = EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content ${UUID.randomUUID()}"))
         repo.createComment(notCommentedItem.storyWithState()!!, listOf(text), { _, _ -> })
 
         assertEquals("comments size in first story in feed must increase",
@@ -160,7 +160,7 @@ class RepositoryPostAndVoteTest {
 
 
         repo.editComment(editedComment,
-                listOf(EditorTextPart("sdg", newBody, pointerPosition = null)))
+                listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf(newBody))))
 
         assertEquals("new comment must have updated body", newBody,
                 blogItems!!.items.first().comments().find { it.id == editedComment.story.id }!!.body)
@@ -201,7 +201,7 @@ class RepositoryPostAndVoteTest {
         val commentSizeBefore = blogItems!!.items.first().getFlataned().size
 
         val commentText = "second_level_comment ${UUID.randomUUID()}"
-        var text = EditorTextPart("sdg", commentText, pointerPosition = null)
+        var text = EditorTextPart("sdg", SpannableStringBuilder.valueOf(commentText))
         repo.createComment(firstLevelComment, listOf(text), { _, _ -> })
 
         assertEquals("comments size in first story in feed must increase",
@@ -219,7 +219,7 @@ class RepositoryPostAndVoteTest {
 
 
         val thirdLevelCommentTextcommentText = "third_level_comment ${UUID.randomUUID()}"
-        text = EditorTextPart("sdg", thirdLevelCommentTextcommentText, pointerPosition = null)
+        text = EditorTextPart("sdg", SpannableStringBuilder.valueOf(thirdLevelCommentTextcommentText))
         repo.createComment(item, listOf(text), { _, _ -> })
         val thirdLevelitem = blogItems!!.items.first().getFlataned().find { it.story.body.contains(thirdLevelCommentTextcommentText) }!!
         assertEquals("third level comment  level 2", 2, thirdLevelitem.story.level)

@@ -42,7 +42,7 @@
         <item name="android:layout_width">@dimen/standart_size_button</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:background">?selectableItemBackground</item>
-        <item name="android:layout_height">@dimen/standart_size_button</item>
+        <item name="android:layout_height">match_parent</item>
     </style>
 
     <style name="EditTextWithPinkCursor">

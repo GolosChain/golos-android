@@ -94,36 +94,77 @@
         android:layout_marginTop="-4dp"
         android:background="@drawable/shape_shadow" />
 
-    <LinearLayout
+    <HorizontalScrollView
+
         android:id="@+id/bottom_lo"
+
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bottom_controls_height"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/white_black_toolbar_color"
-        android:gravity="end"
-        android:orientation="horizontal">
+        android:fillViewport="true">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_users"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_gravity="center"
-            android:background="?selectableItemBackground"
-            android:text="\@"
-            android:textColor="@color/btn_pink_black_color"
-            android:textSize="20dp"
-            android:visibility="gone" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_controls_height"
+            android:layout_gravity="end"
+            android:background="@color/white_black_toolbar_color"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal"
+            android:paddingEnd="@dimen/material_big"
+            android:paddingStart="@dimen/material_big">
 
-        <android.support.v7.widget.AppCompatImageButton
-            android:id="@+id/btn_link"
-            style="@style/BottomButtonStyle"
-            android:layout_marginEnd="@dimen/margin_material_half"
-            app:srcCompat="@drawable/ic_link_24dp" />
+            <io.golos.golos.screens.editor.views.CheckableButton
+                android:id="@+id/btn_title"
+                android:paddingTop="1dp"
+                style="@style/BottomButtonStyle"
+                android:background="@drawable/btn_editor_bottom"
+                app:srcCompat="@drawable/ic_title_24dp" />
 
-        <android.support.v7.widget.AppCompatImageButton
-            android:id="@+id/btn_insert_image"
-            style="@style/BottomButtonStyle"
-            android:layout_marginEnd="@dimen/margin_material"
-            app:srcCompat="@drawable/ic_image_24dp" />
-    </LinearLayout>
+            <io.golos.golos.screens.editor.views.CheckableButton
+                android:id="@+id/btn_bold"
+                style="@style/BottomButtonStyle"
+                android:background="@drawable/btn_editor_bottom"
+                app:srcCompat="@drawable/ic_b_21dp" />
+
+            <io.golos.golos.screens.editor.views.CheckableButton
+                android:id="@+id/btn_quotations"
+                style="@style/BottomButtonStyle"
+
+                android:background="@drawable/btn_editor_bottom"
+                app:srcCompat="@drawable/ic_format_quote" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/btn_quote"
+                style="@style/BottomButtonStyle"
+
+                app:srcCompat="@drawable/ic_reply_24dp" />
+
+            <io.golos.golos.screens.editor.views.CheckableButton
+                android:id="@+id/btn_list_numbered"
+                style="@style/BottomButtonStyle"
+
+                android:background="@drawable/btn_editor_bottom"
+                app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
+
+            <io.golos.golos.screens.editor.views.CheckableButton
+                android:id="@+id/btn_list_bullet"
+                style="@style/BottomButtonStyle"
+
+                android:background="@drawable/btn_editor_bottom"
+                app:srcCompat="@drawable/ic_format_list_bulleted_24dp" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/btn_link"
+                style="@style/BottomButtonStyle"
+
+                app:srcCompat="@drawable/ic_link_24dp" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/btn_insert_image"
+                style="@style/BottomButtonStyle"
+                app:srcCompat="@drawable/ic_image_24dp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
 </RelativeLayout>
