@@ -208,6 +208,8 @@ public class KnifeText extends AppCompatEditText implements TextWatcher {
             return false;
         }
 
+
+
         if (start == end) {
             if (start - 1 < 0 || start + 1 > getEditableText().length()) {
                 return false;

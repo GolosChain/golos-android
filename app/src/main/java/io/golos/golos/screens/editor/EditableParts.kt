@@ -1,6 +1,7 @@
 package io.golos.golos.screens.editor
 
 import android.text.Editable
+import android.text.SpannableStringBuilder
 import io.golos.golos.screens.editor.knife.KnifeParser
 import java.util.*
 
@@ -15,7 +16,7 @@ abstract class EditorPart(open val id: String = UUID.randomUUID().toString()) {
     open var endPointer: Int = CURSOR_POINTER_NOT_SELECTED
 
 
-    fun isFocused() = endPointer > CURSOR_POINTER_NOT_SELECTED
+    fun isFocused() = endPointer > CURSOR_POINTER_NOT_SELECTED || startPointer > CURSOR_POINTER_NOT_SELECTED
 
 
     companion object {
@@ -40,6 +41,11 @@ data class EditorImagePart(override val id: String = UUID.randomUUID().toString(
         set(value) {
             throw IllegalStateException("not supported")
         }
+
+    override fun toString(): String {
+        return "EditorImagePart(imageUrl='$imageUrl')"
+    }
+
 
 }
 
@@ -72,12 +78,23 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
             return out
         }
 
+    fun setNotSelected(){
+        startPointer = CURSOR_POINTER_NOT_SELECTED
+        endPointer = CURSOR_POINTER_NOT_SELECTED
+    }
+
     fun setText(newText: Editable): EditorTextPart {
         return EditorTextPart(id, newText, startPointer, endPointer)
     }
 
-    companion object {
-        fun emptyTextPart() = EditorTextPart(UUID.randomUUID().toString(), emptySpan)
+    override fun toString(): String {
+        return "EditorTextPart(text=$text, startPointer=$startPointer, endPointer=$endPointer)"
     }
+
+    companion object {
+        fun emptyTextPart() = EditorTextPart(UUID.randomUUID().toString(), SpannableStringBuilder.valueOf(""))
+    }
+
+
 
 }

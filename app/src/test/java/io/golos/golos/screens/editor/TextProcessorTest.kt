@@ -1,6 +1,6 @@
 package io.golos.golos.screens.editor
 
-import junit.framework.Assert.assertEquals
+import junit.framework.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,9 +100,23 @@ class TextProcessorTest {
                 text = "2".asSpannable()
         )))
         assertEquals("must be 1 part", 1, out.size)
-        assertEquals("we inserted 2 before e character","sde21".asSpannable(), (out[0] as EditorTextPart).text)
+        assertEquals("we inserted 2 before e character", "sde21".asSpannable(), (out[0] as EditorTextPart).text)
         assertEquals(4, out[0].endPointer)
 
+        out = mTextProcessor.processInput(out, EditorInputAction.InsertAction(EditorImagePart(
+                imageName = "name", imageUrl = "imageUrl")))
+
+        assertEquals("must be 3 part", 3, out.size)
+        assertFalse(out[0].isFocused())
+        assertFalse(out[1].isFocused())
+        assertTrue(out[2].isFocused())
+
+        (out as MutableList<EditorPart>)[2] = EditorTextPart(text = "test".asSpannable(), startPointer = 4,endPointer = 4)
+
+        out = mTextProcessor.processInput(out, EditorInputAction.InsertAction(EditorImagePart(
+                imageName = "name", imageUrl = "imageUrl")))
+        assertEquals("must be 5 part", 5, out.size)
+        assertTrue((out[4] as EditorTextPart).text.toString().isEmpty())
 
         /* out = mTextProcessor.processInput(out, Edit orInputAction.InsertAction(EditorTextPart("lll", null)))
          assertEquals("initial 1 edittext", 1, out.size)

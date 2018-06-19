@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.editor.viewholders.EditorEditTextViewHolder
 import io.golos.golos.screens.editor.viewholders.EditorImageViewHolder
+import timber.log.Timber
+import java.util.*
 
 
 /**
@@ -34,9 +36,10 @@ abstract class EditorAdapterModel(open val id: String) {
 
 data class EditorAdapterTextPart(val textPart: EditorTextPart,
                                  val onFocusChanged: (RecyclerView.ViewHolder, Boolean) -> Unit = { _, _ -> },
-                                 val onNewText: (RecyclerView.ViewHolder, EditorTextPart) -> Unit
-                                 = { _, _ -> },
-                                 val showHint: Boolean = false) : EditorAdapterModel(textPart.id)
+                                 val onNewText: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
+                                 val onCursorChange: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
+                                 val showHint: Boolean = false,
+                                 val modifiers: Set<EditorTextModifier>) : EditorAdapterModel(textPart.id)
 
 data class EditorAdapterImagePart(val imagePart: EditorImagePart,
                                   val isLoading: Boolean = false,
@@ -47,6 +50,7 @@ data class EditorAdapterImagePart(val imagePart: EditorImagePart,
 interface EditorAdapterInteractions {
     fun onEdit(parts: List<EditorPart>)
     fun onPhotoDelete(image: EditorImagePart, parts: List<EditorPart>)
+    fun onCursorChange(parts: List<EditorPart>)
 }
 
 class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
@@ -54,6 +58,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
 
     var parts: ArrayList<EditorPart> = ArrayList()
         set(value) {
+            Timber.e("setvalue")
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                     return field[oldItemPosition].id == value[newItemPosition].id
@@ -62,19 +67,34 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                 override fun getOldListSize() = field.size
                 override fun getNewListSize() = value.size
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition] == value[newItemPosition]
+                    val old = field[oldItemPosition]
+                    val new = value[newItemPosition]
+                    return old == new
                 }
             }).dispatchUpdatesTo(this)
             field = value
+
+        }
+    var textModifiers: Set<EditorTextModifier> = hashSetOf()
+        set(value) {
+            field = value
+            (0 until parts.size).forEach {
+                if (parts[it] is EditorTextPart) notifyItemChanged(it)
+            }
         }
 
+    @Suppress("NAME_SHADOWING")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is EditorEditTextViewHolder -> {
                 val part = parts[position] as EditorTextPart
-                holder.state = EditorAdapterTextPart(part, { _, _ ->
-
-                }, { holder, changingPart ->
+                holder.state = EditorAdapterTextPart(part, { holder, isFocused ->
+                    if (!isFocused) {
+                        val position = holder.adapterPosition
+                        if (position > 0)
+                            (parts.getOrNull(position) as? EditorTextPart)?.setNotSelected()
+                    }
+                }, { _, changingPart ->
                     (0 until parts.size)
                             .filter {
                                 parts[it].id == changingPart.id
@@ -83,7 +103,12 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                                 parts[it] = changingPart
                             }
                     interactor?.onEdit(parts)
-                }, position == 0)
+                }, { _, _ ->
+
+                    interactor?.onCursorChange(parts)
+                },
+                        position == 0,
+                        textModifiers)
                 if (parts[position].isFocused()) {
                     holder.shouldShowKeyboard()
                 }
@@ -112,6 +137,15 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     override fun getItemViewType(position: Int): Int {
         return if (parts[position] is EditorTextPart) 0
         else 1
+    }
+
+    fun onRequestFocus(mRecycler: RecyclerView) {
+
+        (0 until itemCount).forEach {
+            val part = parts[it] as? EditorTextPart
+            if (part?.isFocused() == true)
+                (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.shouldShowKeyboard()
+        }
     }
 }
 

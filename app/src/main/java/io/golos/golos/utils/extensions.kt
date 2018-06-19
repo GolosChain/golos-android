@@ -522,28 +522,7 @@ public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchRe
     return this
 }
 
-@WorkerThread
-public fun resizeToSize(imageFile: File) {
 
-    if (imageFile.sizeInKb() < 800) return
-    val optns = BitmapFactory.Options()
-    optns.inSampleSize = 2
-    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, optns)
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imageFile))
-    var step = 1
-    while (imageFile.sizeInKb() > 800) {
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90 - (step * 10), FileOutputStream(imageFile))
-        step++
-    }
-}
-
-public fun formatUrl(rawUrl: String): String {
-    if (rawUrl.isNullOrEmpty()) return rawUrl
-    var shownLink = rawUrl
-    if (!shownLink.startsWith("http") && !shownLink.contains("www.")) shownLink = "https://www.$shownLink"
-    else if (shownLink.startsWith("www.")) shownLink = "https://$shownLink"
-    return shownLink
-}
 
 public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V>
         = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }

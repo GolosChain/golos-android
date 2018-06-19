@@ -2,6 +2,7 @@ package io.golos.golos.screens.editor
 
 import android.app.Activity
 import android.app.Dialog
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -28,17 +29,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.screens.ButtonState
-import io.golos.golos.screens.EditorBottomButton
-import io.golos.golos.screens.EditorBottomViewHolder
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.widgets.dialogs.OnLinkSubmit
+import io.golos.golos.screens.widgets.dialogs.LinkDialogInterface
 import io.golos.golos.screens.widgets.dialogs.SendLinkDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 
@@ -61,7 +58,11 @@ data class EditorMode(@JsonProperty("title")
                       @JsonProperty("feedType")
                       val feedType: FeedType? = null)
 
-class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.TagsListener, EditorBottomViewHolder.BottomButtonClickListener {
+class EditorActivity : GolosActivity(), EditorAdapterInteractions,
+        EditorFooter.TagsListener,
+        EditorBottomViewHolder.BottomButtonClickListener,
+        LinkDialogInterface,
+        Observer<EditorState> {
     enum class EditorType {
         CREATE_POST, CREATE_COMMENT, EDIT_POST, EDIT_COMMENT
     }
@@ -117,38 +118,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
 
 
         mViewModel.mode = mMode
-        mViewModel.editorLiveData.observe(this, android.arch.lifecycle.Observer {
-            mAdapter.parts = ArrayList(it?.parts ?: ArrayList())
-            it?.error?.let {
-                if (it.localizedMessage != null) mRecycler.showSnackbar(it.localizedMessage)
-                else if (it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
-            }
-            if (it?.isLoading == true) {
-                if (mProgressDialog == null) mProgressDialog = showProgressDialog()
-            } else {
-                mProgressDialog?.let {
-                    it.dismiss()
-                    mProgressDialog = null
-                }
-            }
-            if (mMode?.editorType == EditorType.CREATE_POST) {
-                mTitle.state = EditorTitleState(it?.title ?: "",
-                        mTitle.state.isTitleEditable,
-                        mTitle.state.onTitleChanges,
-                        mTitle.state.subtitle,
-                        mTitle.state.isHidden)
-            }
-            mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
-                    mFooter.state.tagsValidator,
-                    it?.tags?.toArrayList() ?: arrayListOf(),
-                    mFooter.state.tagsListener)
-            it?.completeMessage?.let {
-                mRecycler.showSnackbar(it)
-                Handler().postDelayed({
-                    finish()
-                }, 30)
-            }
-        })
+        mViewModel.editorLiveData.observe(this, this)
         mTitle.state = EditorTitleState(mMode?.title
                 ?: "", mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 {
@@ -176,32 +146,92 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         })
     }
 
-    override fun onClick(clickedButton: ButtonState, allButtons: Map<EditorBottomButton, ButtonState>) {
-        Timber.e("clickedButton = $clickedButton, allButtons = $allButtons")
-        when (clickedButton.type) {
-            EditorBottomButton.ADD_LINK -> {
-                val fr = SendLinkDialog.getInstance()
-                fr.listener = object : OnLinkSubmit {
-                    override fun submit(linkName: String, linkAddress: String) {
-                        if (linkAddress.matches(Regexps.anyImageLink)) {
-                            mViewModel.onUserInput(EditorInputAction.InsertAction(
-                                    EditorImagePart(imageName = linkName, imageUrl = linkAddress)))
-                        } else {
-                            if (linkAddress.isNullOrEmpty()) return
-                            val spannableString = SpannableStringBuilder.valueOf(linkName)
-                            spannableString.setSpan(KnifeURLSpan(formatUrl(linkAddress),
-                                    getColorCompat(R.color.blue_light), true),
-                                    0,
-                                    linkAddress.length,
-                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                            mViewModel.onUserInput(EditorInputAction.InsertAction(
-                                    EditorTextPart(text = spannableString)))
-                        }
+    override fun onChanged(it: EditorState?) {
+        if (it == null) return
+        mAdapter.parts = ArrayList(it.parts)
+        it.error?.let {
+            if (it.localizedMessage != null) mRecycler.showSnackbar(it.localizedMessage)
+            else if (it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
+        }
+        if (it.isLoading) {
+            if (mProgressDialog == null) mProgressDialog = showProgressDialog()
+        } else {
+            mProgressDialog?.let {
+                it.dismiss()
+                mProgressDialog = null
+            }
+        }
+        if (mMode?.editorType == EditorType.CREATE_POST) {
+            mTitle.state = EditorTitleState(it.title,
+                    mTitle.state.isTitleEditable,
+                    mTitle.state.onTitleChanges,
+                    mTitle.state.subtitle,
+                    mTitle.state.isHidden)
+        }
+        mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
+                mFooter.state.tagsValidator,
+                it.tags.toArrayList(),
+                mFooter.state.tagsListener)
+        it.completeMessage?.let {
+            mRecycler.showSnackbar(it)
+            Handler().postDelayed({
+                finish()
+            }, 30)
+        }
+    }
+
+    override fun submit(linkName: String, linkAddress: String) {
+        if (linkAddress.matches(Regexps.anyImageLink)) {
+            mViewModel.onUserInput(EditorInputAction.InsertAction(
+                    EditorImagePart(imageName = linkName, imageUrl = linkAddress)))
+        } else {
+            if (linkAddress.isNullOrEmpty()) return
+            val spannableString = SpannableStringBuilder.valueOf(linkName)
+            spannableString.setSpan(KnifeURLSpan(formatUrl(linkAddress),
+                    getColorCompat(R.color.blue_light), true),
+                    0,
+                    linkName.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            mViewModel.onUserInput(EditorInputAction.InsertAction(
+                    EditorTextPart(text = spannableString)))
+        }
+    }
+
+    override fun onDismissLinkDialog() {
+        mRecycler.requestFocus()
+        mAdapter.onRequestFocus(mRecycler)
+    }
+
+    override fun onCursorChange(parts: List<EditorPart>) {
+        val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
+        if (focusedPart != null) {
+            if (focusedPart.text.isNotEmpty() &&
+                    focusedPart.endPointer > 0 &&//if cursor somehwere in the middle, and text is not empty
+                    focusedPart.endPointer < focusedPart.text.length) {
+                val allSpans = focusedPart.text.getEditorUsedSpans(focusedPart.endPointer - 1, focusedPart.endPointer)
+                if (allSpans.isEmpty()) {//ig text has not modifiers
+                    mBottomButtons.unSelectAll()
+                } else {
+                    allSpans.forEach {
+                        mBottomButtons.setSelected(it, true)//select all found modifiers in bottom bar
+                    }
+                    val remainings = EditorTextModifier.remaining(allSpans)
+                    remainings.forEach {
+                        mBottomButtons.setSelected(it, false)//unselect all remainings modifiers in bottom bar
                     }
                 }
+            } else if (focusedPart.endPointer >= focusedPart.text.length) mBottomButtons.unSelectAll()//if pointer is behind text -
+            // unselect all buttons
+        }
+    }
+
+    override fun onClick(clickedButton: EditorTextModifier, allButtons: Set<EditorTextModifier>) {
+        when (clickedButton) {
+            EditorTextModifier.LINK -> {
+                val fr = SendLinkDialog.getInstance()
                 fr.show(supportFragmentManager, null)
             }
-            EditorBottomButton.INSERT_IMAGE -> {
+            EditorTextModifier.INSERT_IMAGE -> {
                 val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                         PackageManager.PERMISSION_GRANTED
                 if (readExternalPermission) {
@@ -219,6 +249,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                 } else {
                     ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
                 }
+            }
+            EditorTextModifier.QUOTATION_MARKS -> {
+
             }
         }
     }
@@ -260,6 +293,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                             mViewModel
                                     .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = f.name,
                                             imageUrl = "file://${f.absolutePath}")))
+                            mAdapter.onRequestFocus(mRecycler)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -269,7 +303,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
                     }
                 }).start()
             }
-        }
+        } else if (resultCode == Activity.RESULT_CANCELED && requestCode == PICK_IMAGE_ID)
+            mAdapter.onRequestFocus(mRecycler)
     }
 
     override fun onDestroy() {
@@ -281,7 +316,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions, EditorFooter.
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == READ_EXTERNAL_PERMISSION &&
                 grantResults.isNotEmpty() &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) mBottomButtons.performClick(EditorBottomButton.INSERT_IMAGE)
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) mBottomButtons.performClick(EditorTextModifier.INSERT_IMAGE)
     }
 
 

@@ -33,6 +33,7 @@ class StoryParserTests {
         Assert.assertTrue(rows[3] is ImageRow)
         Assert.assertTrue((rows[3] as ImageRow).src == "https://cloud.githubusercontent.com/assets/410789/25783476/0c523dd6-335d-11e7-9165-f5ffc4fc8b5e.png")
         Assert.assertTrue(rows[4] is TextRow)
+
     }
 
     @Test

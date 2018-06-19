@@ -21,6 +21,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.*
 import java.util.concurrent.Executor
 
@@ -83,7 +85,8 @@ class RepositoryPostAndVoteTest {
     fun createPost() {
 
         val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath)
-        repo.createPost(UUID.randomUUID().toString(), listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content")),
+        repo.createPost(UUID.randomUUID().toString(),
+                listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content")),
                 image),
                 listOf("test"), { a, b -> print(b) })
 

@@ -1,6 +1,7 @@
 package io.golos.golos.screens.editor
 
 import android.text.SpannableStringBuilder
+import timber.log.Timber
 import java.util.*
 
 /**
@@ -26,7 +27,7 @@ object TextProcessor {
 
             }
         } else {
-            if (parts.isEmpty()) out.add(EditorTextPart(text = emptySpan,
+            if (parts.isEmpty()) out.add(EditorTextPart(text = "".asSpannable(),
                     startPointer = EditorPart.CURSOR_POINTER_BEGIN, endPointer = EditorPart.CURSOR_POINTER_BEGIN))
             else {
                 when (action) {
@@ -59,7 +60,7 @@ object TextProcessor {
                     }
                 }
 
-                if (out.isEmpty()) out.add(EditorTextPart(text = emptySpan,
+                if (out.isEmpty()) out.add(EditorTextPart(text = "".asSpannable(),
                         startPointer = EditorPart.CURSOR_POINTER_BEGIN,
                         endPointer = EditorPart.CURSOR_POINTER_BEGIN))
             }
@@ -183,6 +184,6 @@ object TextProcessor {
 }
 
 sealed class EditorInputAction {
-    class InsertAction(val part: EditorPart) : EditorInputAction()
-    class DeleteAction(val fastDelete: Int?) : EditorInputAction()
+  data  class InsertAction(val part: EditorPart) : EditorInputAction()
+   data class DeleteAction(val fastDelete: Int?) : EditorInputAction()
 }

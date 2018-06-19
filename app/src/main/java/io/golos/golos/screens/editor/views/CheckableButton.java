@@ -1,19 +1,16 @@
 package io.golos.golos.screens.editor.views;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.view.View;
 
 import javax.annotation.Nullable;
 
-import io.golos.golos.R;
-import timber.log.Timber;
-
 public class CheckableButton extends AppCompatImageButton implements View.OnClickListener {
     @Nullable
     private View.OnClickListener mOnClickListener;
+    private boolean isSelectibilityTurnedOn = true;
 
     public CheckableButton(Context context) {
         super(context);
@@ -50,7 +47,27 @@ public class CheckableButton extends AppCompatImageButton implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        setSelected(!isSelected());
+        if (isSelectibilityTurnedOn) setSelected(!isSelected());
         if (mOnClickListener != null) mOnClickListener.onClick(v);
+    }
+
+    @Nullable
+    public OnClickListener getmOnClickListener() {
+        return mOnClickListener;
+    }
+
+    public void setmOnClickListener(@Nullable OnClickListener mOnClickListener) {
+        this.mOnClickListener = mOnClickListener;
+    }
+
+    public boolean isSelectibilityTurnedOn() {
+        return isSelectibilityTurnedOn;
+    }
+
+    public void setSelectibilityTurnedOn(boolean selectivityTurnedOn) {
+        if (selectivityTurnedOn != isSelectibilityTurnedOn) {
+            if (!selectivityTurnedOn) setSelected(false);
+            isSelectibilityTurnedOn = selectivityTurnedOn;
+        }
     }
 }

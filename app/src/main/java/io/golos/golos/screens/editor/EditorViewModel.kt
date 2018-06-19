@@ -15,6 +15,7 @@ import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.isNullOrEmpty
+import timber.log.Timber
 import java.util.*
 
 
@@ -79,6 +80,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             }
         }
         val editorType = mode?.editorType ?: return
+
         if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.CREATE_POST) {
             DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
                 if (items.isNotEmpty()) {
@@ -107,7 +109,8 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     @MainThread
     fun onUserInput(action: EditorInputAction) {
         val parts = editorLiveData.value?.parts ?: ArrayList()
-        editorLiveData.value = EditorState(parts = mTextProcessor.processInput(parts, action),
+        val result = mTextProcessor.processInput(parts, action)
+        editorLiveData.value = EditorState(parts = result,
                 title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf())
     }

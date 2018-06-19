@@ -74,6 +74,7 @@
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler"
+                    android:descendantFocusability="beforeDescendants"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp" />
@@ -153,10 +154,10 @@
                 android:background="@drawable/btn_editor_bottom"
                 app:srcCompat="@drawable/ic_format_list_bulleted_24dp" />
 
-            <android.support.v7.widget.AppCompatImageButton
+            <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_link"
                 style="@style/BottomButtonStyle"
-
+                android:background="@drawable/btn_editor_bottom"
                 app:srcCompat="@drawable/ic_link_24dp" />
 
             <android.support.v7.widget.AppCompatImageButton
