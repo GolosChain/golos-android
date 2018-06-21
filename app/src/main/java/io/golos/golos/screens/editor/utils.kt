@@ -15,6 +15,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 fun Editable.slice(slicePoint: Int): Pair<Editable, Editable> {
@@ -72,24 +73,63 @@ fun compareGolosSpannables(first: Editable, second: Editable): Boolean {
     return isListEquals(firstSpannables, secondSpannables)
 }
 
+fun <T> Array<T>.toArrayList(): ArrayList<T> {
+    val list = ArrayList<T>(size)
+    forEach {
+        list.add(it)
+    }
+    return list
+}
+
+fun <T> Array<T>.toStringCustom(): String {
+
+    val iMax = size - 1
+    if (iMax == -1)
+        return "[]"
+
+    val b = StringBuilder()
+    b.append('[')
+    var i = 0
+    while (true) {
+        b.append(this[i].toString())
+        if (i == iMax)
+            return b.append(']').toString()
+        b.append(", ")
+        i++
+    }
+}
+
 fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
     if (start > end) return setOf()
-    if (end > length ) return setOf()
+    if (end > length) return setOf()
     val out = hashSetOf<EditorTextModifier>()
     val all = getSpans(start, end, Any::class.java)
     (0 until all.size).forEach {
 
-        if (all[it]::class.java == urlSpan) out.add(EditorTextModifier.LINK)
+        if (all[it]::class.java in urlSpans) out.add(EditorTextModifier.LINK)
     }
+    if (start != end && (
+                    (start > 0 && this[start - 1] == '"') &&
+                            (end < length && this[end] == '"'))) out.add(EditorTextModifier.QUOTATION_MARKS)
+
+    Timber.e("getEditorUsedSpans start = $start end = $end , all = ${Arrays.toString(all)}" +
+            "\n out = $out")
 
     return out
 
 }
 
-val urlSpan = URLSpan::class.java
+fun Editable.removeUrlSpans(start: Int, end: Int) {
+    val spans = getSpans(start, end, Any::class.java)
+    spans.forEach {
+        if (it in urlSpans) removeSpan(it)
+    }
+}
 
+private val urlSpans = setOf(URLSpan::class.java, KnifeURLSpan::class.java)
 
 private val appSpannables = setOf(
+        URLSpan::class.java,
         KnifeURLSpan::class.java,
         KnifeBulletSpan::class.java,
         KnifeQuoteSpan::class.java)

@@ -55,6 +55,7 @@ interface EditorAdapterInteractions {
 
 class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var mHashes = hashMapOf<Int, Int>()
 
     var parts: ArrayList<EditorPart> = ArrayList()
         set(value) {
@@ -67,19 +68,24 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                 override fun getOldListSize() = field.size
                 override fun getNewListSize() = value.size
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    val old = field[oldItemPosition]
                     val new = value[newItemPosition]
-                    return old == new
+                    return mHashes[oldItemPosition] == new.hashCode()
                 }
             }).dispatchUpdatesTo(this)
             field = value
+            field.forEachIndexed { i, part ->
+                mHashes[i] = part.hashCode()
+            }
 
         }
     var textModifiers: Set<EditorTextModifier> = hashSetOf()
         set(value) {
             field = value
             (0 until parts.size).forEach {
-                if (parts[it] is EditorTextPart) notifyItemChanged(it)
+                if ((parts[it] as? EditorTextPart)?.isFocused() == true) {
+                    Timber.e("notifyItemChanged $it")
+                    notifyItemChanged(it)
+                }
             }
         }
 
@@ -104,7 +110,6 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                             }
                     interactor?.onEdit(parts)
                 }, { _, _ ->
-
                     interactor?.onCursorChange(parts)
                 },
                         position == 0,
@@ -127,6 +132,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        Timber.e("onCreateViewHolder")
         return when (viewType) {
             0 -> EditorEditTextViewHolder(R.layout.vh_edit_text, parent)
             1 -> EditorImageViewHolder(parent)
@@ -140,7 +146,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     fun onRequestFocus(mRecycler: RecyclerView) {
-
+        Timber.e("onRequestFocus")
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)

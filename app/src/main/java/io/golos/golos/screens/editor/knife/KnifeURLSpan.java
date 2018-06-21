@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.text.TextPaint;
 import android.text.style.URLSpan;
 
-public class KnifeURLSpan extends URLSpan {
+public class KnifeURLSpan extends URLSpan  {
     private int linkColor = 0;
     private boolean linkUnderline = true;
 

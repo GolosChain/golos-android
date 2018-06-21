@@ -18,8 +18,10 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
+import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.URLSpan
 import android.widget.Button
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -36,6 +38,7 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.LinkDialogInterface
 import io.golos.golos.screens.widgets.dialogs.SendLinkDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 
@@ -77,6 +80,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     private lateinit var mBottomButtons: EditorBottomViewHolder
     private var mMode: EditorMode? = null
     private var mProgressDialog: Dialog? = null
+    private val mHandler = Handler()
+    private var mSavedCursor: Pair<Int, Int>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,56 +185,116 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         }
     }
 
-    override fun submit(linkName: String, linkAddress: String) {
-        if (linkAddress.matches(Regexps.anyImageLink)) {
-            mViewModel.onUserInput(EditorInputAction.InsertAction(
-                    EditorImagePart(imageName = linkName, imageUrl = linkAddress)))
-        } else {
-            if (linkAddress.isNullOrEmpty()) return
-            val spannableString = SpannableStringBuilder.valueOf(linkName)
-            spannableString.setSpan(KnifeURLSpan(formatUrl(linkAddress),
-                    getColorCompat(R.color.blue_light), true),
-                    0,
-                    linkName.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    override fun onLinkSubmit(linkName: String, linkAddress: String) {
+        Timber.e("onLinkSubmit linkName = $linkName linkAddress = $linkAddress")
+        if (linkAddress.isNullOrEmpty()) return
+        val linkAddress = if (linkAddress.matches(Regexps.anyImageLink)) linkAddress else formatUrl(linkAddress)
+
+        val spannableString = SpannableStringBuilder.valueOf(linkName)
+        spannableString.setSpan(KnifeURLSpan(linkAddress,
+                getColorCompat(R.color.blue_light), true),
+                0,
+                linkName.length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        val focusedPart = mViewModel.editorLiveData.value?.parts?.findLast { it.isFocused() } as? EditorTextPart
+        val startPointer = focusedPart?.startPointer ?: 0
+        val endPointer = focusedPart?.endPointer ?: 0
+
+        if (startPointer == endPointer) {
             mViewModel.onUserInput(EditorInputAction.InsertAction(
                     EditorTextPart(text = spannableString)))
-        }
-    }
+        } else {
+            focusedPart?.text?.removeUrlSpans(startPointer, endPointer)
+            focusedPart?.text?.setSpan(KnifeURLSpan(linkAddress,
+                    getColorCompat(R.color.blue_light), true), startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
+            validateBottomButtonSelections(mViewModel.editorLiveData.value?.parts
+                    ?: return)
+            mSavedCursor = null
 
-    override fun onDismissLinkDialog() {
-        mRecycler.requestFocus()
+        }
         mAdapter.onRequestFocus(mRecycler)
     }
 
+    override fun onDismissLinkDialog() {
+        mRecycler.isFocusable = true
+        mAdapter.onRequestFocus(mRecycler)
+        mSavedCursor = null
+    }
+
     override fun onCursorChange(parts: List<EditorPart>) {
+        if (mSavedCursor != null) {
+            val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
+            if (focusedPart != null && mSavedCursor!!.second <= focusedPart.text.length) Selection.setSelection(//for unknown reason cursor
+                    // begin chaotically float in edit text, while edititng it inners, sh we fix it in place during edit
+                    focusedPart.text, mSavedCursor!!.first,
+                    mSavedCursor!!.second)
+        }
+        validateBottomButtonSelections(parts)
+    }
+
+    private fun validateBottomButtonSelections(parts: List<EditorPart>) {
+        Timber.e("validateBottomButtonSelections saved cursor = $mSavedCursor")
+        mHandler.removeCallbacksAndMessages(null)//discard scheduled changes, only apply for fresh one selection
         val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
+        Timber.e("focusedPart = $focusedPart, all spans = " +
+                "${focusedPart?.text?.getSpans(0, focusedPart.text.length, Any::class.java)?.toStringCustom()} ")
         if (focusedPart != null) {
-            if (focusedPart.text.isNotEmpty() &&
-                    focusedPart.endPointer > 0 &&//if cursor somehwere in the middle, and text is not empty
-                    focusedPart.endPointer < focusedPart.text.length) {
-                val allSpans = focusedPart.text.getEditorUsedSpans(focusedPart.endPointer - 1, focusedPart.endPointer)
-                if (allSpans.isEmpty()) {//ig text has not modifiers
+            mHandler.postDelayed({
+                val start = focusedPart.startPointer
+                val endpointer = focusedPart.endPointer
+
+                val allSpans = focusedPart.text.getEditorUsedSpans(start, endpointer)
+                if (allSpans.isEmpty()) {//text has no modifiers
                     mBottomButtons.unSelectAll()
                 } else {
-                    allSpans.forEach {
+                    allSpans.onEach {
                         mBottomButtons.setSelected(it, true)//select all found modifiers in bottom bar
-                    }
-                    val remainings = EditorTextModifier.remaining(allSpans)
-                    remainings.forEach {
+                    }.let {
+                        EditorTextModifier.remaining(allSpans)
+                    }.forEach {
                         mBottomButtons.setSelected(it, false)//unselect all remainings modifiers in bottom bar
                     }
                 }
-            } else if (focusedPart.endPointer >= focusedPart.text.length) mBottomButtons.unSelectAll()//if pointer is behind text -
-            // unselect all buttons
+            }, 250)
         }
     }
 
     override fun onClick(clickedButton: EditorTextModifier, allButtons: Set<EditorTextModifier>) {
+        val selectedModifiers = mBottomButtons.getSelectedModifier()
+        val focusedPart = mViewModel.editorLiveData.value?.parts?.findLast { it.isFocused() } as? EditorTextPart
+        val startPointer = focusedPart?.startPointer ?: 0
+        val endPointer = focusedPart?.endPointer ?: 0
+
+        Timber.e("on click ${focusedPart}")
         when (clickedButton) {
             EditorTextModifier.LINK -> {
-                val fr = SendLinkDialog.getInstance()
-                fr.show(supportFragmentManager, null)
+                if (!selectedModifiers.contains(EditorTextModifier.LINK)) {
+                    val fr: SendLinkDialog
+                    fr = if (startPointer == endPointer) {// if no text selected and user taped on "link" button
+                        SendLinkDialog.getInstance()
+                    } else {
+                        focusedPart ?: return
+                        val text = focusedPart.text.subSequence(startPointer, endPointer)
+                        mSavedCursor = Pair(startPointer, endPointer)
+                        SendLinkDialog.getInstance(text.toString())
+                    }
+                    fr.show(supportFragmentManager, null)
+                } else {//if user selected text with url in it
+                    /* mAdapter.textModifiers = selectedModifiers - EditorTextModifier.LINK*/
+                    focusedPart ?: return
+                    val spans =
+                            focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java)
+                    Timber.e("befor removing spans, ${focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java).toStringCustom()}")
+                    spans.forEach {
+                        focusedPart.text.removeSpan(it)
+                    }
+                    Timber.e("after removing spans, ${focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java).toStringCustom()}")
+                    mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
+                    validateBottomButtonSelections(mViewModel.editorLiveData.value?.parts
+                            ?: return)
+                }
             }
             EditorTextModifier.INSERT_IMAGE -> {
                 val readExternalPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
@@ -251,7 +316,23 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 }
             }
             EditorTextModifier.QUOTATION_MARKS -> {
+                if (focusedPart == null) return
+                mSavedCursor = Pair(startPointer, endPointer)
 
+                if (!mBottomButtons.getSelectedModifier().contains(EditorTextModifier.QUOTATION_MARKS)) {
+                    focusedPart.text.insert(startPointer, "\"")
+                    focusedPart.text.insert(endPointer + 1, "\"")
+                    focusedPart.startPointer += 1
+                    focusedPart.endPointer += 1
+                } else {
+                    val selected = focusedPart.text.subSequence(startPointer, endPointer)
+                    Timber.e("selected = $selected")
+                    mSavedCursor = Pair(startPointer, endPointer - 1)
+                    focusedPart.text.replace(startPointer - 1, endPointer + 1, selected)
+                    focusedPart.startPointer -= 1
+                }
+                mSavedCursor = null
+                mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
             }
         }
     }

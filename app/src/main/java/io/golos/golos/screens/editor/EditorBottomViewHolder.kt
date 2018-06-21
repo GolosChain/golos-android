@@ -26,6 +26,8 @@ class EditorBottomViewHolder(activity: EditorActivity) : View.OnClickListener {
     private val mAll = createState()
     var bottomButtonClickListener: BottomButtonClickListener? = null
 
+    fun getSelectedModifier() = mAll.toSet()
+
 
     init {
         mInsertImageBtn.setOnClickListener(this)
@@ -38,7 +40,6 @@ class EditorBottomViewHolder(activity: EditorActivity) : View.OnClickListener {
         mTitleBtn.setOnClickListener(this)
         mLinkButton.isSelectibilityTurnedOn = false
         mQuotationsBtn.isSelectibilityTurnedOn = false
-
     }
 
     private fun createState(): EnumSet<EditorTextModifier> {
@@ -95,6 +96,8 @@ class EditorBottomViewHolder(activity: EditorActivity) : View.OnClickListener {
     fun performClick(button: EditorTextModifier) = getButtonType(button).performClick()
 
     fun setSelected(button: EditorTextModifier, isSelected: Boolean) {
+        if (button == EditorTextModifier.INSERT_IMAGE) return//insert image cannot be selected
+
         val view = getButtonType(button)
         view.isSelected = isSelected
         if (isSelected) mAll.add(button)

@@ -1,10 +1,12 @@
 package io.golos.golos.screens.editor
 
+import android.text.Selection
 import junit.framework.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 26/10/2017.
@@ -111,12 +113,24 @@ class TextProcessorTest {
         assertFalse(out[1].isFocused())
         assertTrue(out[2].isFocused())
 
-        (out as MutableList<EditorPart>)[2] = EditorTextPart(text = "test".asSpannable(), startPointer = 4,endPointer = 4)
+        (out as MutableList<EditorPart>)[2] = EditorTextPart(text = "test".asSpannable(), startPointer = 4, endPointer = 4)
 
         out = mTextProcessor.processInput(out, EditorInputAction.InsertAction(EditorImagePart(
                 imageName = "name", imageUrl = "imageUrl")))
         assertEquals("must be 5 part", 5, out.size)
         assertTrue((out[4] as EditorTextPart).text.toString().isEmpty())
+
+
+        val spannable = "123 123".asSpannable()
+        Selection.setSelection(spannable, 0, 3)
+        out = mTextProcessor.processInput(listOf(EditorTextPart(text = spannable, startPointer = 0, endPointer = 3)),
+                EditorInputAction.ReplaceAction("45".asSpannable()))
+
+
+        assertEquals("must be 1 part", 1, out.size)
+        assertEquals("result must be 45 123", "45 123", (out[0] as EditorTextPart).text.toString())
+        assertEquals("must retain start selection", 0, (out[0] as EditorTextPart).startPointer)
+        assertEquals("must retain end selection", 2, (out[0] as EditorTextPart).endPointer)
 
         /* out = mTextProcessor.processInput(out, Edit orInputAction.InsertAction(EditorTextPart("lll", null)))
          assertEquals("initial 1 edittext", 1, out.size)

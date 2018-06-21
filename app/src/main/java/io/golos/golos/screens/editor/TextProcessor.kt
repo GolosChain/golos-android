@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor
 
+import android.text.Editable
 import android.text.SpannableStringBuilder
-import timber.log.Timber
 import java.util.*
 
 /**
@@ -57,6 +57,13 @@ object TextProcessor {
                             out.removeAt(action.fastDelete)
                         }
 
+                    }
+                    is EditorInputAction.ReplaceAction -> {
+                        out.addAll(parts)
+                        if (selectedPart is EditorTextPart) {
+                            selectedPart.text.replace(selectedPart.startPointer, selectedPart.endPointer, action.with)
+                            selectedPart.endPointer = selectedPart.startPointer + action.with.length
+                        }
                     }
                 }
 
@@ -184,6 +191,7 @@ object TextProcessor {
 }
 
 sealed class EditorInputAction {
-  data  class InsertAction(val part: EditorPart) : EditorInputAction()
-   data class DeleteAction(val fastDelete: Int?) : EditorInputAction()
+    data class InsertAction(val part: EditorPart) : EditorInputAction()
+    data class DeleteAction(val fastDelete: Int?) : EditorInputAction()
+    data class ReplaceAction(val with: Editable) : EditorInputAction()
 }

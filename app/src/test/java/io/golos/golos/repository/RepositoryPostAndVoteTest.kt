@@ -513,4 +513,12 @@ class RepositoryPostAndVoteTest {
         repo.subscribeOnUserBlog("med", { _, _ -> })
 
     }
+
+    @Test
+    fun getUserComments() {
+        val filter =  StoryFilter(userNameFilter = "dimzec89")
+        val newStories = repo.getStories(FeedType.COMMENTS, filter)
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, filter, null , null)
+        println(newStories)
+    }
 }

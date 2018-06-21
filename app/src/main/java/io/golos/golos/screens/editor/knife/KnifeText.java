@@ -883,6 +883,8 @@ public class KnifeText extends AppCompatEditText implements TextWatcher {
         this.mSelectionListener = mSelectionListener;
     }
 
+
+
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         super.onSelectionChanged(selStart, selEnd);
