@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -21,6 +22,7 @@ import android.support.v7.widget.Toolbar
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.widget.Button
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -267,7 +269,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         val startPointer = focusedPart?.startPointer ?: 0
         val endPointer = focusedPart?.endPointer ?: 0
 
-        Timber.e("on click ${focusedPart}")
+        Timber.e("on click ${focusedPart}, selected ${mBottomButtons.getSelectedModifier()}")
         when (clickedButton) {
             EditorTextModifier.LINK -> {
                 if (!selectedModifiers.contains(EditorTextModifier.LINK)) {
@@ -333,6 +335,67 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 }
                 mSavedCursor = null
                 mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
+            }
+            EditorTextModifier.STYLE_BOLD -> {
+                if (focusedPart == null) return
+                mSavedCursor = Pair(startPointer, endPointer)
+                if (mBottomButtons.getSelectedModifier().contains(EditorTextModifier.STYLE_BOLD)) {//if user tapped at Bold, but text not bold
+
+                    Timber.e("adding spans")
+                    if (startPointer != endPointer)//if we selected text
+                        focusedPart.text.setSpan(StyleSpan(Typeface.BOLD), startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    else if (startPointer == endPointer
+                            && startPointer == focusedPart.text.length)//if we are athe the end
+                    {
+                        Timber.e("we at the end")
+                        if (focusedPart.text.isEmpty()) {
+                            focusedPart.text.append(' ')
+                            focusedPart.endPointer += 1
+                            mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts?: listOf())
+                        }
+
+                        focusedPart.text.setSpan(StyleSpan(Typeface.BOLD), startPointer, endPointer, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                    } else if (startPointer == endPointer && startPointer != focusedPart.text.length)//if we somewhere on in the middle
+                    {
+                        if (startPointer == 0 ||
+                                /**if we at first char*/
+                                focusedPart.text[startPointer] == ' ' || // if we at start/end of word
+                                focusedPart.text[startPointer - 1] == ' ') {
+                            Timber.e("focused start/end of text")
+                            focusedPart.text.setSpan(StyleSpan(Typeface.BOLD), startPointer, endPointer, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                        } else {//if we are at the the middle of the word
+                            val startOfWord = (startPointer downTo 0).find { focusedPart.text[it] == ' ' || focusedPart.text[it] == '.' }
+                                    ?: 0
+                            val endOfWord = (startPointer until focusedPart.text.length).find { focusedPart.text[it] == ' ' || focusedPart.text[it] == '.' }
+                                    ?: focusedPart.text.length
+
+                            Timber.e("we at the middle of word start = $startOfWord end of word = $endOfWord")
+                            focusedPart.text.setSpan(StyleSpan(Typeface.BOLD), startOfWord, endOfWord, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        }
+                    }
+                } else {//deleting bold text
+                    val spans = focusedPart
+                            .text
+                            .getSpans(startPointer, endPointer, StyleSpan::class.java)
+                            .filter { it.style == Typeface.BOLD }
+
+                    if (startPointer == endPointer && startPointer != 0 && focusedPart.text[startPointer - 1] == ' ') {//if we are behind text, and span stretched for us
+                        if (spans.isEmpty()) return
+                        Timber.e("behind text")
+                        val span = spans[0]
+                        val spanStart = focusedPart.text.getSpanStart(span)
+                        val spanEnd = focusedPart.text.getSpanEnd(span)
+                        focusedPart.text.removeSpan(span)
+                        focusedPart.text.setSpan(span, spanStart, spanEnd - 1, focusedPart.text.getSpanFlags(span))
+                    } else {
+                        spans.forEach {
+                            Timber.e("removing span")
+                            focusedPart.text.removeSpan(it)
+                        }
+                    }
+                }
+                mSavedCursor = null
+                onCursorChange(mViewModel.editorLiveData.value?.parts ?: return)
             }
         }
     }

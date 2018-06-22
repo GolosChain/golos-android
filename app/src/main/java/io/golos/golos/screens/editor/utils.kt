@@ -2,9 +2,11 @@ package io.golos.golos.screens.editor
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Typeface
 import android.support.annotation.WorkerThread
 import android.text.Editable
 import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -62,6 +64,8 @@ fun compareGolosSpannables(first: Editable, second: Editable): Boolean {
         it::class.java in appSpannables
     }.toArrayList()
 
+    Timber.e("compareGolosSpannables, first = $firstSpannables second $secondSpannables")
+
     fun isListEquals(first: List<Any>, second: List<Any>): Boolean {
         if (first.size != second.size) return false
         (0 until first.size)
@@ -104,9 +108,13 @@ fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
     if (end > length) return setOf()
     val out = hashSetOf<EditorTextModifier>()
     val all = getSpans(start, end, Any::class.java)
-    (0 until all.size).forEach {
 
-        if (all[it]::class.java in urlSpans) out.add(EditorTextModifier.LINK)
+    (0 until all.size).forEach {
+        val span = all[it]
+        if (span::class.java in urlSpans ) out.add(EditorTextModifier.LINK)
+        else if (span is StyleSpan) {
+            if (span.style == Typeface.BOLD) out.add(EditorTextModifier.STYLE_BOLD)
+        }
     }
     if (start != end && (
                     (start > 0 && this[start - 1] == '"') &&
@@ -132,5 +140,6 @@ private val appSpannables = setOf(
         URLSpan::class.java,
         KnifeURLSpan::class.java,
         KnifeBulletSpan::class.java,
-        KnifeQuoteSpan::class.java)
+        KnifeQuoteSpan::class.java,
+        StyleSpan::class.java)
 

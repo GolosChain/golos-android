@@ -30,7 +30,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     var state: EditorAdapterTextPart? = null
         set(value) {
             if (value == null) return
-            Timber.e("setting new state ${state?.textPart}")
+            Timber.e("setting new state ${value.textPart}")
             mEditText.removeTextChangedListener(this)
             mEditText.setSelectionListener(null)
 
@@ -47,6 +47,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                  mEditText.post {
                      Timber.e("setting new selection state = ${value.textPart}\n start = ${start} " +
                              "end = ${end}")
+                     if (start > -1 && end > -1)
                      mEditText.setSelection(start, end)
                  }
             }
@@ -149,7 +150,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     override fun afterTextChanged(s: Editable?) {
         val currentState = state ?: return
         s ?: return
-        Timber.e("afterTextChanged ${Arrays.toString(s.getSpans(0, mEditText.selectionEnd, Any::class.java))}")
+        Timber.e("afterTextChanged s = $s ${Arrays.toString(s.getSpans(0, mEditText.selectionEnd, Any::class.java))}")
 
         if (mEditText.selectionStart > currentState.textPart.startPointer) currentState.textPart.startPointer = mEditText.selectionStart
         if (mEditText.selectionEnd > currentState.textPart.endPointer) currentState.textPart.endPointer = mEditText.selectionEnd

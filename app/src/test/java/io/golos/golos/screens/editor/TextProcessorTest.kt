@@ -6,7 +6,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 26/10/2017.
@@ -18,6 +17,7 @@ class TextProcessorTest {
     @Before
     fun before() {
         mTextProcessor = TextProcessor
+
     }
 
     @Test
@@ -232,5 +232,13 @@ class TextProcessorTest {
                    pointerPosition = null))
            out.add(EditorTextPart(text = "", pointerPosition = null))
            return out*/
+    }
+
+    @Test
+    fun testGetSpannable() {
+        val test = "qq".asSpannable()
+        test.forEachIndexed({ index, char ->
+            println("index = $index char = $char")
+        })
     }
 }
