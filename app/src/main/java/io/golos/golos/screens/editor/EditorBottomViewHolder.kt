@@ -3,6 +3,7 @@ package io.golos.golos.screens.editor
 import android.view.View
 import io.golos.golos.R
 import io.golos.golos.screens.editor.views.CheckableButton
+import timber.log.Timber
 import java.util.*
 
 

@@ -28,7 +28,7 @@ public class KnifeBulletSpan extends BulletSpan {
     private static final int DEFAULT_COLOR = 0;
     private static final int DEFAULT_RADIUS = 3;
     private static final int DEFAULT_GAP_WIDTH = 2;
-    private static Path bulletPath = null;
+    protected static Path bulletPath = null;
 
     private int bulletColor = DEFAULT_COLOR;
     private int bulletRadius = DEFAULT_RADIUS;
@@ -45,6 +45,18 @@ public class KnifeBulletSpan extends BulletSpan {
         this.bulletColor = src.readInt();
         this.bulletRadius = src.readInt();
         this.bulletGapWidth = src.readInt();
+    }
+
+    public int getBulletColor() {
+        return bulletColor;
+    }
+
+    public int getBulletRadius() {
+        return bulletRadius;
+    }
+
+    public int getBulletGapWidth() {
+        return bulletGapWidth;
     }
 
     @Override

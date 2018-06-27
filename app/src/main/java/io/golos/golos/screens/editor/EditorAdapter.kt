@@ -82,8 +82,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         set(value) {
             field = value
             (0 until parts.size).forEach {
-                if ((parts[it] as? EditorTextPart)?.isFocused() == true) {
-                    Timber.e("notifyItemChanged $it")
+                if ((parts[it] is EditorTextPart)) {
                     notifyItemChanged(it)
                 }
             }

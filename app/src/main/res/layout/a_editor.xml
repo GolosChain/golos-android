@@ -134,10 +134,10 @@
                 android:background="@drawable/btn_editor_bottom"
                 app:srcCompat="@drawable/ic_format_quote" />
 
-            <android.support.v7.widget.AppCompatImageButton
+            <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_quote"
                 style="@style/BottomButtonStyle"
-
+                android:background="@drawable/btn_editor_bottom"
                 app:srcCompat="@drawable/ic_reply_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton

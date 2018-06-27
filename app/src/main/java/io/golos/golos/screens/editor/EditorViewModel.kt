@@ -133,6 +133,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
     @MainThread
     fun onTextChanged(parts: List<EditorPart>) {
+        Timber.e("onTextChanged")
         editorLiveData.value = EditorState(parts = parts, title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf())
     }
