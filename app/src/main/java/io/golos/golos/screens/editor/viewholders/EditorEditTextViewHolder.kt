@@ -5,16 +5,12 @@ import android.text.Editable
 import android.text.Spannable
 import android.text.TextWatcher
 import android.text.style.LeadingMarginSpan
-import android.text.style.MetricAffectingSpan
 import android.text.style.QuoteSpan
-import android.text.style.StyleSpan
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import io.golos.golos.R
 import io.golos.golos.screens.editor.*
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
-import io.golos.golos.screens.editor.knife.KnifeText
 import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.widgets.SelectionAwareEditText
@@ -23,7 +19,7 @@ import timber.log.Timber
 
 class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         GolosViewHolder(res, parent), TextWatcher, View.OnFocusChangeListener, SelectionAwareEditText.SelectionListener {
-    private var mEditText: KnifeText = itemView.findViewById(R.id.et)
+    private var mEditText: SelectionAwareEditText = itemView.findViewById(R.id.et)
     private val whiteSpace = Character.valueOf('\u0020')
     private var ignoreTextChange = false
     private var ignoreOnBind = false
@@ -32,7 +28,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     init {
         mEditText.setSelectionListener(this)
         mEditText.addTextChangedListener(this)
-        editor = mEditText
+        // mEditText.onCreateInputConnection(object : EditorInfo() {}.also { it.inputType = EditorInfo.TYPE_NULL })
     }
 
     var state: EditorAdapterTextPart? = null
@@ -53,12 +49,16 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 Timber.e("setting new text \nold = ${mEditText.text}" +
                         " new = ${textPart}")
                 mEditText.setTextKeepState(textPart.text)
+
+
+
                 textChanged = true
                 var start = value.textPart.startPointer
                 var end = value.textPart.endPointer
                 mEditText.post {
                     Timber.e("setting new selection state = ${value.textPart}\n start = ${start} " +
                             "end = ${end}")
+
                     if (start > mEditText.text.length) start = mEditText.length()
                     if (end > mEditText.text.length) end = mEditText.length()
 
@@ -95,48 +95,6 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     mEditText.hint = hint
                 }
             }
-            /* if (mEditText.isFocused) {
-
-                 val modifiers = value.modifiers
-                 val selectionStart = mEditText.selectionStart
-                 val selectionEnd = mEditText.selectionEnd
-                 val oldHash = mEditText.text.hashCode()
-                 Timber.e("edittext is focused ${value.textPart.text}\n" +
-                         "selectionStart = $selectionStart selectioneEnd = $selectionEnd")
-                 if (modifiers.contains(EditorTextModifier.QUOTATION_MARKS)) {
-                     if (selectionEnd == selectionEnd) mEditText.text.insert(selectionEnd, "\"\"")
-                     else {
-                         mEditText.text.insert(selectionStart, "\"")
-                         mEditText.text.insert(selectionEnd, "\"")
-                     }
-                 } else {
-                     if (mEditText.text.isNotEmpty() && selectionStart != 0 && mEditText.text[selectionStart - 1] == '"') {
-                         mEditText.text.removeRange(selectionStart - 1, selectionStart)
-                         Timber.e("deleting pre quotation marj")
-                     }
-                     if (mEditText.text.isNotEmpty() &&
-                             selectionEnd != 0 &&
-                             mEditText.text[selectionEnd - 1] == '"') {
-                         mEditText.text.removeRange(selectionEnd - 1, selectionEnd)
-                         Timber.e("deleting post quotation marj")
-                     }
-                 }
-
-                 if (!modifiers.contains(EditorTextModifier.LINK)) {
-                     Timber.e("unlinking")
-                     mEditText.link(null)
-                 }
-
-                 val newHash = mEditText.text.hashCode()
-                 if (oldHash != newHash) {
-                     mEditText.post({
-                         Timber.e("modificators changed ")
-
-                         afterTextChanged(mEditText.text)
-                         state?.onFocusChanged?.invoke(this, true)
-                     })
-                 }
-             }*/
             Timber.e("end on bind")
             ignoreTextChange = false
             mEditText.setSelectionListener(this)
@@ -152,8 +110,8 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             if (mEditText.text.length == 0 || mEditText.text[mEditText.text.lastIndex] != whiteSpace) {
                 Timber.e("edittext is empty or last is not whitespace")
 
-                mEditText.text.append(whiteSpace)
-                mEditText.setSelection(mEditText.selectionStart - 1)
+                //    mEditText.text.append(whiteSpace)
+                //    mEditText.setSelection(mEditText.selectionStart - 1)
             }
 
 
@@ -176,8 +134,10 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
         Timber.e("afterTextChanged s = $s  selected mods = ${currentState.modifiers}")
 
-        ignoreOnBind = true
+        //      if (s.length == 1)s.setSpan(newBoldSpan(),1,1, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
 
+        ignoreOnBind = true
+/*
         if (s.isNotEmpty()) {
             val spans = s.getSpans(mEditText.selectionStart - 1, mEditText.selectionEnd, MetricAffectingSpan::class.java)
             if (s.isNotEmpty() && s.length > mLastText.length) {
@@ -191,7 +151,8 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     }
                 }
             }
-        }
+        }*/
+        s.printLeadingMarginSpans(mEditText.selectionEnd)
         if (isLastEditAppendedSmth() && s.isLastCharLineBreaker()) {
             val spans = s.getSpans(s.lastIndex, s.lastIndex, LeadingMarginSpan::class.java)
             spans.forEach {
@@ -222,14 +183,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             }
         }
 
-        val spans = s.getSpans(0, s.length, StyleSpan::class.java)
-        if (spans.isNotEmpty()) {
-            spans.forEach {
-
-                Timber.e("span = $it \n start = ${s.getSpanStart(it)} end = ${s.getSpanEnd(it)} " +
-                        "flag is ${s.getSpanFlags(it)}")
-            }
-        }
+        s.printStyleSpans(mEditText.selectionStart, mEditText.selectionEnd)
 
 
         if (mEditText.selectionStart > currentState.textPart.startPointer) currentState.textPart.startPointer = mEditText.selectionStart
@@ -300,9 +254,5 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             state.textPart.endPointer > state.textPart.text.length -> state.textPart.text.length
             else -> state.textPart.endPointer
         }
-    }
-
-    companion object {
-        public lateinit var editor: EditText
     }
 }

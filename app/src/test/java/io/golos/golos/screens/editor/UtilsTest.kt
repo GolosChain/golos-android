@@ -10,11 +10,12 @@ class UtilsTest {
 
     @Test
     fun testInTheWord() {
-        Assert.assertFalse(" a".asSpannable().isInTheWord(0))
-        Assert.assertTrue(" ab".asSpannable().isInTheWord(1))
-        Assert.assertTrue(" ab".asSpannable().isInTheWord(2))
-        Assert.assertTrue(" ab".asSpannable().isInTheWord(3))
-        Assert.assertFalse(" ab ".asSpannable().isInTheWord(4))
+        Assert.assertFalse(" a".asSpannable().isWithinWord(0))
+        Assert.assertTrue(" ab".asSpannable().isWithinWord(1))
+        Assert.assertTrue(" ab".asSpannable().isWithinWord(2))
+        Assert.assertFalse(" ab".asSpannable().isWithinWord(3))
+        Assert.assertFalse(" ab ".asSpannable().isWithinWord(4))
+        Assert.assertFalse("dfgdfg".asSpannable().isWithinWord(6))
     }
 
     @Test
@@ -27,11 +28,12 @@ class UtilsTest {
         Assert.assertEquals(4, "123 456".asSpannable().getStartOfWord(4))
         Assert.assertEquals(4, "123 456".asSpannable().getStartOfWord(5))
         Assert.assertEquals(4, "123 456".asSpannable().getStartOfWord(6))
-        Assert.assertEquals(2, " \"er\"".asSpannable().getStartOfWord(4))
+        Assert.assertEquals(1, " \"er\"".asSpannable().getStartOfWord(4))
     }
 
     @Test
     fun testGetEndOfWord() {
+        println("is part of word = ${'"'.isPartOfWord()}")
         Assert.assertEquals(-1, " a ".asSpannable().getEndOfWord(0))
         Assert.assertEquals(2, " ab ".asSpannable().getEndOfWord(1))
         Assert.assertEquals(2, " ab ".asSpannable().getEndOfWord(2))
@@ -41,7 +43,7 @@ class UtilsTest {
         Assert.assertEquals("123 456".lastIndex, "123 456".asSpannable().getEndOfWord(5))
         Assert.assertEquals("123 456".lastIndex, "123 456".asSpannable().getEndOfWord(6))
         Assert.assertEquals("123 456 ".lastIndex - 1, "123 456 ".asSpannable().getEndOfWord(6))
-        Assert.assertEquals(3, " \"er\"".asSpannable().getEndOfWord(4))
+        Assert.assertEquals(4, " \"er\"".asSpannable().getEndOfWord(4))
     }
 
     @Test
@@ -63,12 +65,12 @@ class UtilsTest {
 
         startOfWord = spannable.getStartOfWord(10)
         endOfWord = spannable.getEndOfWord(10)
-        Assert.assertEquals("123", spannable.subSequence(startOfWord, endOfWord + 1).toString())
+        Assert.assertEquals("\"123\"", spannable.subSequence(startOfWord, endOfWord + 1).toString())
 
         spannable = " \"er\"".asSpannable()
         startOfWord = spannable.getStartOfWord(4)
         endOfWord = spannable.getEndOfWord(4)
-        Assert.assertEquals("er", spannable.subSequence(startOfWord, endOfWord + 1).toString())
+        Assert.assertEquals("\"er\"", spannable.subSequence(startOfWord, endOfWord + 1).toString())
     }
 
     @Test

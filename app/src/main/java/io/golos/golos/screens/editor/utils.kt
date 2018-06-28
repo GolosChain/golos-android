@@ -7,6 +7,7 @@ import android.graphics.Typeface
 import android.support.annotation.DimenRes
 import android.support.annotation.WorkerThread
 import android.text.Editable
+import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.*
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
@@ -119,11 +120,29 @@ fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
 
     (0 until all.size).forEach {
         val span = all[it]
-        if (span::class.java in urlSpans) out.add(EditorTextModifier.LINK)
-        else if (span is StyleSpan) {
-            if (span.style == Typeface.BOLD) out.add(EditorTextModifier.STYLE_BOLD)
-        } else if (span is AbsoluteSizeSpan) out.add(EditorTextModifier.TITLE)
-        else if (span is KnifeQuoteSpan) out.add(EditorTextModifier.QUOTATION)
+        if (span::class.java in urlSpans) {
+            if (isSpanTouchesEndPointWithExclusiveSpan(span, start) || isSpanTouchesEndPointWithExclusiveSpan(span, end) && start == end) {
+                //if selection touches span border with exlclusive border, not touch it
+            } else {
+                out.add(EditorTextModifier.LINK)
+            }
+        } else if (span is StyleSpan) {
+
+            if (span.style == Typeface.BOLD) {
+                if (isSpanTouchesEndPointWithExclusiveSpan(span, start) || isSpanTouchesEndPointWithExclusiveSpan(span, end) && start == end) {
+                    //if selection touches span border with exlclusive border, not touch it
+                } else {
+                    out.add(EditorTextModifier.STYLE_BOLD)
+                }
+            }
+
+        } else if (span is AbsoluteSizeSpan) {
+            if (isSpanTouchesEndPointWithExclusiveSpan(span, start) || isSpanTouchesEndPointWithExclusiveSpan(span, end) && start == end) {
+                //if selection touches span border with exlclusive border, not touch it
+            } else {
+                out.add(EditorTextModifier.TITLE)
+            }
+        } else if (span is KnifeQuoteSpan) out.add(EditorTextModifier.QUOTATION)
         else if (span is BulletSpan) out.add(EditorTextModifier.LIST_BULLET)
         else if (span is NumberedMarginSpan) out.add(EditorTextModifier.LIST_NUMBERED)
     }
@@ -135,16 +154,45 @@ fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
 
 }
 
+fun Spannable.isSpanTouchesEndPointWithExclusiveSpan(span: Any, endPoint: Int): Boolean {
+    val spanFlags = getSpanFlags(span)
+    val spanEnd = getSpanEnd(span)
+    return spanEnd == endPoint && (spanFlags == INCLUSIVE_EXCLUSIVE || spanFlags == EXCLUSIVE_EXCLUSIVE)
+}
+
+fun Spannable.isSpanTouchesStartPointWithExclusiveSpan(span: Any, startPoint: Int): Boolean {
+    val spanFlags = getSpanFlags(span)
+    val spanStart = getSpanStart(span)
+    return spanStart == startPoint && (spanFlags == EXCLUSIVE_INCLUSIVE || spanFlags == EXCLUSIVE_EXCLUSIVE)
+}
+
+fun checkStartAndEnd(start: Int, end: Int): Boolean {
+    if (start > end) {
+        Timber.e("start > end, this should not happen")
+        return false
+    }
+    if (start == -1) {
+        Timber.e("start == - 1, this should not happen")
+        return false
+    }
+    if (end == -1) {
+        Timber.e("end == - 1, this should not happen")
+        return false
+    }
+
+    return true
+}
+
 fun CharSequence.isWordWrappedByQuotationMarks(pointerToWord: Int): Boolean {
-    if (!isInTheWord(pointerToWord)) return false
+    if (length == 0) return false
+    if (!isWithinWord(pointerToWord)) return false
 
     val startOfWord = getStartOfWord(pointerToWord)
     val endOfWord = getEndOfWord(pointerToWord)
 
-    if (startOfWord > 0 && endOfWord < lastIndex
-            && this[startOfWord - 1] == '"' && this[endOfWord + 1] == '"')
-        return true
-    return false
+    if (!checkStartAndEnd(startOfWord, endOfWord)) return false
+
+    return this[startOfWord] == '"' && this[endOfWord] == '"'
 }
 
 fun Editable.getZeroWhiteSpace() = "\u2063"
@@ -152,11 +200,9 @@ fun Editable.getZeroWhiteSpace() = "\u2063"
 fun Char.isQuotationMark() = this == '"'
 
 //|a a|b ab| _|sdg 123_456
-fun CharSequence.isInTheWord(pointer: Int): Boolean {
+fun CharSequence.isWithinWord(pointer: Int): Boolean {
     return if (length == 0) return false
     else if (pointer != length && this[pointer].isPartOfWord()) return true
-    else if (pointer > 0 && this[pointer - 1].isPartOfWord()) return true
-    else if (pointer == length && this[pointer - 1].isPartOfWord()) return true
     else if (pointer > 0 && pointer < length && this[pointer].isPartOfWord()) return true
     else return false
 
@@ -197,7 +243,7 @@ fun CharSequence.getStartAndEndPositionOfLinePointed(pointerPosition: Int): Pair
     return out
 }
 
-fun Char.isWordBreaker() = !this.isLetter() && !this.isDigit()
+fun Char.isWordBreaker() = !this.isLetter() && !this.isDigit() && this != '"'
 
 fun Char.isPartOfWord() = !isWordBreaker()
 
@@ -219,7 +265,7 @@ fun Editable.removeUrlSpans(start: Int, end: Int) {
 }
 
 fun CharSequence.getStartOfWord(pointerToTheMiddleOfWord: Int): Int {
-    if (!isInTheWord(pointerToTheMiddleOfWord)) return -1
+    if (!isWithinWord(pointerToTheMiddleOfWord)) return -1
     var pointerToTheMiddleOfWord = pointerToTheMiddleOfWord
     if (length == 0) return 0
     if (pointerToTheMiddleOfWord >= length) pointerToTheMiddleOfWord = lastIndex
@@ -237,8 +283,12 @@ fun CharSequence.getStartOfWord(pointerToTheMiddleOfWord: Int): Int {
             ?: 0
 }
 
-fun CharSequence.isEndOfEditable(pointerToPosition: Int): Boolean {
+fun CharSequence.isEndOf(pointerToPosition: Int): Boolean {
     return pointerToPosition >= this.trimEnd().length
+}
+
+fun CharSequence.isStartOf(pointerToPosition: Int): Boolean {
+    return pointerToPosition == 0
 }
 
 fun CharSequence.isEndOfLine(pointerToPosition: Int): Boolean {
@@ -250,8 +300,20 @@ fun CharSequence.isEndOfLine(pointerToPosition: Int): Boolean {
 
 fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
 
+fun Editable.printLeadingMarginSpans(pointerToPosition: Int) {
+    getSpans(pointerToPosition, pointerToPosition, LeadingMarginSpan::class.java)
+            .forEach {
+                Timber.e("$it start = ${getSpanStart(it)} end = ${getSpanEnd(it)} , flag  = ${getSpanFlags(it)}")
+            }
+}
+
+fun CharSequence.isCharPointBreaker(charPosition: Int) =
+        length > 0
+                && charPosition < length
+                && this[charPosition] == '\n'
+
 fun CharSequence.getEndOfWord(pointerToTheMiddleOfWord: Int): Int {
-    if (!isInTheWord(pointerToTheMiddleOfWord)) return -1
+    if (!isWithinWord(pointerToTheMiddleOfWord)) return -1
     var pointerToTheMiddleOfWord = pointerToTheMiddleOfWord
     if (length == 0) return 0
     if (pointerToTheMiddleOfWord >= length) pointerToTheMiddleOfWord = lastIndex
@@ -286,6 +348,14 @@ fun EditorBottomViewHolder.isSelected(leadingMarginSpan: LeadingMarginSpan): Boo
     return false
 }
 
+fun CharSequence.isPositionNextToWord(pointerToPosition: Int) = length > 1
+        && pointerToPosition <= length
+        && this[pointerToPosition - 1].isPartOfWord()
+
+fun CharSequence.isPositionNextToWhiteSpace(pointerToPosition: Int) = length > 0
+        && pointerToPosition <= length
+        && this[pointerToPosition - 1].isWordBreaker()
+
 private val urlSpans = setOf(URLSpan::class.java, KnifeURLSpan::class.java)
 
 private val appSpannables = setOf(
@@ -294,4 +364,19 @@ private val appSpannables = setOf(
         KnifeBulletSpan::class.java,
         KnifeQuoteSpan::class.java,
         StyleSpan::class.java)
+
+fun newBoldSpan() = StyleSpan(Typeface.BOLD)
+
+fun MetricAffectingSpan.copy(span: MetricAffectingSpan): MetricAffectingSpan? {
+    if (this is StyleSpan && span is StyleSpan) return StyleSpan(span.style)
+    if (this is AbsoluteSizeSpan && span is AbsoluteSizeSpan) return AbsoluteSizeSpan(span.size)
+    return null
+}
+
+const val INCLUSIVE_INCLUSIVE = 18
+const val EXCLUSIVE_EXCLUSIVE = 33
+const val INCLUSIVE_EXCLUSIVE = 17
+const val EXCLUSIVE_INCLUSIVE = 34
+
+
 

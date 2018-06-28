@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,7 +22,10 @@ import android.text.Editable
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.style.*
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.LeadingMarginSpan
+import android.text.style.MetricAffectingSpan
+import android.text.style.URLSpan
 import android.widget.Button
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -206,12 +208,24 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         val startPointer = focusedPart?.startPointer ?: 0
         val endPointer = focusedPart?.endPointer ?: 0
 
+        focusedPart ?: return
+
         if (startPointer == endPointer) {
-            mViewModel.onUserInput(EditorInputAction.InsertAction(
-                    EditorTextPart(text = spannableString)))
+            if (focusedPart.text.isWithinWord(startPointer)) {
+                val startOfWord = focusedPart.text.getStartOfWord(startPointer)
+                val endOfWord = focusedPart.text.getEndOfWord(startPointer)
+                if (!checkStartAndEnd(startOfWord, endOfWord)) return
+                if ((endOfWord + 1) > focusedPart.text.length) return
+                focusedPart.text.removeUrlSpans(startOfWord, endOfWord)
+                focusedPart.text.setSpan(KnifeURLSpan(linkAddress,
+                        getColorCompat(R.color.blue_light), true), startOfWord, endOfWord + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else {
+                mViewModel.onUserInput(EditorInputAction.InsertAction(
+                        EditorTextPart(text = spannableString)))
+            }
         } else {
-            focusedPart?.text?.removeUrlSpans(startPointer, endPointer)
-            focusedPart?.text?.setSpan(KnifeURLSpan(linkAddress,
+            focusedPart.text.removeUrlSpans(startPointer, endPointer)
+            focusedPart.text.setSpan(KnifeURLSpan(linkAddress,
                     getColorCompat(R.color.blue_light), true), startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
             validateBottomButtonSelections(mViewModel.editorLiveData.value?.parts
@@ -229,12 +243,17 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     }
 
     override fun onCursorChange(parts: List<EditorPart>) {
-        if (mSavedCursor != null) {
+        Timber.e("onCursorChange mSavedCursor = $mSavedCursor")
+        if (mSavedCursor != null && mSavedCursor!!.first > -1 && mSavedCursor!!.second > -1) {
             val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
-            if (focusedPart != null && mSavedCursor!!.second <= focusedPart.text.length) Selection.setSelection(//for unknown reason cursor
-                    // begin chaotically float in edit text, while edititng it inners, sh we fix it in place during edit
-                    focusedPart.text, mSavedCursor!!.first,
-                    mSavedCursor!!.second)
+            if (focusedPart != null && mSavedCursor!!.second <= focusedPart.text.length) {
+                //for unknown reason cursor
+                // begin chaotically float in edit text, while edititng it inners, sh we fix it in place during edit
+                Timber.e("changing selection")
+                Selection.setSelection(
+                        focusedPart.text, mSavedCursor!!.first,
+                        mSavedCursor!!.second)
+            }
         }
         validateBottomButtonSelections(parts)
     }
@@ -252,9 +271,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
                 val start = focusedPart.startPointer
                 val endpointer = focusedPart.endPointer
-
-
-                focusedPart.text.printStyleSpans()
 
                 val allSpans = focusedPart.text.getEditorUsedSpans(start, endpointer)
                 if (allSpans.isEmpty()) {//text has no modifiers
@@ -283,28 +299,38 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         Timber.e("on click ${focusedPart}, selected ${mBottomButtons.getSelectedModifier()}")
         when (clickedButton) {
             EditorTextModifier.LINK -> {
+                focusedPart ?: return
                 if (!selectedModifiers.contains(EditorTextModifier.LINK)) {
-                    val fr: SendLinkDialog
-                    fr = if (startPointer == endPointer) {// if no text selected and user taped on "link" button
-                        SendLinkDialog.getInstance()
-                    } else {
-                        focusedPart ?: return
-                        val text = focusedPart.text.subSequence(startPointer, endPointer)
-                        mSavedCursor = Pair(startPointer, endPointer)
-                        SendLinkDialog.getInstance(text.toString())
+                    if (startPointer == endPointer) {
+
+                        val fr: SendLinkDialog
+
+                        fr = if (startPointer == endPointer) {// if no text selected and user taped on "link" button
+                            if (focusedPart.text.isWithinWord(startPointer)) {
+                                Timber.e("focusedPart.text.isWithinWord(startPointer)")
+                                val startOfWord = focusedPart.text.getStartOfWord(startPointer)
+                                val endOfWord = focusedPart.text.getEndOfWord(startPointer)
+                                if (!checkStartAndEnd(startOfWord, endOfWord)) return
+                                SendLinkDialog.getInstance(focusedPart.text.substring(startOfWord, endOfWord))
+                            } else {
+                                SendLinkDialog.getInstance()
+                            }
+
+                        } else {
+
+                            val text = focusedPart.text.subSequence(startPointer, endPointer)
+                            mSavedCursor = Pair(startPointer, endPointer)
+                            SendLinkDialog.getInstance(text.toString())
+                        }
+                        fr.show(supportFragmentManager, null)
                     }
-                    fr.show(supportFragmentManager, null)
                 } else {//if user selected text with url in it
-                    /* mAdapter.textModifiers = selectedModifiers - EditorTextModifier.LINK*/
-                    focusedPart ?: return
+                    Timber.e("removing url span")
                     val spans =
                             focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java)
-                    Timber.e("befor removing spans, ${focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java).toStringCustom()}")
                     spans.forEach {
                         focusedPart.text.removeSpan(it)
                     }
-                    Timber.e("after removing spans, ${focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java).toStringCustom()}")
-                    mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
                     validateBottomButtonSelections(mViewModel.editorLiveData.value?.parts
                             ?: return)
                 }
@@ -331,54 +357,52 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             EditorTextModifier.QUOTATION_MARKS -> {
                 if (focusedPart == null) return
                 mSavedCursor = Pair(startPointer, endPointer)
-
-                if (startPointer != endPointer) {//if we selected word
-                    if (!mBottomButtons.getSelectedModifier().contains(EditorTextModifier.QUOTATION_MARKS)) {
+                if (!mBottomButtons.getSelectedModifier().contains(EditorTextModifier.QUOTATION_MARKS)) {
+                    Timber.e("adding quotation marks")
+                    if (startPointer != endPointer) {
+                        //if we selected smth
                         focusedPart.text.insert(startPointer, "\"")
                         focusedPart.text.insert(endPointer + 1, "\"")
                         mSavedCursor = Pair(startPointer + 1, endPointer + 1)//insert signs and move cursor + 1
-                        val spans = focusedPart.text.getSpans(startPointer, endPointer, MetricAffectingSpan::class.java)
-                        spans.forEach {
 
-                        }
-                    } else {//if we selected word with quotations marks
-                        val selected = focusedPart.text.subSequence(startPointer, endPointer)
-                        Timber.e("selected = $selected")
-                        mSavedCursor = Pair(startPointer, endPointer - 1)
-                        focusedPart.text.replace(startPointer - 1, endPointer + 1, selected)
-
-                        mSavedCursor = Pair(startPointer - 1, endPointer - 1)
-                    }
-                } else {//if we selected nothing
-                    if ((startPointer == focusedPart.text.length || startPointer == 0)
-                            && !(focusedPart.text.isInTheWord(startPointer))) {//start end of text, but previous not quote marks
-                        focusedPart.text.insert(startPointer, "\"")
-                        focusedPart.text.insert(endPointer + 1, "\"")
-                        mSavedCursor = Pair(startPointer + 1, endPointer + 1)
-                    } else if (focusedPart.text.isInTheWord(startPointer)) {//if we somewhere in the word
-                        if (allButtons.contains(EditorTextModifier.QUOTATION_MARKS)) {// if it is with quotation marks
-                            Timber.e("deleting quotation marks in word")
-                            val startOfWord = focusedPart.text.getStartOfWord(startPointer - 1)
-                            val endOfWord = focusedPart.text.getEndOfWord(startPointer - 1)
-                            val selected = focusedPart.text.subSequence(startOfWord, endOfWord + 1)
-                            Timber.e("replacing subsequence = $selected")
-                            focusedPart.text.replace(startOfWord - 1, endOfWord + 2, selected)
-
-                            mSavedCursor = Pair(startPointer - 1, endPointer - 1)
+                    } else {
+                        //startPointer == endPointer
+                        if (focusedPart.text.isWithinWord(startPointer)) {
+                            val wordStart = focusedPart.text.getStartOfWord(startPointer)
+                            val wordEnd = focusedPart.text.getEndOfWord(endPointer)
+                            Timber.e("inserting quotation marks before and after word")
+                            if (!checkStartAndEnd(wordStart, wordEnd)) return
+                            focusedPart.text.insert(wordStart, "\"")
+                            focusedPart.text.insert(wordEnd + 2, "\"")
+                            mSavedCursor = Pair(startPointer + 2, endPointer + 2)
                         } else {
-                            Timber.e("at the middle of the word")
-                            val startOfWord = focusedPart.text.getStartOfWord(startPointer - 1)
-                            val endOfWord = focusedPart.text.getEndOfWord(startPointer - 1)
-                            val textLength = focusedPart.text.length
-                            focusedPart.text.insert(startOfWord, "\"")
-                            focusedPart.text.insert(endOfWord + 2, "\"")
-                            mSavedCursor = if (startPointer == textLength) Pair(startPointer + 2, endPointer + 2)
-                            else Pair(startPointer + 1, endPointer + 1)
+                            Timber.e("somewhere in whitespace")
+                            focusedPart.text.insert(startPointer, "\"\"")
+                            focusedPart.startPointer += 1
+                            focusedPart.endPointer += 1
+                            mSavedCursor = Pair(startPointer + 1, endPointer + 1)
                         }
                     }
+                } else {
+                    //startPointer == endPointer
+                    Timber.e("deleting quotation marks")
+                    val wordStart = focusedPart.text.getStartOfWord(startPointer)
+                    val wordEnd = focusedPart.text.getEndOfWord(startPointer)
+                    Timber.e("we selected smth with quotation marks")
+                    if (!checkStartAndEnd(wordStart, wordEnd)) return
+                    if (wordStart == wordEnd) {
+                        Timber.e("word of 0 - length, this should not happen")
+                        return
+                    }
+                    if ((wordStart + 1) > focusedPart.text.length || wordEnd > focusedPart.text.length) {
+                        Timber.e("wordStart = $wordStart && wordEnd = $wordEnd and it length > ${focusedPart.text}")
+                        return
+                    }
+                    val selected = focusedPart.text.subSequence(wordStart + 1, wordEnd)
+                    focusedPart.text.replace(wordStart, wordEnd + 1, selected)
+                    mSavedCursor = Pair(startPointer - 1, endPointer - 1)
+
                 }
-
-
                 onCursorChange(mViewModel.editorLiveData.value?.parts ?: return)
                 mSavedCursor = null
                 mViewModel.onTextChanged(mViewModel.editorLiveData.value?.parts ?: return)
@@ -388,8 +412,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
                 mSavedCursor = Pair(startPointer, endPointer)
 
-                val span: MetricAffectingSpan = if (clickedButton == EditorTextModifier.TITLE) AbsoluteSizeSpan(getDimen(R.dimen.font_big).toInt())
-                else StyleSpan(Typeface.BOLD)
+                val span: MetricAffectingSpan = if (clickedButton == EditorTextModifier.TITLE)
+                    AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt())
+                else newBoldSpan()
 
                 val needsCursorForwarding =
                         processMetricAffection(span, focusedPart.text, startPointer, endPointer)
@@ -425,10 +450,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             if (startPointer != endPointer) {
                 var placeToInsertEndBreak = endPointer
                 var placeToInsertStartBreak = startPointer
-                if (editable.isWordWrappedByQuotationMarks(startPointer)) {
-                    placeToInsertStartBreak -= 1
-                    placeToInsertEndBreak += 1
-                }
+
                 if (!editable.isPreviousCharLineBreak(placeToInsertStartBreak)) {
                     editable.insert(placeToInsertStartBreak, "\n")
                     placeToInsertEndBreak += 1
@@ -470,127 +492,69 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
      * @return if true - needs to move cursor forward
      * */
 
-    private fun processMetricAffection(styleSpan: MetricAffectingSpan, editable: Editable, startPointer: Int, endPointer: Int): Boolean {
+    private fun processMetricAffection(styleSpan: MetricAffectingSpan,
+                                       editable: Editable,
+                                       startPointer: Int,
+                                       endPointer: Int): Boolean {
+        Timber.e("processMetricAffection styleSpan = $styleSpan editable = $editable, its lenth = ${editable.length} startPointer = $startPointer endPointer = $endPointer")
         if (mBottomButtons.isSelected(styleSpan)) {//if user tapped at Bold, but text not bold
 
             Timber.e("adding spans")
             if (startPointer != endPointer)//if we selected text
             {
-                if (editable.isWordWrappedByQuotationMarks(startPointer)) {
-                    editable
-                            .setSpan(styleSpan, startPointer - 1, endPointer + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                } else {
-                    editable
-                            .setSpan(styleSpan, startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                }
 
-            } else if (startPointer == endPointer
-                    && editable.isEndOfEditable(startPointer))//if we are athe the end
+                editable
+                        .setSpan(styleSpan, startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+
+            } else if (startPointer == endPointer)//selected some point at editable
             {
-                Timber.e("we at the end")
-                editable.append('\u0020')
-                editable.setSpan(styleSpan, startPointer, endPointer, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            } else if (startPointer == endPointer && startPointer != editable.length)//if we somewhere on in the middle
-            {
-                if (startPointer == 0 ||
-                        /**if we at first char*/
-                        (startPointer < editable.length && editable[startPointer] == ' ') || // if we at start/end of word
-                        editable[startPointer - 1] == ' ') {
-                    Timber.e("focused start/end of text")
-                    editable.setSpan(styleSpan, startPointer, endPointer, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-                } else {//if we are at the the middle of the word
-                    Timber.e("we at the middle of word")
+
+                if (editable.isStartOf(startPointer)) {
+                    Timber.e("we at the start of editable")
+                    editable.setSpan(styleSpan, startPointer, endPointer, INCLUSIVE_INCLUSIVE)
+                } else if (editable.isEndOf(startPointer)) {
+                    Timber.e("we at the end of editable")
+                    editable.setSpan(styleSpan, startPointer, endPointer, INCLUSIVE_INCLUSIVE)
+                } else if (editable.isWithinWord(startPointer))//if we somewhere on in the middle
+                {
+                    Timber.e("we are within word")
                     val startOfWord = editable.getStartOfWord(startPointer)
-                    val endOfWord = editable.getEndOfWord(startPointer) + 1
-                    if (startOfWord == -1 || endPointer == -1) {
-                        editable.setSpan(styleSpan,
-                                startOfWord,
-                                endOfWord,
-                                Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                    val endOfWord = editable.getEndOfWord(startPointer)
 
-                    } else if (editable.isWordWrappedByQuotationMarks(startPointer)) {
-                        Timber.e("word wrapped in quotation marks")
-                        editable.setSpan(styleSpan,
-                                editable.getStartOfWord(startPointer) - 1,
-                                editable.getEndOfWord(startPointer) + 2,
-                                Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                    } else if (!editable.isInTheWord(startPointer)) {
-                        editable.setSpan(styleSpan,
-                                editable.getStartOfWord(startPointer),
-                                editable.getEndOfWord(startPointer),
-                                Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                    } else {
-                        if (editable.isInTheWord(startPointer)) {
-                            editable.setSpan(styleSpan,
-                                    editable.getStartOfWord(startPointer),
-                                    editable.getEndOfWord(startPointer),
-                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        } else {
-                            editable.setSpan(styleSpan,
-                                    startPointer,
-                                    startPointer,
-                                    Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-                        }
+                    if (!checkStartAndEnd(startOfWord, endOfWord)) return false
 
-                    }
+
+                    editable.setSpan(styleSpan, startOfWord, endOfWord + 1, EXCLUSIVE_EXCLUSIVE)
+                } else {
+                    Timber.e("we are ath some sort of whitespace")
+                    editable.setSpan(styleSpan, startPointer, endPointer, EXCLUSIVE_INCLUSIVE)
                 }
             }
+
         } else {//deleting style
+            Timber.e("deleting spans")
             val trimmedLength = editable.trimEnd().length
 
-            Timber.e("length is ${editable.length} trimmedLength = $trimmedLength")
             val spans = editable
                     .getSpans(startPointer, endPointer, styleSpan::class.java)
-                    .filter {
-                        if (it is StyleSpan)
-                            it.style == Typeface.BOLD
-                        else it is AbsoluteSizeSpan
-                    }
 
-            if (startPointer == endPointer && (startPointer != 0 && (editable.length == startPointer
-                            || trimmedLength + 1 == startPointer || trimmedLength == startPointer))) {
-                //if we are behind text, and span stretched for us
-                if (spans.isEmpty()) return false
-                Timber.e("behind text")
-
-                val span = spans[0]
-                var spanStart = editable.getSpanStart(span)
-                val spanEnd = editable.getSpanEnd(span)
-                if (spanStart == spanEnd) spanStart -= 1
-
-                editable.removeSpan(span)
-                Timber.e(" focusedPart.text[spanEnd - 1] ${editable[spanEnd - 1]}")
-
-                if (editable[endPointer - 1] != ' ') {//_d|_
-                    editable.insert(endPointer + 1, " ")
-                }
-                editable.setSpan(span, spanStart, spanEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-                return true
-
-            } else if (editable.isInTheWord(startPointer)) {//if we somewhere in the word
+            if (startPointer != endPointer || (startPointer == endPointer && editable.isWithinWord(startPointer))) {
                 Timber.e("removing span at the word")
 
-                var wordStart = editable.getStartOfWord(startPointer - 1)
-                var endOfWord = editable.getEndOfWord(startPointer - 1) + 1
-                if (editable.isInTheWord(startPointer)) {
+                var wordStart = if (startPointer != endPointer) startPointer else editable.getStartOfWord(startPointer)
+                var endOfWord = if (startPointer != endPointer) endPointer else editable.getEndOfWord(startPointer) + 1
+                if (startPointer == endPointer) {
                     wordStart -= 1
                     endOfWord += 1
                 }
 
-                val neededSpans = editable.getSpans(wordStart, endOfWord, styleSpan::class.java)
-                        .filter {
-                            Timber.e(it.toString())
-                            if (it is StyleSpan)
-                                it.style == Typeface.BOLD
-                            else it is AbsoluteSizeSpan
-                        }
-
-                neededSpans.forEach {
+                spans.forEach {
                     var spanStart = editable.getSpanStart(it)
                     var spanEnd = editable.getSpanEnd(it)
                     if (spanStart < 0) spanStart = 0
                     if (spanEnd < 0) spanEnd = editable.length
+                    val spanFlag = editable.getSpanFlags(it)
 
                     Timber.e("startReal = ${editable.getSpanStart(it)}" +
                             " endReal = ${editable.getSpanEnd(it)} styledSpans = " +
@@ -600,18 +564,43 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     editable.removeSpan(it)
 
                     if (spanStart <= wordStart && spanStart != wordStart) //copy pre spans, wrapping word, but avoiding 0-length spans
-                        editable.setSpan(it, spanStart, wordStart, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                        editable.setSpan(it, spanStart, wordStart, spanFlag)
                     if (spanEnd >= endOfWord && (endOfWord != spanEnd || startPointer == trimmedLength))//copy post spans, wrapping word, but avoiding 0-length spans
-                        editable.setSpan(it, endOfWord, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                    {
+                        editable.setSpan(it.copy(it)
+                                ?: return false, endOfWord, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                    }
                 }
 
             } else {
-                spans.forEach {
-                    Timber.e("removing span")
-                    editable.removeSpan(it)
+                //if startPointer == endPointer
+
+                if (editable.isPositionNextToWord(startPointer) || editable.isPositionNextToWhiteSpace(startPointer)) {
+                    Timber.e("isPositionNextToWord || isPositionNextToWhiteSpace")
+                    //if we are behind text, and span stretched for us
+                    if (spans.isEmpty()) return false
+
+                    spans.forEach {
+                        val spanStart = editable.getSpanStart(it)
+                        var spanEnd = editable.getSpanEnd(it)
+                        if (spanStart == spanEnd) editable.removeSpan(it)
+                        else {
+
+                            editable.removeSpan(it)
+                            if (editable.isPositionNextToWhiteSpace(startPointer)) spanEnd -= 1
+                            editable.setSpan(it, spanStart, spanEnd, EXCLUSIVE_EXCLUSIVE)
+
+                            return false
+                        }
+
+                    }
+                } else {
+                    spans.forEach {
+                        Timber.e("removing span")
+                        editable.removeSpan(it)
+                    }
                 }
             }
-
         }
         return false
     }
