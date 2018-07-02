@@ -135,7 +135,8 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
         }
 
         fun get(mode: EditorMode, db: SQLiteDatabase): Triple<List<EditorPart>, String, List<String>> {
-            val cursor = db.rawQuery("select * from $tableName where $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
+            val cursor =
+                    db.rawQuery("select * from $tableName where $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
             val out = ArrayList<EditorPart>(2)
             var title = ""
             var tags = listOf("")

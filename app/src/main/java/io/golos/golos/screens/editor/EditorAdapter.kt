@@ -88,6 +88,14 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
             }
         }
 
+    fun onTextSizeChanged(mRecycler: RecyclerView) {
+        (0 until itemCount).forEach {
+            val part = parts[it] as? EditorTextPart
+            if (part?.isFocused() == true)
+                (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.reSetText()
+        }
+    }
+
     @Suppress("NAME_SHADOWING")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {

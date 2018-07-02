@@ -109,7 +109,7 @@ fun Context.getDimen(@DimenRes resid: Int): Float {
 }
 
 fun CharSequence.isPreviousCharLineBreak(pointToChar: Int): Boolean {
-    return pointToChar != 0 && pointToChar < length && this[pointToChar - 1] == '\n'
+    return length > 1 && pointToChar != 0 && pointToChar <= length && this[pointToChar - 1] == '\n'
 }
 
 fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
@@ -152,6 +152,14 @@ fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
     else if (start == end && isWordWrappedByQuotationMarks(start)) out.add(EditorTextModifier.QUOTATION_MARKS)
     return out
 
+}
+
+fun Editable.getPreviousPositionIsNumericList(pointerToPosition: Int): NumberedMarginSpan? {
+    if (length > 1 && pointerToPosition > 1) {
+        getSpans(pointerToPosition - 1, pointerToPosition - 1, NumberedMarginSpan::class.java)
+                .firstOrNull { return it }
+    }
+    return null
 }
 
 fun Spannable.isSpanTouchesEndPointWithExclusiveSpan(span: Any, endPoint: Int): Boolean {
@@ -222,7 +230,7 @@ fun CharSequence.getLineOfWordPosition(wordPosition: Int): Int {
     return pointerToTextPart
 }
 
-fun CharSequence.getStartAndEndPositionOfLinePointed(pointerPosition: Int): Pair<Int, Int> {
+fun CharSequence.getParagraphBounds(pointerPosition: Int): Pair<Int, Int> {
     if (length == 0) return 0 to 0
 
     val textParts = split("\n")
@@ -299,6 +307,7 @@ fun CharSequence.isEndOfLine(pointerToPosition: Int): Boolean {
 
 
 fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
+
 
 fun Editable.printLeadingMarginSpans(pointerToPosition: Int) {
     getSpans(pointerToPosition, pointerToPosition, LeadingMarginSpan::class.java)

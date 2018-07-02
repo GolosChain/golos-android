@@ -28,6 +28,7 @@
     <dimen name="login_lo_margin">36dp</dimen>
     <dimen name="profile_tabbar_height">48dp</dimen>
     <dimen name="quater">4dp</dimen>
+    <dimen name="quint">2dp</dimen>
     <dimen name="height_of_gray_break">10dp</dimen>
     <dimen name="tags_reycler_height">30dp</dimen>
     <dimen name="story_tag_user_avatar_size">52dp</dimen>

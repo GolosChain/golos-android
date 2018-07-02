@@ -67,7 +67,7 @@ public class KnifeQuoteSpan extends QuoteSpan {
 
         p.setStyle(Paint.Style.FILL);
         p.setColor(quoteColor);
-        c.drawRect(x, top, x + dir * quoteGapWidth, bottom, p);
+        c.drawRect(x, top, x + dir * quoteStripeWidth, bottom, p);
 
         p.setStyle(style);
         p.setColor(color);

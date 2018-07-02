@@ -29,11 +29,16 @@ import android.text.style.StrikethroughSpan;
 
 import org.xml.sax.XMLReader;
 
+import timber.log.Timber;
+
 public class KnifeTagHandler implements Html.TagHandler {
-    private static final String BULLET_LI = "li";
-    private static final String STRIKETHROUGH_S = "s";
-    private static final String STRIKETHROUGH_STRIKE = "strike";
-    private static final String STRIKETHROUGH_DEL = "del";
+    public static final String BULLET_LI = "li";
+    public static final String QUOTE = "custom_quote";
+    public static final String NUMBERED_LIST = "custom_n_list";
+    public static final String HEADER = "custom_h";
+    public static final String STRIKETHROUGH_S = "s";
+    public static final String STRIKETHROUGH_STRIKE = "strike";
+    public static final String STRIKETHROUGH_DEL = "del";
 
     private static class Li {}
     private static class Strike {}
@@ -41,6 +46,7 @@ public class KnifeTagHandler implements Html.TagHandler {
     @Override
     public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader) {
         if (opening) {
+            Timber.e("tag = " + tag);
             if (tag.equalsIgnoreCase(BULLET_LI)) {
                 if (output.length() > 0 && output.charAt(output.length() - 1) != '\n') {
                     output.append("\n");

@@ -21,8 +21,6 @@ import android.graphics.Paint;
 import android.text.Layout;
 import android.text.style.LeadingMarginSpan;
 
-import timber.log.Timber;
-
 public class NumberedMarginSpan implements LeadingMarginSpan {
 
     private final int gapWidth;
@@ -33,6 +31,10 @@ public class NumberedMarginSpan implements LeadingMarginSpan {
         this.leadWidth = leadGap;
         this.gapWidth = gapWidth;
         this.index = index;
+    }
+
+    public NumberedMarginSpan nextIndex() {
+        return new NumberedMarginSpan(leadWidth, gapWidth, index + 1);
     }
 
     public int getGapWidth() {

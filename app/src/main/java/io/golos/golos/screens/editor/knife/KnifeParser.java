@@ -21,6 +21,7 @@ import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.AbsoluteSizeSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ImageSpan;
@@ -168,6 +169,9 @@ public class KnifeParser {
                 if (spans[j] instanceof UnderlineSpan) {
                     out.append("<u>");
                 }
+                if (spans[j] instanceof AbsoluteSizeSpan) {
+                    out.append("<h2>");
+                }
 
                 // Use standard strikethrough tag <del> rather than <s> or <strike>
                 if (spans[j] instanceof StrikethroughSpan) {
@@ -202,6 +206,9 @@ public class KnifeParser {
 
                 if (spans[j] instanceof UnderlineSpan) {
                     out.append("</u>");
+                }
+                if (spans[j] instanceof AbsoluteSizeSpan) {
+                    out.append("</h2>");
                 }
 
                 if (spans[j] instanceof StyleSpan) {

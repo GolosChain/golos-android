@@ -86,14 +86,20 @@ class UtilsTest {
     @Test
     fun getLineStartEndPosition() {
         var spanned = "a\nb".asSpannable()
-        var result = spanned.getStartAndEndPositionOfLinePointed(0)
+        var result = spanned.getParagraphBounds(0)
         Assert.assertEquals(0 to 1, result)
-        result = spanned.getStartAndEndPositionOfLinePointed(3)
+        result = spanned.getParagraphBounds(3)
         Assert.assertEquals(2 to 3, result)
         spanned = "a\nbse\n123".asSpannable()
-        result = spanned.getStartAndEndPositionOfLinePointed(6)
+        result = spanned.getParagraphBounds(6)
         Assert.assertEquals(6 to 9, result)
-        result = spanned.getStartAndEndPositionOfLinePointed("a\nbse\n123".length)
+        result = spanned.getParagraphBounds("a\nbse\n123".length)
         Assert.assertEquals(6 to 9, result)
+    }
+
+    @Test
+    fun testForLineBreakers(){
+        val text = "\n\n\n\n"
+
     }
 }

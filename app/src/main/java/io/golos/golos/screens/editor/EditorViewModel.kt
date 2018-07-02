@@ -52,6 +52,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     if (items.isNotEmpty()) {
                         editorLiveData.value = EditorState(null, false, null, items, title, tags)
                     } else {
+
                         editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
                     }
                 })
