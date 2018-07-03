@@ -107,6 +107,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                         if (position > 0)
                             (parts.getOrNull(position) as? EditorTextPart)?.setNotSelected()
                     }
+                    interactor?.onCursorChange(parts)
                 }, { _, changingPart ->
                     (0 until parts.size)
                             .filter {

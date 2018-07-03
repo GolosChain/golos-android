@@ -48,4 +48,12 @@ public class KnifeURLSpan extends URLSpan  {
         ds.setColor(linkColor != 0 ? linkColor : ds.linkColor);
         ds.setUnderlineText(linkUnderline);
     }
+
+    @Override
+    public String toString() {
+        return "KnifeURLSpan{" +
+                "linkColor=" + linkColor +
+                ", linkUnderline=" + linkUnderline +
+                '}';
+    }
 }

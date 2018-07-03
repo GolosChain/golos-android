@@ -72,4 +72,13 @@ public class KnifeQuoteSpan extends QuoteSpan {
         p.setStyle(style);
         p.setColor(color);
     }
+
+    @Override
+    public String toString() {
+        return "KnifeQuoteSpan{" +
+                "quoteColor=" + quoteColor +
+                ", quoteStripeWidth=" + quoteStripeWidth +
+                ", quoteGapWidth=" + quoteGapWidth +
+                '}';
+    }
 }

@@ -9,6 +9,7 @@ import android.support.annotation.WorkerThread
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.style.*
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -110,6 +111,33 @@ fun Context.getDimen(@DimenRes resid: Int): Float {
 
 fun CharSequence.isPreviousCharLineBreak(pointToChar: Int): Boolean {
     return length > 1 && pointToChar != 0 && pointToChar <= length && this[pointToChar - 1] == '\n'
+}
+
+fun CharSequence.isPreviousCharWhiteSpaceThenLineBreak(pointToChar: Int): Boolean {
+    return length > 2 && pointToChar > 2 && pointToChar <= length && this[pointToChar - 1] == ' ' && isPreviousCharLineBreak(pointToChar - 1)
+}
+
+fun Spanned.trimStartAndEmd(): Spanned {
+    if (this is SpannableStringBuilder) {
+        while (!this.isEmpty() && (this[0].isWhitespace() || this[0].toShort() == 8205.toShort())) delete(0, 1)
+        while (!this.isEmpty() && (this[lastIndex].isWhitespace() || this[0].toShort() == 8205.toShort())) delete(lastIndex, length)
+    }
+    return this
+}
+
+fun Spannable.removeAllLeadingMarginSpansAt(start: Int, end: Int) {
+    getSpans(start, end, LeadingMarginSpan::class.java).forEach {
+        removeSpan(it)
+    }
+}
+
+fun Spannable.changeLeadingSpansFlagParagraphToInclusiveInclusive() {
+    getSpans(0, length, LeadingMarginSpan::class.java).forEach {
+        val start = getSpanStart(it)
+        val end = getSpanEnd(it)
+        removeSpan(it)
+        setSpan(it, start, end, INCLUSIVE_INCLUSIVE)
+    }
 }
 
 fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
@@ -230,6 +258,12 @@ fun CharSequence.getLineOfWordPosition(wordPosition: Int): Int {
     return pointerToTextPart
 }
 
+fun Editable.printAllSpans() {
+    getSpans(0, length, Any::class.java).forEach {
+        Timber.e("span = $it, start = ${getSpanStart(it)} end = ${getSpanEnd(it)}")
+    }
+}
+
 fun CharSequence.getParagraphBounds(pointerPosition: Int): Pair<Int, Int> {
     if (length == 0) return 0 to 0
 
@@ -310,7 +344,7 @@ fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
 
 
 fun Editable.printLeadingMarginSpans(pointerToPosition: Int) {
-    getSpans(pointerToPosition, pointerToPosition, LeadingMarginSpan::class.java)
+    getSpans(pointerToPosition, length, LeadingMarginSpan::class.java)
             .forEach {
                 Timber.e("$it start = ${getSpanStart(it)} end = ${getSpanEnd(it)} , flag  = ${getSpanFlags(it)}")
             }
@@ -363,6 +397,7 @@ fun CharSequence.isPositionNextToWord(pointerToPosition: Int) = length > 1
 
 fun CharSequence.isPositionNextToWhiteSpace(pointerToPosition: Int) = length > 0
         && pointerToPosition <= length
+        && pointerToPosition > 0
         && this[pointerToPosition - 1].isWordBreaker()
 
 private val urlSpans = setOf(URLSpan::class.java, KnifeURLSpan::class.java)

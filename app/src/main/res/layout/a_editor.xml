@@ -131,14 +131,14 @@
                 android:id="@+id/btn_quotations"
                 style="@style/BottomButtonStyle"
                 android:background="@drawable/btn_editor_bottom"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:srcCompat="@drawable/ic_format_quote" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_quote"
                 style="@style/BottomButtonStyle"
                 android:background="@drawable/btn_editor_bottom"
-                app:srcCompat="@drawable/ic_format_quote" />
+                app:srcCompat="@drawable/ic_reply_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_list_numbered"

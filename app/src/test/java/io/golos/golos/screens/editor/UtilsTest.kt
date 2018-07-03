@@ -98,8 +98,10 @@ class UtilsTest {
     }
 
     @Test
-    fun testForLineBreakers(){
-        val text = "\n\n\n\n"
-
+    fun testTrim() {
+        var text = " 123 ".asSpannable()
+        Assert.assertEquals("123", text.trimStartAndEmd().toString())
+        text = "\n 123 ".asSpannable()
+        Assert.assertEquals("123", text.trimStartAndEmd().toString())
     }
 }

@@ -33,6 +33,10 @@ public class NumberedMarginSpan implements LeadingMarginSpan {
         this.index = index;
     }
 
+    public NumberedMarginSpan setIndex(int index){
+        return new NumberedMarginSpan(leadWidth, gapWidth, index);
+    }
+
     public NumberedMarginSpan nextIndex() {
         return new NumberedMarginSpan(leadWidth, gapWidth, index + 1);
     }
@@ -62,5 +66,14 @@ public class NumberedMarginSpan implements LeadingMarginSpan {
             c.drawText(index + ".", (leadWidth + x - width / 2) * dir, bottom - p.descent(), p);
             p.setStyle(orgStyle);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "NumberedMarginSpan{" +
+                "gapWidth=" + gapWidth +
+                ", leadWidth=" + leadWidth +
+                ", index=" + index +
+                '}';
     }
 }

@@ -18,10 +18,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
-import android.text.Editable
-import android.text.Selection
-import android.text.Spannable
-import android.text.SpannableStringBuilder
+import android.text.*
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
@@ -36,10 +33,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.editor.knife.KnifeBulletSpan
-import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
-import io.golos.golos.screens.editor.knife.KnifeURLSpan
-import io.golos.golos.screens.editor.knife.NumberedMarginSpan
+import io.golos.golos.screens.editor.knife.*
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.LinkDialogInterface
@@ -72,7 +66,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         EditorFooter.TagsListener,
         EditorBottomViewHolder.BottomButtonClickListener,
         LinkDialogInterface,
-        Observer<EditorState> {
+        Observer<EditorState>,
+        SpanFactory {
     enum class EditorType {
         CREATE_POST, CREATE_COMMENT, EDIT_POST, EDIT_COMMENT
     }
@@ -128,7 +123,12 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             mSubmitBtn.text = getString(R.string.edit)
         }
 
-
+        val htmlHandler = object : HtmlHandler {
+            override fun fromHtml(string: String): Editable {
+                return SpannableStringBuilder.valueOf(KnifeParser.fromHtml(string, this@EditorActivity))
+            }
+        }
+        mViewModel.onCreate(DraftsPersister(this, htmlHandler), htmlHandler)
         mViewModel.mode = mMode
         mViewModel.editorLiveData.observe(this, this)
         mTitle.state = EditorTitleState(mMode?.title
@@ -419,7 +419,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 mSavedCursor = Pair(startPointer, endPointer)
 
                 val span: MetricAffectingSpan = if (clickedButton == EditorTextModifier.TITLE)
-                    AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt())
+                    produceOfType(AbsoluteSizeSpan::class.java)
                 else newBoldSpan()
 
                 val needsCursorForwarding =
@@ -439,19 +439,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             EditorTextModifier.QUOTATION, EditorTextModifier.LIST_BULLET, EditorTextModifier.LIST_NUMBERED -> {
                 focusedPart?.text ?: return
 
-
-
-                processLeadingMarginSpan(if (clickedButton == EditorTextModifier.QUOTATION)
-                    KnifeQuoteSpan(getColorCompat(R.color.blue_light),
-                            getDimen(R.dimen.quint).toInt(),
-                            getDimen(R.dimen.quater).toInt())
-                else if (clickedButton == EditorTextModifier.LIST_BULLET)
-                    KnifeBulletSpan(getColorCompat(R.color.blue_light),
-                            getDimen(R.dimen.quint).toInt(),
-                            getDimen(R.dimen.quater).toInt())
-                else NumberedMarginSpan(12, getDimen(R.dimen.margin_material_half).toInt(),
-                        1),
-                        focusedPart.text, startPointer, endPointer)
+                processLeadingMarginSpan(when (clickedButton) {
+                    EditorTextModifier.QUOTATION -> produceOfType(KnifeQuoteSpan::class.java)
+                    EditorTextModifier.LIST_BULLET -> produceOfType(KnifeBulletSpan::class.java)
+                    else -> produceOfType(NumberedMarginSpan::class.java)
+                }, focusedPart.text, startPointer, endPointer)
 
                 onCursorChange(mViewModel.editorLiveData.value?.parts ?: return)
             }
@@ -478,6 +470,11 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 var placeToInsertEndBreak = endPointer
                 val placeToInsertStartBreak = startPointer
 
+                val pointerToParagraph = editable.getParagraphBounds(startPointer)
+                if (checkStartAndEnd(pointerToParagraph.first,pointerToParagraph.second)){
+                    editable.removeAllLeadingMarginSpansAt(pointerToParagraph.first, pointerToParagraph.second)
+                }
+
                 if (!editable.isPreviousCharLineBreak(placeToInsertStartBreak) && !editable.isStartOf(startPointer)) {
                     editable.insert(placeToInsertStartBreak, "\n")
                     placeToInsertEndBreak += 1
@@ -487,17 +484,19 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                         .setSpan(leadingSpan,
                                 startPointer,
                                 endPointer,
-                                Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                                Spanned.SPAN_INCLUSIVE_INCLUSIVE)
 
 
             } else {//startPointer == endPointer
 
                 var pointerToParagraph = editable.getParagraphBounds(startPointer)
+                if (!checkStartAndEnd(pointerToParagraph.first,pointerToParagraph.second))return
 
                 if (pointerToParagraph.first == pointerToParagraph.second) {
                     editable.insert(pointerToParagraph.second, " ")
                     pointerToParagraph = Pair(pointerToParagraph.first, pointerToParagraph.second + 1)
                 }
+                editable.removeAllLeadingMarginSpansAt(pointerToParagraph.first, pointerToParagraph.second)
 
                 if (leadingSpan is NumberedMarginSpan) {
                     val previousLeadingSpan = editable.getPreviousPositionIsNumericList(pointerToParagraph.first)
@@ -507,7 +506,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                                 .setSpan(previousLeadingSpan.nextIndex(),
                                         pointerToParagraph.first,
                                         pointerToParagraph.second,
-                                        Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                                        Spanned.SPAN_INCLUSIVE_INCLUSIVE)
                         return
                     }
                 }
@@ -516,7 +515,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                         .setSpan(leadingSpan,
                                 pointerToParagraph.first,
                                 pointerToParagraph.second,
-                                Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                                Spanned.SPAN_INCLUSIVE_INCLUSIVE)
             }
         } else {
             //deleting quotation spans
@@ -660,6 +659,22 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
     override fun onEdit(parts: List<EditorPart>) {
         mViewModel.onTextChanged(parts)
+    }
+
+
+    override fun <T : Any?> produceOfType(type: Class<*>): T {
+        return when (type) {
+            KnifeBulletSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
+                    getDimen(R.dimen.quint).toInt(),
+                    getDimen(R.dimen.quater).toInt()) as T
+            NumberedMarginSpan::class.java -> NumberedMarginSpan(12, getDimen(R.dimen.margin_material_half).toInt(),
+                    1) as T
+            KnifeQuoteSpan::class.java -> KnifeQuoteSpan(getColorCompat(R.color.blue_light),
+                    getDimen(R.dimen.quint).toInt(),
+                    getDimen(R.dimen.quater).toInt()) as T
+            AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt()) as T
+            else -> Any() as T
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

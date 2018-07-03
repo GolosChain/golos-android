@@ -1,15 +1,14 @@
 package io.golos.golos.screens.editor
 
 import android.content.ContentValues
+import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Handler
 import android.os.Looper
-import android.text.SpannableStringBuilder
+import android.text.Editable
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.golos.golos.App
-import io.golos.golos.screens.editor.knife.KnifeParser
 import io.golos.golos.utils.getString
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
@@ -21,7 +20,12 @@ import java.util.concurrent.Executors
  */
 val version = 3
 
-object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, version) {
+interface HtmlHandler {
+    fun fromHtml(string: String): Editable
+}
+
+class DraftsPersister(context: Context, private val htmlHandler: HtmlHandler)
+    : SQLiteOpenHelper(context, "drafts.db", null, version) {
     private val executor = Executors.newSingleThreadExecutor()
     private val handler = Handler(Looper.getMainLooper())
 
@@ -67,7 +71,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                  completionHandler: (List<EditorPart>, String, List<String>) -> Unit) {
         executor.execute {
             try {
-                val parts = DraftsTable.get(mode, writableDatabase)
+                val parts = DraftsTable.get(mode, writableDatabase, htmlHandler)
                 handler.post {
                     completionHandler.invoke(parts.first, parts.second, parts.third)
                 }
@@ -134,7 +138,7 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
             db.insertWithOnConflict(tableName, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
         }
 
-        fun get(mode: EditorMode, db: SQLiteDatabase): Triple<List<EditorPart>, String, List<String>> {
+        fun get(mode: EditorMode, db: SQLiteDatabase, htmlHandler: HtmlHandler): Triple<List<EditorPart>, String, List<String>> {
             val cursor =
                     db.rawQuery("select * from $tableName where $modeColumn = \'${mapper.writeValueAsString(mode)}\'", null)
             val out = ArrayList<EditorPart>(2)
@@ -148,9 +152,8 @@ object DraftsPersister : SQLiteOpenHelper(App.context, "drafts.db", null, versio
                     val descriptors = mapper.readValue<List<EditorPartDescriptor>>(it, type)
                     val v = descriptors.map {
                         if (it.type == "text") {
-                            EditorTextPart(it.id, SpannableStringBuilder.valueOf(KnifeParser.fromHtml(it.text
-                                    ?: "")), it.pointerPosition
-                                    ?: EditorPart.CURSOR_POINTER_NOT_SELECTED,
+                            EditorTextPart(it.id, htmlHandler.fromHtml(it.text ?: ""),
+                                    it.pointerPosition ?: EditorPart.CURSOR_POINTER_NOT_SELECTED,
                                     it.pointerPositionEnd ?: EditorPart.CURSOR_POINTER_NOT_SELECTED)
                         } else {
                             EditorImagePart(it.id, it.imageName ?: "", it.imageUrl ?: "")

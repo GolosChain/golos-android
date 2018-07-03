@@ -103,4 +103,13 @@ public class KnifeBulletSpan extends BulletSpan {
             p.setStyle(style);
         }
     }
+
+    @Override
+    public String toString() {
+        return "KnifeBulletSpan{" +
+                "bulletColor=" + bulletColor +
+                ", bulletRadius=" + bulletRadius +
+                ", bulletGapWidth=" + bulletGapWidth +
+                '}';
+    }
 }

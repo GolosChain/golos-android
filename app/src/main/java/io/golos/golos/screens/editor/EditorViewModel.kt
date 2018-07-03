@@ -40,15 +40,18 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
     private var mWorkingItem: StoryWrapper? = null
+    private var mDraftsPersister: DraftsPersister? = null
+    private var mHtmlHandler: HtmlHandler? = null
     private var wasSent = false
     var mode: EditorMode? = null
         set(value) {
+
             field = value
             val feedType = field?.feedType
             val rootStoryId = field?.rootStoryId
             val workingItemId = field?.workingItemId
             if (feedType == null && rootStoryId == null && workingItemId == null) {//root story editor
-                DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
+                mDraftsPersister?.getDraft(mode ?: return, { items, title, tags ->
                     if (items.isNotEmpty()) {
                         editorLiveData.value = EditorState(null, false, null, items, title, tags)
                     } else {
@@ -69,6 +72,11 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             }
         }
 
+    fun onCreate(persister: DraftsPersister, htmlHandler: HtmlHandler) {
+        this.mDraftsPersister = persister
+        mHtmlHandler = htmlHandler
+    }
+
 
     override fun onChanged(t: StoriesFeed?) {
         if (mWorkingItem != null || t == null) return
@@ -83,7 +91,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         val editorType = mode?.editorType ?: return
 
         if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.CREATE_POST) {
-            DraftsPersister.getDraft(mode ?: return, { items, title, tags ->
+            mDraftsPersister?.getDraft(mode ?: return, { items, title, tags ->
                 if (items.isNotEmpty()) {
                     editorLiveData.value = EditorState(null, false, null, items, title, tags)
                 } else {
@@ -187,7 +195,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val listener: (CreatePostResult?, GolosError?) -> Unit = { result, error ->
                 if (error == null) {
                     wasSent = true
-                    if (mode != null) DraftsPersister.deleteDraft(mode!!, {})
+                    if (mode != null) mDraftsPersister?.deleteDraft(mode!!, {})
 
                 }
                 editorLiveData.value = EditorState(error = error,
@@ -225,7 +233,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 if (error == null) {
                     wasSent = true
                     if (mode != null)
-                        DraftsPersister.deleteDraft(mode!!, {})
+                        mDraftsPersister?.deleteDraft(mode!!, {})
                 }
 
                 editorLiveData.value = EditorState(error = error,
@@ -254,7 +262,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     fun onDestroy() {
-        if (!wasSent) DraftsPersister.saveDraft(mode ?: return, editorLiveData.value?.parts
+        if (!wasSent) mDraftsPersister?.saveDraft(mode ?: return, editorLiveData.value?.parts
                 ?: return,
                 title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf(),

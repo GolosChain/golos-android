@@ -19,6 +19,7 @@ package io.golos.golos.screens.editor.knife;
 
 import android.graphics.Typeface;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
@@ -32,9 +33,31 @@ import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
+import org.jetbrains.annotations.Nullable;
+
+import io.golos.golos.screens.editor.UtilsKt;
+import timber.log.Timber;
+
 public class KnifeParser {
+
+
     public static Spanned fromHtml(String source) {
-        return Html.fromHtml(source, null, new KnifeTagHandler());
+        return fromHtml(source, null);
+    }
+
+    public static Spanned fromHtml(String source, @Nullable SpanFactory spanFactory) {
+        Timber.e("from html = " + source);
+        Spanned s = Html
+                .fromHtml(source.startsWith("<b> </b>") ? source
+                        : "<b> </b>" + source, null, new KnifeTagHandler(spanFactory));
+        if (s instanceof SpannableStringBuilder) {
+
+            SpannableStringBuilder sb = ((SpannableStringBuilder) s);
+            UtilsKt.changeLeadingSpansFlagParagraphToInclusiveInclusive(sb);
+            UtilsKt.printLeadingMarginSpans(sb, 0);
+        }
+        return UtilsKt.trimStartAndEmd(s);
+
     }
 
     public static String toHtml(Spanned text) {
@@ -62,6 +85,8 @@ public class KnifeParser {
             } else if (styles.length == 1) {
                 if (styles[0] instanceof BulletSpan) {
                     withinBullet(out, text, i, next++);
+                } else if (styles[0] instanceof NumberedMarginSpan) {
+                    withinNumberedList(out, text, i, next++);
                 } else if (styles[0] instanceof QuoteSpan) {
                     withinQuote(out, text, i, next++);
                 } else {
@@ -107,6 +132,28 @@ public class KnifeParser {
         out.append("</ul>");
     }
 
+    private static void withinNumberedList(StringBuilder out, Spanned text, int start, int end) {
+        out.append("<ol>");
+
+        int next;
+
+        for (int i = start; i < end; i = next) {
+            next = text.nextSpanTransition(i, end, NumberedMarginSpan.class);
+
+            NumberedMarginSpan[] spans = text.getSpans(i, next, NumberedMarginSpan.class);
+            for (NumberedMarginSpan span : spans) {
+                out.append("<" + KnifeTagHandler.NUMBERED_LIST).append(span.getIndex()).append(">");
+            }
+
+            withinContent(out, text, i, next);
+            for (NumberedMarginSpan span : spans) {
+                out.append("</" + KnifeTagHandler.NUMBERED_LIST).append(span.getIndex()).append(">");
+            }
+        }
+
+        out.append("</ol>");
+    }
+
     private static void withinQuote(StringBuilder out, Spanned text, int start, int end) {
         int next;
 
@@ -115,12 +162,13 @@ public class KnifeParser {
 
             QuoteSpan[] quotes = text.getSpans(i, next, QuoteSpan.class);
             for (QuoteSpan quote : quotes) {
-                out.append("<blockquote>");
+                out.append("<").append(KnifeTagHandler.QUOTE).append(">");
             }
 
             withinContent(out, text, i, next);
             for (QuoteSpan quote : quotes) {
-                out.append("</blockquote>");
+
+                out.append("</").append(KnifeTagHandler.QUOTE).append(">");
             }
         }
     }
@@ -170,7 +218,7 @@ public class KnifeParser {
                     out.append("<u>");
                 }
                 if (spans[j] instanceof AbsoluteSizeSpan) {
-                    out.append("<h2>");
+                    out.append("<" + KnifeTagHandler.HEADER + ">");
                 }
 
                 // Use standard strikethrough tag <del> rather than <s> or <strike>
@@ -208,7 +256,7 @@ public class KnifeParser {
                     out.append("</u>");
                 }
                 if (spans[j] instanceof AbsoluteSizeSpan) {
-                    out.append("</h2>");
+                    out.append("</" + KnifeTagHandler.HEADER + ">");
                 }
 
                 if (spans[j] instanceof StyleSpan) {

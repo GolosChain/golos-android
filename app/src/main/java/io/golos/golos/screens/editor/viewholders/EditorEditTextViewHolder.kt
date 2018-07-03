@@ -5,10 +5,12 @@ import android.support.annotation.LayoutRes
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
 import android.text.TextWatcher
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
 import android.text.style.QuoteSpan
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -27,7 +29,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     private val whiteSpace = Character.valueOf('\u0020')
     private var ignoreTextChange = false
     private var ignoreOnBind = false
-    private var mLastText = ""
+    private var mLastTextSize = 0
 
     init {
         mEditText.setSelectionListener(this)
@@ -37,6 +39,12 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 source ?: return "".asSpannable()
                 if (source is Editable) return source
                 return super.newEditable(source)
+            }
+        })
+        mEditText.setOnKeyListener(object : View.OnKeyListener {
+            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                Timber.e("keyCode = $keyCode")
+                return false
             }
         })
     }
@@ -59,7 +67,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 Timber.e("setting new text \nold = ${mEditText.text}" +
                         " new = ${textPart}")
                 mEditText.setTextKeepState(textPart.text)
-
+                mLastTextSize = mEditText.text.length
 
 
                 textChanged = true
@@ -149,9 +157,11 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 val spanStart = s.getSpanStart(it)
                 val spanEnd = s.getSpanEnd(it)
                 val spanFlag = s.getSpanFlags(it)
-                if (spanStart == spanEnd && (spanStart - spanEnd == 0) && spanFlag != EXCLUSIVE_INCLUSIVE) {
+                if (spanStart == spanEnd && spanFlag != EXCLUSIVE_INCLUSIVE) {
                     s.removeSpan(it)
-                    s.setSpan(it, spanStart - 1, spanEnd, spanFlag)
+                    var spanStart = spanStart - 1
+                    if (spanStart < 0) spanStart = 0
+                    s.setSpan(it, spanStart, spanEnd, spanFlag)
                 }
             }
         }
@@ -160,25 +170,30 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
 
 
-        s.printLeadingMarginSpans(mEditText.selectionEnd)
+        s.printLeadingMarginSpans(0)
         Timber.e("mEditText.selectionStart = ${mEditText.selectionStart}")
-        if (isLastEditAppendedSmth() && s.isPreviousCharLineBreak(selection)) {
+        if (s.length > mLastTextSize
+                && s.isPreviousCharLineBreak(selection)) {
             Timber.e("isPreviousCharLineBreaker")
             val spans = s.getSpans(mEditText.selectionStart,
                     selection,
                     LeadingMarginSpan::class.java)
             spans.forEach {
-                Timber.e("moving leading margin spans backwards")
+
                 val spanStart = s.getSpanStart(it)
                 val spanEnd = s.getSpanEnd(it)
-                if (spanStart == spanEnd) s.insert(spanEnd, " ")
+
+                Timber.e("moving leading margin spans backwards $it spanStart = $spanStart spanEnd = $spanEnd")
                 s.removeSpan(it)
-                if (it is QuoteSpan) s.setSpan(it, spanStart, selection - 1, INCLUSIVE_INCLUSIVE)
-                else if (s.isPreviousCharLineBreak(selection - 1) && (it is KnifeBulletSpan || it is NumberedMarginSpan)) {
+                if (it is QuoteSpan && spanStart != spanEnd) s.setSpan(it, spanStart, selection - 1, SPAN_INCLUSIVE_INCLUSIVE)
+                else if ((s.isPreviousCharLineBreak(selection - 1) || s.isPreviousCharWhiteSpaceThenLineBreak(selection - 1))
+                        && (it is KnifeBulletSpan || it is NumberedMarginSpan)) {
                     //two ore more line breaks, don't add additional bullet spans
                     Timber.e("two ore more line breaks")
                 } else if ((it is KnifeBulletSpan || it is NumberedMarginSpan)) {
-                    s.setSpan(it, spanStart, mEditText.selectionEnd - 1, INCLUSIVE_INCLUSIVE)
+                    if (spanStart == mEditText.selectionEnd) return@forEach
+
+                    s.setSpan(it, spanStart, mEditText.selectionEnd - 1, SPAN_INCLUSIVE_INCLUSIVE)
 
                     Timber.e("adding  additional $it span mEditText.selectionStart = ${mEditText.selectionStart}" +
                             "mEditText.selectionEnd = ${mEditText.selectionEnd} ")
@@ -191,13 +206,32 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     if (s.isWithinWord(selection)) {
                         spanEnd = s.getParagraphBounds(selection).second
                     }
-                    s.setSpan(newSpan,
-                            mEditText.selectionStart,
-                            spanEnd,
-                            Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+                    if (!checkStartAndEnd(mEditText.selectionStart, spanEnd)) {
+                        Timber.e("start after end, this should not happen")
+
+                    } else {
+                        s.setSpan(newSpan,
+                                mEditText.selectionStart,
+                                spanEnd,
+                                SPAN_INCLUSIVE_INCLUSIVE)
+                        if (mEditText.selectionStart == spanEnd) {
+                            Timber.e("inserting whitespace")
+                            mEditText.text.insert(mEditText.selectionStart, " ")
+                        }
+                    }
                 }
             }
+        } else if (s.length < mLastTextSize) {
+            Timber.e("deletion")
+            s.getSpans(mEditText.selectionStart, mEditText.selectionEnd, LeadingMarginSpan::class.java)
+                    .forEach {
+                        if (s.getSpanStart(it) == s.getSpanEnd(it)) {
+                            Timber.e("deleting 0 $it, start is ${s.getSpanStart(it)} end = ${s.getSpanEnd(it)}")
+                            s.removeSpan(it)
+                        }
+                    }
         }
+        s.printLeadingMarginSpans(0)
 
         s.printStyleSpans(mEditText.selectionStart, mEditText.selectionEnd)
 
@@ -214,15 +248,21 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 currentState.modifiers)
         ignoreOnBind = false
         if (!ignoreTextChange) currentState.onNewText.invoke(this, state?.textPart ?: return)
-        mLastText = s.toString()
+        mLastTextSize = s.length
     }
 
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
     }
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-
+        Timber.e("onTextChanged s = $s start = $start before = $before count = $count")
+        s ?: return
+        if (s.isEmpty() && start == 0 && before != 0 && count == 0) {
+            Timber.e("removvvings")
+            (s as? Spannable)?.getSpans(0, 0, LeadingMarginSpan::class.java)?.forEach {
+                s.removeSpan(it)
+            }
+        }
     }
 
     public fun reSetText() {
@@ -234,9 +274,9 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         ignoreOnBind = false
     }
 
-    private fun isLastEditAppendedSmth() = mLastText.length < mEditText.text.length
 
     override fun onSelectionChanged(start: Int, end: Int) {
+        Timber.e("")
         val currentState = state ?: return
         val spans = mEditText.text.getSpans(start, end, LeadingMarginSpan::class.java)
         if (spans.size > 1) {
