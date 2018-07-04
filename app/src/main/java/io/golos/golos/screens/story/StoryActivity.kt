@@ -122,7 +122,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 val story = it.storyTree.rootStory() ?: return@Observer
 
-                val ets = if (story.parts.isEmpty()) StoryParserToRows.parse(story, true).toArrayList() else story.parts
+                val ets = if (story.parts.isEmpty())
+                    StoryParserToRows.parse(story, true).toArrayList() else story.parts
                 if (story.parts.isEmpty()) story.parts.addAll(ets)
 
                 if (ets.find { it is ImageRow && it.src.matches(Regexps.linkToGolosBoard) } != null) {

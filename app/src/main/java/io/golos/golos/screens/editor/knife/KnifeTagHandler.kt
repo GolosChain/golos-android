@@ -31,6 +31,7 @@ import io.golos.golos.screens.editor.isLastCharLineBreaker
 import io.golos.golos.screens.editor.printAllSpans
 import org.xml.sax.XMLReader
 import timber.log.Timber.e
+import timber.log.Timber.i
 
 class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
 
@@ -45,39 +46,65 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
 
     private data class NumberedList(val index: Int)
 
+    private var indexOfNumberedList = 0
+
+    private var isOrderedListOpened = false
+    private var isUnOrderedListOpened = false
+
     override fun handleTag(opening: Boolean, tag: String, output: Editable, xmlReader: XMLReader) {
         e("tag = $tag opening = $opening output = $output length = ${output.length}")
         if (opening) {
+            if (tag == "ol") {
+                indexOfNumberedList = 0
+                isOrderedListOpened = true
+            }else if (tag == "ul"){
+                isUnOrderedListOpened = true
+            }
 
-            if (tag.equals(BULLET_LI, ignoreCase = true)) {
+            if (tag.equals(LI, ignoreCase = true) && isUnOrderedListOpened) {
 
                 if (!output.isLastCharLineBreaker()) {
                     output.append("\n")
                 }
                 start(output, Li())
-            } else if (tag.equals(QUOTE, ignoreCase = true)) {
+            } else if (tag == LI && isOrderedListOpened) {
+                if (!output.isLastCharLineBreaker()) {
+                    output.append("\n")
+                }
+                start(output, NumberedList(++indexOfNumberedList))
+            }
+            else if (tag.equals(QUOTE, ignoreCase = true)) {
                 if (!output.isLastCharLineBreaker()) {
                     output.append("\n")
                 }
                 start(output, Quote())
-            } else if (tag.startsWith(NUMBERED_LIST)) {
-                if (!output.isLastCharLineBreaker()) {
-                    output.append("\n")
-                }
-                start(output, NumberedList(Integer.parseInt(tag.replace(allDigits, ""))))
-            } else if (tag.equals(STRIKETHROUGH_S, ignoreCase = true) || tag.equals(STRIKETHROUGH_STRIKE, ignoreCase = true) || tag.equals(STRIKETHROUGH_DEL, ignoreCase = true)) {
+            }  else if (tag.equals(STRIKETHROUGH_S, ignoreCase = true) || tag.equals(STRIKETHROUGH_STRIKE, ignoreCase = true) || tag.equals(STRIKETHROUGH_DEL, ignoreCase = true)) {
                 start(output, Strike())
             } else if (tag == HEADER) {
                 start(output, Header())
             }
 
-        } else {
-            if (tag.equals(BULLET_LI, ignoreCase = true)) {
+        } else {//closing tags
+            if (tag == "ol") {
+                indexOfNumberedList = 0
+                isOrderedListOpened = false
+            }else if (tag == "ul"){
+                isUnOrderedListOpened = false
+            }
+
+            if (tag.equals(LI, ignoreCase = true) && isUnOrderedListOpened) {
                 if (!output.isLastCharLineBreaker()) {
                     output.append("\n")
                 }
                 end(output, Li::class.java, spanFactory?.produceOfType(KnifeBulletSpan::class.java)
                         ?: KnifeBulletSpan(0, 0, 0))
+
+            } else if (tag.equals(LI, ignoreCase = true) && isOrderedListOpened) {
+                if (!output.isLastCharLineBreaker()) {
+                    output.append("\n")
+                }
+                end(output, NumberedList::class.java, spanFactory?.produceOfType(NumberedMarginSpan::class.java)
+                        ?: NumberedMarginSpan(10, 6, 1))
 
             } else if (tag.equals(QUOTE, ignoreCase = true)) {
                 if (!output.isLastCharLineBreaker()) {
@@ -85,13 +112,6 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
                 }
                 end(output, Quote::class.java, spanFactory?.produceOfType(KnifeQuoteSpan::class.java)
                         ?: KnifeQuoteSpan(0, 0, 0))
-
-            } else if (tag.startsWith(NUMBERED_LIST, ignoreCase = true)) {
-                if (!output.isLastCharLineBreaker()) {
-                    output.append("\n")
-                }
-                end(output, NumberedList::class.java, spanFactory?.produceOfType(NumberedMarginSpan::class.java)
-                        ?: NumberedMarginSpan(0, 0, 1))
 
             } else if (tag.equals(STRIKETHROUGH_S, ignoreCase = true) || tag.equals(STRIKETHROUGH_STRIKE, ignoreCase = true) || tag.equals(STRIKETHROUGH_DEL, ignoreCase = true)) {
                 end(output, Strike::class.java, StrikethroughSpan())
@@ -103,7 +123,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     }
 
     private fun start(output: Editable, mark: Any) {
-        e("start, mark = $mark")
+        i("start, mark = $mark")
         output.setSpan(mark, output.length, output.length, Spanned.SPAN_MARK_MARK)
     }
 
@@ -115,14 +135,12 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
         val start = output.getSpanStart(last)
         val end = output.length
 
-        e("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
+        i("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
         output.removeSpan(last)
         val numberedList = if (last is NumberedList) NumberedMarginSpan((replaces[0] as NumberedMarginSpan).leadWidth,
                 (replaces[0] as NumberedMarginSpan).gapWidth,
                 last.index)
         else null
-
-        e("numberedList = $numberedList sublist = ${output.substring(start, end)}")
 
         if (start != end) {
             for (replace in replaces) {
@@ -142,14 +160,13 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     }
 
     companion object {
-        const val BULLET_LI = "li"
+        const val LI = "li"
         const val QUOTE = "custom_quote"
-        const val NUMBERED_LIST = "custom_n_list"
         const val HEADER = "custom_h"
         const val STRIKETHROUGH_S = "s"
         const val STRIKETHROUGH_STRIKE = "strike"
         const val STRIKETHROUGH_DEL = "del"
-        private val allDigits = "\\D".toRegex()
+
 
         private fun getLast(text: Editable, kind: Class<*>): Any? {
             val spans = text.getSpans(0, text.length, kind)

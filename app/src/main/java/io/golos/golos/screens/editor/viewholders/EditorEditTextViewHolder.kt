@@ -21,6 +21,7 @@ import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.widgets.SelectionAwareEditText
 import timber.log.Timber
+import timber.log.Timber.i
 
 
 class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
@@ -255,10 +256,10 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     }
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        Timber.e("onTextChanged s = $s start = $start before = $before count = $count")
+        i("onTextChanged")
         s ?: return
         if (s.isEmpty() && start == 0 && before != 0 && count == 0) {
-            Timber.e("removvvings")
+            i("removing all leading margin spans")
             (s as? Spannable)?.getSpans(0, 0, LeadingMarginSpan::class.java)?.forEach {
                 s.removeSpan(it)
             }

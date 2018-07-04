@@ -1,5 +1,6 @@
 package io.golos.golos.screens.story.model
 
+import eu.bittrade.libs.steemj.base.models.VoteLight
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
@@ -23,6 +24,18 @@ object StoryParserToRows {
     private const val centerStart = "<center>"
     private const val centerEnd = "</center>"
     private const val nbsp = "&nbsp;"
+
+    fun parse(story: String,
+              checkEmptyHtml: Boolean = false,
+              skipHtmlClean: Boolean = false): List<Row> {
+        return parse(GolosDiscussionItem("", 0L, "", "", arrayListOf<String>(),
+                arrayListOf<String>(), arrayListOf<String>(), 0, 0L, 0, "",
+                0.0, story, 0L, "", GolosDiscussionItem.Format.HTML, "", arrayListOf<StoryWrapper>(),
+                "", "", 0, 0, 0L, 0L, 0L,
+                GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT, arrayListOf<VoteLight>(),
+                GolosDiscussionItem.ItemType.PLAIN, "", "", arrayListOf<Row>()),
+                checkEmptyHtml, skipHtmlClean)
+    }
 
     fun parse(story: GolosDiscussionItem,
               checkEmptyHtml: Boolean = false,
@@ -62,6 +75,9 @@ object StoryParserToRows {
                     // so i replace new lines with <br>, if it not prescends by <p>
                     "<br>"
                 }
+                str.replaceSb("h\\d>".toRegex(), {
+                    "h3>"
+                })
 
                 val whiteList = Whitelist.basicWithImages()
                 whiteList.addTags("h1", "h2", "h3", "h4")
@@ -162,7 +178,7 @@ object StoryParserToRows {
 
             if (out.size != (imagesList.size + strings.size)) {
                 imageRows.forEach {
-                    if (!out.contains(it))out.add(it)
+                    if (!out.contains(it)) out.add(it)
                 }
             }
 

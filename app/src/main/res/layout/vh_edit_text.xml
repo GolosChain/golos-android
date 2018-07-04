@@ -4,7 +4,7 @@
     style="@style/EditTextWithPinkCursor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:inputType="textMultiLine"
+    android:inputType="textMultiLine|textCapSentences"
     android:minLines="2"
     android:lineSpacingExtra="2dp"
     android:paddingEnd="@dimen/margin_material"

@@ -471,7 +471,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 val placeToInsertStartBreak = startPointer
 
                 val pointerToParagraph = editable.getParagraphBounds(startPointer)
-                if (checkStartAndEnd(pointerToParagraph.first,pointerToParagraph.second)){
+                if (checkStartAndEnd(pointerToParagraph.first, pointerToParagraph.second)) {
                     editable.removeAllLeadingMarginSpansAt(pointerToParagraph.first, pointerToParagraph.second)
                 }
 
@@ -490,7 +490,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             } else {//startPointer == endPointer
 
                 var pointerToParagraph = editable.getParagraphBounds(startPointer)
-                if (!checkStartAndEnd(pointerToParagraph.first,pointerToParagraph.second))return
+                if (!checkStartAndEnd(pointerToParagraph.first, pointerToParagraph.second)) return
 
                 if (pointerToParagraph.first == pointerToParagraph.second) {
                     editable.insert(pointerToParagraph.second, " ")

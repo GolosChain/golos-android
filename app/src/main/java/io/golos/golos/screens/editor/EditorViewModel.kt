@@ -9,7 +9,6 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.repository.model.StoriesFeed
-import io.golos.golos.screens.editor.knife.KnifeParser
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ErrorCode
@@ -104,7 +103,8 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         .map {
                             when (it) {
                                 is TextRow -> EditorTextPart(UUID.randomUUID().toString(),
-                                        SpannableStringBuilder.valueOf(KnifeParser.fromHtml(it.text)))
+                                        SpannableStringBuilder.valueOf(mHtmlHandler?.fromHtml(it.text)
+                                                ?: ""))
                                 is ImageRow -> EditorImagePart(UUID.randomUUID().toString(), "image", it.src)
                             }
                         }

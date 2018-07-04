@@ -156,9 +156,10 @@ fun TextView.setTextColorCompat(@ColorRes colorId: Int) {
     this.setTextColor(ContextCompat.getColor(this.context, colorId))
 }
 
-fun Activity.getColorCompat(@ColorRes coloId: Int): Int {
+fun Context.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(this, coloId)
 }
+
 
 fun Fragment.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(activity!!, coloId)
@@ -470,6 +471,15 @@ fun ValueAnimator.setInterpolatorB(interpolator: TimeInterpolator): ValueAnimato
 
 fun Fragment.getDimension(@DimenRes dimen: Int): Int {
     return context?.resources?.getDimension(dimen)?.toInt() ?: 0
+}
+fun View.getDimension(@DimenRes dimen: Int): Int {
+    return context?.resources?.getDimension(dimen)?.toInt() ?: 0
+}
+fun Context.getDimen(@DimenRes resid: Int): Float {
+    return resources.getDimension(resid)
+}
+fun View.getDimen(@DimenRes resid: Int): Float {
+    return resources.getDimension(resid)
 }
 
 public fun ViewGroup.iterator(): Iterator<View> {

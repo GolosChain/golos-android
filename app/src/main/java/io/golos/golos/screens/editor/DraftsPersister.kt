@@ -122,7 +122,10 @@ class DraftsPersister(context: Context, private val htmlHandler: HtmlHandler)
                  db: SQLiteDatabase) {
             val parts = parts.map {
                 if (it is EditorTextPart) {
-                    EditorPartDescriptor("text", it.id, null, null, it.htmlRepresentation, it.startPointer, it.endPointer)
+                    EditorPartDescriptor("text", it.id,
+                            null,
+                            null,
+                            it.htmlRepresentation, it.startPointer, it.endPointer)
                 } else {
                     val imagePart = it as EditorImagePart
                     EditorPartDescriptor("image", it.id, imagePart.imageName, imagePart.imageUrl, null, imagePart.startPointer, imagePart.endPointer)

@@ -26,6 +26,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ImageSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.StrikethroughSpan;
@@ -38,32 +39,68 @@ import org.jetbrains.annotations.Nullable;
 import io.golos.golos.screens.editor.UtilsKt;
 import timber.log.Timber;
 
+import static io.golos.golos.screens.editor.knife.KnifeTagHandler.HEADER;
+import static io.golos.golos.screens.editor.knife.KnifeTagHandler.QUOTE;
+
 public class KnifeParser {
-
-
     public static Spanned fromHtml(String source) {
         return fromHtml(source, null);
     }
 
     public static Spanned fromHtml(String source, @Nullable SpanFactory spanFactory) {
+        source = source
+                .replaceAll("blockquote>", QUOTE + ">")
+                .replaceAll("h\\d>", HEADER + ">")
+                .replaceAll("<ul>\\s+<br>", "<ul>")
+                .replaceAll("</li>\\s+<br>", "</li>")
+                .replaceAll("<ol>\\s+<br>","<ol>");
+        return fromInnerHtmlFormat(source, spanFactory);
+    }
+
+
+    private static Spanned fromInnerHtmlFormat(String source, @Nullable SpanFactory spanFactory) {
         Timber.e("from html = " + source);
         Spanned s = Html
                 .fromHtml(source.startsWith("<b> </b>") ? source
                         : "<b> </b>" + source, null, new KnifeTagHandler(spanFactory));
+        Timber.e("after first = " + s);
         if (s instanceof SpannableStringBuilder) {
-
             SpannableStringBuilder sb = ((SpannableStringBuilder) s);
             UtilsKt.changeLeadingSpansFlagParagraphToInclusiveInclusive(sb);
-            UtilsKt.printLeadingMarginSpans(sb, 0);
         }
-        return UtilsKt.trimStartAndEmd(s);
+        return UtilsKt.trimStartAndEnd(s);
 
     }
 
     public static String toHtml(Spanned text) {
+        Timber.e("from = " + text + ", its length is " + text.length());
+        if (text instanceof SpannableStringBuilder) {
+            SpannableStringBuilder sb = (SpannableStringBuilder) text;
+            LeadingMarginSpan[] leadingMarginSpans = sb.getSpans(0, sb.length(), LeadingMarginSpan.class);
+            for (LeadingMarginSpan leadingMarginSpan : leadingMarginSpans) {
+                int spanEnd = sb.getSpanEnd(leadingMarginSpan);
+                int spanStart = sb.getSpanStart(leadingMarginSpan);
+                if (spanStart != spanEnd && spanEnd != 0) {
+                    if (sb.charAt(spanEnd - 1) == '\n') {
+                        sb.removeSpan(leadingMarginSpan);
+                        sb.setSpan(leadingMarginSpan, spanStart, spanEnd - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    }
+                }
+            }
+        }
         StringBuilder out = new StringBuilder();
         withinHtml(out, text);
-        return tidy(out.toString());
+        String htmlString = tidy(out.toString());
+        htmlString = htmlString
+                .replaceAll("</li></ul><ul><li>", "</li><li>")
+                .replaceAll("</li></ol><ol><li>", "</li><li>");
+        Timber.e("htmlstr = " + htmlString);
+        return htmlString
+                .replaceAll(QUOTE + ">", "blockquote>")
+                .replaceAll(HEADER + ">", "h3>")
+                .replaceAll("</li><li>", "</li><br><li>")
+                .replaceAll("</li></ul>", "</li><br></ul>")
+                .replaceAll("</li></ol>", "</li><br></ol>");
     }
 
     private static void withinHtml(StringBuilder out, Spanned text) {
@@ -142,12 +179,12 @@ public class KnifeParser {
 
             NumberedMarginSpan[] spans = text.getSpans(i, next, NumberedMarginSpan.class);
             for (NumberedMarginSpan span : spans) {
-                out.append("<" + KnifeTagHandler.NUMBERED_LIST).append(span.getIndex()).append(">");
+                out.append("<li>");
             }
 
             withinContent(out, text, i, next);
             for (NumberedMarginSpan span : spans) {
-                out.append("</" + KnifeTagHandler.NUMBERED_LIST).append(span.getIndex()).append(">");
+                out.append("</li>");
             }
         }
 

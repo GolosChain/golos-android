@@ -3,6 +3,7 @@ package io.golos.golos.screens.editor
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import io.golos.golos.screens.editor.knife.KnifeParser
+import timber.log.Timber
 import java.util.*
 
 
@@ -29,7 +30,7 @@ data class EditorImagePart(override val id: String = UUID.randomUUID().toString(
                            val imageName: String,
                            val imageUrl: String) : EditorPart(id) {
     override val htmlRepresentation
-        get() = "<center> <a href =\"$imageUrl\">$imageName</a> </center>"
+        get() = "<center> <img src=\"$imageUrl\">$imageName</img> </center>"
 
 
     override var startPointer = CURSOR_POINTER_NOT_SELECTED
@@ -57,7 +58,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
 
     override val htmlRepresentation: String
         get() {
-            var out = KnifeParser.toHtml(text)
+            var out = KnifeParser.toHtml (SpannableStringBuilder(text))
             val scriptRegex = "<(/)?[ ]*script[^>]*>"
             out = out.replace(Regex(scriptRegex), "")
 
@@ -74,6 +75,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
                     "*[link removed]*"
                 else foundString
             })
+            Timber.e("text = $text out = $out")
 
             return out
         }

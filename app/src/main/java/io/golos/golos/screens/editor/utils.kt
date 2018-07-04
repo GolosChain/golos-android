@@ -117,7 +117,7 @@ fun CharSequence.isPreviousCharWhiteSpaceThenLineBreak(pointToChar: Int): Boolea
     return length > 2 && pointToChar > 2 && pointToChar <= length && this[pointToChar - 1] == ' ' && isPreviousCharLineBreak(pointToChar - 1)
 }
 
-fun Spanned.trimStartAndEmd(): Spanned {
+fun Spanned.trimStartAndEnd(): Spanned {
     if (this is SpannableStringBuilder) {
         while (!this.isEmpty() && (this[0].isWhitespace() || this[0].toShort() == 8205.toShort())) delete(0, 1)
         while (!this.isEmpty() && (this[lastIndex].isWhitespace() || this[0].toShort() == 8205.toShort())) delete(lastIndex, length)
@@ -343,7 +343,7 @@ fun CharSequence.isEndOfLine(pointerToPosition: Int): Boolean {
 fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
 
 
-fun Editable.printLeadingMarginSpans(pointerToPosition: Int) {
+fun Spanned.printLeadingMarginSpans(pointerToPosition: Int) {
     getSpans(pointerToPosition, length, LeadingMarginSpan::class.java)
             .forEach {
                 Timber.e("$it start = ${getSpanStart(it)} end = ${getSpanEnd(it)} , flag  = ${getSpanFlags(it)}")

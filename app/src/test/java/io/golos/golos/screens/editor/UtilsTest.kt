@@ -1,5 +1,10 @@
 package io.golos.golos.screens.editor
 
+import android.text.Spannable
+import io.golos.golos.screens.editor.knife.KnifeBulletSpan
+import io.golos.golos.screens.editor.knife.KnifeParser
+import io.golos.golos.screens.editor.knife.NumberedMarginSpan
+import io.golos.golos.screens.story.model.StoryParserToRows
 import junit.framework.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,8 +105,26 @@ class UtilsTest {
     @Test
     fun testTrim() {
         var text = " 123 ".asSpannable()
-        Assert.assertEquals("123", text.trimStartAndEmd().toString())
+        (0 until 20).forEach { text.trimStartAndEnd() }
+        Assert.assertEquals("123", text.toString())
         text = "\n 123 ".asSpannable()
-        Assert.assertEquals("123", text.trimStartAndEmd().toString())
+        Assert.assertEquals("123", text.trimStartAndEnd().toString())
+    }
+
+    @Test
+    fun testFromHtml() {
+        var spanable = "12\n12".asSpannable()
+        spanable.setSpan(KnifeBulletSpan(0, 0, 0), 0, 3, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        spanable.setSpan(KnifeBulletSpan(0, 0, 0), 3, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        var html = KnifeParser.toHtml(spanable)
+        Assert.assertEquals("<ul><li>12</li><br><li>12</li><br></ul>", html)
+        spanable = "12\n12\n34\n34".asSpannable()
+        spanable.setSpan(KnifeBulletSpan(0, 0, 0), 0, 2, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        spanable.setSpan(KnifeBulletSpan(0, 0, 0), 3, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        spanable.setSpan(NumberedMarginSpan(0, 0, 0), 6, 8, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        spanable.setSpan(NumberedMarginSpan(0, 0, 0), 9, 11, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        html = KnifeParser.toHtml(spanable)
+        val parts = StoryParserToRows.parse(html)
+        println(parts)
     }
 }

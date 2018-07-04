@@ -33,7 +33,6 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
