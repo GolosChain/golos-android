@@ -10,10 +10,8 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import io.golos.golos.R
-import io.golos.golos.model.Notification
 import io.golos.golos.notifications.NOTIFICATION_KEY
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
@@ -89,12 +87,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         Repository.get.lastCreatedPost().observe(this, this)
 
         checkStartArgsForNotification(intent)
-
-        findViewById<Button>(R.id.add_btn).setOnClickListener {
-            val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
-            val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-            Repository.get.notificationsRepository.onReceiveNotifications(notifications)
-        }
 
         mNotificationsRecycler.adapter = NotificationsAdapter(listOf(),
                 {
@@ -203,112 +195,3 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
     }
 }
 
-val ntfns = "[\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
-        "    \"count\": 57,\n" +
-        "    \"voter\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"235235235\",\n" +
-        "    \"type\": \"upvote\",\n" +
-        "    \"parent_body\": \"edited\\n\\n\"\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"asf\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/asf\",\n" +
-        "    \"count\": 1,\n" +
-        "    \"voter\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"b7f27653-8324-4daa-a46a-752bdf352146\",\n" +
-        "    \"type\": \"upvote\",\n" +
-        "    \"parent_body\": \"556de2f2-3196-4b5f-81e4-eac7a4ca94ec\"\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"amount\": \"0.001 GOLOS\",\n" +
-        "    \"_to\": \"yuri-vlad-second\",\n" +
-        "    \"memo\": \"блабла\",\n" +
-        "    \"type\": \"transfer\",\n" +
-        "    \"_from\": {\n" +
-        "      \"profile_image\": \"https:\\/\\/s10.postimg.org\\/izwpd7gt5\\/9168810_original.jpg\",\n" +
-        "      \"account\": \"sualex\"\n" +
-        "    }\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
-        "    \"author\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"count\": 1,\n" +
-        "    \"comment_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234#@yuri-vlad\\/re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\",\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
-        "    \"type\": \"comment\",\n" +
-        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\",\n" +
-        "    \"permlink\": \"re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\"\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
-        "    \"author\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"count\": 1,\n" +
-        "    \"comment_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234#@yuri-vlad\\/re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\",\n" +
-        "    \"parent_depth\": 1,\n" +
-        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
-        "    \"type\": \"comment\",\n" +
-        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\",\n" +
-        "    \"permlink\": \"re-yuri-vlad-second-sdgsdgsdg234234-20180418t093157785z\"\n" +
-        "  }," +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/73f6a95e-b346-49d3-b411-8556b9b8f906\",\n" +
-        "    \"count\": 1,\n" +
-        "    \"voter\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"235235235\",\n" +
-        "    \"type\": \"upvote\",\n" +
-        "    \"parent_body\": \"edited\"\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
-        "    \"count\": 1,\n" +
-        "    \"weight\": -10000,\n" +
-        "    \"voter\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
-        "    \"type\": \"downvote\",\n" +
-        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\"\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"parent_author\": \"yuri-vlad-second\",\n" +
-        "    \"parent_permlink\": \"sdgsdgsdg234234\",\n" +
-        "    \"parent_url\": \"\\/test\\/@yuri-vlad-second\\/sdgsdgsdg234234\",\n" +
-        "    \"count\": 7,\n" +
-        "    \"weight\": -10000,\n" +
-        "    \"voter\": {\n" +
-        "      \"account\": \"yuri-vlad\"\n" +
-        "    },\n" +
-        "    \"parent_depth\": 0,\n" +
-        "    \"parent_title\": \"sdgsdgsdg234234\",\n" +
-        "    \"type\": \"downvote\",\n" +
-        "    \"parent_body\": \"sgsdgsdgsdgsdgsdfgsdgsdg2\"\n" +
-        "  }\n" +
-        "]"

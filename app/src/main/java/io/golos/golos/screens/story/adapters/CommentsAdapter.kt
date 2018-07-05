@@ -17,6 +17,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.screens.editor.knife.KnifeParser
+import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -89,7 +91,11 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
 }
 
 
-class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
+class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
+    override fun <T : Any?> produceOfType(type: Class<*>): T {
+       return itemView.context.createGolosSpan(type)
+    }
+
     private val mGlide = Glide.with(itemView)
     private val mText: TextView = itemView.findViewById(R.id.text)
     private val mUsernameTv: TextView = itemView.findViewById(R.id.username_tv)
@@ -237,7 +243,8 @@ class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflat
                         if (it is TextRow) "${it.text}\n"
                         else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
                     }.reduce { s1, s2 -> s1 + s2 }
-                    mText.text = outText.trim().toHtml().trim()
+
+                    mText.text = KnifeParser.fromHtml(outText.trim(), this)
                 }
             }
         }

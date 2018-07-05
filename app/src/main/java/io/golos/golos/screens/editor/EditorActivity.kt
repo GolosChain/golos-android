@@ -563,7 +563,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
                     if (!checkStartAndEnd(startOfWord, endOfWord)) return false
 
-
+                    editable.getSpans(startOfWord, endOfWord, styleSpan::class.java).forEach {
+                        editable.removeSpan(it)
+                    }
                     editable.setSpan(styleSpan, startOfWord, endOfWord + 1, EXCLUSIVE_EXCLUSIVE)
                 } else {
                     Timber.e("we are ath some sort of whitespace")
@@ -663,18 +665,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
 
     override fun <T : Any?> produceOfType(type: Class<*>): T {
-        return when (type) {
-            KnifeBulletSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
-                    getDimen(R.dimen.quint).toInt(),
-                    getDimen(R.dimen.quater).toInt()) as T
-            NumberedMarginSpan::class.java -> NumberedMarginSpan(12, getDimen(R.dimen.margin_material_half).toInt(),
-                    1) as T
-            KnifeQuoteSpan::class.java -> KnifeQuoteSpan(getColorCompat(R.color.blue_light),
-                    getDimen(R.dimen.quint).toInt(),
-                    getDimen(R.dimen.quater).toInt()) as T
-            AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt()) as T
-            else -> Any() as T
-        }
+        return createGolosSpan(type)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -123,7 +123,9 @@ object StoryParserToRows {
             }
 
             str.removeString(nbsp)
+            str.replace("<br>\\s*<br>".toRegex(), "<br>")
             str.replace("(<br>)+".toRegex(), "<br>")
+            str.replace("<br>\\s*<p>".toRegex(), "<br>")
             if (str.startsWith("<br>")) str.delete(0, 4)
 
             var strings = str.split(Regex("(<p>)?<img.+?>(</p>)?"))

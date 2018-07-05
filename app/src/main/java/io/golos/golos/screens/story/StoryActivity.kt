@@ -114,11 +114,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
                     mTitleTv.setViewGone()
                 }
-                if (it.isLoading) {
-                    if (!mSwipeToRefresh.isRefreshing) mSwipeToRefresh.isRefreshing = true
-                } else {
-                    mSwipeToRefresh.isRefreshing = false
-                }
+                mSwipeToRefresh.setRefreshingS(it.isLoading)
 
                 val story = it.storyTree.rootStory() ?: return@Observer
 
@@ -331,6 +327,12 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         ?: return@Observer,
                         ctx = this)
 
+                if (it.storyTree.storyWithState()?.isStoryEditable == true
+                        && mToolbar.menu?.findItem(R.id.of) == null){
+                    mToolbar.menu?.clear()
+                    mToolbar.inflateMenu(R.menu.story_menu_editable)
+                }
+
             } else {
                 setFullscreenProgress(true)
             }
@@ -466,6 +468,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        Timber.e("onCreateOptionsMenu ViewModel.isPostEditable() = ${mViewModel.isPostEditable()}")
         if (mViewModel.isPostEditable()) menuInflater.inflate(R.menu.story_menu_editable, menu)
         else menuInflater.inflate(R.menu.story_menu_not_editable, menu)
         return true

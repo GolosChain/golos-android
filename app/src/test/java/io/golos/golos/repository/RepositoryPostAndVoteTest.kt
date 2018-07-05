@@ -15,14 +15,13 @@ import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.Htmlizer
 import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.util.*
 import java.util.concurrent.Executor
 
@@ -82,12 +81,26 @@ class RepositoryPostAndVoteTest {
     }
 
     @Test
+    fun testIsEditable() {
+        var story: StoryWithComments? = null
+        val permlink = "htr45fgjhtfj"
+        val blog = "test"
+        val stories = repo.getStories(FeedType.UNCLASSIFIED).observeForever {
+            story = it?.items?.first()
+        }
+        repo.requestStoryUpdate(userName, permlink, blog, FeedType.UNCLASSIFIED, {_,_ ->})
+        Assert.assertNotNull(story)
+        story?: return
+        Assert.assertTrue(story!!.storyWithState()!!.isStoryEditable)
+    }
+
+    @Test
     fun createPost() {
 
         val image = EditorImagePart(imageName = "image", imageUrl = Utils.getFileFromResources("back_rect.png").absolutePath)
         repo.createPost(UUID.randomUUID().toString(),
                 listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content")),
-                image),
+                        image),
                 listOf("test"), { a, b -> print(b) })
 
         Thread.sleep(5000)
@@ -516,9 +529,9 @@ class RepositoryPostAndVoteTest {
 
     @Test
     fun getUserComments() {
-        val filter =  StoryFilter(userNameFilter = "dimzec89")
+        val filter = StoryFilter(userNameFilter = "dimzec89")
         val newStories = repo.getStories(FeedType.COMMENTS, filter)
-        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, filter, null , null)
+        repo.requestStoriesListUpdate(20, FeedType.COMMENTS, filter, null, null)
         println(newStories)
     }
 }

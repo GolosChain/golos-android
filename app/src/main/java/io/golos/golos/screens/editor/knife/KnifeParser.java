@@ -53,7 +53,8 @@ public class KnifeParser {
                 .replaceAll("h\\d>", HEADER + ">")
                 .replaceAll("<ul>\\s+<br>", "<ul>")
                 .replaceAll("</li>\\s+<br>", "</li>")
-                .replaceAll("<ol>\\s+<br>","<ol>");
+                .replaceAll("<li>\\s<br>", "<li>")
+                .replaceAll("<ol>\\s+<br>", "<ol>");
         return fromInnerHtmlFormat(source, spanFactory);
     }
 
@@ -98,9 +99,12 @@ public class KnifeParser {
         return htmlString
                 .replaceAll(QUOTE + ">", "blockquote>")
                 .replaceAll(HEADER + ">", "h3>")
-                .replaceAll("</li><li>", "</li><br><li>")
-                .replaceAll("</li></ul>", "</li><br></ul>")
-                .replaceAll("</li></ol>", "</li><br></ol>");
+                .replaceAll("</li><li>", "</li>\n<li>")
+                .replaceAll("</li></ul>", "</li>\n</ul>")
+                .replaceAll("</li></ol>", "</li>\n</ol>")
+                .replaceAll("<ul><li>","<ul>\n<li>")
+                .replaceAll("<ol><li>","<ol>\n<li>")
+                .trim();
     }
 
     private static void withinHtml(StringBuilder out, Spanned text) {
@@ -352,4 +356,5 @@ public class KnifeParser {
     private static String tidy(String html) {
         return html.replaceAll("</ul>(<br>)?", "</ul>").replaceAll("</blockquote>(<br>)?", "</blockquote>");
     }
+
 }

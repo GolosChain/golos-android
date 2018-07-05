@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.os.Looper
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
-import android.text.style.AbsoluteSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,14 +16,14 @@ import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.target.ViewTarget
 import io.golos.golos.R
-import io.golos.golos.screens.editor.knife.*
+import io.golos.golos.screens.editor.knife.KnifeParser
+import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.Row
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.ImageUriResolver
-import io.golos.golos.utils.getColorCompat
-import io.golos.golos.utils.getDimen
+import io.golos.golos.utils.createGolosSpan
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
@@ -177,7 +176,11 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     }
 }
 
-class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
+class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
+    override fun <T : Any?> produceOfType(type: Class<*>): T {
+        return itemView.context.createGolosSpan(type)
+    }
+
     private val mText: TextView = itemView.findViewById(R.id.text)
 
     init {
@@ -189,23 +192,7 @@ class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(
             field = value
             if (field == null) return
             val textRow = field!!.row as TextRow
-            val text = KnifeParser.fromHtml(textRow.text, object : SpanFactory {
-                override fun <T : Any?> produceOfType(type: Class<*>): T {
-                    val view = itemView
-                    return when (type) {
-                        KnifeBulletSpan::class.java -> KnifeBulletSpan(view.getColorCompat(R.color.blue_light),
-                                view.getDimen(R.dimen.quint).toInt(),
-                                view.getDimen(R.dimen.quater).toInt()) as T
-                        NumberedMarginSpan::class.java -> NumberedMarginSpan(12, view.getDimen(R.dimen.margin_material_half).toInt(),
-                                1) as T
-                        KnifeQuoteSpan::class.java -> KnifeQuoteSpan(view.getColorCompat(R.color.blue_light),
-                                view.getDimen(R.dimen.quint).toInt(),
-                                view.getDimen(R.dimen.quater).toInt()) as T
-                        AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(view.getDimen(R.dimen.font_medium).toInt()) as T
-                        else -> Any() as T
-                    }
-                }
-            })
+            val text = KnifeParser.fromHtml(textRow.text, this)
             if (text.isEmpty()) {
                 mText.visibility = View.GONE
             } else {

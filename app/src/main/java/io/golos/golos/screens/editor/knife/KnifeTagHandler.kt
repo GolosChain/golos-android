@@ -52,7 +52,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     private var isUnOrderedListOpened = false
 
     override fun handleTag(opening: Boolean, tag: String, output: Editable, xmlReader: XMLReader) {
-        e("tag = $tag opening = $opening output = $output length = ${output.length}")
+      //  e("tag = $tag opening = $opening output = $output length = ${output.length}")
         if (opening) {
             if (tag == "ol") {
                 indexOfNumberedList = 0
@@ -123,7 +123,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     }
 
     private fun start(output: Editable, mark: Any) {
-        i("start, mark = $mark")
+      //  i("start, mark = $mark")
         output.setSpan(mark, output.length, output.length, Spanned.SPAN_MARK_MARK)
     }
 
@@ -135,7 +135,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
         val start = output.getSpanStart(last)
         val end = output.length
 
-        i("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
+      //  i("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
         output.removeSpan(last)
         val numberedList = if (last is NumberedList) NumberedMarginSpan((replaces[0] as NumberedMarginSpan).leadWidth,
                 (replaces[0] as NumberedMarginSpan).gapWidth,

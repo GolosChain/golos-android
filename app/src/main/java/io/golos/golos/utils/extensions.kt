@@ -24,10 +24,12 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.SearchView
 import android.text.Html
 import android.text.Spanned
+import android.text.style.AbsoluteSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,12 +53,17 @@ import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosCommentNotification
 import io.golos.golos.repository.model.GolosDownVoteNotification
 import io.golos.golos.repository.model.GolosUpVoteNotification
+import io.golos.golos.screens.editor.getDimen
+import io.golos.golos.screens.editor.knife.KnifeBulletSpan
+import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
+import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.story.model.StoryWrapper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.text.MatchResult
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -312,6 +319,27 @@ fun String.toHtml(): Spanned {
     }
 }
 
+fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
+    return when (type) {
+        KnifeBulletSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
+                getDimen(R.dimen.quint).toInt(),
+                getDimen(R.dimen.quater).toInt()) as T
+        NumberedMarginSpan::class.java -> NumberedMarginSpan(12, getDimen(R.dimen.margin_material_half).toInt(),
+                1) as T
+        KnifeQuoteSpan::class.java -> KnifeQuoteSpan(getColorCompat(R.color.blue_light),
+                getDimen(R.dimen.quint).toInt(),
+                getDimen(R.dimen.quater).toInt()) as T
+        AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt()) as T
+        else -> Any() as T
+    }
+}
+
+fun SwipeRefreshLayout.setRefreshingS(isRefreshing:Boolean){
+    if (isRefreshing && !this.isRefreshing )this.isRefreshing = true
+    else   if (!isRefreshing && this.isRefreshing)this.isRefreshing = false
+}
+
+
 fun View.showSnackbar(message: Int) {
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
@@ -529,6 +557,36 @@ fun StringBuilder.removeString(str: String): StringBuilder {
 public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchResult) -> CharSequence): StringBuilder {
     val str = replace(regex, transform)
     this.replace(0, length, str)
+    return this
+}
+public fun StringBuilder.replaceSb(regex: Regex, to:String): StringBuilder {
+    var match: MatchResult? = regex.find(this,0) ?: return this
+
+    var lastStart = 0
+    val length = length
+    do {
+        val foundMatch = match!!
+        append(this, lastStart, foundMatch.range.start)
+        append(to)
+        lastStart = foundMatch.range.endInclusive + 1
+        match = foundMatch.next()
+    } while (lastStart < length && match != null)
+
+    if (lastStart < length) {
+        append(this, lastStart, length)
+    }
+
+
+    return this
+}
+
+public fun StringBuilder.replaceSb(what:String, to: String): StringBuilder {
+    var index = indexOf(what)
+    while (index != -1) {
+        replace(index, index + what.length, to)
+        index += to.length // Move to the end of the replacement
+        index = indexOf(what, index)
+    }
     return this
 }
 

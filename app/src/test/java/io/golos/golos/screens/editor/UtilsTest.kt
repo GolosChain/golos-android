@@ -1,5 +1,6 @@
 package io.golos.golos.screens.editor
 
+import android.text.Html
 import android.text.Spannable
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeParser
@@ -116,7 +117,10 @@ class UtilsTest {
         var spanable = "12\n12".asSpannable()
         spanable.setSpan(KnifeBulletSpan(0, 0, 0), 0, 3, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         spanable.setSpan(KnifeBulletSpan(0, 0, 0), 3, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+
         var html = KnifeParser.toHtml(spanable)
+
+        println("html has line break = ${Html.toHtml(spanable).contains("\n")}")
         Assert.assertEquals("<ul><li>12</li><br><li>12</li><br></ul>", html)
         spanable = "12\n12\n34\n34".asSpannable()
         spanable.setSpan(KnifeBulletSpan(0, 0, 0), 0, 2, Spannable.SPAN_INCLUSIVE_INCLUSIVE)

@@ -10,6 +10,7 @@ import eu.bittrade.libs.steemj.base.models.AccountName
 import eu.bittrade.libs.steemj.enums.PrivateKeyType
 import eu.bittrade.libs.steemj.exceptions.SteemResponseError
 import eu.bittrade.libs.steemj.util.ImmutablePair
+import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
@@ -19,6 +20,8 @@ import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.editor.EditorPart
+import io.golos.golos.screens.editor.knife.KnifeParser
+import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -44,7 +47,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               poster: Poster? = null,
                               notificationsRepository: NotificationsRepositoryImpl? = null,
                               private val mHtmlizer: Htmlizer = object : Htmlizer {
-                                  override fun toHtml(input: String) = input.toHtml()
+                                  override fun toHtml(input: String) = KnifeParser.fromHtml(input, object : SpanFactory {
+                                      override fun <T : Any?> produceOfType(type: Class<*>): T {
+                                          return App.context.createGolosSpan(type)
+                                      }
+                                  })
                               },
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
                               private val mLogger: ExceptionLogger?) : Repository() {
@@ -982,6 +989,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                 try {
                     val story = getStory(blog, author, permLink)
+
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute {
                         liveData.value = StoriesFeed(listOf(story).toArrayList(), FeedType.UNCLASSIFIED, liveData.value?.filter)

@@ -11,9 +11,12 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.screens.editor.knife.KnifeParser
+import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,
@@ -23,7 +26,11 @@ class StripeFullViewHolder(parent: ViewGroup,
                            private val onBlogClick: HolderClickListener,
                            private val onUserClick: HolderClickListener,
                            private val onVotersClick: HolderClickListener
-) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent) {
+) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent), SpanFactory {
+    override fun <T : Any?> produceOfType(type: Class<*>): T {
+        return itemView.context.createGolosSpan(type)
+    }
+
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
@@ -78,13 +85,13 @@ class StripeFullViewHolder(parent: ViewGroup,
             val oldAvatar = oldState?.stripe?.rootStory()?.avatarPath
 
             if (wrapper.avatarPath != null) {
-                if ( newAvatar != oldAvatar)
-                mGlide
-                        .load(ImageUriResolver.resolveImageWithSize(
-                                wrapper.avatarPath ?: "",
-                                wantedwidth = mAvatar.width))
-                        .error(mGlide.load(noAvatarDrawable))
-                        .into(mAvatar)
+                if (newAvatar != oldAvatar)
+                    mGlide
+                            .load(ImageUriResolver.resolveImageWithSize(
+                                    wrapper.avatarPath ?: "",
+                                    wantedwidth = mAvatar.width))
+                            .error(mGlide.load(noAvatarDrawable))
+                            .into(mAvatar)
             } else mAvatar.setImageDrawable(noAvatarDrawable)
             if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
@@ -118,8 +125,8 @@ class StripeFullViewHolder(parent: ViewGroup,
                     mBodyTextMarkwon.text = htmlString
 
                 } else {
-                    htmlString = wrapper.cleanedFromImages.substring(0,
-                            if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length).toHtml()
+                    htmlString = KnifeParser.fromHtml(wrapper.cleanedFromImages.substring(0,
+                            if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length), this)
                     newState.stripe.storyWithState()?.asHtmlString = htmlString
                     mBodyTextMarkwon.text = htmlString
                 }

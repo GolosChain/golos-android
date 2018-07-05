@@ -12,15 +12,12 @@ import android.widget.TextView
 import android.widget.Toast
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
-import io.golos.golos.model.Notification
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.main_activity.ntfns
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.asIntentToShowUrl
-import io.golos.golos.utils.mapper
 
 /**
  * Created by yuri on 12.12.17.
@@ -62,12 +59,6 @@ class SettingsActivity : GolosActivity() {
         setUpCurrency()
         setUpBountyDisplay()
         setUpNotifications()
-
-        findViewById<View>(R.id.btn).setOnClickListener {
-            val listType = mapper.typeFactory.constructCollectionType(List::class.java, Notification::class.java)
-            val notifications = mapper.readValue<List<Notification>>(ntfns, listType)
-            Repository.get.notificationsRepository.onReceiveNotifications(notifications)
-        }
 
     }
 
