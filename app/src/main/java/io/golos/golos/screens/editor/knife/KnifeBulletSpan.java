@@ -21,10 +21,14 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Parcel;
 import android.text.Layout;
+import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
+import android.text.style.LeadingMarginSpan;
 
-public class KnifeBulletSpan extends BulletSpan {
+import timber.log.Timber;
+
+public class KnifeBulletSpan implements LeadingMarginSpan {
     private static final int DEFAULT_COLOR = 0;
     private static final int DEFAULT_RADIUS = 3;
     private static final int DEFAULT_GAP_WIDTH = 2;
@@ -41,7 +45,7 @@ public class KnifeBulletSpan extends BulletSpan {
     }
 
     public KnifeBulletSpan(Parcel src) {
-        super(src);
+      //  super(src);
         this.bulletColor = src.readInt();
         this.bulletRadius = src.readInt();
         this.bulletGapWidth = src.readInt();
@@ -59,13 +63,17 @@ public class KnifeBulletSpan extends BulletSpan {
         return bulletGapWidth;
     }
 
-    @Override
+   /* @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+       // super.writeToParcel(dest, flags);
         dest.writeInt(bulletColor);
         dest.writeInt(bulletRadius);
         dest.writeInt(bulletGapWidth);
-    }
+    }*/
+
+  /*  public int describeContents() {
+        return 0;
+    }*/
 
     @Override
     public int getLeadingMargin(boolean first) {
@@ -77,6 +85,8 @@ public class KnifeBulletSpan extends BulletSpan {
                                   int top, int baseline, int bottom,
                                   CharSequence text, int start, int end,
                                   boolean first, Layout l) {
+        if (!first)return;
+
         if (((Spanned) text).getSpanStart(this) == start) {
             Paint.Style style = p.getStyle();
 

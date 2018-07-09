@@ -4,12 +4,18 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 
+import io.golos.golos.screens.editor.EditorActivityKt;
+import timber.log.Timber;
+
 /**
  * Created by yuri on 22.11.17.
  */
 
 public class SelectionAwareEditText extends AppCompatEditText {
     private SelectionListener mSelectionListener;
+    private boolean freezeLayout = false;
+    private boolean isRequestLoWasCalled = false;
+    private boolean isInvalidateWasCalled = false;
 
     public void setSelectionListener(SelectionListener mSelectionListener) {
         this.mSelectionListener = mSelectionListener;
@@ -37,5 +43,43 @@ public class SelectionAwareEditText extends AppCompatEditText {
 
     public interface SelectionListener {
         void onSelectionChanged(int selStart, int end);
+    }
+
+    public boolean isFreezeLayout() {
+        return freezeLayout;
+    }
+
+    public void setFreezeLayout(boolean freezeLayout) {
+        this.freezeLayout = freezeLayout;
+    /*    if (!freezeLayout) {
+            if (isRequestLoWasCalled) {
+                requestLayout();
+                isRequestLoWasCalled = false;
+            }
+            if (isInvalidateWasCalled) {
+                invalidate();
+                isInvalidateWasCalled = false;
+            }
+        }*/
+    }
+
+    @Override
+    public void requestLayout() {
+        if (EditorActivityKt.DEBUG_EDITOR) Timber.e("requestLayout freezeLayout = " + freezeLayout);
+        if (freezeLayout) {
+            isRequestLoWasCalled = true;
+        } else {
+            super.requestLayout();
+        }
+
+    }
+
+    @Override
+    public void invalidate() {
+        if (freezeLayout) {
+            isInvalidateWasCalled = true;
+        } else {
+            super.invalidate();
+        }
     }
 }

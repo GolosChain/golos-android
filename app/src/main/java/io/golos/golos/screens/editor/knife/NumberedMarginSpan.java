@@ -21,19 +21,24 @@ import android.graphics.Paint;
 import android.text.Layout;
 import android.text.style.LeadingMarginSpan;
 
+import timber.log.Timber;
+
 public class NumberedMarginSpan implements LeadingMarginSpan {
 
     private final int gapWidth;
     private final int leadWidth;
     private final int index;
+    private float textWidth = -1;
+    private int leadMargin;
 
     public NumberedMarginSpan(int leadGap, int gapWidth, int index) {
         this.leadWidth = leadGap;
         this.gapWidth = gapWidth;
         this.index = index;
+        leadMargin = leadWidth + gapWidth;
     }
 
-    public NumberedMarginSpan setIndex(int index){
+    public NumberedMarginSpan setIndex(int index) {
         return new NumberedMarginSpan(leadWidth, gapWidth, index);
     }
 
@@ -54,16 +59,33 @@ public class NumberedMarginSpan implements LeadingMarginSpan {
     }
 
     public int getLeadingMargin(boolean first) {
-        return leadWidth + gapWidth;
+        if (leadMargin > textWidth) return leadMargin;
+        else return ((int) Math.floor(textWidth));
     }
 
-    public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom, CharSequence text, int start, int end, boolean first, Layout l) {
+    public void drawLeadingMargin(Canvas c, Paint p,
+                                  int x,
+                                  int dir,
+                                  int top,
+                                  int baseline,
+                                  int bottom,
+                                  CharSequence text,
+                                  int start,
+                                  int end,
+                                  boolean first,
+                                  Layout l) {
         if (first) {
+
+            float width = p.measureText(String.valueOf(index) + ". ");
+            textWidth =width  * dir;
+
 
             Paint.Style orgStyle = p.getStyle();
             p.setStyle(Paint.Style.FILL);
-            float width = p.measureText("4.");
-            c.drawText(index + ".", (leadWidth + x - width / 2) * dir, bottom - p.descent(), p);
+
+
+            c.drawText(index + ".",
+                    x * dir, baseline, p);
             p.setStyle(orgStyle);
         }
     }

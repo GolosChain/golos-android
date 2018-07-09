@@ -27,6 +27,8 @@ import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.StrikethroughSpan
+import io.golos.golos.screens.editor.DEBUG_EDITOR
+import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.editor.isLastCharLineBreaker
 import io.golos.golos.screens.editor.printAllSpans
 import org.xml.sax.XMLReader
@@ -52,12 +54,12 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     private var isUnOrderedListOpened = false
 
     override fun handleTag(opening: Boolean, tag: String, output: Editable, xmlReader: XMLReader) {
-      //  e("tag = $tag opening = $opening output = $output length = ${output.length}")
+      if (DEBUG_EDITOR)  e("tag = $tag opening = $opening output = $output length = ${output.length}")
         if (opening) {
             if (tag == "ol") {
                 indexOfNumberedList = 0
                 isOrderedListOpened = true
-            }else if (tag == "ul"){
+            }else if (tag == UNORDERED_LIST){
                 isUnOrderedListOpened = true
             }
 
@@ -88,7 +90,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
             if (tag == "ol") {
                 indexOfNumberedList = 0
                 isOrderedListOpened = false
-            }else if (tag == "ul"){
+            }else if (tag == UNORDERED_LIST){
                 isUnOrderedListOpened = false
             }
 
@@ -123,7 +125,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     }
 
     private fun start(output: Editable, mark: Any) {
-      //  i("start, mark = $mark")
+      if (DEBUG_EDITOR)  e("start, mark = $mark")
         output.setSpan(mark, output.length, output.length, Spanned.SPAN_MARK_MARK)
     }
 
@@ -135,7 +137,7 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
         val start = output.getSpanStart(last)
         val end = output.length
 
-      //  i("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
+      if (DEBUG_EDITOR)  e("end ${replaces.toSet()} start = $start, end = $end kind = $kind")
         output.removeSpan(last)
         val numberedList = if (last is NumberedList) NumberedMarginSpan((replaces[0] as NumberedMarginSpan).leadWidth,
                 (replaces[0] as NumberedMarginSpan).gapWidth,
@@ -160,12 +162,13 @@ class KnifeTagHandler(private val spanFactory: SpanFactory?) : Html.TagHandler {
     }
 
     companion object {
-        const val LI = "li"
+        const val LI = "lil"
         const val QUOTE = "custom_quote"
         const val HEADER = "custom_h"
         const val STRIKETHROUGH_S = "s"
         const val STRIKETHROUGH_STRIKE = "strike"
         const val STRIKETHROUGH_DEL = "del"
+        const val UNORDERED_LIST = "c_ul"
 
 
         private fun getLast(text: Editable, kind: Class<*>): Any? {

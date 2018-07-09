@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
@@ -23,6 +24,7 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 30.10.17.
@@ -118,7 +120,8 @@ class UserNotLoggedInFragment : Fragment() {
                 if (it?.error != null) {
                     view.findFocus()?.let { context?.hideKeyboard(it) }
                     Snackbar.make(mLogInEt,
-                            Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage ?: 0)}</font>"),
+                            Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage
+                                    ?: 0)}</font>"),
                             Toast.LENGTH_SHORT).show()
                 }
             }
@@ -163,9 +166,11 @@ class UserNotLoggedInFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (data == null) return
+        var resultCode = PreferenceManager.getDefaultSharedPreferences(activity?:return).getInt(BarcodeScannerActivity.LAST_RESULT_CODE, Activity.RESULT_CANCELED)
+        var out = PreferenceManager.getDefaultSharedPreferences(activity).getString(BarcodeScannerActivity.LAST_RESULT_TEXT, null)
+        //fix of a problem for some old samsung phones
+
         if (resultCode == Activity.RESULT_OK) {
-            val out = data.getStringExtra(BarcodeScannerActivity.SCAN_RESULT_TAG)
             if (out == "http://") {
                 view?.showSnackbar(R.string.scan_fail)
             } else {
@@ -194,10 +199,10 @@ class UserNotLoggedInFragment : Fragment() {
         if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             when (requestCode) {
                 SCAN_ACTIVE_PERMISSION -> {
-                    mActiveKeyEt.performClick()
+                    mScanActive.performClick()
                 }
                 SCAN_POSTING_PERMISSION -> {
-                    mPostingEt.performClick()
+                    mScanPosting.performClick()
                 }
             }
         }

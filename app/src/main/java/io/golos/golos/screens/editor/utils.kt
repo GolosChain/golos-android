@@ -171,7 +171,7 @@ fun Editable.getEditorUsedSpans(start: Int, end: Int): Set<EditorTextModifier> {
                 out.add(EditorTextModifier.TITLE)
             }
         } else if (span is KnifeQuoteSpan) out.add(EditorTextModifier.QUOTATION)
-        else if (span is BulletSpan) out.add(EditorTextModifier.LIST_BULLET)
+        else if (span is KnifeBulletSpan) out.add(EditorTextModifier.LIST_BULLET)
         else if (span is NumberedMarginSpan) out.add(EditorTextModifier.LIST_NUMBERED)
     }
     if (start != end && (
@@ -259,6 +259,7 @@ fun CharSequence.getLineOfWordPosition(wordPosition: Int): Int {
 }
 
 fun Editable.printAllSpans() {
+    if (!DEBUG_EDITOR)return
     getSpans(0, length, Any::class.java).forEach {
         Timber.e("span = $it, start = ${getSpanStart(it)} end = ${getSpanEnd(it)}")
     }
@@ -291,7 +292,7 @@ fun Char.isPartOfWord() = !isWordBreaker()
 
 
 fun Editable.printStyleSpans(start: Int = 0, end: Int = length) {
-
+    if (!DEBUG_EDITOR)return
     getSpans(start, end, StyleSpan::class.java).forEach {
         Timber.e("span = $it \n start = ${getSpanStart(it)} end = ${getSpanEnd(it)} " +
                 "flag is ${getSpanFlags(it)}")
@@ -344,6 +345,7 @@ fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
 
 
 fun Spanned.printLeadingMarginSpans(pointerToPosition: Int) {
+    if (!DEBUG_EDITOR)return
     getSpans(pointerToPosition, length, LeadingMarginSpan::class.java)
             .forEach {
                 Timber.e("$it start = ${getSpanStart(it)} end = ${getSpanEnd(it)} , flag  = ${getSpanFlags(it)}")
@@ -384,8 +386,8 @@ fun EditorBottomViewHolder.isSelected(styleSpan: MetricAffectingSpan): Boolean {
 fun EditorBottomViewHolder.isSelected(leadingMarginSpan: LeadingMarginSpan): Boolean {
     val modifiers = getSelectedModifier()
     modifiers.forEach {
-        if (it == EditorTextModifier.QUOTATION && leadingMarginSpan is QuoteSpan) return true
-        if (it == EditorTextModifier.LIST_BULLET && leadingMarginSpan is BulletSpan) return true
+        if (it == EditorTextModifier.QUOTATION && leadingMarginSpan is KnifeQuoteSpan) return true
+        if (it == EditorTextModifier.LIST_BULLET && leadingMarginSpan is KnifeBulletSpan) return true
         if (it == EditorTextModifier.LIST_NUMBERED && leadingMarginSpan is NumberedMarginSpan) return true
     }
     return false

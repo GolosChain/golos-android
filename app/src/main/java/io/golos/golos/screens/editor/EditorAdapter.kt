@@ -38,8 +38,7 @@ data class EditorAdapterTextPart(val textPart: EditorTextPart,
                                  val onFocusChanged: (RecyclerView.ViewHolder, Boolean) -> Unit = { _, _ -> },
                                  val onNewText: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
                                  val onCursorChange: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
-                                 val showHint: Boolean = false,
-                                 val modifiers: Set<EditorTextModifier>) : EditorAdapterModel(textPart.id)
+                                 val showHint: Boolean = false) : EditorAdapterModel(textPart.id)
 
 data class EditorAdapterImagePart(val imagePart: EditorImagePart,
                                   val isLoading: Boolean = false,
@@ -55,38 +54,34 @@ interface EditorAdapterInteractions {
 
 class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var mHashes = hashMapOf<Int, Int>()
+
+    private val callback = MyCallback()
 
     var parts: ArrayList<EditorPart> = ArrayList()
         set(value) {
-            Timber.e("setvalue")
-            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return field[oldItemPosition].id == value[newItemPosition].id
-                }
-
-                override fun getOldListSize() = field.size
-                override fun getNewListSize() = value.size
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    val new = value[newItemPosition]
-                    return mHashes[oldItemPosition] == new.hashCode()
-                }
-            }).dispatchUpdatesTo(this)
+            if (DEBUG_EDITOR) Timber.e("setvalue")
+            callback.newList = value
+            callback.oldList = field
+            DiffUtil.calculateDiff(callback).dispatchUpdatesTo(this)
             field = value
-            field.forEachIndexed { i, part ->
-                mHashes[i] = part.hashCode()
-            }
+        }
+
+    private class MyCallback : DiffUtil.Callback() {
+        var newList = listOf<EditorPart>()
+        var oldList = listOf<EditorPart>()
+
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun getOldListSize() = oldList.size
+        override fun getNewListSize() = newList.size
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
 
         }
-    var textModifiers: Set<EditorTextModifier> = hashSetOf()
-        set(value) {
-            field = value
-            (0 until parts.size).forEach {
-                if ((parts[it] is EditorTextPart)) {
-                    notifyItemChanged(it)
-                }
-            }
-        }
+    }
 
     fun onTextSizeChanged(mRecycler: RecyclerView) {
         (0 until itemCount).forEach {
@@ -120,8 +115,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
                 }, { _, _ ->
                     interactor?.onCursorChange(parts)
                 },
-                        position == 0,
-                        textModifiers)
+                        position == 0)
                 if (parts[position].isFocused()) {
                     holder.shouldShowKeyboard()
                 }
@@ -159,6 +153,22 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)
                 (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.shouldShowKeyboard()
+        }
+    }
+
+    fun beforeTextSizeChange(mRecycler: RecyclerView) {
+        (0 until itemCount).forEach {
+            val part = parts[it] as? EditorTextPart
+            if (part?.isFocused() == true)
+                (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.beforeTextSizeChange()
+        }
+    }
+
+    fun afterTextSizeChange(mRecycler: RecyclerView) {
+        (0 until itemCount).forEach {
+            val part = parts[it] as? EditorTextPart
+            if (part?.isFocused() == true)
+                (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.afterTextSizeChange()
         }
     }
 }

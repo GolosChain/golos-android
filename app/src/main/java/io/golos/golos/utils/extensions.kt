@@ -58,6 +58,7 @@ import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
 import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.story.model.StoryWrapper
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -320,7 +321,8 @@ fun String.toHtml(): Spanned {
 }
 
 fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
-    return when (type) {
+    val out
+     =  when (type) {
         KnifeBulletSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
                 getDimen(R.dimen.quint).toInt(),
                 getDimen(R.dimen.quater).toInt()) as T
@@ -332,6 +334,8 @@ fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
         AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt()) as T
         else -> Any() as T
     }
+
+    return out
 }
 
 fun SwipeRefreshLayout.setRefreshingS(isRefreshing:Boolean){

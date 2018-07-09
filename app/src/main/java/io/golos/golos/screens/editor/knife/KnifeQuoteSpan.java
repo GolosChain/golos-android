@@ -20,9 +20,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Parcel;
 import android.text.Layout;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.QuoteSpan;
 
-public class KnifeQuoteSpan extends QuoteSpan {
+public class KnifeQuoteSpan implements LeadingMarginSpan {
     private static final int DEFAULT_STRIPE_WIDTH = 2;
     private static final int DEFAULT_GAP_WIDTH = 2;
     private static final int DEFAULT_COLOR = 0xff0000ff;
@@ -38,19 +39,19 @@ public class KnifeQuoteSpan extends QuoteSpan {
     }
 
     public KnifeQuoteSpan(Parcel src) {
-        super(src);
+       // super(src);
         this.quoteColor = src.readInt();
         this.quoteStripeWidth = src.readInt();
         this.quoteGapWidth = src.readInt();
     }
 
-    @Override
+ /*   @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(quoteColor);
         dest.writeInt(quoteStripeWidth);
         dest.writeInt(quoteGapWidth);
-    }
+    }*/
 
     @Override
     public int getLeadingMargin(boolean first) {
@@ -62,6 +63,7 @@ public class KnifeQuoteSpan extends QuoteSpan {
                                   int top, int baseline, int bottom,
                                   CharSequence text, int start, int end,
                                   boolean first, Layout layout) {
+        if (!first)return;
         Paint.Style style = p.getStyle();
         int color = p.getColor();
 

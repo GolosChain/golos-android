@@ -10,26 +10,26 @@ import android.text.TextWatcher
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
 import android.text.style.QuoteSpan
-import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import io.golos.golos.R
 import io.golos.golos.screens.editor.*
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
+import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
 import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.screens.widgets.SelectionAwareEditText
 import timber.log.Timber
-import timber.log.Timber.i
+import timber.log.Timber.e
 
 
 class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         GolosViewHolder(res, parent), TextWatcher, View.OnFocusChangeListener, SelectionAwareEditText.SelectionListener {
     private var mEditText: SelectionAwareEditText = itemView.findViewById(R.id.et)
-    private val whiteSpace = Character.valueOf('\u0020')
     private var ignoreTextChange = false
     private var ignoreOnBind = false
+    private var ignoreSelectionChange = false
     private var mLastTextSize = 0
 
     init {
@@ -42,12 +42,6 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 return super.newEditable(source)
             }
         })
-        mEditText.setOnKeyListener(object : View.OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
-                Timber.e("keyCode = $keyCode")
-                return false
-            }
-        })
     }
 
     var state: EditorAdapterTextPart? = null
@@ -57,15 +51,15 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 field = value
                 return
             }
-            Timber.e("setting new state ${value.textPart}")
+            if (DEBUG_EDITOR) Timber.e("setting new state ${value.textPart}")
             ignoreTextChange = true
             mEditText.setSelectionListener(null)
 
             var textChanged = false
 
             val textPart = value.textPart
-            if (!compareGolosSpannables(textPart.text, mEditText.text)) {
-                Timber.e("setting new text \nold = ${mEditText.text}" +
+            if (textPart.text != mEditText.text) {
+                if (DEBUG_EDITOR) Timber.e("setting new text \nold = ${mEditText.text}" +
                         " new = ${textPart}")
                 mEditText.setTextKeepState(textPart.text)
                 mLastTextSize = mEditText.text.length
@@ -75,7 +69,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 var start = value.textPart.startPointer
                 var end = value.textPart.endPointer
                 mEditText.post {
-                    Timber.e("setting new selection state = ${value.textPart}\n start = ${start} " +
+                    if (DEBUG_EDITOR) Timber.e("setting new selection state = ${value.textPart}\n start = ${start} " +
                             "end = ${end}")
 
                     if (start > mEditText.text.length) start = mEditText.length()
@@ -87,7 +81,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             }
             if (textPart.isFocused() && !textChanged) {
                 if (textPart.startPointer != mEditText.selectionStart || textPart.endPointer != mEditText.selectionEnd) {
-                    Timber.e("selection not matches")
+                    if (DEBUG_EDITOR) Timber.e("selection not matches")
                     mEditText.post {
 
                         mEditText.setSelectionListener(null)
@@ -114,7 +108,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     mEditText.hint = hint
                 }
             }
-            Timber.e("end on bind")
+            if (DEBUG_EDITOR) Timber.e("end on bind")
             ignoreTextChange = false
             mEditText.setSelectionListener(this)
             field = value
@@ -122,7 +116,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
 
-        Timber.e("onFocusChange")
+        if (DEBUG_EDITOR) Timber.e("onFocusChange")
         if (v != null && v == mEditText) {
             val currentState = state ?: return
 
@@ -146,7 +140,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         val currentState = state ?: return
         s ?: return
 
-        Timber.e("afterTextChanged s = $s , its length is ${s.length} selected mods = ${currentState.modifiers},\n" +
+        if (DEBUG_EDITOR) Timber.e("afterTextChanged s = $s , its length is ${s.length} ,\n" +
                 "selection = ${mEditText.selectionEnd}")
 
         ignoreOnBind = true
@@ -172,10 +166,10 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
 
         s.printLeadingMarginSpans(0)
-        Timber.e("mEditText.selectionStart = ${mEditText.selectionStart}")
+        if (DEBUG_EDITOR) Timber.e("mEditText.selectionStart = ${mEditText.selectionStart}")
         if (s.length > mLastTextSize
                 && s.isPreviousCharLineBreak(selection)) {
-            Timber.e("isPreviousCharLineBreaker")
+            if (DEBUG_EDITOR) Timber.e("isPreviousCharLineBreaker")
             val spans = s.getSpans(mEditText.selectionStart,
                     selection,
                     LeadingMarginSpan::class.java)
@@ -184,19 +178,19 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 val spanStart = s.getSpanStart(it)
                 val spanEnd = s.getSpanEnd(it)
 
-                Timber.e("moving leading margin spans backwards $it spanStart = $spanStart spanEnd = $spanEnd")
+                if (DEBUG_EDITOR) Timber.e("moving leading margin spans backwards $it spanStart = $spanStart spanEnd = $spanEnd")
                 s.removeSpan(it)
-                if (it is QuoteSpan && spanStart != spanEnd) s.setSpan(it, spanStart, selection - 1, SPAN_INCLUSIVE_INCLUSIVE)
+                if (it is KnifeQuoteSpan && spanStart != spanEnd) s.setSpan(it, spanStart, selection - 1, SPAN_INCLUSIVE_INCLUSIVE)
                 else if ((s.isPreviousCharLineBreak(selection - 1) || s.isPreviousCharWhiteSpaceThenLineBreak(selection - 1))
                         && (it is KnifeBulletSpan || it is NumberedMarginSpan)) {
                     //two ore more line breaks, don't add additional bullet spans
-                    Timber.e("two ore more line breaks")
+                    if (DEBUG_EDITOR) Timber.e("two ore more line breaks")
                 } else if ((it is KnifeBulletSpan || it is NumberedMarginSpan)) {
                     if (spanStart == mEditText.selectionEnd) return@forEach
 
                     s.setSpan(it, spanStart, mEditText.selectionEnd - 1, SPAN_INCLUSIVE_INCLUSIVE)
 
-                    Timber.e("adding  additional $it span mEditText.selectionStart = ${mEditText.selectionStart}" +
+                    if (DEBUG_EDITOR) Timber.e("adding  additional $it span mEditText.selectionStart = ${mEditText.selectionStart}" +
                             "mEditText.selectionEnd = ${mEditText.selectionEnd} ")
                     val newSpan = when (it) {
                         is KnifeBulletSpan -> KnifeBulletSpan(it.bulletColor, it.bulletRadius, it.bulletGapWidth)
@@ -208,26 +202,28 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                         spanEnd = s.getParagraphBounds(selection).second
                     }
                     if (!checkStartAndEnd(mEditText.selectionStart, spanEnd)) {
-                        Timber.e("start after end, this should not happen")
+                        if (DEBUG_EDITOR) Timber.e("start after end, this should not happen")
 
                     } else {
                         s.setSpan(newSpan,
                                 mEditText.selectionStart,
                                 spanEnd,
                                 SPAN_INCLUSIVE_INCLUSIVE)
-                        if (mEditText.selectionStart == spanEnd) {
-                            Timber.e("inserting whitespace")
-                            mEditText.text.insert(mEditText.selectionStart, " ")
-                        }
+                        /*  if (mEditText.selectionStart == spanEnd) {
+                              if (DEBUG_EDITOR) Timber.e("inserting whitespace mEditText.height = ${mEditText.height}")
+                              itemView.minimumHeight = mEditText.height
+                              mEditText.text.insert(mEditText.selectionStart, " ")
+                              mEditText.minHeight = mEditText.height
+                          }*/
                     }
                 }
             }
         } else if (s.length < mLastTextSize) {
-            Timber.e("deletion")
+            if (DEBUG_EDITOR) Timber.e("deletion")
             s.getSpans(mEditText.selectionStart, mEditText.selectionEnd, LeadingMarginSpan::class.java)
                     .forEach {
                         if (s.getSpanStart(it) == s.getSpanEnd(it)) {
-                            Timber.e("deleting 0 $it, start is ${s.getSpanStart(it)} end = ${s.getSpanEnd(it)}")
+                            if (DEBUG_EDITOR) Timber.e("deleting 0 $it, start is ${s.getSpanStart(it)} end = ${s.getSpanEnd(it)}")
                             s.removeSpan(it)
                         }
                     }
@@ -240,26 +236,26 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         if (mEditText.selectionStart > currentState.textPart.startPointer) currentState.textPart.startPointer = mEditText.selectionStart
         if (mEditText.selectionEnd > currentState.textPart.endPointer) currentState.textPart.endPointer = mEditText.selectionEnd
 
-        val newState = currentState.textPart.setText(s)
+        val newState = currentState.textPart.setText(mEditText.text)
         state = EditorAdapterTextPart(newState,
                 currentState.onFocusChanged,
                 currentState.onNewText,
                 currentState.onCursorChange,
-                currentState.showHint,
-                currentState.modifiers)
+                currentState.showHint)
         ignoreOnBind = false
         if (!ignoreTextChange) currentState.onNewText.invoke(this, state?.textPart ?: return)
         mLastTextSize = s.length
+
     }
 
     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
     }
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        i("onTextChanged")
+        if (DEBUG_EDITOR) e("onTextChanged")
         s ?: return
         if (s.isEmpty() && start == 0 && before != 0 && count == 0) {
-            i("removing all leading margin spans")
+            if (DEBUG_EDITOR) e("removing all leading margin spans")
             (s as? Spannable)?.getSpans(0, 0, LeadingMarginSpan::class.java)?.forEach {
                 s.removeSpan(it)
             }
@@ -267,21 +263,30 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     }
 
     public fun reSetText() {
+
+        if (DEBUG_EDITOR) Timber.e("reSetText")
+
         ignoreOnBind = true
+        ignoreSelectionChange = true
 
         val text = SpannableStringBuilder(mEditText.text)
+
+        mEditText.isFreezeLayout = true
         mEditText.setTextKeepState(text)
+        mEditText.isFreezeLayout = false
 
         ignoreOnBind = false
+        ignoreSelectionChange = false
     }
 
 
     override fun onSelectionChanged(start: Int, end: Int) {
-        Timber.e("")
+        if (ignoreSelectionChange) return
+        if (DEBUG_EDITOR) Timber.e("")
         val currentState = state ?: return
         val spans = mEditText.text.getSpans(start, end, LeadingMarginSpan::class.java)
         if (spans.size > 1) {
-            Timber.e("removing leading spans")
+            if (DEBUG_EDITOR) Timber.e("removing leading spans")
             val classOfFirstSpan = spans[0]::class.java
             val listOfSameSpans = classOfFirstSpan to arrayListOf(spans[0])
             spans.indices.forEach {
@@ -306,7 +311,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
             }
         }
-        Timber.e("onSelectionChanged start = $start end = $end")
+        if (DEBUG_EDITOR) Timber.e("onSelectionChanged start = $start end = $end")
         if (start == -1 || end == -1) {
             currentState.textPart.startPointer = EditorPart.CURSOR_POINTER_NOT_SELECTED
             currentState.textPart.endPointer = EditorPart.CURSOR_POINTER_NOT_SELECTED
@@ -318,12 +323,12 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
     }
 
     fun shouldShowKeyboard() {
-        Timber.e("shouldShowKeyboard")
+        if (DEBUG_EDITOR) Timber.e("shouldShowKeyboard")
         if (mEditText.isFocused) return
 
         if (!mEditText.isFocused) mEditText.requestFocus()
         mEditText.postDelayed({
-            Timber.e("showing keyboard")
+            if (DEBUG_EDITOR) Timber.e("showing keyboard")
             mEditText.setSelection(getStartSelection(), getEndSelection())
             mEditText.requestFocus()
             val inputMethodManager = mEditText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -348,5 +353,13 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             state.textPart.endPointer > state.textPart.text.length -> state.textPart.text.length
             else -> state.textPart.endPointer
         }
+    }
+
+    fun beforeTextSizeChange() {
+        mEditText.isFreezeLayout = true
+    }
+
+    fun afterTextSizeChange() {
+        mEditText.isFreezeLayout = false
     }
 }

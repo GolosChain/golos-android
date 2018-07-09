@@ -117,7 +117,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
     @MainThread
     fun onUserInput(action: EditorInputAction) {
-        Timber.e("on user Input action = $action parts = ${editorLiveData.value?.parts}")
+      if (DEBUG_EDITOR)  Timber.e("on user Input action = $action parts = ${editorLiveData.value?.parts}")
         val parts = editorLiveData.value?.parts ?: ArrayList()
         val result = mTextProcessor.processInput(parts, action)
         editorLiveData.value = EditorState(parts = result,
@@ -142,7 +142,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
     @MainThread
     fun onTextChanged(parts: List<EditorPart>) {
-        Timber.e("onTextChanged")
+        if (DEBUG_EDITOR)  Timber.e("onTextChanged")
         editorLiveData.value = EditorState(parts = parts, title = editorLiveData.value?.title ?: "",
                 tags = editorLiveData.value?.tags ?: listOf())
     }

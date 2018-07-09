@@ -16,14 +16,15 @@ import android.os.Looper
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.Toolbar
 import android.text.*
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
 import android.text.style.URLSpan
+import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -47,6 +48,8 @@ import java.io.FileOutputStream
 /**
  *
  * **/
+const val DEBUG_EDITOR = true
+
 data class EditorMode(@JsonProperty("title")
                       val title: String = "",
                       @JsonProperty("subtitle")
@@ -98,7 +101,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mAdapter = EditorAdapter(interactor = this)
         mRecycler.adapter = mAdapter
         mRecycler.isNestedScrollingEnabled = false
-        (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mBottomButtons = EditorBottomViewHolder(this)
         mBottomButtons.bottomButtonClickListener = this
 
@@ -156,6 +158,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
         })
+        mRecycler.preserveFocusAfterLayout = true
+        mRecycler.itemAnimator = null
+
     }
 
     override fun onChanged(it: EditorState?) {
@@ -197,7 +202,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     }
 
     override fun onLinkSubmit(linkName: String, linkAddress: String) {
-        Timber.e("onLinkSubmit linkName = $linkName linkAddress = $linkAddress")
+        if (DEBUG_EDITOR) Timber.e("onLinkSubmit linkName = $linkName linkAddress = $linkAddress")
         if (linkAddress.isNullOrEmpty()) return
         val linkAddress = if (linkAddress.matches(Regexps.anyImageLink)) linkAddress else formatUrl(linkAddress)
 
@@ -247,7 +252,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     }
 
     override fun onCursorChange(parts: List<EditorPart>) {
-        Timber.e("onCursorChange mSavedCursor = $mSavedCursor")
+        if (DEBUG_EDITOR) Timber.e("onCursorChange mSavedCursor = $mSavedCursor")
         if (mSavedCursor != null && mSavedCursor!!.first > -1 && mSavedCursor!!.second > -1) {
             val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
             if (focusedPart != null && mSavedCursor!!.second <= focusedPart.text.length) {
@@ -263,10 +268,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     }
 
     private fun validateBottomButtonSelections(parts: List<EditorPart>) {
-        Timber.e("validateBottomButtonSelections saved cursor = $mSavedCursor")
+        if (DEBUG_EDITOR) Timber.e("validateBottomButtonSelections saved cursor = $mSavedCursor")
         mHandler.removeCallbacksAndMessages(null)//discard scheduled changes, only apply for fresh one selection
         val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
-        Timber.e("focusedPart = $focusedPart")
+        if (DEBUG_EDITOR) Timber.e("focusedPart = $focusedPart")
 
         if (focusedPart != null) {
             mHandler.postDelayed({
@@ -275,6 +280,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
                 val start = focusedPart.startPointer
                 val endpointer = focusedPart.endPointer
+
+                focusedPart.text.printLeadingMarginSpans(start)
 
                 val allSpans = focusedPart.text.getEditorUsedSpans(start, endpointer)
                 if (allSpans.isEmpty()) {//text has no modifiers
@@ -299,12 +306,12 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         val focusedPart = mViewModel.editorLiveData.value?.parts?.findLast { it.isFocused() } as? EditorTextPart
         val startPointer = focusedPart?.startPointer ?: 0
         val endPointer = focusedPart?.endPointer ?: 0
-        mAdapter.textModifiers = allButtons
+
         focusedPart?.text?.printStyleSpans()
         focusedPart ?: onCursorChange(mViewModel.editorLiveData.value?.parts
                 ?: return)
 
-        Timber.e("on click ${focusedPart}, selected ${mBottomButtons.getSelectedModifier()}")
+        if (DEBUG_EDITOR) Timber.e("on click ${focusedPart}, selected ${mBottomButtons.getSelectedModifier()}")
         when (clickedButton) {
             EditorTextModifier.LINK -> {
                 focusedPart ?: return
@@ -331,7 +338,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     fr.show(supportFragmentManager, null)
 
                 } else {//if user selected text with url in it
-                    Timber.e("removing url span")
+                    if (DEBUG_EDITOR) Timber.e("removing url span")
                     val spans =
                             focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java)
                     spans.forEach {
@@ -364,7 +371,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 if (focusedPart == null) return
                 mSavedCursor = Pair(startPointer, endPointer)
                 if (!mBottomButtons.getSelectedModifier().contains(EditorTextModifier.QUOTATION_MARKS)) {
-                    Timber.e("adding quotation marks")
+                    if (DEBUG_EDITOR) Timber.e("adding quotation marks")
                     if (startPointer != endPointer) {
                         //if we selected smth
                         focusedPart.text.insert(startPointer, "\"")
@@ -376,13 +383,13 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                         if (focusedPart.text.isWithinWord(startPointer)) {
                             val wordStart = focusedPart.text.getStartOfWord(startPointer)
                             val wordEnd = focusedPart.text.getEndOfWord(endPointer)
-                            Timber.e("inserting quotation marks before and after word")
+                            if (DEBUG_EDITOR) Timber.e("inserting quotation marks before and after word")
                             if (!checkStartAndEnd(wordStart, wordEnd)) return
                             focusedPart.text.insert(wordStart, "\"")
                             focusedPart.text.insert(wordEnd + 2, "\"")
                             mSavedCursor = Pair(startPointer + 2, endPointer + 2)
                         } else {
-                            Timber.e("somewhere in whitespace")
+                            if (DEBUG_EDITOR) Timber.e("somewhere in whitespace")
                             focusedPart.text.insert(startPointer, "\"\"")
                             focusedPart.startPointer += 1
                             focusedPart.endPointer += 1
@@ -391,17 +398,17 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     }
                 } else {
                     //startPointer == endPointer
-                    Timber.e("deleting quotation marks")
+                    if (DEBUG_EDITOR) Timber.e("deleting quotation marks")
                     val wordStart = focusedPart.text.getStartOfWord(startPointer)
                     val wordEnd = focusedPart.text.getEndOfWord(startPointer)
-                    Timber.e("we selected smth with quotation marks")
+                    if (DEBUG_EDITOR) Timber.e("we selected smth with quotation marks")
                     if (!checkStartAndEnd(wordStart, wordEnd)) return
                     if (wordStart == wordEnd) {
                         Timber.e("word of 0 - length, this should not happen")
                         return
                     }
                     if ((wordStart + 1) > focusedPart.text.length || wordEnd > focusedPart.text.length) {
-                        Timber.e("wordStart = $wordStart && wordEnd = $wordEnd and it length > ${focusedPart.text}")
+                        if (DEBUG_EDITOR) Timber.e("wordStart = $wordStart && wordEnd = $wordEnd and it length > ${focusedPart.text}")
                         return
                     }
                     val selected = focusedPart.text.subSequence(wordStart + 1, wordEnd)
@@ -416,24 +423,32 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             EditorTextModifier.STYLE_BOLD, EditorTextModifier.TITLE -> {
                 if (focusedPart == null) return
 
-                mSavedCursor = Pair(startPointer, endPointer)
+                //  mSavedCursor = Pair(startPointer, endPointer)
 
                 val span: MetricAffectingSpan = if (clickedButton == EditorTextModifier.TITLE)
                     produceOfType(AbsoluteSizeSpan::class.java)
                 else newBoldSpan()
 
-                val needsCursorForwarding =
-                        processMetricAffection(span, focusedPart.text, startPointer, endPointer)
-
-                if (needsCursorForwarding) {
-                    Timber.e("needsCursorForwarding")
-                    focusedPart.startPointer += 1
-                    focusedPart.endPointer += 1
-                    mSavedCursor = Pair(focusedPart.startPointer, focusedPart.endPointer)
+                if (clickedButton == EditorTextModifier.TITLE) {
+                    mAdapter.beforeTextSizeChange(mRecycler)
                 }
-                onCursorChange(mViewModel.editorLiveData.value?.parts ?: return)
-                mSavedCursor = null
+
+                processMetricAffection(span, focusedPart.text, startPointer, endPointer)
+
                 if (clickedButton == EditorTextModifier.TITLE) mAdapter.onTextSizeChanged(mRecycler)
+                if (clickedButton == EditorTextModifier.TITLE) {
+                    mAdapter.afterTextSizeChange(mRecycler)
+                }
+
+                /* if (needsCursorForwarding) {
+                     if (DEBUG_EDITOR) Timber.e("needsCursorForwarding")
+                     focusedPart.startPointer += 1
+                     focusedPart.endPointer += 1
+                     mSavedCursor = Pair(focusedPart.startPointer, focusedPart.endPointer)
+                 }
+                 onCursorChange(mViewModel.editorLiveData.value?.parts ?: return)
+                 mSavedCursor = null
+                 if (clickedButton == EditorTextModifier.TITLE) mAdapter.onTextSizeChanged(mRecycler)*/
 
             }
             EditorTextModifier.QUOTATION, EditorTextModifier.LIST_BULLET, EditorTextModifier.LIST_NUMBERED -> {
@@ -452,7 +467,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
     private fun processLeadingMarginSpan(leadingSpan: LeadingMarginSpan,
                                          editable: Editable, startPointer: Int, endPointer: Int) {
-        Timber.e("processLeadingMarginSpan $leadingSpan ")
+        if (DEBUG_EDITOR) Timber.e("processLeadingMarginSpan $leadingSpan ")
         if (mBottomButtons.isSelected(leadingSpan)) {
             //adding quotation spans
             val paragraphBounds = editable.getParagraphBounds(startPointer)
@@ -488,7 +503,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
 
             } else {//startPointer == endPointer
-
+                if (DEBUG_EDITOR)Timber.e("startPointer == endPointer")
                 var pointerToParagraph = editable.getParagraphBounds(startPointer)
                 if (!checkStartAndEnd(pointerToParagraph.first, pointerToParagraph.second)) return
 
@@ -501,7 +516,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 if (leadingSpan is NumberedMarginSpan) {
                     val previousLeadingSpan = editable.getPreviousPositionIsNumericList(pointerToParagraph.first)
                     if (previousLeadingSpan != null) {
-                        Timber.e("previous line is numeric span")
+                        if (DEBUG_EDITOR) Timber.e("previous line is numeric span")
                         editable
                                 .setSpan(previousLeadingSpan.nextIndex(),
                                         pointerToParagraph.first,
@@ -510,7 +525,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                         return
                     }
                 }
-
+                if (DEBUG_EDITOR)Timber.e("settting span at ${pointerToParagraph.first} pointerToParagraph.second = ${pointerToParagraph.second}" +
+                        "\n type = $leadingSpan")
                 editable
                         .setSpan(leadingSpan,
                                 pointerToParagraph.first,
@@ -535,9 +551,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                                        editable: Editable,
                                        startPointer: Int,
                                        endPointer: Int): Boolean {
-        Timber.e("processMetricAffection styleSpan = $styleSpan editable = $editable, its lenth = ${editable.length} startPointer = $startPointer endPointer = $endPointer")
-        if (mBottomButtons.isSelected(styleSpan)) {//if user tapped at Bold, but text not bold
-
+        if (DEBUG_EDITOR) Timber.e("processMetricAffection styleSpan = $styleSpan editable = $editable, its lenth = ${editable.length} startPointer = $startPointer endPointer = $endPointer")
+        if (mBottomButtons.isSelected(styleSpan)) {//deleting metric affection spans
             Timber.e("adding spans")
             if (startPointer != endPointer)//if we selected text
             {
@@ -550,14 +565,14 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             {
 
                 if (editable.isStartOf(startPointer)) {
-                    Timber.e("we at the start of editable")
+                    if (DEBUG_EDITOR) Timber.e("we at the start of editable")
                     editable.setSpan(styleSpan, startPointer, endPointer, INCLUSIVE_INCLUSIVE)
                 } else if (editable.isEndOf(startPointer)) {
-                    Timber.e("we at the end of editable")
+                    if (DEBUG_EDITOR) Timber.e("we at the end of editable")
                     editable.setSpan(styleSpan, startPointer, endPointer, INCLUSIVE_INCLUSIVE)
                 } else if (editable.isWithinWord(startPointer))//if we somewhere on in the middle
                 {
-                    Timber.e("we are within word")
+                    if (DEBUG_EDITOR) Timber.e("we are within word")
                     val startOfWord = editable.getStartOfWord(startPointer)
                     val endOfWord = editable.getEndOfWord(startPointer)
 
@@ -568,20 +583,20 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     }
                     editable.setSpan(styleSpan, startOfWord, endOfWord + 1, EXCLUSIVE_EXCLUSIVE)
                 } else {
-                    Timber.e("we are ath some sort of whitespace")
+                    if (DEBUG_EDITOR) Timber.e("we are ath some sort of whitespace")
                     editable.setSpan(styleSpan, startPointer, endPointer, EXCLUSIVE_INCLUSIVE)
                 }
             }
 
         } else {//deleting style
-            Timber.e("deleting spans")
+            if (DEBUG_EDITOR) Timber.e("deleting spans")
             val trimmedLength = editable.trimEnd().length
 
             val spans = editable
                     .getSpans(startPointer, endPointer, styleSpan::class.java)
 
             if (startPointer != endPointer || (startPointer == endPointer && editable.isWithinWord(startPointer))) {
-                Timber.e("removing span at the word")
+                if (DEBUG_EDITOR) Timber.e("removing span at the word")
 
                 var wordStart = if (startPointer != endPointer) startPointer else editable.getStartOfWord(startPointer)
                 var endOfWord = if (startPointer != endPointer) endPointer else editable.getEndOfWord(startPointer) + 1
@@ -597,10 +612,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     if (spanEnd < 0) spanEnd = editable.length
                     val spanFlag = editable.getSpanFlags(it)
 
-                    Timber.e("startReal = ${editable.getSpanStart(it)}" +
+                    if (DEBUG_EDITOR) Timber.e("startReal = ${editable.getSpanStart(it)}" +
                             " endReal = ${editable.getSpanEnd(it)} styledSpans = " +
                             editable.getSpans(0, editable.length, styleSpan::class.java).toStringCustom())
-                    Timber.e("startSpan = $spanStart endSpan = $spanEnd wordStart = $wordStart wordEnd = $endOfWord")
+                    if (DEBUG_EDITOR) Timber.e("startSpan = $spanStart endSpan = $spanEnd wordStart = $wordStart wordEnd = $endOfWord")
 
                     editable.removeSpan(it)
 
@@ -617,7 +632,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 //if startPointer == endPointer
 
                 if (editable.isPositionNextToWord(startPointer) || editable.isPositionNextToWhiteSpace(startPointer)) {
-                    Timber.e("isPositionNextToWord || isPositionNextToWhiteSpace")
+                    if (DEBUG_EDITOR) Timber.e("isPositionNextToWord || isPositionNextToWhiteSpace")
                     //if we are behind text, and span stretched for us
                     if (spans.isEmpty()) return false
 
@@ -637,7 +652,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     }
                 } else {
                     spans.forEach {
-                        Timber.e("removing span")
+                        if (DEBUG_EDITOR) Timber.e("removing span")
                         editable.removeSpan(it)
                     }
                 }
@@ -725,6 +740,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         @JvmStatic
         private val READ_EXTERNAL_PERMISSION = nextInt()
         val MODE_TAG = "MODE_TAG"
+
 
         fun startRootCommentEditor(ctx: Context,
                                    rootStory: StoryWithComments,

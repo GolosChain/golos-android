@@ -36,9 +36,11 @@ import android.text.style.UnderlineSpan;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.golos.golos.screens.editor.EditorActivity;
 import io.golos.golos.screens.editor.UtilsKt;
 import timber.log.Timber;
 
+import static io.golos.golos.screens.editor.EditorActivityKt.DEBUG_EDITOR;
 import static io.golos.golos.screens.editor.knife.KnifeTagHandler.HEADER;
 import static io.golos.golos.screens.editor.knife.KnifeTagHandler.QUOTE;
 
@@ -54,27 +56,31 @@ public class KnifeParser {
                 .replaceAll("<ul>\\s+<br>", "<ul>")
                 .replaceAll("</li>\\s+<br>", "</li>")
                 .replaceAll("<li>\\s<br>", "<li>")
+                .replaceAll("li>", KnifeTagHandler.LI + ">")
+                .replaceAll("ul>", KnifeTagHandler.UNORDERED_LIST + ">")
                 .replaceAll("<ol>\\s+<br>", "<ol>");
         return fromInnerHtmlFormat(source, spanFactory);
     }
 
 
     private static Spanned fromInnerHtmlFormat(String source, @Nullable SpanFactory spanFactory) {
-        Timber.e("from html = " + source);
+      if (DEBUG_EDITOR) Timber.e("from html = " + source);
         Spanned s = Html
-                .fromHtml(source.startsWith("<b> </b>") ? source
-                        : "<b> </b>" + source, null, new KnifeTagHandler(spanFactory));
-        Timber.e("after first = " + s);
+                .fromHtml(source.startsWith("<b></b>") ? source
+                        : "<b></b>" + source, null, new KnifeTagHandler(spanFactory));
+        if (DEBUG_EDITOR) Timber.e("after first = " + s);
+
         if (s instanceof SpannableStringBuilder) {
             SpannableStringBuilder sb = ((SpannableStringBuilder) s);
             UtilsKt.changeLeadingSpansFlagParagraphToInclusiveInclusive(sb);
+            UtilsKt.printAllSpans(sb);
         }
         return UtilsKt.trimStartAndEnd(s);
 
     }
 
     public static String toHtml(Spanned text) {
-        Timber.e("from = " + text + ", its length is " + text.length());
+        if (DEBUG_EDITOR)  Timber.e("from = " + text + ", its length is " + text.length());
         if (text instanceof SpannableStringBuilder) {
             SpannableStringBuilder sb = (SpannableStringBuilder) text;
             LeadingMarginSpan[] leadingMarginSpans = sb.getSpans(0, sb.length(), LeadingMarginSpan.class);
@@ -95,7 +101,7 @@ public class KnifeParser {
         htmlString = htmlString
                 .replaceAll("</li></ul><ul><li>", "</li><li>")
                 .replaceAll("</li></ol><ol><li>", "</li><li>");
-        Timber.e("htmlstr = " + htmlString);
+        if (DEBUG_EDITOR) Timber.e("htmlstr = " + htmlString);
         return htmlString
                 .replaceAll(QUOTE + ">", "blockquote>")
                 .replaceAll(HEADER + ">", "h3>")
@@ -104,6 +110,8 @@ public class KnifeParser {
                 .replaceAll("</li></ol>", "</li>\n</ol>")
                 .replaceAll("<ul><li>","<ul>\n<li>")
                 .replaceAll("<ol><li>","<ol>\n<li>")
+                .replaceAll(KnifeTagHandler.LI + ">","li>")
+                .replaceAll(KnifeTagHandler.UNORDERED_LIST + ">","ui>")
                 .trim();
     }
 
