@@ -11,6 +11,7 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.*
+import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
@@ -259,7 +260,7 @@ fun CharSequence.getLineOfWordPosition(wordPosition: Int): Int {
 }
 
 fun Editable.printAllSpans() {
-    if (!DEBUG_EDITOR)return
+    if (!DEBUG_EDITOR) return
     getSpans(0, length, Any::class.java).forEach {
         Timber.e("span = $it, start = ${getSpanStart(it)} end = ${getSpanEnd(it)}")
     }
@@ -292,7 +293,7 @@ fun Char.isPartOfWord() = !isWordBreaker()
 
 
 fun Editable.printStyleSpans(start: Int = 0, end: Int = length) {
-    if (!DEBUG_EDITOR)return
+    if (!DEBUG_EDITOR) return
     getSpans(start, end, StyleSpan::class.java).forEach {
         Timber.e("span = $it \n start = ${getSpanStart(it)} end = ${getSpanEnd(it)} " +
                 "flag is ${getSpanFlags(it)}")
@@ -345,7 +346,7 @@ fun CharSequence.isLastCharLineBreaker() = length > 0 && this[lastIndex] == '\n'
 
 
 fun Spanned.printLeadingMarginSpans(pointerToPosition: Int) {
-    if (!DEBUG_EDITOR)return
+    if (!DEBUG_EDITOR) return
     getSpans(pointerToPosition, length, LeadingMarginSpan::class.java)
             .forEach {
                 Timber.e("$it start = ${getSpanStart(it)} end = ${getSpanEnd(it)} , flag  = ${getSpanFlags(it)}")
@@ -402,7 +403,7 @@ fun CharSequence.isPositionNextToWhiteSpace(pointerToPosition: Int) = length > 0
         && pointerToPosition > 0
         && this[pointerToPosition - 1].isWordBreaker()
 
-private val urlSpans = setOf(URLSpan::class.java, KnifeURLSpan::class.java)
+private val urlSpans = setOf(KnifeURLSpan::class.java)
 
 private val appSpannables = setOf(
         URLSpan::class.java,

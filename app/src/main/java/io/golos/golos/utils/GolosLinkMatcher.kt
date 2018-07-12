@@ -1,5 +1,7 @@
 package io.golos.golos.utils
 
+import timber.log.Timber
+
 /**
  * Created by yuri on 12.12.17.
  */
@@ -7,7 +9,7 @@ object GolosLinkMatcher {
     fun match(url: String): MatchResult {
         if (url.startsWith("https://golos.io/")
                 || url.startsWith("https://golos.blog/")
-                ) {
+        ) {
             val link = url.replace("https://golos.io/", "")
                     .replace("https://golos.blog/", "")
             if (link.matches(Regexps.storyLink)) {//its link

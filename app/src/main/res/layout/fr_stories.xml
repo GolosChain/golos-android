@@ -1,23 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/stories_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    android:layout_height="match_parent">
 
 
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/refresh_lo"
         android:animateLayoutChanges="true">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical">
+
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/refresh_btn"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/img_refresh"
+                android:gravity="center"
+                android:text="@string/refresh_question"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/font_regular"
+                android:visibility="gone" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -25,35 +44,10 @@
         android:id="@+id/fullscreen_label"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:gravity="top|center_horizontal"
         android:padding="@dimen/margin_material"
         android:paddingTop="100dp"
         android:textSize="@dimen/font_big"
         android:visibility="gone" />
-
-    <FrameLayout
-
-        android:id="@+id/refresh_lo"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/refresh_lo_height"
-        android:animateLayoutChanges="true"
-        android:background="@color/colorAccent"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/refresh_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawablePadding="@dimen/margin_material_half"
-            android:gravity="center_vertical|start"
-            android:text="@string/refresh_question"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            app:backgroundTint="@color/blue_dark" />
-    </FrameLayout>
-</RelativeLayout>
+</FrameLayout>

@@ -2,7 +2,9 @@ package io.golos.golos.screens.editor
 
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
+import android.text.Selection
 import android.view.ViewGroup
+import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.R
 import io.golos.golos.screens.editor.viewholders.EditorEditTextViewHolder
 import io.golos.golos.screens.editor.viewholders.EditorImageViewHolder
@@ -153,6 +155,18 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)
                 (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.shouldShowKeyboard()
+        }
+    }
+
+    fun focusFirstTextPart(mRecycler: RecyclerView) {
+        Timber.e("onRequestFocus")
+        (0 until itemCount).forEach {
+            val part = parts[it] as? EditorTextPart
+            if (part != null) {
+                Selection.setSelection(part.text, 0, 0)
+                (mRecycler.findViewHolderForAdapterPosition(it) as? EditorEditTextViewHolder)?.shouldShowKeyboard()
+                return@focusFirstTextPart
+            }
         }
     }
 

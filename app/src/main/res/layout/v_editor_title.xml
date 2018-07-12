@@ -10,7 +10,7 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:hint="@string/enter_post_title"
-        android:maxLength="255"
+        android:maxLength="10"
         android:paddingBottom="4dp"
         android:paddingTop="@dimen/margin_material"
         android:text=""

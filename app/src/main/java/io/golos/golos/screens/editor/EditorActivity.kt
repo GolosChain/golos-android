@@ -21,15 +21,13 @@ import android.text.*
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
-import android.text.style.URLSpan
-import android.view.View
 import android.widget.Button
-import android.widget.TextView
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
@@ -48,7 +46,7 @@ import java.io.FileOutputStream
 /**
  *
  * **/
-const val DEBUG_EDITOR = true
+
 
 data class EditorMode(@JsonProperty("title")
                       val title: String = "",
@@ -137,6 +135,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 ?: "", mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 {
                     mViewModel.onTitleChanged(it)
+                },
+                {
+                    mAdapter.focusFirstTextPart(mRecycler)
+
                 }, if (mMode?.editorType == EditorType.CREATE_COMMENT) mMode?.subtitle
                 ?: "" else "",
 
@@ -186,6 +188,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             mTitle.state = EditorTitleState(it.title,
                     mTitle.state.isTitleEditable,
                     mTitle.state.onTitleChanges,
+                    mTitle.state.onEnter,
                     mTitle.state.subtitle,
                     mTitle.state.isHidden)
         }
@@ -271,7 +274,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         if (DEBUG_EDITOR) Timber.e("validateBottomButtonSelections saved cursor = $mSavedCursor")
         mHandler.removeCallbacksAndMessages(null)//discard scheduled changes, only apply for fresh one selection
         val focusedPart = parts.findLast { it.isFocused() } as? EditorTextPart
-        if (DEBUG_EDITOR) Timber.e("focusedPart = $focusedPart")
+        if (DEBUG_EDITOR) Timber.e("focusedPart = $focusedPart cursor position is ${focusedPart?.startPointer}")
 
         if (focusedPart != null) {
             mHandler.postDelayed({
@@ -340,7 +343,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 } else {//if user selected text with url in it
                     if (DEBUG_EDITOR) Timber.e("removing url span")
                     val spans =
-                            focusedPart.text.getSpans(startPointer, endPointer, URLSpan::class.java)
+                            focusedPart.text.getSpans(startPointer, endPointer, KnifeURLSpan::class.java)
                     spans.forEach {
                         focusedPart.text.removeSpan(it)
                     }
@@ -503,7 +506,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
 
             } else {//startPointer == endPointer
-                if (DEBUG_EDITOR)Timber.e("startPointer == endPointer")
+                if (DEBUG_EDITOR) Timber.e("startPointer == endPointer")
                 var pointerToParagraph = editable.getParagraphBounds(startPointer)
                 if (!checkStartAndEnd(pointerToParagraph.first, pointerToParagraph.second)) return
 
@@ -525,7 +528,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                         return
                     }
                 }
-                if (DEBUG_EDITOR)Timber.e("settting span at ${pointerToParagraph.first} pointerToParagraph.second = ${pointerToParagraph.second}" +
+                if (DEBUG_EDITOR) Timber.e("settting span at ${pointerToParagraph.first} pointerToParagraph.second = ${pointerToParagraph.second}" +
                         "\n type = $leadingSpan")
                 editable
                         .setSpan(leadingSpan,

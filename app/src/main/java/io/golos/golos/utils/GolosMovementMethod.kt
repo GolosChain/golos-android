@@ -12,6 +12,7 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.*
 import android.widget.TextView
+import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
@@ -335,6 +336,8 @@ class GolosMovementMethod protected constructor() : LinkMovementMethod() {
                 val s = textView.text as Spanned
                 val text: String
                 if (span is URLSpan) {
+                    text = span.url
+                } else if (span is KnifeURLSpan) {
                     text = span.url
                 } else {
                     val start = s.getSpanStart(span)

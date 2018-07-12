@@ -50,8 +50,7 @@
                     android:layout_height="@dimen/avatar_size"
                     android:layout_marginStart="@dimen/material_huge"
                     android:layout_marginTop="45dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="false"
+
                     android:scaleType="centerCrop"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -62,8 +61,8 @@
                     android:id="@+id/avatar_overlay"
                     android:layout_width="@dimen/avatar_size"
                     android:layout_height="@dimen/avatar_size"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="false"
+
+                    android:clickable="true"
                     android:src="#99ffffff"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="@id/avatar_iv"
@@ -266,13 +265,15 @@
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/settings_btn"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_margin="@dimen/margin_material"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_margin="@dimen/margin_material_small"
                     android:padding="0dp"
-                    app:backgroundTint="@android:color/transparent"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    android:background="@null"
+                    android:foreground="@drawable/ripple_oval"
                     app:srcCompat="@drawable/ic_settings_white_24dp" />
 
                 <LinearLayout
@@ -323,6 +324,7 @@
                             android:textColor="@color/gray_7d" />
 
                         <ImageButton
+
                             android:id="@+id/proceed_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"

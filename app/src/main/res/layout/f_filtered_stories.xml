@@ -27,6 +27,8 @@
                 android:layout_height="52dp"
                 android:paddingStart="@dimen/margin_material_half"
                 app:elevation="1dp"
+                android:clickable="true"
+                android:background="?selectableItemBackground"
                 app:navigationIcon="@drawable/ic_seacrh_white_20dp"
                 app:subtitle="@string/search_in_golos"
                 app:subtitleTextColor="@android:color/white" />

@@ -117,47 +117,47 @@
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_title"
                 style="@style/BottomButtonStyle"
-                android:background="@drawable/btn_editor_bottom"
+
                 android:paddingTop="1dp"
                 app:srcCompat="@drawable/ic_title_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_bold"
                 style="@style/BottomButtonStyle"
-                android:background="@drawable/btn_editor_bottom"
+
                 app:srcCompat="@drawable/ic_b_21dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_quotations"
                 style="@style/BottomButtonStyle"
-                android:background="@drawable/btn_editor_bottom"
+
                 android:visibility="visible"
                 app:srcCompat="@drawable/ic_format_quote" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_quote"
                 style="@style/BottomButtonStyle"
-                android:background="@drawable/btn_editor_bottom"
+
                 app:srcCompat="@drawable/ic_reply_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_list_numbered"
                 style="@style/BottomButtonStyle"
 
-                android:background="@drawable/btn_editor_bottom"
+
                 app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_list_bullet"
                 style="@style/BottomButtonStyle"
 
-                android:background="@drawable/btn_editor_bottom"
+
                 app:srcCompat="@drawable/ic_format_list_bulleted_24dp" />
 
             <io.golos.golos.screens.editor.views.CheckableButton
                 android:id="@+id/btn_link"
                 style="@style/BottomButtonStyle"
-                android:background="@drawable/btn_editor_bottom"
+
                 app:srcCompat="@drawable/ic_link_24dp" />
 
             <android.support.v7.widget.AppCompatImageButton

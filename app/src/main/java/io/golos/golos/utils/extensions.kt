@@ -383,6 +383,11 @@ fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {
 fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
     return AppCompatResources.getDrawable(context, resId)!!
 }
+fun View.getVectorDrawableWithIntrinisticSize(@DrawableRes resId: Int): Drawable {
+    val d =  AppCompatResources.getDrawable(context, resId)!!
+    d.setBounds(0,0,d.intrinsicWidth,d.intrinsicHeight)
+    return  d;
+}
 
 fun Context.getVectorAsBitmap(@DrawableRes resId: Int): Bitmap {
 

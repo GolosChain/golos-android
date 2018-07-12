@@ -49,7 +49,6 @@ class StripeCompactViewHolder(parent: ViewGroup,
         mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
         mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
 
-        mTitleTv.setOnClickListener({ onCardClick.onClick(this) })
         mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
         itemView.setOnClickListener({ onCardClick.onClick(this) })
     }

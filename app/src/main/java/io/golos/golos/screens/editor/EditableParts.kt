@@ -30,7 +30,7 @@ data class EditorImagePart(override val id: String = UUID.randomUUID().toString(
                            val imageName: String,
                            val imageUrl: String) : EditorPart(id) {
     override val htmlRepresentation
-        get() = "<center> <img src=\"$imageUrl\">$imageName</img> </center>"
+        get() = "<center> <img src=\"$imageUrl\"/></center>"
 
 
     override var startPointer = CURSOR_POINTER_NOT_SELECTED

@@ -3,8 +3,7 @@ package io.golos.golos.screens.editor
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.text.Editable
-import android.text.TextWatcher
+import android.text.*
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -16,10 +15,11 @@ import io.golos.golos.R
 data class EditorTitleState(var title: CharSequence = "",
                             val isTitleEditable: Boolean = false,
                             val onTitleChanges: (CharSequence) -> Unit = {},
+                            val onEnter: () -> Unit = {},
                             val subtitle: CharSequence? = null,
                             val isHidden: Boolean = false)
 
-class EditorTitle : FrameLayout, TextWatcher {
+class EditorTitle : FrameLayout, TextWatcher, InputFilter {
 
     @JvmOverloads
     constructor(
@@ -43,6 +43,7 @@ class EditorTitle : FrameLayout, TextWatcher {
         LayoutInflater.from(context).inflate(R.layout.v_editor_title, this)
         mTitleEt = findViewById(R.id.title_et)
         mSubtitleText = findViewById(R.id.subtitle_text)
+        mTitleEt.filters = arrayOf<InputFilter>(this, InputFilter.LengthFilter(255))
     }
 
     var state: EditorTitleState = EditorTitleState()
@@ -66,7 +67,8 @@ class EditorTitle : FrameLayout, TextWatcher {
         }
 
     override fun afterTextChanged(s: Editable?) {
-        state = EditorTitleState(s ?: "", state.isTitleEditable, state.onTitleChanges, state.subtitle)
+        state = EditorTitleState(s
+                ?: "", state.isTitleEditable, state.onTitleChanges, state.onEnter, state.subtitle)
         state.onTitleChanges.invoke(state.title)
     }
 
@@ -77,6 +79,19 @@ class EditorTitle : FrameLayout, TextWatcher {
 
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
+    }
+
+    override fun filter(source: CharSequence?, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int): CharSequence? {
+        source ?: return null
+        if (!source.contains('\n')) return null
+        var positionOfLineBreak = source.indexOf('\n')
+        val ssb = SpannableStringBuilder.valueOf(source)
+        while (positionOfLineBreak > -1) {
+            ssb.delete(positionOfLineBreak, positionOfLineBreak + 1)
+            positionOfLineBreak = ssb.indexOf('\n')
+        }
+        state.onEnter.invoke()
+        return ssb
     }
 }
 

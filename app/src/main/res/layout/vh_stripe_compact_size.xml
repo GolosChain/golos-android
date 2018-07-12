@@ -3,6 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:background="?selectableItemBackground"
     android:animateLayoutChanges="true">
 
     <android.support.v7.widget.AppCompatTextView
@@ -13,6 +15,7 @@
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:lines="2"
+        android:clickable="false"
         app:layout_constraintEnd_toStartOf="@id/image"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/controls_lo"
@@ -21,6 +24,7 @@
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/user_name"
+        android:background="@drawable/img_round_ripple_gray"
         style="@style/TitleUserNameStyle"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
@@ -40,11 +44,12 @@
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/blog_name_tv"
+        android:background="@drawable/img_round_ripple_gray"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="2dp"
-        android:background="?selectableItemBackground"
+
         android:drawablePadding="4dp"
         android:textSize="12sp"
         android:textColor="@color/textColorP"
@@ -67,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="20dp"
             android:layout_gravity="center_horizontal"
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/img_round_ripple_gray" />
 
         <TextView
             android:id="@+id/vote_value"
@@ -75,7 +80,7 @@
             android:layout_height="16dp"
             android:layout_marginTop="2dp"
 
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/img_round_ripple_gray" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -92,13 +97,14 @@
             android:layout_height="20dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/margin_material_half"
+            android:foreground="@drawable/img_round_ripple_gray"
            />
 
         <TextView
             android:id="@+id/comments_count_tv"
             style="@style/ControlsTextStyle"
             android:layout_height="wrap_content"
-
+            android:background="@drawable/img_round_ripple_gray"
           android:layout_width="match_parent"
 
             />
@@ -113,6 +119,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/controls_lo"
+        android:background="@drawable/img_round_ripple_gray"
         app:riv_corner_radius="8dp" />
 
 

@@ -9,7 +9,7 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 55
+        versionCode 56
         versionName "0.67"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -29,6 +29,11 @@ android {
             testCoverageEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        buildTypes.each {
+            it.buildConfigField 'String', 'BASE_URL', "\"https://golos.io/\""
+            it.buildConfigField 'boolean', 'DEBUG_EDITOR', "true"
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

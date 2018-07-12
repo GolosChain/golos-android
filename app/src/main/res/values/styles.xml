@@ -282,6 +282,7 @@
         <item name="android:layout_marginStart">@dimen/margin_material</item>
         <item name="android:layout_marginTop">@dimen/margin_material_small</item>
         <item name="android:background">@drawable/rect_blue</item>
+        <item name="android:foreground">@drawable/img_round_ripple_gray_24dp</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingBottom">2dp</item>
         <item name="android:paddingTop">2dp</item>
@@ -318,6 +319,7 @@
         <item name="android:paddingStart">@dimen/margin_material_small</item>
         <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:textSize">@dimen/font_small</item>
+        <item name="android:background">@drawable/img_round_ripple_gray</item>
     </style>
 
     <style name="Base.Widget.AppCompat.Button.Borderless.StorySubButton">
@@ -356,7 +358,6 @@
     </style>
 
     <style name="StripeTitle">
-        <item name="android:background">?selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>

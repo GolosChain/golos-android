@@ -10,6 +10,8 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
+import android.text.SpannableStringBuilder
+import android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.screens.editor.prepend
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
@@ -30,13 +33,13 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
     private var mRefreshButton: TextView? = null
-    private var mRefreshLo: View? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
@@ -44,6 +47,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
+
         bindViews(view)
         setUp()
         return view
@@ -53,14 +57,20 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mRecycler = view.findViewById(R.id.recycler)
         mSwipeRefresh = view.findViewById(R.id.swipe_refresh)
         mRefreshButton = view.findViewById(R.id.refresh_btn)
-        mRefreshLo = view.findViewById(R.id.refresh_lo)
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
         val manager = MyLinearLayoutManager(view.context)
         mRecycler?.layoutManager = manager
         mSwipeRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
-        mRefreshButton?.setCompoundDrawablesWithIntrinsicBounds(mRefreshButton?.getVectorDrawable(R.drawable.ic_refresh_white_14dp), null, null, null)
+
+        val ssb = SpannableStringBuilder.valueOf(getString(R.string.refresh_question))
+        ssb.prepend("    ")
+        ssb.setSpan(CenterVerticalDrawableSpan(mRefreshButton?.getVectorDrawableWithIntrinisticSize(R.drawable.ic_refresh_white_14dp)),
+                0, 1, SPAN_INCLUSIVE_INCLUSIVE)
+
+        mRefreshButton?.text = ssb
+
         mSwipeRefresh?.setColorSchemeResources(R.color.blue_light)
         if (arguments?.getSerializable(TYPE_TAG) == null) return
 
@@ -143,7 +153,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             }
         })
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
-        view.findViewById<View>(R.id.refresh_lo).setOnClickListener { mRefreshButton?.callOnClick() }
     }
 
     private fun setUp() {
@@ -181,10 +190,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
 
         if (t?.showRefreshButton == true) {
-            mRefreshLo?.setViewVisible()
             mRefreshButton?.setViewVisible()
         } else {
-            mRefreshLo?.setViewGone()
+
             mRefreshButton?.setViewGone()
         }
 
@@ -214,21 +222,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             mRecycler?.visibility = View.VISIBLE
             mFullscreenMessageLabel.visibility = View.GONE
         }
-
-        /*   if (mSavedPosition ?: 0 > 0) {
-               val exec = (mRecycler?.adapter as StoriesRecyclerAdapter).handler
-               exec.postDelayed({
-                   Timber.e("mSavedPosition =  $ ")
-                   Timber.e("t?.items?.size =  ${t?.items?.size}")
-                   if (mSavedPosition ?: 0 > 0) {
-                       Timber.e("changing $mSavedPosition")
-                       if (t?.items?.size ?: 0 > 0) {
-                           mRecycler?.scrollToPosition(mSavedPosition ?: return@postDelayed)
-                         //  mSavedPosition = null
-                       }
-                   }
-               }, 1000)
-           }*/
     }
 
 

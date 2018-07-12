@@ -1,11 +1,16 @@
 package io.golos.golos.screens.editor.views;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.view.View;
 
 import javax.annotation.Nullable;
+
+import io.golos.golos.R;
 
 public class CheckableButton extends AppCompatImageButton implements View.OnClickListener {
     @Nullable
@@ -43,6 +48,20 @@ public class CheckableButton extends AppCompatImageButton implements View.OnClic
     public boolean performClick() {
         return super.performClick();
 
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        if (selected) {
+            Drawable d = getDrawable();
+            if (d == null) return;
+            d.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent), PorterDuff.Mode.SRC_IN);
+        } else {
+            Drawable d = getDrawable();
+            if (d == null) return;
+            d.setColorFilter(null);
+        }
     }
 
     @Override

@@ -736,7 +736,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                           filter: StoryFilter?,
                                           startAuthor: String?,
                                           startPermlink: String?, completionHandler: (Unit, GolosError?) -> Unit) {
-
         val request = StoriesRequest(limit, type, startAuthor, startPermlink, filter)
         if (mRequests.contains(request)) return
         mRequests.add(request)

@@ -66,14 +66,12 @@ class StripeFullViewHolder(parent: ViewGroup,
         mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
         mVotersBtn.setOnClickListener({ onVotersClick.onClick(this) })
 
-        mTitleTv.setOnClickListener({ onCardClick.onClick(this) })
-        mBodyTextMarkwon.setOnClickListener({ onCardClick.onClick(this) })
-        mMainImageBig.setOnClickListener({
 
+        mMainImageBig.setOnClickListener({
             onCardClick.onClick(this)
         })
         itemView.setOnClickListener({ onCardClick.onClick(this) })
-        mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
+      //  mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {

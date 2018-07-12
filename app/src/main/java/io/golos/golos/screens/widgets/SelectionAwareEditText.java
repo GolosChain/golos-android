@@ -4,8 +4,10 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 
-import io.golos.golos.screens.editor.EditorActivityKt;
+
 import timber.log.Timber;
+
+import static io.golos.golos.BuildConfig.DEBUG_EDITOR;
 
 /**
  * Created by yuri on 22.11.17.
@@ -65,7 +67,7 @@ public class SelectionAwareEditText extends AppCompatEditText {
 
     @Override
     public void requestLayout() {
-        if (EditorActivityKt.DEBUG_EDITOR) Timber.e("requestLayout freezeLayout = " + freezeLayout);
+        if (DEBUG_EDITOR) Timber.e("requestLayout freezeLayout = " + freezeLayout);
         if (freezeLayout) {
             isRequestLoWasCalled = true;
         } else {

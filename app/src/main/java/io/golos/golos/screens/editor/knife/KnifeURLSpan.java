@@ -16,31 +16,45 @@
 
 package io.golos.golos.screens.editor.knife;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Parcel;
+import android.provider.Browser;
 import android.text.TextPaint;
-import android.text.style.URLSpan;
+import android.text.style.ClickableSpan;
+import android.util.Log;
+import android.view.View;
 
-public class KnifeURLSpan extends URLSpan  {
+public class KnifeURLSpan extends ClickableSpan {
     private int linkColor = 0;
     private boolean linkUnderline = true;
+    private String mURL;
 
     public KnifeURLSpan(String url, int linkColor, boolean linkUnderline) {
-        super(url);
+
         this.linkColor = linkColor;
         this.linkUnderline = linkUnderline;
+        mURL = url;
     }
 
     public KnifeURLSpan(Parcel src) {
-        super(src);
+
         this.linkColor = src.readInt();
         this.linkUnderline = src.readInt() != 0;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(linkColor);
-        dest.writeInt(linkUnderline ? 1 : 0);
+    public KnifeURLSpan(String mURL) {
+        this.mURL = mURL;
+    }
+
+    public String getURL() {
+        return mURL;
+    }
+
+    public void setmURL(String mURL) {
+        this.mURL = mURL;
     }
 
     @Override
@@ -48,6 +62,21 @@ public class KnifeURLSpan extends URLSpan  {
         ds.setColor(linkColor != 0 ? linkColor : ds.linkColor);
         ds.setUnderlineText(linkUnderline);
     }
+
+    @Override
+    public void onClick(View widget) {
+        Uri uri = Uri.parse(getURL());
+        Context context = widget.getContext();
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w("URLSpan", "Actvity was not found for intent, " + intent.toString());
+        }
+    }
+
+
 
     @Override
     public String toString() {

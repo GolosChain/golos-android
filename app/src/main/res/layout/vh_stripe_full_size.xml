@@ -3,6 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:background="?selectableItemBackground"
     android:paddingTop="12dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
@@ -10,6 +12,7 @@
         android:layout_width="@dimen/feed_story_authe_avatar_size"
         android:layout_height="@dimen/feed_story_authe_avatar_size"
         android:layout_marginStart="@dimen/margin_material"
+        android:background="@drawable/img_round_ripple_gray"
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -18,6 +21,7 @@
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/user_name"
         style="@style/TitleUserNameStyle"
+        android:background="@drawable/img_round_ripple_gray"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,6 +40,7 @@
         android:id="@+id/blog_name_tv"
         style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
         android:layout_marginTop="0dp"
+        android:background="@drawable/img_round_ripple_gray"
         android:includeFontPadding="false"
         android:padding="0dp"
         android:textColor="@color/textColorP"
@@ -46,12 +51,12 @@
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/title"
         style="@style/StripeTitle"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_half"
+        android:clickable="false"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,13 +65,14 @@
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/text"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="4dp"
-        android:background="?selectableItemBackground"
-        android:clickable="true"
+        android:background="@drawable/img_round_ripple_gray"
+        android:clickable="false"
         android:ellipsize="end"
         android:lines="4"
         android:textColor="#414548"
@@ -82,10 +88,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_material_half"
         android:adjustViewBounds="true"
-        android:background="?selectableItemBackgroundBorderless"
-        android:clickable="true"
+        android:foreground="?selectableItemBackgroundBorderless"
         android:cropToPadding="true"
         android:minHeight="220dp"
+        android:clickable="true"
         android:scaleType="fitCenter"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
@@ -113,7 +119,7 @@
         <TextView
             android:id="@+id/vote_btn"
             style="@style/VoteButton"
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/img_round_ripple_gray_24dp" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -125,14 +131,14 @@
         <TextView
             android:id="@+id/voters_btn"
             style="@style/StoryBottomControlButton"
-            android:background="?attr/selectableItemBackground"
+            android:background="@drawable/img_round_ripple_gray"
             android:paddingBottom="3dp" />
 
         <TextView
             android:id="@+id/comments_btn"
             style="@style/StoryBottomControlButton"
             android:layout_marginStart="@dimen/margin_material_half"
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/img_round_ripple_gray" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -144,6 +150,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
+                android:background="@drawable/img_round_ripple_gray_24dp"
                 app:srcCompat="@drawable/ic_share_gray_20dp" />
         </FrameLayout>
 

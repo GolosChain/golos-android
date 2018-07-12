@@ -40,7 +40,7 @@
                         android:id="@+id/back_btn"
                         android:layout_width="28dp"
                         android:layout_height="match_parent"
-                        android:background="?selectableItemBackground"
+                        android:background="@drawable/img_round_ripple_gray"
                         android:clickable="true"
                         android:descendantFocusability="beforeDescendants">
 

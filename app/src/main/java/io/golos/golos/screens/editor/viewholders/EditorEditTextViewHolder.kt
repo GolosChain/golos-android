@@ -9,10 +9,10 @@ import android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
 import android.text.TextWatcher
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
-import android.text.style.QuoteSpan
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.R
 import io.golos.golos.screens.editor.*
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
@@ -328,7 +328,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
         if (!mEditText.isFocused) mEditText.requestFocus()
         mEditText.postDelayed({
-            if (DEBUG_EDITOR) Timber.e("showing keyboard")
+            if (DEBUG_EDITOR) Timber.e("showing keyboard getStartSelection() = ${getStartSelection()} getEndSelection() = ${getEndSelection()}")
             mEditText.setSelection(getStartSelection(), getEndSelection())
             mEditText.requestFocus()
             val inputMethodManager = mEditText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
