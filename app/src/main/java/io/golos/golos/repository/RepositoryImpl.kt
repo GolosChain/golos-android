@@ -5,11 +5,11 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.content.Context
 import android.support.annotation.WorkerThread
-import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.AccountName
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
-import eu.bittrade.libs.steemj.exceptions.SteemResponseError
-import eu.bittrade.libs.steemj.util.ImmutablePair
+import eu.bittrade.libs.golosj.Golos4J
+import eu.bittrade.libs.golosj.base.models.AccountName
+import eu.bittrade.libs.golosj.enums.PrivateKeyType
+import eu.bittrade.libs.golosj.exceptions.SteemResponseError
+import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.api.GolosApi

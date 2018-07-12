@@ -3,7 +3,7 @@ package io.golos.golos.repository.model
 import android.os.Parcel
 import android.os.Parcelable
 import com.fasterxml.jackson.annotation.JsonProperty
-import eu.bittrade.libs.steemj.base.models.TrendingTag
+import eu.bittrade.libs.golosj.base.models.TrendingTag
 
 /**
  * Created by yuri on 05.01.18.

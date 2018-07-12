@@ -1,6 +1,6 @@
 package io.golos.golos.utils
 
-import eu.bittrade.libs.steemj.exceptions.*
+import eu.bittrade.libs.golosj.exceptions.*
 import io.golos.golos.R
 import timber.log.Timber
 import java.security.InvalidParameterException

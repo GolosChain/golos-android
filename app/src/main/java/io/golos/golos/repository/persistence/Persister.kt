@@ -4,7 +4,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Base64
 import com.crashlytics.android.Crashlytics
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.repository.model.NotificationsPersister

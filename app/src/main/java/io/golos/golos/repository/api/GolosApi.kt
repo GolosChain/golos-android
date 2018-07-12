@@ -1,6 +1,6 @@
 package io.golos.golos.repository.api
 
-import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
+import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo

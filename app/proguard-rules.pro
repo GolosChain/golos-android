@@ -29,7 +29,7 @@
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.BroadcastReceiver
 -keep public class * extends android.content.ContentProvider
--keep,includedescriptorclasses class eu.bittrade.libs.steemj.communication** { *; }
+-keep,includedescriptorclasses class eu.bittrade.libs.golosj.communication** { *; }
 -dontoptimize
 -keepparameternames
 -keepclassmembers,allowoptimization enum * {
@@ -49,8 +49,8 @@ public static ** valueOf(java.lang.String);
 #-keep class org.jetbrains.** { *; }
 -keep,includedescriptorclasses class javax.lang.model.type.** { *; }
 -keep,includedescriptorclasses class io.golos.** { *; }
--keep,includedescriptorclasses class eu.bittrade.libs.steemj.apis.** { *; }
--keep,includedescriptorclasses class eu.bittrade.libs.steemj.base.models.** { *; }
+-keep,includedescriptorclasses class eu.bittrade.libs.golosj.apis.** { *; }
+-keep,includedescriptorclasses class eu.bittrade.libs.golosj.base.models.** { *; }
 -keep,includedescriptorclasses class kotlin.reflect.jvm.** { *; }
 
 -keep,includedescriptorclasses class ru.noties.markwon.** { *; }

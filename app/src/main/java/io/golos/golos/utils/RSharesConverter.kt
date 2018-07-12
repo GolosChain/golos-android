@@ -1,6 +1,6 @@
 package io.golos.golos.utils
 
-import eu.bittrade.libs.steemj.base.models.GlobalProperties
+import eu.bittrade.libs.golosj.base.models.GlobalProperties
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext

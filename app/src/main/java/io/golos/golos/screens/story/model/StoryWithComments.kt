@@ -2,9 +2,9 @@ package io.golos.golos.screens.story.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import eu.bittrade.libs.steemj.base.models.Discussion
-import eu.bittrade.libs.steemj.base.models.DiscussionWithComments
-import eu.bittrade.libs.steemj.base.models.ExtendedAccount
+import eu.bittrade.libs.golosj.base.models.Discussion
+import eu.bittrade.libs.golosj.base.models.DiscussionWithComments
+import eu.bittrade.libs.golosj.base.models.ExtendedAccount
 import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem

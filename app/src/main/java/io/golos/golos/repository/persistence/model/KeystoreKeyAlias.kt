@@ -1,6 +1,6 @@
 package io.golos.golos.repository.persistence.model
 
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
+import eu.bittrade.libs.golosj.enums.PrivateKeyType
 
 /**
  * Created by yuri on 10.11.17.

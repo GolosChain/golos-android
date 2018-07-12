@@ -1,14 +1,14 @@
 package io.golos.golos.repository.api
 
-import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.apis.follow.enums.FollowType
-import eu.bittrade.libs.steemj.apis.follow.model.FollowApiObject
-import eu.bittrade.libs.steemj.base.models.*
-import eu.bittrade.libs.steemj.enums.DiscussionSortType
-import eu.bittrade.libs.steemj.enums.PrivateKeyType
-import eu.bittrade.libs.steemj.exceptions.SteemResponseError
-import eu.bittrade.libs.steemj.util.AuthUtils
-import eu.bittrade.libs.steemj.util.ImmutablePair
+import eu.bittrade.libs.golosj.Golos4J
+import eu.bittrade.libs.golosj.apis.follow.enums.FollowType
+import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
+import eu.bittrade.libs.golosj.base.models.*
+import eu.bittrade.libs.golosj.enums.DiscussionSortType
+import eu.bittrade.libs.golosj.enums.PrivateKeyType
+import eu.bittrade.libs.golosj.exceptions.SteemResponseError
+import eu.bittrade.libs.golosj.util.AuthUtils
+import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUser
@@ -66,6 +66,7 @@ internal class ApiImpl : GolosApi() {
                     FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
                     else -> throw IllegalStateException(" type $type is unsupported")
                 }
+
         val query = DiscussionQuery()
         query.limit = limit
 
@@ -227,9 +228,9 @@ internal class ApiImpl : GolosApi() {
             followingCount = followObject.followingCount.toLong()
         }
 
-        val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray().firstOrNull() as? PublicKey)?.addressFromPublicKey
+        val postingPublicOuter = (acc.posting.keyAuths.keys.toTypedArray().firstOrNull())?.addressFromPublicKey
                 ?: ""
-        val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray().firstOrNull() as? PublicKey)?.addressFromPublicKey
+        val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray().firstOrNull())?.addressFromPublicKey
                 ?: ""
 
         return GolosUserAccountInfo(GolosUser(acc.name.name, acc.avatarPath),

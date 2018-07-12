@@ -2,9 +2,9 @@ package io.golos.golos.repository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
-import eu.bittrade.libs.steemj.base.models.Discussion
-import eu.bittrade.libs.steemj.base.models.ExtendedAccount
-import eu.bittrade.libs.steemj.base.models.VoteLight
+import eu.bittrade.libs.golosj.base.models.Discussion
+import eu.bittrade.libs.golosj.base.models.ExtendedAccount
+import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.mapper

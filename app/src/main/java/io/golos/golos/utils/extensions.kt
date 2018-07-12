@@ -41,10 +41,10 @@ import android.widget.Toast
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import eu.bittrade.libs.steemj.base.models.Account
-import eu.bittrade.libs.steemj.base.models.AccountName
-import eu.bittrade.libs.steemj.base.models.operations.CommentOperation
-import eu.bittrade.libs.steemj.communication.CommunicationHandler
+import eu.bittrade.libs.golosj.base.models.Account
+import eu.bittrade.libs.golosj.base.models.AccountName
+import eu.bittrade.libs.golosj.base.models.operations.CommentOperation
+import eu.bittrade.libs.golosj.communication.CommunicationHandler
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository

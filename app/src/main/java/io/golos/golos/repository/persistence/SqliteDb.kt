@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import eu.bittrade.libs.steemj.base.models.VoteLight
+import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.story.model.StoryWithComments

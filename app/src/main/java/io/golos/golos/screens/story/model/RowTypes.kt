@@ -1,6 +1,6 @@
 package io.golos.golos.screens.story.model
 
-import eu.bittrade.libs.steemj.base.models.VoteLight
+import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
