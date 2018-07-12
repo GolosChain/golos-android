@@ -119,7 +119,7 @@
         <TextView
             android:id="@+id/vote_btn"
             style="@style/VoteButton"
-            android:background="@drawable/img_round_ripple_gray_24dp" />
+            android:background="@drawable/img_round_ripple_gray" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -150,7 +150,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:background="@drawable/img_round_ripple_gray_24dp"
+                android:background="@drawable/img_round_ripple_gray"
                 app:srcCompat="@drawable/ic_share_gray_20dp" />
         </FrameLayout>
 

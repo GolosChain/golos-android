@@ -31,7 +31,8 @@ android {
         }
         buildTypes.each {
             it.buildConfigField 'String', 'BASE_URL', "\"https://golos.io/\""
-            it.buildConfigField 'boolean', 'DEBUG_EDITOR', "true"
+            it.buildConfigField 'boolean', 'DEBUG_EDITOR', "false"
+            it.buildConfigField 'String []', 'ALTERNATE_URLS', "new String[]{\"https://golos.blog/\"}"
         }
 
     }

@@ -120,6 +120,8 @@ fun String.asIntentToShowUrl(): Intent {
     return i
 }
 
+public fun allGolosUrls() = BuildConfig.ALTERNATE_URLS + BuildConfig.BASE_URL
+
 inline fun <reified T : Any> createIntent(vararg pairs: Pair<String, T>): Intent {
     val out = Intent()
     pairs.forEach {

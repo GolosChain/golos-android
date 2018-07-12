@@ -37,7 +37,7 @@
                     android:layout_width="36dp"
                     android:layout_height="36dp"
 
-                    android:foreground="@drawable/ripple_oval"
+                    android:foreground="@drawable/img_round_ripple_gray"
                     android:scaleType="centerCrop"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

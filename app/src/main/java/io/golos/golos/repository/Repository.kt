@@ -11,6 +11,7 @@ import com.crashlytics.android.Crashlytics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
+import io.golos.golos.BuildConfig
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.AppUserData
@@ -188,7 +189,7 @@ abstract class Repository {
 
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
-        return "https://golos.io/${item.categoryName}/@${item.author}/${item.permlink}"
+        return "${BuildConfig.BASE_URL}${item.categoryName}/@${item.author}/${item.permlink}"
     }
 
     open fun onAppStop() {
