@@ -49,7 +49,7 @@
     <string name="user_used_max_comments_chances">You can not vote for this post anymore</string>
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>
-    <string name="you_voted_same_way">You have already voted for the post</string>
+    <string name="you_voted_same_way">You have already voted</string>
     <string name="login_to_vote">Log in or register to vote</string>
     <string name="login_to_see_feed">Login to view your feed</string>
     <string name="nothing_here">While there is nothing, it will be filled immediately after the appearance of new content</string>
@@ -95,7 +95,7 @@
     <string name="can_vote_once_per_three_second">You can vote only once per three seconds</string>
     <string name="must_be_logged_in_for_this_action">You must be logged in to perform this action</string>
     <string name="must_be_subscribed_for_action">You must be subscribed to user to unsubscribe</string>
-    <string name="you_already_subscribed">You are already subscribed to this author</string>
+    <string name="you_already_subscribed">You have already subscribed</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
     <string name="enter_with_active_key">Login with active key</string>
@@ -133,7 +133,7 @@
     <string name="close">Close</string>
     <string name="refresh_question">Refresh</string>
 
-    <string name="reenter_acc">Auth error. If this repeats, try exit and enter to your account one more time.</string>
+    <string name="reenter_acc">Authorization error. Try exit and enter to your account one more time.</string>
     <string name="settings">Settings</string>
     <string name="stripe_settings">Feed preferences</string>
     <string name="mode">Mode</string>
@@ -147,7 +147,7 @@
     <string name="search_in_golos">Search in Golos.io</string>
     <string name="show_nsfw_images_mode">NSFW content</string>
     <string name="to_flag">Flag</string>
-    <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты</string>
+    <string name="cant_vote_after_payout">Can not vote, reward period is closed already.</string>
     <string name="edit">Edit</string>
     <string name="you_may_comment_only_tw_sec">You may only comment once every 20 seconds</string>
     <string name="maximum_comment_depth">Maximum comment depth reached</string>
@@ -201,6 +201,7 @@
     <string name="show_more_notifications">show %s more %s</string>
     <string name="transfer_income">Transfer from &lt;b>%s&lt;/b></string>
     <string name="error_discussion_is_frozen">Discussion is frozen</string>
+    <string name="too_low_golos_power">Account exceeded bandwidth limits. Please fill up Golos Power or wait for the recharging</string>
 
     <string-array name="daynight">
         <item>Day</item>

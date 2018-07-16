@@ -5,10 +5,10 @@ import org.junit.Test;
 
 import java.util.HashSet;
 
-import eu.bittrade.libs.steemj.Golos4J;
-import eu.bittrade.libs.steemj.base.models.AccountName;
-import eu.bittrade.libs.steemj.enums.PrivateKeyType;
-import eu.bittrade.libs.steemj.util.ImmutablePair;
+import eu.bittrade.libs.golosj.Golos4J;
+import eu.bittrade.libs.golosj.base.models.AccountName;
+import eu.bittrade.libs.golosj.enums.PrivateKeyType;
+import eu.bittrade.libs.golosj.util.ImmutablePair;
 
 import static org.junit.Assert.assertEquals;
 

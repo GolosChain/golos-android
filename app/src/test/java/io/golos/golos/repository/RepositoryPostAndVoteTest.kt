@@ -88,9 +88,9 @@ class RepositoryPostAndVoteTest {
         val stories = repo.getStories(FeedType.UNCLASSIFIED).observeForever {
             story = it?.items?.first()
         }
-        repo.requestStoryUpdate(userName, permlink, blog, FeedType.UNCLASSIFIED, {_,_ ->})
+        repo.requestStoryUpdate(userName, permlink, blog, FeedType.UNCLASSIFIED, { _, _ -> })
         Assert.assertNotNull(story)
-        story?: return
+        story ?: return
         Assert.assertTrue(story!!.storyWithState()!!.isStoryEditable)
     }
 
@@ -533,5 +533,27 @@ class RepositoryPostAndVoteTest {
         val newStories = repo.getStories(FeedType.COMMENTS, filter)
         repo.requestStoriesListUpdate(20, FeedType.COMMENTS, filter, null, null)
         println(newStories)
+    }
+
+    @Test
+    fun testVoteForEveryBody() {
+        val storyType = FeedType.NEW
+        var stories: List<StoryWithComments>? = null
+        repo.getStories(storyType, null).observeForever {
+            stories = it?.items
+        }
+        assertNull(stories)
+        repo.requestStoriesListUpdate(20, storyType, null)
+        assertNotNull(stories)
+
+        while (true) {
+            stories!!.forEach {
+                if (it.rootStory()!!.userVotestatus != GolosDiscussionItem.UserVoteType.VOTED) {
+                    repo.vote(it.storyWithState()!!, 100)
+                    Thread.sleep(3000L)
+                }
+            }
+            repo.requestStoriesListUpdate(20, storyType, null, stories!!.last().rootStory()!!.author, stories!!.last().rootStory()!!.permlink)
+        }
     }
 }

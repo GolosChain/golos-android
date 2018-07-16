@@ -1,8 +1,8 @@
 package io.golos.golos.repository
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.AccountName
+import eu.bittrade.libs.golosj.Golos4J
+import eu.bittrade.libs.golosj.base.models.AccountName
 import io.golos.golos.MockPersister
 import io.golos.golos.MockUserSettings
 import io.golos.golos.repository.api.ApiImpl
@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.Executor
 
-class RepoGetStoriesTest {
+class rRepoGetStoriesTest {
     val userName = "yuri-vlad-second"
     val publicActive = "GLS7feysP2A87x4uNwn68q13rF3bchD6AKhJWf4CmPWjqQF8vCb5G"
     val privateActive = "5K7YbhJZqGnw3hYzsmH5HbDixWP5ByCBdnJxM5uoe9LuMX5rcZV"

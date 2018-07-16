@@ -1,8 +1,8 @@
 package io.golos.golos.repository.model
 
-import eu.bittrade.libs.steemj.Golos4J
-import eu.bittrade.libs.steemj.base.models.DiscussionQuery
-import eu.bittrade.libs.steemj.enums.DiscussionSortType
+import eu.bittrade.libs.golosj.Golos4J
+import eu.bittrade.libs.golosj.base.models.DiscussionQuery
+import eu.bittrade.libs.golosj.enums.DiscussionSortType
 import junit.framework.Assert
 import org.junit.Test
 

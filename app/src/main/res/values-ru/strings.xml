@@ -5,7 +5,7 @@
     <string name="to_much_tags">Можно указать до пяти тeгов</string>
     <string name="use_only_one_dash">в тeге может быть только один дефис</string>
     <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тeги</string>
-    <string name="only_lowercase_characters">Используйте только символы нижнего регистра</string>
+    <string name="only_lowercase_characters">Используйте только символы нижнего регистра: строчные. Не заглавные буквы.</string>
     <string name="use_only_allowed_characters">Используйте только строчные буквы, цифры и одно тире</string>
     <string name="first_char_must_be_a_letter">Должно начинаться с буквы</string>
     <string name="publish">Опубликовать</string>
@@ -49,7 +49,7 @@
     <string name="user_used_max_comments_chances">Больше нельзя голосовать за это сообщение</string>
     <string name="vote_canceled">Голос отменен</string>
     <string name="upvoted">Проголосовано</string>
-    <string name="you_voted_same_way">Вы уже проголосовали за это сообщение</string>
+    <string name="you_voted_same_way">Вы уже проголосовали</string>
     <string name="login_to_vote">Зайдите или зарегестрируйтесь, чтобы проголосовать</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
     <string name="nothing_here">Пока ничего нет, данные будут заполняться сразу после появления нового контента</string>
@@ -100,10 +100,10 @@
     <string name="enter_with_posting_key">Войти с постинг ключом</string>
     <string name="enter_private_active_wif">Введите свой приватный активный ключ</string>
     <string name="enter_private_posting_wif">Введите свой приватный постинг ключ</string>
-    <string name="you_already_subscribed">Вы уже подписаны на этого автора</string>
+    <string name="you_already_subscribed">Вы уже подписаныа</string>
     <string name="you_cannot_subscribe_on_yourself">Вы не можете подписаться на себя</string>
     <string name="retry">Еще раз</string>
-    <string name="scan_fail">Не удалось распозанть QR- код, попробуйте еще раз</string>
+    <string name="scan_fail">Не удалось распознать QR- код, попробуйте еще раз</string>
     <string name="enter_private_key">Необходимо ввести приватный, а не публичный ключ</string>
     <string name="tags_you_subscribed">теги, на которые вы подписаны</string>
     <string name="popular_now">популярное сейчас</string>
@@ -131,7 +131,7 @@
     <string name="help_step_4">4. Его нужно скопировать или сканировать через QR-код.</string>
     <string name="thanks_understood">Спасибо, я все понял</string>
     <string name="close">Закрыть</string>
-    <string name="reenter_acc">Ошибка авторизации.  Если повториться - попробуйте выйти и зайти в свой аккаунт.</string>
+    <string name="reenter_acc">Ошибка авторизации. Попробуйте выйти и зайти в свой аккаунт еще раз.</string>
     <string name="refresh_question">Обновить</string>
     <string name="settings">Настройки</string>
     <string name="stripe_settings">Просмотр ленты</string>
@@ -146,7 +146,7 @@
     <string name="search_in_golos">Поиск в Golos.io</string>
     <string name="show_nsfw_images_mode">Контент для взрослых</string>
     <string name="to_flag">Флаговать</string>
-    <string name="cant_vote_after_payout">Cannot vote again on a comment after payout</string>
+    <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты.</string>
     <string name="edit">Редактировать</string>
     <string name="you_may_comment_only_tw_sec">Вы можете комментировать только раз в 20 секунд</string>
     <string name="maximum_comment_depth">Достигнута максимальная глубина дерева коментирования</string>
@@ -199,7 +199,8 @@
     <string name="new_flag">Новый флаг</string>
     <string name="new_transfer">Новый трансфер</string>
     <string name="show_more_notifications">показать еще %s %s</string>
-    <string name="error_discussion_is_frozen">Нелья комментировать дискуссию после выплаты</string>
+    <string name="error_discussion_is_frozen">Невозможно прокомментировать. Период выплат закрыт.</string>
+    <string name="too_low_golos_power">Недостаточно пропускной способности аккаунта. Пополните Силу Голоса либо дождитесь восстановления</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

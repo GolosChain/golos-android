@@ -1,6 +1,6 @@
 package io.golos.golos
 
-import eu.bittrade.libs.steemj.Golos4J
+import eu.bittrade.libs.golosj.Golos4J
 import io.golos.golos.repository.ImageLoadRunnable
 import io.golos.golos.utils.mapper
 import io.golos.golos.screens.editor.DraftsPersister

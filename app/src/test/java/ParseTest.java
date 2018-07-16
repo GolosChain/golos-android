@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 
-import eu.bittrade.libs.steemj.base.models.Discussion;
-import eu.bittrade.libs.steemj.communication.CommunicationHandler;
-import eu.bittrade.libs.steemj.communication.dto.ResponseWrapperDTO;
+import eu.bittrade.libs.golosj.base.models.Discussion;
+import eu.bittrade.libs.golosj.communication.CommunicationHandler;
+import eu.bittrade.libs.golosj.communication.dto.ResponseWrapperDTO;
 import io.golos.golos.Utils;
 import io.golos.golos.repository.model.DiscussionItemFactory;
 import io.golos.golos.repository.model.GolosDiscussionItem;
