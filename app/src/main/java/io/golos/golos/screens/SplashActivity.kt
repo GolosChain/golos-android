@@ -11,6 +11,7 @@ import io.golos.golos.repository.model.ReadyStatus
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
+import timber.log.Timber
 
 /**
  * Created by yuri on 27.12.17.
@@ -25,6 +26,7 @@ class SplashActivity : GolosActivity(), Observer<ReadyStatus> {
         setContentView(R.layout.a_splash)
         mProgress = findViewById(R.id.progress)
         repo.getAppReadyStatus().observe(this, this)
+        Timber.e("starter intent data = ${intent?.data}")
     }
 
     override fun onChanged(t: ReadyStatus?) {

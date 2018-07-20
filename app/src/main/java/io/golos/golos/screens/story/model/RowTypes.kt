@@ -11,6 +11,7 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
+import timber.log.Timber
 import java.util.*
 
 data class TextRow(val text: String) : Row() {
@@ -55,7 +56,10 @@ object StoryParserToRows {
                 " ![](${it.value.trim()})"
             }
             str.replaceSb(Regexps.linkWithWhiteSpace) {
-                " [](${it.value.trim()})"
+                val lastWhiteSpace = (0 until it.value.lastIndex).find { index -> it.value[index].isWhitespace() }
+                        ?: it.value.lastIndex
+                val link = it.value.subSequence(0, lastWhiteSpace + 1).trim()
+                "[$link]($link) "
             }
             if (!skipHtmlClean) {
                 try {
@@ -127,6 +131,7 @@ object StoryParserToRows {
             str.replace("(<br>)+".toRegex(), "<br>")
             str.replace("<br>\\s*<p>".toRegex(), "<br>")
             if (str.startsWith("<br>")) str.delete(0, 4)
+            if (str.startsWith("<p>")) str.delete(0, 3)
 
             var strings = str.split(Regex("(<p>)?<img.+?>(</p>)?"))
             val stringsCleaned = ArrayList<String>()

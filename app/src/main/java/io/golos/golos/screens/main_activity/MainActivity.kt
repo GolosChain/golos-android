@@ -1,7 +1,9 @@
 package io.golos.golos.screens.main_activity
 
 import android.animation.Animator
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -27,7 +29,7 @@ import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.*
 import java.util.*
 
-class MainActivity : GolosActivity(), Observer<CreatePostResult> {
+class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
     private var lastTimeTapped: Long = Date().time
     private var mDoubleBack = false
     private lateinit var mNotificationsIndicator: TextView
@@ -36,6 +38,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
     private lateinit var mNotificationsRecycler: RecyclerView
     private val mHandler = Handler()
+    private val mSelectLiveData = OneShotLiveData<FeedType>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +54,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
 
         val pager: ViewPager = findViewById(R.id.content_pager)
         pager.adapter = MainPagerAdapter(supportFragmentManager)
+
         pager.offscreenPageLimit = 4
 
         val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
@@ -145,13 +149,13 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         mNotificationsIndicator.setOnClickListener {
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
-
+        checkpreSelect(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
         checkStartArgsForNotification(intent)
+        checkpreSelect(intent)
     }
 
     override fun onChanged(it: CreatePostResult?) {
@@ -159,6 +163,13 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
             StoryActivity.start(this,
                     it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
         }
+    }
+
+    override fun getSelection() = mSelectLiveData
+
+    private fun checkpreSelect(intent: Intent?) {
+        val feedType = intent?.getSerializableExtra(PRESELECT_FEED_TYPE) as? FeedType
+        mSelectLiveData.value = feedType
     }
 
     private fun checkStartArgsForNotification(intent: Intent?) {
@@ -183,7 +194,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         } else {
             super.onBackPressed()
         }
-
     }
 
 
@@ -192,6 +202,21 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult> {
         const val FILTERED_BY_TAG_STORIES = 1
         const val PROFILE_FRAGMENT_POSITION = 3
         const val STARTED_FROM_NOTIFICATION = "STARTED_FROM_NOTIFICATION"
+        const val PRESELECT_FEED_TYPE = "SHOW_FEED_TYPE"
+
+        fun getIntent(context: Context, feedType: FeedType? = null): Intent {
+            val intent = Intent(context, MainActivity::class.java)
+            if (feedType != null) intent.putExtra(PRESELECT_FEED_TYPE, feedType)
+            return intent
+        }
+
+        fun start(context: Context, feedType: FeedType? = null) {
+            context.startActivity(getIntent(context, feedType))
+        }
     }
+}
+
+interface FeedTypePreselect {
+    fun getSelection(): LiveData<FeedType>
 }
 

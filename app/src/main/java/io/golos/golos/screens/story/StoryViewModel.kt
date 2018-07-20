@@ -50,6 +50,7 @@ class StoryViewModel : ViewModel() {
 
         mLiveData.removeSource(mRepository.getStories(feedType, filter))
         mLiveData.addSource(mRepository.getStories(feedType, filter)) {
+
             val storyItems = it
             it?.items?.find {
                 it.rootStory()?.author == this.author

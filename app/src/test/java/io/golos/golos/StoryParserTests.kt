@@ -14,6 +14,7 @@ import io.golos.golos.utils.replaceSb
 import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Test
+import timber.log.Timber
 
 /**
  * Created by yuri on 28.11.17.
@@ -146,6 +147,16 @@ class StoryParserTests {
     }
 
     @Test
+    fun testStories8() {
+        val stories = Utils.readStoriesFromResourse("stripe8.json")
+        Assert.assertTrue(stories.size > 1)
+        val text = "https://golos.io/ru--pyatxknignabukvu/@amidabudda/startuet-konkurs-pyat-knig-na-odnu-bukvu-16 Мне дали «К»"
+
+        println(StringBuilder(text).replace(Regexps.linkWithWhiteSpace, { "[](${it.value.trim()})" }))
+
+    }
+
+    @Test
     fun testStory8() {
         val stories = Utils.readStoriesFromResourse("story_two_lines.json").first()
         val rowParser = StoryParserToRows
@@ -160,11 +171,16 @@ class StoryParserTests {
     fun testStory9() {
         val story = Utils.readStoriesFromResourse("story13.json").first()
         val rows = StoryParserToRows.parse(story.rootStory()!!)
-        assertEquals("there must be 4 photos",4,rows.size)
+        assertEquals("there must be 4 photos", 4, rows.size)
         rows.forEach {
             if (it is TextRow) fail("there is no text")
         }
 
+    }
+    @Test
+    fun testStory14() {
+        val story = Utils.readStoriesFromResourse("story14.json").first()
+        val rows = StoryParserToRows.parse(story.rootStory()!!)
     }
 
     @Test

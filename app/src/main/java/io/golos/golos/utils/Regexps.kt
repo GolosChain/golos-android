@@ -13,7 +13,7 @@ object Regexps {
     val linkWithoutATag = Regex("<.?>(https://||http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w@a]+)?<.+?>")
     val link = Regex("(https://||http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w@a]+)")
     val imageExtract = Regex("<img\\s.*?src=(?:'|\")([^'\">]+)(?:'|\")")
-    val markdownChecker = Regex("\\[[^]]+\\]\\(https?:\\/\\/\\S+\\)")
+    val markdownChecker = Regex("(\\[])|(!\\[])|(#{2,})|(\\*{2,})|(~{2,})")
     val gramsInUntion = 31.1034768
     val trashTags = Regex("<p>|</p>|<b>|</b>|\\n|<br>|</br>|&nbsp;")
     val userRegexp = Regex("(?<!/)(@[a-zA-Z]{1}[a-zA-Z.\\-0-9]{2,15}){1}(?!(/))(?!(</a>))\\b")
@@ -22,6 +22,7 @@ object Regexps {
     val linkToGolosBoard = Regex("https://imgp.golos.io/.+/http://golosboard.com/.+/.+.png")
     val wrongTagRegexp = Regex("(u\\w{1,4}){6,}")
     val imgpFindRegexp = Regex("https://imgp.golos.io/.*(?=http)")
+    val feedRegexp = Regex("created|blog|trending|hot|promoted")
 
 
 }

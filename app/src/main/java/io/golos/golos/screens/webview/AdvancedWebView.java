@@ -60,7 +60,7 @@ import java.util.MissingResourceException;
 import io.golos.golos.screens.stories.model.FeedType;
 import io.golos.golos.screens.story.StoryActivity;
 import io.golos.golos.utils.GolosLinkMatcher;
-import io.golos.golos.utils.MatchResult;
+import io.golos.golos.utils.GolosMatchResult;
 import io.golos.golos.utils.NoMatch;
 import io.golos.golos.utils.StoryLinkMatch;
 
@@ -555,7 +555,7 @@ public class AdvancedWebView extends WebView {
                 } else {
                     super.onLoadResource(view, url);
                 }
-                MatchResult result = GolosLinkMatcher.INSTANCE.match(url);
+                GolosMatchResult result = GolosLinkMatcher.INSTANCE.match(url);
                 if (result instanceof StoryLinkMatch) {
                     StoryLinkMatch match = (StoryLinkMatch) result;
                     StoryActivity.Companion.start(getContext(),

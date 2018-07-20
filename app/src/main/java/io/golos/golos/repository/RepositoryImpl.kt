@@ -983,7 +983,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         } else {
             networkExecutor.execute {
-
                 loadSubscribersIfNeeded()
 
                 try {
@@ -1406,14 +1405,21 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     savedStories.map { it.value.items }
                             .forEach { setUpWrapperOnStoryItems(it, skipVoteStatusTest = true, skipEditableTest = true) }
                     mMainThreadExecutor.execute {
-                        val stories = savedStories
+                        savedStories
                                 .mapValues {
                                     val items = MutableLiveData<StoriesFeed>()
                                     it.value.isFeedActual = false
                                     items.value = it.value
                                     items
                                 }
-                        mFilteredMap.putAll(stories)
+                                .forEach { t, u ->
+                                    if (mFilteredMap.containsKey(t)) {
+                                        mFilteredMap[t]?.value = u.value
+
+                                    } else {
+                                        mFilteredMap[t] = u
+                                    }
+                                }
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
                     }
                 }

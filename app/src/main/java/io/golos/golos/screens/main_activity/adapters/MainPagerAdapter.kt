@@ -8,6 +8,7 @@ import io.golos.golos.screens.main_activity.MainActivity.Companion.PROFILE_FRAGM
 import io.golos.golos.screens.main_activity.MainActivity.Companion.STORIES_FRAGMENT_POSITION
 import io.golos.golos.screens.profile.ProfileRootFragment
 import io.golos.golos.screens.stories.StoriesHolderFragment
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.FilteredStoriesByTagFragment
 import io.golos.golos.screens.widgets.GolosFragment
 
@@ -18,7 +19,7 @@ class MainPagerAdapter(manager: FragmentManager) : FragmentPagerAdapter(manager)
 
     override fun getItem(position: Int): Fragment {
         return when (position) {
-            STORIES_FRAGMENT_POSITION -> StoriesHolderFragment()
+            STORIES_FRAGMENT_POSITION -> StoriesHolderFragment.getInstance()
             FILTERED_BY_TAG_STORIES -> FilteredStoriesByTagFragment()
             2 -> GolosFragment()
             PROFILE_FRAGMENT_POSITION -> ProfileRootFragment()

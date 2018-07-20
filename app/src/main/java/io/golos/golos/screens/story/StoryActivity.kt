@@ -144,7 +144,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 mStoryRecycler.setViewVisible()
                 val adapter = mStoryRecycler.adapter as StoryAdapter
-
                 adapter.items = ArrayList(ets)
                 if (mAvatar.drawable == null) {
                     mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
@@ -328,7 +327,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                         ctx = this)
 
                 if (it.storyTree.storyWithState()?.isStoryEditable == true
-                        && mToolbar.menu?.findItem(R.id.of) == null){
+                        && mToolbar.menu?.findItem(R.id.of) == null) {
                     mToolbar.menu?.clear()
                     mToolbar.inflateMenu(R.menu.story_menu_editable)
                 }
@@ -468,7 +467,6 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Timber.e("onCreateOptionsMenu ViewModel.isPostEditable() = ${mViewModel.isPostEditable()}")
         if (mViewModel.isPostEditable()) menuInflater.inflate(R.menu.story_menu_editable, menu)
         else menuInflater.inflate(R.menu.story_menu_not_editable, menu)
         return true

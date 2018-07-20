@@ -1,8 +1,8 @@
 package io.golos.golos.screens.story
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
+import io.golos.golos.MockUserSettings
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.RepositoryImpl
 import io.golos.golos.repository.api.ApiImpl
@@ -10,12 +10,14 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryViewState
 import io.golos.golos.utils.GolosLinkMatcher
+import io.golos.golos.utils.Htmlizer
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.StoryLinkMatch
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.Executor
 
 /**
  * Created by yuri on 13.12.17.
@@ -26,12 +28,26 @@ class StoryViewModelTest {
     public val rule = InstantTaskExecutorRule()
     private lateinit var repo: RepositoryImpl
     private lateinit var storyViewModel: StoryViewModel
+    val executor: Executor
+        get() {
+            return Executor { it.run() }
+        }
+
     @Before
     fun before() {
         repo = RepositoryImpl(
-                MainThreadExecutor,
-                MainThreadExecutor ,
-                MainThreadExecutor, MockPersister, ApiImpl(), mLogger = null
+                executor,
+                executor,
+                executor,
+                MockPersister,
+                ApiImpl(),
+                mLogger = null,
+                mUserSettings = MockUserSettings,
+                mHtmlizer = object : Htmlizer {
+                    override fun toHtml(input: String): CharSequence {
+                        return input
+                    }
+                }
         )
         Repository.setSingletoneInstance(repo)
         storyViewModel = StoryViewModel()
@@ -45,7 +61,7 @@ class StoryViewModelTest {
         Assert.assertNull(state)
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
         var story = repo.getStories(FeedType.UNCLASSIFIED, null)
-        repo.requestStoryUpdate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED) { _, e ->}
+        repo.requestStoryUpdate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED) { _, e -> }
         storyViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true

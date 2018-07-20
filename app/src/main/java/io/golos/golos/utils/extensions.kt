@@ -10,7 +10,6 @@ import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -19,7 +18,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
-import android.support.annotation.*
+import android.support.annotation.ColorRes
+import android.support.annotation.DimenRes
+import android.support.annotation.DrawableRes
+import android.support.annotation.LayoutRes
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -57,14 +59,12 @@ import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
 import io.golos.golos.screens.editor.knife.NumberedMarginSpan
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWrapper
-import timber.log.Timber
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.text.MatchResult
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
@@ -177,6 +177,17 @@ fun Fragment.getColorCompat(@ColorRes coloId: Int): Int {
 
 fun View.getColorCompat(@ColorRes coloId: Int): Int {
     return ContextCompat.getColor(context!!, coloId)
+}
+
+fun fromString(string: String): FeedType? {
+    return when (string.toLowerCase()) {
+        "trending" -> FeedType.POPULAR
+        "created" -> FeedType.NEW
+        "blog" -> FeedType.BLOG
+        "hot" -> FeedType.ACTUAL
+        "promoted" -> FeedType.PROMO
+        else -> null
+    }
 }
 
 fun Fragment.showProgressDialog(): ProgressDialog {
@@ -323,8 +334,7 @@ fun String.toHtml(): Spanned {
 }
 
 fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
-    val out
-     =  when (type) {
+    val out = when (type) {
         KnifeBulletSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
                 getDimen(R.dimen.quint).toInt(),
                 getDimen(R.dimen.quater).toInt()) as T
@@ -340,9 +350,9 @@ fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
     return out
 }
 
-fun SwipeRefreshLayout.setRefreshingS(isRefreshing:Boolean){
-    if (isRefreshing && !this.isRefreshing )this.isRefreshing = true
-    else   if (!isRefreshing && this.isRefreshing)this.isRefreshing = false
+fun SwipeRefreshLayout.setRefreshingS(isRefreshing: Boolean) {
+    if (isRefreshing && !this.isRefreshing) this.isRefreshing = true
+    else if (!isRefreshing && this.isRefreshing) this.isRefreshing = false
 }
 
 
@@ -385,10 +395,11 @@ fun Context.getVectorDrawable(@DrawableRes resId: Int): Drawable {
 fun View.getVectorDrawable(@DrawableRes resId: Int): Drawable {
     return AppCompatResources.getDrawable(context, resId)!!
 }
+
 fun View.getVectorDrawableWithIntrinisticSize(@DrawableRes resId: Int): Drawable {
-    val d =  AppCompatResources.getDrawable(context, resId)!!
-    d.setBounds(0,0,d.intrinsicWidth,d.intrinsicHeight)
-    return  d;
+    val d = AppCompatResources.getDrawable(context, resId)!!
+    d.setBounds(0, 0, d.intrinsicWidth, d.intrinsicHeight)
+    return d;
 }
 
 fun Context.getVectorAsBitmap(@DrawableRes resId: Int): Bitmap {
@@ -511,12 +522,15 @@ fun ValueAnimator.setInterpolatorB(interpolator: TimeInterpolator): ValueAnimato
 fun Fragment.getDimension(@DimenRes dimen: Int): Int {
     return context?.resources?.getDimension(dimen)?.toInt() ?: 0
 }
+
 fun View.getDimension(@DimenRes dimen: Int): Int {
     return context?.resources?.getDimension(dimen)?.toInt() ?: 0
 }
+
 fun Context.getDimen(@DimenRes resid: Int): Float {
     return resources.getDimension(resid)
 }
+
 fun View.getDimen(@DimenRes resid: Int): Float {
     return resources.getDimension(resid)
 }
@@ -570,8 +584,9 @@ public fun StringBuilder.replaceSb(regex: Regex, transform: (kotlin.text.MatchRe
     this.replace(0, length, str)
     return this
 }
-public fun StringBuilder.replaceSb(regex: Regex, to:String): StringBuilder {
-    var match: MatchResult? = regex.find(this,0) ?: return this
+
+public fun StringBuilder.replaceSb(regex: Regex, to: String): StringBuilder {
+    var match: MatchResult? = regex.find(this, 0) ?: return this
 
     var lastStart = 0
     val length = length
@@ -591,7 +606,7 @@ public fun StringBuilder.replaceSb(regex: Regex, to:String): StringBuilder {
     return this
 }
 
-public fun StringBuilder.replaceSb(what:String, to: String): StringBuilder {
+public fun StringBuilder.replaceSb(what: String, to: String): StringBuilder {
     var index = indexOf(what)
     while (index != -1) {
         replace(index, index + what.length, to)
@@ -602,6 +617,4 @@ public fun StringBuilder.replaceSb(what:String, to: String): StringBuilder {
 }
 
 
-
-public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V>
-        = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }
+public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V> = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }

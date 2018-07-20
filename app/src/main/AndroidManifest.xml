@@ -19,8 +19,8 @@
         <activity
             android:name=".screens.editor.EditorActivity"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="stateAlwaysVisible"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".screens.widgets.BarcodeScannerActivity"
             android:launchMode="singleTask"
@@ -54,7 +54,7 @@
             android:screenOrientation="portrait"
 
             android:theme="@style/LauncherTheme">
-            
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,6 +62,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
 
             </intent-filter>
+
+
         </activity>
 
         <meta-data
@@ -90,6 +92,62 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
+
+        <activity
+            android:name=".RouteActivity"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="golos.io"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="sandbox.golos.io"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="golos.io"
+                    android:scheme="golosioapp" />
+            </intent-filter>
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="goldvoice.club"
+                    android:scheme="https" />
+            </intent-filter>
+
+        </activity>
+
+
         <service android:name=".notifications.MyInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
@@ -109,8 +167,8 @@
             android:name=".notifications.NotificationsBroadCastReceiver"
             android:enabled="true"
             android:exported="false">
-            <intent-filter >
-                <action android:name="io.golos.golos.notifications.NOTIFICATION_KEY"/>
+            <intent-filter>
+                <action android:name="io.golos.golos.notifications.NOTIFICATION_KEY" />
             </intent-filter>
         </receiver>
     </application>

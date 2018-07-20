@@ -53,6 +53,7 @@ public class KnifeParser {
         source = source
                 .replaceAll("blockquote>", QUOTE + ">")
                 .replaceAll("h\\d>", HEADER + ">")
+                .replaceAll("<li><br><p>", "<li>")
                 .replaceAll("<ul>\\s+<br>", "<ul>")
                 .replaceAll("</li>\\s+<br>", "</li>")
                 .replaceAll("<li>\\s<br>", "<li>")

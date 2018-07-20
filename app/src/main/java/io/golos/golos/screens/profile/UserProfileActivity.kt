@@ -31,9 +31,14 @@ class UserProfileActivity : GolosActivity() {
         private val USERNAME_TAG = "USERNAME_TAG"
         fun start(ctx: Context,
                   username: String) {
+            ctx.startActivity(getStartIntent(ctx, username))
+        }
+
+        fun getStartIntent(ctx: Context,
+                           username: String): Intent {
             val i = Intent(ctx, UserProfileActivity::class.java)
             i.putExtra(USERNAME_TAG, username)
-            ctx.startActivity(i)
+            return i
         }
     }
 }

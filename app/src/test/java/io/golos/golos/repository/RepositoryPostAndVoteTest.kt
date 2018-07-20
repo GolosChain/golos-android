@@ -16,7 +16,9 @@ import io.golos.golos.screens.editor.EditorImagePart
 import io.golos.golos.screens.editor.EditorTextPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.utils.GolosLinkMatcher
 import io.golos.golos.utils.Htmlizer
+import io.golos.golos.utils.StoryLinkMatch
 import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Before
@@ -533,6 +535,18 @@ class RepositoryPostAndVoteTest {
         val newStories = repo.getStories(FeedType.COMMENTS, filter)
         repo.requestStoriesListUpdate(20, FeedType.COMMENTS, filter, null, null)
         println(newStories)
+    }
+
+    @Test
+    fun getStory() {
+        val link = GolosLinkMatcher.match("https://golos.io/ru--pyatxknignabukvu/@amidabudda/startuet-konkurs-pyat-knig-na-odnu-bukvu-16") as StoryLinkMatch
+        var stories: List<StoryWithComments>? = null
+        repo.getStories(FeedType.UNCLASSIFIED, null).observeForever {
+            stories = it?.items
+        }
+        Assert.assertNull(stories)
+        repo.requestStoryUpdate(link.author, link.permlink, link.blog, FeedType.UNCLASSIFIED)
+        Assert.assertNotNull(stories)
     }
 
     @Test

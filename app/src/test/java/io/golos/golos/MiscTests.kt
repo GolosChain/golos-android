@@ -4,6 +4,7 @@ import eu.bittrade.libs.golosj.Golos4J
 import io.golos.golos.repository.ImageLoadRunnable
 import io.golos.golos.utils.mapper
 import io.golos.golos.screens.editor.DraftsPersister
+import io.golos.golos.screens.editor.knife.KnifeParser
 import org.junit.Test
 import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
@@ -56,5 +57,6 @@ class MiscTests {
         val parts = mapper.readValue<List<DraftsPersister.DraftsTable.EditorPartDescriptor>>(v, type)
         println(parts)
     }
+
 
 }

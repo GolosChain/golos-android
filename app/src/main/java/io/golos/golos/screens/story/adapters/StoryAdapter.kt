@@ -24,6 +24,7 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.createGolosSpan
+import timber.log.Timber
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
