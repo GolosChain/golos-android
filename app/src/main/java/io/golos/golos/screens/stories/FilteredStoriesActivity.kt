@@ -22,13 +22,12 @@ import io.golos.golos.screens.stories.model.FilteredStoriesViewModel
 import io.golos.golos.screens.stories.model.FilteredStoriesViewState
 import io.golos.golos.screens.tags.TagSubscriptionCancelDialogFr
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.utils.Translit
-import io.golos.golos.utils.setViewGone
-import io.golos.golos.utils.setViewVisible
-import io.golos.golos.utils.toArrayList
+import io.golos.golos.utils.*
 import timber.log.Timber
 
-class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewState>, TagSubscriptionCancelDialogFr.ResultListener {
+class FilteredStoriesActivity : GolosActivity(),
+        Observer<FilteredStoriesViewState>,
+        TagSubscriptionCancelDialogFr.ResultListener {
     private lateinit var mViewPager: ViewPager
     private lateinit var mPostCountTv: TextView
     private lateinit var mTagTitle: TextView
@@ -40,6 +39,8 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
     private lateinit var mSimilarParentLo: ViewGroup
     private lateinit var mViewModel: FilteredStoriesViewModel
     private val FRAGMENT_TAG = "FRAGMENT_TAG"
+    private val mSelectLiveData: OneShotLiveData<FeedType> = OneShotLiveData()
+    private val supportedTypes = listOf(FeedType.POPULAR, FeedType.NEW, FeedType.ACTUAL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,16 +64,31 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
         val filter = StoryFilter(tagName)
         mViewPager.adapter = StoriesPagerAdapter(this,
                 supportFragmentManager,
-                listOf(Pair(FeedType.POPULAR, filter),
-                        Pair(FeedType.NEW, filter),
-                        Pair(FeedType.ACTUAL, filter)))
+                supportedTypes.map { Pair(it, filter) })
+        mSelectLiveData.observe(this, Observer {
+            if (it == null) return@Observer
+            val index = supportedTypes.indexOf(it)
+            if (index > -1) mViewPager.post { mViewPager.setCurrentItem(index, true) }
+        })
+
     }
+
 
     override fun onCancelConfirm() {
         mViewModel.onTagUnsubscribe()
     }
 
     override fun onCancelCancel() {
+    }
+
+    private fun checkpreSelect(intent: Intent?) {
+        val feedType = intent?.getSerializableExtra(FEED_TYPE) as? FeedType
+        mSelectLiveData.value = feedType
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        checkpreSelect(intent ?: return)
     }
 
     override fun onChanged(t: FilteredStoriesViewState?) {
@@ -137,11 +153,20 @@ class FilteredStoriesActivity : GolosActivity(), Observer<FilteredStoriesViewSta
 
     companion object {
         private val TAG_FILTER = "TAG_FILTER"
+        private val FEED_TYPE = "FEED_TYPE"
         fun start(context: Context,
-                  tagName: String) {
+                  tagName: String,
+                  feedType: FeedType? = null) {
+            context.startActivity(getIntent(context, tagName, feedType))
+        }
+
+        fun getIntent(context: Context,
+                      tagName: String,
+                      feedType: FeedType? = null): Intent {
             val intent = Intent(context, FilteredStoriesActivity::class.java)
             intent.putExtra(TAG_FILTER, tagName)
-            context.startActivity(intent)
+            if (feedType != null) intent.putExtra(FEED_TYPE, feedType)
+            return intent
         }
     }
 }

@@ -27,6 +27,7 @@ import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
@@ -179,6 +180,11 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             broadcasterIntent.putExtra(NOTIFICATION_KEY, intentHashCode)
             sendBroadcast(broadcasterIntent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Timber.e("onResume")
     }
 
     override fun onBackPressed() {

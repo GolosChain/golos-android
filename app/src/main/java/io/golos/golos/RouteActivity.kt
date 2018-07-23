@@ -6,12 +6,10 @@ import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.SplashActivity
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.profile.UserProfileActivity
+import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
-import io.golos.golos.utils.FeedMatch
-import io.golos.golos.utils.GolosLinkMatcher
-import io.golos.golos.utils.StoryLinkMatch
-import io.golos.golos.utils.UserLinkMatch
+import io.golos.golos.utils.*
 import timber.log.Timber
 
 public class RouteActivity : GolosActivity() {
@@ -20,6 +18,7 @@ public class RouteActivity : GolosActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(android.R.style.Theme_Translucent_NoTitleBar)
         super.onCreate(savedInstanceState)
+        Timber.e("onCreate")
         Timber.e("start activity data = ${intent.data}")
 
         intent?.data?.let {
@@ -37,6 +36,10 @@ public class RouteActivity : GolosActivity() {
                 }
                 is FeedMatch -> {
                     MainActivity.start(this, match.feedType)
+                }
+                is CategoryMatch -> {
+                    startActivities(arrayOf(startMainActivityIntent,
+                            FilteredStoriesActivity.getIntent(this, match.category, match.feedType)))
                 }
                 else -> {
                     startActivity(Intent(this, SplashActivity::class.java))

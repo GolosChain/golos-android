@@ -27,6 +27,11 @@ object GolosLinkMatcher {
             } else if (link.matches(feedRegexp)) {
                 val feedType = fromString(link) ?: return NoMatch()
                 return FeedMatch(feedType)
+            } else if (link.matches(Regexps.categoryRegexp)) {
+                val items = link.split("/")
+                if (items.size == 2) {
+                    return CategoryMatch(items[1], fromString(items[0]))
+                }
             }
         } else if (url.startsWith("https://goldvoice.club/")) {//https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/
             val link = url.replace("https://goldvoice.club/", "")
@@ -52,6 +57,8 @@ data class StoryLinkMatch(val author: String,
 data class UserLinkMatch(val user: String) : GolosMatchResult()
 
 data class FeedMatch(val feedType: FeedType) : GolosMatchResult()
+data class CategoryMatch(val category: String,
+                         val feedType: FeedType?) : GolosMatchResult()
 
 class NoMatch : GolosMatchResult()
 

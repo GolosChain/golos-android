@@ -23,6 +23,7 @@ object Regexps {
     val wrongTagRegexp = Regex("(u\\w{1,4}){6,}")
     val imgpFindRegexp = Regex("https://imgp.golos.io/.*(?=http)")
     val feedRegexp = Regex("created|blog|trending|hot|promoted")
+    val categoryRegexp = Regex("(created|blog|trending|hot|promoted)/[a-z]{3,}")
 
 
 }

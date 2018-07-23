@@ -1403,7 +1403,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 } else {
 
                     savedStories.map { it.value.items }
-                            .forEach { setUpWrapperOnStoryItems(it, skipVoteStatusTest = true, skipEditableTest = true) }
+                            .map {
+                                setUpWrapperOnStoryItems(it, skipVoteStatusTest = true, skipEditableTest = true)
+                                it
+                            }
                     mMainThreadExecutor.execute {
                         savedStories
                                 .mapValues {
@@ -1412,16 +1415,18 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                     items.value = it.value
                                     items
                                 }
-                                .forEach { t, u ->
-                                    if (mFilteredMap.containsKey(t)) {
-                                        mFilteredMap[t]?.value = u.value
-
+                                .onEach {
+                                    val key = it.key
+                                    val value = it.value
+                                    if (mFilteredMap.containsKey(key)) {
+                                        mFilteredMap[key]?.value = value.value
                                     } else {
-                                        mFilteredMap[t] = u
+                                        mFilteredMap[key] = value
                                     }
                                 }
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
                     }
+
                 }
 
             } catch (e: Exception) {
