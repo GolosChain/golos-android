@@ -16,7 +16,6 @@ object GolosLinkMatcher {
             allGolosUrls().forEach {
                 link = link.removePrefix(it).replace("app/", "")
             }
-            Timber.e("link = $link")
             if (link.matches(Regexps.storyLink)) {//it is link a story
                 val parts = link.split("/")
                 if (parts.size == 3) {
@@ -31,6 +30,11 @@ object GolosLinkMatcher {
                 val items = link.split("/")
                 if (items.size == 2) {
                     return CategoryMatch(items[1], fromString(items[0]))
+                }
+            } else if (link.matches(Regexps.userFeedLink)) {
+                val sts = link.split("/")
+                if (sts.size == 2) {
+                    return UserProfileSectionMatch(sts[0], fromString(sts[1]))
                 }
             }
         } else if (url.startsWith("https://goldvoice.club/")) {//https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/
@@ -55,6 +59,8 @@ data class StoryLinkMatch(val author: String,
                           val permlink: String) : GolosMatchResult()
 
 data class UserLinkMatch(val user: String) : GolosMatchResult()
+
+data class UserProfileSectionMatch(val user: String, val feedType: FeedType?) : GolosMatchResult()
 
 data class FeedMatch(val feedType: FeedType) : GolosMatchResult()
 data class CategoryMatch(val category: String,

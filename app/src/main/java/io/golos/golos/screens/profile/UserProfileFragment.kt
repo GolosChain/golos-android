@@ -54,6 +54,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mGolosCountTV: TextView
     private lateinit var mProceedButton: View
     private lateinit var mUserCoverIv: ImageView
+    private lateinit var mProfilePager: ViewPager
     private var mLastAccountInfo: GolosUserAccountInfo? = null
 
 
@@ -81,18 +82,18 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mVotingPowerTv = v.findViewById(R.id.voting_power_tv)
         mVotingPowerIndicator = v.findViewById(R.id.voting_power_progress)
         mGolosCountTV = v.findViewById(R.id.tv_wallet_balance_count)
-        val pager = v.findViewById<ViewPager>(R.id.profile_pager)
+        mProfilePager = v.findViewById<ViewPager>(R.id.profile_pager)
         if (arguments?.containsKey(USERNAME_TAG) == true) {
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
                     activity!!,
                     arguments!!.getString(USERNAME_TAG))
-            pager.offscreenPageLimit = adapter.size
-            pager.adapter = adapter
+            mProfilePager.offscreenPageLimit = adapter.size
+            mProfilePager.adapter = adapter
 
         }
 
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
-        tabbar.setupWithViewPager(pager)
+        tabbar.setupWithViewPager(mProfilePager)
         val settingsButton = v.findViewById<View>(R.id.settings_btn)
         settingsButton.setOnClickListener({
             val i = Intent(activity!!, SettingsActivity::class.java)
@@ -101,6 +102,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
 
         return v
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -167,6 +169,14 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
                     ?: return@setOnClickListener, arguments?.getString(USERNAME_TAG)
                     ?: return@setOnClickListener)
         }
+
+        (activity as? ProfileSectionPreselector)?.getPreselect()?.observe(this, Observer { feedType ->
+            mProfilePager.post {
+                (mProfilePager.adapter as? ProfileFragmentsAdapter)?.let {
+                    mProfilePager.setCurrentItem(it.getPositionOf(feedType) ?: return@let, true)
+                }
+            }
+        })
 
     }
 

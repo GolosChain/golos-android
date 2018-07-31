@@ -186,6 +186,7 @@ fun fromString(string: String): FeedType? {
         "blog" -> FeedType.BLOG
         "hot" -> FeedType.ACTUAL
         "promoted" -> FeedType.PROMO
+        "comments" -> FeedType.COMMENTS
         else -> null
     }
 }

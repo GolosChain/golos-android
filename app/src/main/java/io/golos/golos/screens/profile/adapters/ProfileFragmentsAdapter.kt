@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentPagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.UserInformationFragment
-import io.golos.golos.screens.profile.WalletFragment
 import io.golos.golos.screens.stories.StoriesFragment
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
@@ -35,6 +34,12 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
             2 -> context.getString(R.string.information)
             else -> ""
         }
+    }
+
+    fun getPositionOf(feedType: FeedType?) = when (feedType) {
+        FeedType.BLOG -> 0
+        FeedType.COMMENTS -> 1
+        else -> null
     }
 
     override fun getCount(): Int {

@@ -2,6 +2,8 @@ package io.golos.golos.screens
 
 import android.app.Activity
 import android.app.UiModeManager
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -13,8 +15,10 @@ import android.widget.Toast
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.utils.ErrorCode
+import io.golos.golos.utils.OneShotLiveData
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.restart
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -23,6 +27,7 @@ import java.util.concurrent.TimeUnit
  */
 abstract class GolosActivity : AppCompatActivity() {
     private var isResumed = false
+    private val showVoteDialog: MutableLiveData<Boolean> = OneShotLiveData()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,19 +39,25 @@ abstract class GolosActivity : AppCompatActivity() {
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_NO))
         }
         super.onCreate(savedInstanceState)
-        if (!Repository.get.userSettingsRepository.isUserVotedForApp() && !Repository.get.userSettingsRepository.isVoteQuestionMade()) {
+        if (needToShowVoteDialog()) {
             Handler().postDelayed({
-                if (isResumed) {
-                    VoteForAppDialog.getInstance().show(supportFragmentManager, null)
-                }
-            },
-                    TimeUnit.SECONDS.toMillis(120))
+                if (needToShowVoteDialog())
+                    showVoteDialog.value = true
+            }, TimeUnit.SECONDS.toMillis(10))
         }
+        showVoteDialog.observe(this, Observer {
+            if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)
+        })
     }
 
     override fun onResume() {
         super.onResume()
         isResumed = true
+    }
+
+    private fun needToShowVoteDialog(): Boolean {
+        return !Repository.get.userSettingsRepository.isUserVotedForApp()
+                && !Repository.get.userSettingsRepository.isVoteQuestionMade()
     }
 
     override fun onStop() {
@@ -83,7 +94,7 @@ abstract class GolosActivity : AppCompatActivity() {
     }
 
     open fun showErrorMessage(code: ErrorCode) {
-       val message = when (code) {
+        val message = when (code) {
             ErrorCode.ERROR_SLOW_CONNECTION -> R.string.slow_internet_connection
             ErrorCode.ERROR_NO_CONNECTION -> R.string.slow_internet_connection
             else -> R.string.unknown_error

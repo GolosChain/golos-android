@@ -38,7 +38,7 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 @Suppress("NAME_SHADOWING", "LABEL_NAME_CLASH")
-internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newSingleThreadExecutor(),
+internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newFixedThreadPool(4),
                               private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister = Persister.get,
@@ -831,7 +831,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             discussionItem.updatingState = UpdatingState.UPDATING
             val result = replacer.findAndReplace(discussionItem, storiesAll)
             if (result) {
-                it.value = it.value
+                it.value = it.value?.setNewError(null)
             }
         }
         networkExecutor.execute {
@@ -861,7 +861,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         }
 
                         mMainThreadExecutor.execute {
-                            it.value = it.value
+                            it.value = it.value?.setNewError(null)
                         }
                         isVoted = true
                     } else {
@@ -869,7 +869,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             val replaced = replacer.findAndReplace(voteItem, storiesAll)
                             if (replaced) {
                                 mMainThreadExecutor.execute {
-                                    it.value = it.value
+                                    it.value = it.value?.setNewError(null)
                                 }
                             }
                         }

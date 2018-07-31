@@ -3,7 +3,10 @@ package io.golos.golos.repository.api
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.apis.follow.enums.FollowType
 import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
-import eu.bittrade.libs.golosj.base.models.*
+import eu.bittrade.libs.golosj.base.models.AccountName
+import eu.bittrade.libs.golosj.base.models.DiscussionQuery
+import eu.bittrade.libs.golosj.base.models.ExtendedAccount
+import eu.bittrade.libs.golosj.base.models.Permlink
 import eu.bittrade.libs.golosj.enums.DiscussionSortType
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
@@ -73,10 +76,13 @@ internal class ApiImpl : GolosApi() {
         if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
         if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
 
-        if (startAuthor == null && (type == FeedType.COMMENTS)) query.startAuthor = AccountName(filter!!.userNameFilter.first())
-
         filter?.userNameFilter?.let {
             query.selectAuthors = it.map { AccountName(it) }
+        }
+
+        if (startAuthor == null && (type == FeedType.COMMENTS)) {
+            query.startAuthor = AccountName(filter!!.userNameFilter.first())
+            query.selectAuthors = null
         }
 
         query.truncateBody = truncateBody

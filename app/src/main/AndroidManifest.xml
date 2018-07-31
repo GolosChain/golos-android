@@ -95,8 +95,7 @@
 
 
         <activity
-            android:name=".RouteActivity"
-            android:screenOrientation="portrait">
+            android:name=".RouteActivity">
 
             <intent-filter>
 

@@ -7,7 +7,7 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_lo"
+        android:layout_above="@id/scroll_bottom_lo"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
@@ -90,14 +90,14 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/bottom_lo"
-        android:layout_alignTop="@id/bottom_lo"
+        android:layout_alignBottom="@+id/scroll_bottom_lo"
+        android:layout_alignTop="@id/scroll_bottom_lo"
         android:layout_marginTop="-4dp"
         android:background="@drawable/shape_shadow" />
 
     <HorizontalScrollView
 
-        android:id="@+id/bottom_lo"
+        android:id="@+id/scroll_bottom_lo"
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

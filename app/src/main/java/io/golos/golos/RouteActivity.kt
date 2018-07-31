@@ -18,8 +18,7 @@ public class RouteActivity : GolosActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(android.R.style.Theme_Translucent_NoTitleBar)
         super.onCreate(savedInstanceState)
-        Timber.e("onCreate")
-        Timber.e("start activity data = ${intent.data}")
+        Timber.i("start activity data = ${intent.data}")
 
         intent?.data?.let {
             val link = it.toString()
@@ -40,6 +39,9 @@ public class RouteActivity : GolosActivity() {
                 is CategoryMatch -> {
                     startActivities(arrayOf(startMainActivityIntent,
                             FilteredStoriesActivity.getIntent(this, match.category, match.feedType)))
+                }
+                is UserProfileSectionMatch -> {
+                    startActivities(arrayOf(startMainActivityIntent, UserProfileActivity.getStartIntent(this, match.user, match.feedType)))
                 }
                 else -> {
                     startActivity(Intent(this, SplashActivity::class.java))

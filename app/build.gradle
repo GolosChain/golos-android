@@ -9,8 +9,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 58
-        versionName "0.69"
+        versionCode 59
+        versionName "0.70"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -32,6 +32,7 @@ android {
         buildTypes.each {
             it.buildConfigField 'String', 'BASE_URL', "\"https://golos.io/\""
             it.buildConfigField 'boolean', 'DEBUG_EDITOR', "false"
+            it.buildConfigField 'String', 'GATE_URL', "\"ws://95.216.154.157:3000\""
             it.buildConfigField 'String []', 'ALTERNATE_URLS', "new String[]{\"https://golos.blog/\"," +
                     "\"https://sandbox.golos.io/\",   \"golosioapp://golos.io/\"}"
         }

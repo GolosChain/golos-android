@@ -38,7 +38,6 @@ class FilteredStoriesActivity : GolosActivity(),
     private lateinit var mSimilarTagsLo: ViewGroup
     private lateinit var mSimilarParentLo: ViewGroup
     private lateinit var mViewModel: FilteredStoriesViewModel
-    private val FRAGMENT_TAG = "FRAGMENT_TAG"
     private val mSelectLiveData: OneShotLiveData<FeedType> = OneShotLiveData()
     private val supportedTypes = listOf(FeedType.POPULAR, FeedType.NEW, FeedType.ACTUAL)
 
@@ -68,9 +67,11 @@ class FilteredStoriesActivity : GolosActivity(),
         mSelectLiveData.observe(this, Observer {
             if (it == null) return@Observer
             val index = supportedTypes.indexOf(it)
-            if (index > -1) mViewPager.post { mViewPager.setCurrentItem(index, true) }
+            if (index > -1) mViewPager.post {
+                mViewPager.setCurrentItem(index, true)
+            }
         })
-
+        checkPreSelect(intent)
     }
 
 
@@ -81,14 +82,14 @@ class FilteredStoriesActivity : GolosActivity(),
     override fun onCancelCancel() {
     }
 
-    private fun checkpreSelect(intent: Intent?) {
+    private fun checkPreSelect(intent: Intent?) {
         val feedType = intent?.getSerializableExtra(FEED_TYPE) as? FeedType
         mSelectLiveData.value = feedType
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        checkpreSelect(intent ?: return)
+        checkPreSelect(intent ?: return)
     }
 
     override fun onChanged(t: FilteredStoriesViewState?) {

@@ -19,6 +19,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {
         super.onMessageReceived(p0)
         try {
+
             val notification = mapper.readValue<Notification>(p0?.data?.get("message")
                     ?: return, Notification::class.java)
             Handler(Looper.getMainLooper()).post {
