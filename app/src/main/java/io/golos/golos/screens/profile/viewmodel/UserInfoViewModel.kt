@@ -45,13 +45,13 @@ class UserInfoViewModel : ViewModel(), Observer<GolosUserAccountInfo> {
                 mLiveData.value?.isSubscriptionInProgress ?: false)
     }
 
-    private fun isActiveUserPage() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName == userName
+    private fun isActiveUserPage() = mRepository.isUserLoggedIn() && mRepository.appUserData.value?.userName == userName
 
     fun isSettingButtonShown() = isActiveUserPage()
 
     fun canUserSeeVotingPower() = isActiveUserPage()
 
-    fun isFollowButtonVisible() = mRepository.isUserLoggedIn() && mRepository.getCurrentUserDataAsLiveData().value?.userName != userName
+    fun isFollowButtonVisible() = mRepository.isUserLoggedIn() && mRepository.appUserData.value?.userName != userName
 
     fun getLiveData(): LiveData<UserAccountModel> {
         return mLiveData

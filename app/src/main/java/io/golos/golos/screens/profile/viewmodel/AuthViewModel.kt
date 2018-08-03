@@ -50,7 +50,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
 
     init {
         mRepository
-                .getCurrentUserDataAsLiveData().observeForever(this)
+                .appUserData.observeForever(this)
         mRepository.requestActiveUserDataUpdate()
     }
 
@@ -60,7 +60,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
                     isPostingKeyVisible = true,
                     isLoading = false,
                     userName = t?.userName ?: "")
-        } else if (t != null) {
+        } else {
             initUser(t)
         }
     }

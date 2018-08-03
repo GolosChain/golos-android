@@ -4,6 +4,7 @@ import eu.bittrade.libs.golosj.DatabaseMethods
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.base.models.Permlink
 import eu.bittrade.libs.golosj.base.models.SignedTransaction
+import eu.bittrade.libs.golosj.base.models.TimePointSec
 import eu.bittrade.libs.golosj.base.models.operations.VoteOperation
 
 interface SecretSigner {
@@ -18,8 +19,11 @@ class GolosSecretSigner(
                 AccountName("test"),
                 Permlink(secret),
                 1.toShort())
-        val globalProperties = databaseMethods.dynamicGlobalProperties
-        return SignedTransaction(globalProperties.headBlockId, listOf(voteOperation), null)
-                .apply { sign() }.signatures.firstOrNull() ?: ""
+
+        val transaction = SignedTransaction(3367,
+                879276768,
+                TimePointSec("2018-07-06T24:52:24"),
+                listOf(voteOperation), listOf())
+        return transaction.createSignWithoutCanonicalTest()
     }
 }

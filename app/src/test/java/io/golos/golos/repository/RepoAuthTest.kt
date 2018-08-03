@@ -41,7 +41,7 @@ class RepoAuthTest {
 
     @Test
     fun testAuth() {
-        val authData = repo.getCurrentUserDataAsLiveData();
+        val authData = repo.appUserData;
         Assert.assertNull(authData.value)
         Assert.assertFalse(repo.isUserLoggedIn())
 

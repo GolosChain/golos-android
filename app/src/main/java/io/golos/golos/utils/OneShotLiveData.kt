@@ -9,7 +9,6 @@ public class OneShotLiveData<T>() : MutableLiveData<T>() {
 
     override fun observe(owner: LifecycleOwner, observer: Observer<T>) {
         super.observe(owner, Observer {
-            Timber.e("new value = $it")
             if (it == null) return@Observer
             observer.onChanged(it)
             value = null

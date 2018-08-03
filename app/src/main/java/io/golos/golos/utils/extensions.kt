@@ -47,6 +47,7 @@ import eu.bittrade.libs.golosj.base.models.Account
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.base.models.operations.CommentOperation
 import eu.bittrade.libs.golosj.communication.CommunicationHandler
+import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -616,6 +617,8 @@ public fun StringBuilder.replaceSb(what: String, to: String): StringBuilder {
     }
     return this
 }
+
+public inline infix fun <A, B> A.to(that: B): ImmutablePair<A, B> = ImmutablePair(this, that)
 
 
 public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V> = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }

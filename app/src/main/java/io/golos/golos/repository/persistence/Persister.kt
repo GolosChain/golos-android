@@ -99,6 +99,16 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mDatabase.deleteAllStories()
     }
 
+    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
+        return mPreference.getBoolean("setUserSubscribedOnNotificationsThroughServices", false)
+    }
+
+    override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
+        mPreference
+                .edit()
+                .putBoolean("setUserSubscribedOnNotificationsThroughServices", isSubscribed).apply()
+    }
+
     private fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
@@ -150,6 +160,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         val decryptor = DeCryptor()
         val out = HashMap<PrivateKeyType, String?>()
 
+
         types.forEach {
             val keyAlias = KeystoreKeyAliasConverter.convert(it)
             if (!keyStore.containsAlias(keyAlias.name)) out.put(it, null)
@@ -195,10 +206,14 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         val userDataString = mPreference.getString("userdata", "") ?: return null
         if (userDataString.isEmpty()) return null
         val userData = mapper.readValue(userDataString, AppUserData::class.java)
-        val keys = getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
-        userData.privateActiveWif = keys[PrivateKeyType.ACTIVE]
-        userData.privatePostingWif = keys[PrivateKeyType.POSTING]
-        return userData
+        try {
+            val keys = getKeys(setOf(PrivateKeyType.ACTIVE, PrivateKeyType.POSTING))
+            userData.privateActiveWif = keys[PrivateKeyType.ACTIVE]
+            userData.privatePostingWif = keys[PrivateKeyType.POSTING]
+            return userData
+        }catch (e:Exception){
+            return null
+        }
     }
 
     override fun saveUserData(userData: AppUserData) {
@@ -223,6 +238,14 @@ private class MockPersister : Persister() {
     private var currentUserName: String? = null
     override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
 
+    }
+
+    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
+        return true
+    }
+
+    override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {

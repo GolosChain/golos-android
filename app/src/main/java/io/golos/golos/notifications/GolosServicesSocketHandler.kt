@@ -1,10 +1,14 @@
 package io.golos.golos.notifications
 
+import android.support.annotation.WorkerThread
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.golosj.communication.CommunicationHandler.getObjectMapper
 import eu.bittrade.libs.golosj.configuration.SteemJConfig
+import io.golos.golos.utils.JsonConvertable
 import io.golos.golos.utils.mapper
 import org.glassfish.tyrus.client.ClientManager
 import org.glassfish.tyrus.client.ClientProperties
@@ -17,6 +21,7 @@ import java.lang.Exception
 import java.net.URI
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicLong
 import javax.net.ssl.HostnameVerifier
 import javax.websocket.*
 
@@ -28,9 +33,9 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
     private val mClient: ClientManager
     private var mSession: Session? = null
+    @Volatile
     private var mRawJsonResponse: String? = null
-    private val mLatches = Collections.synchronizedMap<Long, CountDownLatch>(mapOf())
-    private val mGlobalLock = Any()
+    private val mLatches = Collections.synchronizedMap<Long, CountDownLatch>(hashMapOf())
 
     init {
         this.mClient = ClientManager.createClient()
@@ -56,12 +61,13 @@ class GolosServicesSocketHandler(private val gateUrl: String,
     }
 
     override fun onMessage(message: String?) {
-        Timber.e("onMessage $message")
-
+        Timber.i("onMessage message = $message")
         if (message?.contains("\"id\"") == true) {
+            Timber.e("contains id")
             val id = mapper.readValue<IdentifiableImpl>(message).id
             val latch = mLatches[id]
             mLatches.remove(id)
+            mRawJsonResponse = message
             latch?.countDown()
         } else if (!message.isNullOrEmpty()) {
             try {
@@ -76,29 +82,38 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
     @Synchronized
     override fun requestAuth() {
-        if (mSession?.isOpen != true) mClient.connectToServer(this, ClientEndpointConfig.Builder.create().build(), URI(gateUrl))
+        if (mSession?.isOpen == true) mSession?.close()
+        mClient.connectToServer(this, ClientEndpointConfig.Builder.create().build(), URI(gateUrl))
 
     }
 
     @Throws(IOException::class, DeploymentException::class, JSONException::class)
-    override fun sendMessage(message: GolosServicesForwardMessage): GolosServicesInputMessage {
+    override fun sendMessage(message: GolosServicesRequest, method: String): GolosServicesResponse {
         if (mSession?.isOpen != true) {
-            synchronized(mGlobalLock, {
-                if (mSession?.isOpen != true) {
-                    mClient.connectToServer(this, ClientEndpointConfig.Builder.create().build(), URI(gateUrl))
-                }
-            })
+            requestAuth()
         }
 
-        Timber.e("sendMessage ${message.stringRepresentation()}")
-        mSession?.basicRemote?.sendText(message.stringRepresentation())
+        val messageToSend = GolosServicesMessagesWrapper(method, message)
+        val messageString = mapper.writeValueAsString(messageToSend)
+
+        Timber.i("sendMessage $messageString from ${Thread.currentThread().name}")
+
+        mSession?.basicRemote?.sendText(messageString)
+
 
         val latch = CountDownLatch(1)
-        mLatches[message.id] = latch
+        mLatches[messageToSend.id] = latch
         latch.await()
 
-        return mMapper?.convertValue(mRawJsonResponse, GolosServicesInputMessage::class.java)
-                ?: throw JSONException("cannot convert value $mRawJsonResponse")
+        if (mRawJsonResponse?.contains("\"error\"") == true) {
+            val error = mMapper?.readValue<GolosServicesErrorMessage>(mRawJsonResponse ?: "")
+                    ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
+            throw GolosServicesException(error.error)
+
+        } else
+
+            return mMapper?.readValue(mRawJsonResponse ?: "")
+                    ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
 
     }
 
@@ -120,9 +135,27 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
 interface GolosServicesCommunicator {
     @Throws(IOException::class, DeploymentException::class, JSONException::class)
-    fun sendMessage(message: GolosServicesForwardMessage): GolosServicesInputMessage
+    @WorkerThread
+    fun sendMessage(message: GolosServicesRequest, method: String): GolosServicesResponse
 
+    @WorkerThread
     fun requestAuth()
 }
 
+class GolosServicesException(val golosServicesError: GolosServicesError) : Exception(golosServicesError.toString())
 
+
+internal data class GolosServicesMessagesWrapper(@JsonProperty("method") val method: String,
+                                                 @JsonProperty("params") val params: JsonConvertable) : Identifiable {
+    fun stringRepresentation(): String = mapper.writeValueAsString(this)
+
+    @JsonProperty("jsonrpc")
+    val jsonRpc = "2.0"
+
+    @JsonIgnore()
+    private val _id = requestCounter.incrementAndGet()
+    @JsonProperty("id")
+    override val id = _id
+}
+
+private val requestCounter = AtomicLong(0)

@@ -28,6 +28,14 @@ object MockPersister : Persister() {
 
     }
 
+    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
+       return false
+    }
+
+    override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
+
+    }
+
     override fun getSubscribeOnTopic(): String?  = ""
 
     override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {

@@ -100,7 +100,7 @@ class StoriesHolderFragment : GolosFragment() {
             if (it == FeedType.PERSONAL_FEED) {
                 if (isUserLoggedIn)
                     Pair(FeedType.PERSONAL_FEED, StoryFilter(null,
-                            Repository.get.getCurrentUserDataAsLiveData().value?.userName
+                            Repository.get.appUserData.value?.userName
                                     ?: ""))
                 else null
             } else Pair(it, null)

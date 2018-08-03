@@ -36,7 +36,7 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
 
     @MainThread
     override fun setUp(context: Context) {
-        mRepository.getCurrentUserDataAsLiveData().observeForever(object : Observer<AppUserData> {
+        mRepository.appUserData.observeForever(object : Observer<AppUserData> {
             override fun onChanged(t: AppUserData?) {
                 val userName = mNotificationsPersister.getSubscribeOnTopic()
                 if (t?.isUserLoggedIn == true) {

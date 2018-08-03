@@ -77,8 +77,8 @@ class StoryViewModel : ViewModel() {
                 this.blog = mLiveData.value?.storyTree?.rootStory()?.categoryName
             }
         }
-        mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
-        mLiveData.addSource(mRepository.getCurrentUserDataAsLiveData()) {
+        mLiveData.removeSource(mRepository.appUserData)
+        mLiveData.addSource(mRepository.appUserData) {
             mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
                     mLiveData.value?.storyTitle ?: "",
                     mRepository.isUserLoggedIn(),
@@ -216,7 +216,7 @@ class StoryViewModel : ViewModel() {
 
     fun onEditClick(ctx: Context, item: GolosDiscussionItem) {
         if (mRepository.isUserLoggedIn()
-                && mRepository.getCurrentUserDataAsLiveData().value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
+                && mRepository.appUserData.value?.userName == mLiveData.value?.storyTree?.rootStory()?.author) {
 
             mLiveData.value?.let {
                 EditorActivity.startEditPostOrComment(ctx,
@@ -318,7 +318,7 @@ class StoryViewModel : ViewModel() {
 
     fun onDestroy() {
         mLiveData.removeSource(mRepository.getStories(feedType, filter))
-        mLiveData.removeSource(mRepository.getCurrentUserDataAsLiveData())
+        mLiveData.removeSource(mRepository.appUserData)
         mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
         mLiveData.removeSource(mRepository.getUserSubscribedTags())
     }

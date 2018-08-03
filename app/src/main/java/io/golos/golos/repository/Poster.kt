@@ -87,7 +87,7 @@ internal class Poster(private val mRepository: Repository,
                     .forEach {
                         val part = content[it]
                         if (part is EditorImagePart) {
-                            val newUrl = if (part.imageUrl.startsWith("/") || part.imageUrl.startsWith("file")) mGolosApi.uploadImage(mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
+                            val newUrl = if (part.imageUrl.startsWith("/") || part.imageUrl.startsWith("file")) mGolosApi.uploadImage(mRepository.appUserData.value?.userName!!,
                                     File(part.imageUrl))
                             else part.imageUrl
                             content[it] = EditorImagePart(part.id, part.imageName, newUrl)
@@ -100,28 +100,28 @@ internal class Poster(private val mRepository: Repository,
                 EditType.CREATE_POST -> {
                     if (title == null)
                         throw IllegalArgumentException("for $type title  must be provided")
-                    mGolosApi.sendPost(mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
+                    mGolosApi.sendPost(mRepository.appUserData.value?.userName!!,
                             title, content, tags.toArrayList().toArray(Array(tags.size, { "" })))
                 }
                 EditType.EDIT_POST -> {
 
                     if (originalPostOrCommentPermlink == null || title == null) throw IllegalArgumentException("for $type original post and title" +
                             " argument must be provided")
-                    mGolosApi.editPost(originalPostOrCommentPermlink, mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
+                    mGolosApi.editPost(originalPostOrCommentPermlink, mRepository.appUserData.value?.userName!!,
                             title, content, tags.toArrayList().toArray(Array(tags.size, { "" })))
                 }
                 EditType.CREATE_COMMENT -> {
                     if (parentAuthor == null || parentPermlink == null || categoryName == null)
                         throw IllegalArgumentException("for $type parentPermlink and " +
                                 " parentAuthor and categoryName  must be provided")
-                    mGolosApi.sendComment(mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
+                    mGolosApi.sendComment(mRepository.appUserData.value?.userName!!,
                             parentAuthor, parentPermlink, content, categoryName)
                 }
                 EditType.EDIT_COMMENT -> {
                     if (parentAuthor == null || parentPermlink == null || originalPostOrCommentPermlink == null || categoryName == null)
                         throw IllegalArgumentException("for $type parentPermlink," +
                                 " parentAuthor,categoryName and originalPostOrCommentPermlink must be provided")
-                    mGolosApi.editComment(mRepository.getCurrentUserDataAsLiveData().value?.userName!!,
+                    mGolosApi.editComment(mRepository.appUserData.value?.userName!!,
                             parentAuthor, parentPermlink, originalPostOrCommentPermlink, content, categoryName)
                 }
             }

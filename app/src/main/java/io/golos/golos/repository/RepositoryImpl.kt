@@ -10,8 +10,9 @@ import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
-import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.notifications.GolosServicesGateWay
+import io.golos.golos.notifications.GolosServicesInteractionManager
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -20,8 +21,6 @@ import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.editor.EditorPart
-import io.golos.golos.screens.editor.knife.KnifeParser
-import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -38,7 +37,7 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 @Suppress("NAME_SHADOWING", "LABEL_NAME_CLASH")
-internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newFixedThreadPool(4),
+internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newFixedThreadPool(2),
                               private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister = Persister.get,
@@ -46,13 +45,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
                               notificationsRepository: NotificationsRepositoryImpl? = null,
-                              private val mHtmlizer: Htmlizer = object : Htmlizer {
-                                  override fun toHtml(input: String) = KnifeParser.fromHtml(input, object : SpanFactory {
-                                      override fun <T : Any?> produceOfType(type: Class<*>): T {
-                                          return App.context.createGolosSpan(type)
-                                      }
-                                  })
-                              },
+                              golosServicesGateWay: GolosServicesGateWay? = null,
+                              private val mHtmlizer: Htmlizer = KnifeHtmlizer,
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
                               private val mLogger: ExceptionLogger?) : Repository() {
 
@@ -84,6 +78,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
     private val mNotificationsRepository: NotificationsRepositoryImpl
+    private val mGolosServicesGateWay: GolosServicesGateWay
 
     @WorkerThread
     private fun loadStories(limit: Int,
@@ -114,9 +109,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     init {
-
-        mAuthLiveData.value = mPersister.getActiveUserData()
-
         mFilteredMap.apply {
             put(StoryRequest(FeedType.ACTUAL, null), MutableLiveData())
             put(StoryRequest(FeedType.POPULAR, null), MutableLiveData())
@@ -134,6 +126,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }).observeForever({})
         mNotificationsRepository =
                 notificationsRepository ?: NotificationsRepositoryImpl(this, FCMTopicSubscriber, mPersister)
+
+        mGolosServicesGateWay = golosServicesGateWay ?: GolosServicesInteractionManager(userDataProvider = this)
     }
 
     override fun onAppCreate(ctx: Context) {
@@ -141,7 +135,21 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mUserSettings.setUp(ctx)
         mExchangesRepository.setUp(ctx)
         mNotificationsRepository.setUp(ctx)
+
         prepareForLaunch()
+        try {
+            val userData = mPersister.getActiveUserData()
+            if (userData != null) {
+                mAuthLiveData.value = userData
+                setActiveUserAccount(userData.userName
+                        ?: return, userData.privateActiveWif, userData.privatePostingWif)
+                mGolosServicesGateWay.setUp()
+            }
+
+        } catch (e: Throwable) {
+            deleteUserdata()
+        }
+
     }
 
     @WorkerThread
@@ -1009,9 +1017,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override fun getCurrentUserDataAsLiveData(): LiveData<AppUserData> {
-        return mAuthLiveData
-    }
+    override val appUserData = mAuthLiveData
 
     override fun createPost(title: String,
                             content: List<EditorPart>,
@@ -1393,7 +1399,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
-                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = getCurrentUserDataAsLiveData().value?.userName
+                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = mAuthLiveData.value?.userName
                                     ?: "") else null,
                             completionHandler = { _, e ->
                                 if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)

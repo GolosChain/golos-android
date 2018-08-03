@@ -246,7 +246,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     private fun getFeedModeSettings() = FeedCellSettings(Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
             Repository.get.userSettingsRepository.isImagesShown().value == true,
             NSFWStrategy(Repository.get.userSettingsRepository.isNSFWShow().value == true,
-                    Pair(mRepository.isUserLoggedIn(), mRepository.getCurrentUserDataAsLiveData().value?.userName
+                    Pair(mRepository.isUserLoggedIn(), mRepository.appUserData.value?.userName
                             ?: "")),
             Repository.get.userSettingsRepository.getCurrency().value
                     ?: UserSettingsRepository.GolosCurrency.USD,

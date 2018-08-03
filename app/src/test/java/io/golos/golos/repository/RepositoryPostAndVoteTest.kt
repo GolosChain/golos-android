@@ -65,7 +65,7 @@ class RepositoryPostAndVoteTest {
 
     @Test
     fun testAuth() {
-        val authData = repo.getCurrentUserDataAsLiveData()
+        val authData = repo.appUserData
         val resp = authData.value!!
         assertNotNull(resp)
         assertNotNull(resp.privateActiveWif)
@@ -134,7 +134,7 @@ class RepositoryPostAndVoteTest {
     fun createCommentTest() {
         Thread.sleep(20_000)
 
-        val authData = repo.getCurrentUserDataAsLiveData()
+        val authData = repo.appUserData
         assertNotNull(authData.value)
         var blogItems: StoriesFeed? = null
         var allComments: StoriesFeed? = null
@@ -190,7 +190,7 @@ class RepositoryPostAndVoteTest {
     fun createSecondLevelComment() {
         Thread.sleep(20_000)
 
-        val authData = repo.getCurrentUserDataAsLiveData()
+        val authData = repo.appUserData
         assertNotNull(authData.value)
         var blogItems: StoriesFeed? = null
         var allComments: StoriesFeed? = null
@@ -473,7 +473,7 @@ class RepositoryPostAndVoteTest {
         repo.getUserInfo(vredinkaAccount).observeForever {
             vredinkaAccountInfo = it
         }
-        repo.getCurrentUserDataAsLiveData().observeForever({
+        repo.appUserData.observeForever({
             userAcc = it
         })
         repo.subscribeOnUserBlog("golosmedia", { _, _ -> })

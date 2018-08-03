@@ -1,0 +1,9 @@
+{
+  "method": "auth",
+  "params": {
+    "user": "yuri-vlad-second",
+    "sign": "1c6cea6ffc7ab34bda992a1cc10122a17fd76b9cbda4c18715223652fbe4120455734b88601fc21023591576ced2b0cc325737762cb41e353253a750425f147717"
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
