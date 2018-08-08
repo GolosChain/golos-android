@@ -1,52 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:gravity="center_horizontal"
-    android:background="@color/white_black_toolbar_color"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_vote_for_app_dialog"
+    android:minHeight="240dp"
+    android:minWidth="240dp">
+
 
     <TextView
-        android:id="@+id/lable"
-        android:layout_width="wrap_content"
+        android:id="@+id/vd_title_tv"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/material_huge"
-        android:text="@string/like_app_question"
-        android:textColor="@color/textColorP"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:layout_marginEnd="@dimen/material_big"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="@dimen/material_big"
+        android:gravity="start"
+        android:minHeight="28dp"
+        android:text="@string/golos_io"
+        android:textColor="@color/vote_dialog_title"
+        android:textSize="@dimen/vote_vor_app_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/vote"
-        style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
-        android:text="@string/vote_exclamation"
-        app:layout_constraintEnd_toEndOf="@id/lable"
-        app:layout_constraintStart_toEndOf="@id/not_now"
+    <TextView
+        android:id="@+id/lable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/material_big"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="10dp"
+        android:gravity="start"
+        android:lineSpacingMultiplier="1.6"
+        android:paddingBottom="@dimen/quater"
+        android:paddingTop="@dimen/quater"
+        android:text="@string/vote_app_plead"
+        android:textColor="@color/vote_for_app_dialog_secondary_text"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vd_title_tv" />
+
+    <io.golos.golos.screens.StarsRow
+        android:id="@+id/stars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/material_big"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lable" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#FF979797"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/never" />
 
     <Button
         android:id="@+id/never"
         style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
+        android:layout_marginTop="40dp"
         android:text="@string/never"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toStartOf="@+id/vote"
-        app:layout_constraintStart_toStartOf="@id/lable"
-        app:layout_constraintTop_toBottomOf="@id/lable" />
+        android:textColor="@color/vote_for_app_dialog_secondary_text"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stars" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#FF979797"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/never" />
 
     <Button
         android:id="@+id/not_now"
         style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
         android:text="@string/not_now"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toStartOf="@+id/vote"
-        app:layout_constraintStart_toStartOf="@id/lable"
-        app:layout_constraintTop_toBottomOf="@id/lable" />
+        android:textColor="@color/vote_for_app_dialog_secondary_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/never" />
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#FF979797"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/not_now" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/vote"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
+        android:text="@string/vote_exclamation"
+        android:textColor="@color/blue_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/not_now" />
+
+</android.support.constraint.ConstraintLayout>

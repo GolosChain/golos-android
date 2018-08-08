@@ -274,6 +274,10 @@ val Account.cover: String?
         return avatarPath
     }
 
+public fun Context.getLayoutInflater(): LayoutInflater = LayoutInflater.from(this)
+
+public fun View.getLayoutInflater():LayoutInflater = context.getLayoutInflater()
+
 val Account.moto: String?
     get() {
         var moto: String? = null

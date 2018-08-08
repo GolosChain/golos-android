@@ -138,9 +138,9 @@
     <string name="mode">Режим</string>
     <string name="compact_mode">Компактный режим</string>
     <string name="images_mode">Просмотр картинок</string>
-    <string name="like_app_question">Нравится приложение? Оцени его!</string>
+    <string name="vote_app_plead">Поставьте свою оценку в Google Play.</string>
     <string name="not_now">Не сейчас</string>
-    <string name="vote_exclamation">Проголосовать!</string>
+    <string name="vote_exclamation">Проголосовать</string>
     <string name="you_must_have_more_repo_for_action">У вас недостаточно репутации для действия</string>
     <string name="never">Никогда</string>
     <string name="search_in_golos">Поиск в Golos.io</string>
@@ -201,6 +201,7 @@
     <string name="show_more_notifications">показать еще %s %s</string>
     <string name="error_discussion_is_frozen">Невозможно прокомментировать. Период выплат закрыт.</string>
     <string name="too_low_golos_power">Недостаточно пропускной способности аккаунта. Пополните Силу Голоса либо дождитесь восстановления</string>
+    <string name="golos_io">Нравится Golos.io?</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

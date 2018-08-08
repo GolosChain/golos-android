@@ -32,17 +32,18 @@ data class GolosPushSubscribeRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class IdentifiableImpl(@JsonProperty("id") override val id: Long) : Identifiable
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosServicesError(
         @JsonProperty("code")
         val code: Int,
         @JsonProperty("message")
         val message: String)
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosServicesResponse(@JsonProperty("id")
                                  override val id: Long,
                                  @JsonProperty("result")
-                                 val result: List<String>) : IdentifiableImpl(id)
-
+                                 val result: Any) : IdentifiableImpl(id)
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosServicesErrorMessage(
         @JsonProperty("id")
         override val id: Long,

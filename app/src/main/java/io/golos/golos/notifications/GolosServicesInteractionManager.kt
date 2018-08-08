@@ -64,7 +64,9 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
                                     signHandler.sign(appUserData.userName
                                             ?: return@execute, it.secret
                                             ?: return@execute)), ServicesMethod.AUTH.stringRepresentation())
+                            println("$authResult")
                             if (authResult.isAuthSuccessMessage()) {
+
                                 isAuthComplete = true
                                 isAuthInProgress = false
 
@@ -75,7 +77,7 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
                         } catch (e: GolosServicesException) {
                             Timber.e("error$e")
                             if (e.getErrorType() == JsonRpcError.AUTH_ERROR) {
-                                if (authCounter.incrementAndGet() < 10)
+                                if (authCounter.incrementAndGet() < 20)
                                     workerExecutor.execute { communicationHandler.requestAuth() }
 
                             }
@@ -88,10 +90,10 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
         workerExecutor.execute {
             communicationHandler.requestAuth()
         }
-
     }
 
     private fun onAuthComplete() {
+        println("onAuthComplete")
         subscribeToPushIfNeeded()
     }
 

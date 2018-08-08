@@ -1,21 +1,29 @@
 package io.golos.golos.screens
 
+import android.annotation.TargetApi
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutCompat
+import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsImpl
 import io.golos.golos.screens.widgets.dialogs.GolosDialog
+import io.golos.golos.utils.getLayoutInflater
 
 
 /**
  * Created by yuri on 07.02.18.
  */
 class VoteForAppDialog : GolosDialog() {
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_vote_for_app, container, false)
@@ -41,10 +49,35 @@ class VoteForAppDialog : GolosDialog() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.Theme_AppCompat_Dialog)
+        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.VoteForAppDialogStyle)
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     companion object {
         fun getInstance() = VoteForAppDialog()
+    }
+}
+
+public class StarsRow @JvmOverloads constructor(context: Context,
+                                         attributeSet: AttributeSet? = null,
+                                         defStyleAttr: Int = 0) : LinearLayoutCompat(context, attributeSet, defStyleAttr) {
+
+    init {
+        getLayoutInflater().inflate(R.layout.v_stars, this, true)
+        orientation = HORIZONTAL
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        return super.onTouchEvent(event)
     }
 }

@@ -49,4 +49,6 @@
     <color name="profile_gap_color">#F2F4F7</color>
     <color name="notification_text_color">@color/gray_4f</color>
     <color name="notification_delimeter">#eeeeee</color>
+    <color name="vote_dialog_title">#DE000000</color>
+    <color name="vote_for_app_dialog_secondary_text">#FF959595</color>
 </resources>

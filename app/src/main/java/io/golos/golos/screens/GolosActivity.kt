@@ -18,7 +18,6 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.OneShotLiveData
 import io.golos.golos.utils.nextInt
 import io.golos.golos.utils.restart
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -43,7 +42,7 @@ abstract class GolosActivity : AppCompatActivity() {
             Handler().postDelayed({
                 if (needToShowVoteDialog())
                     showVoteDialog.value = true
-            }, TimeUnit.SECONDS.toMillis(120))
+            }, TimeUnit.SECONDS.toMillis(3))
         }
         showVoteDialog.observe(this, Observer {
             if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)

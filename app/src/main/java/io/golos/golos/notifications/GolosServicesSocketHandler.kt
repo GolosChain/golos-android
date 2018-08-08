@@ -61,9 +61,8 @@ class GolosServicesSocketHandler(private val gateUrl: String,
     }
 
     override fun onMessage(message: String?) {
-        Timber.i("onMessage message = $message")
+        println("onMessage message = $message")
         if (message?.contains("\"id\"") == true) {
-            Timber.e("contains id")
             val id = mapper.readValue<IdentifiableImpl>(message).id
             val latch = mLatches[id]
             mLatches.remove(id)
@@ -96,10 +95,9 @@ class GolosServicesSocketHandler(private val gateUrl: String,
         val messageToSend = GolosServicesMessagesWrapper(method, message)
         val messageString = mapper.writeValueAsString(messageToSend)
 
-        Timber.i("sendMessage $messageString from ${Thread.currentThread().name}")
+        println("sendMessage $messageString from ${Thread.currentThread().name}")
 
         mSession?.basicRemote?.sendText(messageString)
-
 
         val latch = CountDownLatch(1)
         mLatches[messageToSend.id] = latch
@@ -111,10 +109,8 @@ class GolosServicesSocketHandler(private val gateUrl: String,
             throw GolosServicesException(error.error)
 
         } else
-
             return mMapper?.readValue(mRawJsonResponse ?: "")
                     ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
-
     }
 
 
@@ -124,11 +120,11 @@ class GolosServicesSocketHandler(private val gateUrl: String,
         }
 
         override fun onDisconnect(closeReason: CloseReason?): Boolean {
-            return true
+            return false
         }
 
         override fun getDelay(): Long {
-            return 1_000L
+            return 5_000L
         }
     }
 }
