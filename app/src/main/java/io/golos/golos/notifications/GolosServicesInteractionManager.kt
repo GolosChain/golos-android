@@ -101,6 +101,7 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
         if (!isAuthComplete) return
         workerExecutor.execute {
             val token = tokenProvider.onTokenChange.value ?: return@execute
+            Timber.e("token = $token")
             Timber.i("subscribing on notifications")
             if (notificationsPersister.isUserSubscribedOnNotificationsThroughServices()) return@execute
             try {

@@ -12,8 +12,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
+import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.*
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
 

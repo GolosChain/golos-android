@@ -203,7 +203,16 @@
     <string name="error_discussion_is_frozen">Discussion is frozen</string>
     <string name="too_low_golos_power">Account exceeded bandwidth limits. Please fill up Golos Power or wait for the recharging</string>
     <string name="golos_io">Like Golos.io?</string>
-
+    <string name="userr_voted">/@%s liked your entry 👍</string>
+    <string name="user_downvoted">/@%s disliked your entry 😵</string>
+    <string name="user_transfered">/@%s has transferred to your account %s GOLOS 💸</string>
+    <string name="user_replied">/@%s replied your entry ✌️</string>
+    <string name="user_subscribed">/@/%s has subscribed to your blog 😊️</string>
+    <string name="user_unsubscribed">/@/%s has unsubscribed to your blog 😔️</string>
+    <string name="user_mentioned">/@%s mentioned you 🤔</string>
+    <string name="user_reposted">/@%s made the repost of your post 😎</string>
+    <string name="user_voted_for_you">/@%s voted for you as a delegate 🔥</string>
+    <string name="user_canceled_vote_for_you">/@%s has removed your voice from your delegate node 🙈</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

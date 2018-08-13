@@ -17,8 +17,8 @@ import io.golos.golos.R
 import io.golos.golos.notifications.NOTIFICATION_KEY
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.repository.model.GolosNotifications
-import io.golos.golos.repository.model.PostLinkable
+import io.golos.golos.notifications.GolosNotifications
+import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper

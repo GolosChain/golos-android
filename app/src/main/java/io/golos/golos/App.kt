@@ -26,12 +26,10 @@ import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
-import io.golos.golos.notifications.NOTIFICATION_KEY
-import io.golos.golos.notifications.NotificationsBroadCastReceiver
+import io.golos.golos.notifications.*
 import io.golos.golos.repository.AppLifecycleRepository
 import io.golos.golos.repository.LifeCycleEvent
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.*
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity

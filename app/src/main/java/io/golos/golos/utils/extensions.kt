@@ -53,9 +53,9 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.model.GolosCommentNotification
-import io.golos.golos.repository.model.GolosDownVoteNotification
-import io.golos.golos.repository.model.GolosUpVoteNotification
+import io.golos.golos.notifications.GolosCommentNotification
+import io.golos.golos.notifications.GolosDownVoteNotification
+import io.golos.golos.notifications.GolosUpVoteNotification
 import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -71,7 +71,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
  */
 
-val siteUrl = "https://golos.io"
+const val siteUrl = BuildConfig.BASE_URL
 
 object Counter {
     val counter = AtomicInteger(-1)

@@ -47,6 +47,7 @@ internal class ApiImpl : GolosApi() {
 
     override fun getUserAvatars(names: List<String>): Map<String, String?> {
         val out = HashMap<String, String?>()
+        if (names.isEmpty())return out
         names.forEach {
             out[it] = null
         }

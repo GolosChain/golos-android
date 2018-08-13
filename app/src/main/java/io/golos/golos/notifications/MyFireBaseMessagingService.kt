@@ -2,7 +2,6 @@ package io.golos.golos.notifications
 
 import android.os.Handler
 import android.os.Looper
-import com.crashlytics.android.Crashlytics
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import io.golos.golos.model.Notification
@@ -19,6 +18,11 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage?) {
         super.onMessageReceived(p0)
         try {
+            Timber.e("on new notification $p0")
+            Timber.e("data is ${p0?.data}")
+            Timber.e("notification is   ${p0?.notification}")
+            Timber.e("notification title is   ${p0?.notification?.title}")
+            Timber.e("notification title is   ${p0?.notification?.body}")
 
             val notification = mapper.readValue<Notification>(p0?.data?.get("message")
                     ?: return, Notification::class.java)
@@ -29,7 +33,17 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
         } catch (e: Exception) {
             e.printStackTrace()
             Timber.e(e)
-            Crashlytics.getInstance().core.logException(e)
+            try {
+                val notifsListType = mapper.typeFactory.constructCollectionType(List::class.java, NotificationNew::class.java)
+                val notification = mapper.readValue<List<NotificationNew>>(p0?.data?.get("message")
+                        ?: return, notifsListType)
+                Handler(Looper.getMainLooper()).post {
+                    Repository.get.notificationsRepository.onReceiveNotificationsNew(notification)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Timber.e(e)
+            }
         }
 
     }

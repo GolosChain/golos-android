@@ -33,3 +33,4 @@ fun GolosServicesErrorMessage.getErrorType(): JsonRpcError? {
 }
 
 fun GolosServicesException.getErrorType(): JsonRpcError? = rpcErrorFromCode(this.golosServicesError.code)
+

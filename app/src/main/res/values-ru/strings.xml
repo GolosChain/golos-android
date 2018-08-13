@@ -162,7 +162,7 @@
     <string name="site">Сайт</string>
     <string name="yeat_with_dor">%s г.</string>
     <string name="registrationDate">Дата регистрации</string>
-    <string name="information" >Информация</string>
+    <string name="information">Информация</string>
     <string name="users_voted_on_post">Ваш <![CDATA[<a href = "%s">пост</>]]> поддержали %s %s</string>
     <string name="users_voted_on_comment">Ваш <![CDATA[<a href = "%s">комментарий</>]]> поддержали %s %s</string>
     <string name="users_voted_on_post_for_notification">Ваш пост поддержали %s %s</string>
@@ -202,6 +202,16 @@
     <string name="error_discussion_is_frozen">Невозможно прокомментировать. Период выплат закрыт.</string>
     <string name="too_low_golos_power">Недостаточно пропускной способности аккаунта. Пополните Силу Голоса либо дождитесь восстановления</string>
     <string name="golos_io">Нравится Golos.io?</string>
+    <string name="userr_voted">/@%s оценил(а) вашу запись 👍</string>
+    <string name="user_downvoted">/@%s негативно оценил(а) вашу запись 😵</string>
+    <string name="user_transfered">/@%s перевел(а) на ваш счет %s GOLOS 💸</string>
+    <string name="user_replied">/@%s ответил на вашу запись ✌️</string>
+    <string name="user_subscribed">/@/%s подписался на ваш блог 😊️</string>
+    <string name="user_unsubscribed">/@/%s отписался на ваш блог 😔️</string>
+    <string name="user_mentioned">/@%s упомянул(а) вас в своей записи 🤔</string>
+    <string name="user_reposted">/@%s сделал(а) репост вашего поста 😎</string>
+    <string name="user_voted_for_you">/@%s проголосовал за вас как за делегата 🔥</string>
+    <string name="user_canceled_vote_for_you">/@%s снял свой голос с вашей делегатской ноды 🙈</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

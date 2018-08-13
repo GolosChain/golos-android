@@ -26,7 +26,6 @@ class SplashActivity : GolosActivity(), Observer<ReadyStatus> {
         setContentView(R.layout.a_splash)
         mProgress = findViewById(R.id.progress)
         repo.getAppReadyStatus().observe(this, this)
-        Timber.e("starter intent data = ${intent?.data}")
     }
 
     override fun onChanged(t: ReadyStatus?) {

@@ -13,8 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.GolosNotifications
-import io.golos.golos.repository.model.PostLinkable
+import io.golos.golos.notifications.GolosNotifications
+import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper
 import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
