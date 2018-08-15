@@ -16,16 +16,19 @@ import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
+import timber.log.Timber
 
-
-internal data class NotificationWrapper(val notification: GolosNotification,
-                                        val clickListener: (GolosViewHolder) -> Unit,
-                                        val onCancelClickListener: (GolosViewHolder) -> Unit)
 
 class NotificationsAdapter(notifications: List<GolosNotification>,
                            var clickListener: (GolosNotification) -> Unit = {},
                            var cancelListener: (GolosNotification) -> Unit = {},
-                           private val showOnlyFirst: Boolean) : RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
+                           private val showOnlyFirst: Boolean,
+                           private val appearanceHandler: NotificationAppearanceManager = NotificationAppearanceManagerImpl) : RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
+
+    internal data class NotificationWrapper(val notification: GolosNotification,
+                                            val clickListener: (GolosViewHolder) -> Unit,
+                                            val onCancelClickListener: (GolosViewHolder) -> Unit,
+                                            val appearanceHandler: NotificationAppearanceManager = NotificationAppearanceManagerImpl)
 
     var notification = notifications
         set(value) {
@@ -207,6 +210,25 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                                 "$siteUrl${commentNotification.parentUrl}").toHtml()
 
                         mText.text = text
+                    }
+                    else -> {
+                        val appearance = value.appearanceHandler.makeAppearance(notification)
+                        mSecondaryImage.setViewGone()
+
+                        if (appearance.title != null) {
+                            mText.maxLines = 1
+                            mTitle.setViewVisible()
+                            mTextLinearLo.gravity = Gravity.TOP
+                            mTextLinearLo.setPadding(0, 0, 0, 0)
+                            mTitle.text = appearance.title
+                        } else {
+                            mText.maxLines = 2
+                            mTitle.setViewGone()
+                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
+                            mTextLinearLo.setPadding(0, 0, 0, 0)
+                        }
+                        mText.text = appearance.body
+                        mGlide.load(appearance.iconUrl).into(mImage)
                     }
                 }
             }

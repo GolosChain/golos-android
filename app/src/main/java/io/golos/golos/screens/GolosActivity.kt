@@ -42,7 +42,7 @@ abstract class GolosActivity : AppCompatActivity() {
             Handler().postDelayed({
                 if (needToShowVoteDialog())
                     showVoteDialog.value = true
-            }, TimeUnit.MINUTES.toMillis(2))
+            }, TimeUnit.MINUTES.toMillis(3))
         }
         showVoteDialog.observe(this, Observer {
             if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)

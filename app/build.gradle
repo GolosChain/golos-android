@@ -32,7 +32,7 @@ android {
         buildTypes.each {
             it.buildConfigField 'String', 'BASE_URL', "\"https://golos.io/\""
             it.buildConfigField 'boolean', 'DEBUG_EDITOR', "false"
-            it.buildConfigField 'String', 'GATE_URL', "\"ws://95.216.154.157:3000\""
+            it.buildConfigField 'String', 'GATE_URL', "\"ws://95.216.153.236:8080\""
             it.buildConfigField 'String []', 'ALTERNATE_URLS', "new String[]{\"https://golos.blog/\"," +
                     "\"https://sandbox.golos.io/\",   \"golosioapp://golos.io/\"}"
         }

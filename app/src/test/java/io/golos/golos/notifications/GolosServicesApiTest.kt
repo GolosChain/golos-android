@@ -3,12 +3,14 @@ package io.golos.golos.notifications
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.UserDataProvider
 import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.utils.mapper
 import io.golos.golos.utils.to
 import org.junit.Before
 import org.junit.Rule
@@ -65,9 +67,9 @@ class GolosServicesApiTest {
 
     @Test
     fun test1() {
-        // GolosServicesSocketHandler(BuildConfig.GATE_URL).sendMessage(GolosAuthResponse("sdgsgd", "sgsdgsgd"), "auth")
-
-        Thread.sleep(120_000)
-
+        val authSucces = "{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":{\"status\":\"OK\"}}"
+        val response = mapper.readValue<GolosServicesResponse>(authSucces)
+        response.isAuthSuccessMessage()
+        response.isPushSubscribeSuccesMessage()
     }
 }

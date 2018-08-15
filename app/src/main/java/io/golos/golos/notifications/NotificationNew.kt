@@ -17,16 +17,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = WitnessCancelVoteNotificationNew::class, name = "witnessCancelVote")])
 
 
-sealed class NotificationNew(@JsonProperty("eventType") val eventType: String)
+sealed class NotificationNew(@JsonProperty(value = "eventType") val eventType: String,
+                             @JsonProperty(value = "counter") val counter: Int = 0)
 
 data class VoteNotificationNew(@JsonProperty("permlink") val permlink: String,
-                               @JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("vote")
+                               @JsonProperty("voter") val voter: String) : NotificationNew("vote")
 
 data class FlagNotificationNew(@JsonProperty("permlink") val permlink: String,
-                               @JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("flag")
+                               @JsonProperty("voter") val voter: String) : NotificationNew("flag")
 
 data class TransferNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>,
-                                   @JsonProperty("amount") val amount: Double) : NotificationNew("transfer")
+                                   @JsonProperty("amount") val amount: String) : NotificationNew("transfer")
 
 data class ReplyNotificationNew(@JsonProperty("permlink") val permlink: String,
                                 @JsonProperty("parentPermlink") val parentPermlink: String,

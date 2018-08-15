@@ -143,12 +143,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mAuthLiveData.value = userData
                 setActiveUserAccount(userData.userName
                         ?: return, userData.privateActiveWif, userData.privatePostingWif)
-                mGolosServicesGateWay.setUp()
+
             }
 
         } catch (e: Throwable) {
             deleteUserdata()
         }
+        mGolosServicesGateWay.setUp()
 
     }
 

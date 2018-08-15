@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import io.golos.golos.utils.JsonConvertable
 import io.golos.golos.utils.mapper
 
@@ -23,8 +24,8 @@ data class GolosAuthRequest(
         val sign: String) : GolosServicesRequest()
 
 data class GolosPushSubscribeRequest(
-        @JsonProperty("key")
-        val fcmToken: String,
+        @JsonProperty("profile")
+        val profile: String,
         @JsonProperty("deviceType")
         val deviceType: String = "android") : GolosServicesRequest()
 
@@ -38,11 +39,13 @@ data class GolosServicesError(
         val code: Int,
         @JsonProperty("message")
         val message: String)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosServicesResponse(@JsonProperty("id")
                                  override val id: Long,
                                  @JsonProperty("result")
                                  val result: Any) : IdentifiableImpl(id)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosServicesErrorMessage(
         @JsonProperty("id")
@@ -65,9 +68,11 @@ sealed class GolosServicesNotification(
 
 class GolosServerAuthRequest(
         @JsonProperty("params")
-        private val parameters: Array<String>) : GolosServicesNotification(method = "sign") {
+        private val params: Secret) : GolosServicesNotification(method = "sign") {
 
-    val secret = parameters.firstOrNull()
+    val secret = params.secret
+
+    data class Secret(@JsonProperty("secret") val secret: String)
 }
 
 

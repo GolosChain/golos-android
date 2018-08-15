@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Golos.io</string>
     <string name="add_max_five_tags">Напишите 5 тегов</string>
-    <string name="enter_tag_name">Введите название тeгов, через пробел</string>
+
     <string name="to_much_tags">Можно указать до пяти тeгов</string>
     <string name="use_only_one_dash">в тeге может быть только один дефис</string>
     <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тeги</string>
@@ -198,20 +198,31 @@
     <string name="new_upvote">Новый лайк</string>
     <string name="new_flag">Новый флаг</string>
     <string name="new_transfer">Новый трансфер</string>
-    <string name="show_more_notifications">показать еще %s %s</string>
+    <string name="show_more_notifications">показать еще %s</string>
     <string name="error_discussion_is_frozen">Невозможно прокомментировать. Период выплат закрыт.</string>
     <string name="too_low_golos_power">Недостаточно пропускной способности аккаунта. Пополните Силу Голоса либо дождитесь восстановления</string>
     <string name="golos_io">Нравится Golos.io?</string>
-    <string name="userr_voted">/@%s оценил(а) вашу запись 👍</string>
-    <string name="user_downvoted">/@%s негативно оценил(а) вашу запись 😵</string>
-    <string name="user_transfered">/@%s перевел(а) на ваш счет %s GOLOS 💸</string>
-    <string name="user_replied">/@%s ответил на вашу запись ✌️</string>
-    <string name="user_subscribed">/@/%s подписался на ваш блог 😊️</string>
-    <string name="user_unsubscribed">/@/%s отписался на ваш блог 😔️</string>
-    <string name="user_mentioned">/@%s упомянул(а) вас в своей записи 🤔</string>
-    <string name="user_reposted">/@%s сделал(а) репост вашего поста 😎</string>
-    <string name="user_voted_for_you">/@%s проголосовал за вас как за делегата 🔥</string>
-    <string name="user_canceled_vote_for_you">/@%s снял свой голос с вашей делегатской ноды 🙈</string>
+    <string name="userr_voted">@%s оценил вашу запись 👍</string>
+    <string name="user_downvoted">@%s негативно оценил вашу запись 😵</string>
+    <string name="user_transfered">@%s перевел на ваш счет %s 💸</string>
+    <string name="user_replied">@%s ответил на вашу запись ✌️</string>
+    <string name="user_subscribed">@/%s подписался на ваш блог 😊️</string>
+    <string name="user_unsubscribed">@/%s отписался на ваш блог 😔️</string>
+    <string name="user_mentioned">@%s упомянул вас в своей записи 🤔</string>
+    <string name="user_reposted">@%s сделал репост вашего поста 😎</string>
+    <string name="user_voted_for_you">@%s проголосовал за вас как за делегата 🔥</string>
+    <string name="user_canceled_vote_for_you">@%s снял свой голос с вашей делегатской ноды 🙈</string>
+    <string name="userr_voted_several">@%s и еще %s вашу запись 👍</string>
+    <string name="user_downvoted_several">@%s и еще %s вашу запись 😵</string>
+    <string name="transfer_title">Пришел перевод</string>
+    <string name="user_transfered_several">@%s и еще %s на ваш счет %s</string>
+    <string name="user_replied_several">@%s и еще %s вашу запись ✌️</string>
+    <string name="user_subscribed_several">@%s и еще %s на ваш блог 😊</string>
+    <string name="user_unsubscribed_several">@%s и еще %s от вашего блога 😔</string>
+    <string name="user_mentioned_several">@%s и еще %s вас 🤔</string>
+    <string name="user_reposted_several">@%s и еще %s репост вашего поста 😎</string>
+    <string name="user_voted_for_you_several" >@%s и еще %s за вас как за делегата 🔥</string>
+    <string name="user_canceled_vote_for_you_several" >@%s и еще %s сняли свои голоса с вашей делегатской ноды 🙈</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

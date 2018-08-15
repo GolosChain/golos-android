@@ -6,7 +6,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -17,11 +17,8 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatDelegate
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
@@ -33,10 +30,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
-import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.getVectorAsBitmap
-import io.golos.golos.utils.isCommentToPost
-import io.golos.golos.utils.toHtml
 import timber.log.Timber
 
 
@@ -79,6 +73,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 aStarted++
                 if (aStopped == (aStarted - 1)) {
                     mLiveData.value = LifeCycleEvent.APP_IN_FOREGROUND
+                    (getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.cancelAll()
                 }
             }
 
@@ -150,115 +145,28 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 } else {
                     builder.setDefaults(0).setSound(null)
                 }
-                var isBuilt = false
 
                 (notification as? PostLinkable)?.getLink()?.let {
                     builder.setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent,
                             StoryActivity.getStartIntent(this, it.author, it.blog, it.permlink,
                                     FeedType.UNCLASSIFIED, null), dismissIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                 }
+                val appearance = NotificationAppearanceManagerImpl.makeAppearance(notification)
+                Glide.with(this).load(appearance.iconUrl).into(object : SimpleTarget<Drawable>() {
+                    override fun onResourceReady(p0: Drawable?, p1: Transition<in Drawable>?) {
+                        val bitmap = p0?.getVectorAsBitmap()
 
-                when (notification) {
-                    is GolosUpVoteNotification -> {
-                        val voteNotification = notification.voteNotification
+                        Handler(Looper.getMainLooper()).post {
+                            builder.setContentText(appearance.body)
+                                    .setLargeIcon(bitmap)
+                                    .setContentTitle(appearance.title)
 
-                        if (voteNotification.count > 1) {
-                            val textId = if (isCommentToPost(notification)) R.string.users_voted_on_post_for_notification
-                            else R.string.users_voted_on_comment_for_notification
-
-
-                            builder
-                                    .setLargeIcon(getVectorAsBitmap(R.drawable.ic_like_40dp_white_on_blue))
-                                    .setContentText(getString(textId,
-                                            voteNotification.count.toString(),
-                                            resources.getQuantityString(R.plurals.times, voteNotification.count)).toHtml())
-
-                        } else if (voteNotification.count == 1) {
-
-                            val textId = if (isCommentToPost(notification)) R.string.user_voted_on_post_for_notification
-                            else R.string.user_voted_on_comment_for_notification
-
-                            val text = getString(textId, voteNotification.from.name.capitalize()).toHtml()
-
-                            if (voteNotification.from.avatar == null) builder
-                                    .setContentText(text)
-                                    .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
-                            else {
-                                isBuilt = true
-                                loadImageThenShowNotification(builder, text, null, voteNotification.from.avatar)
-                            }
+                            if (appearance.title != null) builder.setContentTitle(appearance.title)
+                            notificationManager.notify(notifId, builder.build())
                         }
                     }
-                    is GolosDownVoteNotification -> {
+                })
 
-                        val voteNotification = notification.voteNotification
-
-                        if (voteNotification.count > 1) {
-                            val textId = if (isCommentToPost(notification)) R.string.users_downvoted_on_post_for_notification
-                            else R.string.users_downvoted_on_comment_for_notification
-
-                            builder.setLargeIcon(getVectorAsBitmap(R.drawable.ic_downvote_white_on_blue_40dp))
-
-                            builder.setContentText(getString(textId,
-                                    Math.abs(voteNotification.count).toString(),
-                                    resources.getQuantityString(R.plurals.plural_for_downvoted, Math.abs(voteNotification.count))).toHtml())
-
-                        } else if (voteNotification.count == 1) {
-                            val textId = if (isCommentToPost(notification)) R.string.user_downvoted_on_post_for_notification
-                            else R.string.user_downvoted_on_comment_for_notification
-
-                            val text = getString(textId, voteNotification.from.name.capitalize()).toHtml()
-
-
-                            if (voteNotification.from.avatar == null) builder.setContentText(text)
-                                    .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
-                                    .setContentTitle(voteNotification.from.name.capitalize())
-                                    .setStyle(NotificationCompat.BigTextStyle(builder))
-                            else {
-                                isBuilt = true
-                                loadImageThenShowNotification(builder, text, null,
-                                        voteNotification.from.avatar)
-
-                            }
-
-                        }
-                    }
-                    is GolosTransferNotification -> {
-
-                        val transferNotification = notification.transferNotification
-                        val text = getString(R.string.user_transferred_you, transferNotification.amount)
-
-                        if (transferNotification.from.avatar == null) builder.setContentText(text)
-                                .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
-                                .setContentTitle(getString(R.string.transfer_income, transferNotification.from.name.capitalize()).toHtml())
-                        else {
-                            isBuilt = true
-                            loadImageThenShowNotification(builder, text,
-                                    getString(R.string.transfer_income, transferNotification.from.name.capitalize()).toHtml(),
-                                    transferNotification.from.avatar)
-                        }
-                    }
-                    is GolosCommentNotification -> {
-
-                        val commentNotification = notification.commentNotification
-                        val textId = if (isCommentToPost(notification)) R.string.user_answered_on_post_for_notification
-                        else R.string.user_answered_on_comment_for_notification
-                        val text = getString(textId, commentNotification.author.name.capitalize()).toHtml()
-
-
-                        if (commentNotification.author.avatar == null) builder.setContentText(text)
-                                .setLargeIcon(getVectorAsBitmap(R.drawable.ic_person_gray_32dp))
-                                .setContentTitle(commentNotification.parentAuthor.capitalize())
-                        else {
-                            isBuilt = true
-                            loadImageThenShowNotification(builder, text, commentNotification.parentAuthor.capitalize(), commentNotification.author.avatar)
-                        }
-                    }
-
-                }
-                if (!isBuilt) {
-                    notificationManager.notify(notifId, builder.build())
-                }
             } else if (getLifeCycleLiveData().value != LifeCycleEvent.APP_IN_BACKGROUND) {
                 notificationManager.cancelAll()
             }
@@ -281,40 +189,6 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         } else this.packageName
     }
 
-    private fun loadImageThenShowNotification(builder: NotificationCompat.Builder,
-                                              text: CharSequence,
-                                              title: CharSequence?,
-                                              avatarPath: String) {
-
-        val wantedSize = resources.getDimension(R.dimen.notification_big_icon_size).toInt()
-        Glide.with(this)
-                .asBitmap()
-                .apply(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) RequestOptions().circleCrop() else RequestOptions().centerCrop())
-                .load(ImageUriResolver
-                        .resolveImageWithSize(avatarPath, wantedwidth = wantedSize))
-
-
-                .listener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Bitmap>?, p3: Boolean): Boolean {
-                        return true
-                    }
-
-
-                    override fun onResourceReady(p0: Bitmap?, p1: Any?, p2: Target<Bitmap>?, p3: DataSource?, p4: Boolean): Boolean {
-                        Handler(Looper.getMainLooper()).post {
-                            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                            builder
-                                    .setLargeIcon(p0)
-                                    .setContentText(text)
-                            if (title != null) builder.setContentTitle(title)
-                            notificationManager.notify(notifId, builder.build())
-                        }
-
-                        return true
-                    }
-                })
-                .submit(wantedSize, wantedSize)
-    }
 
     fun isRoboUnitTest(): Boolean {
         return "robolectric" == Build.FINGERPRINT

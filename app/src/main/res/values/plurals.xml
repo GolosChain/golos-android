@@ -16,6 +16,92 @@
         <item quantity="zero">Days</item>
         <item quantity="other">Days</item>
     </plurals>
+    <plurals name="other">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+    <plurals name="negative_reacted">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
+    <plurals name="answered">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
+    <plurals name="transfered">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+    <plurals name="mentioned">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
+    <plurals name="made_repost">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
+    <plurals name="voted_for_witness">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+    <plurals name="canceled_vote_for_witness">
+        <item quantity="few">%s others have</item>
+        <item quantity="many">%s others have</item>
+        <item quantity="one">%s other has</item>
+        <item quantity="two">%s others have</item>
+        <item quantity="zero">%s others have</item>
+        <item quantity="other">%s others have</item>
+    </plurals>
+    <plurals name="unsubscribed">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
+    <plurals name="subscribed">
+        <item quantity="few">%s others</item>
+        <item quantity="many">%s others</item>
+        <item quantity="one">%s other</item>
+        <item quantity="two">%s others</item>
+        <item quantity="zero">%s others</item>
+        <item quantity="other">%s others</item>
+    </plurals>
+
     <plurals name="hours">
         <item quantity="few">Hours</item>
         <item quantity="many">Hours</item>
@@ -74,11 +160,11 @@
         <item quantity="other">users</item>
     </plurals>
     <plurals name="notifications" >
-        <item quantity="few">notifications</item>
-        <item quantity="many">notifications</item>
-        <item quantity="one">notification</item>
-        <item quantity="two">notifications</item>
-        <item quantity="zero">notifications</item>
-        <item quantity="other">notifications</item>
+        <item quantity="few">%s more notifications</item>
+        <item quantity="many">%s more notifications</item>
+        <item quantity="one">%s more notification</item>
+        <item quantity="two">%s more notifications</item>
+        <item quantity="zero">%s more notifications</item>
+        <item quantity="other">%s more notifications</item>
     </plurals>
 </resources>

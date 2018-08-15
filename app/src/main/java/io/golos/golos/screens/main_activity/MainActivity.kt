@@ -14,11 +14,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
+import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.NOTIFICATION_KEY
+import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
-import io.golos.golos.notifications.GolosNotifications
-import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper
@@ -27,6 +27,7 @@ import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
@@ -114,6 +115,8 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
         }
 
         Repository.get.notificationsRepository.notifications.observe(this, Observer<GolosNotifications> {
+
+            mButtonContainer.animate().cancel()
             (mNotificationsRecycler.adapter as? NotificationsAdapter)?.notification = it?.notifications ?: listOf()
             if (it?.notifications?.isEmpty() != false) {
                 mNotificationsContainer.setViewGone()
@@ -124,25 +127,33 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                 if (it.notifications.size == 1) {
                     mNotificationsContainer.setViewVisible()
                     if (mButtonContainer.alpha > 0f) {
+
                         mButtonContainer.animate().alpha(0f).setDuration(200L).setListener(object : EndAnimationListener() {
                             override fun onAnimationEnd(p0: Animator?) {
+
                                 mButtonContainer.setViewGone()
                             }
                         })
+                    } else {
+                        mButtonContainer.setViewGone()
                     }
 
                 } else {
                     mNotificationsContainer.setViewVisible()
                     if (mButtonContainer.alpha == 0f) {
+
                         mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
                             override fun onAnimationEnd(p0: Animator?) {
+
                                 mButtonContainer.setViewVisible()
                             }
                         })
+                    } else {
+                        mButtonContainer.setViewVisible()
                     }
                     mNotificationsIndicator.text = getString(R.string.show_more_notifications,
-                            (it.notifications.count() - 1).toString(),
-                            resources.getQuantityString(R.plurals.notifications, it.notifications.count()))
+                            resources.getQuantityString(R.plurals.notifications, it.notifications.count() - 1,
+                                    (it.notifications.count() - 1).toString()))
                 }
             }
         })
@@ -150,6 +161,8 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         checkpreSelect(intent)
+
+
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -173,7 +186,10 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
     }
 
     private fun checkStartArgsForNotification(intent: Intent?) {
+        Timber.e("checkStartArgsForNotification")
         if (intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) != 0) {
+            Timber.e("checkStartArgsForNotification, value = ${intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0)
+                    ?: 0}")
             val intentHashCode = intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) ?: 0
             val broadcasterIntent = Intent(NOTIFICATION_KEY)
             broadcasterIntent.putExtra(NOTIFICATION_KEY, intentHashCode)

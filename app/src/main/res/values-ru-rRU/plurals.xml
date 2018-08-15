@@ -16,6 +16,86 @@
         <item quantity="zero">Дней</item>
         <item quantity="other">Дней</item>
     </plurals>
+    <plurals name="other">
+        <item quantity="few">%s оценили</item>
+        <item quantity="many">%s оценили</item>
+        <item quantity="one">%s оценил</item>
+        <item quantity="two">%s оценили</item>
+        <item quantity="zero">%s оценили</item>
+        <item quantity="other">%s оценили</item>
+    </plurals>
+    <plurals name="negative_reacted">
+        <item quantity="few">%s негативно оценили</item>
+        <item quantity="many">%s негативно оценили</item>
+        <item quantity="one">%s негативно оценил</item>
+        <item quantity="two">%s негативно оценили</item>
+        <item quantity="zero">%s негативно оценили</item>
+        <item quantity="other">%s негативно оценили</item>
+    </plurals>
+
+    <plurals name="transfered">
+        <item quantity="few">%s перевели</item>
+        <item quantity="many">%s перевелии</item>
+        <item quantity="one">%s перевел</item>
+        <item quantity="two">%s перевели</item>
+        <item quantity="zero">%s перевели</item>
+        <item quantity="other">%s перевели</item>
+    </plurals>
+
+    <plurals name="answered">
+        <item quantity="few">%s ответили</item>
+        <item quantity="many">%s ответили</item>
+        <item quantity="one">%s ответил</item>
+        <item quantity="two">%s ответили</item>
+        <item quantity="zero">%s ответили</item>
+        <item quantity="other">%s ответили</item>
+    </plurals>
+
+    <plurals name="subscribed">
+        <item quantity="few">%%s подписались</item>
+        <item quantity="many">%s подписались</item>
+        <item quantity="one">%s подписался</item>
+        <item quantity="two">%s подписались</item>
+        <item quantity="zero">%s подписались</item>
+        <item quantity="other">%s подписались</item>
+    </plurals>
+
+    <plurals name="unsubscribed">
+        <item quantity="few">%%s отписались</item>
+        <item quantity="many">%s отписались</item>
+        <item quantity="one">%s отписался</item>
+        <item quantity="two">%s отписались</item>
+        <item quantity="zero">%s отписались</item>
+        <item quantity="other">%s отписались</item>
+    </plurals>
+
+    <plurals name="mentioned">
+        <item quantity="few">%%s упомянули</item>
+        <item quantity="many">%s упомянули</item>
+        <item quantity="one">%s упомянули</item>
+        <item quantity="two">%s упомянули</item>
+        <item quantity="zero">%s упомянули</item>
+        <item quantity="other">%s упомянули</item>
+    </plurals>
+
+    <plurals name="made_repost">
+        <item quantity="few">%s сделали</item>
+        <item quantity="many">%s сделали</item>
+        <item quantity="one">%s сделал</item>
+        <item quantity="two">%s сделали</item>
+        <item quantity="zero">%s сделали</item>
+        <item quantity="other">%s сделали</item>
+    </plurals>
+
+    <plurals name="voted_for_witness">
+        <item quantity="few">%s проголосовали</item>
+        <item quantity="many">%s проголосовали</item>
+        <item quantity="one">%s проголосовал</item>
+        <item quantity="two">%s проголосовали</item>
+        <item quantity="zero">%s проголосовали</item>
+        <item quantity="other">%s проголосовали</item>
+    </plurals>
+
     <plurals name="hours">
         <item quantity="few">Часа</item>
         <item quantity="many">Часов</item>
@@ -23,6 +103,15 @@
         <item quantity="two">Часа</item>
         <item quantity="zero">Часов</item>
         <item quantity="other">Часов</item>
+    </plurals>
+
+    <plurals name="canceled_vote_for_witness">
+        <item quantity="few">%s</item>
+        <item quantity="many">%s</item>
+        <item quantity="one">%s</item>
+        <item quantity="two">%s</item>
+        <item quantity="zero">%s</item>
+        <item quantity="other">%s</item>
     </plurals>
     <plurals name="subscription">
         <item quantity="few">Подписки</item>
@@ -73,11 +162,11 @@
         <item quantity="other">негативных реакций</item>
     </plurals>
     <plurals name="notifications" >
-        <item quantity="few">нотификации</item>
-        <item quantity="many">нотификаций</item>
-        <item quantity="one">нотификация</item>
-        <item quantity="two">нотификации</item>
-        <item quantity="zero">нотификаций</item>
-        <item quantity="other">нотификаций</item>
+        <item quantity="few">%s нотификации</item>
+        <item quantity="many">%s нотификаций</item>
+        <item quantity="one">%s нотификацию</item>
+        <item quantity="two">%s нотификации</item>
+        <item quantity="zero">%s нотификаций</item>
+        <item quantity="other">%s нотификаций</item>
     </plurals>
 </resources>

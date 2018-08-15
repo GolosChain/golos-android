@@ -18,10 +18,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
-import android.support.annotation.ColorRes
-import android.support.annotation.DimenRes
-import android.support.annotation.DrawableRes
-import android.support.annotation.LayoutRes
+import android.support.annotation.*
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -50,12 +47,12 @@ import eu.bittrade.libs.golosj.communication.CommunicationHandler
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
-import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.notifications.GolosCommentNotification
 import io.golos.golos.notifications.GolosDownVoteNotification
 import io.golos.golos.notifications.GolosUpVoteNotification
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -276,7 +273,7 @@ val Account.cover: String?
 
 public fun Context.getLayoutInflater(): LayoutInflater = LayoutInflater.from(this)
 
-public fun View.getLayoutInflater():LayoutInflater = context.getLayoutInflater()
+public fun View.getLayoutInflater(): LayoutInflater = context.getLayoutInflater()
 
 val Account.moto: String?
     get() {
@@ -425,6 +422,22 @@ fun Context.getVectorAsBitmap(@DrawableRes resId: Int): Bitmap {
 
 }
 
+fun Drawable.getVectorAsBitmap(): Bitmap {
+
+    var drawable = this
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        drawable = (DrawableCompat.wrap(this)).mutate()
+    }
+    val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth,
+            drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap);
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+
+    return bitmap
+
+}
+
 fun CommentOperation.getTags(): List<String> {
     val out = ArrayList<String>()
     try {
@@ -492,6 +505,8 @@ fun isOnMainThread(): Boolean {
     if (BuildConfig.DEBUG) return true
     return (Looper.getMainLooper() == Looper.myLooper())
 }
+
+public fun Context.getQuantityString(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any?) = resources.getQuantityString(id, quantity, *formatArgs)
 
 fun calculateShownReward(wrapper: StoryWrapper,
                          chosenCurrency: UserSettingsRepository.GolosCurrency = Repository.get.userSettingsRepository.getCurrency().value

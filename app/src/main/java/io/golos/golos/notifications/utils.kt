@@ -6,11 +6,11 @@ import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.rpcErrorFromCode
 
-private data class AuthSuccess(@JsonProperty("status") val status: String)
+private data class Success(@JsonProperty("status") val status: String)
 
 fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
     try {
-        val succes = mapper.convertValue<AuthSuccess>(result)
+        val succes = mapper.convertValue<Success>(result)
         return succes.status.equals("ok", true)
     } catch (e: Exception) {
         e.printStackTrace()
@@ -20,8 +20,8 @@ fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
 
 fun GolosServicesResponse.isPushSubscribeSuccesMessage(): Boolean {
     try {
-        val succes = mapper.convertValue<String>(result)
-        return succes.equals("ok", true)
+        val succes = mapper.convertValue<Success>(result)
+        return succes.status.equals("ok", true)
     } catch (e: Exception) {
         e.printStackTrace()
         return false

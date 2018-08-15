@@ -9,6 +9,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.iid.FirebaseInstanceIdService
 import com.google.firebase.messaging.FirebaseMessaging
 import io.golos.golos.App
+import timber.log.Timber
 
 
 /**
@@ -20,28 +21,40 @@ class MyInstanceIdService : FirebaseInstanceIdService() {
     override fun onTokenRefresh() {
         super.onTokenRefresh()
         val token = FirebaseInstanceId.getInstance().token
+        Timber.e("onTokenRefresh $token")
         FirebaseMessaging.getInstance().subscribeToTopic("all")
         FirebaseMessaging.getInstance().subscribeToTopic("all_android")
+
+        val oldToken = getOldToken()
+
+        PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("old_token", oldToken).commit()
         PreferenceManager.getDefaultSharedPreferences(baseContext).edit().putString("token", token).commit()
-        FCMTokenProviderImpl.setFcmToken(token ?: return)
+
+        FCMTokenProviderImpl.setFcmToken(FCMTokens(oldToken, token ?: return))
     }
+
+    private fun getOldToken(): String? =
+            PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", null)
 }
 
 interface FCMTokenProvider {
-    val onTokenChange: LiveData<String>
+    val onTokenChange: LiveData<FCMTokens>
 }
 
+data class FCMTokens(val oldToken: String?, val newToken: String)
+
 object FCMTokenProviderImpl : FCMTokenProvider {
-    private val mLiveData = MutableLiveData<String>()
+    private val mLiveData = MutableLiveData<FCMTokens>()
 
     init {
-        PreferenceManager
-                .getDefaultSharedPreferences(App.context)
-                .getString("token", null)
-                ?.let { mLiveData.value = it }
+        val token = PreferenceManager.getDefaultSharedPreferences(App.context).getString("token", null)
+        token?.let {
+            setFcmToken(FCMTokens(null, token))
+        }
     }
 
-    internal fun setFcmToken(token: String) {
+    internal fun setFcmToken(token: FCMTokens) {
+        Timber.e("setFcmToken $token")
         Handler(Looper.getMainLooper()).post {
             mLiveData.value = token
         }

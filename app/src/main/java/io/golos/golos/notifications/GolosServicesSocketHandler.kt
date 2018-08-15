@@ -62,6 +62,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
     override fun onMessage(message: String?) {
         println("onMessage message = $message")
+        Timber.e("onMessage message = $message")
         if (message?.contains("\"id\"") == true) {
             val id = mapper.readValue<IdentifiableImpl>(message).id
             val latch = mLatches[id]
@@ -73,8 +74,9 @@ class GolosServicesSocketHandler(private val gateUrl: String,
                 val golosServiceNotification = mapper.readValue<GolosServicesNotification>(message
                         ?: "")
                 onServiceNotification?.invoke(golosServiceNotification)
-            } catch (e: JsonParseException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
+                Timber.e(e)
             }
         }
     }
@@ -96,6 +98,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
         val messageString = mapper.writeValueAsString(messageToSend)
 
         println("sendMessage $messageString from ${Thread.currentThread().name}")
+        Timber.e("sendMessage $messageString")
 
         mSession?.basicRemote?.sendText(messageString)
 
