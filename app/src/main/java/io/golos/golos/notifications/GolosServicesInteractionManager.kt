@@ -85,7 +85,7 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
                                 communicationHandler.requestAuth()
                             }
                         } catch (e: GolosServicesException) {
-                            Timber.e("error$e")
+                            Timber.e("error $e")
                             if (e.getErrorType() == JsonRpcError.AUTH_ERROR) {
                                 if (authCounter.incrementAndGet() < 20)
                                     workerExecutor.execute { communicationHandler.requestAuth() }
@@ -111,6 +111,7 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
         if (!isAuthComplete) return
         workerExecutor.execute {
             val token = tokenProvider.onTokenChange.value ?: return@execute
+            Timber.i("token = $token")
             if (!needToSubscribeToPushes(token)) return@execute
             try {
                 val request = GolosPushSubscribeRequest(token.newToken)

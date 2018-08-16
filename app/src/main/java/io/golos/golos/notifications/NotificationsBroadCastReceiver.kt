@@ -11,9 +11,17 @@ const val NOTIFICATION_KEY = "io.golos.golos.notifications.NOTIFICATION_KEY"
 class NotificationsBroadCastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+
         if (intent.hasExtra(NOTIFICATION_KEY)) {
+
             val hashCode = intent.getIntExtra(NOTIFICATION_KEY, 0)
-            val notification = Repository.get.notificationsRepository.notifications.value?.notifications?.find { it.hashCode() == hashCode }
+
+            val notification = Repository
+                    .get
+                    .notificationsRepository
+                    .notifications
+                    .value?.notifications?.find { it.hashCode() == hashCode }
+            Timber.e("found = $notification")
             Repository.get.notificationsRepository.dismissNotification(notification ?: return)
         }
     }

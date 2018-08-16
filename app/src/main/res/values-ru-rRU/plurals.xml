@@ -19,7 +19,7 @@
     <plurals name="other">
         <item quantity="few">%s оценили</item>
         <item quantity="many">%s оценили</item>
-        <item quantity="one">%s оценил</item>
+        <item quantity="one">%s оценили</item>
         <item quantity="two">%s оценили</item>
         <item quantity="zero">%s оценили</item>
         <item quantity="other">%s оценили</item>
@@ -27,7 +27,7 @@
     <plurals name="negative_reacted">
         <item quantity="few">%s негативно оценили</item>
         <item quantity="many">%s негативно оценили</item>
-        <item quantity="one">%s негативно оценил</item>
+        <item quantity="one">%s негативно оценили</item>
         <item quantity="two">%s негативно оценили</item>
         <item quantity="zero">%s негативно оценили</item>
         <item quantity="other">%s негативно оценили</item>
@@ -35,8 +35,8 @@
 
     <plurals name="transfered">
         <item quantity="few">%s перевели</item>
-        <item quantity="many">%s перевелии</item>
-        <item quantity="one">%s перевел</item>
+        <item quantity="many">%s перевели</item>
+        <item quantity="one">%s перевели</item>
         <item quantity="two">%s перевели</item>
         <item quantity="zero">%s перевели</item>
         <item quantity="other">%s перевели</item>
@@ -45,16 +45,16 @@
     <plurals name="answered">
         <item quantity="few">%s ответили</item>
         <item quantity="many">%s ответили</item>
-        <item quantity="one">%s ответил</item>
+        <item quantity="one">%s ответили</item>
         <item quantity="two">%s ответили</item>
         <item quantity="zero">%s ответили</item>
         <item quantity="other">%s ответили</item>
     </plurals>
 
     <plurals name="subscribed">
-        <item quantity="few">%%s подписались</item>
+        <item quantity="few">%s подписались</item>
         <item quantity="many">%s подписались</item>
-        <item quantity="one">%s подписался</item>
+        <item quantity="one">%s подписались</item>
         <item quantity="two">%s подписались</item>
         <item quantity="zero">%s подписались</item>
         <item quantity="other">%s подписались</item>
@@ -63,7 +63,7 @@
     <plurals name="unsubscribed">
         <item quantity="few">%%s отписались</item>
         <item quantity="many">%s отписались</item>
-        <item quantity="one">%s отписался</item>
+        <item quantity="one">%s отписались</item>
         <item quantity="two">%s отписались</item>
         <item quantity="zero">%s отписались</item>
         <item quantity="other">%s отписались</item>
@@ -81,7 +81,7 @@
     <plurals name="made_repost">
         <item quantity="few">%s сделали</item>
         <item quantity="many">%s сделали</item>
-        <item quantity="one">%s сделал</item>
+        <item quantity="one">%s сделали</item>
         <item quantity="two">%s сделали</item>
         <item quantity="zero">%s сделали</item>
         <item quantity="other">%s сделали</item>
@@ -90,7 +90,7 @@
     <plurals name="voted_for_witness">
         <item quantity="few">%s проголосовали</item>
         <item quantity="many">%s проголосовали</item>
-        <item quantity="one">%s проголосовал</item>
+        <item quantity="one">%s проголосовали</item>
         <item quantity="two">%s проголосовали</item>
         <item quantity="zero">%s проголосовали</item>
         <item quantity="other">%s проголосовали</item>

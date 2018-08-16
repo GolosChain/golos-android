@@ -86,10 +86,10 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
         return mNotifications.value?.notifications?.filter {
             val settings = mRepository.userSettingsRepository.getNotificationsSettings().value
             when (it) {
-                is GolosUpVoteNotification -> settings?.showUpvoteNotifs ?: true
-                is GolosTransferNotification -> settings?.showTransferNotifs ?: true
-                is GolosCommentNotification -> settings?.showNewCommentNotifs ?: true
-                is GolosDownVoteNotification -> settings?.showUpvoteNotifs ?: true
+                is GolosUpVoteNotificationNew -> settings?.showUpvoteNotifs ?: true
+                is GolosTransferNotificationNew -> settings?.showTransferNotifs ?: true
+                is GolosCommentNotificationNew -> settings?.showNewCommentNotifs ?: true
+                is GolosDownVoteNotificationNew -> settings?.showUpvoteNotifs ?: true
                 else -> true
             }
 

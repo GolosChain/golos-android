@@ -47,9 +47,6 @@ import eu.bittrade.libs.golosj.communication.CommunicationHandler
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
-import io.golos.golos.notifications.GolosCommentNotification
-import io.golos.golos.notifications.GolosDownVoteNotification
-import io.golos.golos.notifications.GolosUpVoteNotification
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ExchangeValues
@@ -575,10 +572,6 @@ public fun ViewGroup.iterator(): Iterator<View> {
 fun AccountName?.isNullOrEmpty(): Boolean {
     return this?.name.isNullOrEmpty()
 }
-
-fun isCommentToPost(notification: GolosCommentNotification) = notification.commentNotification.parentDepth == 0
-fun isCommentToPost(notification: GolosDownVoteNotification) = notification.voteNotification.parentDepth == 0
-fun isCommentToPost(notification: GolosUpVoteNotification) = notification.voteNotification.parentDepth == 0
 
 public operator fun ViewGroup.get(position: Int) = if (position < childCount) getChildAt(position) else null
 /**

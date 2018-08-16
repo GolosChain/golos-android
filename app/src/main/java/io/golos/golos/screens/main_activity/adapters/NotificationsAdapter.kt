@@ -1,6 +1,5 @@
 package io.golos.golos.screens.main_activity.adapters
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -12,10 +11,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
-import io.golos.golos.notifications.*
+import io.golos.golos.notifications.GolosNotification
+import io.golos.golos.notifications.NotificationAppearanceManager
+import io.golos.golos.notifications.NotificationAppearanceManagerImpl
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosViewHolder
-import io.golos.golos.utils.*
+import io.golos.golos.utils.GolosMovementMethod
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 import timber.log.Timber
 
 
@@ -105,146 +108,27 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
                 val notification = value.notification
                 mImage.background = null
-                when (notification) {
-                    is GolosUpVoteNotification -> {
 
-                        val voteNotification = notification.voteNotification
-                        mText.maxLines = 2
-                        mTextLinearLo.setPadding(0, 0, 0, itemView.resources.getDimension(R.dimen.material_big).toInt())
-                        if (voteNotification.count > 1) {
+                val appearance = value.appearanceHandler.makeAppearance(notification)
+                mSecondaryImage.setViewGone()
 
-                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
-                            mTitle.setViewGone()
-                            mSecondaryImage.setViewGone()
-
-                            mImage.setImageResource(R.drawable.ic_like_40dp_white_on_blue)
-
-                            val textId = if (isCommentToPost(notification)) R.string.users_voted_on_post else R.string.users_voted_on_comment
-
-                            mText.text = itemView.resources.getString(textId,
-                                    "$siteUrl${voteNotification.parentUrl}",
-                                    voteNotification.count.toString(),
-                                    itemView.resources.getQuantityString(R.plurals.times, voteNotification.count)).toHtml()
-
-
-                        } else if (voteNotification.count == 1) {
-                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
-                            mTitle.setViewGone()
-                            setAvatar(voteNotification.from.avatar)
-                            val textId = if (isCommentToPost(notification)) R.string.user_voted_on_post else R.string.user_voted_on_comment
-
-                            val text = itemView.resources.getString(textId, voteNotification.from.name.capitalize(),
-                                    "$siteUrl${voteNotification.parentUrl}").toHtml()
-                            mText.text = text
-                        }
-                    }
-                    is GolosDownVoteNotification -> {
-                        mSecondaryImage.setViewGone()
-                        val voteNotification = notification.voteNotification
-                        mText.maxLines = 2
-                        mTextLinearLo.setPadding(0, 0, 0, itemView.resources.getDimension(R.dimen.material_big).toInt())
-                        if (voteNotification.count > 1) {
-
-                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
-                            mTitle.setViewGone()
-                            val textId = if (isCommentToPost(notification)) R.string.users_downvoted_on_post else R.string.users_downvoted_on_comment
-
-                            mImage.setImageResource(R.drawable.ic_downvote_white_on_blue_40dp)
-
-                            mText.text = itemView.resources.getString(textId,
-                                    "$siteUrl${voteNotification.parentUrl}",
-                                    Math.abs(voteNotification.count).toString(),
-                                    itemView.resources.getQuantityString(R.plurals.plural_for_downvoted, Math.abs(voteNotification.count))).toHtml()
-
-
-                        } else if (voteNotification.count == 1) {
-                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
-                            mTitle.setViewGone()
-
-                            setAvatar(voteNotification.from.avatar)
-
-                            val textId = if (isCommentToPost(notification)) R.string.user_downvoted_on_post else R.string.user_downvoted_on_comment
-
-                            val text = itemView.resources.getString(textId,
-                                    voteNotification.from.name.capitalize(),
-                                    "$siteUrl${voteNotification.parentUrl}").toHtml()
-                            mText.text = text
-                        }
-                    }
-                    is GolosTransferNotification -> {
-
-                        val transferNotification = notification.transferNotification
-                        mTextLinearLo.gravity = Gravity.TOP
-                        val title = itemView.resources.getString(R.string.transfer_income, transferNotification.from.name.capitalize()).toHtml()
-                        mTitle.text = title
-                        mTitle.setViewVisible()
-                        mText.maxLines = 1
-                        mTextLinearLo.setPadding(0, 0, 0, 0)
-
-                        mSecondaryImage.background = ContextCompat.getDrawable(itemView.context, R.drawable.shape_notifications_small_icon_back)
-
-                        mSecondaryImage.setImageResource(R.drawable.ic_coins_14dp)
-                        mSecondaryImage.setViewVisible()
-
-                        setAvatar(transferNotification.from.avatar)
-
-                        val text = itemView.resources.getString(R.string.user_transferred_you,
-                                transferNotification.amount)
-                        mText.text = text
-                    }
-                    is GolosCommentNotification -> {
-                        mSecondaryImage.background = ContextCompat.getDrawable(itemView.context, R.drawable.shape_notifications_small_icon_back)
-                        mSecondaryImage.setImageResource(if (isCommentToPost(notification)) R.drawable.ic_comment_small else R.drawable.ic_answer_on_comment)
-                        mSecondaryImage.setViewVisible()
-                        mTextLinearLo.setPadding(0, 0, 0, 0)
-                        mTextLinearLo.gravity = Gravity.TOP
-                        mTitle.setViewVisible()
-                        mTitle.text = notification.commentNotification.parentAuthor.capitalize()
-                        mText.maxLines = 1
-
-                        val commentNotification = notification.commentNotification
-                        setAvatar(commentNotification.author.avatar)
-                        val textId = if (isCommentToPost(notification)) R.string.user_answered_on_post else R.string.user_answered_on_comment
-                        val text = itemView.resources.getString(textId,
-                                commentNotification.author.name.capitalize(),
-                                "$siteUrl${commentNotification.parentUrl}").toHtml()
-
-                        mText.text = text
-                    }
-                    else -> {
-                        val appearance = value.appearanceHandler.makeAppearance(notification)
-                        mSecondaryImage.setViewGone()
-
-                        if (appearance.title != null) {
-                            mText.maxLines = 1
-                            mTitle.setViewVisible()
-                            mTextLinearLo.gravity = Gravity.TOP
-                            mTextLinearLo.setPadding(0, 0, 0, 0)
-                            mTitle.text = appearance.title
-                        } else {
-                            mText.maxLines = 2
-                            mTitle.setViewGone()
-                            mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
-                            mTextLinearLo.setPadding(0, 0, 0, 0)
-                        }
-                        mText.text = appearance.body
-                        mGlide.load(appearance.iconUrl).into(mImage)
-                    }
+                if (appearance.title != null) {
+                    mText.maxLines = 2
+                    mTitle.setViewVisible()
+                    mTextLinearLo.gravity = Gravity.TOP
+                    mTextLinearLo.setPadding(0, 0, 0, 0)
+                    mTitle.text = appearance.title
+                } else {
+                    mText.maxLines = 2
+                    mTitle.setViewGone()
+                    mTextLinearLo.gravity = Gravity.CENTER_VERTICAL
+                    mTextLinearLo.setPadding(0, 0, 0, 0)
                 }
-            }
+                mText.text = appearance.body
+                Timber.e("appearance = $appearance")
+                mImage.setImageResource(appearance.iconId)
 
-        private fun setAvatar(path: String?) {
-            mImage.setViewVisible()
-            if (path != null) {
-                mImage.scaleType = ImageView.ScaleType.CENTER_CROP
-                mGlide
-                        .load(ImageUriResolver.resolveImageWithSize(
-                                path,
-                                wantedwidth = mImage.width))
-                        .error(mGlide.load(itemView.getVectorDrawable(R.drawable.ic_person_gray_52dp)))
-                        .into(mImage)
-            } else mImage.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_person_gray_52dp))
-        }
+            }
     }
 }
 

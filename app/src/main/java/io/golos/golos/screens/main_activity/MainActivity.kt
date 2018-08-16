@@ -16,6 +16,7 @@ import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.NOTIFICATION_KEY
+import io.golos.golos.notifications.NotificationsBroadCastReceiver
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
@@ -27,7 +28,6 @@ import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
@@ -97,9 +97,10 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                 {
                     if (it is PostLinkable) {
                         it.getLink()?.let {
+
                             StoryActivity.start(this, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
-                        mHandler.postDelayed({ Repository.get.notificationsRepository.dismissNotification(it) }, 1000)
+                        mHandler.post({ Repository.get.notificationsRepository.dismissNotification(it) })
                     } else {
                         mHandler.post { Repository.get.notificationsRepository.dismissNotification(it) }
                     }
@@ -186,12 +187,11 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
     }
 
     private fun checkStartArgsForNotification(intent: Intent?) {
-        Timber.e("checkStartArgsForNotification")
+
         if (intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) != 0) {
-            Timber.e("checkStartArgsForNotification, value = ${intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0)
-                    ?: 0}")
+
             val intentHashCode = intent?.getIntExtra(STARTED_FROM_NOTIFICATION, 0) ?: 0
-            val broadcasterIntent = Intent(NOTIFICATION_KEY)
+            val broadcasterIntent = Intent(this, NotificationsBroadCastReceiver::class.java)
             broadcasterIntent.putExtra(NOTIFICATION_KEY, intentHashCode)
             sendBroadcast(broadcasterIntent)
         }

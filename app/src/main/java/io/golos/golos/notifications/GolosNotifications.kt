@@ -1,27 +1,25 @@
 package io.golos.golos.notifications
 
-import io.golos.golos.model.*
 import io.golos.golos.repository.Repository
 import java.util.*
 
 sealed class GolosNotification(open val numberOfSameType: Int = 0) {
-   abstract val id: String
-
+    abstract val id: String
 
 
     companion object {
         fun fromNotification(notification: NotificationNew): GolosNotification {
             return when (notification) {
                 is VoteNotificationNew -> GolosUpVoteNotificationNew(notification.permlink, notification.voter, notification.counter)
-                is ReplyNotificationNew -> GolosCommentNotificationNew(notification.permlink, notification.parentPermlink, notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is TransferNotificationNew -> GolosTransferNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.amount, notification.counter)
+                is ReplyNotificationNew -> GolosCommentNotificationNew(notification.permlink, notification.author, notification.counter)
+                is TransferNotificationNew -> GolosTransferNotificationNew(notification.from, notification.amount.toString().plus(" GOLOS"), notification.counter)
                 is FlagNotificationNew -> GolosDownVoteNotificationNew(notification.permlink, notification.voter, notification.counter)
-                is SubscribeNotificationNew -> GolosSubscribeNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is UnSubscribeNotificationNew -> GolosUnSubscribeNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is MentionNotificationNew -> GolosMentionNotificationNew(notification.permlink, notification.parentPermlink, notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is WitnessVoteNotificationNew -> GolosWitnessVoteNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is WitnessCancelVoteNotificationNew -> WitnessCancelVoteGolosNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.counter)
-                is RepostNotificationNew -> GolosRepostNotificationNew(notification.fromUsers.firstOrNull().orEmpty(), notification.permlink, notification.counter)
+                is SubscribeNotificationNew -> GolosSubscribeNotificationNew(notification.follower, notification.counter)
+                is UnSubscribeNotificationNew -> GolosUnSubscribeNotificationNew(notification.follower, notification.counter)
+                is MentionNotificationNew -> GolosMentionNotificationNew(notification.permlink, notification.author, notification.counter)
+                is WitnessVoteNotificationNew -> GolosWitnessVoteNotificationNew(notification.voter, notification.counter)
+                is WitnessCancelVoteNotificationNew -> WitnessCancelVoteGolosNotificationNew(notification.voter, notification.counter)
+                is RepostNotificationNew -> GolosRepostNotificationNew(notification.reposter, notification.permlink, notification.counter)
             }
         }
     }
@@ -44,9 +42,9 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
 }
 
 class GolosRepostNotificationNew(val fromUser: String,
-                                      val permlink: String,
-                                      override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
-    override fun getLink() = permlink.extractLink()
+                                 val permlink: String,
+                                 override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
+    override fun getLink() = permlink.extractLinkFromNew()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosRepostNotificationNew) return false
@@ -74,7 +72,7 @@ class GolosRepostNotificationNew(val fromUser: String,
 
 }
 
-class WitnessCancelVoteGolosNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification(){
+class WitnessCancelVoteGolosNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -98,7 +96,7 @@ class WitnessCancelVoteGolosNotificationNew(val fromUser: String, override val n
 
 }
 
-class GolosWitnessVoteNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification(){
+class GolosWitnessVoteNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -122,27 +120,18 @@ class GolosWitnessVoteNotificationNew(val fromUser: String, override val numberO
 
 }
 
-class GolosMentionNotificationNew(val permlink: String, val parentPermlink: String,
-                                       val fromUser: String, override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
-    fun parentUrlCleared(): String {
-        val strings = permlink.split("#")
+class GolosMentionNotificationNew(val permlink: String,
+                                  val fromUser: String,
+                                  override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
 
-        if (strings.size < 2) return parentPermlink
-        val secondPart = strings[1]
-        val pathParts = permlink.split("/")
-        if (pathParts.size < 2) return parentPermlink
-        val out = "/${pathParts[1]}/$secondPart"
-        return out
-    }
+    override fun getLink() = PostLinkExtractedData(fromUser, null, permlink)
 
-    override fun getLink() = parentUrlCleared().extractLink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosMentionNotificationNew) return false
         if (!super.equals(other)) return false
 
         if (permlink != other.permlink) return false
-        if (parentPermlink != other.parentPermlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
         if (id != other.id) return false
@@ -153,18 +142,18 @@ class GolosMentionNotificationNew(val permlink: String, val parentPermlink: Stri
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + permlink.hashCode()
-        result = 31 * result + parentPermlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
         result = 31 * result + id.hashCode()
         return result
     }
 
+
     override val id: String = UUID.randomUUID().toString()
 
 }
 
-class GolosSubscribeNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification(){
+class GolosSubscribeNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -188,7 +177,8 @@ class GolosSubscribeNotificationNew(val fromUser: String, override val numberOfS
 
 
 }
-class GolosUnSubscribeNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification(){
+
+class GolosUnSubscribeNotificationNew(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -213,7 +203,7 @@ class GolosUnSubscribeNotificationNew(val fromUser: String, override val numberO
 }
 
 class GolosUpVoteNotificationNew(val permlink: String, val fromUser: String, override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
-    override fun getLink() = permlink.extractLink()
+    override fun getLink() = permlink.extractLinkFromNew()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosUpVoteNotificationNew) return false
@@ -240,64 +230,12 @@ class GolosUpVoteNotificationNew(val permlink: String, val fromUser: String, ove
 
 }
 
-class GolosUpVoteNotification(val voteNotification: VoteNotification) : GolosNotification(), PostLinkable {
-    override val id: String = UUID.randomUUID().toString()
-    override fun getLink() = voteNotification.parentUrl.extractLink()
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is GolosUpVoteNotification) return false
-        if (!super.equals(other)) return false
-
-        if (voteNotification != other.voteNotification) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + voteNotification.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-
-}
-
-private fun String.extractLink(): PostLinkExtractedData? {
-    val parts = this.split("/")
-    return if (parts.size == 4) {
-        return PostLinkExtractedData(parts[2].substring(1), parts[1], parts[3])
-    } else null
-}
 
 private fun String.extractLinkFromNew(): PostLinkExtractedData? {
     return PostLinkExtractedData(Repository.get.appUserData.value?.userName
             ?: return null, null, this)
 }
 
-class GolosDownVoteNotification(val voteNotification: DownVoteNotification) : GolosNotification(), PostLinkable {
-    override val id: String = UUID.randomUUID().toString()
-    override fun getLink() = voteNotification.parentUrl.extractLinkFromNew()
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is GolosDownVoteNotification) return false
-        if (!super.equals(other)) return false
-
-        if (voteNotification != other.voteNotification) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + voteNotification.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-}
 
 class GolosDownVoteNotificationNew(val permlink: String,
                                    val fromUser: String,
@@ -328,63 +266,21 @@ class GolosDownVoteNotificationNew(val permlink: String,
 }
 
 
-class GolosCommentNotification(val commentNotification: CommentNotification) : GolosNotification(), PostLinkable {
-    override val id: String = UUID.randomUUID().toString()
-    fun parentUrlCleared(): String {
-        val strings = commentNotification.commentUrl.split("#")
-
-        if (strings.size < 2) return commentNotification.parentUrl
-        val secondPart = strings[1]
-        val pathParts = commentNotification.commentUrl.split("/")
-        if (pathParts.size < 2) return commentNotification.parentUrl
-        val out = "/${pathParts[1]}/$secondPart"
-        return out
-    }
-
-    override fun getLink() = parentUrlCleared().extractLink()
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is GolosCommentNotification) return false
-        if (!super.equals(other)) return false
-
-        if (commentNotification != other.commentNotification) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + commentNotification.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-}
-
-class GolosCommentNotificationNew(val permlink: String, val parentPermlink: String, val fromUser: String, override val numberOfSameType: Int) :
+class GolosCommentNotificationNew(val permlink: String,
+                                  val fromUser: String,
+                                  override val numberOfSameType: Int) :
 
         GolosNotification(), PostLinkable {
-    fun parentUrlCleared(): String {
-        val strings = permlink.split("#")
 
-        if (strings.size < 2) return parentPermlink
-        val secondPart = strings[1]
-        val pathParts = permlink.split("/")
-        if (pathParts.size < 2) return parentPermlink
-        val out = "/${pathParts[1]}/$secondPart"
-        return out
-    }
     override val id: String = UUID.randomUUID().toString()
 
-    override fun getLink() = parentUrlCleared().extractLink()
+    override fun getLink() = PostLinkExtractedData(fromUser, null, permlink)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosCommentNotificationNew) return false
         if (!super.equals(other)) return false
 
         if (permlink != other.permlink) return false
-        if (parentPermlink != other.parentPermlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
         if (id != other.id) return false
@@ -395,7 +291,6 @@ class GolosCommentNotificationNew(val permlink: String, val parentPermlink: Stri
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + permlink.hashCode()
-        result = 31 * result + parentPermlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
         result = 31 * result + id.hashCode()
@@ -406,29 +301,7 @@ class GolosCommentNotificationNew(val permlink: String, val parentPermlink: Stri
 }
 
 
-class GolosTransferNotification(val transferNotification: TransferNotification) : GolosNotification(){
-    override val id: String = UUID.randomUUID().toString()
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is GolosTransferNotification) return false
-        if (!super.equals(other)) return false
-
-        if (transferNotification != other.transferNotification) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + transferNotification.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-}
-
-class GolosTransferNotificationNew(val fromUser: String, val amount: String, override val numberOfSameType: Int) : GolosNotification(){
+class GolosTransferNotificationNew(val fromUser: String, val amount: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

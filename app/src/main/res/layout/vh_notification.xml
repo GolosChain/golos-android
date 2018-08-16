@@ -23,10 +23,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="@dimen/margin_material"
+        android:layout_marginBottom="@dimen/margin_material_small"
         android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
-        android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginTop="@dimen/margin_material_small"
         android:layout_toEndOf="@id/image_iv"
         android:layout_toStartOf="@+id/cancel_ibtn"
         android:background="?selectableItemBackgroundBorderless"
@@ -45,18 +45,18 @@
             android:textSize="@dimen/font_medium"
             android:textStyle="bold"
 
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <TextView
 
             android:id="@+id/text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
 
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="sdgsdgsdgsdgsdsgdsdgggsdg "
+            android:text="sdgsdgsdgsdgsdsgdsdgggsdg sdggsdgsdgsgdsgdsgdsdg "
             android:textColor="@color/notification_text_color" />
     </LinearLayout>
 

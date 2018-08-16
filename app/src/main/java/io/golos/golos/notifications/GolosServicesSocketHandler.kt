@@ -3,7 +3,6 @@ package io.golos.golos.notifications
 import android.support.annotation.WorkerThread
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.golosj.communication.CommunicationHandler.getObjectMapper
@@ -62,7 +61,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
     override fun onMessage(message: String?) {
         println("onMessage message = $message")
-        Timber.e("onMessage message = $message")
+
         if (message?.contains("\"id\"") == true) {
             val id = mapper.readValue<IdentifiableImpl>(message).id
             val latch = mLatches[id]
@@ -98,7 +97,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
         val messageString = mapper.writeValueAsString(messageToSend)
 
         println("sendMessage $messageString from ${Thread.currentThread().name}")
-        Timber.e("sendMessage $messageString")
+
 
         mSession?.basicRemote?.sendText(messageString)
 

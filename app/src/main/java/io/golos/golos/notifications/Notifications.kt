@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 
 sealed class NotificationNew(@JsonProperty(value = "eventType") val eventType: String,
-                             @JsonProperty(value = "counter") val counter: Int = 0)
+                             @JsonProperty(value = "counter") val counter: Int = 1)
 
 data class VoteNotificationNew(@JsonProperty("permlink") val permlink: String,
                                @JsonProperty("voter") val voter: String) : NotificationNew("vote")
@@ -26,24 +26,22 @@ data class VoteNotificationNew(@JsonProperty("permlink") val permlink: String,
 data class FlagNotificationNew(@JsonProperty("permlink") val permlink: String,
                                @JsonProperty("voter") val voter: String) : NotificationNew("flag")
 
-data class TransferNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>,
-                                   @JsonProperty("amount") val amount: String) : NotificationNew("transfer")
+data class TransferNotificationNew(@JsonProperty("from") val from: String,
+                                   @JsonProperty("amount") val amount: Double) : NotificationNew("transfer")
 
 data class ReplyNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                @JsonProperty("parentPermlink") val parentPermlink: String,
-                                @JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("reply")
+                                @JsonProperty("author") val author: String) : NotificationNew("reply")
 
-data class SubscribeNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("subscribe")
+data class SubscribeNotificationNew(@JsonProperty("follower") val follower: String) : NotificationNew("subscribe")
 
-data class UnSubscribeNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("unsubscribe")
+data class UnSubscribeNotificationNew(@JsonProperty("follower") val follower: String) : NotificationNew("unsubscribe")
 
 data class MentionNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                  @JsonProperty("parentPermlink") val parentPermlink: String,
-                                  @JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("mention")
+                                  @JsonProperty("author") val author: String) : NotificationNew("mention")
 
 data class RepostNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                 @JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("repost")
+                                 @JsonProperty("reposter") val reposter: String) : NotificationNew("repost")
 
-data class WitnessVoteNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("witnessVote")
+data class WitnessVoteNotificationNew(@JsonProperty("voter") val voter: String) : NotificationNew("witnessVote")
 
-data class WitnessCancelVoteNotificationNew(@JsonProperty("fromUsers") val fromUsers: List<String>) : NotificationNew("witnessCancelVote")
+data class WitnessCancelVoteNotificationNew(@JsonProperty("voter") val voter: String) : NotificationNew("witnessCancelVote")

@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -16,9 +15,6 @@ import android.support.multidex.MultiDexApplication
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatDelegate
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
@@ -152,20 +148,13 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                                     FeedType.UNCLASSIFIED, null), dismissIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                 }
                 val appearance = NotificationAppearanceManagerImpl.makeAppearance(notification)
-                Glide.with(this).load(appearance.iconUrl).into(object : SimpleTarget<Drawable>() {
-                    override fun onResourceReady(p0: Drawable?, p1: Transition<in Drawable>?) {
-                        val bitmap = p0?.getVectorAsBitmap()
-
-                        Handler(Looper.getMainLooper()).post {
-                            builder.setContentText(appearance.body)
-                                    .setLargeIcon(bitmap)
-                                    .setContentTitle(appearance.title)
-
-                            if (appearance.title != null) builder.setContentTitle(appearance.title)
-                            notificationManager.notify(notifId, builder.build())
-                        }
-                    }
-                })
+                Handler(Looper.getMainLooper()).post {
+                    builder.setContentText(appearance.body)
+                            .setLargeIcon(getVectorAsBitmap(appearance.iconId))
+                            .setContentTitle(appearance.title)
+                    if (appearance.title != null) builder.setContentTitle(appearance.title)
+                    notificationManager.notify(notifId, builder.build())
+                }
 
             } else if (getLifeCycleLiveData().value != LifeCycleEvent.APP_IN_BACKGROUND) {
                 notificationManager.cancelAll()
