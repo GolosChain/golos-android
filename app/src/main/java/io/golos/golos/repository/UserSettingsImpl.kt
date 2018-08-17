@@ -24,7 +24,17 @@ internal class UserSettingsImpl : UserSettingsRepository {
 
         val notificainsSerialized: String? = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("notifications_settings", null)
         mNotificationsSettings.value = if (notificainsSerialized != null) mapper.readValue(notificainsSerialized, NotificationsDisplaySetting::class.java)
-        else NotificationsDisplaySetting(false, false, true, true)
+        else NotificationsDisplaySetting(false,
+                false,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true)
 
         val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)
 

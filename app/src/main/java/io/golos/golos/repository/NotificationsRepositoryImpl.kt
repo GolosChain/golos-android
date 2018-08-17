@@ -10,7 +10,6 @@ import io.golos.golos.repository.model.NotificationTopicSubscription
 import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.utils.toArrayList
-import timber.log.Timber
 
 interface NotificationsRepository {
     val notifications: LiveData<GolosNotifications>
@@ -86,11 +85,16 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
         return mNotifications.value?.notifications?.filter {
             val settings = mRepository.userSettingsRepository.getNotificationsSettings().value
             when (it) {
-                is GolosUpVoteNotificationNew -> settings?.showUpvoteNotifs ?: true
-                is GolosTransferNotificationNew -> settings?.showTransferNotifs ?: true
-                is GolosCommentNotificationNew -> settings?.showNewCommentNotifs ?: true
-                is GolosDownVoteNotificationNew -> settings?.showUpvoteNotifs ?: true
-                else -> true
+                is GolosUpVoteNotification -> settings?.showUpvoteNotifs ?: true
+                is GolosTransferNotification -> settings?.showTransferNotifs ?: true
+                is GolosCommentNotification -> settings?.showNewCommentNotifs ?: true
+                is GolosDownVoteNotification -> settings?.showFlagNotifs ?: true
+                is GolosSubscribeNotification -> settings?.showSubscribeNotifs ?: true
+                is GolosUnSubscribeNotification -> settings?.showUnSubscribeNotifs ?: true
+                is GolosMentionNotification -> settings?.showMentions ?: true
+                is GolosWitnessVoteNotification -> settings?.showWitnessVote ?: true
+                is WitnessCancelVoteGolosNotification -> settings?.showWitnessCancelVote ?: true
+                is GolosRepostNotification -> settings?.showReblog ?: true
             }
 
         } ?: listOf()

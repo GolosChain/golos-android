@@ -222,6 +222,12 @@
     <string name="user_reposted_several">@%s and %s have reposted your post</string>
     <string name="user_voted_for_you_several">@%s and %s voted for you as delegates</string>
     <string name="user_canceled_vote_for_you_several">@%s and %s removed their voices from your delegate node</string>
+    <string name="flag">Flag</string>
+    <string name="subscribe_on_blog">Subscribe on blog</string>
+    <string name="unsubscribe_from_blog">Unsubscribe from blog</string>
+    <string name="reblog">Reblog</string>
+    <string name="witness_vote">Vote for witness</string>
+    <string name="witness_cancel_vote">Cancel of witness vote</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

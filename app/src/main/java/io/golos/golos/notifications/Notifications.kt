@@ -42,6 +42,6 @@ data class MentionNotificationNew(@JsonProperty("permlink") val permlink: String
 data class RepostNotificationNew(@JsonProperty("permlink") val permlink: String,
                                  @JsonProperty("reposter") val reposter: String) : NotificationNew("repost")
 
-data class WitnessVoteNotificationNew(@JsonProperty("voter") val voter: String) : NotificationNew("witnessVote")
+data class WitnessVoteNotificationNew(@JsonProperty("from") val from: String) : NotificationNew("witnessVote")
 
-data class WitnessCancelVoteNotificationNew(@JsonProperty("voter") val voter: String) : NotificationNew("witnessCancelVote")
+data class WitnessCancelVoteNotificationNew(@JsonProperty("from") val from: String) : NotificationNew("witnessCancelVote")

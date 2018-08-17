@@ -1,18 +1,65 @@
 package io.golos.golos.repository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class NotificationsDisplaySetting(
         @JsonProperty("playSoundWhenAppStopped")
         val playSoundWhenAppStopped: Boolean,
         @JsonProperty("showUpvoteNotifs")
         val showUpvoteNotifs: Boolean,
+        @JsonProperty("showFlagNotifs")
+        val showFlagNotifs: Boolean,
         @JsonProperty("showNewCommentNotifs")
         val showNewCommentNotifs: Boolean,
         @JsonProperty("showTransferNotifs")
-        val showTransferNotifs: Boolean) {
+        val showTransferNotifs: Boolean,
+        @JsonProperty("showSubscribeNotifs")
+        val showSubscribeNotifs: Boolean,
+        @JsonProperty("showUnSubscribeNotifs")
+        val showUnSubscribeNotifs: Boolean,
+        @JsonProperty("showMentions")
+        val showMentions: Boolean,
+        @JsonProperty("showReblog")
+        val showReblog: Boolean,
+        @JsonProperty("showWitnessVote")
+        val showWitnessVote: Boolean,
+        @JsonProperty("showWitnessCancelVote")
+        val showWitnessCancelVote: Boolean) {
+
+    private fun createNew(
+            playSoundWhenAppStopped: Boolean = this.playSoundWhenAppStopped,
+            showUpvoteNotifs: Boolean = this.showUpvoteNotifs,
+            showFlagNotifs: Boolean = this.showFlagNotifs,
+            showNewCommentNotifs: Boolean = this.showNewCommentNotifs,
+            showTransferNotifs: Boolean = this.showTransferNotifs,
+            showSubscribeNotifs: Boolean = this.showSubscribeNotifs,
+            showUnSubscribeNotifs: Boolean = this.showUnSubscribeNotifs,
+            showMentions: Boolean = this.showMentions,
+            showReblog: Boolean = this.showReblog,
+            showWitnessVote: Boolean = this.showWitnessVote,
+            showWitnessCancelVote: Boolean = this.showWitnessCancelVote): NotificationsDisplaySetting {
+
+        return NotificationsDisplaySetting(playSoundWhenAppStopped, showUpvoteNotifs, showFlagNotifs,
+                showNewCommentNotifs, showTransferNotifs, showSubscribeNotifs, showUnSubscribeNotifs,
+                showMentions, showReblog, showWitnessVote, showWitnessCancelVote)
+    }
+
+
+    fun setPLaySound(play: Boolean) = createNew(playSoundWhenAppStopped = play)
+    fun setShowUpvoteNotifs(show: Boolean) = createNew(showUpvoteNotifs = show)
+    fun setShowFlags(show: Boolean) = createNew(showFlagNotifs = show)
+    fun setShowNewCommentNotifs(show: Boolean) = createNew(showNewCommentNotifs = show)
+    fun setShowTransferNotifs(show: Boolean) = createNew(showTransferNotifs = show)
+    fun setShowSubscribeNotifs(show: Boolean) = createNew(showSubscribeNotifs = show)
+    fun setShowUnSubscribeNotifs(show: Boolean) = createNew(showUnSubscribeNotifs = show)
+    fun setShowMentionsNotifs(show: Boolean) = createNew(showMentions = show)
+    fun setShowReblogNotifs(show: Boolean) = createNew(showReblog = show)
+    fun setShowWitnessVote(show: Boolean) = createNew(showWitnessVote = show)
+    fun setShowWitnessCancelVote(show: Boolean) = createNew(showWitnessCancelVote = show)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -20,35 +67,38 @@ class NotificationsDisplaySetting(
 
         if (playSoundWhenAppStopped != other.playSoundWhenAppStopped) return false
         if (showUpvoteNotifs != other.showUpvoteNotifs) return false
+        if (showFlagNotifs != other.showFlagNotifs) return false
         if (showNewCommentNotifs != other.showNewCommentNotifs) return false
         if (showTransferNotifs != other.showTransferNotifs) return false
+        if (showSubscribeNotifs != other.showSubscribeNotifs) return false
+        if (showUnSubscribeNotifs != other.showUnSubscribeNotifs) return false
+        if (showMentions != other.showMentions) return false
+        if (showReblog != other.showReblog) return false
+        if (showWitnessVote != other.showWitnessVote) return false
+        if (showWitnessCancelVote != other.showWitnessCancelVote) return false
 
         return true
     }
 
-
-
-    fun setPLaySound(play: Boolean) = if (play == playSoundWhenAppStopped)
-        this else NotificationsDisplaySetting(play, showUpvoteNotifs, showNewCommentNotifs, showTransferNotifs)
-
-    fun setShowUpvoteNotifs(show: Boolean) = if (show == showUpvoteNotifs)
-        this else NotificationsDisplaySetting(playSoundWhenAppStopped, show, showNewCommentNotifs, showTransferNotifs)
-
-    fun setShowNewCommentNotifs(show: Boolean) = if (show == showNewCommentNotifs)
-        this else NotificationsDisplaySetting(playSoundWhenAppStopped, showUpvoteNotifs, show, showTransferNotifs)
-
-    fun setShowTransferNotifss(show: Boolean) = if (show == showTransferNotifs)
-        this else NotificationsDisplaySetting(playSoundWhenAppStopped, showUpvoteNotifs, showNewCommentNotifs, show)
-
     override fun hashCode(): Int {
         var result = playSoundWhenAppStopped.hashCode()
         result = 31 * result + showUpvoteNotifs.hashCode()
+        result = 31 * result + showFlagNotifs.hashCode()
         result = 31 * result + showNewCommentNotifs.hashCode()
         result = 31 * result + showTransferNotifs.hashCode()
+        result = 31 * result + showSubscribeNotifs.hashCode()
+        result = 31 * result + showUnSubscribeNotifs.hashCode()
+        result = 31 * result + showMentions.hashCode()
+        result = 31 * result + showReblog.hashCode()
+        result = 31 * result + showWitnessVote.hashCode()
+        result = 31 * result + showWitnessCancelVote.hashCode()
         return result
     }
 
+
     override fun toString(): String {
-        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, showUpvoteNotifs=$showUpvoteNotifs, showNewCommentNotifs=$showNewCommentNotifs, showTransferNotifs=$showTransferNotifs)"
+        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, showUpvoteNotifs=$showUpvoteNotifs, showFlagNotifs=$showFlagNotifs, showNewCommentNotifs=$showNewCommentNotifs, showTransferNotifs=$showTransferNotifs, showSubscribeNotifs=$showSubscribeNotifs, showUnSubscribeNotifs=$showUnSubscribeNotifs, showMentions=$showMentions, showReblog=$showReblog, showWitnessVote=$showWitnessVote, showWitnessCancelVote=$showWitnessCancelVote)"
     }
+
+
 }

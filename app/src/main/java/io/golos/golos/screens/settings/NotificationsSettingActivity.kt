@@ -22,7 +22,15 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                     .setTitle(titleId = R.string.mention)
                     .setSwitch(NotificationSettings.SHOW_UPVOTE, R.string.upvote, t.showUpvoteNotifs)
                     .setSwitch(NotificationSettings.SHOW_TRANSFER, R.string.transfer, t.showTransferNotifs)
+                    .setSwitch(NotificationSettings.SHOW_FLAG, R.string.flag, t.showFlagNotifs)
                     .setSwitch(NotificationSettings.SHOW_NEW_COMMENT, R.string.new_comment, t.showNewCommentNotifs)
+                    .setSwitch(NotificationSettings.SUBSCRIBE_ON_BLOG, R.string.subscribe_on_blog, t.showSubscribeNotifs)
+                    .setSwitch(NotificationSettings.UNSUBSCRIBE_FROM_BLOG, R.string.unsubscribe_from_blog, t.showUnSubscribeNotifs)
+                    .setSwitch(NotificationSettings.MENTIONS, R.string.mention, t.showMentions)
+                    .setSwitch(NotificationSettings.REBLOG, R.string.reblog, t.showReblog)
+                    .setSwitch(NotificationSettings.WITNESS_VOTE, R.string.witness_vote, t.showWitnessVote)
+                    .setSwitch(NotificationSettings.WITNESS_CANCEL, R.string.witness_cancel_vote, t.showWitnessCancelVote)
+
                     .build({ id, oldValue, newValue ->
                         val settings = Repository.get.userSettingsRepository.getNotificationsSettings().value
                                 ?: t
@@ -32,7 +40,14 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                                 NotificationSettings.PLAY_SOUND -> notifSettingsRepo.setNotificationSettings(settings.setPLaySound(newValue))
                                 NotificationSettings.SHOW_UPVOTE -> notifSettingsRepo.setNotificationSettings(settings.setShowUpvoteNotifs(newValue))
                                 NotificationSettings.SHOW_NEW_COMMENT -> notifSettingsRepo.setNotificationSettings(settings.setShowNewCommentNotifs(newValue))
-                                NotificationSettings.SHOW_TRANSFER -> notifSettingsRepo.setNotificationSettings(settings.setShowTransferNotifss(newValue))
+                                NotificationSettings.SHOW_TRANSFER -> notifSettingsRepo.setNotificationSettings(settings.setShowTransferNotifs(newValue))
+                                NotificationSettings.SHOW_FLAG -> notifSettingsRepo.setNotificationSettings(settings.setShowFlags(newValue))
+                                NotificationSettings.SUBSCRIBE_ON_BLOG -> notifSettingsRepo.setNotificationSettings(settings.setShowSubscribeNotifs(newValue))
+                                NotificationSettings.UNSUBSCRIBE_FROM_BLOG -> notifSettingsRepo.setNotificationSettings(settings.setShowUnSubscribeNotifs(newValue))
+                                NotificationSettings.MENTIONS -> notifSettingsRepo.setNotificationSettings(settings.setShowMentionsNotifs(newValue))
+                                NotificationSettings.REBLOG -> notifSettingsRepo.setNotificationSettings(settings.setShowReblogNotifs(newValue))
+                                NotificationSettings.WITNESS_VOTE -> notifSettingsRepo.setNotificationSettings(settings.setShowWitnessVote(newValue))
+                                NotificationSettings.WITNESS_CANCEL -> notifSettingsRepo.setNotificationSettings(settings.setShowWitnessCancelVote(newValue))
                             }
                         }
                     })
@@ -40,7 +55,8 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
     }
 
     enum class NotificationSettings {
-        SHOW_UPVOTE, SHOW_TRANSFER, SHOW_NEW_COMMENT, PLAY_SOUND
+        SHOW_UPVOTE, SHOW_FLAG, SHOW_TRANSFER, SHOW_NEW_COMMENT, PLAY_SOUND, SUBSCRIBE_ON_BLOG,
+        UNSUBSCRIBE_FROM_BLOG, MENTIONS, REBLOG, WITNESS_VOTE, WITNESS_CANCEL
     }
 
 

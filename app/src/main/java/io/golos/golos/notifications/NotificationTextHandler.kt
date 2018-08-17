@@ -59,7 +59,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
 
 
         return when (golosNotification) {
-            is GolosUpVoteNotificationNew -> {
+            is GolosUpVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.userr_voted, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.userr_voted]}")
                 else context.getString(R.string.userr_voted_several, golosNotification.fromUser,
@@ -67,7 +67,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         .plus(" ${mEmojisMap[R.string.userr_voted_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_like_40dp_white_on_blue)
             }
-            is GolosDownVoteNotificationNew -> {
+            is GolosDownVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_downvoted, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_downvoted]}")
                 else context.getString(R.string.user_downvoted_several, golosNotification.fromUser,
@@ -75,7 +75,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         .plus(" ${mEmojisMap[R.string.user_downvoted_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_downvote_white_on_blue_40dp)
             }
-            is GolosTransferNotificationNew -> {
+            is GolosTransferNotification -> {
                 val title = context.getString(R.string.transfer_title)
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_transfered, golosNotification.fromUser, golosNotification.amount)
                         .plus(" ${mEmojisMap[R.string.user_transfered]}")
@@ -86,7 +86,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
 
                 return NotificationAppearance(title = title, body = text, iconId = R.drawable.ic_thank_w)
             }
-            is GolosCommentNotificationNew -> {
+            is GolosCommentNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_replied, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_replied]}")
                 else context.getString(R.string.user_replied_several, golosNotification.fromUser,
@@ -96,7 +96,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         body = text
                         , iconId = R.drawable.ic_message_w_40dp)
             }
-            is GolosSubscribeNotificationNew -> {
+            is GolosSubscribeNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_subscribed, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_subscribed]}")
                 else context.getString(R.string.user_subscribed_several, golosNotification.fromUser,
@@ -104,7 +104,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         .plus(" ${mEmojisMap[R.string.user_subscribed_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_subscribe_w_40dp)
             }
-            is GolosUnSubscribeNotificationNew -> {
+            is GolosUnSubscribeNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_unsubscribed, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_unsubscribed]}")
                 else context.getString(R.string.user_unsubscribed_several,
@@ -113,7 +113,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         .plus(" ${mEmojisMap[R.string.user_unsubscribed_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_unsubscribe_w_40dp)
             }
-            is GolosMentionNotificationNew -> {
+            is GolosMentionNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_mentioned, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_mentioned]}")
                 else context.getString(R.string.user_mentioned_several, golosNotification.fromUser,
@@ -123,7 +123,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
                         .plus(" ${mEmojisMap[R.string.user_mentioned_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_mention_w_40dp)
             }
-            is GolosRepostNotificationNew -> {
+            is GolosRepostNotification -> {
 
                 val text = if (numOfSameNotifications == 1)
                     context.getString(R.string.user_reposted, golosNotification.fromUser)
@@ -136,7 +136,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
 
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_repost_w_40dp)
             }
-            is GolosWitnessVoteNotificationNew -> {
+            is GolosWitnessVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_voted_for_you, golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_voted_for_you]}")
                 else context.getString(R.string.user_voted_for_you_several, golosNotification.fromUser,
@@ -147,7 +147,7 @@ object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
 
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnessvote_w_40dp)
             }
-            is WitnessCancelVoteGolosNotificationNew -> {
+            is WitnessCancelVoteGolosNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_canceled_vote_for_you,
                         golosNotification.fromUser)
                         .plus(" ${mEmojisMap[R.string.user_canceled_vote_for_you]}")

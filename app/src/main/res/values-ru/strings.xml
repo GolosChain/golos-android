@@ -223,6 +223,12 @@
     <string name="user_reposted_several">@%s и еще %s репост вашего поста</string>
     <string name="user_voted_for_you_several" >@%s и еще %s за вас как за делегата</string>
     <string name="user_canceled_vote_for_you_several" >@%s и еще %s сняли свои голоса с вашей делегатской ноды</string>
+    <string name="flag">Флаг</string>
+    <string name="subscribe_on_blog">Подписка на блог</string>
+    <string name="unsubscribe_from_blog">Отписка от блога</string>
+    <string name="reblog">Реблог</string>
+    <string name="witness_vote">Голос за вашу делегатскую ноду</string>
+    <string name="witness_cancel_vote">Снятие голоса с вашей делегатской ноды</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
