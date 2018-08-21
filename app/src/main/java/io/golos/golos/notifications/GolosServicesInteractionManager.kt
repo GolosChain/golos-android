@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 interface GolosServicesGateWay {
     fun setUp()
+
+    fun onUserLogout()
 }
 
 class GolosServicesInteractionManager(private val communicationHandler: GolosServicesCommunicator
@@ -89,7 +91,6 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
                             if (e.getErrorType() == JsonRpcError.AUTH_ERROR) {
                                 if (authCounter.incrementAndGet() < 20)
                                     workerExecutor.execute { communicationHandler.requestAuth() }
-
                             }
                         }
                     }
@@ -102,8 +103,17 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
         }
     }
 
+    override fun onUserLogout() {
+        workerExecutor.execute {
+            communicationHandler.dropConnection()
+            notificationsPersister.setUserSubscribedOnNotificationsThroughServices(false)
+            isAuthComplete = false
+            isAuthInProgress = false
+        }
+    }
+
     private fun onAuthComplete() {
-        println("onAuthComplete")
+        Timber.i("onAuthComplete")
         subscribeToPushIfNeeded()
     }
 
@@ -136,6 +146,8 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
     private fun onTokenChanged() {
         subscribeToPushIfNeeded()
     }
+
+
 }
 
 

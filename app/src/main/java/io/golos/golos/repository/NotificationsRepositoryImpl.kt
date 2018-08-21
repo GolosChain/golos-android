@@ -21,6 +21,10 @@ interface NotificationsRepository {
 
     @MainThread
     fun dismissNotification(notification: GolosNotification)
+
+    @MainThread
+    fun dismissNotifications(notifications: List<GolosNotification>)
+    fun dismissAllNotifications()
 }
 
 /**
@@ -77,6 +81,16 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
     override fun dismissNotification(notification: GolosNotification) {
         mNotifications.value = GolosNotifications(mNotifications.value?.notifications?.filter { it != notification }
                 ?: listOf())
+    }
+
+    @MainThread
+    override fun dismissNotifications(notifications: List<GolosNotification>) {
+        val newNotifs = mNotifications.value?.notifications ?: arrayListOf<GolosNotification>()-notifications
+        mNotifications.value = GolosNotifications(newNotifs)
+    }
+
+    override fun dismissAllNotifications() {
+        mNotifications.value = GolosNotifications(listOf())
     }
 
     override val notifications: LiveData<GolosNotifications> = mFilteredNotifications

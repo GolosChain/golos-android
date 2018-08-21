@@ -27,7 +27,7 @@ data class FlagNotificationNew(@JsonProperty("permlink") val permlink: String,
                                @JsonProperty("voter") val voter: String) : NotificationNew("flag")
 
 data class TransferNotificationNew(@JsonProperty("from") val from: String,
-                                   @JsonProperty("amount") val amount: Double) : NotificationNew("transfer")
+                                   @JsonProperty("amount") val amount: String) : NotificationNew("transfer")
 
 data class ReplyNotificationNew(@JsonProperty("permlink") val permlink: String,
                                 @JsonProperty("author") val author: String) : NotificationNew("reply")

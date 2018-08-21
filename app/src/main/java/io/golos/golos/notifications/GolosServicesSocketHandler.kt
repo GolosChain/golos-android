@@ -115,6 +115,13 @@ class GolosServicesSocketHandler(private val gateUrl: String,
                     ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
     }
 
+    override fun dropConnection() {
+        mSession?.close()
+
+        mLatches.forEach { entry ->
+            mRawJsonResponse = "{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":${Int.MIN_VALUE},\"message\":\"Logout\"}}"
+            entry.value.countDown() }
+    }
 
     private inner class MyReconnectHandler : ClientManager.ReconnectHandler() {
         override fun onConnectFailure(exception: Exception?): Boolean {
@@ -138,6 +145,9 @@ interface GolosServicesCommunicator {
 
     @WorkerThread
     fun requestAuth()
+
+    @WorkerThread
+    fun dropConnection()
 }
 
 class GolosServicesException(val golosServicesError: GolosServicesError) : Exception(golosServicesError.toString())

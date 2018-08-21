@@ -720,6 +720,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
                 it.value = it.value
             }
+            mNotificationsRepository.dismissAllNotifications()
+
+            mGolosServicesGateWay.onUserLogout()
         } catch (e: Exception) {
             logException(e)
         }

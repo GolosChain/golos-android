@@ -2,7 +2,7 @@ package io.golos.golos.utils
 
 enum class JsonRpcError {
     PARSE_ERROR, INVALID_REQUEST, METHOD_NOT_FOUND, INVALID_PARAMS, INTERNAL_ERROR, SERVER_ERROR,
-    AUTH_ERROR, NOT_AUTHORIZED;
+    AUTH_ERROR, NOT_AUTHORIZED, LOGOUT;
 
 
 }
@@ -15,6 +15,7 @@ fun rpcErrorFromCode(code: Int): JsonRpcError? {
         -32602 -> JsonRpcError.INVALID_PARAMS
         -32603 -> JsonRpcError.INTERNAL_ERROR
         403 -> JsonRpcError.AUTH_ERROR
+        Int.MIN_VALUE -> JsonRpcError.LOGOUT
         406 -> JsonRpcError.NOT_AUTHORIZED
         else -> {
             if (code in -32000 downTo -32099) JsonRpcError.SERVER_ERROR

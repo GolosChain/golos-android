@@ -12,7 +12,7 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
             return when (notification) {
                 is VoteNotificationNew -> GolosUpVoteNotification(notification.permlink, notification.voter, notification.counter)
                 is ReplyNotificationNew -> GolosCommentNotification(notification.permlink, notification.author, notification.counter)
-                is TransferNotificationNew -> GolosTransferNotification(notification.from, notification.amount.toString().plus(" GOLOS"), notification.counter)
+                is TransferNotificationNew -> GolosTransferNotification(notification.from, notification.amount, notification.counter)
                 is FlagNotificationNew -> GolosDownVoteNotification(notification.permlink, notification.voter, notification.counter)
                 is SubscribeNotificationNew -> GolosSubscribeNotification(notification.follower, notification.counter)
                 is UnSubscribeNotificationNew -> GolosUnSubscribeNotification(notification.follower, notification.counter)

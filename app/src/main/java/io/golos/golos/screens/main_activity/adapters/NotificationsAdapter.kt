@@ -125,7 +125,6 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                     mTextLinearLo.setPadding(0, 0, 0, 0)
                 }
                 mText.text = appearance.body
-                Timber.e("appearance = $appearance")
                 mImage.setImageResource(appearance.iconId)
 
             }
