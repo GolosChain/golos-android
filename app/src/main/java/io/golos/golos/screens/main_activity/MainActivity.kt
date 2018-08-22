@@ -3,21 +3,22 @@ package io.golos.golos.screens.main_activity
 import android.animation.Animator
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import io.golos.golos.R
-import io.golos.golos.notifications.GolosNotifications
-import io.golos.golos.notifications.NOTIFICATION_KEY
-import io.golos.golos.notifications.NotificationsBroadCastReceiver
-import io.golos.golos.notifications.PostLinkable
+import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.GolosActivity
@@ -162,8 +163,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         checkpreSelect(intent)
-
-
     }
 
     override fun onNewIntent(intent: Intent?) {

@@ -22,8 +22,9 @@ class GolosSecretSigner(
 
         val transaction = SignedTransaction(3367,
                 879276768,
-                TimePointSec("2018-07-06T24:52:24"),
+                TimePointSec(1530888744000),
                 listOf(voteOperation), listOf())
+
         return transaction.createSignWithoutCanonicalTest()
     }
 }

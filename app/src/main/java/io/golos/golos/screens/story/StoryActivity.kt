@@ -33,6 +33,7 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
@@ -108,6 +109,11 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     override fun isAppOnline() = App.isAppOnline()
                 })
 
+        mViewModel.imageDialogShowEvent.observe(this, Observer {
+            val dialogData = it ?: return@Observer
+            PhotosDialog.getInstance(dialogData.images, if (dialogData.position < 0) 0 else dialogData.position)
+                    .show(supportFragmentManager, "images")
+        })
         mViewModel.liveData.observe(this, Observer {
             if (it?.storyTree?.rootStory() != null) {
                 setFullscreenProgress(false)
@@ -397,10 +403,13 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+
         (mStoryRecycler.adapter as StoryAdapter).onRowClick = { row, iv ->
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
-            else if (row is ImageRow) mViewModel.onMainStoryImageClick(this, row.src, iv)
+            else if (row is ImageRow) mViewModel.onMainStoryImageClick(row.src)
         }
+
+
         mSwipeToRefresh.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener({

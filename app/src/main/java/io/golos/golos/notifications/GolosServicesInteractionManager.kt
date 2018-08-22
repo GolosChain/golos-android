@@ -57,6 +57,7 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
                 onChanged()
             }
         })
+
     }
 
     private fun onChanged() {
@@ -81,7 +82,6 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
 
                                 isAuthComplete = true
                                 isAuthInProgress = false
-
                                 onAuthComplete()
                             } else {
                                 communicationHandler.requestAuth()
@@ -109,11 +109,13 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
             notificationsPersister.setUserSubscribedOnNotificationsThroughServices(false)
             isAuthComplete = false
             isAuthInProgress = false
+            authCounter.set(0)
         }
     }
 
     private fun onAuthComplete() {
         Timber.i("onAuthComplete")
+
         subscribeToPushIfNeeded()
     }
 
@@ -147,6 +149,13 @@ class GolosServicesInteractionManager(private val communicationHandler: GolosSer
         subscribeToPushIfNeeded()
     }
 
+    override fun toString(): String {
+        return "isAuthComplete = $isAuthComplete " +
+                "\nisAuthInProgress = $isAuthInProgress " +
+                "\nauthCounter = ${authCounter.get()}\nisUserSubscribedOnNotificationsThroughServices()" +
+                " = ${notificationsPersister.isUserSubscribedOnNotificationsThroughServices()}\n\n" +
+                "tokenProvider token = ${tokenProvider.onTokenChange.value}"
+    }
 
 }
 

@@ -3,12 +3,11 @@ package io.golos.golos.screens.story
 import android.app.Activity
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
-import android.support.v7.app.AppCompatActivity
-import android.widget.ImageView
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -20,9 +19,7 @@ import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
-import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StoryViewModel : ViewModel() {
     private val mLiveData = MediatorLiveData<StoryViewState>()
@@ -34,6 +31,9 @@ class StoryViewModel : ViewModel() {
     var blog: String? = null
     private lateinit var feedType: FeedType
     private lateinit var mInternetStatusNotifier: InternetStatusNotifier
+    private val mImageClickEvents = MutableLiveData<ImageClickData>()
+    public val imageDialogShowEvent: LiveData<ImageClickData> = mImageClickEvents
+
 
     fun onCreate(author: String,
                  permLink: String,
@@ -122,6 +122,7 @@ class StoryViewModel : ViewModel() {
             )
         })
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, _ -> }
+
     }
 
 
@@ -134,7 +135,10 @@ class StoryViewModel : ViewModel() {
 
     }
 
-    fun onMainStoryImageClick(activity: Activity, src: String, iv: ImageView?) {
+    data class ImageClickData(val position: Int, val images: List<String>)
+
+
+    fun onMainStoryImageClick(src: String) {
         val images = mLiveData.value?.storyTree?.rootStory()?.parts
                 ?.filter { it is ImageRow }
                 ?.map { it as ImageRow }
@@ -146,9 +150,7 @@ class StoryViewModel : ViewModel() {
         if (images.isEmpty()) return
 
         val position = images.indexOf(src)
-        PhotosDialog.getInstance(images, if (position < 0) 0 else position)
-                .show((activity as AppCompatActivity)
-                        .supportFragmentManager, "images")
+        mImageClickEvents.value = ImageClickData(position, images)
     }
 
     val canUserVote: Boolean
