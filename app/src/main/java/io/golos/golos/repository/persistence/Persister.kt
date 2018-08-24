@@ -194,14 +194,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         mPreference.edit().putString("username", name).apply()
     }
 
-    override fun saveSubscribedOnTopic(topic: String?) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("topic", topic).apply()
-    }
-
-    override fun getSubscribeOnTopic(): String? {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString("topic", null)
-    }
-
     override fun getActiveUserData(): AppUserData? {
         val userDataString = mPreference.getString("userdata", "") ?: return null
         if (userDataString.isEmpty()) return null
@@ -252,13 +244,6 @@ private class MockPersister : Persister() {
 
     }
 
-    override fun saveSubscribedOnTopic(topic: String?) {
-
-    }
-
-    override fun getSubscribeOnTopic(): String? {
-        return ""
-    }
 
     override fun getStories(): Map<StoryRequest, StoriesFeed> {
         return hashMapOf()

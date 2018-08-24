@@ -1,30 +1,27 @@
-package io.golos.golos.repository
+package io.golos.golos.notifications
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.content.Context
 import android.support.annotation.MainThread
-import io.golos.golos.notifications.*
-import io.golos.golos.repository.model.NotificationTopicSubscription
-import io.golos.golos.repository.model.NotificationsPersister
-import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.utils.toArrayList
 
-interface NotificationsRepository {
+interface PushNotificationsRepository {
     val notifications: LiveData<GolosNotifications>
     @MainThread
-    fun setUp(context: Context)
+    fun setUp()
 
     @MainThread
-    fun onReceiveNotifications(notifications: List<NotificationNew>)
+    fun onReceivePushNotifications(notifications: List<Notification>)
 
     @MainThread
     fun dismissNotification(notification: GolosNotification)
 
+
     @MainThread
-    fun dismissNotifications(notifications: List<GolosNotification>)
     fun dismissAllNotifications()
+
 }
 
 /**
@@ -32,46 +29,27 @@ interface NotificationsRepository {
  */
 
 
-internal class NotificationsRepositoryImpl(private val mRepository: Repository,
-                                           private val mNotificationTopicSubscription: NotificationTopicSubscription,
-                                           private val mNotificationsPersister: NotificationsPersister) : NotificationsRepository {
+internal class PushNotificationsRepositoryImpl(private val settingsRepository: UserSettingsRepository
+                                               = Repository.get.userSettingsRepository) : PushNotificationsRepository {
     private val mNotifications = MutableLiveData<GolosNotifications>()
     private val mFilteredNotifications = MutableLiveData<GolosNotifications>()
 
 
     @MainThread
-    override fun setUp(context: Context) {
-        mRepository.appUserData.observeForever(object : Observer<AppUserData> {
-            override fun onChanged(t: AppUserData?) {
-                val userName = mNotificationsPersister.getSubscribeOnTopic()
-                if (t?.isUserLoggedIn == true) {
-                    if (userName != null) return
-                    mNotificationTopicSubscription.subscribeOn(t.userName ?: return)
-                    mNotificationsPersister.saveSubscribedOnTopic(t.userName)
-                } else if (t?.isUserLoggedIn == false) {
-                    if (userName != null) {
-                        mNotificationTopicSubscription.unsubscribeOf(userName)
-                        mNotificationsPersister.saveSubscribedOnTopic(null)
-                        mFilteredNotifications.value = null
-                        mNotifications.value = null
-                    }
-                }
-            }
-        })
+    override fun setUp() {
         mNotifications.observeForever {
             val new = GolosNotifications(getFiteredNotificaitons())
             if (new != mFilteredNotifications.value) mFilteredNotifications.value = new
 
         }
-        Repository.get.userSettingsRepository.getNotificationsSettings().observeForever {
+        settingsRepository.getNotificationsSettings().observeForever {
             val new = GolosNotifications(getFiteredNotificaitons())
             if (new != mFilteredNotifications.value) mFilteredNotifications.value = new
         }
     }
 
     @MainThread
-    override fun onReceiveNotifications(notifications: List<NotificationNew>) {
-        if (!mRepository.isUserLoggedIn()) return
+    override fun onReceivePushNotifications(notifications: List<Notification>) {
         val newNotifications = ArrayList(notifications.map { GolosNotification.fromNotification(it) }) + (mNotifications.value?.notifications
                 ?: listOf()).toArrayList()
         mNotifications.value = GolosNotifications(newNotifications)
@@ -83,11 +61,6 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
                 ?: listOf())
     }
 
-    @MainThread
-    override fun dismissNotifications(notifications: List<GolosNotification>) {
-        val newNotifs = mNotifications.value?.notifications ?: arrayListOf<GolosNotification>()-notifications
-        mNotifications.value = GolosNotifications(newNotifs)
-    }
 
     override fun dismissAllNotifications() {
         mNotifications.value = GolosNotifications(listOf())
@@ -97,7 +70,7 @@ internal class NotificationsRepositoryImpl(private val mRepository: Repository,
 
     private fun getFiteredNotificaitons(): List<GolosNotification> {
         return mNotifications.value?.notifications?.filter {
-            val settings = mRepository.userSettingsRepository.getNotificationsSettings().value
+            val settings = settingsRepository.getNotificationsSettings().value
             when (it) {
                 is GolosUpVoteNotification -> settings?.showUpvoteNotifs ?: true
                 is GolosTransferNotification -> settings?.showTransferNotifs ?: true

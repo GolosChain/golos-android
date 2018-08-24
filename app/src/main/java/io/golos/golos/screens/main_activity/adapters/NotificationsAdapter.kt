@@ -12,26 +12,25 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.golos.golos.R
 import io.golos.golos.notifications.GolosNotification
-import io.golos.golos.notifications.NotificationAppearanceManager
-import io.golos.golos.notifications.NotificationAppearanceManagerImpl
+import io.golos.golos.utils.NotificationsAndEventsAppearanceMaker
+import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
-import timber.log.Timber
 
 
 class NotificationsAdapter(notifications: List<GolosNotification>,
                            var clickListener: (GolosNotification) -> Unit = {},
                            var cancelListener: (GolosNotification) -> Unit = {},
                            private val showOnlyFirst: Boolean,
-                           private val appearanceHandler: NotificationAppearanceManager = NotificationAppearanceManagerImpl) : RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
+                           private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl) : RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
 
     internal data class NotificationWrapper(val notification: GolosNotification,
                                             val clickListener: (GolosViewHolder) -> Unit,
                                             val onCancelClickListener: (GolosViewHolder) -> Unit,
-                                            val appearanceHandler: NotificationAppearanceManager = NotificationAppearanceManagerImpl)
+                                            val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
 
     var notification = notifications
         set(value) {

@@ -2,6 +2,7 @@ package io.golos.golos
 
 import android.annotation.SuppressLint
 import android.app.*
+import android.app.Notification
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.Context
@@ -26,6 +27,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.utils.getVectorAsBitmap
 import timber.log.Timber
 
@@ -147,7 +149,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                             StoryActivity.getStartIntent(this, it.author, it.blog, it.permlink,
                                     FeedType.UNCLASSIFIED, null), dismissIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                 }
-                val appearance = NotificationAppearanceManagerImpl.makeAppearance(notification)
+                val appearance = NotificationsAndEventsAppearanceMakerImpl.makeAppearance(notification)
                 Handler(Looper.getMainLooper()).post {
                     builder.setContentText(appearance.body)
                             .setLargeIcon(getVectorAsBitmap(appearance.iconId))

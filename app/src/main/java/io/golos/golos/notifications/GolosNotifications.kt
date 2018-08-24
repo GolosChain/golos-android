@@ -8,18 +8,18 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
 
 
     companion object {
-        fun fromNotification(notification: NotificationNew): GolosNotification {
+        fun fromNotification(notification: Notification): GolosNotification {
             return when (notification) {
-                is VoteNotificationNew -> GolosUpVoteNotification(notification.permlink, notification.voter, notification.counter)
-                is ReplyNotificationNew -> GolosCommentNotification(notification.permlink, notification.author, notification.counter)
-                is TransferNotificationNew -> GolosTransferNotification(notification.from, notification.amount, notification.counter)
-                is FlagNotificationNew -> GolosDownVoteNotification(notification.permlink, notification.voter, notification.counter)
-                is SubscribeNotificationNew -> GolosSubscribeNotification(notification.follower, notification.counter)
-                is UnSubscribeNotificationNew -> GolosUnSubscribeNotification(notification.follower, notification.counter)
-                is MentionNotificationNew -> GolosMentionNotification(notification.permlink, notification.author, notification.counter)
-                is WitnessVoteNotificationNew -> GolosWitnessVoteNotification(notification.from, notification.counter)
-                is WitnessCancelVoteNotificationNew -> WitnessCancelVoteGolosNotification(notification.from, notification.counter)
-                is RepostNotificationNew -> GolosRepostNotification(notification.reposter, notification.permlink, notification.counter)
+                is VoteNotification -> GolosUpVoteNotification(notification.permlink, notification.voter, notification.counter)
+                is ReplyNotification -> GolosCommentNotification(notification.permlink, notification.author, notification.counter)
+                is TransferNotification -> GolosTransferNotification(notification.from, notification.amount, notification.counter)
+                is FlagNotification -> GolosDownVoteNotification(notification.permlink, notification.voter, notification.counter)
+                is SubscribeNotification -> GolosSubscribeNotification(notification.follower, notification.counter)
+                is UnSubscribeNotification -> GolosUnSubscribeNotification(notification.follower, notification.counter)
+                is MentionNotification -> GolosMentionNotification(notification.permlink, notification.author, notification.counter)
+                is WitnessVoteNotification -> GolosWitnessVoteNotification(notification.from, notification.counter)
+                is WitnessCancelVoteNotification -> WitnessCancelVoteGolosNotification(notification.from, notification.counter)
+                is RepostNotification -> GolosRepostNotification(notification.reposter, notification.permlink, notification.counter)
             }
         }
     }
@@ -44,7 +44,7 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
 class GolosRepostNotification(val fromUser: String,
                               val permlink: String,
                               override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
-    override fun getLink() = permlink.extractLinkFromNew()
+    override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosRepostNotification) return false
@@ -203,7 +203,7 @@ class GolosUnSubscribeNotification(val fromUser: String, override val numberOfSa
 }
 
 class GolosUpVoteNotification(val permlink: String, val fromUser: String, override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
-    override fun getLink() = permlink.extractLinkFromNew()
+    override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosUpVoteNotification) return false
@@ -231,7 +231,7 @@ class GolosUpVoteNotification(val permlink: String, val fromUser: String, overri
 }
 
 
-private fun String.extractLinkFromNew(): PostLinkExtractedData? {
+private fun String.makeLinkFromPermlink(): PostLinkExtractedData? {
     return PostLinkExtractedData(Repository.get.appUserData.value?.userName
             ?: return null, null, this)
 }
@@ -241,7 +241,7 @@ class GolosDownVoteNotification(val permlink: String,
                                 val fromUser: String,
                                 override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
     override val id: String = UUID.randomUUID().toString()
-    override fun getLink() = permlink.extractLinkFromNew()
+    override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosDownVoteNotification) return false

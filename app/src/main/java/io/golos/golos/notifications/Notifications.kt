@@ -5,43 +5,43 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "eventType")
-@JsonSubTypes(value = [(JsonSubTypes.Type(value = ReplyNotificationNew::class, name = "reply")),
-    JsonSubTypes.Type(value = VoteNotificationNew::class, name = "vote"),
-    JsonSubTypes.Type(value = TransferNotificationNew::class, name = "transfer"),
-    JsonSubTypes.Type(value = FlagNotificationNew::class, name = "flag"),
-    JsonSubTypes.Type(value = SubscribeNotificationNew::class, name = "subscribe"),
-    JsonSubTypes.Type(value = UnSubscribeNotificationNew::class, name = "unsubscribe"),
-    JsonSubTypes.Type(value = MentionNotificationNew::class, name = "mention"),
-    JsonSubTypes.Type(value = RepostNotificationNew::class, name = "repost"),
-    JsonSubTypes.Type(value = WitnessVoteNotificationNew::class, name = "witnessVote"),
-    JsonSubTypes.Type(value = WitnessCancelVoteNotificationNew::class, name = "witnessCancelVote")])
+@JsonSubTypes(value = [(JsonSubTypes.Type(value = ReplyNotification::class, name = "reply")),
+    JsonSubTypes.Type(value = VoteNotification::class, name = "vote"),
+    JsonSubTypes.Type(value = TransferNotification::class, name = "transfer"),
+    JsonSubTypes.Type(value = FlagNotification::class, name = "flag"),
+    JsonSubTypes.Type(value = SubscribeNotification::class, name = "subscribe"),
+    JsonSubTypes.Type(value = UnSubscribeNotification::class, name = "unsubscribe"),
+    JsonSubTypes.Type(value = MentionNotification::class, name = "mention"),
+    JsonSubTypes.Type(value = RepostNotification::class, name = "repost"),
+    JsonSubTypes.Type(value = WitnessVoteNotification::class, name = "witnessVote"),
+    JsonSubTypes.Type(value = WitnessCancelVoteNotification::class, name = "witnessCancelVote")])
 
 
-sealed class NotificationNew(@JsonProperty(value = "eventType") val eventType: String,
-                             @JsonProperty(value = "counter") val counter: Int = 1)
+sealed class Notification(@JsonProperty(value = "eventType") val eventType: String,
+                          @JsonProperty(value = "counter") val counter: Int = 1)
 
-data class VoteNotificationNew(@JsonProperty("permlink") val permlink: String,
-                               @JsonProperty("voter") val voter: String) : NotificationNew("vote")
+data class VoteNotification(@JsonProperty("permlink") val permlink: String,
+                            @JsonProperty("voter") val voter: String) : Notification("vote")
 
-data class FlagNotificationNew(@JsonProperty("permlink") val permlink: String,
-                               @JsonProperty("voter") val voter: String) : NotificationNew("flag")
+data class FlagNotification(@JsonProperty("permlink") val permlink: String,
+                            @JsonProperty("voter") val voter: String) : Notification("flag")
 
-data class TransferNotificationNew(@JsonProperty("from") val from: String,
-                                   @JsonProperty("amount") val amount: String) : NotificationNew("transfer")
+data class TransferNotification(@JsonProperty("from") val from: String,
+                                @JsonProperty("amount") val amount: String) : Notification("transfer")
 
-data class ReplyNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                @JsonProperty("author") val author: String) : NotificationNew("reply")
+data class ReplyNotification(@JsonProperty("permlink") val permlink: String,
+                             @JsonProperty("author") val author: String) : Notification("reply")
 
-data class SubscribeNotificationNew(@JsonProperty("follower") val follower: String) : NotificationNew("subscribe")
+data class SubscribeNotification(@JsonProperty("follower") val follower: String) : Notification("subscribe")
 
-data class UnSubscribeNotificationNew(@JsonProperty("follower") val follower: String) : NotificationNew("unsubscribe")
+data class UnSubscribeNotification(@JsonProperty("follower") val follower: String) : Notification("unsubscribe")
 
-data class MentionNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                  @JsonProperty("author") val author: String) : NotificationNew("mention")
+data class MentionNotification(@JsonProperty("permlink") val permlink: String,
+                               @JsonProperty("author") val author: String) : Notification("mention")
 
-data class RepostNotificationNew(@JsonProperty("permlink") val permlink: String,
-                                 @JsonProperty("reposter") val reposter: String) : NotificationNew("repost")
+data class RepostNotification(@JsonProperty("permlink") val permlink: String,
+                              @JsonProperty("reposter") val reposter: String) : Notification("repost")
 
-data class WitnessVoteNotificationNew(@JsonProperty("from") val from: String) : NotificationNew("witnessVote")
+data class WitnessVoteNotification(@JsonProperty("from") val from: String) : Notification("witnessVote")
 
-data class WitnessCancelVoteNotificationNew(@JsonProperty("from") val from: String) : NotificationNew("witnessCancelVote")
+data class WitnessCancelVoteNotification(@JsonProperty("from") val from: String) : Notification("witnessCancelVote")

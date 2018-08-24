@@ -18,17 +18,12 @@ class MyFireBaseMessagingService : FirebaseMessagingService1() {
         super.onMessageReceived(p0)
         try {
 
-            Timber.e("notification title is   ${p0?.notification?.title}")
-            Timber.e("notification body is   ${p0?.notification?.body}")
-            Timber.e("data is ${p0?.data}")
+            Timber.i("data is ${p0?.data}")
+            val notification = mapper.readValue<Notification>(p0?.data?.get("body")
+                    ?: return, Notification::class.java)
 
-
-            val notification = mapper.readValue<NotificationNew>(p0?.data?.get("body")
-                    ?: return, NotificationNew::class.java)
-
-            Timber.e("notification = $notification")
             Handler(Looper.getMainLooper()).post {
-                Repository.get.notificationsRepository.onReceiveNotifications(listOf(notification))
+                Repository.get.notificationsRepository.onReceivePushNotifications(listOf(notification))
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -16,9 +16,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import io.golos.golos.R
 import io.golos.golos.notifications.*
+import io.golos.golos.repository.services.GolosServicesGateWayImpl
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.GolosActivity
@@ -163,6 +163,20 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         checkpreSelect(intent)
+
+
+      /*  val tokenTv = findViewById<TextView>(R.id.fcm_token)
+        findViewById<View>(R.id.renew).setOnClickListener {
+            findViewById<TextView>(R.id.s_data).text = GolosServicesGateWayImpl.instance.toString()
+            tokenTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", null)
+        }
+        findViewById<View>(R.id.copy).setOnClickListener {
+            (getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.primaryClip = ClipData.newPlainText("",
+                    PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
+                    ?: "")
+        }*/
+
+
     }
 
     override fun onNewIntent(intent: Intent?) {

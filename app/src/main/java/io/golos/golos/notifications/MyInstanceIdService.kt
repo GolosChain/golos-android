@@ -38,7 +38,7 @@ class MyInstanceIdService : FirebaseInstanceIdService() {
 }
 
 interface FCMTokenProvider {
-    val onTokenChange: LiveData<FCMTokens>
+    val tokenLiveData: LiveData<FCMTokens>
 }
 
 data class FCMTokens(val oldToken: String?, val newToken: String)
@@ -61,5 +61,5 @@ object FCMTokenProviderImpl : FCMTokenProvider {
     }
 
 
-    override val onTokenChange = mLiveData
+    override val tokenLiveData = mLiveData
 }

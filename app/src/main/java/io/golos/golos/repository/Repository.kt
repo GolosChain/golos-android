@@ -3,8 +3,6 @@ package io.golos.golos.repository
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.support.annotation.AnyThread
 import android.support.annotation.MainThread
 import com.crashlytics.android.Crashlytics
@@ -12,6 +10,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.BuildConfig
+import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUser
@@ -23,9 +22,13 @@ import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.ExceptionLogger
 import io.golos.golos.utils.GolosError
+import io.golos.golos.utils.MainThreadExecutor
 import io.golos.golos.utils.Regexps
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.Executors
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 interface UserDataProvider {
     val appUserData: LiveData<AppUserData>
@@ -66,12 +69,7 @@ abstract class Repository : UserDataProvider {
             ThreadPoolExecutor(1, 2,
                     Long.MAX_VALUE, TimeUnit.MILLISECONDS, queu, ThreadFactoryBuilder().setNameFormat("network executor thread -%d").build())
         }
-        private val mMainThreadExecutor: Executor
-            get() {
-
-                val handler = Handler(Looper.getMainLooper())
-                return Executor { command -> handler.post(command) }
-            }
+        private val mMainThreadExecutor = MainThreadExecutor()
 
         fun setSingletoneInstance(repository: Repository) {
             instance = repository
@@ -240,7 +238,7 @@ abstract class Repository : UserDataProvider {
 
     abstract val userSettingsRepository: UserSettingsRepository
 
-    abstract val notificationsRepository: NotificationsRepository
+    abstract val notificationsRepository: PushNotificationsRepository
 
     abstract fun getGolosUsers(nick: String): LiveData<List<GolosUser>>
 }

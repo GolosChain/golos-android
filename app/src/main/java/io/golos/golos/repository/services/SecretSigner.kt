@@ -1,6 +1,5 @@
-package io.golos.golos.notifications
+package io.golos.golos.repository.services
 
-import eu.bittrade.libs.golosj.DatabaseMethods
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.base.models.Permlink
 import eu.bittrade.libs.golosj.base.models.SignedTransaction
@@ -11,9 +10,7 @@ interface SecretSigner {
     fun sign(user: String, secret: String): String
 }
 
-class GolosSecretSigner(
-        private val databaseMethods: DatabaseMethods
-) : SecretSigner {
+class GolosSecretSigner : SecretSigner {
     override fun sign(user: String, secret: String): String {
         val voteOperation = VoteOperation(AccountName(user),
                 AccountName("test"),

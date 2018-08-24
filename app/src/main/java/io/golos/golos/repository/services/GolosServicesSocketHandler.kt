@@ -1,4 +1,4 @@
-package io.golos.golos.notifications
+package io.golos.golos.repository.services
 
 import android.support.annotation.WorkerThread
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -60,7 +60,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
     }
 
     override fun onMessage(message: String?) {
-        println("onMessage message = $message")
+        Timber.i("onMessage message = $message")
 
         if (message?.contains("\"id\"") == true) {
             val id = mapper.readValue<IdentifiableImpl>(message).id

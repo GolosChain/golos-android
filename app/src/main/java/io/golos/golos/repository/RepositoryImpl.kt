@@ -11,8 +11,7 @@ import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
-import io.golos.golos.notifications.GolosServicesGateWay
-import io.golos.golos.notifications.GolosServicesInteractionManager
+import io.golos.golos.notifications.PushNotificationsRepositoryImpl
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -20,6 +19,8 @@ import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
+import io.golos.golos.repository.services.GolosServices
+import io.golos.golos.repository.services.GolosServicesImpl
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -44,8 +45,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mGolosApi: GolosApi = GolosApi.get,
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
-                              notificationsRepository: NotificationsRepositoryImpl? = null,
-                              golosServicesGateWay: GolosServicesGateWay? = null,
+                              notificationsRepository: PushNotificationsRepositoryImpl? = null,
+                              golosServices: GolosServices? = null,
                               private val mHtmlizer: Htmlizer = KnifeHtmlizer,
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
                               private val mLogger: ExceptionLogger?) : Repository() {
@@ -77,8 +78,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
-    private val mNotificationsRepository: NotificationsRepositoryImpl
-    private val mGolosServicesGateWay: GolosServicesGateWay
+    private val mNotificationsRepository: PushNotificationsRepositoryImpl
+    private val mGolosServices: GolosServices
 
     @WorkerThread
     private fun loadStories(limit: Int,
@@ -125,16 +126,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         }).observeForever({})
         mNotificationsRepository =
-                notificationsRepository ?: NotificationsRepositoryImpl(this, FCMTopicSubscriber, mPersister)
+                notificationsRepository ?: PushNotificationsRepositoryImpl()
 
-        mGolosServicesGateWay = golosServicesGateWay ?: GolosServicesInteractionManager(userDataProvider = this)
+        mGolosServices = golosServices ?: GolosServicesImpl()
     }
 
     override fun onAppCreate(ctx: Context) {
         super.onAppCreate(ctx)
         mUserSettings.setUp(ctx)
         mExchangesRepository.setUp(ctx)
-        mNotificationsRepository.setUp(ctx)
+        mNotificationsRepository.setUp()
 
         prepareForLaunch()
         try {
@@ -143,14 +144,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mAuthLiveData.value = userData
                 setActiveUserAccount(userData.userName
                         ?: return, userData.privateActiveWif, userData.privatePostingWif)
-
             }
 
         } catch (e: Throwable) {
             deleteUserdata()
         }
-        mGolosServicesGateWay.setUp()
-
+        mGolosServices.setUp()
     }
 
     @WorkerThread
@@ -721,8 +720,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 it.value = it.value
             }
             mNotificationsRepository.dismissAllNotifications()
-
-            mGolosServicesGateWay.onUserLogout()
         } catch (e: Exception) {
             logException(e)
         }
@@ -1169,7 +1166,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override val userSettingsRepository: UserSettingsRepository = mUserSettings
 
-    override val notificationsRepository: NotificationsRepositoryImpl = mNotificationsRepository
+    override val notificationsRepository: PushNotificationsRepositoryImpl = mNotificationsRepository
 
     override fun isUserLoggedIn(): Boolean {
         return mAuthLiveData.value != null &&

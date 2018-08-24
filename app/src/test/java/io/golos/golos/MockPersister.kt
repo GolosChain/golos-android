@@ -1,14 +1,12 @@
 package io.golos.golos
 
-import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.StoriesFeed
+import io.golos.golos.repository.model.StoryRequest
 import io.golos.golos.repository.model.Tag
 import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.repository.persistence.model.AppUserData
+import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.utils.toArrayList
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 /**
  * Created by yuri on 15.12.17.
@@ -19,24 +17,19 @@ object MockPersister : Persister() {
     var userData: AppUserData? = null
     var name: String? = null
     var userSubscribedTags = ArrayList<Tag>()
+    private var isUserSubscribedOnNotificationsThroughServices = false
     override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
         users.add(userAvatar)
 
     }
 
-    override fun saveSubscribedOnTopic(topic: String?) {
 
-    }
-
-    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
-       return false
-    }
+    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean = isUserSubscribedOnNotificationsThroughServices
 
     override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
-
+        isUserSubscribedOnNotificationsThroughServices = isSubscribed
     }
 
-    override fun getSubscribeOnTopic(): String?  = ""
 
     override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
         users.addAll(userAvatars)
@@ -44,7 +37,9 @@ object MockPersister : Persister() {
 
     override fun getAvatarForUser(userName: String): Pair<String, Long>? {
 
-        return users.find{ it.userName == userName}?.let { Pair(it.avatarPath?:return null,it.dateUpdated) }
+        return users.find { it.userName == userName }?.let {
+            Pair(it.avatarPath ?: return null, it.dateUpdated)
+        }
 
     }
 
@@ -59,7 +54,7 @@ object MockPersister : Persister() {
     }
 
     override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
-       return HashMap()
+        return HashMap()
     }
 
     override fun getCurrentUserName() = userData?.userName

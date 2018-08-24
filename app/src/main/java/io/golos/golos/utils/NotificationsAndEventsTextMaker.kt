@@ -1,23 +1,23 @@
-package io.golos.golos.notifications
+package io.golos.golos.utils
 
 import android.os.Build
 import android.support.annotation.DrawableRes
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
-import io.golos.golos.utils.getQuantityString
 
 data class NotificationAppearance(val title: CharSequence? = null,
                                   val body: CharSequence,
                                   val profileImage: String? = null,
                                   @DrawableRes val iconId: Int)
 
-interface NotificationAppearanceManager {
+interface NotificationsAndEventsAppearanceMaker {
     fun makeAppearance(golosNotification: GolosNotification,
                        currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
 }
 
-object NotificationAppearanceManagerImpl : NotificationAppearanceManager {
+object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppearanceMaker {
     private val mEmojisMap = HashMap<Int, String>().apply {
         put(R.string.userr_voted, "\uD83D\uDC4D")
         put(R.string.userr_voted_several, "\uD83D\uDC4D")
