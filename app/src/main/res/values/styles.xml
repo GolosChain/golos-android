@@ -14,6 +14,7 @@
     <style name="GolosDialogTheme" parent="Theme.AppCompat.Dialog">
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
     <style name="NotificationsDialog" parent="Theme.AppCompat.Dialog">
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">@color/semi_semi_black</item>
@@ -37,6 +38,7 @@
     <style name="BoldTextStyle">
         <item name="android:textStyle">bold</item>
     </style>
+
     <style name="VoteForAppDialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:background">@null</item>
     </style>

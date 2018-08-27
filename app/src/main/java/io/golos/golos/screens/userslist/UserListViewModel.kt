@@ -16,7 +16,7 @@ import io.golos.golos.screens.userslist.model.UserListRowData
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.StringSupplier
+import io.golos.golos.utils.StringProvider
 import timber.log.Timber
 
 data class UserListViewState(val title: String,
@@ -28,7 +28,7 @@ class UserListViewModel : ViewModel() {
     private var userName: String? = null
     private var storyId: Long? = null
     private lateinit var mListType: ListType
-    private lateinit var mStringSupplier: StringSupplier
+    private lateinit var mStringSupplier: StringProvider
     private lateinit var mTitle: String
     private val mRepository = Repository.get
     private val mCurrentUsersubscriptions = HashSet<UserBlogSubscription>()
@@ -42,7 +42,7 @@ class UserListViewModel : ViewModel() {
     fun onCreate(userName: String?,
                  storyId: Long?,
                  type: ListType,
-                 stringSuppliers: StringSupplier,
+                 stringSuppliers: StringProvider,
                  internetStatusNotifier: InternetStatusNotifier) {
         this.userName = userName
         this.mListType = type

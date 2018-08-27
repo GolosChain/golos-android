@@ -19,6 +19,7 @@
     <string name="active_key">Приватный активный ключ</string>
     <string name="cancel">Отмена</string>
     <string name="exit">Выйти</string>
+    <string name="events">Уведомления</string>
     <string name="enter_post_title">Напишите заголовок</string>
     <string name="tab_back_double_to_enter">Нажмите еще раз для выхода</string>
     <string name="slow_internet_connection">Слишком медленное соединение. Попробуйте еще раз</string>
@@ -229,6 +230,13 @@
     <string name="reblog">Реблог</string>
     <string name="witness_vote">Голос за вашу делегатскую ноду</string>
     <string name="witness_cancel_vote">Снятие голоса с вашей делегатской ноды</string>
+    <string name="Notifications">Уведомления</string>
+    <string name="all">Все</string>
+    <string name="awards">Награды</string>
+    <string name="replys">Ответы</string>
+    <string name="social">Социальные</string>
+    <string name="mentions">Упоминания</string>
+    <string name="empty">Поска здесь пусто</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

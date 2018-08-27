@@ -184,6 +184,7 @@
     <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> answered on your comment</string>
     <string name="user_transferred_you">You received %s</string>
     <string name="notifications">Online notifications on Golos.io</string>
+    <string name="events">Notifications</string>
     <string name="mention">Mentions</string>
     <string name="upvote">Upvote</string>
     <string name="transfer">Transfer</string>
@@ -228,6 +229,13 @@
     <string name="reblog">Reblog</string>
     <string name="witness_vote">Vote for witness</string>
     <string name="witness_cancel_vote">Cancel of witness vote</string>
+    <string name="Notifications">Notifications</string>
+    <string name="all">All</string>
+    <string name="awards">Awards</string>
+    <string name="replys">replies</string>
+    <string name="social">Social</string>
+    <string name="mentions">Mentions</string>
+    <string name="empty">Empty</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>
@@ -243,6 +251,7 @@
         <item>Two decimal place</item>
         <item>Three decimal places</item>
     </string-array>
+
 
 </resources>
 

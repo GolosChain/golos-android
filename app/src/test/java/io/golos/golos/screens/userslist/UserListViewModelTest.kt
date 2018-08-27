@@ -10,7 +10,7 @@ import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.screens.userslist.model.UserListRowData
 import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.StringSupplier
+import io.golos.golos.utils.StringProvider
 import io.golos.golos.utils.UpdatingState
 import junit.framework.Assert
 import org.junit.Before
@@ -55,7 +55,7 @@ class UserListViewModelTest {
             status = it
         }
         Assert.assertNull(status)
-        mViewModel.onCreate("yuri-vlad-second", null, ListType.SUBSCRIPTIONS, object : StringSupplier {
+        mViewModel.onCreate("yuri-vlad-second", null, ListType.SUBSCRIPTIONS, object : StringProvider {
             override fun get(id: Int, args: String?): String {
                 return "stub"
             }
@@ -74,7 +74,7 @@ class UserListViewModelTest {
 
 
         //other user subscriptions
-        mViewModel.onCreate("med", null, ListType.SUBSCRIPTIONS, object : StringSupplier {
+        mViewModel.onCreate("med", null, ListType.SUBSCRIPTIONS, object : StringProvider {
             override fun get(id: Int, args: String?): String {
                 return "stub"
             }
@@ -103,7 +103,7 @@ class UserListViewModelTest {
             status = it
         }
         Assert.assertNull(status)
-        mViewModel.onCreate(null, story.id, ListType.VOTERS, object : StringSupplier {
+        mViewModel.onCreate(null, story.id, ListType.VOTERS, object : StringProvider {
             override fun get(id: Int, arguments: String?): String {
                 return "stub"
             }

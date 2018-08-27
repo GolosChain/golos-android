@@ -6,6 +6,7 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.services.*
 
 data class NotificationAppearance(val title: CharSequence? = null,
                                   val body: CharSequence,
@@ -14,6 +15,9 @@ data class NotificationAppearance(val title: CharSequence? = null,
 
 interface NotificationsAndEventsAppearanceMaker {
     fun makeAppearance(golosNotification: GolosNotification,
+                       currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
+
+    fun makeAppearance(golosEvent: GolosEvent,
                        currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
 }
 
@@ -48,6 +52,27 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
         put(R.string.user_canceled_vote_for_you, "\uD83D\uDE48")
         put(R.string.user_canceled_vote_for_you_several, "\uD83D\uDE48")
 
+    }
+
+
+    override fun makeAppearance(golosEvent: GolosEvent,
+                                currentUserName: String): NotificationAppearance {
+        return makeAppearance(when (golosEvent) {
+            is GolosVoteEvent -> GolosUpVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosFlagEvent -> GolosDownVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosTransferEvent -> GolosTransferNotification(golosEvent.fromUsers.first(), golosEvent.amount, golosEvent.counter)
+            is GolosReplyEvent -> GolosCommentNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosSubscribeEvent -> GolosSubscribeNotification(golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosUnSubscribeEvent -> GolosUnSubscribeNotification(golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosMentionEvent -> GolosMentionNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosRepostEvent -> GolosRepostNotification(golosEvent.fromUsers.first(), golosEvent.permlink, golosEvent.counter)
+            is GolosWitnessVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosWitnessCancelVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
+
+            is GolosAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
+            is GolosCuratorAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
+            is GolosMessageEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
+        }, currentUserName)
     }
 
     override fun makeAppearance(golosNotification: GolosNotification,

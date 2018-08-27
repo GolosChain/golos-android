@@ -4,7 +4,6 @@ import android.support.annotation.WorkerThread
 import io.golos.golos.BuildConfig
 import io.golos.golos.utils.JsonRpcError
 import timber.log.Timber
-import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -20,7 +19,7 @@ interface GolosServicesGateWay {
     fun subscribeOnNotifications(fcmToken: String)
 
     @WorkerThread
-    fun getEvents(fromId: String?, eventType: EventType?, limit: Int? = 100): List<GolosEvent>
+    fun getEvents(fromId: String?, eventType: List<EventType>?, limit: Int? = 100): List<GolosEvent>
 
 }
 
@@ -41,7 +40,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                 }
     }
 
-    private val authCounter = AtomicInteger(1)
+    val authCounter = AtomicInteger(1)
 
     @Volatile
     private var authRequest: GolosServerAuthRequest? = null
@@ -73,7 +72,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                     signHandler.sign(userName, authRequest.secret)), ServicesMethod.AUTH.stringRepresentation())
             println("$authResult")
             if (authResult.isAuthSuccessMessage()) {
-
+                authCounter.set(1)
             } else {
                 communicationHandler.requestAuth()
             }
@@ -98,10 +97,10 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         authCounter.set(1)
     }
 
-    override fun getEvents(fromId: String?, eventType: EventType?, limit: Int?): List<GolosEvent> {
-        val types: String = if (eventType == null) "all" else Arrays.toString(arrayOf(eventType.toString()))
-        return communicationHandler.sendMessage(GolosEventRequest(fromId, limit ?: 40,
-                types), ServicesMethod.GET_NOTIFS_HISTORY.stringRepresentation())
+    override fun getEvents(fromId: String?, eventType: List<EventType>?, limit: Int?): List<GolosEvent> {
+        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 40)
+        else GolosEventRequest(fromId, limit ?: 40, eventType.map { it.toString() })
+        return communicationHandler.sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY.stringRepresentation())
                 .getEventData()
                 .map { GolosEvent.fromEvent(it) }
     }

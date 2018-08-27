@@ -20,6 +20,8 @@ import java.lang.Exception
 import java.net.URI
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicLong
 import javax.net.ssl.HostnameVerifier
 import javax.websocket.*
@@ -100,19 +102,25 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
 
         mSession?.basicRemote?.sendText(messageString)
+        try {
+            val latch = CountDownLatch(1)
+            mLatches[messageToSend.id] = latch
+            if (!latch.await(30_000, TimeUnit.SECONDS)) {
+                throw TimeoutException()
+            }
 
-        val latch = CountDownLatch(1)
-        mLatches[messageToSend.id] = latch
-        latch.await()
+            if (mRawJsonResponse?.contains("\"error\"") == true) {
+                val error = mMapper?.readValue<GolosServicesErrorMessage>(mRawJsonResponse ?: "")
+                        ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
+                throw GolosServicesException(error.error)
 
-        if (mRawJsonResponse?.contains("\"error\"") == true) {
-            val error = mMapper?.readValue<GolosServicesErrorMessage>(mRawJsonResponse ?: "")
-                    ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
-            throw GolosServicesException(error.error)
-
-        } else
-            return mMapper?.readValue(mRawJsonResponse ?: "")
-                    ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
+            } else
+                return mMapper?.readValue(mRawJsonResponse ?: "")
+                        ?: throw IllegalArgumentException("cannot convert value $mRawJsonResponse")
+        } catch (e: TimeoutException) {
+            e.printStackTrace()
+            return sendMessage(message, method)
+        }
     }
 
     override fun dropConnection() {
@@ -120,7 +128,8 @@ class GolosServicesSocketHandler(private val gateUrl: String,
 
         mLatches.forEach { entry ->
             mRawJsonResponse = "{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":${Int.MIN_VALUE},\"message\":\"Logout\"}}"
-            entry.value.countDown() }
+            entry.value.countDown()
+        }
     }
 
     private inner class MyReconnectHandler : ClientManager.ReconnectHandler() {

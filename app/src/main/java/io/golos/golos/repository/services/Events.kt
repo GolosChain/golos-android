@@ -38,8 +38,8 @@ class CustomJsonDateDeserializer : JsonDeserializer<Long>() {
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "eventType")
-@JsonSubTypes(value = [JsonSubTypes.Type(value = VoteEvent::class, name = "flag"),
-    JsonSubTypes.Type(value = FlagEvent::class, name = "vote"),
+@JsonSubTypes(value = [JsonSubTypes.Type(value = VoteEvent::class, name = "vote"),
+    JsonSubTypes.Type(value = FlagEvent::class, name = "flag"),
     JsonSubTypes.Type(value = TransferEvent::class, name = "transfer"),
     JsonSubTypes.Type(value = ReplyEvent::class, name = "reply"),
     JsonSubTypes.Type(value = SubscribeEvent::class, name = "subscribe"),
@@ -191,41 +191,54 @@ class GolosVoteEvent(id: String,
                      creationTime: Long,
                      counter: Int,
                      val permlink: String,
-                     val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable {
+                     val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable, Sourcable {
     override fun getLink() = permlink.makeLinkFromPermlink()
-
+    override fun getAuthors() = fromUsers
 }
 
 class GolosFlagEvent(id: String, creationTime: Long, counter: Int,
-                     val permlink: String, val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter) {
+                     val permlink: String, val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
     override fun getLink() = permlink.makeLinkFromPermlink()
+    override fun getAuthors() = fromUsers
 }
 
 class GolosTransferEvent(id: String, creationTime: Long, counter: Int,
-                         val amount: String, val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                         val amount: String, val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors() = fromUsers
+
+}
 
 class GolosSubscribeEvent(id: String, creationTime: Long, counter: Int,
-                          val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                          val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors(): List<String> = fromUsers
+}
 
 class GolosUnSubscribeEvent(id: String, creationTime: Long, counter: Int,
-                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors(): List<String> = fromUsers
+}
 
 class GolosReplyEvent(id: String, creationTime: Long, counter: Int,
-                      val permlink: String, val parentPermlink: String,
-                      val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter) {
-    override fun getLink() = permlink.makeLinkFromPermlink()
+                      val permlink: String,
+                      val parentPermlink: String,
+                      val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+
+    override fun getLink() = PostLinkExtractedData(fromUsers.first(), null, permlink)
+    override fun getAuthors() = fromUsers
 }
 
 class GolosMentionEvent(id: String, creationTime: Long, counter: Int,
                         val permlink: String, val parentPermlink: String,
-                        val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter) {
-    override fun getLink() = permlink.makeLinkFromPermlink()
+                        val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getLink() = PostLinkExtractedData(fromUsers.first(), null, permlink)
+    override fun getAuthors() = fromUsers
 }
 
 class GolosRepostEvent(id: String, creationTime: Long, counter: Int,
                        val permlink: String,
-                       val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter) {
+                       val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
     override fun getLink() = permlink.makeLinkFromPermlink()
+    override fun getAuthors() = fromUsers
 }
 
 class GolosAwardEvent(id: String, creationTime: Long, counter: Int,
@@ -241,13 +254,24 @@ class GolosCuratorAwardEvent(id: String, creationTime: Long, counter: Int,
 }
 
 class GolosMessageEvent(id: String, creationTime: Long, counter: Int,
-                        val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                        val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors(): List<String> = fromUsers
+}
 
 class GolosWitnessVoteEvent(id: String, creationTime: Long, counter: Int,
-                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors(): List<String> = fromUsers
+}
 
 class GolosWitnessCancelVoteEvent(id: String, creationTime: Long, counter: Int,
-                                  val fromUsers: List<String>) : GolosEvent(id, creationTime, counter)
+                                  val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+    override fun getAuthors(): List<String> = fromUsers
+}
+
+
+interface Sourcable {
+    fun getAuthors(): List<String>
+}
 
 
 

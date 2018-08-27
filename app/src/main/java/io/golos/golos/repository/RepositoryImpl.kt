@@ -19,6 +19,8 @@ import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
+import io.golos.golos.repository.services.EventType
+import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.repository.services.GolosServices
 import io.golos.golos.repository.services.GolosServicesImpl
 import io.golos.golos.screens.editor.EditorPart
@@ -182,6 +184,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         })
         return map
+    }
+
+    override fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>> {
+        return mGolosServices.getEvents(type)
+    }
+
+    override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int) {
+        mGolosServices.requestEventsUpdate(type, fromId, limit)
     }
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {

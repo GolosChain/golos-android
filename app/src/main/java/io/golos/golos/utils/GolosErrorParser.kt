@@ -39,6 +39,7 @@ object GolosErrorParser {
             return R.string.unknown_error
         }
 
+        Timber.e(" error?.error?.steemErrorDetails?.data? = ${ error?.error?.steemErrorDetails?.data}")
         val message = error?.error?.steemErrorDetails?.data?.toString()
                 ?: return R.string.unknown_error
 
@@ -48,7 +49,7 @@ object GolosErrorParser {
             return R.string.cant_vote_after_payout
         if (message.contains("Discussion is frozen"))
             return R.string.error_discussion_is_frozen
-        if (message.contains(" Voter has used the maximum number of vote changes on this commen"))
+        if (message.contains("Voter has used the maximum number of vote"))
             return R.string.user_used_max_comments_chances
         if (message.contains(" You have already voted in a similar way"))
             return R.string.you_voted_same_way

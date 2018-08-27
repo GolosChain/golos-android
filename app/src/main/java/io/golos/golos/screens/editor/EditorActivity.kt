@@ -145,7 +145,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 isHidden = isTitleHidden())
 
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
-                TagsStringValidator(object : StringSupplier {
+                TagsStringValidator(object : StringProvider {
                     override fun get(resId: Int, args: String?): String {
                         return getString(resId, args)
                     }

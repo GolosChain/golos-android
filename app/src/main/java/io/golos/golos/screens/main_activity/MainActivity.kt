@@ -3,13 +3,10 @@ package io.golos.golos.screens.main_activity
 import android.animation.Animator
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
@@ -17,8 +14,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
-import io.golos.golos.notifications.*
-import io.golos.golos.repository.services.GolosServicesGateWayImpl
+import io.golos.golos.notifications.GolosNotifications
+import io.golos.golos.notifications.NOTIFICATION_KEY
+import io.golos.golos.notifications.NotificationsBroadCastReceiver
+import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
 import io.golos.golos.screens.GolosActivity
@@ -71,8 +70,13 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                     true
                 }
                 R.id.notifications -> {
-                    bottomNavView.showSnackbar(R.string.unaval_in_current_version)
-                    false
+                    if (Repository.get.isUserLoggedIn()) {
+                        pager.currentItem = NOTIFICATIONS_HISTORY
+                        true
+                    } else {
+                        bottomNavView.showSnackbar(R.string.must_be_logged_in_for_this_action)
+                        false
+                    }
                 }
                 R.id.add -> {
                     if (!Repository.get.isUserLoggedIn()) {
@@ -163,20 +167,6 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         checkpreSelect(intent)
-
-
-      /*  val tokenTv = findViewById<TextView>(R.id.fcm_token)
-        findViewById<View>(R.id.renew).setOnClickListener {
-            findViewById<TextView>(R.id.s_data).text = GolosServicesGateWayImpl.instance.toString()
-            tokenTv.text = PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", null)
-        }
-        findViewById<View>(R.id.copy).setOnClickListener {
-            (getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.primaryClip = ClipData.newPlainText("",
-                    PreferenceManager.getDefaultSharedPreferences(baseContext).getString("token", "")
-                    ?: "")
-        }*/
-
-
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -230,6 +220,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
         const val STORIES_FRAGMENT_POSITION = 0
         const val FILTERED_BY_TAG_STORIES = 1
         const val PROFILE_FRAGMENT_POSITION = 3
+        const val NOTIFICATIONS_HISTORY = 2
         const val STARTED_FROM_NOTIFICATION = "STARTED_FROM_NOTIFICATION"
         const val PRESELECT_FEED_TYPE = "SHOW_FEED_TYPE"
 

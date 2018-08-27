@@ -35,6 +35,15 @@ data class GolosEventRequest(
         //from 1 to 100
         val limit: Int = 40,
         @JsonProperty("types")
+        val types: List<String>) : GolosServicesRequest()
+
+data class GolosAllEventRequest(
+        @JsonProperty("fromId")
+        val fromId: String? = null,
+        @JsonProperty("limit")
+        //from 1 to 100
+        val limit: Int = 40,
+        @JsonProperty("types")
         val types: String = "all") : GolosServicesRequest()
 
 

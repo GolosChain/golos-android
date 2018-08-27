@@ -12,7 +12,7 @@ import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.screens.tags.fragments.TagsListFragment
 import io.golos.golos.screens.tags.fragments.UserListFragment
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.utils.StringSupplier
+import io.golos.golos.utils.StringProvider
 
 class TagsAndUsersPager @JvmOverloads constructor(context: Context,
                                                   attrs: AttributeSet? = null) : ViewPager(context, attrs) {
@@ -27,7 +27,7 @@ class TagsAndUsersPager @JvmOverloads constructor(context: Context,
             val adapter = Adapter(supportActivity.supportFragmentManager,
                     mTagsListFragment,
                     mUserListFragment,
-                    object : StringSupplier {
+                    object : StringProvider {
                         override fun get(resId: Int, args: String?): String {
                             return context.getString(resId, args)
                         }
@@ -64,7 +64,7 @@ class TagsAndUsersPager @JvmOverloads constructor(context: Context,
     class Adapter(fm: FragmentManager,
                   val tagsListFragment: TagsListFragment,
                   val userListFragment: UserListFragment,
-                  val stringSupplier: StringSupplier) : FragmentPagerAdapter(fm) {
+                  val stringSupplier: StringProvider) : FragmentPagerAdapter(fm) {
         override fun getItem(position: Int): Fragment {
             return when (position) {
                 0 -> tagsListFragment

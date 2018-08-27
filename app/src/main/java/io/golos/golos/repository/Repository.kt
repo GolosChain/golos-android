@@ -15,6 +15,8 @@ import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
+import io.golos.golos.repository.services.EventType
+import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -34,7 +36,12 @@ interface UserDataProvider {
     val appUserData: LiveData<AppUserData>
 }
 
-abstract class Repository : UserDataProvider {
+interface EventsProvider {
+    fun getEvents(type: List<EventType>?):LiveData<List<GolosEvent>>
+    fun requestEventsUpdate(type: List<EventType>?, fromId: String? = null, limit: Int = 40)
+}
+
+abstract class Repository : UserDataProvider, EventsProvider {
 
     companion object {
         private var instance: Repository? = null

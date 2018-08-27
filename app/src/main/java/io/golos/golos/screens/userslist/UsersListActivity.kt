@@ -48,7 +48,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mViewModel.onCreate(intent.getStringExtra(USERNAME_TAG),
                 if (intent.hasExtra(STORY_ID_TAG)) intent.getLongExtra(STORY_ID_TAG, 0L) else null,
                 type,
-                object : StringSupplier {
+                object : StringProvider {
                     override fun get(resId: Int, args: String?): String {
                         return getString(resId, args)
                     }

@@ -11,7 +11,10 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
 import android.text.Html
+import android.view.KeyEvent
 import android.widget.Toast
+import io.golos.golos.BuildConfig
+import io.golos.golos.EActivity
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.utils.ErrorCode
@@ -48,6 +51,21 @@ abstract class GolosActivity : AppCompatActivity() {
             if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)
         })
     }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (BuildConfig.DEBUG) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    startActivity(Intent(this, EActivity::class.java))
+                    return true
+                }
+            }
+        }
+
+
+        return super.onKeyDown(keyCode, event)
+    }
+
 
     override fun onResume() {
         super.onResume()

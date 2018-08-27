@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor
 
 import io.golos.golos.R
-import io.golos.golos.utils.StringSupplier
+import io.golos.golos.utils.StringProvider
 import io.golos.golos.utils.StringValidator
 
 /**
@@ -17,7 +17,7 @@ cats.find(c => '18+' !== c && !/^[a-zа-яё-ґєії]/.test(c)) ? tt('category_
 
 cats.find(c => '18+' !== c && !/[a-zа-яё0-9ґєії]$/.test(c)) ? tt('category_selector_jsx.must_end_with_a_letter_or_number') :
  */
-class TagsStringValidator(private val supplier: StringSupplier) : StringValidator {
+class TagsStringValidator(private val supplier: StringProvider) : StringValidator {
     override fun validate(input: String): Pair<Boolean, String> {
         val input = input.trim().replace(Regex("\\s+"), " ")
         val out = ArrayList(input.split(" "))

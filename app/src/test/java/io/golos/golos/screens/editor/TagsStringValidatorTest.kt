@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor
 
 import io.golos.golos.R
-import io.golos.golos.utils.StringSupplier
+import io.golos.golos.utils.StringProvider
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -15,7 +15,7 @@ class TagsStringValidatorTest {
 
     @Test
     fun validate() {
-        val validator = TagsStringValidator(object : StringSupplier {
+        val validator = TagsStringValidator(object : StringProvider {
             override fun get(id: Int, args: String?): String {
                 return when (id) {
                     R.string.use_only_one_dash -> use_only_one_dash
