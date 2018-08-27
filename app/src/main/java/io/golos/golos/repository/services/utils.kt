@@ -11,7 +11,7 @@ private class Success(@JsonProperty("status") val status: String)
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-private class EventData(val data: List<Event>)
+private class EventData(@JsonProperty("data") val data: List<Event>)
 
 enum class EventType {
     VOTE, FLAG, TRANSFER, REPLY, SUBSCRIBE, UNSUBSCRIBE, MENTION, REPOST, AWARD, CURATOR_AWARD, MESSAGE,

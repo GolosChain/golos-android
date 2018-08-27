@@ -115,6 +115,7 @@ class GolosServicesImpl(
             if (!needToSubscribeToPushes(token)) return@execute
             try {
                 mGolosServicesGateWay.subscribeOnNotifications(token.newToken)
+                notificationsPersister.setUserSubscribedOnNotificationsThroughServices(true)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -160,7 +161,10 @@ class GolosServicesImpl(
                         set.clear()
                         set.addAll(it.value)
                         set.addAll(mEventsMap[it.key]!!.value.orEmpty())
-                        mEventsMap[it.key]!!.value = set.toList()
+                        val list = set.toList()
+                        mainThreadExecutor.execute {
+                            mEventsMap[it.key]!!.value = list
+                        }
                     }
                 }
             } catch (e: Exception) {

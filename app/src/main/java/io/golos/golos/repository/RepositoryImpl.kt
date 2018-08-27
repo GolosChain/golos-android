@@ -126,9 +126,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         }).observeForever({})
         mNotificationsRepository =
-                notificationsRepository ?: PushNotificationsRepositoryImpl()
+                notificationsRepository ?: PushNotificationsRepositoryImpl(mUserSettings)
 
-        mGolosServices = golosServices ?: GolosServicesImpl()
+        mGolosServices = golosServices ?: GolosServicesImpl(userDataProvider = object : UserDataProvider {
+            override val appUserData: LiveData<AppUserData>
+                get() = this@RepositoryImpl.appUserData
+        })
     }
 
     override fun onAppCreate(ctx: Context) {

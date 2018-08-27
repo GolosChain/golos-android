@@ -51,6 +51,7 @@ public class KnifeParser {
 
     public static Spanned fromHtml(String source, @Nullable SpanFactory spanFactory) {
         source = source
+
                 .replaceAll("blockquote>", QUOTE + ">")
                 .replaceAll("h\\d>", HEADER + ">")
                 .replaceAll("<li><br><p>", "<li>")
@@ -276,6 +277,7 @@ public class KnifeParser {
             }
         }
     }
+
     private static void withinContent(StringBuilder out, Spanned text, int start, int end) {
         int next;
 

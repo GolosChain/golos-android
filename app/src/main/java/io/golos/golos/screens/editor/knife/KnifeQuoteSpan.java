@@ -18,10 +18,8 @@ package io.golos.golos.screens.editor.knife;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.os.Parcel;
 import android.text.Layout;
 import android.text.style.LeadingMarginSpan;
-import android.text.style.QuoteSpan;
 
 public class KnifeQuoteSpan implements LeadingMarginSpan {
     private static final int DEFAULT_STRIPE_WIDTH = 2;
@@ -38,20 +36,6 @@ public class KnifeQuoteSpan implements LeadingMarginSpan {
         this.quoteGapWidth = quoteGapWidth != 0 ? quoteGapWidth : DEFAULT_GAP_WIDTH;
     }
 
-    public KnifeQuoteSpan(Parcel src) {
-       // super(src);
-        this.quoteColor = src.readInt();
-        this.quoteStripeWidth = src.readInt();
-        this.quoteGapWidth = src.readInt();
-    }
-
- /*   @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(quoteColor);
-        dest.writeInt(quoteStripeWidth);
-        dest.writeInt(quoteGapWidth);
-    }*/
 
     @Override
     public int getLeadingMargin(boolean first) {
@@ -63,7 +47,7 @@ public class KnifeQuoteSpan implements LeadingMarginSpan {
                                   int top, int baseline, int bottom,
                                   CharSequence text, int start, int end,
                                   boolean first, Layout layout) {
-        if (!first)return;
+
         Paint.Style style = p.getStyle();
         int color = p.getColor();
 

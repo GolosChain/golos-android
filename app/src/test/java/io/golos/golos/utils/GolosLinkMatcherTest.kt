@@ -19,5 +19,8 @@ class GolosLinkMatcherTest {
         Assert.assertTrue(result is StoryLinkMatch)
         Assert.assertEquals(StoryLinkMatch("vood.one", null,
                 "istoriya-o-tom-kak-ryzhevolosye-varvary-okno-v-yaponiyu-prorubali-chast-2-davlenie-ameriki-i-okonchatelnyi-krakh-izolyacii"), result)
+
+        result = GolosLinkMatcher.match("https://golos.io/goldvoice/@t3ran13/obshchenie-s-predstavitelyami-golosio-goloscore-i-cyberfund")
+        Assert.assertTrue(result is StoryLinkMatch)
     }
 }

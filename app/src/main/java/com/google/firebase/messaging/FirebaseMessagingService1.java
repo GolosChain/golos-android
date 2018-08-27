@@ -12,15 +12,15 @@ import android.os.Bundle;
 import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.google.android.gms.common.internal.Hide;
 import com.google.firebase.iid.zzb;
 import com.google.firebase.iid.zzk;
 import com.google.firebase.iid.zzz;
+
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Queue;
-
-import timber.log.Timber;
 
 public class FirebaseMessagingService1 extends zzb {
     private static final Queue<String> zzoma = new ArrayDeque(10);
@@ -52,7 +52,7 @@ public class FirebaseMessagingService1 extends zzb {
     public final boolean zzq(Intent var1) {
         if ("com.google.firebase.messaging.NOTIFICATION_OPEN".equals(var1.getAction())) {
             PendingIntent var4;
-            if ((var4 = (PendingIntent)var1.getParcelableExtra("pending_intent")) != null) {
+            if ((var4 = (PendingIntent) var1.getParcelableExtra("pending_intent")) != null) {
                 try {
                     var4.send();
                 } catch (CanceledException var5) {
@@ -78,7 +78,7 @@ public class FirebaseMessagingService1 extends zzb {
         }
 
         byte var4 = -1;
-        switch(var2.hashCode()) {
+        switch (var2.hashCode()) {
             case 75300319:
                 if (var2.equals("com.google.firebase.messaging.NOTIFICATION_DISMISS")) {
                     var4 = 1;
@@ -93,7 +93,7 @@ public class FirebaseMessagingService1 extends zzb {
         String var10001;
         String var10002;
         String var10003;
-        switch(var4) {
+        switch (var4) {
             case 0:
                 String var7;
                 String var8;
@@ -131,7 +131,7 @@ public class FirebaseMessagingService1 extends zzb {
                     }
 
                     byte var12 = -1;
-                    switch(var10.hashCode()) {
+                    switch (var10.hashCode()) {
                         case -2062414158:
                             if (var10.equals("deleted_messages")) {
                                 var12 = 1;
@@ -153,10 +153,15 @@ public class FirebaseMessagingService1 extends zzb {
                             }
                     }
 
-                    switch(var12) {
+                    switch (var12) {
                         case 0:
                             if (zzal(var1.getExtras())) {
-                                zzd.zzf(this, var1);
+                                try {
+                                    zzd.zzf(this, var1);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
                             }
 
                             Bundle var17;
@@ -165,14 +170,18 @@ public class FirebaseMessagingService1 extends zzb {
                             }
 
                             var17.remove("android.support.content.wakelockid");
-                           if (zza.zzai(var17)) {
+                            if (zza.zzai(var17)) {
                               /*  if (zza.zzfc(this).zzt(var17)) {
                                     this.onMessageReceived(new RemoteMessage(var17));
                                     break;
                                 }*/
 
-                                if (zzal(var17)) {
-                                    zzd.zzi(this, var1);
+                                try {
+                                    if (zzal(var17)) {
+                                        zzd.zzi(this, var1);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             }
 
@@ -237,9 +246,9 @@ public class FirebaseMessagingService1 extends zzb {
     static void zzr(Bundle var0) {
         Iterator var1 = var0.keySet().iterator();
 
-        while(var1.hasNext()) {
+        while (var1.hasNext()) {
             String var2;
-            if ((var2 = (String)var1.next()) != null && var2.startsWith("google.c.")) {
+            if ((var2 = (String) var1.next()) != null && var2.startsWith("google.c.")) {
                 var1.remove();
             }
         }
