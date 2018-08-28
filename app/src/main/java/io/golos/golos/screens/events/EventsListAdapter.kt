@@ -13,16 +13,16 @@ import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
 
-class EventsListAdapter(notifications: List<GolosEvent>,
+class EventsListAdapter(notifications: List<EventsListItem>,
                         var clickListener: (GolosEvent) -> Unit = {},
                         private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
-    : RecyclerView.Adapter<EventsListAdapter.EventsListAdapterViewHolder>() {
+    : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal data class NotificationWrapper(val notification: GolosEvent,
                                             val clickListener: (GolosViewHolder) -> Unit,
                                             val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
 
-    var notification = notifications
+    var items = notifications
         set(value) {
 
             val oldValue = field
@@ -30,7 +30,7 @@ class EventsListAdapter(notifications: List<GolosEvent>,
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
 
-                    return oldValue[oldItemPosition].id == value[newItemPosition].id
+                    return oldValue[oldItemPosition] == value[newItemPosition]
                 }
 
 
@@ -48,18 +48,31 @@ class EventsListAdapter(notifications: List<GolosEvent>,
         }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventsListAdapterViewHolder {
-        return EventsListAdapterViewHolder(parent)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            R.layout.vh_event_date_delimeter -> EventDateViewHolder(parent)
+            R.layout.vh_event -> EventsListAdapterViewHolder(parent)
+            else -> throw IllegalStateException("unknown type")
+        }
     }
 
-    override fun getItemCount() = notification.size
+    override fun getItemCount() = items.size
 
 
-    override fun onBindViewHolder(holder: EventsListAdapterViewHolder, position: Int) {
-        holder.state = NotificationWrapper(notification[position],
-                { clickListener.invoke(notification[it.adapterPosition]) })
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = items[position]
+        if (item is EventContainingItem) {
+            (holder as EventsListAdapterViewHolder).state = NotificationWrapper(item.event,
+                    { clickListener.invoke((items[it.adapterPosition] as EventContainingItem).event) })
+        } else if (item is DateMarkContainingItem) {
+            (holder as EventDateViewHolder).dateString = item.date
+        }
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if (items[position] is EventContainingItem) R.layout.vh_event
+        else R.layout.vh_event_date_delimeter
+    }
 
     class EventsListAdapterViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.vh_event, parent) {
         private val mImage: ImageView = itemView.findViewById(R.id.image_iv)
@@ -105,6 +118,15 @@ class EventsListAdapter(notifications: List<GolosEvent>,
                 }
                 mText.text = appearance.body
                 mImage.setImageResource(appearance.iconId)
+            }
+    }
+
+    class EventDateViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.vh_event_date_delimeter, parent) {
+        private val mDateText = itemView.findViewById<TextView>(R.id.text)
+        var dateString: String = ""
+            set(value) {
+                field = value
+                mDateText.text = value
             }
     }
 }

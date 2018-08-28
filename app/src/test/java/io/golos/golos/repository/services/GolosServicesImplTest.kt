@@ -62,7 +62,7 @@ class GolosServicesImplTest {
         assert(mGolosServiceApi.getEvents().value.orEmpty().isNotEmpty())
         print(mGolosServiceApi.getEvents().value)
 
-        mGolosServiceApi.getEvents(EventType.VOTE).value.orEmpty().let { assert(it.isNotEmpty()) }
+        mGolosServiceApi.getEvents(listOf(EventType.VOTE)).value.orEmpty().let { assert(it.isNotEmpty()) }
 
         assert(MockPersister.isUserSubscribedOnNotificationsThroughServices())
 
@@ -70,7 +70,7 @@ class GolosServicesImplTest {
 
         assert(mGolosServiceApi.getEvents().value.orEmpty().isEmpty())
         EventType.values().forEach {
-            mGolosServiceApi.getEvents(it).value.orEmpty().let { assert(it.isEmpty()) }
+            mGolosServiceApi.getEvents(listOf(it)).value.orEmpty().let { assert(it.isEmpty()) }
         }
         assert(!MockPersister.isUserSubscribedOnNotificationsThroughServices())
 

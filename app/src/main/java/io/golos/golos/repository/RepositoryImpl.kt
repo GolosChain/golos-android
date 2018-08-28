@@ -48,12 +48,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
                               notificationsRepository: PushNotificationsRepositoryImpl? = null,
+                              avatarsRepository: AvatarRepository? = null,
                               golosServices: GolosServices? = null,
                               private val mHtmlizer: Htmlizer = KnifeHtmlizer,
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
                               private val mLogger: ExceptionLogger?) : Repository() {
 
     private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
+    private val mAvatarsRepository: AvatarRepository
 
     private val mAppReadyStatusLiveData = MutableLiveData<ReadyStatus>()
 
@@ -134,6 +136,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             override val appUserData: LiveData<AppUserData>
                 get() = this@RepositoryImpl.appUserData
         })
+        mAvatarsRepository = avatarsRepository ?: AvatarRepositoryImpl(mPersister, mGolosApi)
     }
 
     override fun onAppCreate(ctx: Context) {
@@ -155,6 +158,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             deleteUserdata()
         }
         mGolosServices.setUp()
+        mAvatarsRepository.setUp()
     }
 
     @WorkerThread

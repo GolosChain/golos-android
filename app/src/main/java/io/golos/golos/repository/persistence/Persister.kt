@@ -1,12 +1,12 @@
 package io.golos.golos.repository.persistence
 
 import android.content.Context
-import android.preference.PreferenceManager
 import android.util.Base64
 import com.crashlytics.android.Crashlytics
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
+import io.golos.golos.repository.AvatarPersister
 import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryRequest
@@ -24,15 +24,7 @@ import kotlin.collections.HashMap
 /**
  * Created by yuri on 06.11.17.
  */
-abstract class Persister : NotificationsPersister {
-
-    abstract fun saveAvatarPathForUser(userAvatar: UserAvatar)
-
-    abstract fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>)
-
-    abstract fun getAvatarForUser(userName: String): Pair<String, Long>?
-
-    abstract fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?>
+abstract class Persister : NotificationsPersister, AvatarPersister {
 
     abstract fun getCurrentUserName(): String?
 
@@ -101,6 +93,10 @@ private class OnDevicePersister(private val context: Context) : Persister() {
 
     override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
         return mPreference.getBoolean("setUserSubscribedOnNotificationsThroughServices", false)
+    }
+
+    override fun getAllAvatars(): List<UserAvatar> {
+        return mDatabase.getAllAvatars()
     }
 
     override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
@@ -203,7 +199,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
             userData.privateActiveWif = keys[PrivateKeyType.ACTIVE]
             userData.privatePostingWif = keys[PrivateKeyType.POSTING]
             return userData
-        }catch (e:Exception){
+        } catch (e: Exception) {
             return null
         }
     }
@@ -232,12 +228,16 @@ private class MockPersister : Persister() {
 
     }
 
+    override fun getAllAvatars(): List<UserAvatar> {
+        return emptyList()
+    }
+
     override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
         return true
     }
 
     override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {

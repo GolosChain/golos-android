@@ -127,6 +127,11 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         DiscussionItemsTable.deleteAll(writableDatabase)
     }
 
+    fun getAllAvatars(): List<UserAvatar> {
+        return AvatarsTable.getAllAvatars(writableDatabase)
+
+    }
+
     private object AvatarsTable {
         private val databaseName = "avatars"
         private val avatarPathColumn = "avatar_path"
@@ -220,6 +225,30 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             }
 
             return map
+        }
+
+        fun getAllAvatars(db: SQLiteDatabase): List<UserAvatar> {
+            val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
+                    " * ", null, null, null, null)
+            if (cursor.count == 0) {
+                cursor.close()
+                return emptyList()
+            }
+            val out = ArrayList<UserAvatar>(100)
+            cursor.moveToFirst()
+            while (!cursor.isAfterLast) {
+                val name = cursor.getString(userNameColumn)
+                if (name != null) {
+                    val avatar = UserAvatar(name,
+                            cursor.getString(avatarPathColumn),
+                            cursor.getLong(dateColumn))
+                    out.add(avatar)
+                }
+
+                cursor.moveToNext()
+            }
+            cursor.close()
+            return out
         }
     }
 

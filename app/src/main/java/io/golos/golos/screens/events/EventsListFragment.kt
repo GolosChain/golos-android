@@ -14,28 +14,26 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.screens.widgets.GolosFragment
-import io.golos.golos.utils.getColorCompat
-import io.golos.golos.utils.setViewGone
-import io.golos.golos.utils.setViewVisible
-import io.golos.golos.utils.toArrayList
+import io.golos.golos.utils.*
 
-class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<EventsList> {
+class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItem>> {
 
 
-    override fun onChanged(t: EventsList?) {
+    override fun onChanged(t: List<EventsListItem>?) {
         t?.let { eventsList ->
-            val events = eventsList.events
+
             if (mSwipeToRefresh?.isRefreshing == true) mSwipeToRefresh?.isRefreshing = false
-            if (events.isEmpty()) {
+            if (eventsList.isEmpty()) {
                 mSwipeToRefresh?.setViewGone()
                 mLabel?.setViewVisible()
             } else {
                 mSwipeToRefresh?.setViewVisible()
                 mLabel?.setViewGone()
-                (mRecycler?.adapter as?  EventsListAdapter)?.notification = events
+                (mRecycler?.adapter as?  EventsListAdapter)?.items = eventsList
             }
         }
     }
+
 
     override fun onRefresh() {
         mViewModel?.requestUpdate()
@@ -71,9 +69,13 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel?.onCreate(getEventTypes(arguments ?: return), Repository.get)
+        mViewModel?.onCreate(getEventTypes(arguments
+                ?: return), Repository.get, EventsSorterUseCase(object : StringProvider {
+            override fun get(resId: Int, args: String?) = getString(resId, args)
+        }))
         mViewModel?.eventsList?.observe(this, this)
     }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable("EventsListFragmentIS", mRecycler?.layoutManager?.onSaveInstanceState())

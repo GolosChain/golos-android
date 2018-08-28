@@ -1,6 +1,7 @@
 package io.golos.golos.repository.api
 
 import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
+import io.golos.golos.repository.AvatarsApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
@@ -9,7 +10,7 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import java.io.File
 
 
-abstract class GolosApi {
+abstract class GolosApi : AvatarsApi {
 
     companion object {
         private var instance: GolosApi? = null
@@ -23,8 +24,6 @@ abstract class GolosApi {
             }
     }
 
-
-    abstract fun getUserAvatars(names: List<String>): Map<String, String?>
 
     abstract fun getStory(blog: String,
                           author: String,

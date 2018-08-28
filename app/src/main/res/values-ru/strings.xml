@@ -237,6 +237,7 @@
     <string name="social">Социальные</string>
     <string name="mentions">Упоминания</string>
     <string name="empty">Поска здесь пусто</string>
+    <string name="yestarday">Вчера</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

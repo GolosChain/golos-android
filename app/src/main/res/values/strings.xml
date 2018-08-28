@@ -236,6 +236,7 @@
     <string name="social">Social</string>
     <string name="mentions">Mentions</string>
     <string name="empty">Empty</string>
+    <string name="yesterday">Yesterday</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

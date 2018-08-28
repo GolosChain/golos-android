@@ -1,9 +1,6 @@
 package io.golos.golos.screens.events
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.*
 import android.support.v4.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.EventsProvider
@@ -24,15 +21,19 @@ class EventsViewModel : ViewModel(), Observer<List<GolosEvent>> {
     }
 
     private val mEventsList = MutableLiveData<EventsList>()
-    val eventsList = mEventsList as LiveData<EventsList>
+    val eventsList: LiveData<List<EventsListItem>> = Transformations.map(mEventsList, {
+        getSorter()?.getListItems(it.events)
+    })
     private var mEventsProvider: EventsProvider? = null
     private var mEventTypes: List<EventType>? = null
+    private var mEventsSorter: EventsSorterUseCase? = null
 
     fun onCreate(eventTypes: List<EventType>?,
-                 eventsProvider: EventsProvider) {
+                 eventsProvider: EventsProvider,
+                 eventsSorter: EventsSorterUseCase?) {
         mEventsProvider = eventsProvider
         mEventTypes = eventTypes
-
+        mEventsSorter = eventsSorter
         onChanged(mEventsProvider?.getEvents(mEventTypes)?.value)
     }
 
@@ -42,6 +43,8 @@ class EventsViewModel : ViewModel(), Observer<List<GolosEvent>> {
             mEventsProvider?.requestEventsUpdate(mEventTypes)
         }
     }
+
+    private fun getSorter() = mEventsSorter
 
     fun onScrollToTheEnd() {
         mEventsProvider?.requestEventsUpdate(mEventTypes,
