@@ -30,11 +30,11 @@
                           <map>
                             <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="d1d1d6" />
-                            <entry key="height" value="40" />
-                            <entry key="outputName" value="ic_witnesscancelvote_w_40dp" />
+                            <entry key="height" value="20" />
+                            <entry key="outputName" value="ic_comment_small" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="$USER_HOME$/Downloads/icon_app_golos/ic_witnessCancelVote_w.svg" />
-                            <entry key="width" value="40" />
+                            <entry key="sourceFile" value="$USER_HOME$/Downloads/ic_comment_small.svg" />
+                            <entry key="width" value="20" />
                           </map>
                         </option>
                       </PersistentState>

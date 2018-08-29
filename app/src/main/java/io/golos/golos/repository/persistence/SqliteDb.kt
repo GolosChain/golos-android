@@ -229,7 +229,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
         fun getAllAvatars(db: SQLiteDatabase): List<UserAvatar> {
             val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
-                    " * ", null, null, null, null)
+                    null, null, null, null, null)
             if (cursor.count == 0) {
                 cursor.close()
                 return emptyList()

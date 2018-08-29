@@ -13,7 +13,6 @@ interface AvatarRepository {
 
     fun requestAvatarsUpdate(forUsers: List<String>)
 
-    fun setUp()
 }
 
 interface AvatarPersister {
@@ -40,19 +39,17 @@ class AvatarRepositoryImpl(private val persister: AvatarPersister,
     private val mAvatars = MutableLiveData<Map<String, String?>>()
 
 
-    override fun setUp() {
+    fun setUp() {
         workerExecutor.execute {
             val avatars = persister.getAllAvatars()
             val currentTime = System.currentTimeMillis()
             val map = HashMap<String, String?>(avatars.size)
-            avatars.forEach({
+            avatars.forEach {
                 val userName = it.userName
                 if (currentTime < (it.dateUpdated + mAvatarRefreshDelay)) {
                     map[userName] = it.avatarPath
-                } else {
-                    map[userName] = null
                 }
-            })
+            }
             mainThreadExecutor.execute {
                 mAvatars.value = map
             }
@@ -68,7 +65,8 @@ class AvatarRepositoryImpl(private val persister: AvatarPersister,
 
         workerExecutor.execute {
             val userList = forUsers.toSet().toList()
-            api.getUserAvatars(userList)
+            api.getUserAvatars(userList
+                    .filter { !mAvatars.value.orEmpty().containsKey(it) })
                     .takeIf { it.isNotEmpty() }
                     ?.let {
                         val all = HashMap(it)

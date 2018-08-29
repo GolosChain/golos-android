@@ -23,6 +23,9 @@ object MockPersister : Persister() {
 
     }
 
+    override fun getAllAvatars(): List<UserAvatar> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun isUserSubscribedOnNotificationsThroughServices(): Boolean = isUserSubscribedOnNotificationsThroughServices
 

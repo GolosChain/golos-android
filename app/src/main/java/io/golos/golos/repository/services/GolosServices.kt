@@ -13,9 +13,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserDataProvider
 import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.persistence.Persister
-import io.golos.golos.utils.JsonRpcError
-import io.golos.golos.utils.MainThreadExecutor
-import io.golos.golos.utils.rpcErrorFromCode
+import io.golos.golos.utils.*
 import timber.log.Timber
 import java.util.TreeSet
 import java.util.concurrent.Executor
@@ -36,7 +34,8 @@ interface GolosServices {
             /**null if update all events**/
             eventTypes: List<EventType>? = null,
             fromId: String? = null,
-            limit: Int? = 100)
+            limit: Int? = 20,
+            completionHandler: (Unit, GolosError?) -> Unit)
 }
 
 class GolosServicesImpl(
@@ -65,12 +64,12 @@ class GolosServicesImpl(
 
 
     override fun setUp() {
-        tokenProvider.tokenLiveData.observeForever({
+        tokenProvider.tokenLiveData.observeForever {
             onTokenOrAuthStateChanged()
-        })
-        userDataProvider.appUserData.observeForever({
+        }
+        userDataProvider.appUserData.observeForever {
             onTokenOrAuthStateChanged()
-        })
+        }
 
         instance = this
     }
@@ -109,7 +108,7 @@ class GolosServicesImpl(
     @WorkerThread
     private fun onAuthComplete() {
         subscribeToPushIfNeeded()
-        requestEventsUpdate()
+        requestEventsUpdate(completionHandler = { _, _ -> })
     }
 
     private fun subscribeToPushIfNeeded() {
@@ -141,14 +140,15 @@ class GolosServicesImpl(
         } else {
             val liveData = MediatorLiveData<List<GolosEvent>>()
             val allData = TreeSet<GolosEvent>()
+            val set = TreeSet<GolosEvent>()
 
             eventType.forEach {
-                liveData.addSource(mEventsMap[it] as LiveData<List<GolosEvent>>, {
-                    val set = TreeSet<GolosEvent>()
+                liveData.addSource(mEventsMap[it] as LiveData<List<GolosEvent>>) {
+                    set.clear()
                     set.addAll(liveData.value ?: emptyList())
                     set.addAll(it ?: emptyList())
                     liveData.value = set.toList()
-                })
+                }
                 allData.addAll(mEventsMap[it]!!.value.orEmpty())
             }
 
@@ -157,7 +157,10 @@ class GolosServicesImpl(
         }
     }
 
-    override fun requestEventsUpdate(eventTypes: List<EventType>?, fromId: String?, limit: Int?) {
+    override fun requestEventsUpdate(eventTypes: List<EventType>?,
+                                     fromId: String?,
+                                     limit: Int?,
+                                     completionHandler: (Unit, GolosError?) -> Unit) {
         workerExecutor.execute {
             try {
                 val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, limit)
@@ -193,11 +196,13 @@ class GolosServicesImpl(
                         allEvents.value = set.toList()
                     }
                 }
+                mainThreadExecutor.execute { completionHandler(Unit, null) }
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (e is GolosServicesException) {
                     reauthIfNeeded(e)
                 }
+                mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
             }
         }
     }

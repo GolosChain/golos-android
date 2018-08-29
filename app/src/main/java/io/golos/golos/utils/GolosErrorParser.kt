@@ -2,6 +2,7 @@ package io.golos.golos.utils
 
 import eu.bittrade.libs.golosj.exceptions.*
 import io.golos.golos.R
+import io.golos.golos.repository.services.GolosServicesException
 import timber.log.Timber
 import java.security.InvalidParameterException
 
@@ -12,6 +13,7 @@ object GolosErrorParser {
     fun parse(e: Exception): GolosError {
         e.printStackTrace()
         return when (e) {
+            is GolosServicesException -> GolosError(ErrorCode.ERROR_INTERNAL_SERVER, e.golosServicesError.message, null)
             is SteemResponseError -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, GolosErrorParser.getLocalizedError(e))
             is SteemInvalidTransactionException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.message, null)
             is SteemTimeoutException -> GolosError(ErrorCode.ERROR_SLOW_CONNECTION, null, R.string.slow_internet_connection)
@@ -39,7 +41,7 @@ object GolosErrorParser {
             return R.string.unknown_error
         }
 
-        Timber.e(" error?.error?.steemErrorDetails?.data? = ${ error?.error?.steemErrorDetails?.data}")
+        Timber.e(" error?.error?.steemErrorDetails?.data? = ${error?.error?.steemErrorDetails?.data}")
         val message = error?.error?.steemErrorDetails?.data?.toString()
                 ?: return R.string.unknown_error
 

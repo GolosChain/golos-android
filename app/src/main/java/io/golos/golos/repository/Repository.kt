@@ -37,11 +37,14 @@ interface UserDataProvider {
 }
 
 interface EventsProvider {
-    fun getEvents(type: List<EventType>?):LiveData<List<GolosEvent>>
-    fun requestEventsUpdate(type: List<EventType>?, fromId: String? = null, limit: Int = 40)
+    fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>>
+    fun requestEventsUpdate(type: List<EventType>?,
+                            fromId: String? = null,
+                            limit: Int = 40,
+                            completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 }
 
-abstract class Repository : UserDataProvider, EventsProvider {
+abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
 
     companion object {
         private var instance: Repository? = null

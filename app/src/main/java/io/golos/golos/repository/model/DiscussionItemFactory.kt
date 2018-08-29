@@ -9,9 +9,9 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
-import io.golos.golos.utils.isNullOrEmpty
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -23,7 +23,7 @@ object DiscussionItemFactory {
         val url = discussion.url ?: ""
         val id = discussion.id
         val title = discussion.title ?: ""
-        val categoryName = discussion.category?:""
+        val categoryName = discussion.category ?: ""
 
         val votesNum = discussion.netVotes
         val commentsCount = discussion.children
@@ -71,7 +71,7 @@ object DiscussionItemFactory {
         val id = discussion.id
         val title = discussion.title ?: ""
 
-        val categoryName = discussion.category?:""
+        val categoryName = discussion.category ?: ""
 
         val votesNum = discussion.netVotes
         val commentsCount = discussion.children
@@ -108,18 +108,28 @@ object DiscussionItemFactory {
 
     private fun getMetadataFromItem(tags: String): GolosDiscussionItemMetadata {
         val metadata = GolosDiscussionItemMetadata()
-        if (tags.isNullOrEmpty())return metadata
+        if (tags.isNullOrEmpty()) return metadata
 
         var json: JSONObject? = null
         try {
             json = JSONObject(tags)
             if (json.has("tags")) {
-                val tagsArray = json.getJSONArray("tags")
-                if (tagsArray.length() > 0) {
-                    (0 until tagsArray.length())
-                            .mapTo(metadata.tags)
-                            { tagsArray[it].toString() }
+
+                val tagsJson = json["tags"]
+                val tagsList = ArrayList<String>()
+
+
+                if (tagsJson is JSONArray) {
+                    (0 until tagsJson.length())
+                            .forEach {
+                                tagsList.add(tagsJson[it].toString())
+                            }
+                } else if (tagsJson is String) {
+                    tagsJson.split(" ").let { tagsList.addAll(it) }
                 }
+
+                metadata.tags.addAll(tagsList)
+
             }
         } catch (e: JSONException) {
             Timber.e(tags)

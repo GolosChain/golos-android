@@ -19,8 +19,8 @@ import java.util.*
 
 class CustomJsonDateDeserializer : JsonDeserializer<Long>() {
 
-    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
-        timeZone = TimeZone.getDefault()
+    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").apply {
+        timeZone = TimeZone.getTimeZone("GMT")
     }
 
     @Throws(IOException::class, JsonProcessingException::class)
@@ -146,7 +146,14 @@ private fun String.makeLinkFromPermlink(): PostLinkExtractedData? {
 
 sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int) : Comparable<GolosEvent> {
 
+    var avatarPath: String? = null
+
     override fun compareTo(other: GolosEvent) = -Longs.compare(this.creationTime, other.creationTime)
+
+    override fun toString(): String {
+        return "GolosEvent(id='$id', creationTime=$creationTime, counter=$counter, avatarPath=$avatarPath)"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosEvent) return false
@@ -154,6 +161,7 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
         if (id != other.id) return false
         if (creationTime != other.creationTime) return false
         if (counter != other.counter) return false
+        if (avatarPath != other.avatarPath) return false
 
         return true
     }
@@ -162,8 +170,10 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
         var result = id.hashCode()
         result = 31 * result + creationTime.hashCode()
         result = 31 * result + counter
+        result = 31 * result + (avatarPath?.hashCode() ?: 0)
         return result
     }
+
 
     companion object {
         fun fromEvent(event: Event): GolosEvent {
@@ -191,85 +201,364 @@ class GolosVoteEvent(id: String,
                      creationTime: Long,
                      counter: Int,
                      val permlink: String,
-                     val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable, Sourcable {
+                     val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable, Authorable {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosVoteEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosVoteEvent(permlink='$permlink', fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosFlagEvent(id: String, creationTime: Long, counter: Int,
-                     val permlink: String, val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+                     val permlink: String, val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Authorable {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosFlagEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosFlagEvent(permlink='$permlink', fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosTransferEvent(id: String, creationTime: Long, counter: Int,
-                         val amount: String, val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                         val amount: String, val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosTransferEvent) return false
+        if (!super.equals(other)) return false
+
+        if (amount != other.amount) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + amount.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosTransferEvent(amount='$amount', fromUsers=$fromUsers)"
+    }
 
 }
 
 class GolosSubscribeEvent(id: String, creationTime: Long, counter: Int,
-                          val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                          val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors(): List<String> = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosSubscribeEvent) return false
+        if (!super.equals(other)) return false
+
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosSubscribeEvent(fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosUnSubscribeEvent(id: String, creationTime: Long, counter: Int,
-                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors(): List<String> = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosUnSubscribeEvent) return false
+        if (!super.equals(other)) return false
+
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosUnSubscribeEvent(fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosReplyEvent(id: String, creationTime: Long, counter: Int,
                       val permlink: String,
                       val parentPermlink: String,
-                      val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+                      val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Authorable {
 
     override fun getLink() = PostLinkExtractedData(fromUsers.first(), null, permlink)
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosReplyEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (parentPermlink != other.parentPermlink) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + parentPermlink.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosReplyEvent(permlink='$permlink', parentPermlink='$parentPermlink', fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosMentionEvent(id: String, creationTime: Long, counter: Int,
                         val permlink: String, val parentPermlink: String,
-                        val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+                        val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Authorable {
     override fun getLink() = PostLinkExtractedData(fromUsers.first(), null, permlink)
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosMentionEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (parentPermlink != other.parentPermlink) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + parentPermlink.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosMentionEvent(permlink='$permlink', parentPermlink='$parentPermlink', fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosRepostEvent(id: String, creationTime: Long, counter: Int,
                        val permlink: String,
-                       val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Sourcable {
+                       val fromUsers: List<String>) : PostLinkable, GolosEvent(id, creationTime, counter), Authorable {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun getAuthors() = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosRepostEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosRepostEvent(permlink='$permlink', fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosAwardEvent(id: String, creationTime: Long, counter: Int,
                       val permlink: String,
                       val award: Award) : PostLinkable, GolosEvent(id, creationTime, counter) {
     override fun getLink() = permlink.makeLinkFromPermlink()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosAwardEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (award != other.award) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + award.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosAwardEvent(permlink='$permlink', award=$award)"
+    }
+
 }
 
 class GolosCuratorAwardEvent(id: String, creationTime: Long, counter: Int,
                              val permlink: String,
                              val award: Award) : PostLinkable, GolosEvent(id, creationTime, counter) {
     override fun getLink() = permlink.makeLinkFromPermlink()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosCuratorAwardEvent) return false
+        if (!super.equals(other)) return false
+
+        if (permlink != other.permlink) return false
+        if (award != other.award) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + award.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosCuratorAwardEvent(permlink='$permlink', award=$award)"
+    }
+
 }
 
 class GolosMessageEvent(id: String, creationTime: Long, counter: Int,
-                        val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                        val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors(): List<String> = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosMessageEvent) return false
+        if (!super.equals(other)) return false
+
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosMessageEvent(fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosWitnessVoteEvent(id: String, creationTime: Long, counter: Int,
-                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                            val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors(): List<String> = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosWitnessVoteEvent) return false
+        if (!super.equals(other)) return false
+
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosWitnessVoteEvent(fromUsers=$fromUsers)"
+    }
+
 }
 
 class GolosWitnessCancelVoteEvent(id: String, creationTime: Long, counter: Int,
-                                  val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Sourcable {
+                                  val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), Authorable {
     override fun getAuthors(): List<String> = fromUsers
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GolosWitnessCancelVoteEvent) return false
+        if (!super.equals(other)) return false
+
+        if (fromUsers != other.fromUsers) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + fromUsers.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "GolosWitnessCancelVoteEvent(fromUsers=$fromUsers)"
+    }
+
 }
 
 
-interface Sourcable {
+interface Authorable {
     fun getAuthors(): List<String>
 }
 

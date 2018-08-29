@@ -15,6 +15,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItem>> {
 
@@ -29,7 +30,10 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
             } else {
                 mSwipeToRefresh?.setViewVisible()
                 mLabel?.setViewGone()
-                (mRecycler?.adapter as?  EventsListAdapter)?.items = eventsList
+                mRecycler?.post {
+                    (mRecycler?.adapter as?  EventsListAdapter)?.items = eventsList
+                }
+
             }
         }
     }
@@ -43,6 +47,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     private var mSwipeToRefresh: SwipeRefreshLayout? = null
     private var mLabel: TextView? = null
     private var mViewModel: EventsViewModel? = null
+    private var mLoadingProgress: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_events_list, container, false)
@@ -51,12 +56,17 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         mSwipeToRefresh = view.findViewById(R.id.swipe_refresh)
         mLabel = view.findViewById(R.id.fullscreen_label)
         mViewModel = ViewModelProviders.of(this).get(EventsViewModel::class.java)
+        mLoadingProgress = view.findViewById(R.id.loading_progress)
         mSwipeToRefresh?.setOnRefreshListener(this)
         mSwipeToRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
 
         mRecycler?.adapter = EventsListAdapter(emptyList(), {
             mViewModel?.onEventClick(activity ?: return@EventsListAdapter, it)
+        },
+                { mViewModel?.onScrollToTheEnd() })
+        mViewModel?.updateState?.observe(this, Observer<Boolean> {
+
         })
         return view
     }
@@ -70,9 +80,11 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel?.onCreate(getEventTypes(arguments
-                ?: return), Repository.get, EventsSorterUseCase(object : StringProvider {
-            override fun get(resId: Int, args: String?) = getString(resId, args)
-        }))
+                ?: return), Repository.get,
+                EventsSorterUseCase(object : StringProvider {
+                    override fun get(resId: Int, args: String?) = getString(resId, args)
+                }),
+                Repository.get)
         mViewModel?.eventsList?.observe(this, this)
     }
 

@@ -121,14 +121,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             put(StoryRequest(FeedType.PROMO, null), MutableLiveData())
             put(StoryRequest(FeedType.UNCLASSIFIED, null), MutableLiveData())
         }
-        Transformations.map(mTags, {
+        Transformations.map(mTags) {
             workerExecutor.execute {
                 val lt = it.map { LocalizedTag(it) }
                 mMainThreadExecutor.execute {
                     mLocalizedTags.value = lt
                 }
             }
-        }).observeForever({})
+        }.observeForever({})
         mNotificationsRepository =
                 notificationsRepository ?: PushNotificationsRepositoryImpl(mUserSettings)
 
@@ -158,7 +158,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             deleteUserdata()
         }
         mGolosServices.setUp()
-        mAvatarsRepository.setUp()
+        (mAvatarsRepository as AvatarRepositoryImpl).setUp()
     }
 
     @WorkerThread
@@ -171,6 +171,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return null
     }
 
+    override val avatars: LiveData<Map<String, String?>>
+        get() = mAvatarsRepository.avatars
+
+    override fun requestAvatarsUpdate(forUsers: List<String>) {
+        mAvatarsRepository.requestAvatarsUpdate(forUsers)
+    }
+
     @WorkerThread
     private fun getUserAvatarsFromDb(users: List<String>): Map<String, String?> {
         if (users.isEmpty()) return hashMapOf()
@@ -178,7 +185,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         val avatars = mPersister.getAvatarsFor(users)
         val currentTime = System.currentTimeMillis()
         val map = HashMap<String, String?>(avatars.size)
-        avatars.forEach({
+        avatars.forEach {
             val userName = it.key
             val avatar = it.value
             if (avatar != null && currentTime < (avatar.dateUpdated + mAvatarRefreshDelay)) {
@@ -186,7 +193,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             } else {
                 map[userName] = null
             }
-        })
+        }
         return map
     }
 
@@ -194,12 +201,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return mGolosServices.getEvents(type)
     }
 
-    override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int) {
-        mGolosServices.requestEventsUpdate(type, fromId, limit)
+    override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int, completionHandler: (Unit, GolosError?) -> Unit) {
+        mGolosServices.requestEventsUpdate(type, fromId, limit, completionHandler)
     }
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
-        val story = if (blog != null) mGolosApi.getStory(blog, author, permlink, { list ->
+        val story = if (blog != null) mGolosApi.getStory(blog, author, permlink) { list ->
             list.forEach {
                 if (!mUsersAccountInfo.containsKey(it.golosUser.userName)) {
                     val liveData = MutableLiveData<GolosUserAccountInfo>()
@@ -210,7 +217,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             }
 
-        })
+        }
         else mGolosApi.getStoryWithoutComments(author, permlink)
 
         setUpWrapperOnStoryItems(Collections.singletonList(story))
@@ -376,9 +383,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun getUserInfo(userName: String): LiveData<GolosUserAccountInfo> {
         return if (isUserLoggedIn()
-                && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData, {
-            it?.toAccountInfo()
-        }) else {
+                && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData) {
+                    it?.toAccountInfo()
+                } else {
             if (!mUsersAccountInfo.containsKey(userName)) {
                 mUsersAccountInfo[userName] = MutableLiveData()
             }
@@ -961,24 +968,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             } catch (e: Exception) {
                 mLogger?.log(e)
-                /* val listOfList = allLiveData()
-                 val replacer = StorySearcherAndReplacer()
-                 listOfList.forEach {
-                     val allItems = ArrayList(it.value?.items ?: ArrayList())
-                     val currentWorkingitem = story
-                     val result = replacer
-                             .findAndReplace(StoryWrapper(currentWorkingitem,
-                                     UpdatingState.FAILED,
-                                     canUserEditDiscussionItem(currentWorkingitem)),
-                                     allItems)
-                     if (result) {
-                         mMainThreadExecutor.execute {
-                             it.value = StoriesFeed(allItems, it.value?.type ?: FeedType.NEW,
-                                     error = GolosErrorParser.parse(e), filter = it.value?.filter)
-                             completionListener.invoke(Unit, GolosErrorParser.parse(e))
-                         }
-                     }
-                 }*/
             }
         }
     }

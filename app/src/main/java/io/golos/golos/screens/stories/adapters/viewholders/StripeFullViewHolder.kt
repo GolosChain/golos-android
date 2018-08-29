@@ -67,9 +67,9 @@ class StripeFullViewHolder(parent: ViewGroup,
         mVotersBtn.setOnClickListener({ onVotersClick.onClick(this) })
 
 
-        mMainImageBig.setOnClickListener({
+        mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
-        })
+        }
         itemView.setOnClickListener({ onCardClick.onClick(this) })
       //  mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
     }

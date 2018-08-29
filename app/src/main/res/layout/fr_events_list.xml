@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/stories_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
 
 
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
         android:animateLayoutChanges="true">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler"
             android:layout_width="match_parent"
-            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView
-        android:text="@string/empty"
         android:id="@+id/fullscreen_label"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,6 +31,14 @@
         android:gravity="top|center_horizontal"
         android:padding="@dimen/margin_material"
         android:paddingTop="100dp"
+        android:text="@string/empty"
         android:textSize="@dimen/font_big"
         android:visibility="gone" />
-</FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/loading_progress"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:indeterminate="true"
+        android:visibility="gone" />
+</LinearLayout>

@@ -10,15 +10,22 @@ import io.golos.golos.repository.services.*
 
 data class NotificationAppearance(val title: CharSequence? = null,
                                   val body: CharSequence,
-                                  val profileImage: String? = null,
-                                  @DrawableRes val iconId: Int)
+                                  @DrawableRes val iconId: Int) {
+}
+
+data class EventAppearance(val title: CharSequence?,
+                           val body: CharSequence,
+                           val profileImage: String?,
+                           val showProfileImage: Boolean,
+                           @DrawableRes val bigIconId: Int,
+                           @DrawableRes val smallIconId: Int)
 
 interface NotificationsAndEventsAppearanceMaker {
     fun makeAppearance(golosNotification: GolosNotification,
                        currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
 
     fun makeAppearance(golosEvent: GolosEvent,
-                       currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
+                       currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): EventAppearance
 }
 
 object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppearanceMaker {
@@ -56,8 +63,8 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
 
 
     override fun makeAppearance(golosEvent: GolosEvent,
-                                currentUserName: String): NotificationAppearance {
-        return makeAppearance(when (golosEvent) {
+                                currentUserName: String): EventAppearance {
+        val eventApp = makeAppearance(when (golosEvent) {
             is GolosVoteEvent -> GolosUpVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosFlagEvent -> GolosDownVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosTransferEvent -> GolosTransferNotification(golosEvent.fromUsers.first(), golosEvent.amount, golosEvent.counter)
@@ -73,6 +80,30 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosCuratorAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
             is GolosMessageEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
         }, currentUserName)
+        val needToShowAvatar = golosEvent is Authorable && golosEvent.counter == 1
+        val smallIconId = when (golosEvent) {
+            is GolosVoteEvent -> R.drawable.ic_like_20dp
+            is GolosFlagEvent -> R.drawable.ic_dizlike_20dp//4469AF
+            is GolosTransferEvent -> R.drawable.ic_coins_20dp
+            is GolosReplyEvent -> R.drawable.ic_comment_20dp
+            is GolosSubscribeEvent -> R.drawable.ic_subscribe_20dp
+            is GolosUnSubscribeEvent ->  R.drawable.ic_unsubscribe_20dp
+            is GolosMentionEvent -> R.drawable.ic_avatar_20dp
+            is GolosRepostEvent -> R.drawable.ic_repost_20dp
+            is GolosWitnessVoteEvent -> R.drawable.ic_delegat_vote_20dp
+            is GolosWitnessCancelVoteEvent -> R.drawable.ic_no_delegat_20dp
+
+            is GolosAwardEvent ->  R.drawable.ic_award_20dp //unsupported
+            is GolosCuratorAwardEvent -> R.drawable.ic_avatar_20dp//unsupported
+            is GolosMessageEvent -> R.drawable.ic_avatar_20dp//unsupported
+        }
+        return EventAppearance(eventApp.title,eventApp.body,golosEvent.avatarPath,needToShowAvatar, eventApp.iconId, smallIconId)
+    }
+
+
+    private fun checkAndSetAvatar(golosEvent: GolosEvent): String? {
+        return if (golosEvent is Authorable && golosEvent.counter == 1) golosEvent.avatarPath
+        else null
     }
 
     override fun makeAppearance(golosNotification: GolosNotification,
@@ -80,9 +111,6 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
         val context = App.context
         val numOfSameNotifications = golosNotification.numberOfSameType
         val numOfAdditionalNotifications = numOfSameNotifications - 1
-
-
-
         return when (golosNotification) {
             is GolosUpVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.userr_voted, golosNotification.fromUser)
@@ -98,7 +126,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                 else context.getString(R.string.user_downvoted_several, golosNotification.fromUser,
                         context.getQuantityString(R.plurals.negative_reacted, numOfAdditionalNotifications, numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_downvoted_several]}")
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_downvote_white_on_blue_40dp)
+                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_dizlike_40dp_white_on_blue)
             }
             is GolosTransferNotification -> {
                 val title = context.getString(R.string.transfer_title)

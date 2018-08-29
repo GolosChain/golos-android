@@ -1,11 +1,12 @@
 package io.golos.golos.utils;
 
 import android.content.Context;
+import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
-public class AllIntercepingRelative extends RelativeLayout{
+public class AllIntercepingRelative extends ConstraintLayout{
     public AllIntercepingRelative(Context context) {
         super(context);
     }

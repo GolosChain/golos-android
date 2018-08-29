@@ -22,8 +22,7 @@ class EventsSorterUseCaseTest {
         val events = getStories("events.json")
         val listItems = useCase.getListItems(events)
         Assert.assertTrue(listItems.first() is DateMarkContainingItem)
-        Assert.assertTrue(listItems[18] is DateMarkContainingItem)
-        Assert.assertTrue(listItems[20] is DateMarkContainingItem)
+
     }
 
     fun getStories(path: String): List<GolosEvent> {
