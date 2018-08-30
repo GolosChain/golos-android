@@ -65,7 +65,7 @@ class ApiImplTest {
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
         assertEquals(1, resp.accountInfo.subscribersCount)
-        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals(3, resp.accountInfo.subscribesCount)
         assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
                 resp.accountInfo.userMotto)
         assertTrue(resp.accountInfo.postsCount > 23)
@@ -80,7 +80,7 @@ class ApiImplTest {
         assertEquals(publicActive, resp.activeAuth!!.first)
         assertEquals(privateActive, resp.activeAuth!!.second)
         assertEquals(1, resp.accountInfo.subscribersCount)
-        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals(3, resp.accountInfo.subscribesCount)
         assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
                 resp.accountInfo.userMotto)
         assertTrue(resp.accountInfo.postsCount > 23)
@@ -96,7 +96,7 @@ class ApiImplTest {
         assertEquals(privatePosting, resp.postingAuth!!.second)
         assertEquals(publicActive, resp.activeAuth!!.first)
         assertEquals(1, resp.accountInfo.subscribersCount)
-        assertEquals(3, resp.accountInfo.subscibesCount)
+        assertEquals(3, resp.accountInfo.subscribesCount)
         assertEquals("тили тили, хали-гали, это мы не проходили, это нам не задавали,  парам пам пам.",
                 resp.accountInfo.userMotto)
         assertNull(resp.activeAuth!!.second)

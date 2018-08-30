@@ -236,7 +236,7 @@ class rRepoGetStoriesTest {
         Assert.assertTrue(userInfo!!.golosPower > 0)
         Assert.assertTrue(userInfo!!.postsCount > 2L)
         Assert.assertTrue(userInfo!!.safeGbg > 0)
-        Assert.assertTrue(userInfo!!.subscibesCount > 1L)
+        Assert.assertTrue(userInfo!!.subscribesCount > 1L)
         Assert.assertTrue(userInfo!!.subscribersCount > 1L)
 
         repo.authWithPostingWif(userName, postingWif = privatePosting, listener = { _ -> })
@@ -260,7 +260,7 @@ class rRepoGetStoriesTest {
         Assert.assertTrue(userInfo!!.golosPower > 0)
         Assert.assertTrue(userInfo!!.postsCount > 10)
         Assert.assertTrue(userInfo!!.safeGbg == 0.0)
-        Assert.assertTrue(userInfo!!.subscibesCount > 1)
+        Assert.assertTrue(userInfo!!.subscribesCount > 1)
         Assert.assertTrue(userInfo!!.subscribersCount > 0)
 
         Assert.assertTrue(repo.isUserLoggedIn())

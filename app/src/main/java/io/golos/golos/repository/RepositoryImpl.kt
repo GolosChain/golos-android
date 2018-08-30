@@ -11,14 +11,13 @@ import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
+import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.notifications.PushNotificationsRepositoryImpl
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AppUserData
-import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
-import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.repository.services.GolosServices
@@ -27,14 +26,12 @@ import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.*
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
@@ -48,14 +45,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
                               poster: Poster? = null,
                               notificationsRepository: PushNotificationsRepositoryImpl? = null,
-                              avatarsRepository: AvatarRepository? = null,
+                              avatarsRepository: GolosUsersRepository? = null,
                               golosServices: GolosServices? = null,
                               private val mHtmlizer: Htmlizer = KnifeHtmlizer,
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
                               private val mLogger: ExceptionLogger?) : Repository() {
 
-    private val mAvatarRefreshDelay = TimeUnit.DAYS.toMillis(7)
-    private val mAvatarsRepository: AvatarRepository
+
+    private val mUsersRepository: GolosUsersRepository
 
     private val mAppReadyStatusLiveData = MutableLiveData<ReadyStatus>()
 
@@ -70,19 +67,19 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     //votes
     private var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
 
-    //users data
-    private val mUsersAccountInfo: HashMap<String, MutableLiveData<GolosUserAccountInfo>> = HashMap()
-    private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
-    private val mUsersSubscribers: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
+    /* //users data
+     private val mUsersAccountInfo: HashMap<String, MutableLiveData<GolosUserAccountInfo>> = HashMap()
+     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
+     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()*/
 
     //current user data
-    private val mAuthLiveData = MutableLiveData<AppUserData>()
+    private val mAuthLiveData = MutableLiveData<ApplicationUser>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
-    private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
+    //  private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
-    private val mNotificationsRepository: PushNotificationsRepositoryImpl
+    private val mNotificationsRepository: PushNotificationsRepository
     private val mGolosServices: GolosServices
 
     @WorkerThread
@@ -102,13 +99,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 startAuthor,
                 startPermlink)
 
-        val authors = out.map { it.rootStory()?.author ?: "_____absent_____" }
-        val avatars = getUserAvatarsFromDb(authors)
-
-        out.forEach {
-            it.rootStory()?.avatarPath = avatars[it.rootStory()?.author ?: "_____absent_____"]
-
-        }
         setUpWrapperOnStoryItems(out)
         return out
     }
@@ -133,10 +123,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 notificationsRepository ?: PushNotificationsRepositoryImpl(mUserSettings)
 
         mGolosServices = golosServices ?: GolosServicesImpl(userDataProvider = object : UserDataProvider {
-            override val appUserData: LiveData<AppUserData>
+            override val appUserData: LiveData<ApplicationUser>
                 get() = this@RepositoryImpl.appUserData
         })
-        mAvatarsRepository = avatarsRepository ?: AvatarRepositoryImpl(mPersister, mGolosApi)
+        mUsersRepository = avatarsRepository ?: UsersRepositoryImpl(mPersister,
+                this,
+                mGolosApi)
     }
 
     override fun onAppCreate(ctx: Context) {
@@ -144,57 +136,27 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mUserSettings.setUp(ctx)
         mExchangesRepository.setUp(ctx)
         mNotificationsRepository.setUp()
-
-        prepareForLaunch()
         try {
             val userData = mPersister.getActiveUserData()
             if (userData != null) {
-                mAuthLiveData.value = userData
-                setActiveUserAccount(userData.userName
-                        ?: return, userData.privateActiveWif, userData.privatePostingWif)
+                if (userData.privateActiveWif != null || userData.privatePostingWif != null) {
+                    mAuthLiveData.value = ApplicationUser(userData.userName!!, true)
+                    setActiveUserAccount(userData.userName
+                            ?: return, userData.privateActiveWif, userData.privatePostingWif)
+
+                    mUsersRepository.requestUsersAccountInfoUpdate(listOf(userData.userName.orEmpty()))
+                } else {
+                    deleteUserdata()
+                }
             }
 
         } catch (e: Throwable) {
             deleteUserdata()
         }
         mGolosServices.setUp()
-        (mAvatarsRepository as AvatarRepositoryImpl).setUp()
-    }
+        (mUsersRepository as UsersRepositoryImpl).setUp()
 
-    @WorkerThread
-    private fun getUserAvatarFromDb(username: String): String? {
-        val avatar = mPersister.getAvatarForUser(username)
-        val currentTime = System.currentTimeMillis()
-        if (avatar != null && currentTime < (avatar.second + mAvatarRefreshDelay)) {
-            return avatar.first
-        }
-        return null
-    }
-
-    override val avatars: LiveData<Map<String, String?>>
-        get() = mAvatarsRepository.avatars
-
-    override fun requestAvatarsUpdate(forUsers: List<String>) {
-        mAvatarsRepository.requestAvatarsUpdate(forUsers)
-    }
-
-    @WorkerThread
-    private fun getUserAvatarsFromDb(users: List<String>): Map<String, String?> {
-        if (users.isEmpty()) return hashMapOf()
-
-        val avatars = mPersister.getAvatarsFor(users)
-        val currentTime = System.currentTimeMillis()
-        val map = HashMap<String, String?>(avatars.size)
-        avatars.forEach {
-            val userName = it.key
-            val avatar = it.value
-            if (avatar != null && currentTime < (avatar.dateUpdated + mAvatarRefreshDelay)) {
-                map[userName] = avatar.avatarPath
-            } else {
-                map[userName] = null
-            }
-        }
-        return map
+        prepareForLaunch()
     }
 
     override fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>> {
@@ -207,16 +169,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
         val story = if (blog != null) mGolosApi.getStory(blog, author, permlink) { list ->
-            list.forEach {
-                if (!mUsersAccountInfo.containsKey(it.golosUser.userName)) {
-                    val liveData = MutableLiveData<GolosUserAccountInfo>()
-                    mMainThreadExecutor.execute {
-                        liveData.value = it
-                        mUsersAccountInfo[it.golosUser.userName] = liveData
-                    }
-                }
-            }
-
+            mUsersRepository.addAccountInfo(list)
         }
         else mGolosApi.getStoryWithoutComments(author, permlink)
 
@@ -224,10 +177,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return story
     }
 
-    override fun authWithMasterKey(userName: String, masterKey: String, listener: (UserAuthResponse) -> Unit) {
+    override fun authWithMasterKey(name: String, masterKey: String, listener: (UserAuthResponse) -> Unit) {
         networkExecutor.execute {
             try {
-                val resp = auth(userName, masterKey, null, null)
+                val resp = auth(name, masterKey, null, null)
                 mMainThreadExecutor.execute {
                     listener.invoke(resp)
                 }
@@ -236,16 +189,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = GolosUserAccountInfo(GolosUser(userName))))
+                            accountInfo = GolosUserAccountInfo(name)))
                 }
             }
         }
     }
 
-    override fun authWithActiveWif(login: String, activeWif: String, listener: (UserAuthResponse) -> Unit) {
+    override fun authWithActiveWif(name: String, activeWif: String, listener: (UserAuthResponse) -> Unit) {
         networkExecutor.execute {
             try {
-                val resp = auth(login, null, activeWif, null)
+                val resp = auth(name, null, activeWif, null)
                 mMainThreadExecutor.execute {
                     listener.invoke(resp)
                 }
@@ -254,16 +207,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = GolosUserAccountInfo(GolosUser(login))))
+                            accountInfo = GolosUserAccountInfo(name)))
                 }
             }
         }
     }
 
-    override fun authWithPostingWif(login: String, postingWif: String, listener: (UserAuthResponse) -> Unit) {
+    override fun authWithPostingWif(name: String, postingWif: String, listener: (UserAuthResponse) -> Unit) {
         networkExecutor.execute {
             try {
-                val resp = auth(login, null, null, postingWif)
+                val resp = auth(name, null, null, postingWif)
                 mMainThreadExecutor.execute {
                     listener.invoke(resp)
                 }
@@ -273,7 +226,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     listener.invoke(UserAuthResponse(false,
                             error = GolosErrorParser.parse(e),
-                            accountInfo = GolosUserAccountInfo(GolosUser(login))))
+                            accountInfo = GolosUserAccountInfo(name)))
                 }
             }
         }
@@ -292,19 +245,13 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
         val response = mGolosApi.auth(userName, masterKey, activeWif, postingWif)
         if (response.isKeyValid) {
-            if (response.accountInfo.golosUser.avatarPath != null) {
-                mPersister.saveAvatarPathForUser(UserAvatar(userName,
-                        response.accountInfo.golosUser.avatarPath,
-                        System.currentTimeMillis()))
-            }
 
             val userData = AppUserData.fromPositiveAuthResponse(response)
-
             mPersister.saveUserData(userData)
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
 
             mMainThreadExecutor.execute {
-                mAuthLiveData.value = userData
+                mAuthLiveData.value = ApplicationUser(userName, true)
             }
         }
         if (response.isKeyValid) {
@@ -322,7 +269,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                          skipVoteStatusTest: Boolean = false,
                                          skipEditableTest: Boolean = false,
                                          skipHtmlizer: Boolean = false) {
-        val name = mAuthLiveData.value?.userName
+        val name = mAuthLiveData.value?.name
         if (!isUserLoggedIn() || name == null) {
             items.forEach {
                 if (!skipEditableTest) it.storyWithState()?.isStoryEditable = false
@@ -350,7 +297,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override fun requestActiveUserDataUpdate() {
+    override fun requestApplicationUserDataUpdate() {
         if (isUserLoggedIn()) {
             val userData = mPersister.getActiveUserData()!!
             networkExecutor.execute {
@@ -381,355 +328,49 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override fun getUserInfo(userName: String): LiveData<GolosUserAccountInfo> {
-        return if (isUserLoggedIn()
-                && userName == mAuthLiveData.value?.userName) Transformations.map(mAuthLiveData) {
-                    it?.toAccountInfo()
-                } else {
-            if (!mUsersAccountInfo.containsKey(userName)) {
-                mUsersAccountInfo[userName] = MutableLiveData()
-            }
-            mUsersAccountInfo[userName]!!
-        }
+    override fun getGolosUserAccountInfos(names: List<String>): List<LiveData<GolosUserAccountInfo>> {
+        return mUsersRepository.getGolosUserAccountInfos(names)
     }
 
-    override fun requestUserInfoUpdate(userName: String,
-                                       completionHandler: (GolosUserAccountInfo, GolosError?) -> Unit) {
-        networkExecutor.execute {
-            try {
-                loadSubscribersIfNeeded()
-
-                if (isUserLoggedIn()//if we updating state of user, that is cashed in current user subscriptions
-                        && mCurrentUserSubscriptions.value?.find { it.user.name == userName } != null
-                        && userName != mAuthLiveData.value?.userName) {
-                    if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo[userName] = MutableLiveData()
-
-                    val userInfo = mUsersAccountInfo[userName]!!
-                    if (userInfo.value == null) {
-                        mMainThreadExecutor.execute {
-                            userInfo.value = GolosUserAccountInfo(GolosUser(userName),
-                                    isCurrentUserSubscribed = isUserSubscribedOn(userName))
-                        }
-                    }
-                }
-
-
-                val accinfo = mGolosApi.getAccountInfo(userName)
-                if (isUserLoggedIn() && userName == mAuthLiveData.value?.userName) {//if we updating current user
-                    mMainThreadExecutor.execute {
-                        mAuthLiveData.value = AppUserData(true, accinfo.userMotto, accinfo.golosUser.avatarPath,
-                                accinfo.golosUser.userName, mAuthLiveData.value?.privateActiveWif, mAuthLiveData.value?.privatePostingWif,
-                                accinfo.activePublicKey, accinfo.postingPublicKey, accinfo.subscibesCount,
-                                accinfo.subscribersCount, accinfo.gbgAmount, accinfo.golosAmount, accinfo.golosPower,
-                                accinfo.accountWorth, accinfo.postsCount, accinfo.safeGbg, accinfo.safeGolos, accinfo.votingPower,
-                                accinfo.location, accinfo.website, accinfo.registrationDate, accinfo.userCover)
-                        completionHandler.invoke(accinfo, null)
-                    }
-                } else {
-                    accinfo.isCurrentUserSubscribed = isUserSubscribedOn(accinfo.golosUser.userName)
-                    if (!mUsersAccountInfo.containsKey(userName)) mUsersAccountInfo[userName] = MutableLiveData()
-                    val userInfo = mUsersAccountInfo[userName]!!
-
-                    mMainThreadExecutor.execute {
-                        userInfo.value = accinfo
-                        completionHandler.invoke(accinfo, null)
-                    }
-                }
-            } catch (e: Exception) {
-                logException(e)
-                mMainThreadExecutor.execute {
-                    completionHandler.invoke(GolosUserAccountInfo(GolosUser(userName)), GolosErrorParser.parse(e))
-                }
-            }
-        }
+    override fun requestUsersAccountInfoUpdate(golosUserName: List<String>, completionHandler: (Unit, GolosError?) -> Unit) {
+        mUsersRepository.requestUsersAccountInfoUpdate(golosUserName, completionHandler)
     }
 
-    @WorkerThread
-    private fun isUserSubscribedOn(onAuthor: String): Boolean {
-        if (isUserLoggedIn()) {
-            var subs = mCurrentUserSubscriptions.value
-            if (subs == null) {
-                subs = mGolosApi
-                        .getSubscriptions(mPersister.getCurrentUserName() ?: return false, null)
-                        .map {
-                            UserBlogSubscription(UserObject(it.following.name, getUserAvatarFromDb(it.following.name)),
-                                    SubscribeStatus.SubscribedStatus)
-                        }
-                mMainThreadExecutor.execute {
-                    mCurrentUserSubscriptions.value = subs
-                }
-            }
-            return subs.find { it.user.name == onAuthor } != null
-        }
-        return false
+    override fun getGolosUserSubscribers(golosUserName: String): LiveData<List<String>> {
+        return mUsersRepository.getGolosUserSubscribers(golosUserName)
     }
 
-    private fun followOrUnfollow(isFollow: Boolean, user: String, completionHandler: (Unit, GolosError?) -> Unit) {
-        if (!isUserLoggedIn()) {
-            mMainThreadExecutor.execute {
-                completionHandler.invoke(Unit,
-                        GolosError(ErrorCode.WRONG_STATE,
-                                null,
-                                R.string.must_be_logged_in_for_this_action))
-            }
-            return
-        }
-        if (isUserLoggedIn() && mPersister.getCurrentUserName() == user) {
-            mMainThreadExecutor.execute {
-                completionHandler.invoke(Unit,
-                        GolosError(ErrorCode.WRONG_STATE,
-                                null,
-                                R.string.you_cannot_subscribe_on_yourself))
-            }
-            return
-        }
-        if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
-            mMainThreadExecutor.execute {
-                completionHandler.invoke(Unit,
-                        GolosError(ErrorCode.WRONG_STATE,
-                                null,
-                                if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
-            }
-            return
-        }
-
-
-        if (isFollow) {
-            val users = ArrayList(mCurrentUserSubscriptions.value ?: arrayListOf())
-            users.add(UserBlogSubscription(UserObject(user, getUserAvatarFromDb(user)), SubscribeStatus(false, UpdatingState.UPDATING)))
-            mCurrentUserSubscriptions.value = users
-        } else {
-            mCurrentUserSubscriptions.value?.find {
-                it.user.name == user
-            }?.status = SubscribeStatus(true, UpdatingState.UPDATING)
-            mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value
-        }
-
-        networkExecutor.execute {
-            try {
-                if (isFollow) mGolosApi.follow(user) else mGolosApi.unfollow(user)
-
-                if (isFollow) {//update current user subscriptions list
-                    mMainThreadExecutor.execute {
-                        mCurrentUserSubscriptions.value?.find {
-                            it.user.name == user
-                        }?.status = SubscribeStatus.SubscribedStatus
-                    }
-                    requestSubscribesUpdate(user)
-                } else {
-                    mMainThreadExecutor.execute {
-                        val items = ArrayList((mCurrentUserSubscriptions.value ?: arrayListOf()))
-                                .filter { it.user.name != user }
-                        mCurrentUserSubscriptions.value = items
-                        mAuthLiveData.value?.subscibesCount = items.size.toLong()
-                        mAuthLiveData.value = mAuthLiveData.value
-                    }
-                }
-
-
-                if (isFollow
-                        && mUsersSubscribers.contains(user)) {//add current user to subscribers list of cashed users data
-                    val currentUserFollowObject = UserObject(mPersister.getCurrentUserName() ?: "",
-                            mAuthLiveData.value?.avatarPath)
-                    val subscribers = ArrayList(mUsersSubscribers[user]
-                            ?.value ?: ArrayList())
-                    subscribers.add(currentUserFollowObject)
-                    mMainThreadExecutor.execute {
-                        mUsersSubscribers[user]?.value = subscribers
-                    }
-                }
-                val userValue = mUsersAccountInfo[user]
-                userValue?.let {
-                    val info = it.value
-                    if (info != null) {
-                        val copy = info.copy()
-                        copy.isCurrentUserSubscribed = isFollow
-                        if (mUsersSubscribers[user] != null) {
-                            copy.subscribersCount = mUsersSubscribers[user]
-                                    ?.value
-                                    ?.size
-                                    ?.toLong() ?: 0L
-                        } else {
-                            copy.subscribersCount = if (isFollow) copy.subscribersCount + 1 else copy.subscribersCount - 1
-                        }
-                        mMainThreadExecutor.execute {
-                            it.value = copy
-                        }
-                    }
-                }
-                mMainThreadExecutor.execute {
-                    completionHandler.invoke(Unit, null)
-                }
-            } catch (e: Exception) {
-                logException(e)
-
-                mMainThreadExecutor.execute {
-                    if (isFollow) {
-                        mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value?.filter {
-                            it.user.name != user
-                        }
-                    } else {
-                        mCurrentUserSubscriptions.value?.find {
-                            it.user.name == user
-                        }?.status = SubscribeStatus(true, UpdatingState.FAILED)
-                    }
-                    mCurrentUserSubscriptions.value = mCurrentUserSubscriptions.value
-                    completionHandler.invoke(Unit, GolosErrorParser.parse(e))
-                }
-            }
-        }
+    override fun requestGolosUserSubscribersUpdate(golosUserName: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        return mUsersRepository.requestGolosUserSubscribersUpdate(golosUserName, completionHandler)
     }
 
-    override fun subscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
-        followOrUnfollow(true, user, completionHandler)
+    override fun getGolosUserSubscriptions(golosUserName: String): LiveData<List<String>> {
+        return mUsersRepository.getGolosUserSubscriptions(golosUserName)
     }
 
-    override fun unSubscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
-        followOrUnfollow(false, user, completionHandler)
+    override fun requestGolosUserSubscriptionsUpdate(golosUserName: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        return mUsersRepository.requestGolosUserSubscriptionsUpdate(golosUserName, completionHandler)
     }
 
-    @WorkerThread
-    private fun requestSubscribesUpdate(startFrom: String?) {
-        val objects = mGolosApi
-                .getSubscriptions(mPersister.getCurrentUserName() ?: return, startFrom)
-                .map {
-                    UserBlogSubscription(UserObject(it.following.name, getUserAvatarFromDb(it.following.name)),
-                            SubscribeStatus.SubscribedStatus)
-                }
-        if (startFrom == null) {
-            mMainThreadExecutor.execute {
-                mCurrentUserSubscriptions.value = objects
-            }
-        } else {
-            val current = mCurrentUserSubscriptions.value ?: arrayListOf()
-            current.forEach {
-                if (it.user.avatar == null) it.user.avatar = getUserAvatarFromDb(it.user.name)
-            }
-            mMainThreadExecutor.execute {
-                mCurrentUserSubscriptions.value = (current + objects).distinct()
-                mAuthLiveData.value?.subscibesCount = mCurrentUserSubscriptions.value?.size?.toLong() ?: 0L
-                mAuthLiveData.value = mAuthLiveData.value
-            }
-        }
+    override fun subscribeOnGolosUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        return mUsersRepository.subscribeOnGolosUserBlog(user, completionHandler)
     }
 
-
-    @WorkerThread
-    private fun loadSubscribersIfNeeded() {
-        try {
-            if (isUserLoggedIn() && mCurrentUserSubscriptions.value?.size ?: 0 == 0) requestSubscribesUpdate(null)
-        } catch (e: Exception) {
-            mLogger?.log(e)
-            e.printStackTrace()
-        }
-
+    override fun unSubscribeFromGolosUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit) {
+        return mUsersRepository.unSubscribeFromGolosUserBlog(user, completionHandler)
     }
 
-    override fun getSubscribersToBlog(ofUser: String): LiveData<List<UserObject>> {
-        if (!mUsersSubscribers.contains(ofUser)) mUsersSubscribers[ofUser] = MutableLiveData()
-        return mUsersSubscribers[ofUser]!!
+    override fun addAccountInfo(list: List<GolosUserAccountInfo>) {
+        return mUsersRepository.addAccountInfo(list)
     }
 
-    override fun getSubscriptionsToBlogs(ofUser: String): LiveData<List<UserObject>> {
-        if (isUserLoggedIn() && mAuthLiveData.value?.userName == ofUser) return Transformations.map(mCurrentUserSubscriptions, {
-            it.map { UserObject(it.user.name, it.user.avatar) }
-        })
-
-        if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions[ofUser] = MutableLiveData()
-        return mUsersSubscriptions[ofUser]!!
-    }
-
-    override fun getCurrentUserSubscriptions(): LiveData<List<UserBlogSubscription>> {
-        return mCurrentUserSubscriptions
-    }
-
-    private fun requestSubscribersOrSubscriptionbsUpdate(isSubscribers: Boolean,
-                                                         ofUser: String,
-                                                         completionHandler: (List<UserObject>, GolosError?) -> Unit) {
-        networkExecutor.execute {
-            try {
-
-                if (isSubscribers) {
-                    if (!mUsersSubscribers.contains(ofUser)) mUsersSubscribers[ofUser] = MutableLiveData()
-                } else {
-                    if (ofUser != mAuthLiveData.value?.userName) {//check if we are  not updating current user subscriptions
-                        if (!mUsersSubscriptions.contains(ofUser)) mUsersSubscriptions[ofUser] = MutableLiveData()
-                    }
-                }
-
-                val users = if (isSubscribers) mGolosApi.getSubscribers(ofUser, null) else mGolosApi.getSubscriptions(ofUser, null)
-                val usersFollowObjects = users
-                        .map {
-                            val name = if (isSubscribers) it.follower.name else it.following.name
-                            UserObject(name,
-                                    getUserAvatarFromDb(name))
-                        }
-                mMainThreadExecutor.execute {
-                    if (isSubscribers) mUsersSubscribers[ofUser]?.value = usersFollowObjects
-                    else {
-                        if (ofUser == mAuthLiveData.value?.userName) {
-                            mCurrentUserSubscriptions.value = usersFollowObjects.map { UserBlogSubscription(it, SubscribeStatus.SubscribedStatus) }
-                        } else {
-                            mUsersSubscriptions[ofUser]?.value = usersFollowObjects
-                        }
-
-                    }
-
-                    if (mUsersAccountInfo.contains(ofUser)) {
-                        if (isSubscribers) mUsersAccountInfo[ofUser]?.value?.subscribersCount = usersFollowObjects.size.toLong()
-                    }
-                    completionHandler.invoke(usersFollowObjects, null)
-                }
-
-                val absentAvatar = usersFollowObjects.filter { it.avatar == null }.map { it.name }
-
-                val avatars = mGolosApi.getUserAvatars(absentAvatar)
-                        .filter { it.value != null }
-                        .map {
-                            UserAvatar(it.key, it.value, System.currentTimeMillis())
-                        }
-                mPersister.saveAvatarsPathForUsers(avatars)
-
-                usersFollowObjects.forEach {
-                    it.avatar = getUserAvatarFromDb(it.name)
-                }
-                mMainThreadExecutor.execute {
-                    if (isSubscribers) mUsersSubscribers[ofUser]?.value = usersFollowObjects
-                    else {
-                        if (ofUser == mAuthLiveData.value?.userName) {
-                            mCurrentUserSubscriptions.value = usersFollowObjects.map { UserBlogSubscription(it, SubscribeStatus.SubscribedStatus) }
-                        } else {
-                            mUsersSubscriptions[ofUser]?.value = usersFollowObjects
-                        }
-
-                    }
-                }
-
-            } catch (e: Exception) {
-                logException(e)
-                mMainThreadExecutor.execute {
-                    completionHandler.invoke(ArrayList(), GolosErrorParser.parse(e))
-                }
-            }
-        }
-
-    }
-
-    override fun requestSubscribersUpdate(ofUser: String,
-                                          completionHandler: (List<UserObject>, GolosError?) -> Unit) {
-        requestSubscribersOrSubscriptionbsUpdate(true, ofUser, completionHandler)
-    }
-
-    override fun requestSubscriptionUpdate(ofUser: String,
-                                           completionHandler: (List<UserObject>, GolosError?) -> Unit) {
-        requestSubscribersOrSubscriptionbsUpdate(false, ofUser, completionHandler)
-    }
+    override val currentUserSubscriptionsUpdateStatus: LiveData<Map<String, UpdatingState>>
+        get() = mUsersRepository.currentUserSubscriptionsUpdateStatus
 
     override fun deleteUserdata() {
         try {
             mPersister.deleteUserData()
             mAuthLiveData.value = null
-            mCurrentUserSubscriptions.value = listOf()
             allLiveData().forEach {
                 it.value?.items?.forEach {
                     it.rootStory()?.userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
@@ -787,10 +428,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     val feed = StoriesFeed(out.toArrayList(), type, filter)
                     updatingFeed.value = feed
                     completionHandler.invoke(Unit, null)
-                    startLoadingAbscentAvatars(out, type, filter)
+                    mUsersRepository.requestUsersAccountInfoUpdate(discussions.mapNotNull { it.rootStory()?.author })
                 }
                 mRequests.remove(request)
-                loadSubscribersIfNeeded()
+
             } catch (e: Exception) {
                 logException(e)
                 mRequests.remove(request)
@@ -805,44 +446,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         }
     }
-
-    private fun startLoadingAbscentAvatars(forItems: List<StoryWithComments>, feedType: FeedType, filter: StoryFilter?) {
-        networkExecutor.execute(object : ImageLoadRunnable {
-            override fun run() {
-                try {
-                    val userNames = forItems
-                            .filter { it.rootStory()?.avatarPath == null }
-                            .distinct()
-                            .map { it.rootStory()?.author ?: "" }
-
-                    val avatarsMap = mGolosApi.getUserAvatars(userNames)
-                    val avatars =
-                            avatarsMap
-                                    .filter { it.value != null }
-                                    .map {
-                                        UserAvatar(it.key, it.value, System.currentTimeMillis())
-                                    }
-                    mPersister.saveAvatarsPathForUsers(avatars)
-
-                    val items = convertFeedTypeToLiveData(feedType, filter).value!!.items
-                    items.forEach {
-                        if (avatarsMap.containsKey(it.rootStory()?.author
-                                        ?: "")) it.rootStory()?.avatarPath = avatarsMap[it.rootStory()?.author
-                                ?: ""]
-                    }
-
-                    convertFeedTypeToLiveData(feedType, filter).let {
-                        mMainThreadExecutor.execute {
-                            it.value = it.value
-                        }
-                    }
-                } catch (e: Exception) {
-                    logException(e)
-                }
-            }
-        })
-    }
-
 
     override fun vote(comment: StoryWrapper, percents: Short) {
         if (percents > 100 || percents < -100) return
@@ -877,7 +480,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         val currentStory = if (voteStrength != 0.toShort()) mGolosApi.vote(story.author, story.permlink, voteStrength)
                         else mGolosApi.cancelVote(story.author, story.permlink)
 
-                        currentStory.avatarPath = getUserAvatarFromDb(story.author)
+                        currentStory.avatarPath = story.avatarPath
                         votedItem = StoryWrapper(currentStory,
                                 UpdatingState.DONE,
                                 mExchangesRepository.getExchangeLiveData().value
@@ -935,20 +538,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private fun requestStoryUpdate(story: StoryWrapper, completionListener: (Unit, GolosError?) -> Unit) {
         networkExecutor.execute {
-            loadSubscribersIfNeeded()
             try {
                 val updatedStory = getStory(story.story.categoryName,
                         story.story.author,
                         story.story.permlink)
-
-                val avatars = updatedStory.getFlataned()
-                        .filter {
-                            it.story.avatarPath != null
-                        }
-                        .map {
-                            UserAvatar(it.story.author, it.story.avatarPath, System.currentTimeMillis())
-                        }
-                mPersister.saveAvatarsPathForUsers(avatars)
 
                 val listOfList = allLiveData()
                 val replacer = StorySearcherAndReplacer()
@@ -998,8 +591,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             }
         } else {
             networkExecutor.execute {
-                loadSubscribersIfNeeded()
-
                 try {
                     val story = getStory(blog, author, permLink)
 
@@ -1041,24 +632,24 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
                 networkExecutor.execute {
                     if (!isUserLoggedIn()) return@execute
-                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
-                            ?: "")),
+
+                    val userName = mAuthLiveData.value?.name.orEmpty()
+
+                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(userName)),
                             1024, null, null).firstOrNull() ?: return@execute
 
-                    val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
-                            ?: "")))
+                    val comments = convertFeedTypeToLiveData(FeedType.BLOG,
+                            StoryFilter(userNameFilter = listOf(userName)))
 
                     mMainThreadExecutor.execute {
+                        val userName = mAuthLiveData.value?.name.orEmpty()
+
                         comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items
                                 ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG,
-                                StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
+                                StoryFilter(userNameFilter = userName),
                                 comments.value?.error)
-                        val data = mAuthLiveData.value
-                        if (data != null) {
-                            data.postsCount += 1
-                            mAuthLiveData.value = data
-                        }
+                        mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }
                 }
             } catch (e: Exception) {
@@ -1089,7 +680,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     resultListener(result.first, result.second)
                 }
-                requestStoryUpdate(originalPost, { _, _ -> })
+                requestStoryUpdate(originalPost) { _, _ -> }
             } catch (e: Exception) {
                 logException(e)
                 mMainThreadExecutor.execute {
@@ -1109,34 +700,32 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         networkExecutor.execute {
             try {
                 val result = mPoster.createComment(toItem.story, content)
-                requestStoryUpdate(toItem, { _, _ ->
+                requestStoryUpdate(toItem) { _, _ ->
                     resultListener.invoke(result.first, result.second)
-                })
+                }
 
                 mMainThreadExecutor.execute {
                     mLastPostLiveData.value = result.first ?: return@execute
                 }
                 networkExecutor.execute {
                     if (!isUserLoggedIn()) return@execute
+                    val userName = mAuthLiveData.value?.name.orEmpty()
 
-                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
-                            ?: "")),
+                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(userName)),
                             1024, null, null).firstOrNull() ?: return@execute
 
-                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(mAuthLiveData.value?.userName
-                            ?: "")))
+                    val comments = convertFeedTypeToLiveData(FeedType.COMMENTS,
+                            StoryFilter(userNameFilter = listOf(userName)))
 
                     mMainThreadExecutor.execute {
+                        val userName = mAuthLiveData.value?.name.orEmpty()
                         comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items
                                 ?: ArrayList())).toArrayList(),
                                 FeedType.COMMENTS,
-                                StoryFilter(userNameFilter = mAuthLiveData.value?.userName ?: ""),
+                                StoryFilter(userNameFilter = userName),
                                 comments.value?.error)
-                        val data = mAuthLiveData.value
-                        if (data != null) {
-                            data.postsCount += 1
-                            mAuthLiveData.value = data
-                        }
+
+                        mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }
                 }
             } catch (e: Exception) {
@@ -1160,7 +749,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     resultListener(result.first, result.second)
                     mLastPostLiveData.value = result.first ?: return@execute
                 }
-                requestStoryUpdate(originalComment, { _, _ -> })
+                requestStoryUpdate(originalComment) { _, _ -> }
             } catch (e: Exception) {
                 logException(e)
                 mMainThreadExecutor.execute {
@@ -1172,12 +761,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override val userSettingsRepository: UserSettingsRepository = mUserSettings
 
-    override val notificationsRepository: PushNotificationsRepositoryImpl = mNotificationsRepository
+    override val notificationsRepository: PushNotificationsRepository = mNotificationsRepository
 
     override fun isUserLoggedIn(): Boolean {
-        return mAuthLiveData.value != null &&
-                mAuthLiveData.value?.userName != null &&
-                (mAuthLiveData.value?.privateActiveWif != null || mAuthLiveData.value?.privatePostingWif != null)
+        return mAuthLiveData.value?.isLogged == true &&
+                mAuthLiveData.value?.name != null
     }
 
     private fun convertFeedTypeToLiveData(feedtype: FeedType,
@@ -1311,13 +899,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         workerExecutor.execute {
             item.let {
 
-                val avatars = getUserAvatarsFromDb(it.activeVotes.map { it.name })
-                val payouts = RSharesConverter.convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
+                val payouts = RSharesConverter
+                        .convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
                 val voters = it
                         .activeVotes
                         .filter { it.percent != 0 }
                         .mapIndexed { index, voteLight ->
-                            VotedUserObject(voteLight.name, avatars[voteLight.name], payouts[index])
+                            VotedUserObject(voteLight.name,
+                                    null,
+                                    payouts[index])
                         }
                         .distinct()
                         .sorted()
@@ -1325,41 +915,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mMainThreadExecutor.execute {
                     liveData.value = voters
                 }
-                networkExecutor.execute {
-                    try {
-                        val avatars = mGolosApi.getUserAvatars(voters
-                                .filter { it.avatar == null }
-                                .map { it.name })
-
-                        val avatarObjects = avatars
-                                .filter { it.value != null }
-                                .map {
-                                    UserAvatar(it.key, it.value, System.currentTimeMillis())
-                                }
-                        workerExecutor.execute {
-                            mPersister.saveAvatarsPathForUsers(avatarObjects)
-
-                            voters.forEach {
-                                if (avatars.containsKey(it.name)) it.avatar = avatars[it.name]
-                            }
-                            mMainThreadExecutor.execute {
-                                liveData.value = voters
-                            }
-                        }
-                    } catch (e: Exception) {
-                        logException(e)
-                    }
-                }
             }
         }
         return liveData
     }
-
-    override fun getGolosUsers(nick: String): LiveData<List<GolosUser>> {
-        val golosUsers = MutableLiveData<List<GolosUser>>()
+/*
+    override fun lookUpUsers(nick: String): LiveData<List<GolosUserWithAvatar>> {
+        val golosUsers = MutableLiveData<List<GolosUserWithAvatar>>()
         networkExecutor.execute {
             val users = mGolosApi
-                    .getGolosUsers(nick)
+                    .lookUpUsers(nick)
                     .toArrayList()
             var avatars = getUserAvatarsFromDb(users.map { it.userName })
             (0 until users.size)
@@ -1390,7 +955,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
 
         return golosUsers
-    }
+    }*/
 
 
     override fun requestInitRetry() {
@@ -1406,8 +971,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
-                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = mAuthLiveData.value?.userName
-                                    ?: "") else null,
+                            filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = mAuthLiveData.value?.name.orEmpty()) else null,
                             completionHandler = { _, e ->
                                 if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)
                                 else mAppReadyStatusLiveData.value = ReadyStatus(true, null)
@@ -1438,10 +1002,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                     }
                                 }
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
+
                     }
 
                 }
-
+                if (mAuthLiveData.value?.isLogged == true) {
+                    val userName = mAuthLiveData.value?.name.orEmpty()
+                    mUsersRepository.requestGolosUserSubscriptionsUpdate(userName)
+                    mUsersRepository.requestGolosUserSubscribersUpdate(userName)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 logException(e)
@@ -1465,7 +1034,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                     it.key.filter!!.tagFilter.size > 1 ||
                                     (isUserLoggedIn() &&
                                             it.key.filter!!.userNameFilter.size == 1 &&
-                                            it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.userName)
+                                            it.key.filter!!.userNameFilter[0] == mAuthLiveData.value?.name)
                         }
                         .mapValues {
                             val out = it.value.value!!.copy()
@@ -1507,6 +1076,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     private fun canUserEditDiscussionItem(item: GolosDiscussionItem): Boolean {
-        return isUserLoggedIn() && item.author == mAuthLiveData.value?.userName
+        return isUserLoggedIn() && item.author == mAuthLiveData.value?.name.orEmpty()
     }
 }

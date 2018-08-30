@@ -217,7 +217,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
 
 
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
-        this.isVisibleToUser = isVisibleToUser
+        this.isVisibleToUser = visibleToUser
         if (visibleToUser) {
             if (!internetStatusNotifier.isAppOnline()) {
                 setAppOffline()
@@ -228,7 +228,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                     mStoriesLiveData.value?.items?.isEmpty() == true) {
                 if (isUpdating.get()) return
                 mStoriesLiveData.value = StoriesViewState(true, false)
-                mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
+                mRepository.requestStoriesListUpdate(20, type, filter, null, null) { _, _ -> }
                 isUpdating.set(true)
             }
         }
@@ -246,8 +246,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     private fun getFeedModeSettings() = FeedCellSettings(Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
             Repository.get.userSettingsRepository.isImagesShown().value == true,
             NSFWStrategy(Repository.get.userSettingsRepository.isNSFWShow().value == true,
-                    Pair(mRepository.isUserLoggedIn(), mRepository.appUserData.value?.userName
-                            ?: "")),
+                    Pair(mRepository.isUserLoggedIn(), mRepository.appUserData.value?.name.orEmpty())),
             Repository.get.userSettingsRepository.getCurrency().value
                     ?: UserSettingsRepository.GolosCurrency.USD,
             Repository.get.userSettingsRepository.getBountDisplay().value

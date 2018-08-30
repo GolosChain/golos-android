@@ -1,16 +1,14 @@
 package io.golos.golos.repository.api
 
-import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
-import io.golos.golos.repository.AvatarsApi
+import io.golos.golos.repository.GolosUsersApi
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import java.io.File
 
 
-abstract class GolosApi : AvatarsApi {
+abstract class GolosApi : GolosUsersApi {
 
     companion object {
         private var instance: GolosApi? = null
@@ -35,8 +33,6 @@ abstract class GolosApi : AvatarsApi {
                             filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryWithComments>
 
     abstract fun auth(userName: String, masterKey: String?, activeWif: String?, postingWif: String?): UserAuthResponse
-
-    abstract fun getAccountInfo(of: String): GolosUserAccountInfo
 
     abstract fun cancelVote(author: String, permlink: String): GolosDiscussionItem
 
@@ -64,16 +60,9 @@ abstract class GolosApi : AvatarsApi {
                              content: String,
                              categoryName: String): CreatePostResult
 
-    abstract fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject>
-
-    abstract fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject>
-
-    abstract fun follow(user: String)
-
-    abstract fun unfollow(user: String)
-
     // empty startForSubscribersOrSubscriptions from to startForSubscribersOrSubscriptions from beginning, maxCount 1 - 1000
     abstract fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag>
 
-    abstract fun getGolosUsers(nick: String): List<GolosUser>
+    abstract fun lookUpUsers(nick: String): List<String>
+
 }

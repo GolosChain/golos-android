@@ -202,10 +202,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         mFollowProgress.visibility = if (t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mMotoTv.text = it.userMotto
         mSubscribersNumTv.text = it.subscribersCount.toString()
-        mSubscriptionsNum.text = it.subscibesCount.toString()
+        mSubscriptionsNum.text = it.subscribesCount.toString()
         mPostsCountTv.text = it.postsCount.toString()
         mSubscribers.text = resources.getQuantityString(R.plurals.subscribers, it.subscribersCount.toInt())
-        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscibesCount.toInt())
+        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscribesCount.toInt())
         mPostsTv.text = resources.getQuantityString(R.plurals.posts, it.postsCount.toInt())
         t.error?.let {
             view?.showSnackbar(it.localizedMessage ?: 0)

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.*
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
@@ -14,7 +15,7 @@ import io.golos.golos.utils.*
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 4
+private val dbVersion = 5
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
 
@@ -25,6 +26,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
         db?.execSQL(DiscussionItemsTable.createTableString)
+        db?.execSQL(SubscribersTable.createTableString)
+        db?.execSQL(SubscriptionsTable.createTableString)
+        db?.execSQL(UsersTable.createTableString)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -35,6 +39,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
         db?.execSQL(DiscussionItemsTable.createTableString)
+        db?.execSQL(SubscribersTable.createTableString)
+        db?.execSQL(SubscriptionsTable.createTableString)
+        db?.execSQL(UsersTable.createTableString)
 
         if (oldVersion == 3) {
             db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
@@ -130,6 +137,33 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     fun getAllAvatars(): List<UserAvatar> {
         return AvatarsTable.getAllAvatars(writableDatabase)
 
+    }
+
+    fun saveGolosUsersAccountInfo(list: List<GolosUserAccountInfo>) {
+        UsersTable.saveGolosUsersAccountInfo(writableDatabase, list)
+    }
+
+    fun saveGolosUsersSubscribers(map: Map<String, List<String>>) {
+        SubscribersTable.saveGolosUsersSubscribers(writableDatabase, map)
+    }
+
+    fun getGolosUsersSubscribers(): Map<String, List<String>> {
+        return SubscribersTable.getGolosUsersSubscribers(writableDatabase)
+
+    }
+
+    fun saveGolosUsersSubscriptions(map: Map<String, List<String>>) {
+        SubscriptionsTable.saveGolosUsersSubscriptions(writableDatabase, map)
+    }
+
+    fun getGolosUsersAccountInfo(): List<GolosUserAccountInfo> {
+        return UsersTable.getGolosUsersAccountInfo(writableDatabase)
+
+    }
+
+
+    fun getGolosUsersSubscriptions(): Map<String, List<String>> {
+        return SubscriptionsTable.getGolosUsersSubscriptions(writableDatabase)
     }
 
     private object AvatarsTable {
@@ -252,6 +286,189 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
     }
 
+    private object SubscribersTable {
+        const val databaseName = "subscribers_table"
+        private const val userName = "user_name"
+        private const val subscribers = "subscribers"
+        const val createTableString = "create table if not exists $databaseName ( $userName text primary key, $subscribers text )"
+
+        fun saveGolosUsersSubscribers(writableDatabase: SQLiteDatabase?,
+                                      map: Map<String, List<String>>) {
+            writableDatabase ?: return
+            writableDatabase.beginTransaction()
+            val values = ContentValues()
+            map.forEach {
+                values.put(userName, it.key)
+                values.put(subscribers, mapper.writeValueAsString(it.value))
+                writableDatabase.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            writableDatabase.setTransactionSuccessful()
+            writableDatabase.endTransaction()
+        }
+
+        fun getGolosUsersSubscribers(writableDatabase: SQLiteDatabase?): Map<String, List<String>> {
+            val out = HashMap<String, List<String>>()
+            writableDatabase ?: return out
+
+            val c = writableDatabase.rawQuery("select * from $databaseName", emptyArray())
+            if (c.moveToFirst()) {
+                val collectionType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+                while (!c.isAfterLast) {
+                    val userName = c.getString(userName).orEmpty()
+                    val subscribersString = c.getString(subscribers)
+                    val subscribers = mapper.readValue<List<String>>(subscribersString, collectionType)
+                    out[userName] = subscribers
+                    c.moveToNext()
+                }
+            }
+            c.close()
+            return out
+        }
+    }
+
+    private object SubscriptionsTable {
+        const val databaseName = "subscriptions_table"
+        private const val userName = "user_name"
+        private const val subscriptions = "subscriptions"
+        const val createTableString = "create table if not exists $databaseName ( $userName text primary key, $subscriptions text )"
+
+        fun saveGolosUsersSubscriptions(writableDatabase: SQLiteDatabase?,
+                                        map: Map<String, List<String>>) {
+            writableDatabase ?: return
+            writableDatabase.beginTransaction()
+            val values = ContentValues()
+            map.forEach {
+                values.put(userName, it.key)
+                values.put(subscriptions, mapper.writeValueAsString(it.value))
+                writableDatabase.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            writableDatabase.setTransactionSuccessful()
+            writableDatabase.endTransaction()
+        }
+
+        fun getGolosUsersSubscriptions(writableDatabase: SQLiteDatabase?): Map<String, List<String>> {
+            val out = HashMap<String, List<String>>()
+            writableDatabase ?: return out
+
+            val c = writableDatabase.rawQuery("select * from $databaseName", emptyArray())
+            if (c.moveToFirst()) {
+                val collectionType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+                while (!c.isAfterLast) {
+                    val userName = c.getString(userName).orEmpty()
+                    val subscribersString = c.getString(subscriptions)
+                    val subscribers = mapper.readValue<List<String>>(subscribersString, collectionType)
+                    out[userName] = subscribers
+                    c.moveToNext()
+                }
+            }
+            c.close()
+            return out
+        }
+    }
+
+    private object UsersTable {
+        const val databaseName = "users_table"
+        const val userName = "user_name"
+        const val avatarPath = "avatar_path"
+        const val userMotto = "user_motto"
+        const val postsCount = "posts_count"
+        const val accountWorth = "account_worth"
+        const val gbgAmount = "gbg_amount"
+        const val golosAmount = "golos_amount"
+        const val golosPower = "golos_power"
+        const val safeGbg = "safe_gbg"
+        const val safeGolos = "safe_golos"
+        const val subscribersCount = "subscribers_count"
+        const val subscriptionsCount = "subscriptions_count"
+        const val postingPublicKey = "posting_key"
+        const val activePublicKey = "active_key"
+        const val votingPower = "voting_power"
+        const val location = "location"
+        const val website = "website"
+        const val registrationDate = "registration_date"
+        const val userCover = "user_cover"
+        const val lastTimeInfoUpdatedAt = "last_time_updated"
+
+        const val createTableString = "create table if not exists $databaseName ( $userName text primary key," +
+                "$avatarPath text, $userMotto text, $postsCount integer, $accountWorth real, $gbgAmount real," +
+                "$golosAmount real, $golosPower real, $safeGbg real, $safeGolos real, $subscribersCount integer," +
+                " $subscriptionsCount integer, $postingPublicKey text, $activePublicKey text, $votingPower integer," +
+                "$location text, $website text, $registrationDate integer, $userCover text, $lastTimeInfoUpdatedAt text) "
+
+
+        fun saveGolosUsersAccountInfo(writableDatabase: SQLiteDatabase?,
+                                      list: List<GolosUserAccountInfo>) {
+            writableDatabase ?: return
+            val values = ContentValues()
+            writableDatabase.beginTransaction()
+            list.forEach {
+                values.put(userName, it.userName)
+                values.put(avatarPath, it.avatarPath)
+                values.put(userMotto, it.userMotto)
+                values.put(postsCount, it.postsCount)
+                values.put(accountWorth, it.accountWorth)
+                values.put(gbgAmount, it.gbgAmount)
+                values.put(golosAmount, it.golosAmount)
+                values.put(golosPower, it.golosPower)
+                values.put(safeGbg, it.safeGbg)
+                values.put(safeGolos, it.safeGolos)
+                values.put(subscribersCount, it.subscribersCount)
+                values.put(subscriptionsCount, it.subscriptionsCount)
+                values.put(postingPublicKey, it.postingPublicKey)
+                values.put(activePublicKey, it.activePublicKey)
+                values.put(votingPower, it.votingPower)
+                values.put(location, it.location)
+                values.put(website, it.website)
+                values.put(registrationDate, it.registrationDate)
+                values.put(userCover, it.userCover)
+                values.put(lastTimeInfoUpdatedAt, it.lastTimeInfoUpdatedAt)
+                writableDatabase.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            writableDatabase.setTransactionSuccessful()
+            writableDatabase.endTransaction()
+        }
+
+        fun getGolosUsersAccountInfo(writableDatabase: SQLiteDatabase?): List<GolosUserAccountInfo> {
+            val out = arrayListOf<GolosUserAccountInfo>()
+            writableDatabase ?: return out
+            val c = writableDatabase.rawQuery("select * from $databaseName", emptyArray())
+
+            if (c.moveToFirst()) {
+                while (!c.isAfterLast) {
+                    out.add(GolosUserAccountInfo(
+                            c.getString(userName).orEmpty(),
+                            c.getString(avatarPath),
+                            c.getString(userMotto),
+                            c.getLong(postsCount),
+                            c.getDouble(accountWorth),
+                            c.getDouble(gbgAmount),
+                            c.getDouble(golosAmount),
+                            c.getDouble(golosPower),
+                            c.getDouble(safeGbg),
+                            c.getDouble(safeGolos),
+                            c.getInt(subscribersCount),
+                            c.getInt(subscriptionsCount),
+                            c.getString(postingPublicKey).orEmpty(),
+                            c.getString(activePublicKey).orEmpty(),
+                            c.getInt(votingPower),
+                            c.getString(location).orEmpty(),
+                            c.getString(website).orEmpty(),
+                            c.getLong(registrationDate),
+                            c.getString(userCover),
+                            c.getLong(lastTimeInfoUpdatedAt)
+
+                    ))
+                    c.moveToNext()
+                }
+            }
+            c.close()
+            return out
+
+        }
+
+
+    }
+
 
     private object DiscussionItemsTable {
         const val databaseName = "discussion_item_table"
@@ -285,7 +502,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         const val parentAuthor = "parentAuthor"
 
 
-        val createTableString = "create table if not exists $databaseName ( $id integer primary key ," +
+        const val createTableString = "create table if not exists $databaseName ( $id integer primary key ," +
                 "$url text, $title text, $categoryName text, $tags text, $images text, $links text," +
                 "$votesNum integer, $votesRshares integer, $commentsCount integer, " +
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +

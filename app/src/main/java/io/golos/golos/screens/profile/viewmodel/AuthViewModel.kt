@@ -51,7 +51,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
     init {
         mRepository
                 .appUserData.observeForever(this)
-        mRepository.requestActiveUserDataUpdate()
+        mRepository.requestApplicationUserDataUpdate()
     }
 
     override fun onChanged(t: AppUserData?) {
@@ -141,7 +141,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
                     userAccountWorth = resp.accountInfo.accountWorth,
                     isLoading = false,
                     subscribersNum = resp.accountInfo.subscribersCount,
-                    subscribesNum = resp.accountInfo.subscibesCount,
+                    subscribesNum = resp.accountInfo.subscribesCount,
                     userMoto = resp.accountInfo.userMotto,
                     golosAmount = resp.accountInfo.golosAmount,
                     golosPower = resp.accountInfo.golosPower,

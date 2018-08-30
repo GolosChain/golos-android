@@ -6,7 +6,7 @@ import com.crashlytics.android.Crashlytics
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
-import io.golos.golos.repository.AvatarPersister
+import io.golos.golos.repository.GolosUsersPersister
 import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.repository.model.StoryRequest
@@ -17,14 +17,12 @@ import io.golos.golos.utils.toArrayList
 import timber.log.Timber
 import java.security.KeyStore
 import java.security.KeyStoreException
-import java.util.*
-import kotlin.collections.HashMap
 
 
 /**
  * Created by yuri on 06.11.17.
  */
-abstract class Persister : NotificationsPersister, AvatarPersister {
+abstract class Persister : NotificationsPersister, GolosUsersPersister {
 
     abstract fun getCurrentUserName(): String?
 
@@ -55,11 +53,10 @@ abstract class Persister : NotificationsPersister, AvatarPersister {
         private var mOnDevicePersister: Persister? = null
         val get: Persister
             @Synchronized get() {
-                if (App.isMocked) return MockPersister() else {
-                    if (mOnDevicePersister == null) mOnDevicePersister = OnDevicePersister(App.context)
-                    return mOnDevicePersister!!
-                }
+                if (mOnDevicePersister == null) mOnDevicePersister = OnDevicePersister(App.context)
+                return mOnDevicePersister!!
             }
+
     }
 
     abstract fun deleteUserData()
@@ -71,13 +68,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
     private val mDatabase: SqliteDb = SqliteDb(context)
     private val mPreference = context.getSharedPreferences("ondevicepersister", Context.MODE_PRIVATE)
 
-    override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
-        mDatabase.saveAvatar(userAvatar)
-    }
-
-    override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
-        mDatabase.saveAvatars(userAvatars)
-    }
 
     override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
         mDatabase.saveStories(stories)
@@ -95,9 +85,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         return mPreference.getBoolean("setUserSubscribedOnNotificationsThroughServices", false)
     }
 
-    override fun getAllAvatars(): List<UserAvatar> {
-        return mDatabase.getAllAvatars()
-    }
 
     override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
         mPreference
@@ -105,11 +92,35 @@ private class OnDevicePersister(private val context: Context) : Persister() {
                 .putBoolean("setUserSubscribedOnNotificationsThroughServices", isSubscribed).apply()
     }
 
+    override fun saveGolosUsersAccountInfo(list: List<GolosUserAccountInfo>) {
+        mDatabase.saveGolosUsersAccountInfo(list)
+    }
+
+    override fun saveGolosUsersSubscribers(map: Map<String, List<String>>) {
+        mDatabase.saveGolosUsersSubscribers(map)
+    }
+
+    override fun saveGolosUsersSubscriptions(map: Map<String, List<String>>) {
+        mDatabase.saveGolosUsersSubscriptions(map)
+    }
+
+    override fun getGolosUsersAccountInfo(): List<GolosUserAccountInfo> {
+       return mDatabase.getGolosUsersAccountInfo()
+    }
+
+    override fun getGolosUsersSubscribers(): Map<String, List<String>> {
+        return mDatabase.getGolosUsersSubscribers()
+    }
+
+    override fun getGolosUsersSubscriptions(): Map<String, List<String>> {
+        return mDatabase.getGolosUsersSubscriptions()
+    }
+
     private fun saveKeys(keysToSave: Map<PrivateKeyType, String?>) {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         val encryptor = EnCryptor()
-        keysToSave.forEach({
+        keysToSave.forEach {
             val keyAlias = KeystoreKeyAliasConverter.convert(it.key)
             if (it.value == null) {
                 try {
@@ -125,7 +136,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
                 val outBuffer = encryptor.encryptText(keyAlias, stringToEncrypt)
                 mPreference.edit().putString(keyAlias.name, Base64.encodeToString(outBuffer, Base64.DEFAULT)).apply()
             }
-        })
+        }
     }
 
     override fun saveUserSubscribedTags(tags: List<Tag>) {
@@ -172,15 +183,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         return out
     }
 
-    override fun getAvatarForUser(userName: String): Pair<String, Long>? {
-        val userAvatar = mDatabase.getAvatar(userName)
-        if (userAvatar?.avatarPath == null) return null
-        else return Pair(userAvatar.avatarPath, userAvatar.dateUpdated)
-    }
-
-    override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
-        return mDatabase.getAvatars(users)
-    }
 
     override fun getCurrentUserName(): String? {
         return getActiveUserData()?.userName
@@ -217,90 +219,5 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         saveKeys(mapOf(Pair(PrivateKeyType.POSTING, null), Pair(PrivateKeyType.ACTIVE, null)))
         saveCurrentUserName(null)
         mPreference.edit().putString("userdata", "").apply()
-    }
-}
-
-
-private class MockPersister : Persister() {
-    private var userData: AppUserData? = null
-    private var currentUserName: String? = null
-    override fun saveAvatarPathForUser(userAvatar: UserAvatar) {
-
-    }
-
-    override fun getAllAvatars(): List<UserAvatar> {
-        return emptyList()
-    }
-
-    override fun isUserSubscribedOnNotificationsThroughServices(): Boolean {
-        return true
-    }
-
-    override fun setUserSubscribedOnNotificationsThroughServices(isSubscribed: Boolean) {
-
-    }
-
-    override fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
-
-    }
-
-
-    override fun getStories(): Map<StoryRequest, StoriesFeed> {
-        return hashMapOf()
-    }
-
-    override fun deleteAllStories() {
-
-    }
-
-    override fun saveAvatarsPathForUsers(userAvatars: List<UserAvatar>) {
-
-    }
-
-    override fun getAvatarsFor(users: List<String>): Map<String, UserAvatar?> {
-        return HashMap()
-    }
-
-    override fun saveUserSubscribedTags(tags: List<Tag>) {
-
-    }
-
-    override fun getUserSubscribedTags(): List<Tag> {
-        return arrayListOf()
-    }
-
-    override fun deleteUserSubscribedTag(tag: Tag) {
-    }
-
-    override fun getAvatarForUser(userName: String): Pair<String, Long> {
-        Thread.sleep(150)
-        return Pair("https://s20.postimg.org/6bfyz1wjh/VFcp_Mpi_DLUIk.jpg", Date().time)
-    }
-
-    override fun saveTags(tags: List<Tag>) {
-    }
-
-    override fun getTags(): List<Tag> {
-        return listOf()
-    }
-
-    override fun getCurrentUserName(): String? {
-        return currentUserName
-    }
-
-    override fun saveCurrentUserName(name: String?) {
-        currentUserName = name
-    }
-
-    override fun getActiveUserData(): AppUserData? {
-        return userData
-    }
-
-    override fun saveUserData(userData: AppUserData) {
-        this.userData = userData
-    }
-
-    override fun deleteUserData() {
-        userData = null
     }
 }

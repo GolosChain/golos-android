@@ -7,7 +7,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.content.Intent
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserWithAvatar
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.tags.TagAndUsersSearchActivity
@@ -21,7 +21,7 @@ import io.golos.golos.utils.GolosError
 data class TagSearchViewModelScreenState(
         val isLoading: Boolean = false,
         val shownTags: List<LocalizedTag>,
-        val shownUsers: List<GolosUser>,
+        val shownUsers: List<GolosUserWithAvatar>,
         val error: GolosError?
 )
 
@@ -32,13 +32,13 @@ class TagSearchViewModel : ViewModel(), Observer<List<LocalizedTag>> {
     private var lastLookupString: String? = null
     private var isSearchInProgress = false
     private val userRegexps = "([a-z][a-zA-Z.\\-0-9]{2,15})".toRegex()
-    private var mUserObserver = Observer<List<GolosUser>> {
+    private var mUserObserver = Observer<List<GolosUserWithAvatar>> {
         mTagsData.value = TagSearchViewModelScreenState(false,
                 mTagsData.value?.shownTags ?: listOf(),
                 it ?: listOf(),
                 null)
     }
-    private var mLastUserLiveData: LiveData<List<GolosUser>> = MutableLiveData()
+    private var mLastUserLiveData: LiveData<List<GolosUserWithAvatar>> = MutableLiveData()
 
     fun onCreate() {
         mRepo.getLocalizedTags().observeForever(this)
@@ -137,7 +137,7 @@ class TagSearchViewModel : ViewModel(), Observer<List<LocalizedTag>> {
 
     fun getLiveData(): LiveData<TagSearchViewModelScreenState> = mTagsData
 
-    fun onUserClick(tagSearchActivity: TagAndUsersSearchActivity, user: GolosUser) {
+    fun onUserClick(tagSearchActivity: TagAndUsersSearchActivity, user: GolosUserWithAvatar) {
         UserProfileActivity.start(tagSearchActivity, user.userName)
     }
 }

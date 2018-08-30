@@ -14,7 +14,6 @@ import eu.bittrade.libs.golosj.util.AuthUtils
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.GolosUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
@@ -43,16 +42,6 @@ internal class ApiImpl : GolosApi() {
         return StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
                 mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
                 null), UpdatingState.DONE), ArrayList())
-    }
-
-    override fun getUserAvatars(names: List<String>): Map<String, String?> {
-        val out = HashMap<String, String?>()
-        if (names.isEmpty())return out
-        names.forEach {
-            out[it] = null
-        }
-
-        return mGolosApi.databaseMethods.getAccountAvatar(names.map { AccountName(it) }) ?: out
     }
 
     override fun getStories(limit: Int, type: FeedType,
@@ -107,23 +96,25 @@ internal class ApiImpl : GolosApi() {
         if (masterKey == null && activeWif == null && postingWif == null)
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
+                    accountInfo = GolosUserAccountInfo(userName))
 
         if (userName.length < 3 || userName.length > 16) {
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
+                    accountInfo = GolosUserAccountInfo(userName))
         }
         if (activeWif?.startsWith("GLS") == true
                 || postingWif?.startsWith("GLS") == true) {
             return UserAuthResponse(false, null, null,
                     error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.enter_private_key),
-                    accountInfo = GolosUserAccountInfo(GolosUser(userName)))
+                    accountInfo = GolosUserAccountInfo(userName))
         }
-        val acc = getAccountInfo(userName)
+        val acc = getGolosUsers(listOf(userName), true)[userName]
+                ?: return negativeAuthResponse(userName)
+
         if (acc.activePublicKey.isEmpty()) return UserAuthResponse(false, null, null,
                 error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.wrong_credentials),
-                accountInfo = GolosUserAccountInfo(GolosUser(userName)))
+                accountInfo = GolosUserAccountInfo(userName))
 
         if (masterKey != null) {
             val keys = AuthUtils.generatePublicWiFs(userName, masterKey, arrayOf(PrivateKeyType.POSTING, PrivateKeyType.ACTIVE))
@@ -210,16 +201,23 @@ internal class ApiImpl : GolosApi() {
                 null,
                 null,
                 error = error,
-                accountInfo = GolosUserAccountInfo(GolosUser(username)))
+                accountInfo = GolosUserAccountInfo(username))
     }
 
-    override fun getAccountInfo(of: String): GolosUserAccountInfo {
-        val accs = mGolosApi.databaseMethods.getAccounts(listOf(AccountName(of)))
-        if (accs.size == 0 || accs[0] == null) return GolosUserAccountInfo(GolosUser(of))
-        return convertExtendedAccountToAccountInfo(accs[0], true)
+    override fun getGolosUsers(names: List<String>, fetchSubsInfo: Boolean): Map<String, GolosUserAccountInfo> {
+        val accs = mGolosApi.databaseMethods.getAccounts(names.map { AccountName(it) }).filterNotNull()
+
+        if (accs.isEmpty()) return emptyMap()
+
+        return accs
+                .map { convertExtendedAccountToAccountInfo(it, fetchSubsInfo) }
+                .associateBy { it.userName }
+
+
     }
 
-    private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount, fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
+    private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount,
+                                                    fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
         val votePower = acc.vestingShares.amount * 0.000268379
         val golosNum = acc.balance.amount
         val gbgAmount = acc.sbdBalance.amount
@@ -240,24 +238,27 @@ internal class ApiImpl : GolosApi() {
         val activePublicOuter = (acc.active.keyAuths.keys.toTypedArray().firstOrNull())?.addressFromPublicKey
                 ?: ""
 
-        return GolosUserAccountInfo(GolosUser(acc.name.name, acc.avatarPath),
+        return GolosUserAccountInfo(acc.name.name,
+                acc.avatarPath,
                 acc.moto,
                 acc.postCount,
                 accWorth,
-                followingCount,
-                followersCount,
                 gbgAmount,
                 golosNum,
                 votePower,
                 safeGbg,
                 safeGolos,
+                followersCount.toInt(),
+                followingCount.toInt(),
+
                 postingPublicOuter,
                 activePublicOuter,
-                votingPower = acc.votingPower,
-                location = acc.location ?: "",
-                website = acc.webSite ?: "",
-                registrationDate = acc.created.dateTimeAsTimestamp,
-                userCover = acc.cover)
+                acc.votingPower,
+                acc.location ?: "",
+                acc.webSite ?: "",
+                acc.created.dateTimeAsTimestamp,
+                acc.cover,
+                System.currentTimeMillis())
     }
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {
@@ -310,7 +311,7 @@ internal class ApiImpl : GolosApi() {
                 Permlink(permlinkOfItemToReply),
                 AccountName(sendFromAccount),
                 content,
-                Array(1, { categoryName }))
+                Array(1) { categoryName })
         return CreatePostResult(false, result.author.name, result.getTags().first(), result.permlink.link)
     }
 
@@ -325,16 +326,16 @@ internal class ApiImpl : GolosApi() {
                 Permlink(originalComentPermlink),
                 AccountName(sendFromAccount),
                 content,
-                Array(1, { categoryName }))
+                Array(1) { categoryName })
         return CreatePostResult(false, result.author.name, result.getTags().first(), result.permlink.link)
     }
 
-    override fun getSubscriptions(forUser: String, startFrom: String?): List<FollowApiObject> {
-        return getSubscribesOrSubscribers(false, forUser, startFrom)
+    override fun getGolosUserSubscriptions(forUser: String, startFrom: String?): List<String> {
+        return getSubscribesOrSubscribers(false, forUser, startFrom).mapNotNull { it.following.name }
     }
 
-    override fun getSubscribers(forUser: String, startFrom: String?): List<FollowApiObject> {
-        return getSubscribesOrSubscribers(true, forUser, startFrom)
+    override fun getGolosUserSubscribers(forUser: String, startFrom: String?): List<String> {
+        return getSubscribesOrSubscribers(true, forUser, startFrom).mapNotNull { it.follower.name }
     }
 
     @Suppress("NAME_SHADOWING")
@@ -409,12 +410,12 @@ internal class ApiImpl : GolosApi() {
         }
     }
 
-    override fun follow(user: String) {
-        Golos4J.getInstance().simplifiedOperations.follow(AccountName(user))
+    override fun subscribe(onUser: String) {
+        Golos4J.getInstance().simplifiedOperations.follow(AccountName(onUser))
     }
 
-    override fun unfollow(user: String) {
-        Golos4J.getInstance().simplifiedOperations.unfollow(AccountName(user))
+    override fun unSubscribe(fromUser: String) {
+        Golos4J.getInstance().simplifiedOperations.unfollow(AccountName(fromUser))
     }
 
     override fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag> {
@@ -449,9 +450,7 @@ internal class ApiImpl : GolosApi() {
         }
     }
 
-    override fun getGolosUsers(nick: String): List<GolosUser> {
+    override fun lookUpUsers(nick: String): List<String> {
         return mGolosApi.databaseMethods.lookupAccounts(nick, 10)
-                .filter { it != null }
-                .map { GolosUser(it) }
     }
 }

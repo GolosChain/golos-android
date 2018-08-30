@@ -10,10 +10,9 @@ import android.os.Handler
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.SearchView
-import android.view.MotionEvent
 import android.view.View
 import io.golos.golos.R
-import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserWithAvatar
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.TagSearchViewModel
@@ -114,7 +113,7 @@ class TagAndUsersSearchActivity : GolosActivity(), Observer<TagSearchViewModelSc
             }
         }
         mTagsAndUsersPager.userClickListener = object : TagsAndUsersPager.OnUserClickListener {
-            override fun onClick(golosUser: GolosUser) {
+            override fun onClick(golosUser: GolosUserWithAvatar) {
                 mViewModel.onUserClick(this@TagAndUsersSearchActivity, golosUser)
             }
         }

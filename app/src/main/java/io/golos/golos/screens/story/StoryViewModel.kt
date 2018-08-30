@@ -92,7 +92,7 @@ class StoryViewModel : ViewModel() {
             )
         }
         mLiveData.removeSource(mRepository.getCurrentUserSubscriptions())
-        mLiveData.addSource(mRepository.getCurrentUserSubscriptions(), {
+        mLiveData.addSource(mRepository.getCurrentUserSubscriptions()) {
             if (it?.any { it.user.name == this.author } == true) {
                 val followItem = it.find { it.user.name == this.author } ?: return@addSource
                 mLiveData.value = StoryViewState(mLiveData.value?.isLoading ?: false,
@@ -105,7 +105,7 @@ class StoryViewModel : ViewModel() {
                         followItem.status,
                         mLiveData.value?.subscribeOnTagStatus ?: SubscribeStatus.UnsubscribedStatus)
             }
-        })
+        }
         mLiveData.removeSource(mRepository.getUserSubscribedTags())
         mLiveData.addSource(mRepository.getUserSubscribedTags(), {
             val tagItem = it?.find { it.name == this.blog }

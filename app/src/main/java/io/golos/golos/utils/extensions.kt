@@ -632,5 +632,7 @@ public fun StringBuilder.replaceSb(what: String, to: String): StringBuilder {
 
 public inline infix fun <A, B> A.to(that: B): ImmutablePair<A, B> = ImmutablePair(this, that)
 
+public inline infix fun <A, B> A.toN(that: B): Pair<A, B> = Pair(this, that)
+
 
 public fun <K, V> mutableMapOf(pairs: List<Pair<K, V>>): MutableMap<K, V> = LinkedHashMap<K, V>(pairs.size).apply { putAll(pairs) }

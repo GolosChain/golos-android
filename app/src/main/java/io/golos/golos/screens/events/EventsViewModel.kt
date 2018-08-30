@@ -3,7 +3,7 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.*
 import android.support.v4.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
-import io.golos.golos.repository.AvatarRepository
+import io.golos.golos.repository.GolosUsersRepository
 import io.golos.golos.repository.EventsProvider
 import io.golos.golos.repository.services.Authorable
 import io.golos.golos.repository.services.EventType
@@ -23,7 +23,7 @@ class EventsViewModel : ViewModel() {
     private var mEventsProvider: EventsProvider? = null
     private var mEventTypes: List<EventType>? = null
     private var mEventsSorter: EventsSorterUseCase? = null
-    private var mAvatarsProvider: AvatarRepository? = null
+    private var mAvatarsProvider: GolosUsersRepository? = null
     private var lastEventsSize: Int = 0
     private val updateLimit = 15
 
@@ -31,7 +31,7 @@ class EventsViewModel : ViewModel() {
     fun onCreate(eventTypes: List<EventType>?,
                  eventsProvider: EventsProvider,
                  eventsSorter: EventsSorterUseCase?,
-                 avatarsProvider: AvatarRepository?) {
+                 avatarsProvider: GolosUsersRepository?) {
         mEventsProvider = eventsProvider
         mEventTypes = eventTypes
         mEventsSorter = eventsSorter

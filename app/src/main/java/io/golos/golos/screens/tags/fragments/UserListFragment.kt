@@ -1,13 +1,12 @@
 package io.golos.golos.screens.tags.fragments
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
-import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserWithAvatar
 import io.golos.golos.screens.tags.views.TagsAndUsersPager
 import io.golos.golos.screens.userslist.UserListAdapter
 import io.golos.golos.screens.userslist.model.UserListRowData
@@ -26,7 +25,7 @@ class UserListFragment : GolosFragment() {
         mRecycler?.adapter = UserListAdapter()
         if (userClickListener != null) {
             (mRecycler?.adapter as? UserListAdapter)?.setUserClickListener {
-                userClickListener?.onClick(GolosUser(it.name, it.avatar))
+                userClickListener?.onClick(GolosUserWithAvatar(it.name, it.avatar))
             }
         }
         if (mUsers.isNotEmpty()) {
@@ -39,7 +38,7 @@ class UserListFragment : GolosFragment() {
 
     operator fun getValue(tagsAndUsersPager: TagsAndUsersPager, property: KProperty<*>) = mUsers
 
-    operator fun setValue(tagsAndUsersPager: TagsAndUsersPager, property: KProperty<*>, list: List<GolosUser>) {
+    operator fun setValue(tagsAndUsersPager: TagsAndUsersPager, property: KProperty<*>, list: List<GolosUserWithAvatar>) {
         mUsers = list
         (mRecycler?.adapter as? UserListAdapter)?.listItems = mUsers.map {
             UserListRowData(it.userName, it.avatarPath, null, null)
@@ -50,10 +49,10 @@ class UserListFragment : GolosFragment() {
         set(value) {
             field = value
             (mRecycler?.adapter as? UserListAdapter)?.setUserClickListener {
-                value?.onClick(GolosUser(it.name, it.avatar))
+                value?.onClick(GolosUserWithAvatar(it.name, it.avatar))
             }
         }
 
 
-    private var mUsers: List<GolosUser> = arrayListOf()
+    private var mUsers: List<GolosUserWithAvatar> = arrayListOf()
 }

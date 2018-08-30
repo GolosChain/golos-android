@@ -187,7 +187,6 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
     companion object get {
         lateinit var context: Context
-        val isMocked = false
         fun isAppOnline(): Boolean {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             return cm?.activeNetworkInfo != null && cm.activeNetworkInfo.isConnected

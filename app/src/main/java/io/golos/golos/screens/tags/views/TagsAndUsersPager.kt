@@ -8,7 +8,7 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.util.AttributeSet
 import io.golos.golos.R
-import io.golos.golos.repository.persistence.model.GolosUser
+import io.golos.golos.repository.persistence.model.GolosUserWithAvatar
 import io.golos.golos.screens.tags.fragments.TagsListFragment
 import io.golos.golos.screens.tags.fragments.UserListFragment
 import io.golos.golos.screens.tags.model.LocalizedTag
@@ -42,7 +42,7 @@ class TagsAndUsersPager @JvmOverloads constructor(context: Context,
 
     public var tags: List<LocalizedTag> by mTagsListFragment
 
-    public var users: List<GolosUser> by mUserListFragment
+    public var users: List<GolosUserWithAvatar> by mUserListFragment
 
     public var tagClickListener: OnTagClickListener?
         set(value) {
@@ -87,7 +87,7 @@ class TagsAndUsersPager @JvmOverloads constructor(context: Context,
     }
 
     interface OnUserClickListener {
-        fun onClick(tag: GolosUser)
+        fun onClick(tag: GolosUserWithAvatar)
     }
 }
 

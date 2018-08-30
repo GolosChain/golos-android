@@ -5,16 +5,10 @@ import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.support.annotation.AnyThread
 import android.support.annotation.MainThread
-import com.crashlytics.android.Crashlytics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import io.fabric.sdk.android.Fabric
-import io.golos.golos.App
 import io.golos.golos.BuildConfig
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.model.*
-import io.golos.golos.repository.persistence.model.AppUserData
-import io.golos.golos.repository.persistence.model.GolosUser
-import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
@@ -22,7 +16,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.utils.ExceptionLogger
+import io.golos.golos.utils.FabricExceptionLogger
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.MainThreadExecutor
 import io.golos.golos.utils.Regexps
@@ -33,7 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 interface UserDataProvider {
-    val appUserData: LiveData<AppUserData>
+    val appUserData: LiveData<ApplicationUser>
 }
 
 interface EventsProvider {
@@ -44,7 +38,7 @@ interface EventsProvider {
                             completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 }
 
-abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
+abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository {
 
     companion object {
         private var instance: Repository? = null
@@ -55,18 +49,7 @@ abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
                         networkExecutor,
                         Executors.newSingleThreadExecutor(ThreadFactoryBuilder().setNameFormat("worker executor thread -%d").build()),
                         mMainThreadExecutor,
-                        mLogger = object : ExceptionLogger {
-                            override fun log(t: Throwable) {
-                                try {
-                                    if (!Fabric.isInitialized()) {
-                                        Fabric.with(App.context, Crashlytics())
-                                    }
-                                    Crashlytics.logException(t)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-                        })
+                        mLogger = FabricExceptionLogger)
                 return instance!!
             }
         private val networkExecutor: ThreadPoolExecutor by lazy {
@@ -110,27 +93,20 @@ abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
                                           completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
-    abstract fun authWithMasterKey(userName: String,
+    abstract fun authWithMasterKey(name: String,
                                    masterKey: String,
                                    listener: (UserAuthResponse) -> Unit)
 
     @MainThread
-    abstract fun authWithActiveWif(login: String,
+    abstract fun authWithActiveWif(name: String,
                                    activeWif: String,
                                    listener: (UserAuthResponse) -> Unit)
 
-    abstract fun authWithPostingWif(login: String,
+    abstract fun authWithPostingWif(name: String,
                                     postingWif: String,
                                     listener: (UserAuthResponse) -> Unit)
 
-    @MainThread
-    abstract fun requestActiveUserDataUpdate()
-
-    @MainThread
-    abstract fun getUserInfo(userName: String): LiveData<GolosUserAccountInfo>
-
-    @MainThread
-    abstract fun requestUserInfoUpdate(userName: String, completionHandler: (GolosUserAccountInfo, GolosError?) -> Unit)
+    abstract fun requestApplicationUserDataUpdate()
 
     @MainThread
     abstract fun deleteUserdata()
@@ -173,28 +149,6 @@ abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
 
     @AnyThread
     abstract fun isUserLoggedIn(): Boolean
-
-    //subscription to blog
-    @MainThread
-    abstract fun getCurrentUserSubscriptions(): LiveData<List<UserBlogSubscription>>
-
-    @MainThread
-    abstract fun getSubscribersToBlog(ofUser: String): LiveData<List<UserObject>>
-
-    @MainThread
-    abstract fun getSubscriptionsToBlogs(ofUser: String): LiveData<List<UserObject>>
-
-    @MainThread
-    abstract fun requestSubscribersUpdate(ofUser: String, completionHandler: (List<UserObject>, GolosError?) -> Unit)
-
-    @MainThread
-    abstract fun requestSubscriptionUpdate(ofUser: String, completionHandler: (List<UserObject>, GolosError?) -> Unit)
-
-    @MainThread
-    abstract fun subscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
-
-    @MainThread
-    abstract fun unSubscribeOnUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
     //tags
     @MainThread
@@ -250,7 +204,6 @@ abstract class Repository : UserDataProvider, EventsProvider, AvatarRepository {
 
     abstract val notificationsRepository: PushNotificationsRepository
 
-    abstract fun getGolosUsers(nick: String): LiveData<List<GolosUser>>
 }
 
 interface ImageLoadRunnable : Runnable

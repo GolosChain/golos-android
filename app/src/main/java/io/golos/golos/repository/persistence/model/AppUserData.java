@@ -299,14 +299,14 @@ public class AppUserData implements Cloneable {
     public static AppUserData fromPositiveAuthResponse(UserAuthResponse response) {
         return new AppUserData(true,
                 response.getAccountInfo().getUserMotto(),
-                response.getAccountInfo().getGolosUser().getAvatarPath(),
-                response.getAccountInfo().getGolosUser().getUserName(),
+                response.getAccountInfo().getAvatarPath(),
+                response.getAccountInfo().getUserName(),
                 response.getActiveAuth().getSecond(),
                 response.getPostingAuth().getSecond(),
                 response.getAccountInfo().getActivePublicKey(),
                 response.getAccountInfo().getPostingPublicKey(),
-                response.getAccountInfo().getSubscibesCount(),
-                response.getAccountInfo().getSubscribersCount(),
+                0,
+                0,
                 response.getAccountInfo().getGbgAmount(),
                 response.getAccountInfo().getGolosAmount(),
                 response.getAccountInfo().getGolosPower(),
@@ -321,16 +321,6 @@ public class AppUserData implements Cloneable {
                 response.getAccountInfo().getUserCover());
     }
 
-    public GolosUserAccountInfo toAccountInfo() {
-
-        return new GolosUserAccountInfo(new GolosUser(userName == null ? "" : userName, avatarPath), mMoto,
-                postsCount, accountWorth, subscibesCount, subscribersCount,
-                gbgAmount, golosAmount, golosPower, safeGbg,
-                safeGolos, publicPostingWif == null ? "" : publicPostingWif,
-                publicActiveWif == null ? "" : publicActiveWif, false, votingPower,
-                location == null ? "" : location, webSite == null ? "" : webSite, registerDate, cover);
-    }
-
     @Override
     public String toString() {
         return "UserData{" +
@@ -343,7 +333,7 @@ public class AppUserData implements Cloneable {
                 ", publicActiveWif='" + publicActiveWif + '\'' +
                 ", privatePostingWif='" + privatePostingWif + '\'' +
                 ", publicPostingWif='" + publicPostingWif + '\'' +
-                ", subscibesCount=" + subscibesCount +
+                ", subscribesCount=" + subscibesCount +
                 ", subscribersCount=" + subscribersCount +
                 ", gbgAmount=" + gbgAmount +
                 ", golosAmount=" + golosAmount +

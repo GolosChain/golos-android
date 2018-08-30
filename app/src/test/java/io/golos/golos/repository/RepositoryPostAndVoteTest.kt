@@ -254,7 +254,7 @@ class RepositoryPostAndVoteTest {
             assertNotNull(resp.accountInfo.golosUser.avatarPath)
             assertNotNull(resp.accountInfo.userMotto)
             assertTrue(resp.accountInfo.postsCount != 0L)
-            assertTrue(resp.accountInfo.subscibesCount != 0L)
+            assertTrue(resp.accountInfo.subscribesCount != 0L)
             assertTrue(resp.accountInfo.subscribersCount != 0L)
             assertTrue(resp.accountInfo.gbgAmount != 0.0)
             assertTrue(resp.accountInfo.golosAmount != 0.0)
