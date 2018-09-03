@@ -56,6 +56,7 @@ import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
 import io.golos.golos.screens.editor.knife.NumberedMarginSpan
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWrapper
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
@@ -77,6 +78,17 @@ fun Cursor.getString(columnName: String): String? {
     val columnNumber = this.getColumnIndex(columnName)
     if (columnNumber < 0) return null
     return this.getString(this.getColumnIndex(columnName))
+}
+
+inline fun traceCaller() {
+    if (BuildConfig.DEBUG) {
+        Timber.e(Thread.currentThread().stackTrace[4].toString())
+    }
+}
+
+inline fun <reified K, reified V> Map<K, V>.toHashMap(): HashMap<K, V> {
+    return if (this is HashMap<K, V>) return this
+    else HashMap(this)
 }
 
 fun Cursor.getLong(columnName: String): Long {
@@ -442,9 +454,9 @@ fun CommentOperation.getTags(): List<String> {
             var node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
             node?.let {
                 val tags = node.get("tags")?.asIterable()
-                tags?.forEach({
+                tags?.forEach {
                     out.add(it.asText())
-                })
+                }
             }
         }
 

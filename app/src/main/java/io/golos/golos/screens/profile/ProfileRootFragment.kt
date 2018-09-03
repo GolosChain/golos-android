@@ -37,7 +37,7 @@ class ProfileRootFragment : GolosFragment(), Observer<AuthState> {
     override fun onChanged(it: AuthState?) {
         if (it?.isLoggedIn == true) {
             if (childFragmentManager.findFragmentByTag(mUserProfileFTag) == null) {
-                if (Repository.get.appUserData.value?.userName != null)
+                if (Repository.get.appUserData.value?.name != null)
                     childFragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.fade_in, 0)
                             .replace(mRoot.id,

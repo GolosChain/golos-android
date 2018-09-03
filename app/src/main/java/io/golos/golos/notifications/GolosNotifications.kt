@@ -232,7 +232,7 @@ class GolosUpVoteNotification(val permlink: String, val fromUser: String, overri
 
 
 private fun String.makeLinkFromPermlink(): PostLinkExtractedData? {
-    return PostLinkExtractedData(Repository.get.appUserData.value?.userName
+    return PostLinkExtractedData(Repository.get.appUserData.value?.name
             ?: return null, null, this)
 }
 

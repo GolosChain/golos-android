@@ -87,7 +87,7 @@ class TagAndUsersSearchActivity : GolosActivity(), Observer<TagSearchViewModelSc
                 mHandler.removeCallbacksAndMessages(null)
                 if (p0.isNullOrBlank()) mViewModel.searchUser("")
                 else {
-                    mHandler.postDelayed({ mViewModel.searchUser(p0 ?: "") }, 1000)
+                    mHandler.postDelayed({ mViewModel.searchUser(p0 ?: "") }, 600)
                 }
                 return true
             }
@@ -97,10 +97,10 @@ class TagAndUsersSearchActivity : GolosActivity(), Observer<TagSearchViewModelSc
             mViewModel.onTagSearchEnd()
             false
         }
-        mTagsSearchV.setOnQueryTextFocusChangeListener({ v, isFocused ->
+        mTagsSearchV.setOnQueryTextFocusChangeListener { v, isFocused ->
             if (v == mTagsSearchV && isFocused && mTagsSearchV.query.isEmpty()) mViewModel.onTagSearchStart()
             else if (v == mTagsSearchV && !isFocused && mTagsSearchV.query.isEmpty()) mViewModel.onTagSearchEnd()
-        })
+        }
         mTabbar = findViewById(R.id.appbar)
         mProgress = findViewById(R.id.progress)
         mTagsAndUsersPager = findViewById(R.id.tags_and_users_recycler)

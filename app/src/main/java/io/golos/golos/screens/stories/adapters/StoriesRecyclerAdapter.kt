@@ -15,6 +15,7 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.HolderClickListener
+import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -81,7 +82,6 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
         } else {
             workingExecutor.execute {
                 try {
-
                     val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                             if (mStripes == null
@@ -102,8 +102,9 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                                     || newItems.isEmpty()
                                     || mStripes.lastIndex < oldItemPosition
                                     || newItems.size < newItemPosition) return false
+                            val newItem = newItems[newItemPosition].storyWithState() ?: return false
                             val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                            return oldHash == newItems[newItemPosition].storyWithState()?.hashCode()
+                            return oldHash == newItem.hashCode()
                         }
                     })
                     handler.post {

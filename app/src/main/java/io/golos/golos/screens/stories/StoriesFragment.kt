@@ -1,5 +1,6 @@
 package io.golos.golos.screens.stories
 
+
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
@@ -33,7 +34,6 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
@@ -79,7 +79,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
 
-        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, this, filter)
+        mViewModel = StoriesModelFactory.getStoriesViewModel(type, activity, null, filter)
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
@@ -155,6 +155,16 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
     }
 
+    override fun onStart() {
+        super.onStart()
+        mViewModel?.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mViewModel?.onStop()
+    }
+
     private fun setUp() {
 
         if (isVisibleBacking == true) {
@@ -176,12 +186,12 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     override fun onChanged(t: StoriesViewState?) {
         if (t?.isLoading == true) {
             if (mSwipeRefresh?.isRefreshing == false) {
-                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
-                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = true })
+                mSwipeRefresh?.post { mSwipeRefresh?.isRefreshing = false }
+                mSwipeRefresh?.post { mSwipeRefresh?.isRefreshing = true }
             }
         } else {
             if (mSwipeRefresh?.isRefreshing == true) {
-                mSwipeRefresh?.post({ mSwipeRefresh?.isRefreshing = false })
+                mSwipeRefresh?.post { mSwipeRefresh?.isRefreshing = false }
             }
         }
 
@@ -237,26 +247,18 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         val parc = mRecycler?.layoutManager as? LinearLayoutManager
         parc?.onSaveInstanceState().let {
             outState.putParcelable("recyclerState", it)
         }
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mViewModel?.onDestroy()
+        super.onSaveInstanceState(outState)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         val parc = savedInstanceState?.getParcelable<Parcelable>("recyclerState")
         parc?.let {
-            (mRecycler?.layoutManager as? LinearLayoutManager)?.let {
-                it.onRestoreInstanceState(parc)
-            }
+            (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
         }
     }
 
@@ -269,8 +271,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     }
 
     companion object {
-        private val TYPE_TAG = "TYPE_TAG"
-        private val FILTER_TAG = "FILTER_TAG"
+        private const val TYPE_TAG = "TYPE_TAG"
+        private const val FILTER_TAG = "FILTER_TAG"
 
         fun getInstance(type: FeedType,
                         filter: StoryFilter? = null): StoriesFragment {
@@ -280,8 +282,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
             return fr
         }
 
-        fun createArguments(type: FeedType,
-                            filter: StoryFilter? = null): Bundle {
+        private fun createArguments(type: FeedType,
+                                    filter: StoryFilter? = null): Bundle {
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
             if (filter != null)

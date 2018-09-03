@@ -22,6 +22,8 @@ import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
+import io.golos.golos.utils.isNullOrEmpty
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -69,10 +71,19 @@ object StoriesModelFactory {
 
 data class StoriesViewState(val isLoading: Boolean,
                             val showRefreshButton: Boolean,
-                            val items: List<StoryWithComments> = ArrayList(),
-                            val error: GolosError? = null,
-                            val fullscreenMessage: Int? = null,
-                            val popupMessage: Int? = null)
+                            val items: List<StoryWithComments>,
+                            val error: GolosError?,
+                            val fullscreenMessage: Int?,
+                            val popupMessage: Int?) {
+    fun ChangeField(isLoading: Boolean = this.isLoading,
+                    showRefreshButton: Boolean = this.showRefreshButton,
+                    items: List<StoryWithComments> = this.items,
+                    error: GolosError? = this.error,
+                    fullscreenMessage: Int? = this.fullscreenMessage,
+                    popupMessage: Int? = this.popupMessage): StoriesViewState {
+        return StoriesViewState(isLoading, showRefreshButton, items, error, fullscreenMessage, popupMessage)
+    }
+}
 
 class CommentsViewModel : FeedViewModel() {
     override val type: FeedType
@@ -106,11 +117,8 @@ open class FeedViewModel : StoriesViewModel() {
     }
 
     override fun onNewItems(items: StoriesFeed?): StoriesViewState {
-        return StoriesViewState(false,
-                items?.isFeedActual == false,
-                items?.items ?: ArrayList(),
-                items?.error,
-                if (items?.items?.size ?: 0 == 0) R.string.nothing_here else null)
+        val state = super.onNewItems(items)
+        return state.ChangeField(fullscreenMessage = if (items?.items?.size?.or(0) == 0) R.string.nothing_here else null)
     }
 }
 
@@ -136,16 +144,17 @@ class PromoViewModel : StoriesViewModel() {
 }
 
 
-abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
+abstract class StoriesViewModel : ViewModel() {
     protected abstract val type: FeedType
-    protected val mStoriesLiveData: MutableLiveData<StoriesViewState> = MutableLiveData()
-    protected val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
-    protected val mRepository = Repository.get
-    protected val isUpdating = AtomicBoolean(false)
-    protected var isVisibleToUser: Boolean = false
+    private val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
+    private val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
+    private val mRepository = Repository.get
+    private val isUpdating = AtomicBoolean(false)
+    private var isVisibleToUser: Boolean = false
     protected var filter: StoryFilter? = null
-    protected lateinit var internetStatusNotifier: InternetStatusNotifier
+    private lateinit var internetStatusNotifier: InternetStatusNotifier
     private var mObserver: Observer<Boolean>? = null
+
 
     val storiesLiveData: LiveData<StoriesViewState>
         get() {
@@ -157,18 +166,35 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
-        if (this.filter != null && this.filter != filter) {//recreating
-            mStoriesLiveData.value = StoriesViewState(false,
-                    false,
-                    arrayListOf())
-            isUpdating.set(false)
-            onChangeVisibilityToUser(isVisibleToUser)
-        }
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
-        mRepository.getStories(type, filter).observeForever(this)
+        mStoriesLiveData.value = StoriesViewState(false,
+                mRepository.getStories(type, filter).value?.isFeedActual == false,
+                mRepository.getStories(type, filter).value?.items.orEmpty().apply {
+                    this.onEach {
+                        val story = it.rootStory() ?: return@onEach
+                        story.avatarPath = mRepository.usersAvatars.value?.get(story.author)
+                    }
+                },
+                null, null, null)
+    }
 
+    fun onStart() {
+        mStoriesLiveData.addSource(mRepository.getStories(type, filter)) {
+            if (it?.type == type && it.filter == filter)
+                mStoriesLiveData.value = onNewItems(it)
+        }
 
+        mStoriesLiveData.addSource(mRepository.usersAvatars) { usersMap ->
+            usersMap ?: return@addSource
+            mStoriesLiveData.value = mStoriesLiveData
+                    .value?.ChangeField(
+                    items = mStoriesLiveData.value?.items?.onEach {
+                        it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
+                    }.orEmpty()
+            )
+
+        }
         if (mObserver == null) {
             mObserver = Observer {
                 mFeedSettingsLiveData.value = getFeedModeSettings()
@@ -188,16 +214,43 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
         }
     }
 
-    override fun onChanged(t: StoriesFeed?) {
-        if (t?.type == type && t.filter == filter)
-            mStoriesLiveData.value = onNewItems(t)
+    fun onStop() {
+        mStoriesLiveData.removeSource(mRepository.getStories(type, filter))
+        mStoriesLiveData.removeSource(mRepository.usersAvatars)
+
+        if (mObserver != null) {
+            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
+                    ?: return)
+            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver
+                    ?: return)
+            Repository.get.userSettingsRepository.isNSFWShow().removeObserver(mObserver ?: return)
+            mObserver = null
+        }
     }
 
     protected open fun onNewItems(items: StoriesFeed?): StoriesViewState {
-        return StoriesViewState(false,
+        val state = StoriesViewState(false,
                 items?.isFeedActual == false,
                 items?.items ?: ArrayList(),
-                items?.error)
+                items?.error, null, null)
+
+        state.items.mapNotNull {
+            it.rootStory()
+        }.onEach {
+            it.avatarPath = mRepository.usersAvatars.value?.get(it.author)
+        }
+
+
+        val authorsWithNoAvatars = state
+                .items
+                .filter { it.rootStory()?.avatarPath == null }
+                .mapNotNull { it.rootStory()?.author }
+                .filter { !mRepository.getGolosUserAccountInfos().value.orEmpty().containsKey(it) }
+        mRepository.requestUsersAccountInfoUpdate(authorsWithNoAvatars.apply {
+            Timber.e("requesting avatars for $this")
+
+        })
+        return state
     }
 
     open fun onSwipeToRefresh() {
@@ -207,10 +260,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = StoriesViewState(true,
-                    false,
-                    mStoriesLiveData.value?.items ?: ArrayList())
-            mRepository.requestStoriesListUpdate(20, type, filter, null, null, { _, _ -> })
+            mStoriesLiveData.value = mStoriesLiveData.value?.ChangeField(isLoading = true, error = null, showRefreshButton = false)
+
+            mRepository.requestStoriesListUpdate(20, type, filter, null, null) { _, _ -> }
             isUpdating.set(true)
         }
     }
@@ -223,11 +275,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
                 setAppOffline()
                 return
             }
-            if (mStoriesLiveData.value == null ||
-                    mStoriesLiveData.value?.items == null ||
-                    mStoriesLiveData.value?.items?.isEmpty() == true) {
+            if (mStoriesLiveData.value?.items.isNullOrEmpty()) {
                 if (isUpdating.get()) return
-                mStoriesLiveData.value = StoriesViewState(true, false)
+                mStoriesLiveData.value = mStoriesLiveData.value?.ChangeField(isLoading = true, error = null, showRefreshButton = false)
                 mRepository.requestStoriesListUpdate(20, type, filter, null, null) { _, _ -> }
                 isUpdating.set(true)
             }
@@ -235,12 +285,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     private fun setAppOffline() {
-        mStoriesLiveData.value = StoriesViewState(false,
-                mStoriesLiveData.value?.showRefreshButton == true,
-                mStoriesLiveData.value?.items ?: ArrayList(),
-                GolosError(ErrorCode.ERROR_NO_CONNECTION,
-                        null,
-                        R.string.no_internet_connection))
+        mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = false, error = GolosError(ErrorCode.ERROR_NO_CONNECTION,
+                null,
+                R.string.no_internet_connection))
     }
 
     private fun getFeedModeSettings() = FeedCellSettings(Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
@@ -259,18 +306,16 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             return
         }
         if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
-        //  if (isUpdating.get())return
+
         isUpdating.set(true)
         if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = StoriesViewState(true,
-                    mStoriesLiveData.value?.showRefreshButton == true,
-                    mStoriesLiveData.value?.items ?: ArrayList())
+            mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true)
         }
 
         mRepository.requestStoriesListUpdate(20,
                 type,
                 filter,
-                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink, { _, _ -> })
+                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink) { _, _ -> }
     }
 
     open fun onCardClick(it: StoryWithComments, context: Context?) {
@@ -313,12 +358,9 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             val story = it.storyWithState() ?: return
             mRepository.vote(story, vote)
         } else {
-            mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
-                    mStoriesLiveData.value?.showRefreshButton == true,
-                    mStoriesLiveData.value?.items ?: ArrayList(),
-                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+            mStoriesLiveData.value =
+                    mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
-
     }
 
     open fun cancelVote(it: StoryWithComments) {
@@ -330,10 +372,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
             val story = it.storyWithState() ?: return
             mRepository.cancelVote(story)
         } else {
-            mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
-                    mStoriesLiveData.value?.showRefreshButton == true,
-                    mStoriesLiveData.value?.items ?: ArrayList(),
-                    GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+            mStoriesLiveData.value = mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
     }
 
@@ -342,10 +381,7 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     fun onVoteRejected(it: StoryWithComments) {
-        mStoriesLiveData.value = StoriesViewState(mStoriesLiveData.value?.isLoading ?: false,
-                mStoriesLiveData.value?.showRefreshButton == true,
-                mStoriesLiveData.value?.items ?: ArrayList(),
-                GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+        mStoriesLiveData.value = mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
     fun onBlogClick(story: StoryWithComments, context: Context?) {
@@ -368,21 +404,4 @@ abstract class StoriesViewModel : ViewModel(), Observer<StoriesFeed> {
     fun onVotersClick(it: StoryWithComments, context: Context?) {
         UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
     }
-
-    override fun toString(): String {
-        return "StoriesViewModel(type=$type, isVisibleToUser=$isVisibleToUser, filter=$filter)"
-    }
-
-    fun onDestroy() {
-        mRepository.getStories(type, filter).removeObserver(this)
-        if (mObserver != null) {
-            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isNSFWShow().removeObserver(mObserver ?: return)
-            mObserver = null
-        }
-    }
-
 }

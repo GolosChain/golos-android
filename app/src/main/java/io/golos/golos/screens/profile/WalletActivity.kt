@@ -37,11 +37,11 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
     override fun onChanged(t: UserAccountModel?) {
         val it = t?.accountInfo ?: return
 
-        mUserName.text = it.golosUser.userName.capitalize()
+        mUserName.text = it.userName.capitalize()
         val glide = Glide.with(this)
-        if (it.golosUser.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
+        if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
         else {
-            glide.load(ImageUriResolver.resolveImageWithSize(it.golosUser.avatarPath, wantedwidth = mUserAvatar.width))
+            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth = mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)

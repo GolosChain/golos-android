@@ -1,16 +1,14 @@
 package io.golos.golos.screens.profile.viewmodel
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.*
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.UserAuthResponse
-import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
 
 data class UserProfileState(val isLoggedIn: Boolean,
                             val isLoading: Boolean,
@@ -20,9 +18,9 @@ data class UserProfileState(val isLoggedIn: Boolean,
                             val userPostsCount: Long = 0L,
                             val userAccountWorth: Double = 0.0,
                             val isPostingKeyVisible: Boolean,
-                            val subscribesNum: Long = 0,
+                            val subscribesNum: Int = 0,
                             val userMoto: String? = null,
-                            val subscribersNum: Long = 0,
+                            val subscribersNum: Int = 0,
                             val golosAmount: Double = 0.0,
                             val golosPower: Double = 0.0,
                             val gbgAmount: Double = 0.0,
@@ -38,30 +36,27 @@ data class AuthUserInput(val login: String,
                          val postingWif: String = "",
                          val activeWif: String = "")
 
-class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserData> {
+class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<ApplicationUser> {
     val userProfileState = MutableLiveData<UserProfileState>()
-    val userAuthState = Transformations.map(userProfileState,
-            {
-                if (it?.isLoggedIn == true) AuthState(true, it.userName)
-                else AuthState(false, "")
-            })
+    val userAuthState = Transformations.map(userProfileState
+    ) {
+        if (it?.isLoggedIn == true) AuthState(true, it.userName)
+        else AuthState(false, "")
+    }!!
     private var mLastUserInput = AuthUserInput("")
     private val mRepository = Repository.get
+    private val mMediator = MediatorLiveData<Any>()
 
     init {
         mRepository
                 .appUserData.observeForever(this)
-        mRepository.requestApplicationUserDataUpdate()
     }
 
-    override fun onChanged(t: AppUserData?) {
-        if (t == null || !t.isUserLoggedIn) {
-            userProfileState.value = UserProfileState(isLoggedIn = false,
-                    isPostingKeyVisible = true,
-                    isLoading = false,
-                    userName = t?.userName ?: "")
+    override fun onChanged(it: ApplicationUser?) {
+        if (it?.isLogged != true) {
+            userProfileState.value = UserProfileState(false, false, null, isPostingKeyVisible = true, userName = "")
         } else {
-            initUser(t)
+            initUser()
         }
     }
 
@@ -91,6 +86,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
     }
 
     fun onLoginClick() {
+        Timber.e("onLoginClick input = $mLastUserInput")
         if (mLastUserInput.login.isEmpty()) {
             showAuthError(GolosError(ErrorCode.ERROR_AUTH,
                     localizedMessage = R.string.enter_login,
@@ -105,8 +101,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
                 userProfileState.value = UserProfileState(false, true, null,
                         mLastUserInput.login, isPostingKeyVisible = false)
                 mRepository.authWithActiveWif(mLastUserInput.login,
-                        mLastUserInput.activeWif,
-                        { proceedAuthResponse(it) })
+                        mLastUserInput.activeWif
+                ) { proceedAuthResponse(it) }
             }
         } else if (userProfileState.value?.isPostingKeyVisible == true) {
             if (mLastUserInput.postingWif.isEmpty()) {
@@ -121,8 +117,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
                         userMoto = userProfileState.value?.userName ?: "")
 
                 mRepository.authWithPostingWif(mLastUserInput.login,
-                        mLastUserInput.postingWif,
-                        { proceedAuthResponse(it) })
+                        mLastUserInput.postingWif
+                ) { proceedAuthResponse(it) }
 
             }
         }
@@ -135,13 +131,13 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
             }
         } else {
             userProfileState.value = UserProfileState(isLoggedIn = true,
-                    userName = resp.accountInfo.golosUser.userName,
-                    avatarPath = resp.accountInfo.golosUser.avatarPath,
+                    userName = resp.accountInfo.userName,
+                    avatarPath = resp.accountInfo.avatarPath,
                     userPostsCount = resp.accountInfo.postsCount,
                     userAccountWorth = resp.accountInfo.accountWorth,
                     isLoading = false,
                     subscribersNum = resp.accountInfo.subscribersCount,
-                    subscribesNum = resp.accountInfo.subscribesCount,
+                    subscribesNum = resp.accountInfo.subscriptionsCount,
                     userMoto = resp.accountInfo.userMotto,
                     golosAmount = resp.accountInfo.golosAmount,
                     golosPower = resp.accountInfo.golosPower,
@@ -153,28 +149,30 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<AppUserD
         }
     }
 
-    private fun initUser(userData: AppUserData) {
-        if (userData.privateActiveWif != null || userData.privatePostingWif != null) {
-            userProfileState.value = UserProfileState(isLoggedIn = true,
-                    isLoading = false,
-                    userName = userData.userName ?: "",
-                    avatarPath = userData.avatarPath,
-                    userAccountWorth = userData.gbgAmount,
-                    userPostsCount = userData.postsCount,
-                    subscribesNum = userData.subscibesCount,
-                    subscribersNum = userData.subscribersCount,
-                    userMoto = userData.getmMoto(),
-                    golosAmount = userData.golosAmount,
-                    golosPower = userData.golosPower,
-                    gbgAmount = userData.gbgAmount,
-                    gbgInSafeAmount = userData.safeGbg,
-                    golosInSafeAmount = userData.safeGolos,
-                    accountWorth = userData.accountWorth,
-                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
-        } else {
-            showAuthError(GolosError(ErrorCode.ERROR_AUTH, null,
-                    R.string.wrong_credentials))
-        }
+    private fun initUser() {
+        val appUserData =
+                mRepository.getGolosUserAccountInfos()
+                        .value
+                        ?.get(mRepository.appUserData.value?.name
+                                ?: return) ?: return
+
+        userProfileState.value = UserProfileState(isLoggedIn = true,
+                isLoading = false,
+                userName = appUserData.userName,
+                avatarPath = appUserData.avatarPath,
+                userAccountWorth = appUserData.gbgAmount,
+                userPostsCount = appUserData.postsCount,
+                subscribesNum = appUserData.subscriptionsCount,
+                subscribersNum = appUserData.subscribersCount,
+                userMoto = appUserData.userMotto,
+                golosAmount = appUserData.golosAmount,
+                golosPower = appUserData.golosPower,
+                gbgAmount = appUserData.gbgAmount,
+                gbgInSafeAmount = appUserData.safeGbg,
+                golosInSafeAmount = appUserData.safeGolos,
+                accountWorth = appUserData.accountWorth,
+                isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
+
     }
 
     fun onLogoutClick() {

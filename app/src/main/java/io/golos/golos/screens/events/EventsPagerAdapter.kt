@@ -14,7 +14,7 @@ class EventsPagerAdapter(private val textProvider: StringProvider,
     override fun getItem(position: Int): Fragment {
         fragments[position] = when (position) {
             0 -> EventsListFragment.getInstance(null)
-            1 -> EventsListFragment.getInstance(listOf(EventType.AWARD, EventType.CURATOR_AWARD))
+            1 -> EventsListFragment.getInstance(listOf(EventType.REWARD, EventType.CURATOR_AWARD))
             2 -> EventsListFragment.getInstance(listOf(EventType.REPLY))
             3 -> EventsListFragment.getInstance(listOf(EventType.VOTE, EventType.FLAG, EventType.SUBSCRIBE, EventType.UNSUBSCRIBE, EventType.REPOST))
             4 -> EventsListFragment.getInstance(listOf(EventType.MENTION))

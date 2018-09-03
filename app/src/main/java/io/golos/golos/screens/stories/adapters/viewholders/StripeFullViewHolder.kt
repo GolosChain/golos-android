@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.knife.KnifeParser
@@ -44,6 +45,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mVotersBtn: TextView = itemView.findViewById(R.id.voters_btn)
     private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
+    private var oldAvatar: String? = null
 
     private val mGlide = Glide.with(parent.context)
 
@@ -57,21 +59,21 @@ class StripeFullViewHolder(parent: ViewGroup,
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
         mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
 
-        mCommentsButton.setOnClickListener({ onCommentsClick.onClick(this) })
-        mShareBtn.setOnClickListener({ onShareClick.onClick(this) })
-        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
-        mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
-        mAvatar.setOnClickListener({ onUserClick.onClick(this) })
-        mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
-        mUpvoteBtn.setOnClickListener({ onUpvoteClick.onClick(this) })
-        mVotersBtn.setOnClickListener({ onVotersClick.onClick(this) })
+        mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
+        mShareBtn.setOnClickListener { onShareClick.onClick(this) }
+        mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
+        mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
+        mAvatar.setOnClickListener { onUserClick.onClick(this) }
+        mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
+        mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
+        mVotersBtn.setOnClickListener { onVotersClick.onClick(this) }
 
 
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
         itemView.setOnClickListener({ onCardClick.onClick(this) })
-      //  mBodyTextMarkwon.movementMethod = GolosMovementMethod.instance
+
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -80,16 +82,18 @@ class StripeFullViewHolder(parent: ViewGroup,
 
             val wrapper = newState.stripe.rootStory() ?: return
             val newAvatar = wrapper.avatarPath
-            val oldAvatar = oldState?.stripe?.rootStory()?.avatarPath
 
             if (wrapper.avatarPath != null) {
-                if (newAvatar != oldAvatar)
+                if (newAvatar != oldAvatar) {
                     mGlide
                             .load(ImageUriResolver.resolveImageWithSize(
                                     wrapper.avatarPath ?: "",
                                     wantedwidth = mAvatar.width))
+                            .apply(RequestOptions().placeholder(noAvatarDrawable))
                             .error(mGlide.load(noAvatarDrawable))
                             .into(mAvatar)
+                    oldAvatar = wrapper.avatarPath
+                }
             } else mAvatar.setImageDrawable(noAvatarDrawable)
             if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {

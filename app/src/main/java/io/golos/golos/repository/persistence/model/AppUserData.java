@@ -35,8 +35,8 @@ public class AppUserData implements Cloneable {
     private String cover;
 
     private long registerDate;
-    private long subscibesCount;
-    private long subscribersCount;
+    private int subscibesCount;
+    private int subscribersCount;
     private double gbgAmount;
     private double golosAmount;
     private double golosPower;
@@ -55,8 +55,8 @@ public class AppUserData implements Cloneable {
                        @Nullable String privatePostingWif,
                        @Nullable String publicActiveWif,
                        @Nullable String publicPostingWif,
-                       long subscibesCount,
-                       long subscribersCount,
+                       int subscibesCount,
+                       int subscribersCount,
                        double gbgAmount,
                        double golosAmount,
                        double golosPower,
@@ -238,21 +238,21 @@ public class AppUserData implements Cloneable {
     }
 
     @Nullable
-    public long getSubscibesCount() {
+    public int getSubscibesCount() {
         return subscibesCount;
     }
 
-    public void setSubscibesCount(@Nullable long subscibesCount) {
+    public void setSubscibesCount(@Nullable int subscibesCount) {
         this.subscibesCount = subscibesCount;
     }
 
     @Nullable
-    public long getSubscribersCount() {
+    public int getSubscribersCount() {
         return subscribersCount;
     }
 
     @Nullable
-    public void setSubscribersCount(long subscribersCount) {
+    public void setSubscribersCount(int subscribersCount) {
         this.subscribersCount = subscribersCount;
     }
 

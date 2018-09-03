@@ -3,8 +3,8 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.*
 import android.support.v4.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
-import io.golos.golos.repository.GolosUsersRepository
 import io.golos.golos.repository.EventsProvider
+import io.golos.golos.repository.GolosUsersRepository
 import io.golos.golos.repository.services.Authorable
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.GolosEvent
@@ -23,39 +23,42 @@ class EventsViewModel : ViewModel() {
     private var mEventsProvider: EventsProvider? = null
     private var mEventTypes: List<EventType>? = null
     private var mEventsSorter: EventsSorterUseCase? = null
-    private var mAvatarsProvider: GolosUsersRepository? = null
-    private var lastEventsSize: Int = 0
+    private var mUsersProvider: GolosUsersRepository? = null
     private val updateLimit = 15
 
 
     fun onCreate(eventTypes: List<EventType>?,
                  eventsProvider: EventsProvider,
                  eventsSorter: EventsSorterUseCase?,
-                 avatarsProvider: GolosUsersRepository?) {
+                 usersProvider: GolosUsersRepository?) {
         mEventsProvider = eventsProvider
         mEventTypes = eventTypes
         mEventsSorter = eventsSorter
-        mAvatarsProvider = avatarsProvider
+        mUsersProvider = usersProvider
 
         onLiveDataChanged()
     }
 
     private fun onLiveDataChanged() {
         val events = mEventsProvider?.getEvents(mEventTypes)?.value.orEmpty()
-        val avatars = mAvatarsProvider?.avatars?.value.orEmpty()
+
+        val users = mUsersProvider?.getGolosUserAccountInfos()?.value.orEmpty()
         events.filter { it is Authorable }.forEach {
-            it.avatarPath = avatars[(it as Authorable).getAuthors().firstOrNull()]
+            it.avatarPath = users[(it as Authorable).getAuthors().firstOrNull()]?.avatarPath
         }
         mEventsList.value = EventsList(events)
-        if (lastEventsSize != events.size) {
-            lastEventsSize = events.size
-            mAvatarsProvider?.requestAvatarsUpdate(events
+        if (events.isNotEmpty()) {
+            val authorsWithNoAvatars = mEventsList.value?.events
+                    .orEmpty()
+                    .filter { it.avatarPath == null && it is Authorable }
+                    .map { (it as Authorable).getAuthors().firstOrNull() }
+                    .distinct()
                     .filter {
-                        it is Authorable
-                                && it.avatarPath == null
-                                && it.getAuthors().isNotEmpty()
+                        !mUsersProvider?.getGolosUserAccountInfos()?.value.orEmpty().containsKey(it)
                     }
-                    .map { (it as Authorable).getAuthors().first() })
+                    .filterNotNull()
+
+            if (authorsWithNoAvatars.isNotEmpty()) mUsersProvider?.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
         }
     }
 
@@ -76,7 +79,7 @@ class EventsViewModel : ViewModel() {
 
     fun onStop() {
         mEventsProvider?.let { mEventsList.removeSource(it.getEvents(mEventTypes)) }
-        mAvatarsProvider?.let { mEventsList.removeSource(it.avatars) }
+        mUsersProvider?.let { mEventsList.removeSource(it.getGolosUserAccountInfos()) }
     }
 
     fun onEventClick(fragmentActivity: FragmentActivity, it: GolosEvent) {
@@ -100,8 +103,8 @@ class EventsViewModel : ViewModel() {
                 onLiveDataChanged()
             }
         }
-        mAvatarsProvider?.let {
-            mEventsList.addSource(it.avatars) {
+        mUsersProvider?.let {
+            mEventsList.addSource(it.getGolosUserAccountInfos()) {
                 onLiveDataChanged()
             }
         }

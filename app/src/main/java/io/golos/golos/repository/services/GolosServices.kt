@@ -76,7 +76,7 @@ class GolosServicesImpl(
 
     private fun onTokenOrAuthStateChanged() {
         val appUserData = userDataProvider.appUserData.value
-        if (appUserData == null || !appUserData.isUserLoggedIn) {
+        if (appUserData == null || !appUserData.isLogged) {
             if (isAuthComplete) {
                 workerExecutor.execute {
                     mGolosServicesGateWay.logout()
@@ -94,7 +94,7 @@ class GolosServicesImpl(
         isAuthInProgress = true
         workerExecutor.execute {
             try {
-                mGolosServicesGateWay.auth(appUserData.userName ?: return@execute)
+                mGolosServicesGateWay.auth(appUserData.name)
                 isAuthComplete = true
                 isAuthInProgress = false
                 onAuthComplete()
@@ -209,8 +209,8 @@ class GolosServicesImpl(
 
     private fun reauthIfNeeded(e: GolosServicesException) {
         if (rpcErrorFromCode(e.golosServicesError.code) == JsonRpcError.BAD_REQUEST
-                && userDataProvider.appUserData.value?.isUserLoggedIn == true) {
-            mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.userName
+                && userDataProvider.appUserData.value?.isLogged == true) {
+            mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
                     ?: return)
             isAuthComplete = true
             isAuthInProgress = false
@@ -231,7 +231,7 @@ class GolosServicesImpl(
                 is GolosReplyEvent -> EventType.REPLY
                 is GolosRepostEvent -> EventType.REPOST
                 is GolosMentionEvent -> EventType.MENTION
-                is GolosAwardEvent -> EventType.AWARD
+                is GolosAwardEvent -> EventType.REWARD
                 is GolosCuratorAwardEvent -> EventType.CURATOR_AWARD
                 is GolosMessageEvent -> EventType.MESSAGE
                 is GolosWitnessVoteEvent -> EventType.WITNESS_VOTE

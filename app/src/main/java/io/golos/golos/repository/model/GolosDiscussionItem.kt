@@ -18,39 +18,77 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     val id: Long,
                                                     val title: String,
                                                     val categoryName: String,
-                                                    val tags: MutableList<String> = ArrayList(),
-                                                    val images: MutableList<String> = ArrayList(),
-                                                    val links: MutableList<String> = ArrayList(),
+                                                    val tags: List<String>,
+                                                    val images: MutableList<String>,
+                                                    val links: List<String>,
                                                     val votesNum: Int,
                                                     val votesRshares: Long,
                                                     val commentsCount: Int,
                                                     val permlink: String,
-                                                    var gbgAmount: Double,
-                                                    var body: String,
-                                                    var bodyLength: Long,
+                                                    val gbgAmount: Double,
+                                                    val body: String,
+                                                    val bodyLength: Long,
                                                     val author: String,
-                                                    var format: Format = Format.HTML,
+                                                    val format: Format = Format.HTML,
                                                     var avatarPath: String? = null,
-                                                    var children: MutableList<StoryWrapper> = ArrayList(),
-                                                    var parentPermlink: String,
-                                                    var parentAuthor: String,
-                                                    var childrenCount: Int,
+                                                    val children: MutableList<StoryWrapper> = ArrayList(),
+                                                    val parentPermlink: String,
+                                                    val parentAuthor: String,
+                                                    val childrenCount: Int,
                                                     var level: Int = 0,
                                                     val reputation: Long,
                                                     val lastUpdated: Long,
                                                     val created: Long,
-                                                    var userVotestatus: UserVoteType = UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
-                                                    val activeVotes: MutableList<VoteLight> = arrayListOf(),
+                                                    var userVotestatus: UserVoteType,
+                                                    val activeVotes: MutableList<VoteLight>,
                                                     var type: ItemType = ItemType.PLAIN,
                                                     val firstRebloggedBy: String,
                                                     var cleanedFromImages: String,
-                                                    var parts: MutableList<Row> = ArrayList()) : Cloneable {
+                                                    val parts: MutableList<Row> = ArrayList()) : Cloneable {
+
+
+    fun changeField(url: String = this.url,
+                    id: Long = this.id,
+                    title: String = this.title,
+                    categoryName: String = this.categoryName,
+                    tags: List<String> = this.tags,
+                    images: MutableList<String> = this.images,
+                    links: List<String> = this.links,
+                    votesNum: Int = this.votesNum,
+                    votesRshares: Long = this.votesRshares,
+                    commentsCount: Int = this.commentsCount,
+                    permlink: String = this.permlink,
+                    gbgAmount: Double = this.gbgAmount,
+                    body: String = this.body,
+                    bodyLength: Long = this.bodyLength,
+                    author: String = this.author,
+                    format: Format = this.format,
+                    avatarPath: String? = this.avatarPath,
+                    children: MutableList<StoryWrapper> = this.children,
+                    parentPermlink: String = this.parentPermlink,
+                    parentAuthor: String = this.parentAuthor,
+                    childrenCount: Int = this.childrenCount,
+                    level: Int = this.level,
+                    reputation: Long = this.reputation,
+                    lastUpdated: Long = this.lastUpdated,
+                    created: Long = this.created,
+                    userVotestatus: UserVoteType = this.userVotestatus,
+                    activeVotes: MutableList<VoteLight> = this.activeVotes,
+                    type: ItemType = this.type,
+                    firstRebloggedBy: String = this.firstRebloggedBy,
+                    cleanedFromImages: String = this.cleanedFromImages,
+                    parts: MutableList<Row> = this.parts): GolosDiscussionItem {
+
+        return GolosDiscussionItem(url, id, title, categoryName, tags, images, links, votesNum, votesRshares, commentsCount,
+                permlink, gbgAmount, body, bodyLength, author, format, avatarPath, children, parentPermlink, parentAuthor,
+                childrenCount, level, reputation, lastUpdated, created, userVotestatus, activeVotes, type, firstRebloggedBy, cleanedFromImages, parts)
+    }
 
 
     val isRootStory: Boolean
         get() = tags.contains(parentPermlink)
 
-
+/*
     constructor(discussion: Discussion, account: ExtendedAccount?) : this(
             url = discussion.url ?: "",
             id = discussion.id,
@@ -125,7 +163,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
                 e.printStackTrace()
             }
         }
-        body = discussion.body ?: ""
+
         val toRowsParser = StoryParserToRows
         parts = toRowsParser.parse(this).toArrayList()
         if (parts.size == 0) {
@@ -158,7 +196,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
             }
         }
 
-    }
+    }*/
 
     override public fun clone(): Any {
         return super.clone()

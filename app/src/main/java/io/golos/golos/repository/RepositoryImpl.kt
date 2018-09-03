@@ -131,6 +131,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mGolosApi)
     }
 
+    override val usersAvatars: LiveData<Map<String, String?>>
+        get() = mUsersRepository.usersAvatars
+
     override fun onAppCreate(ctx: Context) {
         super.onAppCreate(ctx)
         mUserSettings.setUp(ctx)
@@ -165,6 +168,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int, completionHandler: (Unit, GolosError?) -> Unit) {
         mGolosServices.requestEventsUpdate(type, fromId, limit, completionHandler)
+    }
+
+    override fun lookupUsers(username: String): LiveData<List<String>> {
+        return mUsersRepository.lookupUsers(username)
     }
 
     private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
@@ -217,6 +224,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         networkExecutor.execute {
             try {
                 val resp = auth(name, null, null, postingWif)
+                Timber.e("resp = $resp")
                 mMainThreadExecutor.execute {
                     listener.invoke(resp)
                 }
@@ -251,6 +259,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             setActiveUserAccount(userName, response.activeAuth?.second, response.postingAuth?.second)
 
             mMainThreadExecutor.execute {
+                mUsersRepository.addAccountInfo(listOf(response.accountInfo))
+                mUsersRepository.requestGolosUserSubscribersUpdate(userData.userName.orEmpty())
+                mUsersRepository.requestGolosUserSubscriptionsUpdate(userData.userName.orEmpty())
+
                 mAuthLiveData.value = ApplicationUser(userName, true)
             }
         }
@@ -324,15 +336,18 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             }
         } else {
-            mAuthLiveData.value = null
+            mMainThreadExecutor.execute {
+                mAuthLiveData.value = null
+            }
         }
     }
 
-    override fun getGolosUserAccountInfos(names: List<String>): List<LiveData<GolosUserAccountInfo>> {
-        return mUsersRepository.getGolosUserAccountInfos(names)
+    override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
+        return mUsersRepository.getGolosUserAccountInfos()
     }
 
     override fun requestUsersAccountInfoUpdate(golosUserName: List<String>, completionHandler: (Unit, GolosError?) -> Unit) {
+        traceCaller()
         mUsersRepository.requestUsersAccountInfoUpdate(golosUserName, completionHandler)
     }
 
@@ -428,7 +443,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     val feed = StoriesFeed(out.toArrayList(), type, filter)
                     updatingFeed.value = feed
                     completionHandler.invoke(Unit, null)
-                    mUsersRepository.requestUsersAccountInfoUpdate(discussions.mapNotNull { it.rootStory()?.author })
                 }
                 mRequests.remove(request)
 
@@ -867,6 +881,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
 
+        if (id == mVotesLiveData.first) return mVotesLiveData.second
+
         val liveData = MutableLiveData<List<VotedUserObject>>()
         mVotesLiveData = Pair(id, liveData)
 
@@ -895,6 +911,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             liveData.value = listOf()
             return liveData
         }
+        Timber.e("ld = ${liveData.value}")
 
         workerExecutor.execute {
             item.let {
@@ -1006,11 +1023,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     }
 
                 }
-                if (mAuthLiveData.value?.isLogged == true) {
-                    val userName = mAuthLiveData.value?.name.orEmpty()
-                    mUsersRepository.requestGolosUserSubscriptionsUpdate(userName)
-                    mUsersRepository.requestGolosUserSubscribersUpdate(userName)
-                }
+                requestApplicationUserDataUpdate()
             } catch (e: Exception) {
                 e.printStackTrace()
                 logException(e)

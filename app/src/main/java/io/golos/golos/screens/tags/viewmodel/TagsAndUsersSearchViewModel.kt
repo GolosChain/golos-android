@@ -1,10 +1,7 @@
 package io.golos.golos.screens.tags.viewmodel
 
 import android.app.Activity
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.*
 import android.content.Intent
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.model.GolosUserWithAvatar
@@ -32,24 +29,17 @@ class TagSearchViewModel : ViewModel(), Observer<List<LocalizedTag>> {
     private var lastLookupString: String? = null
     private var isSearchInProgress = false
     private val userRegexps = "([a-z][a-zA-Z.\\-0-9]{2,15})".toRegex()
-    private var mUserObserver = Observer<List<GolosUserWithAvatar>> {
-        mTagsData.value = TagSearchViewModelScreenState(false,
-                mTagsData.value?.shownTags ?: listOf(),
-                it ?: listOf(),
-                null)
-    }
-    private var mLastUserLiveData: LiveData<List<GolosUserWithAvatar>> = MutableLiveData()
+    private var mLastUsers: List<String> = listOf()
 
     fun onCreate() {
         mRepo.getLocalizedTags().observeForever(this)
-        mRepo.requestTrendingTagsUpdate({ _, e ->
+        mRepo.requestTrendingTagsUpdate { _, e ->
             if (e != null) {
-                mTagsData.value = TagSearchViewModelScreenState(false,
-                        mTagsData.value?.shownTags ?: listOf(),
-                        listOf(),
-                        e)
+                mTagsData.value = mTagsData.value?.copy(error = e)
             }
-        })
+        }
+        mRepo.usersAvatars.observeForever { onSearchOrUsersDataChanged() }
+        mUserLiveData.observeForever { onSearchOrUsersDataChanged() }
     }
 
     override fun onChanged(it: List<LocalizedTag>?) {
@@ -78,18 +68,44 @@ class TagSearchViewModel : ViewModel(), Observer<List<LocalizedTag>> {
 
     }
 
-    fun searchUser(nick: String) {
-        mLastUserLiveData.removeObserver(mUserObserver)
+    private var mUserLiveData = MediatorLiveData<Any>()
 
+    private var lastLiveData: LiveData<List<String>> = MutableLiveData<List<String>>()
+
+    fun searchUser(nick: String) {
+
+        mUserLiveData.removeSource(lastLiveData)
         if (!nick.matches(userRegexps)) {
-            mTagsData.value = TagSearchViewModelScreenState(false,
-                    mTagsData.value?.shownTags ?: listOf(),
-                    listOf(),
-                    null)
+            mTagsData.value = mTagsData.value?.copy(isLoading = false, shownUsers = listOf())
         } else {
-            mLastUserLiveData = mRepo.getGolosUsers(nick.toLowerCase())
-            mLastUserLiveData.observeForever(mUserObserver)
+            lastLiveData = mRepo.lookupUsers(nick.toLowerCase())
+            mUserLiveData.addSource(lastLiveData) {
+
+                mLastUsers = it.orEmpty()
+                onSearchOrUsersDataChanged()
+            }
+
         }
+    }
+
+    private fun onSearchOrUsersDataChanged() {
+
+        val users = mLastUsers
+        val usersData = mRepo.usersAvatars.value.orEmpty()
+
+
+        val objects = users.map { GolosUserWithAvatar(it, usersData[it]) }
+
+        mTagsData.value = mTagsData.value?.copy(shownUsers = objects)
+
+
+        val usersWithNoAvatars = objects.filter {
+            it.avatarPath == null
+                    && !mRepo.usersAvatars.value.orEmpty().containsKey(it.userName)
+        }.map { it.userName }
+
+        mRepo.requestUsersAccountInfoUpdate(usersWithNoAvatars)
+
     }
 
     fun onTagClick(activity: Activity,

@@ -84,6 +84,7 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
     private val mSubTitleTv = itemView.findViewById<TextView>(R.id.sub_tv)
     private val mSubscibeButton = itemView.findViewById<Button>(R.id.follow_btn)
     private val mProgress = itemView.findViewById<View>(R.id.progress)
+    private var mLastAvatar: String? = null
     var state: UserListItemState? = null
         set(value) {
             field = value
@@ -94,14 +95,17 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 mSubscibeButton.setOnClickListener { }
             } else {
                 if (value.item.avatar != null) {
-                    Glide
-                            .with(itemView)
-                            .load(ImageUriResolver.resolveImageWithSize(value.item.avatar
-                                    ?: "", wantedwidth = mAvatar.width))
-                            .apply(RequestOptions()
-                                    .error(R.drawable.ic_person_gray_80dp)
-                                    .placeholder(R.drawable.ic_person_gray_80dp))
-                            .into(mAvatar)
+                    if (mLastAvatar != value.item.avatar) {
+                        Glide
+                                .with(itemView)
+                                .load(ImageUriResolver.resolveImageWithSize(value.item.avatar
+                                        ?: "", wantedwidth = mAvatar.width))
+                                .apply(RequestOptions()
+                                        .error(R.drawable.ic_person_gray_80dp)
+                                        .placeholder(R.drawable.ic_person_gray_80dp))
+                                .into(mAvatar)
+                    }
+                    mLastAvatar = value.item.avatar
                 } else {
                     mAvatar.setImageResource(R.drawable.ic_person_gray_80dp)
                 }
@@ -126,6 +130,7 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 itemView.setOnClickListener { value.onUserClick.invoke(this) }
 
                 val updatingState = value.item.subscribeStatus?.updatingState
+
                 if (updatingState == null) {
                     mProgress.setViewGone()
                     mSubscibeButton.setViewGone()

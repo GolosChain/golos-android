@@ -46,7 +46,7 @@ class CustomJsonDateDeserializer : JsonDeserializer<Long>() {
     JsonSubTypes.Type(value = UnSubscribeEvent::class, name = "unsubscribe"),
     JsonSubTypes.Type(value = MentionEvent::class, name = "mention"),
     JsonSubTypes.Type(value = RepostEvent::class, name = "repost"),
-    JsonSubTypes.Type(value = AwardEvent::class, name = "award"),
+    JsonSubTypes.Type(value = AwardEvent::class, name = "reward"),
     JsonSubTypes.Type(value = CuratorAwardEvent::class, name = "curatorAward"),
     JsonSubTypes.Type(value = MessageEvent::class, name = "message"),
     JsonSubTypes.Type(value = WitnessVoteEvent::class, name = "witnessVote"),
@@ -126,8 +126,8 @@ data class MentionEvent(@JsonProperty("permlink") val permlink: String,
 
 data class RepostEvent(@JsonProperty("permlink") val permlink: String) : Event(EventType.REPOST.toString())
 
-data class AwardEvent(@JsonProperty("permlink") val permlink: String, @JsonProperty("award") val award: Award)
-    : Event(EventType.AWARD.toString())
+data class AwardEvent(@JsonProperty("reward") val reward: Award, @JsonProperty("permlink") val permlink: String)
+    : Event(EventType.REWARD.toString())
 
 data class CuratorAwardEvent(@JsonProperty("permlink") val permlink: String, @JsonProperty("award") val award: Award)
     : Event(EventType.CURATOR_AWARD.toString())
@@ -140,7 +140,7 @@ class WitnessCancelVoteEvent : Event(EventType.WITNESS_CANCEL_VOTE.toString())
 
 
 private fun String.makeLinkFromPermlink(): PostLinkExtractedData? {
-    return PostLinkExtractedData(Repository.get.appUserData.value?.userName
+    return PostLinkExtractedData(Repository.get.appUserData.value?.name
             ?: return null, null, this)
 }
 
@@ -186,7 +186,7 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
                 is ReplyEvent -> GolosReplyEvent(event._id, event.createdAt, event.counter, event.permlink, event.parentPermlink, event.fromUsers)
                 is RepostEvent -> GolosRepostEvent(event._id, event.createdAt, event.counter, event.permlink, event.fromUsers)
                 is MentionEvent -> GolosMentionEvent(event._id, event.createdAt, event.counter, event.permlink, event.parentPermlink, event.fromUsers)
-                is AwardEvent -> GolosAwardEvent(event._id, event.createdAt, event.counter, event.permlink, event.award)
+                is AwardEvent -> GolosAwardEvent(event._id, event.createdAt, event.counter, event.reward,event.permlink)
                 is CuratorAwardEvent -> GolosCuratorAwardEvent(event._id, event.createdAt, event.counter, event.permlink, event.award)
                 is MessageEvent -> GolosMessageEvent(event._id, event.createdAt, event.counter, event.fromUsers)
                 is WitnessVoteEvent -> GolosWitnessVoteEvent(event._id, event.createdAt, event.counter, event.fromUsers)
@@ -427,31 +427,31 @@ class GolosRepostEvent(id: String, creationTime: Long, counter: Int,
 }
 
 class GolosAwardEvent(id: String, creationTime: Long, counter: Int,
-                      val permlink: String,
-                      val award: Award) : PostLinkable, GolosEvent(id, creationTime, counter) {
-    override fun getLink() = permlink.makeLinkFromPermlink()
+                      val award: Award, val permlink:String) : GolosEvent(id, creationTime, counter) {
+
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is GolosAwardEvent) return false
         if (!super.equals(other)) return false
 
-        if (permlink != other.permlink) return false
         if (award != other.award) return false
+        if (permlink != other.permlink) return false
 
         return true
     }
 
+
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + permlink.hashCode()
         result = 31 * result + award.hashCode()
+        result = 31 * result + permlink.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "GolosAwardEvent(permlink='$permlink', award=$award)"
+        return "GolosAwardEvent(award=$award, permlink='$permlink')"
     }
-
 }
 
 class GolosCuratorAwardEvent(id: String, creationTime: Long, counter: Int,

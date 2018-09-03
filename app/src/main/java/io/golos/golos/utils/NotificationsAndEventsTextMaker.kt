@@ -22,10 +22,10 @@ data class EventAppearance(val title: CharSequence?,
 
 interface NotificationsAndEventsAppearanceMaker {
     fun makeAppearance(golosNotification: GolosNotification,
-                       currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): NotificationAppearance
+                       currentUserName: String = Repository.get.appUserData.value?.name.orEmpty()): NotificationAppearance
 
     fun makeAppearance(golosEvent: GolosEvent,
-                       currentUserName: String = Repository.get.appUserData.value?.userName.orEmpty()): EventAppearance
+                       currentUserName: String = Repository.get.appUserData.value?.name.orEmpty()): EventAppearance
 }
 
 object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppearanceMaker {

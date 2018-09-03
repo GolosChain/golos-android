@@ -2,16 +2,22 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.support.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
+import timber.log.Timber
+import java.util.TreeSet
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
+import kotlin.collections.set
 
 interface GolosUsersRepository {
 
-    fun getGolosUserAccountInfos(names: List<String>): List<LiveData<GolosUserAccountInfo>>
+    fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>>
 
     fun requestUsersAccountInfoUpdate(golosUserName: List<String>,
                                       completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
@@ -31,6 +37,12 @@ interface GolosUsersRepository {
     fun addAccountInfo(list: List<GolosUserAccountInfo>)
 
     val currentUserSubscriptionsUpdateStatus: LiveData<Map<String, UpdatingState>>
+
+    val usersAvatars: LiveData<Map<String, String?>>
+
+    fun lookupUsers(username: String): LiveData<List<String>>
+
+
 }
 
 interface GolosUsersPersister {
@@ -60,47 +72,63 @@ interface GolosUsersApi {
     fun subscribe(onUser: String)
 
     fun unSubscribe(fromUser: String)
+
+    fun lookUpUsers(nick: String): List<String>
 }
 
 class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                           private val mCurrentUserInfo: UserDataProvider,
                           private val mGolosApi: GolosUsersApi,
-                          private val mWorkerExecutor: Executor = NamedExecutor("users repo executor"),
+                          private val mWorkerExecutor: Executor = Executors.newSingleThreadExecutor(),
                           private val mMainThreadExecutor: Executor = MainThreadExecutor(),
                           private val mUserInfoRefreshDelay: Long = TimeUnit.DAYS.toMillis(5),
                           private val mLogger: ExceptionLogger = FabricExceptionLogger) : GolosUsersRepository {
 
 
-    private val mGolosUsers: HashMap<String, MutableLiveData<GolosUserAccountInfo>> = HashMap()
+    private val mGolosUsers: MutableLiveData<Map<String, GolosUserAccountInfo>> = MutableLiveData()
     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<String>>> = HashMap()
     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<String>>> = HashMap()
     private val mUpdatingStates = MutableLiveData<HashMap<String, UpdatingState>>()
+    private val mUsersName = TreeSet<String>()
 
-    override fun getGolosUserAccountInfos(names: List<String>): List<LiveData<GolosUserAccountInfo>> {
-        val out = arrayListOf<LiveData<GolosUserAccountInfo>>()
+    override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
+        return mGolosUsers
+    }
 
-        names.forEach {
-            if (!mGolosUsers.containsKey(it)) mGolosUsers[it] = MutableLiveData()
-            out.add(mGolosUsers[it]!!)
-        }
-        return out
+    override val usersAvatars: LiveData<Map<String, String?>> = Transformations.map(mGolosUsers) {
+
+        it.mapValues { it.value.avatarPath }
     }
 
     override fun requestUsersAccountInfoUpdate(golosUserName: List<String>,
                                                completionHandler: (Unit, GolosError?) -> Unit) {
+
+        if (golosUserName.isEmpty()) {
+            completionHandler(Unit, null)
+            return
+        }
+        Timber.e("requestUsersAccountInfoUpdate $golosUserName")
+
         mWorkerExecutor.execute {
             try {
-                val users = mGolosApi.getGolosUsers(golosUserName, golosUserName.size == 1)
-                mMainThreadExecutor.execute {
-                    golosUserName.forEach {
-                        if (!mGolosUsers.containsKey(it)) mGolosUsers[it] = MutableLiveData()
-                    }
-                    mGolosUsers.forEach {
-                        it.value.value = users[it.key]
-                    }
+                val users =
+                        mGolosApi.getGolosUsers(golosUserName.distinct(), golosUserName.size == 1).toHashMap()
+                val allSaveUsers = mGolosUsers.value.orEmpty().toHashMap()
 
+                if (golosUserName.size != 1) {
+                    val allSavedSubscriptionsData = allSaveUsers.mapValues { Pair(it.value.subscribersCount, it.value.subscriptionsCount) }
+                    allSavedSubscriptionsData.forEach {
+                       val newInfoWithOldSubscribers =  users[it.key]?.copy(subscribersCount = it.value.first, subscriptionsCount = it.value.second)
+                        if (newInfoWithOldSubscribers != null)
+                            users[it.key] = newInfoWithOldSubscribers
+                    }
                 }
-                mPersister.saveGolosUsersAccountInfo(users.map { it.value })
+
+                allSaveUsers.putAll(users)
+                mMainThreadExecutor.execute {
+                    mGolosUsers.value = allSaveUsers
+                }
+                mPersister.saveGolosUsersAccountInfo(allSaveUsers.map { it.value })
             } catch (e: Exception) {
                 mLogger.log(e)
                 mMainThreadExecutor.execute {
@@ -110,12 +138,37 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         }
     }
 
-    override fun addAccountInfo(list: List<GolosUserAccountInfo>) {
-        mMainThreadExecutor.execute {
-            list.forEach { it ->
-                if (!mGolosUsers.containsKey(it.userName)) mGolosUsers[it.userName] = MutableLiveData()
-                mGolosUsers[it.userName]?.value = it
+    override fun lookupUsers(username: String): LiveData<List<String>> {
+        val liveData = MutableLiveData<List<String>>()
+        mWorkerExecutor.execute {
+
+            var users = mUsersName.filter {
+                it.startsWith(username)
             }
+
+            mMainThreadExecutor.execute {
+                liveData.value = users
+            }
+            val foundUsers = mGolosApi.lookUpUsers(username)
+
+            mUsersName.addAll(foundUsers)
+            users = mUsersName.filter {
+
+                it.startsWith(username)
+            }
+            mMainThreadExecutor.execute {
+                liveData.value = users
+
+            }
+        }
+        return liveData
+    }
+
+    override fun addAccountInfo(list: List<GolosUserAccountInfo>) {
+        if (list.isEmpty()) return
+        mMainThreadExecutor.execute {
+            val new = list.associateBy { it.userName }
+            mGolosUsers.value = new + mGolosUsers.value.orEmpty()
         }
         mWorkerExecutor.execute { mPersister.saveGolosUsersAccountInfo(list) }
     }
@@ -164,7 +217,8 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                                  completionHandler: (Unit, GolosError?) -> Unit) {
         val isUserLoggedIn = mCurrentUserInfo.appUserData.value?.isLogged == true
         val currentUserName = mCurrentUserInfo.appUserData.value?.name.orEmpty()
-        if (isUserLoggedIn) {
+
+        if (!isUserLoggedIn) {
             mMainThreadExecutor.execute {
                 completionHandler.invoke(Unit,
                         GolosError(ErrorCode.WRONG_STATE,
@@ -201,11 +255,29 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             try {
                 if (isFollow) mGolosApi.subscribe(user) else mGolosApi.unSubscribe(user)
 
+                val allCurentUserSubscroptions = mUsersSubscriptions[currentUserName]?.value.orEmpty()
+
+                val allUserData = mGolosUsers.value.orEmpty().toHashMap()
+                val currentUserData = allUserData[currentUserName]
+
                 mMainThreadExecutor.execute {
-                    requestGolosUserSubscribersUpdate(currentUserName)
+                    if (isFollow) {
+                        mUsersSubscriptions[currentUserName]?.value = listOf(user) + allCurentUserSubscroptions
+                        currentUserData?.let {
+                            allUserData.put(it.userName, it.copy(subscriptionsCount = it.subscriptionsCount + 1))
+                        }
+                    } else {
+                        mUsersSubscriptions[currentUserName]?.value = allCurentUserSubscroptions - listOf(user)
+                        currentUserData?.let {
+                            allUserData.put(it.userName, it.copy(subscriptionsCount = it.subscriptionsCount - 1))
+                        }
+                    }
+                    requestUsersAccountInfoUpdate(listOf(user))
                     updatingStates[user] = UpdatingState.DONE
+                    mUpdatingStates.value = updatingStates
                     completionHandler.invoke(Unit, null)
                 }
+
 
             } catch (e: Exception) {
                 FabricExceptionLogger.log(e)

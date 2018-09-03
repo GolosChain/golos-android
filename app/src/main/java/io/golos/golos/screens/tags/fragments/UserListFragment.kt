@@ -36,6 +36,11 @@ class UserListFragment : GolosFragment() {
         return v
     }
 
+    override fun onStart() {
+        super.onStart()
+
+    }
+
     operator fun getValue(tagsAndUsersPager: TagsAndUsersPager, property: KProperty<*>) = mUsers
 
     operator fun setValue(tagsAndUsersPager: TagsAndUsersPager, property: KProperty<*>, list: List<GolosUserWithAvatar>) {

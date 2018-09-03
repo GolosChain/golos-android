@@ -31,7 +31,7 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                     .setSwitch(NotificationSettings.WITNESS_VOTE, R.string.witness_vote, t.showWitnessVote)
                     .setSwitch(NotificationSettings.WITNESS_CANCEL, R.string.witness_cancel_vote, t.showWitnessCancelVote)
 
-                    .build({ id, oldValue, newValue ->
+                    .build { id, oldValue, newValue ->
                         val settings = Repository.get.userSettingsRepository.getNotificationsSettings().value
                                 ?: t
                         val notifSettingsRepo = Repository.get.userSettingsRepository
@@ -50,7 +50,7 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                                 NotificationSettings.WITNESS_CANCEL -> notifSettingsRepo.setNotificationSettings(settings.setShowWitnessCancelVote(newValue))
                             }
                         }
-                    })
+                    }
         }
     }
 

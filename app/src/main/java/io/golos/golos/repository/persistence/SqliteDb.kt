@@ -630,7 +630,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
 
-                    discussionItem.avatarPath = avatarTable.get(discussionItem.author, db)?.avatarPath
+
                     temp.add(discussionItem)
                     cursor.moveToNext()
                 }

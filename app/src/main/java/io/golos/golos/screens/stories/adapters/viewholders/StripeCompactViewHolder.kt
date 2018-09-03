@@ -42,15 +42,15 @@ class StripeCompactViewHolder(parent: ViewGroup,
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
 
-        mCommentsButton.setOnClickListener({ onCommentsClick.onClick(this) })
-        mCommentsIv.setOnClickListener({ onCommentsClick.onClick(this) })
-        mUpvoteValue.setOnClickListener({ onUpvoteClick.onClick(this) })
-        mUpvoteIv.setOnClickListener({ onUpvoteClick.onClick(this) })
-        mBlogNameTv.setOnClickListener({ onBlogClick.onClick(this) })
-        mUserNameTv.setOnClickListener({ onUserClick.onClick(this) })
+        mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
+        mCommentsIv.setOnClickListener { onCommentsClick.onClick(this) }
+        mUpvoteValue.setOnClickListener { onUpvoteClick.onClick(this) }
+        mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
+        mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
+        mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
 
-        mMainImageBig.setOnClickListener({ onCardClick.onClick(this) })
-        itemView.setOnClickListener({ onCardClick.onClick(this) })
+        mMainImageBig.setOnClickListener { onCardClick.onClick(this) }
+        itemView.setOnClickListener { onCardClick.onClick(this) }
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {

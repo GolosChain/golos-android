@@ -93,9 +93,14 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mTitle.text = t.title
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mViewModel.onDestroy()
+    override fun onStart() {
+        super.onStart()
+        mViewModel.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mViewModel.onStop()
     }
 
     companion object {

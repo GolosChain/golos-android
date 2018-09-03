@@ -83,11 +83,11 @@ class StoriesHolderFragment : GolosFragment() {
 
     private fun setup(root: View) {
         mFab = root.findViewById(R.id.fab)
-        mFab.setOnClickListener({
+        mFab.setOnClickListener {
             context?.let {
                 EditorActivity.startPostCreator(it, "")
             }
-        })
+        }
         mPager = root.findViewById(R.id.holder_view_pager)
         mPager.offscreenPageLimit = 4
         val tabLo: TabLayout = root.findViewById(R.id.tab_lo)
@@ -100,7 +100,7 @@ class StoriesHolderFragment : GolosFragment() {
             if (it == FeedType.PERSONAL_FEED) {
                 if (isUserLoggedIn)
                     Pair(FeedType.PERSONAL_FEED, StoryFilter(null,
-                            Repository.get.appUserData.value?.userName
+                            Repository.get.appUserData.value?.name
                                     ?: ""))
                 else null
             } else Pair(it, null)

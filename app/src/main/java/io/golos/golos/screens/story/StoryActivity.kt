@@ -347,6 +347,17 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         })
     }
 
+
+    override fun onStart() {
+        super.onStart()
+        mViewModel.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mViewModel.onStop()
+    }
+
     private fun setUpViews() {
         mToolbar = findViewById<Toolbar>(R.id.toolbar)
 
@@ -412,7 +423,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         mSwipeToRefresh.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
-        mMoneyBtn.setOnClickListener({
+        mMoneyBtn.setOnClickListener {
             if (mViewModel.canUserVote) {
                 val story = mViewModel.liveData.value?.storyTree?.storyWithState()
                         ?: return@setOnClickListener
@@ -428,8 +439,8 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             } else {
                 mViewModel.onVoteRejected()
             }
-        })
-        mFlagTv.setOnClickListener({
+        }
+        mFlagTv.setOnClickListener {
             if (mViewModel.canUserVote) {
                 val story = mViewModel.liveData.value?.storyTree?.storyWithState()
                         ?: return@setOnClickListener
@@ -437,7 +448,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             } else {
                 mViewModel.onVoteRejected()
             }
-        })
+        }
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
             if (mViewModel.canUserVote) {
                 if (mViewModel.canUserUpVoteOnThis(it)) {
@@ -463,9 +474,9 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
             mViewModel.onAnswerToComment(this, it.story)
         }
-        mFab.setOnClickListener({
+        mFab.setOnClickListener {
             mViewModel.onWriteRootComment(this)
-        })
+        }
         mSwipeToRefresh.isRefreshing = true
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
         mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
@@ -492,7 +503,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        mViewModel.onDestroy()
+        mViewModel.onStop()
     }
 
     private fun setFullscreenProgress(isShown: Boolean) {

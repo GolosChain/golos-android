@@ -34,6 +34,13 @@ data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
 
         public val UnsubscribedStatus = unSubscribed
         public val SubscribedStatus = subScribed
+
+        fun create(isCurrentUserSubscribed: Boolean,
+                   updatingState: UpdatingState): SubscribeStatus {
+          return  if (!isCurrentUserSubscribed && updatingState == UpdatingState.DONE) return unSubscribed
+            else if (isCurrentUserSubscribed && updatingState == UpdatingState.DONE) return subScribed
+            else SubscribeStatus(isCurrentUserSubscribed, updatingState)
+        }
     }
 }
 
@@ -101,7 +108,11 @@ class StoryWithComments(rootStory: StoryWrapper?,
 
             val comments = firstLevelDiscussion.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
 
-            comments.forEach { it.story.children = createCommentsTree(ArrayList(allComments), it, 1) }
+            comments
+                    .forEach {
+                        it.story.children.clear()
+                        it.story.children.addAll(createCommentsTree(ArrayList(allComments), it, 1))
+                    }
 
             mCommentsWithState = ArrayList(comments)
         }
@@ -121,7 +132,8 @@ class StoryWithComments(rootStory: StoryWrapper?,
                     if (replaceWith.story.id == src[it].story.id) {
                         val replacingItem = src[it].story
                         src[it] = replaceWith
-                        src[it].story.children = replacingItem.children
+                        src[it].story.children.clear()
+                        src[it].story.children.addAll(replacingItem.children)
                         src[it].story.level = replacingItem.level
                         changes = true
                     }
@@ -156,7 +168,8 @@ class StoryWithComments(rootStory: StoryWrapper?,
         val out = from.filter { it.story.parentPermlink == to.story.permlink }
         out.forEach {
             it.story.level = level
-            it.story.children = ArrayList(createCommentsTree(from, it, level + 1))
+            it.story.children.clear()
+            it.story.children.addAll(createCommentsTree(from, it, level + 1))
         }
         return ArrayList(out)
     }

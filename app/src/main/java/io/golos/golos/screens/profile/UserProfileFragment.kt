@@ -26,6 +26,7 @@ import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingsActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 10.11.17.
@@ -56,6 +57,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mUserCoverIv: ImageView
     private lateinit var mProfilePager: ViewPager
     private var mLastAccountInfo: GolosUserAccountInfo? = null
+    private var mLastAvatarPath: String? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -95,12 +97,22 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
         val tabbar = v.findViewById<TabLayout>(R.id.tab_lo_logged_in)
         tabbar.setupWithViewPager(mProfilePager)
         val settingsButton = v.findViewById<View>(R.id.settings_btn)
-        settingsButton.setOnClickListener({
+        settingsButton.setOnClickListener {
             val i = Intent(activity!!, SettingsActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
-        })
+        }
 
         return v
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mViewModel.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mViewModel.onStop()
     }
 
 
@@ -183,29 +195,31 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     override fun onChanged(t: UserAccountModel?) {
         if (view == null) return
         val it = t?.accountInfo ?: return
-        if (mLastAccountInfo?.hashCode() ?: 0 == t.accountInfo.hashCode()) return
-        mUserName.text = it.golosUser.userName.capitalize()
+
+        mUserName.text = it.userName.capitalize()
         val glide = Glide.with(view ?: return)
 
-        if (it.golosUser.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
-        else if (mLastAccountInfo?.golosUser?.avatarPath != t.accountInfo.golosUser.avatarPath) {
+        if (it.avatarPath == null) glide.load(R.drawable.ic_person_gray_80dp).into(mUserAvatar)
+        else if (mLastAvatarPath != t.accountInfo.avatarPath) {
 
-            glide.load(ImageUriResolver.resolveImageWithSize(it.golosUser.avatarPath, wantedwidth = mUserAvatar.width))
+            glide.load(ImageUriResolver.resolveImageWithSize(it.avatarPath, wantedwidth = mUserAvatar.width))
                     .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_80dp))
                     .error(glide.load(R.drawable.ic_person_gray_80dp))
                     .into(mUserAvatar)
+
+            mLastAvatarPath = t.accountInfo.avatarPath
         }
 
-        if (it.isCurrentUserSubscribed) mFollowBtn.text = getString(R.string.unfollow)
-        else mFollowBtn.text = getString(R.string.follow)
+        mFollowBtn.text = getString(t.followButtonText)
+
         mFollowBtn.visibility = if (t.isFollowButtonVisible && !t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mFollowProgress.visibility = if (t.isSubscriptionInProgress) View.VISIBLE else View.GONE
         mMotoTv.text = it.userMotto
         mSubscribersNumTv.text = it.subscribersCount.toString()
-        mSubscriptionsNum.text = it.subscribesCount.toString()
+        mSubscriptionsNum.text = it.subscriptionsCount.toString()
         mPostsCountTv.text = it.postsCount.toString()
         mSubscribers.text = resources.getQuantityString(R.plurals.subscribers, it.subscribersCount.toInt())
-        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscribesCount.toInt())
+        mSubscriptions.text = resources.getQuantityString(R.plurals.subscription, it.subscriptionsCount)
         mPostsTv.text = resources.getQuantityString(R.plurals.posts, it.postsCount.toInt())
         t.error?.let {
             view?.showSnackbar(it.localizedMessage ?: 0)

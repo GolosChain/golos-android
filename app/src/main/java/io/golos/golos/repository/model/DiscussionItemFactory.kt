@@ -1,6 +1,5 @@
 package io.golos.golos.repository.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import eu.bittrade.libs.golosj.base.models.Discussion
 import eu.bittrade.libs.golosj.base.models.DiscussionLight
 import eu.bittrade.libs.golosj.base.models.ExtendedAccount
@@ -9,7 +8,7 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
-import io.golos.golos.utils.mapper
+import io.golos.golos.utils.avatarPath
 import io.golos.golos.utils.toArrayList
 import org.json.JSONArray
 import org.json.JSONException
@@ -47,19 +46,18 @@ object DiscussionItemFactory {
                         ?: 0L, author = author, parentPermlink = parentPermlink,
                 parentAuthor = discussion.parentAuthor.name ?: "", childrenCount = childrenCount,
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
-                firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages)
+                firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages,
+                format = metadata.format,
+                links = metadata.links,
+                images = metadata.images,
+                tags = metadata.tags,
+                avatarPath = account?.avatarPath,
+                activeVotes = discussion.activeVotes
+                        ?.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) }.orEmpty().toArrayList(),
+                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        discussion.activeVotes?.forEach {
-            item.activeVotes.add(VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100))
-        }
-
-        item.format = metadata.format
-        item.links.addAll(metadata.links)
-        item.images.addAll(metadata.images)
-        item.tags.addAll(metadata.tags)
 
         setTypeOfItem(item)
-        account?.let { setAvatar(item, it) }
         checkImages(item)
         return item
     }
@@ -91,24 +89,24 @@ object DiscussionItemFactory {
                 votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
                 bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, parentAuthor = discussion.parentAuthor
-                ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated, created = created, firstRebloggedBy = firstRebloggedBy,
-                cleanedFromImages = cleanedFromImages)
+                ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated,
+                created = created, firstRebloggedBy = firstRebloggedBy,
+                cleanedFromImages = cleanedFromImages, format = metadata.format,
+                links = metadata.links,
+                images = metadata.images,
+                tags = metadata.tags,
+                avatarPath = account?.avatarPath,
+                activeVotes = discussion.votes,
+                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
 
-        item.format = metadata.format
-        item.links.addAll(metadata.links)
-        item.images.addAll(metadata.images)
-        item.tags.addAll(metadata.tags)
-
-        item.activeVotes.addAll(discussion.votes)
         setTypeOfItem(item)
-        account?.let { setAvatar(item, it) }
         checkImages(item)
         return item
     }
 
     private fun getMetadataFromItem(tags: String): GolosDiscussionItemMetadata {
         val metadata = GolosDiscussionItemMetadata()
-        if (tags.isNullOrEmpty()) return metadata
+        if (tags.isEmpty()) return metadata
 
         var json: JSONObject? = null
         try {
@@ -178,9 +176,10 @@ object DiscussionItemFactory {
         }
     }
 
+
     private fun setTypeOfItem(golosDiscussionItem: GolosDiscussionItem) {
         val toRowsParser = StoryParserToRows
-        golosDiscussionItem.parts = toRowsParser.parse(golosDiscussionItem).toArrayList()
+        golosDiscussionItem.parts.addAll(toRowsParser.parse(golosDiscussionItem).toArrayList())
         if (golosDiscussionItem.parts.size == 0) {
             Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
         } else {
@@ -203,16 +202,6 @@ object DiscussionItemFactory {
         }
     }
 
-    private fun setAvatar(golosDiscussionItem: GolosDiscussionItem, extendedAccount: ExtendedAccount) {
-        try {
-            val node: JsonNode? = mapper.readTree(extendedAccount.jsonMetadata)
-            golosDiscussionItem.avatarPath = node?.get("profile")?.get("profile_image")?.asText()
-        } catch (e: Exception) {
-            Timber.e("error parsing string ${extendedAccount.jsonMetadata}")
-            e.printStackTrace()
-        }
-
-    }
 
     private data class GolosDiscussionItemMetadata(
             val tags: MutableList<String> = arrayListOf(),

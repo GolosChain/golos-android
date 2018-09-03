@@ -27,27 +27,27 @@ class SettingsActivity : GolosActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.a_settings)
-        findViewById<View>(R.id.golos_wiki_tv).setOnClickListener({
+        findViewById<View>(R.id.golos_wiki_tv).setOnClickListener {
             startActivity("https://wiki.golos.io/".asIntentToShowUrl())
-        })
-        findViewById<View>(R.id.about_golos_tv).setOnClickListener({
+        }
+        findViewById<View>(R.id.about_golos_tv).setOnClickListener {
             StoryActivity.start(this,
                     "golos", "ru--golos",
                     "golos-russkoyazychnaya-socialno-mediinaya-blokchein-platforma",
                     FeedType.UNCLASSIFIED,
                     null)
-        })
-        findViewById<View>(R.id.privacy_policy_tv).setOnClickListener({
+        }
+        findViewById<View>(R.id.privacy_policy_tv).setOnClickListener {
             StoryActivity.start(this,
                     "golos", "ru--konfidenczialxnostx",
                     "politika-konfidencialnosti",
                     FeedType.UNCLASSIFIED,
                     null)
-        })
-        findViewById<View>(R.id.exit).setOnClickListener({
+        }
+        findViewById<View>(R.id.exit).setOnClickListener {
             Repository.get.deleteUserdata()
             Toast.makeText(this, R.string.user_made_logout, Toast.LENGTH_SHORT).show()
-        })
+        }
         val versionTv = findViewById<TextView>(R.id.version_tv)
         versionTv.text = getString(R.string.golos_android_v, BuildConfig.VERSION_NAME)
 

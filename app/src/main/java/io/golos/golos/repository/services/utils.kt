@@ -14,7 +14,7 @@ private class Success(@JsonProperty("status") val status: String)
 private class EventData(@JsonProperty("data") val data: List<Event>)
 
 enum class EventType {
-    VOTE, FLAG, TRANSFER, REPLY, SUBSCRIBE, UNSUBSCRIBE, MENTION, REPOST, AWARD, CURATOR_AWARD, MESSAGE,
+    VOTE, FLAG, TRANSFER, REPLY, SUBSCRIBE, UNSUBSCRIBE, MENTION, REPOST, REWARD, CURATOR_AWARD, MESSAGE,
     WITNESS_VOTE, WITNESS_CANCEL_VOTE;
 
     override fun toString(): String {
@@ -27,8 +27,8 @@ enum class EventType {
             UNSUBSCRIBE -> "unsubscribe"
             MENTION -> "mention"
             REPOST -> "repost"
-            AWARD -> "award"
-            CURATOR_AWARD -> "curatorAward"
+            REWARD -> "reward"
+            CURATOR_AWARD -> "curatorReward"
             MESSAGE -> "message"
             WITNESS_VOTE -> "witnessVote"
             WITNESS_CANCEL_VOTE -> "witnessCancelVote"
