@@ -3,6 +3,7 @@ package io.golos.golos.screens.main_activity.adapters
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
 import io.golos.golos.screens.events.EventsHolderFragment
 import io.golos.golos.screens.main_activity.MainActivity.Companion.FILTERED_BY_TAG_STORIES
 import io.golos.golos.screens.main_activity.MainActivity.Companion.NOTIFICATIONS_HISTORY
@@ -16,7 +17,7 @@ import io.golos.golos.screens.widgets.GolosFragment
 /**
  * Created by yuri on 05.12.17.
  */
-class MainPagerAdapter(manager: FragmentManager) : FragmentPagerAdapter(manager) {
+class MainPagerAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
 
     override fun getItem(position: Int): Fragment {
         return when (position) {

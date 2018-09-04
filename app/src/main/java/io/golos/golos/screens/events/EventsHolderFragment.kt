@@ -22,6 +22,7 @@ class EventsHolderFragment : GolosFragment() {
         }, childFragmentManager)
         val tabLo = v.findViewById<TabLayout>(R.id.tab_lo)
         tabLo.setupWithViewPager(mPager)
+        mPager?.offscreenPageLimit = 1
         return v
     }
 

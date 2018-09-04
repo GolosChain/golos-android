@@ -187,13 +187,23 @@ abstract class StoriesViewModel : ViewModel() {
 
         mStoriesLiveData.addSource(mRepository.usersAvatars) { usersMap ->
             usersMap ?: return@addSource
-            mStoriesLiveData.value = mStoriesLiveData
-                    .value?.ChangeField(
-                    items = mStoriesLiveData.value?.items?.onEach {
-                        it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
-                    }.orEmpty()
-            )
+            val new = mStoriesLiveData.value?.items?.onEach {
+                it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
+            }.orEmpty()
+            val old =  mStoriesLiveData.value?.items.orEmpty()
 
+            var isNeedToUpdate = false
+            if (new.size != old.size)isNeedToUpdate = true
+            new.forEachIndexed { index, storyWithComments ->
+                if (storyWithComments != old.getOrNull(index))isNeedToUpdate = true
+            }
+
+            if (isNeedToUpdate){
+                mStoriesLiveData.value = mStoriesLiveData
+                        .value?.ChangeField(
+                        items = new
+                )
+            }
         }
         if (mObserver == null) {
             mObserver = Observer {

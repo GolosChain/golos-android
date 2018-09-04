@@ -36,7 +36,7 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
     private lateinit var mViewPager: ViewPager
     private lateinit var mNoTagsTv: TextView
     private lateinit var mPopularNowTv: TabLayout
-    private var mLastTags = List(0, { LocalizedTag(Tag("", 0.0, 0L, 0L)) })
+    private var mLastTags = List(0) { LocalizedTag(Tag("", 0.0, 0L, 0L)) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_filtered_stories, container, false)
@@ -44,9 +44,9 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
         mViewPager = v.findViewById(R.id.filtered_pager_lo)
         mNoTagsTv = v.findViewById(R.id.no_tags_chosen_tv)
         mPopularNowTv = v.findViewById<TabLayout>(R.id.tab_lo)
-        mViewPager.offscreenPageLimit = 3
+        mViewPager.offscreenPageLimit = 1
         mPopularNowTv.setupWithViewPager(mViewPager)
-        mTagsReycler.layoutManager = MyLinearLayoutManager(inflater.context, LinearLayoutManager.HORIZONTAL, false)
+
         (mTagsReycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         val viewModel = ViewModelProviders.of(this).get(FilteredStoriesByTagFragmentViewModel::class.java)
         viewModel.getTagsLiveData().observe(this, this)

@@ -1,11 +1,8 @@
 package io.golos.golos.screens.stories.adapters
 
-import android.os.Handler
-import android.support.annotation.NonNull
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
@@ -15,9 +12,6 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.HolderClickListener
-import timber.log.Timber
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
@@ -41,18 +35,6 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                              feedCellSettings: FeedCellSettings)
     : RecyclerView.Adapter<StoriesViewHolder>() {
 
-    companion object {
-        @JvmStatic
-        @NonNull
-        private val workingExecutor: Executor
-
-        init {
-            val namedThreadFactory =
-                    ThreadFactoryBuilder().setNameFormat("stories recycler threads -%d").build()
-            workingExecutor = Executors.newSingleThreadExecutor(namedThreadFactory)
-        }
-    }
-
 
     var feedCellSettings = feedCellSettings
         set(value) {
@@ -65,63 +47,52 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
         }
     private var mStripes = ArrayList<StoryWithComments>()
     private val mItemsMap = HashMap<Long, Int>()
-    val handler = Handler()
 
 
     fun setStripesCustom(newItems: List<StoryWithComments>) {
         if (mStripes.isEmpty()) {
-            handler.post {
-
-                mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
-                notifyDataSetChanged()
-                mStripes.forEach {
-                    mItemsMap[it.rootStory()?.id ?: 0L] = it.hashCode()
-                }
+            mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
+            notifyDataSetChanged()
+            mStripes.forEach {
+                mItemsMap[it.rootStory()?.id ?: 0L] = it.hashCode()
             }
-
         } else {
-            workingExecutor.execute {
-                try {
-                    val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                            if (mStripes == null
-                                    || newItems == null
-                                    || mStripes.isEmpty()
-                                    || newItems.isEmpty()
-                                    || mStripes.lastIndex < oldItemPosition) return false
+            try {
+                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        if (mStripes == null
+                                || newItems == null
+                                || mStripes.isEmpty()
+                                || newItems.isEmpty()
+                                || mStripes.lastIndex < oldItemPosition) return false
 
-                            return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
-                        }
+                        return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
+                    }
 
-                        override fun getOldListSize() = mStripes.size
-                        override fun getNewListSize() = newItems.size
-                        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                            if (mStripes == null
-                                    || newItems == null
-                                    || mStripes.isEmpty()
-                                    || newItems.isEmpty()
-                                    || mStripes.lastIndex < oldItemPosition
-                                    || newItems.size < newItemPosition) return false
-                            val newItem = newItems[newItemPosition].storyWithState() ?: return false
-                            val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                            return oldHash == newItem.hashCode()
-                        }
-                    })
-                    handler.post {
-                        result.dispatchUpdatesTo(this)
-                        mStripes = ArrayList(newItems)
-                        mStripes.forEach {
-                            mItemsMap[it.rootStory()?.id
-                                    ?: 0L] = it.storyWithState()?.hashCode() ?: 0
-                        }
+                    override fun getOldListSize() = mStripes.size
+                    override fun getNewListSize() = newItems.size
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        if (mStripes == null
+                                || newItems == null
+                                || mStripes.isEmpty()
+                                || newItems.isEmpty()
+                                || mStripes.lastIndex < oldItemPosition
+                                || newItems.size < newItemPosition) return false
+                        val newItem = newItems[newItemPosition].storyWithState() ?: return false
+                        val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
+                        return oldHash == newItem.hashCode()
                     }
-                } catch (e: Exception) {
-                    handler.post {
-                        e.printStackTrace()
-                        mStripes = ArrayList(newItems)
-                        notifyDataSetChanged()
-                    }
+                })
+                result.dispatchUpdatesTo(this)
+                mStripes = ArrayList(newItems)
+                mStripes.forEach {
+                    mItemsMap[it.rootStory()?.id
+                            ?: 0L] = it.storyWithState()?.hashCode() ?: 0
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                mStripes = ArrayList(newItems)
+                notifyDataSetChanged()
             }
         }
     }

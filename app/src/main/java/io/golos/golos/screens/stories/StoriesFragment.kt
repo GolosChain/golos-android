@@ -1,7 +1,6 @@
 package io.golos.golos.screens.stories
 
 
-import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.os.Parcelable
@@ -34,6 +33,7 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
@@ -44,6 +44,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
     private var lastSentUpdateRequestTime = System.currentTimeMillis()
+    private var parc: Parcelable? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -60,8 +61,6 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mSwipeRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))
         mSwipeRefresh?.setOnRefreshListener(this)
         mFullscreenMessageLabel = view.findViewById(R.id.fullscreen_label)
-        val manager = MyLinearLayoutManager(view.context)
-        mRecycler?.layoutManager = manager
         mSwipeRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
 
         val ssb = SpannableStringBuilder.valueOf(getString(R.string.refresh_question))
@@ -79,7 +78,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
 
-        mViewModel = StoriesModelFactory.getStoriesViewModel(type, activity, null, filter)
+        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, this, filter)
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
@@ -144,7 +143,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val position = manager.findLastCompletelyVisibleItemPosition()
+                val position = (mRecycler?.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
                 if (position + 10 > mAdapter.itemCount
                         && ((System.currentTimeMillis() - lastSentUpdateRequestTime) > 1_000)) {
                     mViewModel?.onScrollToTheEnd()
@@ -157,6 +156,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
 
     override fun onStart() {
         super.onStart()
+
         mViewModel?.onStart()
     }
 
@@ -170,8 +170,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (isVisibleBacking == true) {
             mViewModel?.onChangeVisibilityToUser(true)
         }
-        mViewModel?.storiesLiveData?.removeObservers(activity as LifecycleOwner)
-        mViewModel?.storiesLiveData?.observe(activity as LifecycleOwner, this)
+
+        mViewModel?.storiesLiveData?.observe(this, this)
 
         val observer = Observer<FeedCellSettings> { it ->
             mAdapter.feedCellSettings = it ?: FeedCellSettings(true,
@@ -180,7 +180,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                     UserSettingsRepository.GolosCurrency.USD,
                     UserSettingsRepository.GolosBountyDisplay.THREE_PLACES)
         }
-        mViewModel?.cellViewSettingLiveData?.observe(activity as LifecycleOwner, observer)
+        mViewModel?.cellViewSettingLiveData?.observe(this, observer)
     }
 
     override fun onChanged(t: StoriesViewState?) {
@@ -196,7 +196,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
 
         if (t?.items != null) {
-            mRecycler?.post { mAdapter.setStripesCustom(t.items) }
+            mRecycler?.post {
+                mAdapter.setStripesCustom(t.items)
+                if (parc != null){
+                    (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
+                    parc = null
+                }
+            }
         }
 
         if (t?.showRefreshButton == true) {
@@ -249,18 +255,20 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     override fun onSaveInstanceState(outState: Bundle) {
         val parc = mRecycler?.layoutManager as? LinearLayoutManager
         parc?.onSaveInstanceState().let {
-            outState.putParcelable("recyclerState", it)
+            outState.putParcelable("StoriesFragmentRC", it)
         }
         super.onSaveInstanceState(outState)
     }
 
+
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        val parc = savedInstanceState?.getParcelable<Parcelable>("recyclerState")
+        parc = savedInstanceState?.getParcelable<Parcelable>("StoriesFragmentRC")
         parc?.let {
             (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
         }
     }
+
 
     fun getArgs(): Pair<FeedType, StoryFilter?> {
         val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType

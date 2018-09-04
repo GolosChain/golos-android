@@ -80,7 +80,9 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
 
             mLiveData.addSource(mRepository.getGolosUserSubscriptions(t.name)) {
                 if (it?.any { it == this.author } == true) {
+
                     val subscriptionState = mRepository.currentUserSubscriptionsUpdateStatus.value?.get(this.author)
+
                     mLiveData.value = mLiveData.value?.changeField(
                             subscribeOnStoryAuthorStatus = SubscribeStatus(true, subscriptionState
                                     ?: UpdatingState.DONE),
@@ -131,6 +133,7 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
         mLiveData.removeSource(mRepository.appUserData)
         mLiveData.removeSource(mRepository.getGolosUserSubscriptions(mRepository.appUserData.value?.name.orEmpty()))
         mLiveData.removeSource(mRepository.getUserSubscribedTags())
+        mRepository.appUserData.removeObserver(this)
     }
 
     data class ImageClickData(val position: Int, val images: List<String>)

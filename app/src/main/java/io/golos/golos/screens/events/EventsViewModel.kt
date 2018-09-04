@@ -35,8 +35,6 @@ class EventsViewModel : ViewModel() {
         mEventTypes = eventTypes
         mEventsSorter = eventsSorter
         mUsersProvider = usersProvider
-
-        onLiveDataChanged()
     }
 
     private fun onLiveDataChanged() {
@@ -46,19 +44,27 @@ class EventsViewModel : ViewModel() {
         events.filter { it is Authorable }.forEach {
             it.avatarPath = users[(it as Authorable).getAuthors().firstOrNull()]?.avatarPath
         }
-        mEventsList.value = EventsList(events)
-        if (events.isNotEmpty()) {
-            val authorsWithNoAvatars = mEventsList.value?.events
-                    .orEmpty()
-                    .filter { it.avatarPath == null && it is Authorable }
-                    .map { (it as Authorable).getAuthors().firstOrNull() }
-                    .distinct()
-                    .filter {
-                        !mUsersProvider?.getGolosUserAccountInfos()?.value.orEmpty().containsKey(it)
-                    }
-                    .filterNotNull()
+        var isNeededToUpdate = false
+        if (events.size != mEventsList.value?.events.orEmpty().size) isNeededToUpdate = true
+        events.forEachIndexed { index, golosEvent ->
+            if (golosEvent != mEventsList.value?.events.orEmpty().getOrNull(index)) isNeededToUpdate = true
+        }
 
-            if (authorsWithNoAvatars.isNotEmpty()) mUsersProvider?.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
+        if (isNeededToUpdate){
+            mEventsList.value = EventsList(events)
+            if (events.isNotEmpty()) {
+                val authorsWithNoAvatars = mEventsList.value?.events
+                        .orEmpty()
+                        .filter { it.avatarPath == null && it is Authorable }
+                        .map { (it as Authorable).getAuthors().firstOrNull() }
+                        .distinct()
+                        .filter {
+                            !mUsersProvider?.usersAvatars?.value.orEmpty().containsKey(it)
+                        }
+                        .filterNotNull()
+
+                if (authorsWithNoAvatars.isNotEmpty()) mUsersProvider?.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
+            }
         }
     }
 
@@ -79,7 +85,7 @@ class EventsViewModel : ViewModel() {
 
     fun onStop() {
         mEventsProvider?.let { mEventsList.removeSource(it.getEvents(mEventTypes)) }
-        mUsersProvider?.let { mEventsList.removeSource(it.getGolosUserAccountInfos()) }
+        mUsersProvider?.let { mEventsList.removeSource(it.usersAvatars) }
     }
 
     fun onEventClick(fragmentActivity: FragmentActivity, it: GolosEvent) {
@@ -104,7 +110,7 @@ class EventsViewModel : ViewModel() {
             }
         }
         mUsersProvider?.let {
-            mEventsList.addSource(it.getGolosUserAccountInfos()) {
+            mEventsList.addSource(it.usersAvatars) {
                 onLiveDataChanged()
             }
         }

@@ -89,7 +89,7 @@ class StoriesHolderFragment : GolosFragment() {
             }
         }
         mPager = root.findViewById(R.id.holder_view_pager)
-        mPager.offscreenPageLimit = 4
+        mPager.offscreenPageLimit = 1
         val tabLo: TabLayout = root.findViewById(R.id.tab_lo)
         tabLo.setupWithViewPager(mPager)
     }

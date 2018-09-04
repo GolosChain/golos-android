@@ -160,6 +160,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
         return out.flatMap { listOf(it) + getChildren(it) }
     }
 
+
     private fun createCommentsTree(from: ArrayList<StoryWrapper>, to: StoryWrapper, level: Int): ArrayList<StoryWrapper> {
         if (to.story.childrenCount == 0) return ArrayList()
         if (from.contains(to)) {

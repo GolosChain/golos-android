@@ -347,7 +347,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     override fun requestUsersAccountInfoUpdate(golosUserName: List<String>, completionHandler: (Unit, GolosError?) -> Unit) {
-        traceCaller()
         mUsersRepository.requestUsersAccountInfoUpdate(golosUserName, completionHandler)
     }
 

@@ -3,8 +3,10 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -18,9 +20,11 @@ import io.golos.golos.utils.*
 import timber.log.Timber
 
 class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItem>> {
+    private var parcelable: Parcelable? = null
 
 
     override fun onChanged(t: List<EventsListItem>?) {
+
         t?.let { eventsList ->
 
             if (mSwipeToRefresh?.isRefreshing == true) mSwipeToRefresh?.isRefreshing = false
@@ -32,6 +36,12 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 mLabel?.setViewGone()
                 mRecycler?.post {
                     (mRecycler?.adapter as?  EventsListAdapter)?.items = eventsList
+
+                    if (parcelable != null && eventsList.isNotEmpty()) {
+
+                        (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parcelable)
+                        parcelable = null
+                    }
                 }
 
             }
@@ -90,26 +100,26 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable("EventsListFragmentIS", mRecycler?.layoutManager?.onSaveInstanceState())
+        outState.putParcelable("EventsListFragment123", mRecycler?.layoutManager?.onSaveInstanceState())
         super.onSaveInstanceState(outState)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        savedInstanceState?.let {
-            mRecycler?.layoutManager?.onRestoreInstanceState(it.getParcelable("EventsListFragmentIS"))
-        }
+        parcelable = savedInstanceState?.getParcelable("EventsListFragment123")
     }
 
 
     override fun onStop() {
         super.onStop()
         mViewModel?.onStop()
+
     }
 
     override fun onStart() {
         super.onStart()
         mViewModel?.onStart()
+
     }
 
 

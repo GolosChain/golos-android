@@ -55,6 +55,7 @@
                     android:layout_height="@dimen/tags_reycler_height"
                     android:layout_marginBottom="@dimen/margin_material_half"
                     android:paddingEnd="@dimen/margin_material"
+                    app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"
                     app:layout_collapseMode="pin"
                     android:paddingStart="@dimen/margin_material"
                     tools:ignore="RtlSymmetry" />
