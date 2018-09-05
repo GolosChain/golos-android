@@ -18,6 +18,7 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
+import timber.log.Timber
 
 
 /**

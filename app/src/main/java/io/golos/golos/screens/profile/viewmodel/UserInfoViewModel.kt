@@ -27,15 +27,19 @@ data class UserAccountModel(val accountInfo: GolosUserAccountInfo,
 class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
     private var mLastUserName: String? = null
     private var mLstCurrentUserHash: Int = 0
+    private var subsWasMade = false
     override fun onChanged(t: ApplicationUser?) {
         if (t?.isLogged == true) {
-            mLastUserName = t.name
-            mLiveData.addSource(mRepository.getGolosUserSubscriptions(mLastUserName
-                    ?: return)) {
+            if (!subsWasMade){
+                mLastUserName = t.name
+                mLiveData.addSource(mRepository.getGolosUserSubscriptions(mLastUserName
+                        ?: return)) {
 
-                onChanged()
+                    onChanged()
+                }
+                mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onChanged() }
+                subsWasMade = true
             }
-            mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onChanged() }
         } else {
             mLiveData.removeSource(mRepository.getGolosUserSubscriptions(mLastUserName ?: return))
             mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
@@ -98,7 +102,7 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
     }
 
     private fun onChanged() {
-        Timber.e("onChanged $userName")
+
         val isUserLogged = mRepository.appUserData.value?.isLogged ?: false
         val currentUserName = mRepository.appUserData.value?.name.orEmpty()
         val usersData = mRepository.getGolosUserAccountInfos().value.orEmpty()[userName] ?: return

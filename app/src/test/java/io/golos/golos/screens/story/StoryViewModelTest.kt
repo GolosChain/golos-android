@@ -57,7 +57,7 @@ class StoryViewModelTest {
     @Test
     fun onCreate() {
         var state: StoryViewState? = null
-        storyViewModel.liveData.observeForever { t -> state = t }
+        storyViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
         var story = repo.getStories(FeedType.UNCLASSIFIED, null)
@@ -77,7 +77,7 @@ class StoryViewModelTest {
         repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), completionHandler = { _, _ -> })
         Assert.assertNotNull(stories.value)
         var state: StoryViewState? = null
-        storyViewModel.liveData.observeForever { t -> state = t }
+        storyViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
         val story = stories.value!!.items.first().rootStory()!!
         storyViewModel.onCreate(story.author, story.permlink,
@@ -97,7 +97,7 @@ class StoryViewModelTest {
         repo.unSubscribeOnUserBlog("sinte", { _, _ -> })
 
         var state: StoryViewState? = null
-        storyViewModel.liveData.observeForever { t -> state = t }
+        storyViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
 
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch

@@ -28,6 +28,7 @@ import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
@@ -57,6 +58,12 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
         pager.adapter = MainPagerAdapter(supportFragmentManager)
 
         pager.offscreenPageLimit = 1
+
+        pager.setPageTransformer(false) { page, pos ->
+            val posAbs = Math.abs(pos)
+            if (pos > 0.99) page.alpha = 0.0f
+            else page.alpha = 1 - posAbs
+        }
 
         val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
         bottomNavView.setOnNavigationItemSelectedListener {
@@ -167,6 +174,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         checkpreSelect(intent)
+
     }
 
     override fun onNewIntent(intent: Intent?) {

@@ -10,21 +10,23 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import io.golos.golos.repository.services.GolosEvent
+import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
 
-class EventsListAdapter(notifications: List<EventsListItem>,
-                        var clickListener: (GolosEvent) -> Unit = {},
+class EventsListAdapter(notifications: List<EventsListItemWrapper>,
+                        var clickListener: (EventListItem) -> Unit = {},
                         var onBottomReach: () -> Unit = {},
+                        var onSubscribeClick: (EventListItem) -> Unit = {},
                         private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    internal data class NotificationWrapper(val notification: GolosEvent,
+    internal data class NotificationWrapper(val notification: EventContainingItem,
                                             val clickListener: (GolosViewHolder) -> Unit,
+                                            val onSubscribeClick: (GolosViewHolder) -> Unit,
                                             val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
 
-    private val mHashes = HashMap<EventsListItem, Int>()
+    private val mHashes = HashMap<EventsListItemWrapper, Int>()
     var items = notifications
         set(value) {
 
@@ -32,8 +34,12 @@ class EventsListAdapter(notifications: List<EventsListItem>,
             field = value
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    val old = oldValue[oldItemPosition]
+                    val new = value[newItemPosition]
+                    return if (old is EventContainingItem && new is EventContainingItem) {
+                        old.event.golosEvent.id == new.event.golosEvent.id
 
-                    return oldValue[oldItemPosition] == value[newItemPosition]
+                    } else oldValue[oldItemPosition] == value[newItemPosition]
                 }
 
 
@@ -70,8 +76,15 @@ class EventsListAdapter(notifications: List<EventsListItem>,
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
         if (item is EventContainingItem) {
-            (holder as EventsListAdapterViewHolder).state = NotificationWrapper(item.event,
-                    { clickListener.invoke((items[it.adapterPosition] as EventContainingItem).event) })
+            (holder as EventsListAdapterViewHolder).state = NotificationWrapper(item,
+                    {
+                        clickListener.invoke((items.getOrNull(it.adapterPosition) as? EventContainingItem)?.event
+                                ?: return@NotificationWrapper)
+                    }, {
+
+                onSubscribeClick((items.getOrNull(it.adapterPosition)  as? EventContainingItem)?.event
+                        ?: return@NotificationWrapper)
+            })
         } else if (item is DateMarkContainingItem) {
             (holder as EventDateViewHolder).dateString = item.date
         }
@@ -85,19 +98,24 @@ class EventsListAdapter(notifications: List<EventsListItem>,
 
     class EventsListAdapterViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.vh_event, parent) {
         private val mImage: ImageView = itemView.findViewById(R.id.image_iv)
+        private val mSubscribeButton: View = itemView.findViewById(R.id.subscribe_btn)
+        private val mProgress: View = itemView.findViewById(R.id.progress)
         private val mText: TextView = itemView.findViewById(R.id.text)
         private val mTitle: TextView = itemView.findViewById(R.id.title)
         private val mSecondaryImage = itemView.findViewById<ImageView>(R.id.secondary_icon)
         private val mGlide = Glide.with(itemView)
-        private val mView = itemView.findViewById<ConstraintLayout>(R.id.card)
+        private val mView = itemView.findViewById<AllIntercepingConstrintLayout>(R.id.card)
+        private var oldAppearance: EventAppearance? = null
 
 
         init {
             mText.movementMethod = GolosMovementMethod.instance
+            mView.setExcpetedViews(listOf(mSubscribeButton))
         }
 
         internal var state: NotificationWrapper? = null
             set(value) {
+
                 field = value
                 if (value == null) return
                 val onClickListener = View.OnClickListener { value.clickListener.invoke(this@EventsListAdapterViewHolder) }
@@ -109,7 +127,7 @@ class EventsListAdapter(notifications: List<EventsListItem>,
                 val notification = value.notification
                 mImage.background = null
 
-                val appearance = value.appearanceHandler.makeAppearance(notification)
+                val appearance = value.appearanceHandler.makeAppearance(notification.event)
 
                 if (appearance.title != null) {
                     mText.maxLines = 2
@@ -127,24 +145,49 @@ class EventsListAdapter(notifications: List<EventsListItem>,
                     (mText.layoutParams as ConstraintLayout.LayoutParams).topToBottom = -1
                     mText.requestLayout()
                 }
+                if (oldAppearance?.body != appearance.body) mText.text = appearance.body
 
-                mText.text = appearance.body
                 if (appearance.showProfileImage) {
                     mSecondaryImage.setViewVisible()
                     if (appearance.profileImage != null) {
-                        mGlide
-                                .load(ImageUriResolver.resolveImageWithSize(appearance.profileImage, wantedwidth = mImage.height))
-                                .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_40dp))
-                                .into(mImage)
+                        if (oldAppearance?.profileImage != appearance.profileImage) {
+                            mGlide
+                                    .load(ImageUriResolver.resolveImageWithSize(appearance.profileImage, wantedwidth = mImage.height))
+                                    .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_40dp))
+                                    .into(mImage)
+                        }
+
                     } else {
                         mImage.setImageResource(R.drawable.ic_person_gray_40dp)
                     }
                     mSecondaryImage.setViewVisible()
-                    mSecondaryImage.setImageResource(appearance.smallIconId)
+                    if (oldAppearance?.smallIconId != appearance.smallIconId) mSecondaryImage.setImageResource(appearance.smallIconId)
                 } else {
                     mImage.setImageResource(appearance.bigIconId)
                     mSecondaryImage.setViewGone()
                 }
+                val event = notification.event as? SubscribeEventListItem
+                if (event?.showSubscribeButton == true) {
+                    when {
+                        event.authorSubscriptionState == SubscribeStatus.UnsubscribedStatus -> {
+                            mSubscribeButton.setViewVisible()
+                            mProgress.setViewGone()
+                            mSubscribeButton.setOnClickListener { value.onSubscribeClick(this) }
+                        }
+                        event.authorSubscriptionState.updatingState == UpdatingState.UPDATING -> {
+                            mSubscribeButton.setViewInvisible()
+                            mProgress.setViewVisible()
+                        }
+                        else -> {
+                            mSubscribeButton.setViewGone()
+                            mProgress.setViewGone()
+                        }
+                    }
+                } else {
+                    mSubscribeButton.setViewGone()
+                    mProgress.setViewGone()
+                }
+                oldAppearance = appearance
             }
     }
 

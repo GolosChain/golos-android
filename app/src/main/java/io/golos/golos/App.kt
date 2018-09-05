@@ -46,6 +46,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
 
     override fun onCreate() {
+
         context = this
         super.onCreate()
         if (isRoboUnitTest()) return

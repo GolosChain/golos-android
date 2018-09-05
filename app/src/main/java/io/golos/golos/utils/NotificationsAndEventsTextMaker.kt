@@ -7,6 +7,7 @@ import io.golos.golos.R
 import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.*
+import io.golos.golos.screens.events.EventListItem
 
 data class NotificationAppearance(val title: CharSequence? = null,
                                   val body: CharSequence,
@@ -24,7 +25,7 @@ interface NotificationsAndEventsAppearanceMaker {
     fun makeAppearance(golosNotification: GolosNotification,
                        currentUserName: String = Repository.get.appUserData.value?.name.orEmpty()): NotificationAppearance
 
-    fun makeAppearance(golosEvent: GolosEvent,
+    fun makeAppearance(eventListItem: EventListItem,
                        currentUserName: String = Repository.get.appUserData.value?.name.orEmpty()): EventAppearance
 }
 
@@ -62,8 +63,10 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
     }
 
 
-    override fun makeAppearance(golosEvent: GolosEvent,
+    override fun makeAppearance(eventListItem: EventListItem,
                                 currentUserName: String): EventAppearance {
+        val golosEvent = eventListItem.golosEvent
+
         val eventApp = makeAppearance(when (golosEvent) {
             is GolosVoteEvent -> GolosUpVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosFlagEvent -> GolosDownVoteNotification(golosEvent.permlink, golosEvent.fromUsers.first(), golosEvent.counter)
@@ -80,6 +83,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosCuratorAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
             is GolosMessageEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
         }, currentUserName)
+
         val needToShowAvatar = golosEvent is Authorable && golosEvent.counter == 1
         val smallIconId = when (golosEvent) {
             is GolosVoteEvent -> R.drawable.ic_like_20dp
@@ -87,23 +91,17 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosTransferEvent -> R.drawable.ic_coins_20dp
             is GolosReplyEvent -> R.drawable.ic_comment_20dp
             is GolosSubscribeEvent -> R.drawable.ic_subscribe_20dp
-            is GolosUnSubscribeEvent ->  R.drawable.ic_unsubscribe_20dp
+            is GolosUnSubscribeEvent -> R.drawable.ic_unsubscribe_20dp
             is GolosMentionEvent -> R.drawable.ic_avatar_20dp
             is GolosRepostEvent -> R.drawable.ic_repost_20dp
             is GolosWitnessVoteEvent -> R.drawable.ic_delegat_vote_20dp
             is GolosWitnessCancelVoteEvent -> R.drawable.ic_no_delegat_20dp
 
-            is GolosAwardEvent ->  R.drawable.ic_award_20dp //unsupported
+            is GolosAwardEvent -> R.drawable.ic_award_20dp //unsupported
             is GolosCuratorAwardEvent -> R.drawable.ic_avatar_20dp//unsupported
             is GolosMessageEvent -> R.drawable.ic_avatar_20dp//unsupported
         }
-        return EventAppearance(eventApp.title,eventApp.body,golosEvent.avatarPath,needToShowAvatar, eventApp.iconId, smallIconId)
-    }
-
-
-    private fun checkAndSetAvatar(golosEvent: GolosEvent): String? {
-        return if (golosEvent is Authorable && golosEvent.counter == 1) golosEvent.avatarPath
-        else null
+        return EventAppearance(eventApp.title, eventApp.body, eventListItem.avatarPath, needToShowAvatar, eventApp.iconId, smallIconId)
     }
 
     override fun makeAppearance(golosNotification: GolosNotification,

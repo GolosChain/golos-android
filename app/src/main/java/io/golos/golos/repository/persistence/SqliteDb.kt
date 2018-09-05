@@ -11,6 +11,7 @@ import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
+import java.util.*
 
 /**
  * Created by yuri on 06.11.17.
@@ -109,10 +110,14 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         val storiesIds = StoriesRequestsTable.get(writableDatabase)
 
         val votes = VotesTable.getAll(writableDatabase)
+
+        val stories = DiscussionItemsTable.getAll(AvatarsTable, writableDatabase)
+
         return storiesIds
                 .groupBy { it }
                 .mapValues {
-                    StoriesFeed(DiscussionItemsTable.get(it.key.storyIds, AvatarsTable, writableDatabase)
+                    val filteredStories = it.key.storyIds.mapNotNull { stories[it] }
+                    StoriesFeed(filteredStories
                             .map { StoryWithComments(StoryWrapper(it, UpdatingState.DONE), arrayListOf()) }.toArrayList(),
                             it.key.request.feedType,
                             it.key.request.filter,
@@ -207,6 +212,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             cursor.close()
             return avatar
         }
+
 
         fun getAvatarsFromDb(db: SQLiteDatabase, usernames: List<String>): Map<String, UserAvatar?> {
             if (usernames.isEmpty()) return hashMapOf()
@@ -516,10 +522,12 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                  db: SQLiteDatabase) {
 
             if (items.isEmpty()) return
+            var savingItems = items
+            if (savingItems.size > 20) savingItems = savingItems.subList(0,20)
 
             val values = ContentValues()
             db.beginTransaction()
-            items.forEach {
+            savingItems.forEach {
                 values.put(this.id, it.id)
                 values.put(this.url, it.url)
                 values.put(this.title, it.title)
@@ -529,7 +537,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.links, mapper.writeValueAsString(it.links))
                 values.put(this.permlink, it.permlink)
                 values.put(this.gbgAmount, it.gbgAmount)
-                values.put(this.body, it.body)
+                values.put(this.body, if (it.body.length > 1024) it.body.substring(0, 1024) else it.body)
                 values.put(this.author, it.author)
                 values.put(this.format, it.format.name)
                 values.put(this.parentPermlink, it.parentPermlink)
@@ -556,7 +564,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
                 db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-            val avatars = items.filter { it.avatarPath != null }.map { UserAvatar(it.author, it.avatarPath, System.currentTimeMillis()) }
+            val avatars = savingItems.filter { it.avatarPath != null }.map { UserAvatar(it.author, it.avatarPath, System.currentTimeMillis()) }
 
             avatarTable.save(avatars, db)
 
@@ -641,6 +649,79 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             }
             cursor.close()
             return out
+        }
+
+        fun getAll(avatarTable: AvatarsTable,
+                   db: SQLiteDatabase): Map<Long, GolosDiscussionItem> {
+
+            val cursor = db.rawQuery("select * from $databaseName", null)
+            val out = ArrayList<GolosDiscussionItem>(cursor.count)
+
+            val avatars = avatarTable.getAllAvatars(db).associateBy { it.userName }
+
+            if (cursor.count != 0) {
+                cursor.moveToFirst()
+
+                val stringListType = mapper.typeFactory.constructCollectionType(List::class.java, String::class.java)
+
+                while (!cursor.isAfterLast) {
+
+                    val tags = mapper.readValue<List<String>>(cursor.getString(tags)
+                            ?: "", stringListType).toArrayList()
+                    val images = mapper.readValue<List<String>>(cursor.getString(images)
+                            ?: "", stringListType).toArrayList()
+                    val links = mapper.readValue<List<String>>(cursor.getString(links)
+                            ?: "", stringListType).toArrayList()
+
+
+                    val format = cursor.getString(format)
+                    val itemType = cursor.getString(type)
+                    val voteType = cursor.getInt(isUserUpvotedOnThis)
+                    val author = cursor.getString(author)
+
+                    val discussionItem = GolosDiscussionItem(cursor.getString(url) ?: "",
+                            cursor.getLong(id),
+                            cursor.getString(title) ?: "",
+                            cursor.getString(categoryName) ?: "",
+                            tags,
+                            images,
+                            links,
+                            cursor.getInt(votesNum),
+                            cursor.getLong(votesRshares),
+                            cursor.getInt(commentsCount),
+                            cursor.getString(permlink) ?: "",
+                            cursor.getDouble(gbgAmount),
+                            cursor.getString(body) ?: "",
+                            cursor.getLong(bodyLength),
+                            author.orEmpty(),
+                            if (format != null) GolosDiscussionItem.Format.valueOf(format) else GolosDiscussionItem.Format.HTML,
+                            avatars[author.orEmpty()]?.avatarPath,
+                            arrayListOf(),
+                            cursor.getString(parentPermlink) ?: "",
+                            cursor.getString(parentAuthor) ?: "",
+                            cursor.getInt(childrenCount),
+                            cursor.getInt(level),
+                            cursor.getLong(reputation),
+                            cursor.getLong(lastUpdated),
+                            cursor.getLong(created),
+                            when {
+                                voteType > 0 -> GolosDiscussionItem.UserVoteType.VOTED
+                                voteType < 0 -> GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                                else -> GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT
+                            },
+                            arrayListOf(),
+                            if (itemType != null) GolosDiscussionItem.ItemType.valueOf(itemType) else GolosDiscussionItem.ItemType.PLAIN,
+                            cursor.getString(firstRebloggedBy) ?: "",
+                            cursor.getString(cleanedFromImages) ?: "",
+                            arrayListOf())
+
+
+                    out.add(discussionItem)
+                    cursor.moveToNext()
+                }
+            }
+            cursor.close()
+            return out.associateBy { it.id }
         }
 
         fun deleteAll(db: SQLiteDatabase) {

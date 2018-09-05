@@ -67,15 +67,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     //votes
     private var mVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
 
-    /* //users data
-     private val mUsersAccountInfo: HashMap<String, MutableLiveData<GolosUserAccountInfo>> = HashMap()
-     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()
-     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<UserObject>>> = HashMap()*/
 
     //current user data
     private val mAuthLiveData = MutableLiveData<ApplicationUser>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
-    //  private val mCurrentUserSubscriptions = MutableLiveData<List<UserBlogSubscription>>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
@@ -166,6 +161,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return mGolosServices.getEvents(type)
     }
 
+    override val currentUserSubscriptions: LiveData<List<String>>
+        get() = mUsersRepository.currentUserSubscriptions
+
     override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int, completionHandler: (Unit, GolosError?) -> Unit) {
         mGolosServices.requestEventsUpdate(type, fromId, limit, completionHandler)
     }
@@ -224,7 +222,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         networkExecutor.execute {
             try {
                 val resp = auth(name, null, null, postingWif)
-                Timber.e("resp = $resp")
                 mMainThreadExecutor.execute {
                     listener.invoke(resp)
                 }
@@ -935,44 +932,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
         return liveData
     }
-/*
-    override fun lookUpUsers(nick: String): LiveData<List<GolosUserWithAvatar>> {
-        val golosUsers = MutableLiveData<List<GolosUserWithAvatar>>()
-        networkExecutor.execute {
-            val users = mGolosApi
-                    .lookUpUsers(nick)
-                    .toArrayList()
-            var avatars = getUserAvatarsFromDb(users.map { it.userName })
-            (0 until users.size)
-                    .forEach {
-                        val userName = users[it].userName
-                        if (avatars.containsKey(userName)) users[it] = users[it].setAvatar(avatars[userName])
-
-                    }
-            mMainThreadExecutor.execute {
-                golosUsers.value = users
-            }
-            avatars = mGolosApi.getUserAvatars(users
-                    .filter { it.avatarPath == null }
-                    .map { it.userName }
-                    .distinct())
-            if (avatars.isNotEmpty()) {
-                (0 until users.size)
-                        .forEach {
-                            val userName = users[it].userName
-                            if (avatars.containsKey(userName)) {
-                                users[it] = users[it].setAvatar(avatars[userName])
-                            }
-                        }
-                mMainThreadExecutor.execute {
-                    golosUsers.value = users
-                }
-            }
-        }
-
-        return golosUsers
-    }*/
-
 
     override fun requestInitRetry() {
         mPersister.deleteAllStories()

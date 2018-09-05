@@ -38,9 +38,9 @@ data class AuthUserInput(val login: String,
 
 class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<ApplicationUser> {
     val userProfileState = MutableLiveData<UserProfileState>()
-    val userAuthState = Transformations.map(userProfileState
+    val userAuthState = Transformations.map(Repository.get.appUserData
     ) {
-        if (it?.isLoggedIn == true) AuthState(true, it.userName)
+        if (it?.isLogged == true) AuthState(true, it.name)
         else AuthState(false, "")
     }!!
     private var mLastUserInput = AuthUserInput("")

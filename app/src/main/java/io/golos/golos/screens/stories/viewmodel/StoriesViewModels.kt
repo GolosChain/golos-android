@@ -23,7 +23,6 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.isNullOrEmpty
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -190,15 +189,15 @@ abstract class StoriesViewModel : ViewModel() {
             val new = mStoriesLiveData.value?.items?.onEach {
                 it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
             }.orEmpty()
-            val old =  mStoriesLiveData.value?.items.orEmpty()
+            val old = mStoriesLiveData.value?.items.orEmpty()
 
             var isNeedToUpdate = false
-            if (new.size != old.size)isNeedToUpdate = true
+            if (new.size != old.size) isNeedToUpdate = true
             new.forEachIndexed { index, storyWithComments ->
-                if (storyWithComments != old.getOrNull(index))isNeedToUpdate = true
+                if (storyWithComments != old.getOrNull(index)) isNeedToUpdate = true
             }
 
-            if (isNeedToUpdate){
+            if (isNeedToUpdate) {
                 mStoriesLiveData.value = mStoriesLiveData
                         .value?.ChangeField(
                         items = new
@@ -256,10 +255,7 @@ abstract class StoriesViewModel : ViewModel() {
                 .filter { it.rootStory()?.avatarPath == null }
                 .mapNotNull { it.rootStory()?.author }
                 .filter { !mRepository.getGolosUserAccountInfos().value.orEmpty().containsKey(it) }
-        mRepository.requestUsersAccountInfoUpdate(authorsWithNoAvatars.apply {
-            Timber.e("requesting avatars for $this")
-
-        })
+        mRepository.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
         return state
     }
 

@@ -146,12 +146,10 @@ private fun String.makeLinkFromPermlink(): PostLinkExtractedData? {
 
 sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int) : Comparable<GolosEvent> {
 
-    var avatarPath: String? = null
-
     override fun compareTo(other: GolosEvent) = -Longs.compare(this.creationTime, other.creationTime)
 
     override fun toString(): String {
-        return "GolosEvent(id='$id', creationTime=$creationTime, counter=$counter, avatarPath=$avatarPath)"
+        return "GolosEvent(id='$id', creationTime=$creationTime, counter=$counter)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -161,7 +159,6 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
         if (id != other.id) return false
         if (creationTime != other.creationTime) return false
         if (counter != other.counter) return false
-        if (avatarPath != other.avatarPath) return false
 
         return true
     }
@@ -170,7 +167,7 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
         var result = id.hashCode()
         result = 31 * result + creationTime.hashCode()
         result = 31 * result + counter
-        result = 31 * result + (avatarPath?.hashCode() ?: 0)
+
         return result
     }
 

@@ -114,7 +114,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
             PhotosDialog.getInstance(dialogData.images, if (dialogData.position < 0) 0 else dialogData.position)
                     .show(supportFragmentManager, "images")
         })
-        mViewModel.liveData.observe(this, Observer {
+        mViewModel.storyLiveData.observe(this, Observer {
             if (it?.storyTree?.rootStory() != null) {
                 setFullscreenProgress(false)
                 if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
@@ -186,30 +186,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
                 }
 
-                val subscribeText = if (it.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
-                else getString(R.string.follow)
 
-                if (subscribeText != mAuthorSubscribeButton.text) {
-                    mAuthorSubscribeButton.text = subscribeText
-                }
-
-                if (it.subscribeOnStoryAuthorStatus.updatingState == UpdatingState.UPDATING) {
-                    mAuthorSubscribeButton.setViewGone()
-                    mAuthorSubscribeProgress.setViewVisible()
-                } else {
-                    mAuthorSubscribeButton.setViewVisible()
-                    mAuthorSubscribeProgress.setViewGone()
-                }
-
-                if (!mAuthorSubscribeButton.hasOnClickListeners()) {
-                    mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
-                }
-
-                if (it.subscribeOnTagStatus.isCurrentUserSubscribed) {
-                    mTagSubscribeBtn.setText(R.string.unfollow)
-                } else {
-                    mTagSubscribeBtn.setText(R.string.follow)
-                }
                 mCommentsCountBtn.setViewVisible()
                 if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     if (mMoneyBtn.tag ?: "" != "green") {
@@ -345,6 +322,34 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                 mTitleTv.text = it?.storyTitle
             }
         })
+        mViewModel.subscriptionLiveData.observe(this, Observer {
+            it ?: return@Observer
+
+            val subscribeText = if (it.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed) getString(R.string.unfollow)
+            else getString(R.string.follow)
+
+            if (subscribeText != mAuthorSubscribeButton.text) {
+                mAuthorSubscribeButton.text = subscribeText
+            }
+
+            if (it.subscribeOnStoryAuthorStatus.updatingState == UpdatingState.UPDATING) {
+                mAuthorSubscribeButton.setViewGone()
+                mAuthorSubscribeProgress.setViewVisible()
+            } else {
+                mAuthorSubscribeButton.setViewVisible()
+                mAuthorSubscribeProgress.setViewGone()
+            }
+
+            if (!mAuthorSubscribeButton.hasOnClickListeners()) {
+                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
+            }
+
+            if (it.subscribeOnTagStatus.isCurrentUserSubscribed) {
+                mTagSubscribeBtn.setText(R.string.unfollow)
+            } else {
+                mTagSubscribeBtn.setText(R.string.follow)
+            }
+        })
     }
 
 
@@ -425,7 +430,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener {
             if (mViewModel.canUserVote) {
-                val story = mViewModel.liveData.value?.storyTree?.storyWithState()
+                val story = mViewModel.storyLiveData.value?.storyTree?.storyWithState()
                         ?: return@setOnClickListener
                 if (mViewModel.canUserUpVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
@@ -442,7 +447,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
         }
         mFlagTv.setOnClickListener {
             if (mViewModel.canUserVote) {
-                val story = mViewModel.liveData.value?.storyTree?.storyWithState()
+                val story = mViewModel.storyLiveData.value?.storyTree?.storyWithState()
                         ?: return@setOnClickListener
                 mViewModel.onStoryVote(story, -100)
             } else {
@@ -495,7 +500,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.share -> mViewModel.onShareClick(this)
-            R.id.edit -> mViewModel.onEditClick(this, mViewModel.liveData.value?.storyTree?.rootStory()
+            R.id.edit -> mViewModel.onEditClick(this, mViewModel.storyLiveData.value?.storyTree?.rootStory()
                     ?: return true)
         }
         return true

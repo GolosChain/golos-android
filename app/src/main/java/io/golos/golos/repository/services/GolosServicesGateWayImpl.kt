@@ -79,7 +79,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         } catch (e: GolosServicesException) {
             Timber.e("error $e")
             if (e.getErrorType() == JsonRpcError.AUTH_ERROR) {
-                if (authCounter.incrementAndGet() < 20)
+                if (authCounter.incrementAndGet() < 30)
                     auth(userName)
             } else throw e
         }

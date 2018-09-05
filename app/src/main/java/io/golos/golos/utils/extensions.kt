@@ -388,6 +388,21 @@ fun View.setViewVisible() {
     if (this.visibility != View.VISIBLE) visibility = View.VISIBLE
 }
 
+fun View.setViewInvisible() {
+    if (this.visibility != View.INVISIBLE) visibility = View.INVISIBLE
+}
+
+//compares content and position in collection
+inline fun <reified T> List<T>.compareContents(other: List<T>): Boolean {
+
+    if (size != other.size) return false
+    forEachIndexed { index, t ->
+        if (t != other[index]) return false
+    }
+
+    return true
+}
+
 fun View.hideKeyboard() {
     val imm = context.getSystemService(
             Context.INPUT_METHOD_SERVICE) as InputMethodManager

@@ -1,13 +1,13 @@
 package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.support.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.TreeSet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -30,7 +30,7 @@ interface GolosUsersRepository {
 
     fun requestGolosUserSubscriptionsUpdate(golosUserName: String, completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
-    fun subscribeOnGolosUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
+    fun subscribeOnGolosUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     fun unSubscribeFromGolosUserBlog(user: String, completionHandler: (Unit, GolosError?) -> Unit)
 
@@ -39,6 +39,8 @@ interface GolosUsersRepository {
     val currentUserSubscriptionsUpdateStatus: LiveData<Map<String, UpdatingState>>
 
     val usersAvatars: LiveData<Map<String, String?>>
+
+    val currentUserSubscriptions: LiveData<List<String>>
 
     fun lookupUsers(username: String): LiveData<List<String>>
 
@@ -90,10 +92,17 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<String>>> = HashMap()
     private val mUpdatingStates = MutableLiveData<HashMap<String, UpdatingState>>()
     private val mUsersName = TreeSet<String>()
+    private val mCurrentUserSubscriptions = MediatorLiveData<List<String>>()
+
+    private var isSubscribedOnCurrentUserSubscriptions = false
+    private var mLastName: String? = null
 
     override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
         return mGolosUsers
     }
+
+    override val currentUserSubscriptions = mCurrentUserSubscriptions
+
 
     override val usersAvatars: LiveData<Map<String, String?>> = Transformations.map(mGolosUsers) {
 
@@ -107,8 +116,6 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             completionHandler(Unit, null)
             return
         }
-        Timber.e("requestUsersAccountInfoUpdate $golosUserName")
-
         mWorkerExecutor.execute {
             try {
                 val users =
@@ -118,7 +125,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                 if (golosUserName.size != 1) {
                     val allSavedSubscriptionsData = allSaveUsers.mapValues { Pair(it.value.subscribersCount, it.value.subscriptionsCount) }
                     allSavedSubscriptionsData.forEach {
-                       val newInfoWithOldSubscribers =  users[it.key]?.copy(subscribersCount = it.value.first, subscriptionsCount = it.value.second)
+                        val newInfoWithOldSubscribers = users[it.key]?.copy(subscribersCount = it.value.first, subscriptionsCount = it.value.second)
                         if (newInfoWithOldSubscribers != null)
                             users[it.key] = newInfoWithOldSubscribers
                     }
@@ -337,6 +344,26 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             addAccountInfo(mPersister.getGolosUsersAccountInfo())
             addSubscriptions(mPersister.getGolosUsersSubscriptions())
             addSubscribers(mPersister.getGolosUsersSubscribers())
+        }
+        mCurrentUserSubscriptions.addSource(mCurrentUserInfo.appUserData) {
+            mLastName = it?.name
+            if (it?.isLogged == true && mLastName != null) {
+                if (!isSubscribedOnCurrentUserSubscriptions) {
+
+                    mCurrentUserSubscriptions.addSource(getGolosUserSubscriptions(mLastName.orEmpty())) {
+                        val subscribers = it.orEmpty()
+                        val oldValue = mCurrentUserSubscriptions.value.orEmpty()
+                        if (!subscribers.compareContents(oldValue)) mCurrentUserSubscriptions.value = subscribers
+                    }
+
+                    isSubscribedOnCurrentUserSubscriptions = true
+
+                }
+            } else {
+                isSubscribedOnCurrentUserSubscriptions = false
+                mCurrentUserSubscriptions.removeSource(getGolosUserSubscriptions(mLastName.orEmpty()))
+                if (mCurrentUserSubscriptions.value != null) mCurrentUserSubscriptions.value = null
+            }
         }
     }
 

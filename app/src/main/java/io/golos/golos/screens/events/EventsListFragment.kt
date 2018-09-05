@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,13 +18,12 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.*
-import timber.log.Timber
 
-class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItem>> {
+class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItemWrapper>> {
     private var parcelable: Parcelable? = null
 
 
-    override fun onChanged(t: List<EventsListItem>?) {
+    override fun onChanged(t: List<EventsListItemWrapper>?) {
 
         t?.let { eventsList ->
 
@@ -74,10 +74,12 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         mRecycler?.adapter = EventsListAdapter(emptyList(), {
             mViewModel?.onEventClick(activity ?: return@EventsListAdapter, it)
         },
-                { mViewModel?.onScrollToTheEnd() })
+                { mViewModel?.onScrollToTheEnd() },
+                { mViewModel?.onFollowClick(it) })
         mViewModel?.updateState?.observe(this, Observer<Boolean> {
 
         })
+        (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         return view
     }
 
@@ -94,6 +96,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 EventsSorterUseCase(object : StringProvider {
                     override fun get(resId: Int, args: String?) = getString(resId, args)
                 }),
+                Repository.get,
                 Repository.get)
         mViewModel?.eventsList?.observe(this, this)
     }

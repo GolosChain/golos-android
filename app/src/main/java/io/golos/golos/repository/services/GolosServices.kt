@@ -84,7 +84,9 @@ class GolosServicesImpl(
                     isAuthComplete = false
                     isAuthInProgress = false
                     allEvents.value = null
-                    mEventsMap.forEach { it.value.value = null }
+                    mainThreadExecutor.execute {
+                        mEventsMap.forEach { it.value.value = null }
+                    }
                 }
             }
             return
@@ -200,24 +202,29 @@ class GolosServicesImpl(
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (e is GolosServicesException) {
+                    Timber.e("re authing")
                     reauthIfNeeded(e)
+                } else {
+                    mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
                 }
-                mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
+
             }
         }
     }
 
     private fun reauthIfNeeded(e: GolosServicesException) {
-        if (rpcErrorFromCode(e.golosServicesError.code) == JsonRpcError.BAD_REQUEST
+        val errorCode = rpcErrorFromCode(e.golosServicesError.code)
+        if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
                 && userDataProvider.appUserData.value?.isLogged == true) {
             mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
                     ?: return)
             isAuthComplete = true
             isAuthInProgress = false
             onAuthComplete()
+        } else {
+            isAuthComplete = false
+            isAuthInProgress = false
         }
-
-
     }
 
     private fun groupEventsByType(list: List<GolosEvent>): Map<EventType, List<GolosEvent>> {

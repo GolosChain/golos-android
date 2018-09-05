@@ -30,4 +30,6 @@ class MainPagerAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(man
     }
 
     override fun getCount() = 4
+
+
 }

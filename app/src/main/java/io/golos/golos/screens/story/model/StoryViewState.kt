@@ -12,23 +12,12 @@ data class StoryViewState(val isLoading: Boolean = false,
                           val isStoryCommentButtonShown: Boolean = false,
                           val errorCode: GolosError? = null,
                           val tags: MutableList<String> = arrayListOf(),
-                          val storyTree: StoryWithComments = StoryWithComments(discussionWithComments = DiscussionWithComments()),
-                          val canUserMakeBlogSubscriptionActions: Boolean = false,
-                          val subscribeOnStoryAuthorStatus: SubscribeStatus,
-                          val subscribeOnTagStatus: SubscribeStatus) {
+                          val storyTree: StoryWithComments = StoryWithComments(discussionWithComments = DiscussionWithComments()))
 
-    fun changeField(isLoading: Boolean = this.isLoading,
-                    storyTitle: String = this.storyTitle,
-                    isStoryCommentButtonShown: Boolean = this.isStoryCommentButtonShown,
-                    errorCode: GolosError? = this.errorCode,
-                    tags: MutableList<String> = this.tags,
-                    storyTree: StoryWithComments = this.storyTree,
-                    canUserMakeBlogSubscriptionActions: Boolean = this.canUserMakeBlogSubscriptionActions,
-                    subscribeOnStoryAuthorStatus: SubscribeStatus = this.subscribeOnStoryAuthorStatus,
-                    subscribeOnTagStatus: SubscribeStatus = this.subscribeOnTagStatus): StoryViewState {
-        return StoryViewState(isLoading, storyTitle, isStoryCommentButtonShown, errorCode, tags, storyTree,
-                canUserMakeBlogSubscriptionActions, subscribeOnStoryAuthorStatus, subscribeOnTagStatus)
-    }
-}
+data class StorySubscriptionBlockState(val canUserMakeBlogSubscriptionActions: Boolean,
+                                       val subscribeOnStoryAuthorStatus: SubscribeStatus,
+                                       val subscribeOnTagStatus: SubscribeStatus)
+
+
 
 
