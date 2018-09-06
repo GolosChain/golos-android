@@ -160,14 +160,14 @@ class ApiImplTest {
     fun postFirstLevelCommentTest() {
         Thread.sleep(4000)
         Golos4J.getInstance().addKeysToAccount(AccountName(accname), ImmutablePair(PrivateKeyType.POSTING, privatePosting))
-        val storyTree = service.getStory("ase", "yuri-vlad-second", "123")
+        val storyTree = service.getStory("ase", "yuri-vlad-second", "123", null)
         assertNotNull(storyTree)
         service.sendComment("yuri-vlad-second",
                 storyTree.rootStory()!!.author,
                 storyTree.rootStory()!!.permlink,
                 "test first level reply ${UUID.randomUUID()}",
                 storyTree.rootStory()!!.categoryName)
-        val updatedStoryTree = service.getStory("ase", "yuri-vlad-second", "123")
+        val updatedStoryTree = service.getStory("ase", "yuri-vlad-second", "123", null)
         assertEquals(storyTree.commentsWithState().size + 1, updatedStoryTree.comments().size)
 
     }
@@ -175,14 +175,14 @@ class ApiImplTest {
     @Test
     fun postSecondLevelTest() {
         Golos4J.getInstance().addKeysToAccount(AccountName(accname), ImmutablePair(PrivateKeyType.POSTING, privatePosting))
-        val storyTree = service.getStory("ase", "yuri-vlad-second", "123")
+        val storyTree = service.getStory("ase", "yuri-vlad-second", "123", null)
         assertNotNull(storyTree)
         service.sendComment("yuri-vlad-second",
                 storyTree.comments().first().author,
                 storyTree.comments().first().permlink,
                 "test second level reply ${UUID.randomUUID()}",
                 storyTree.rootStory()!!.categoryName)
-        val updatedStoryTreeWithSecondLevel = service.getStory("ase", "yuri-vlad-second", "123")
+        val updatedStoryTreeWithSecondLevel = service.getStory("ase", "yuri-vlad-second", "123", null)
         assertEquals(storyTree.comments().first().childrenCount + 1, updatedStoryTreeWithSecondLevel.comments().first().childrenCount)
     }
 
@@ -216,7 +216,8 @@ class ApiImplTest {
     @Test
     fun getStoryNoComments() {
         val story = service.getStoryWithoutComments("sinte",
-                "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh")
+                "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh",
+                null)
         Assert.assertNotNull(story)
     }
 

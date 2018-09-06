@@ -57,6 +57,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mAppReadyStatusLiveData = MutableLiveData<ReadyStatus>()
 
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
+    private val mStoryUpdateRequests = Collections.synchronizedSet(HashSet<StoryLoadRequest>())
 
     private val mTags = MutableLiveData<List<Tag>>()
     private val mLocalizedTags = MutableLiveData<List<LocalizedTag>>()
@@ -76,6 +77,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
     private val mNotificationsRepository: PushNotificationsRepository
     private val mGolosServices: GolosServices
+
 
     @WorkerThread
     private fun loadStories(limit: Int,
@@ -172,11 +174,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return mUsersRepository.lookupUsers(username)
     }
 
-    private fun getStory(blog: String?, author: String, permlink: String): StoryWithComments {
-        val story = if (blog != null) mGolosApi.getStory(blog, author, permlink) { list ->
+    private fun getStory(blog: String?,
+                         author: String,
+                         permlink: String,
+                         voteLimit: Int?): StoryWithComments {
+        val story = if (blog != null) mGolosApi.getStory(blog, author, permlink, voteLimit) { list ->
             mUsersRepository.addAccountInfo(list)
         }
-        else mGolosApi.getStoryWithoutComments(author, permlink)
+        else mGolosApi.getStoryWithoutComments(author, permlink, voteLimit)
 
         setUpWrapperOnStoryItems(Collections.singletonList(story))
         return story
@@ -551,7 +556,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             try {
                 val updatedStory = getStory(story.story.categoryName,
                         story.story.author,
-                        story.story.permlink)
+                        story.story.permlink,
+                        null)
 
                 val listOfList = allLiveData()
                 val replacer = StorySearcherAndReplacer()
@@ -582,6 +588,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     override fun requestStoryUpdate(author: String,
                                     permLink: String,
                                     blog: String?,
+                                    loadVotes: Boolean,
+                                    loadChildStories: Boolean,
                                     feedType: FeedType,
                                     completionListener: (Unit, GolosError?) -> Unit) {
         if (feedType != FeedType.UNCLASSIFIED) {
@@ -600,16 +608,30 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 requestStoryUpdate(it, completionListener)
             }
         } else {
+            val request = StoryLoadRequest(author, permLink, blog, loadVotes, loadChildStories)
+            if (mStoryUpdateRequests.contains(request)) return
+            mStoryUpdateRequests.add(request)
             networkExecutor.execute {
                 try {
-                    val story = getStory(blog, author, permLink)
+                    val story = getStory(blog, author, permLink, if (loadVotes) null else 0)
 
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
+                    val position = liveData.value?.items?.indexOfFirst { it.rootStory()?.id == story.rootStory()?.id }?:-1
                     mMainThreadExecutor.execute {
-                        liveData.value = StoriesFeed(listOf(story).toArrayList(), FeedType.UNCLASSIFIED, liveData.value?.filter)
+                        liveData.value = StoriesFeed(
+                                if (position == -1) liveData.value?.items.orEmpty().toArrayList().apply {
+                                    add(story)
+                                } else liveData.value?.items.orEmpty().toArrayList().apply {
+                                    this[position] = story
+                                },
+                                FeedType.UNCLASSIFIED,
+                                liveData.value?.filter,
+                                null,
+                                true)
                         completionListener.invoke(Unit, null)
+                        mStoryUpdateRequests.remove(request)
                     }
-                    if (blog == null) {
+                    if (blog == null && loadChildStories) {
                         requestStoryUpdate(story, completionListener)
                     }
                 } catch (e: Exception) {
@@ -1050,3 +1072,5 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return isUserLoggedIn() && item.author == mAuthLiveData.value?.name.orEmpty()
     }
 }
+
+private data class StoryLoadRequest(val author: String, val permlink: String, val blog: String?, val loadVotes: Boolean, val loadComents: Boolean)

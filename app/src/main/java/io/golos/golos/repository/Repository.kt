@@ -38,7 +38,62 @@ interface EventsProvider {
                             completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 }
 
-abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository {
+interface StoriesProvider{
+    @MainThread
+    abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoriesFeed>
+
+    @MainThread
+    abstract fun requestStoriesListUpdate(limit: Int,
+                                          type: FeedType,
+                                          filter: StoryFilter? = null,
+                                          startAuthor: String? = null,
+                                          startPermlink: String? = null,
+                                          completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
+    @MainThread
+    abstract fun lastCreatedPost(): LiveData<CreatePostResult>
+
+    @MainThread
+    abstract fun vote(comment: StoryWrapper, percents: Short)
+
+    @MainThread
+    abstract fun cancelVote(comment: StoryWrapper)
+
+    @MainThread
+    abstract fun requestStoryUpdate(story: StoryWithComments,
+                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun requestStoryUpdate(author: String,
+                                    permLink: String,
+                                    blog: String?,
+                                    loadVotes: Boolean = true,
+                                    loadChildStories: Boolean = true,
+                                    feedType: FeedType ,
+                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
+                            resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun editPost(title: String, content: List<EditorPart>, tags: List<String>,
+                          originalPost: StoryWrapper,
+                          resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun createComment(toItem: StoryWrapper, content: List<EditorPart>,
+                               resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun editComment(originalComment: StoryWrapper,
+                             content: List<EditorPart>,
+                             resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
+}
+
+abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository, StoriesProvider {
 
     companion object {
         private var instance: Repository? = null
@@ -78,19 +133,8 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     }
 
     @MainThread
-    open fun onAppCreate(ctx: Context) {
-    }
+    open fun onAppCreate(ctx: Context) {}
 
-    @MainThread
-    abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoriesFeed>
-
-    @MainThread
-    abstract fun requestStoriesListUpdate(limit: Int,
-                                          type: FeedType,
-                                          filter: StoryFilter? = null,
-                                          startAuthor: String? = null,
-                                          startPermlink: String? = null,
-                                          completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
     abstract fun authWithMasterKey(name: String,
@@ -111,41 +155,7 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     @MainThread
     abstract fun deleteUserdata()
 
-    @MainThread
-    abstract fun lastCreatedPost(): LiveData<CreatePostResult>
 
-    @MainThread
-    abstract fun vote(comment: StoryWrapper, percents: Short)
-
-    @MainThread
-    abstract fun cancelVote(comment: StoryWrapper)
-
-    @MainThread
-    abstract fun requestStoryUpdate(story: StoryWithComments,
-                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
-
-    @MainThread
-    abstract fun requestStoryUpdate(author: String, permLink: String,
-                                    blog: String?, feedType: FeedType,
-                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
-
-    @MainThread
-    abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
-                            resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
-
-    @MainThread
-    abstract fun editPost(title: String, content: List<EditorPart>, tags: List<String>,
-                          originalPost: StoryWrapper,
-                          resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
-
-    @MainThread
-    abstract fun createComment(toItem: StoryWrapper, content: List<EditorPart>,
-                               resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
-
-    @MainThread
-    abstract fun editComment(originalComment: StoryWrapper,
-                             content: List<EditorPart>,
-                             resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     @AnyThread
     abstract fun isUserLoggedIn(): Boolean
@@ -169,8 +179,6 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     @MainThread
     abstract fun requestTrendingTagsUpdate(completionHandler: (List<Tag>, GolosError?) -> Unit)
 
-    @MainThread
-    abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
 
     @MainThread
     abstract fun getAppReadyStatus(): LiveData<ReadyStatus>
@@ -190,15 +198,9 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
         return "${BuildConfig.BASE_URL}${item.categoryName}/@${item.author}/${item.permlink}"
     }
 
-    open fun onAppStop() {
+    open fun onAppStop() {}
 
-
-    }
-
-    open fun onAppDestroy() {
-
-
-    }
+    open fun onAppDestroy() {}
 
     abstract val userSettingsRepository: UserSettingsRepository
 

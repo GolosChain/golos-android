@@ -61,7 +61,7 @@ class StoryViewModelTest {
         Assert.assertNull(state)
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
         var story = repo.getStories(FeedType.UNCLASSIFIED, null)
-        repo.requestStoryUpdate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED) { _, e -> }
+        repo.requestStoryUpdate(result.author, result.permlink, result.blog,,, FeedType.UNCLASSIFIED) { _, e -> }
         storyViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true

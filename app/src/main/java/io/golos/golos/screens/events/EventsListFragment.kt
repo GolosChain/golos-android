@@ -58,6 +58,8 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     private var mLabel: TextView? = null
     private var mViewModel: EventsViewModel? = null
     private var mLoadingProgress: View? = null
+    private var isVisibleToUser : Boolean= false
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_events_list, container, false)
@@ -85,7 +87,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
-        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+        this.isVisibleToUser = isVisibleToUser
     }
 
 
@@ -96,6 +98,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 EventsSorterUseCase(object : StringProvider {
                     override fun get(resId: Int, args: String?) = getString(resId, args)
                 }),
+                Repository.get,
                 Repository.get,
                 Repository.get)
         mViewModel?.eventsList?.observe(this, this)
@@ -122,6 +125,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     override fun onStart() {
         super.onStart()
         mViewModel?.onStart()
+        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
 
     }
 

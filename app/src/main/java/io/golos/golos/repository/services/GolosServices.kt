@@ -202,8 +202,7 @@ class GolosServicesImpl(
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (e is GolosServicesException) {
-                    Timber.e("re authing")
-                    reauthIfNeeded(e)
+                    if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, completionHandler)
                 } else {
                     mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
                 }
@@ -212,19 +211,22 @@ class GolosServicesImpl(
         }
     }
 
-    private fun reauthIfNeeded(e: GolosServicesException) {
+    private fun reauthIfNeeded(e: GolosServicesException): Boolean {
         val errorCode = rpcErrorFromCode(e.golosServicesError.code)
         if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
                 && userDataProvider.appUserData.value?.isLogged == true) {
             mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
-                    ?: return)
+                    ?: return false)
             isAuthComplete = true
             isAuthInProgress = false
             onAuthComplete()
-        } else {
+            return true
+        } else if (userDataProvider.appUserData.value?.isLogged != true) {
+            mGolosServicesGateWay.logout()
             isAuthComplete = false
             isAuthInProgress = false
         }
+        return false
     }
 
     private fun groupEventsByType(list: List<GolosEvent>): Map<EventType, List<GolosEvent>> {

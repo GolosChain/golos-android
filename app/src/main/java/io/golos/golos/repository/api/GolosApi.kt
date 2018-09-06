@@ -25,9 +25,11 @@ abstract class GolosApi : GolosUsersApi {
 
     abstract fun getStory(blog: String,
                           author: String,
-                          permlink: String, accountDataHandler: (List<GolosUserAccountInfo>) -> Unit = { _ -> }): StoryWithComments
+                          permlink: String,
+                          voteLimit: Int? = null,
+                          accountDataHandler: (List<GolosUserAccountInfo>) -> Unit = { _ -> }): StoryWithComments
 
-    abstract fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments
+    abstract fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int? = null): StoryWithComments
 
     abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
                             filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryWithComments>

@@ -79,9 +79,9 @@ object StoryParserToRows {
                     // so i replace new lines with <br>, if it not prescends by <p>
                     "<br>"
                 }
-                str.replaceSb("h\\d>".toRegex(), {
+                str.replaceSb("h\\d>".toRegex()) {
                     "h3>"
-                })
+                }
 
                 val whiteList = Whitelist.basicWithImages()
                 whiteList.addTags("h1", "h2", "h3", "h4")

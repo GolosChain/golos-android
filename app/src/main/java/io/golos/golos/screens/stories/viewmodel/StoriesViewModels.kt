@@ -23,6 +23,7 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.isNullOrEmpty
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -70,19 +71,11 @@ object StoriesModelFactory {
 
 data class StoriesViewState(val isLoading: Boolean,
                             val showRefreshButton: Boolean,
+                            val scrollToFirst: Boolean,
                             val items: List<StoryWithComments>,
                             val error: GolosError?,
                             val fullscreenMessage: Int?,
-                            val popupMessage: Int?) {
-    fun ChangeField(isLoading: Boolean = this.isLoading,
-                    showRefreshButton: Boolean = this.showRefreshButton,
-                    items: List<StoryWithComments> = this.items,
-                    error: GolosError? = this.error,
-                    fullscreenMessage: Int? = this.fullscreenMessage,
-                    popupMessage: Int? = this.popupMessage): StoriesViewState {
-        return StoriesViewState(isLoading, showRefreshButton, items, error, fullscreenMessage, popupMessage)
-    }
-}
+                            val popupMessage: Int?)
 
 class CommentsViewModel : FeedViewModel() {
     override val type: FeedType
@@ -117,7 +110,7 @@ open class FeedViewModel : StoriesViewModel() {
 
     override fun onNewItems(items: StoriesFeed?): StoriesViewState {
         val state = super.onNewItems(items)
-        return state.ChangeField(fullscreenMessage = if (items?.items?.size?.or(0) == 0) R.string.nothing_here else null)
+        return state.copy(fullscreenMessage = if (items?.items?.size?.or(0) == 0) R.string.nothing_here else null)
     }
 }
 
@@ -153,6 +146,7 @@ abstract class StoriesViewModel : ViewModel() {
     protected var filter: StoryFilter? = null
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private var mObserver: Observer<Boolean>? = null
+    private val updateSize = 20
 
 
     val storiesLiveData: LiveData<StoriesViewState>
@@ -167,8 +161,9 @@ abstract class StoriesViewModel : ViewModel() {
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
+
         mStoriesLiveData.value = StoriesViewState(false,
-                mRepository.getStories(type, filter).value?.isFeedActual == false,
+                mRepository.getStories(type, filter).value?.isFeedActual == false, false,
                 mRepository.getStories(type, filter).value?.items.orEmpty().apply {
                     this.onEach {
                         val story = it.rootStory() ?: return@onEach
@@ -199,7 +194,7 @@ abstract class StoriesViewModel : ViewModel() {
 
             if (isNeedToUpdate) {
                 mStoriesLiveData.value = mStoriesLiveData
-                        .value?.ChangeField(
+                        .value?.copy(
                         items = new
                 )
             }
@@ -240,6 +235,7 @@ abstract class StoriesViewModel : ViewModel() {
     protected open fun onNewItems(items: StoriesFeed?): StoriesViewState {
         val state = StoriesViewState(false,
                 items?.isFeedActual == false,
+                items?.items.orEmpty().size == updateSize,
                 items?.items ?: ArrayList(),
                 items?.error, null, null)
 
@@ -266,9 +262,11 @@ abstract class StoriesViewModel : ViewModel() {
             return
         }
         if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = mStoriesLiveData.value?.ChangeField(isLoading = true, error = null, showRefreshButton = false)
+            mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true, error = null, showRefreshButton = false)
 
-            mRepository.requestStoriesListUpdate(20, type, filter, null, null) { _, _ -> }
+            mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ ->
+
+            }
             isUpdating.set(true)
         }
     }
@@ -283,8 +281,8 @@ abstract class StoriesViewModel : ViewModel() {
             }
             if (mStoriesLiveData.value?.items.isNullOrEmpty()) {
                 if (isUpdating.get()) return
-                mStoriesLiveData.value = mStoriesLiveData.value?.ChangeField(isLoading = true, error = null, showRefreshButton = false)
-                mRepository.requestStoriesListUpdate(20, type, filter, null, null) { _, _ -> }
+                mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true, error = null, showRefreshButton = false)
+                mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
                 isUpdating.set(true)
             }
         }
@@ -318,7 +316,7 @@ abstract class StoriesViewModel : ViewModel() {
             mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true)
         }
 
-        mRepository.requestStoriesListUpdate(20,
+        mRepository.requestStoriesListUpdate(updateSize,
                 type,
                 filter,
                 mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink) { _, _ -> }

@@ -13,6 +13,7 @@ import io.golos.golos.R
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                         var clickListener: (EventListItem) -> Unit = {},
@@ -119,7 +120,6 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                 field = value
                 if (value == null) return
                 val onClickListener = View.OnClickListener { value.clickListener.invoke(this@EventsListAdapterViewHolder) }
-
 
                 itemView.setOnClickListener(onClickListener)
                 itemView.findViewById<ViewGroup>(R.id.card).setOnClickListener(onClickListener)

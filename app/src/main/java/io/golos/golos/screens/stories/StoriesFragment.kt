@@ -151,7 +151,10 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 }
             }
         })
-        mRefreshButton?.setOnClickListener { mViewModel?.onSwipeToRefresh() }
+        mRefreshButton?.setOnClickListener {
+
+            mViewModel?.onSwipeToRefresh()
+        }
     }
 
     override fun onStart() {
@@ -201,6 +204,13 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 if (parc != null){
                     (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
                     parc = null
+                }
+
+                mRecycler?.post {
+                    if (t.scrollToFirst){
+                        if (t.items.isNotEmpty())mRecycler?.scrollToPosition(0)
+
+                    }
                 }
             }
         }

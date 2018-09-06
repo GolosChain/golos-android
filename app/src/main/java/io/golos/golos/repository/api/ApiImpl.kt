@@ -31,16 +31,19 @@ internal class ApiImpl : GolosApi() {
     override fun getStory(blog: String,
                           author: String,
                           permlink: String,
+                          voteLimit: Int?,
                           accountDataHandler: (List<GolosUserAccountInfo>) -> Unit): StoryWithComments {
-        val rawStory = mGolosApi.databaseMethods.getStoryWithRepliesAndInvolvedAccounts(AccountName(author), Permlink(permlink), -1)
+        val rawStory = mGolosApi.databaseMethods.getStoryWithRepliesAndInvolvedAccounts(AccountName(author), Permlink(permlink), voteLimit
+                ?: -1)
         val story = StoryWithComments(rawStory!!)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story
     }
 
-    override fun getStoryWithoutComments(author: String, permlink: String): StoryWithComments {
+    override fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int?): StoryWithComments {
         return StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
-                mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!,
+                mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink), voteLimit
+                        ?: -1)!!,
                 null), UpdatingState.DONE), ArrayList())
     }
 

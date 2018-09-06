@@ -90,7 +90,7 @@ class RepositoryPostAndVoteTest {
         val stories = repo.getStories(FeedType.UNCLASSIFIED).observeForever {
             story = it?.items?.first()
         }
-        repo.requestStoryUpdate(userName, permlink, blog, FeedType.UNCLASSIFIED, { _, _ -> })
+        repo.requestStoryUpdate(userName, permlink, blog,,, FeedType.UNCLASSIFIED, { _, _ -> })
         Assert.assertNotNull(story)
         story ?: return
         Assert.assertTrue(story!!.storyWithState()!!.isStoryEditable)
@@ -430,7 +430,7 @@ class RepositoryPostAndVoteTest {
         Assert.assertTrue(actualStories.value!!.items.first().comments().isEmpty())
 
         val firstStory = actualStories.value!!.items.first().rootStory()!!
-        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName, FeedType.POPULAR) { _, e -> }
+        repo.requestStoryUpdate(firstStory.author, firstStory.permlink, firstStory.categoryName,,, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items.first().comments().isNotEmpty())
 
         var updatingSoty = actualStories.value!!.items[2].rootStory()!!
@@ -443,7 +443,7 @@ class RepositoryPostAndVoteTest {
         Assert.assertTrue(actualStories.value!!.items[1].comments().isEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName,,, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStories.value!!.items[2].comments().isNotEmpty())
         Assert.assertTrue(actualStoriesWithFilter.value!!.items.find { it.rootStory()!!.id == updatingSoty.id }!!.comments().isNotEmpty())
 
@@ -456,7 +456,7 @@ class RepositoryPostAndVoteTest {
         updatingSoty = actualStoriesWithFilter.value!!.items[1].rootStory()!!
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isEmpty())
 
-        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName, FeedType.POPULAR) { _, e -> }
+        repo.requestStoryUpdate(updatingSoty.author, updatingSoty.permlink, updatingSoty.categoryName,,, FeedType.POPULAR) { _, e -> }
         Assert.assertTrue(actualStoriesWithFilter.value!!.items[1].comments().isNotEmpty())
     }
 
@@ -545,7 +545,7 @@ class RepositoryPostAndVoteTest {
             stories = it?.items
         }
         Assert.assertNull(stories)
-        repo.requestStoryUpdate(link.author, link.permlink, link.blog, FeedType.UNCLASSIFIED)
+        repo.requestStoryUpdate(link.author, link.permlink, link.blog,,, FeedType.UNCLASSIFIED)
         Assert.assertNotNull(stories)
     }
 

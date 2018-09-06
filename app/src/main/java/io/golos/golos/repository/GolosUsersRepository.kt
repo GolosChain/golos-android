@@ -1,13 +1,11 @@
 package io.golos.golos.repository
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.*
 import android.support.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.TreeSet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -97,6 +95,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
     private var isSubscribedOnCurrentUserSubscriptions = false
     private var mLastName: String? = null
 
+
     override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
         return mGolosUsers
     }
@@ -184,7 +183,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         if (!mUsersSubscribers.containsKey(golosUserName)) mUsersSubscribers[golosUserName] = MutableLiveData()
         mWorkerExecutor.execute {
             try {
-                val subscribers = mGolosApi.getGolosUserSubscribers(golosUserName, null)
+                val subscribers = mGolosApi.getGolosUserSubscribers(golosUserName, null).sortedBy { it[0] }
                 mMainThreadExecutor.execute {
                     mUsersSubscribers[golosUserName]?.value = subscribers
                     completionHandler(Unit, null)
@@ -325,7 +324,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         if (!mUsersSubscriptions.containsKey(golosUserName)) mUsersSubscriptions[golosUserName] = MutableLiveData()
         mWorkerExecutor.execute {
             try {
-                val subscriptions = mGolosApi.getGolosUserSubscriptions(golosUserName, null)
+                val subscriptions = mGolosApi.getGolosUserSubscriptions(golosUserName, null).sortedBy { it[0] }
                 mMainThreadExecutor.execute {
                     mUsersSubscriptions[golosUserName]?.value = subscriptions
                     completionHandler(Unit, null)
@@ -357,7 +356,6 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                     }
 
                     isSubscribedOnCurrentUserSubscriptions = true
-
                 }
             } else {
                 isSubscribedOnCurrentUserSubscriptions = false
@@ -371,7 +369,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         mMainThreadExecutor.execute {
             golosUsersSubscribers.forEach {
                 if (!mUsersSubscribers.contains(it.key)) mUsersSubscribers[it.key] = MutableLiveData()
-                mUsersSubscribers[it.key]?.value = it.value
+                mUsersSubscribers[it.key]?.value = it.value.sortedBy { it[0] }
             }
         }
     }
@@ -380,7 +378,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         mMainThreadExecutor.execute {
             golosUsersSubscriptions.forEach {
                 if (!mUsersSubscriptions.contains(it.key)) mUsersSubscriptions[it.key] = MutableLiveData()
-                mUsersSubscriptions[it.key]?.value = it.value
+                mUsersSubscriptions[it.key]?.value = it.value.sortedBy { it[0] }
             }
         }
     }

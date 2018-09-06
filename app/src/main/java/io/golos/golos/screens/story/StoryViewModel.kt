@@ -125,7 +125,7 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
                     subscribeOnTagStatus = SubscribeStatus(tagItem != null, UpdatingState.DONE))
         }
         mSubscriptionsLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onGolosUserSubscriptionsStateChanged() }
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, _ -> }
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog,true,true, feedType) { _, _ -> }
     }
 
     fun onStop() {
@@ -255,7 +255,7 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
     }
 
     fun requestRefresh() {
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, feedType) { _, e -> }
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, true, true, feedType) { _, e -> }
     }
 
     fun onCommentClick(context: Context, comment: GolosDiscussionItem) {

@@ -164,7 +164,7 @@ class rRepoGetStoriesTest {
         Assert.assertNull(items.value)
         repo.requestStoryUpdate("sinte",
                 "o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh",
-                null, FeedType.UNCLASSIFIED) { _, e -> }
+                null,,, FeedType.UNCLASSIFIED) { _, e -> }
         Assert.assertNotNull(items.value)
         Assert.assertEquals(1, items.value?.items?.size)
         Assert.assertTrue(items.value?.items!![0].comments().isNotEmpty())

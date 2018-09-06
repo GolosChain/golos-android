@@ -197,7 +197,7 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
 class GolosVoteEvent(id: String,
                      creationTime: Long,
                      counter: Int,
-                     val permlink: String,
+                    val permlink: String,
                      val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable, Authorable {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun getAuthors() = fromUsers
@@ -558,6 +558,7 @@ class GolosWitnessCancelVoteEvent(id: String, creationTime: Long, counter: Int,
 interface Authorable {
     fun getAuthors(): List<String>
 }
+
 
 
 
