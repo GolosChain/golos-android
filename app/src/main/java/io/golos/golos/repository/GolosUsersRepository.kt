@@ -36,6 +36,7 @@ interface GolosUsersRepository {
 
     val currentUserSubscriptionsUpdateStatus: LiveData<Map<String, UpdatingState>>
 
+
     val usersAvatars: LiveData<Map<String, String?>>
 
     val currentUserSubscriptions: LiveData<List<String>>

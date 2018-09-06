@@ -88,6 +88,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
         this.isVisibleToUser = isVisibleToUser
+        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
     }
 
 
@@ -125,8 +126,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     override fun onStart() {
         super.onStart()
         mViewModel?.onStart()
-        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
-
+        if (isVisibleToUser) mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
     }
 
 

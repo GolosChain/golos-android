@@ -31,6 +31,7 @@ interface UserDataProvider {
 }
 
 interface EventsProvider {
+    @MainThread
     fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>>
     fun requestEventsUpdate(type: List<EventType>?,
                             fromId: String? = null,
