@@ -22,6 +22,7 @@ import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingsActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
     private lateinit var mUserAvatar: ImageView
@@ -94,15 +95,16 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
         }
 
 
-        mSettingButton.setOnClickListener({
+        mSettingButton.setOnClickListener {
             val i = Intent(this, SettingsActivity::class.java)
             startActivityForResult(i, CHANGE_THEME)
-        })
+        }
         findViewById<View>(R.id.back_btn).setOnClickListener { onBackPressed() }
     }
 
     override fun onStart() {
         super.onStart()
+        mViewModel.onStart()
         if (mViewModel.canUserSeeVotingPower()) {
             mUserAvatar.setOnClickListener {
                 mVotingPowerIndicator.progress = 0
@@ -138,9 +140,15 @@ class WalletActivity : GolosActivity(), Observer<UserAccountModel> {
         else mSettingButton.setViewGone()
     }
 
+    override fun onStop() {
+        super.onStop()
+        mViewModel.onStop()
+    }
+
     companion object {
         fun start(fromActivity: Activity, userName: String) {
             val i = Intent(fromActivity, WalletActivity::class.java)
+            Timber.e("start $userName")
             i.putExtra("userName", userName)
             fromActivity.startActivity(i)
         }

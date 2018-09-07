@@ -30,7 +30,7 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
     private var subsWasMade = false
     override fun onChanged(t: ApplicationUser?) {
         if (t?.isLogged == true) {
-            if (!subsWasMade){
+            if (!subsWasMade) {
                 mLastUserName = t.name
                 mLiveData.addSource(mRepository.getGolosUserSubscriptions(mLastUserName
                         ?: return)) {
@@ -60,9 +60,8 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
     fun onStart() {
         mLiveData.addSource(mRepository
                 .getGolosUserAccountInfos()) {
-            val myUser = it?.get(userName)?:return@addSource
-
-            if (myUser.hashCode() != mLstCurrentUserHash){
+            val myUser = it?.get(userName) ?: return@addSource
+            if (myUser.hashCode() != mLstCurrentUserHash) {
                 onChanged()
                 mLstCurrentUserHash = myUser.hashCode()
             }
