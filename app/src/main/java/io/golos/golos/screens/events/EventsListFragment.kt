@@ -58,7 +58,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     private var mLabel: TextView? = null
     private var mViewModel: EventsViewModel? = null
     private var mLoadingProgress: View? = null
-    private var isVisibleToUser : Boolean= false
+    private var isVisibleToUser: Boolean = false
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -103,6 +103,11 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 Repository.get,
                 Repository.get)
         mViewModel?.eventsList?.observe(this, this)
+        (parentFragment as? ReselectionEmitter)?.reselectLiveData?.observe(this, Observer {
+            if (it == arguments?.getInt(POSITION, Int.MIN_VALUE) && mRecycler?.childCount != 0) {
+                mRecycler?.post { mRecycler?.scrollToPosition(0) }
+            }
+        })
     }
 
 
@@ -132,12 +137,15 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
     companion object {
 
-        fun getInstance(types: List<EventType>?): EventsListFragment {
+        private val POSITION = "position"
+
+        fun getInstance(types: List<EventType>?, position: Int): EventsListFragment {
             val f = EventsListFragment()
                     .apply {
                         arguments = Bundle()
                                 .apply {
                                     setEventTypes(types, this)
+                                    putInt(POSITION, position)
                                 }
                     }
             return f

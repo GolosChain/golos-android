@@ -71,7 +71,6 @@ object StoriesModelFactory {
 
 data class StoriesViewState(val isLoading: Boolean,
                             val showRefreshButton: Boolean,
-                            val scrollToFirst: Boolean,
                             val items: List<StoryWithComments>,
                             val error: GolosError?,
                             val fullscreenMessage: Int?,
@@ -163,7 +162,7 @@ abstract class StoriesViewModel : ViewModel() {
         this.internetStatusNotifier = internetStatusNotifier
 
         mStoriesLiveData.value = StoriesViewState(false,
-                mRepository.getStories(type, filter).value?.isFeedActual == false, false,
+                mRepository.getStories(type, filter).value?.isFeedActual == false,
                 mRepository.getStories(type, filter).value?.items.orEmpty().apply {
                     this.onEach {
                         val story = it.rootStory() ?: return@onEach
@@ -235,7 +234,6 @@ abstract class StoriesViewModel : ViewModel() {
     protected open fun onNewItems(items: StoriesFeed?): StoriesViewState {
         val state = StoriesViewState(false,
                 items?.isFeedActual == false,
-                items?.items.orEmpty().size == updateSize,
                 items?.items ?: ArrayList(),
                 items?.error, null, null)
 

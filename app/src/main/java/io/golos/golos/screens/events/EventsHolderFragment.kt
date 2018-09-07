@@ -1,5 +1,7 @@
 package io.golos.golos.screens.events
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
@@ -8,10 +10,17 @@ import android.view.View
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.GolosFragment
+import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.StringProvider
+import timber.log.Timber
 
-class EventsHolderFragment : GolosFragment() {
+class EventsHolderFragment : GolosFragment(), ReselectionEmitter {
+    private val mReselectLiveData = MutableLiveData<Int>()
     private var mPager: ViewPager? = null
+
+    override val reselectLiveData: LiveData<Int>
+        get() = mReselectLiveData
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_events_holder, container, false)
         mPager = v.findViewById<ViewPager>(R.id.holder_view_pager)
@@ -22,6 +31,19 @@ class EventsHolderFragment : GolosFragment() {
         }, childFragmentManager)
         val tabLo = v.findViewById<TabLayout>(R.id.tab_lo)
         tabLo.setupWithViewPager(mPager)
+        tabLo.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener{
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                mReselectLiveData.value = tabLo.selectedTabPosition
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+
+            }
+        })
         mPager?.offscreenPageLimit = 1
         return v
     }

@@ -5,10 +5,9 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.PagerAdapter
-import android.support.v7.widget.RecyclerView
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.screens.stories.StoriesFragment
+import io.golos.golos.screens.stories.DiscussionsListFragment
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
 
@@ -22,7 +21,7 @@ class StoriesPagerAdapter(val context: Context,
     override fun getItem(position: Int): Fragment {
         return if (position > supportedFeedTypes.lastIndex) GolosFragment()
         else {
-            StoriesFragment.getInstance(supportedFeedTypes[position].first, supportedFeedTypes[position].second)
+            DiscussionsListFragment.getInstance(supportedFeedTypes[position].first, position, supportedFeedTypes[position].second)
         }
     }
 
@@ -41,7 +40,7 @@ class StoriesPagerAdapter(val context: Context,
     }
 
     override fun getItemPosition(`object`: Any): Int {
-        if (`object` is StoriesFragment) {
+        if (`object` is DiscussionsListFragment) {
             val args = `object`.getArgs()
             val position = supportedFeedTypes.indexOf(args)
             return if (position > 0) position else PagerAdapter.POSITION_NONE

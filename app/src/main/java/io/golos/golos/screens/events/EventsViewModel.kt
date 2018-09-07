@@ -42,7 +42,6 @@ class EventsViewModel : ViewModel() {
                  userStatusProvider: UserDataProvider,
                  storiesProvider: StoriesProvider) {
 
-        Timber.e("eventTypes $eventTypes")
 
         mEventsProvider = eventsProvider
         if (eventTypes != null) {

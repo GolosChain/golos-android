@@ -2,7 +2,6 @@ package io.golos.golos.screens.events
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.app.FragmentStatePagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.services.EventType
@@ -14,12 +13,12 @@ class EventsPagerAdapter(private val textProvider: StringProvider,
     private val fragments: HashMap<Int, GolosFragment> = hashMapOf()
     override fun getItem(position: Int): Fragment {
         fragments[position] = when (position) {
-            0 -> EventsListFragment.getInstance(null)
-            1 -> EventsListFragment.getInstance(listOf(EventType.REWARD, EventType.CURATOR_AWARD))
-            2 -> EventsListFragment.getInstance(listOf(EventType.REPLY))
-            3 -> EventsListFragment.getInstance(listOf(EventType.VOTE, EventType.FLAG, EventType.SUBSCRIBE, EventType.UNSUBSCRIBE, EventType.REPOST))
-            4 -> EventsListFragment.getInstance(listOf(EventType.MENTION))
-            else -> EventsListFragment.getInstance(null)
+            0 -> EventsListFragment.getInstance(null, position)
+            1 -> EventsListFragment.getInstance(listOf(EventType.REWARD, EventType.CURATOR_AWARD), position)
+            2 -> EventsListFragment.getInstance(listOf(EventType.REPLY), position)
+            3 -> EventsListFragment.getInstance(listOf(EventType.VOTE, EventType.FLAG, EventType.SUBSCRIBE, EventType.UNSUBSCRIBE, EventType.REPOST), position)
+            4 -> EventsListFragment.getInstance(listOf(EventType.MENTION), position)
+            else -> EventsListFragment.getInstance(null, position)
         }
         return fragments[position]!!
     }

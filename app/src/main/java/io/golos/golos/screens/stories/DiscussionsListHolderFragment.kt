@@ -1,5 +1,7 @@
 package io.golos.golos.screens.stories
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -18,17 +20,21 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
-import timber.log.Timber
+import io.golos.golos.utils.OneShotLiveData
+import io.golos.golos.utils.ReselectionEmitter
 
 
 /**
  * Created by yuri on 30.10.17.
  */
-class StoriesHolderFragment : GolosFragment() {
+
+
+class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
     private lateinit var mPager: ViewPager
     private lateinit var mFab: FloatingActionButton
     private val mFeedPositions: List<FeedType>
     private lateinit var mAuthModel: AuthViewModel
+    private val mReselectEmitter = MutableLiveData<Int>()
 
     init {
         mFeedPositions = (ArrayList<FeedType>().apply {
@@ -40,6 +46,8 @@ class StoriesHolderFragment : GolosFragment() {
         })
     }
 
+    override val reselectLiveData: LiveData<Int>
+        get() = mReselectEmitter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.f_stripes, container, false)
@@ -92,6 +100,19 @@ class StoriesHolderFragment : GolosFragment() {
         mPager = root.findViewById(R.id.holder_view_pager)
         mPager.offscreenPageLimit = 1
         val tabLo: TabLayout = root.findViewById(R.id.tab_lo)
+        tabLo.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                mReselectEmitter.value = tabLo.selectedTabPosition
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+
+            }
+        })
         tabLo.setupWithViewPager(mPager)
     }
 
@@ -110,8 +131,9 @@ class StoriesHolderFragment : GolosFragment() {
     }
 
     companion object {
-        fun getInstance(): StoriesHolderFragment {
-            return StoriesHolderFragment()
+        fun getInstance(): DiscussionsListHolderFragment {
+            return DiscussionsListHolderFragment()
         }
     }
 }
+

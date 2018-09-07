@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.UserInformationFragment
-import io.golos.golos.screens.stories.StoriesFragment
+import io.golos.golos.screens.stories.DiscussionsListFragment
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
 
@@ -20,8 +20,8 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
     val size = 3
     override fun getItem(position: Int): Fragment {
         return when (position) {
-            0 -> StoriesFragment.getInstance(FeedType.BLOG, StoryFilter(userNameFilter = profileUserName))
-            1 -> StoriesFragment.getInstance(FeedType.COMMENTS, StoryFilter(userNameFilter = profileUserName))
+            0 -> DiscussionsListFragment.getInstance(FeedType.BLOG, position, StoryFilter(userNameFilter = profileUserName))
+            1 -> DiscussionsListFragment.getInstance(FeedType.COMMENTS, position, StoryFilter(userNameFilter = profileUserName))
             2 -> UserInformationFragment()
             else -> GolosFragment()
         }

@@ -2,9 +2,7 @@ package io.golos.golos.screens.profile
 
 import android.animation.ObjectAnimator
 import android.animation.TypeEvaluator
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import android.arch.lifecycle.*
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.TabLayout
@@ -26,12 +24,11 @@ import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingsActivity
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 10.11.17.
  */
-class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
+class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionEmitter {
     private lateinit var mUserAvatar: ImageView
     private lateinit var mUserName: TextView
     private lateinit var mViewModel: UserInfoViewModel
@@ -58,7 +55,10 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
     private lateinit var mProfilePager: ViewPager
     private var mLastAccountInfo: GolosUserAccountInfo? = null
     private var mLastAvatarPath: String? = null
+    private val mReselectionsEmitter = MutableLiveData<Int>()
 
+    override val reselectLiveData: LiveData<Int>
+        get() = mReselectionsEmitter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_user_logged_in, container, false)
@@ -101,7 +101,19 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel> {
             val i = Intent(activity!!, SettingsActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         }
+        tabbar.addOnTabSelectedListener(object :TabLayout.OnTabSelectedListener{
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+              mReselectionsEmitter.value = tabbar.selectedTabPosition
+            }
 
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+
+            }
+        })
         return v
     }
 

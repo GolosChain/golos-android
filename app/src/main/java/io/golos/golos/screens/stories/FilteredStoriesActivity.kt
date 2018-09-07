@@ -1,5 +1,7 @@
 package io.golos.golos.screens.stories
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -27,7 +29,8 @@ import timber.log.Timber
 
 class FilteredStoriesActivity : GolosActivity(),
         Observer<FilteredStoriesViewState>,
-        TagSubscriptionCancelDialogFr.ResultListener {
+        TagSubscriptionCancelDialogFr.ResultListener,
+        ReselectionEmitter {
     private lateinit var mViewPager: ViewPager
     private lateinit var mPostCountTv: TextView
     private lateinit var mTagTitle: TextView
@@ -40,6 +43,10 @@ class FilteredStoriesActivity : GolosActivity(),
     private lateinit var mViewModel: FilteredStoriesViewModel
     private val mSelectLiveData: OneShotLiveData<FeedType> = OneShotLiveData()
     private val supportedTypes = listOf(FeedType.POPULAR, FeedType.NEW, FeedType.ACTUAL)
+    private val mReselectionEmitter = MutableLiveData<Int>()
+
+    override val reselectLiveData: LiveData<Int>
+        get() = mReselectionEmitter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,8 +65,22 @@ class FilteredStoriesActivity : GolosActivity(),
         mViewModel.getLiveData().observe(this, this)
         mViewModel.onCreate(tagName)
         mViewPager.offscreenPageLimit = 3
-        val title = findViewById<TabLayout>(R.id.tab_lo)
-        title.setupWithViewPager(mViewPager)
+        val tabLayout = findViewById<TabLayout>(R.id.tab_lo)
+        tabLayout.setupWithViewPager(mViewPager)
+
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                mReselectionEmitter.value = tabLayout.selectedTabPosition
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+
+            }
+        })
         val filter = StoryFilter(tagName)
         mViewPager.adapter = StoriesPagerAdapter(this,
                 supportFragmentManager,

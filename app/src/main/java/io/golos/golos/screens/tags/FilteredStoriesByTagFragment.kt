@@ -1,11 +1,12 @@
 package io.golos.golos.screens.tags
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
@@ -23,7 +24,7 @@ import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagFragmentViewModel
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagViewModel
 import io.golos.golos.screens.widgets.GolosFragment
-import io.golos.golos.utils.MyLinearLayoutManager
+import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
 import io.golos.golos.utils.toArrayList
@@ -31,12 +32,18 @@ import io.golos.golos.utils.toArrayList
 /**
  * Created by yuri on 06.01.18.
  */
-class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesByTagViewModel> {
+class FilteredStoriesByTagFragment : GolosFragment(),
+        Observer<FilteredStoriesByTagViewModel>,
+        ReselectionEmitter {
     private lateinit var mTagsReycler: RecyclerView
     private lateinit var mViewPager: ViewPager
     private lateinit var mNoTagsTv: TextView
     private lateinit var mPopularNowTv: TabLayout
     private var mLastTags = List(0) { LocalizedTag(Tag("", 0.0, 0L, 0L)) }
+    private val mReselectionLiveData = MutableLiveData<Int>()
+
+    override val reselectLiveData: LiveData<Int>
+        get() = mReselectionLiveData
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_filtered_stories, container, false)
@@ -46,6 +53,18 @@ class FilteredStoriesByTagFragment : GolosFragment(), Observer<FilteredStoriesBy
         mPopularNowTv = v.findViewById<TabLayout>(R.id.tab_lo)
         mViewPager.offscreenPageLimit = 1
         mPopularNowTv.setupWithViewPager(mViewPager)
+
+        mPopularNowTv.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                mReselectionLiveData.value = mPopularNowTv.selectedTabPosition
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+            }
+        })
 
         (mTagsReycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         val viewModel = ViewModelProviders.of(this).get(FilteredStoriesByTagFragmentViewModel::class.java)

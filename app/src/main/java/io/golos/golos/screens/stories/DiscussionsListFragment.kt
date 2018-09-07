@@ -33,9 +33,8 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
-class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
+class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: StoriesViewModel? = null
@@ -53,6 +52,8 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         setUp()
         return view
     }
+
+    private fun getRecycler(): RecyclerView = mRecycler!!
 
     private fun bindViews(view: View) {
         mRecycler = view.findViewById(R.id.recycler)
@@ -157,10 +158,36 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         }
     }
 
+    private val reselectObserver = object : Observer<Int> {
+        override fun onChanged(it: Int?) {
+            val pagePositon = arguments?.getInt(PAGE_POSITION, Int.MIN_VALUE)
+            if (it == pagePositon && getRecycler().childCount != 0) {
+                getRecycler().scrollToPosition(0)
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
 
         mViewModel?.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val parentFragment = parentFragment
+        val activity = activity
+        if (parentFragment is ReselectionEmitter) parentFragment.reselectLiveData.observe(this, reselectObserver)
+        else if (activity is ReselectionEmitter) activity.reselectLiveData.observe(this, reselectObserver)
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        val parentFragment = parentFragment
+        val activity = activity
+        if (parentFragment is ReselectionEmitter) parentFragment.reselectLiveData.removeObserver(reselectObserver)
+        else if (activity is ReselectionEmitter) activity.reselectLiveData.removeObserver(reselectObserver)
     }
 
     override fun onStop() {
@@ -201,16 +228,9 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         if (t?.items != null) {
             mRecycler?.post {
                 mAdapter.setStripesCustom(t.items)
-                if (parc != null){
+                if (parc != null) {
                     (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
                     parc = null
-                }
-
-                mRecycler?.post {
-                    if (t.scrollToFirst){
-                        if (t.items.isNotEmpty())mRecycler?.scrollToPosition(0)
-
-                    }
                 }
             }
         }
@@ -236,6 +256,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
                 }
             }
         }
+
         t?.popupMessage?.let {
             view?.showSnackbar(it)
         }
@@ -259,6 +280,7 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
         super.setUserVisibleHint(isVisibleToUser)
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+
 
     }
 
@@ -291,19 +313,23 @@ class StoriesFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observ
     companion object {
         private const val TYPE_TAG = "TYPE_TAG"
         private const val FILTER_TAG = "FILTER_TAG"
+        private const val PAGE_POSITION = "PAGE_POSITION"
 
         fun getInstance(type: FeedType,
-                        filter: StoryFilter? = null): StoriesFragment {
-            val fr = StoriesFragment()
-            val bundle = createArguments(type, filter)
+                        pagePosition: Int,
+                        filter: StoryFilter? = null): DiscussionsListFragment {
+            val fr = DiscussionsListFragment()
+            val bundle = createArguments(type, pagePosition, filter)
             fr.arguments = bundle
             return fr
         }
 
         private fun createArguments(type: FeedType,
+                                    pagePosition: Int,
                                     filter: StoryFilter? = null): Bundle {
             val bundle = Bundle()
             bundle.putSerializable(TYPE_TAG, type)
+            bundle.putInt(PAGE_POSITION, pagePosition)
             if (filter != null)
                 bundle.putString(FILTER_TAG, mapper.writeValueAsString(filter))
             else bundle.putString(FILTER_TAG, null)
