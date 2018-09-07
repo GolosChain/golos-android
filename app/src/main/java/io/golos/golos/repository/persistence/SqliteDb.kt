@@ -88,10 +88,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
     fun saveStories(stories: Map<StoryRequest, StoriesFeed>) {
         val discussionItem = stories
-                .map { it.value.items }
+                .map {
+                    var items = it.value.items
+                    if (items.size > 20) items = items.slice(0..20).toArrayList()
+                    items
+                }
                 .flatMap { it }
-                .filter { it.rootStory() != null }
-                .map { it.rootStory()!! }
+                .mapNotNull { it.rootStory() }
         DiscussionItemsTable.save(discussionItem, VotesTable, AvatarsTable, writableDatabase)
         val storiesIds = stories
                 .map {
@@ -523,7 +526,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
             if (items.isEmpty()) return
             var savingItems = items
-            if (savingItems.size > 20) savingItems = savingItems.subList(0,20)
+            if (savingItems.size > 200) savingItems = savingItems.subList(0, 200)
 
             val values = ContentValues()
             db.beginTransaction()

@@ -1041,8 +1041,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 storiesToSave
 
                         .flatMap { it.value.items }
-                        .filter { it.rootStory() != null }
-                        .map { it.rootStory()!! }
+                        .mapNotNull { it.rootStory()}
                         .forEach {
                             var items = it.activeVotes.distinct().toArrayList()
                             if (items.size > 100) {
@@ -1054,7 +1053,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             it.activeVotes.addAll(items)
                         }
 
+                storiesToSave.forEach {
+                    Timber.e("request = ${it.key}  stories size is ${it.value.items.size}")
+                }
+
                 mPersister.saveStories(storiesToSave)
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 logException(e)
