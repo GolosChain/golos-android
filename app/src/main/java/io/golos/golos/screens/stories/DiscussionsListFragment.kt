@@ -33,6 +33,7 @@ import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
@@ -47,7 +48,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
-
         bindViews(view)
         setUp()
         return view
@@ -278,6 +278,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
+        Timber.e("setUserVisibleHint $isVisibleToUser")
+        Timber.e("mViewModel $mViewModel")
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
 

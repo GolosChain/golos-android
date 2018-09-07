@@ -72,6 +72,7 @@ class StoryWithComments(rootStory: StoryWrapper?,
         return mCommentsWithState
     }
 
+    @Synchronized
     fun setUpLevels() {
         setUpLevels(0, mRootStoryWrapper
                 ?.story

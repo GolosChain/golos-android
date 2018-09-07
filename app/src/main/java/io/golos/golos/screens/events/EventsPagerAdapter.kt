@@ -37,6 +37,5 @@ class EventsPagerAdapter(private val textProvider: StringProvider,
     override fun getCount(): Int = 5
     fun onUserVisibilityChanged(visibleToUser: Boolean, position: Int) {
         fragments[position]?.userVisibleHint = visibleToUser
-
     }
 }

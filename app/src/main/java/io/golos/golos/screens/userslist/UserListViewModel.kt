@@ -35,16 +35,22 @@ class UserListViewModel : ViewModel() {
 
     fun getLiveData(): LiveData<UserListViewState> = mLiveData
     private var mLastUserName: String? = null
+    private var isSubscribed = false
 
     private val mUserDataObserver = Observer<ApplicationUser> {
         if (it?.isLogged == true) {
-            val userName = it.name
-            mLastUserName = userName
-            mLiveData.addSource(mRepository.getGolosUserSubscriptions(userName)) {
-                onValueChanged()
+            if (!isSubscribed){
+                val userName = it.name
+                mLastUserName = userName
+                mLiveData.addSource(mRepository.getGolosUserSubscriptions(userName)) {
+                    onValueChanged()
+                }
+                mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onValueChanged() }
+                isSubscribed = true
             }
-            mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onValueChanged() }
+
         } else {
+            isSubscribed = false
             if (mLastUserName != null) {
                 mLiveData.removeSource(mRepository.getGolosUserSubscriptions(mLastUserName
                         ?: return@Observer))
@@ -55,6 +61,7 @@ class UserListViewModel : ViewModel() {
 
 
     fun onStart() {
+        Timber.e("onStart")
 
         mRepository.appUserData.observeForever(mUserDataObserver)
         if (mListType == ListType.SUBSCRIPTIONS || mListType == ListType.SUBSCRIBERS) {
@@ -83,6 +90,20 @@ class UserListViewModel : ViewModel() {
                 onValueChanged()
             }
         }
+    }
+
+    fun onStop() {
+        Timber.e("onStop")
+        userName?.let {
+            mLiveData.removeSource(mRepository.getGolosUserSubscriptions(it))
+            mLiveData.removeSource(mRepository.getGolosUserSubscribers(it))
+        }
+        storyId?.let {
+            mLiveData.removeSource(mRepository.getVotedUsersForDiscussion(it))
+        }
+
+        mRepository.appUserData.removeObserver(mUserDataObserver)
+        mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
     }
 
     private fun onValueChanged() {
@@ -155,18 +176,7 @@ class UserListViewModel : ViewModel() {
         }
     }
 
-    fun onStop() {
-        userName?.let {
-            mLiveData.removeSource(mRepository.getGolosUserSubscriptions(it))
-            mLiveData.removeSource(mRepository.getGolosUserSubscribers(it))
-        }
-        storyId?.let {
-            mLiveData.removeSource(mRepository.getVotedUsersForDiscussion(it))
-        }
 
-        mRepository.appUserData.removeObserver(mUserDataObserver)
-        mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
-    }
 
     fun onCreate(userName: String?,
                  storyId: Long?,

@@ -613,15 +613,18 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             mStoryUpdateRequests.add(request)
             networkExecutor.execute {
                 try {
-                    val story = getStory(blog, author, permLink, if (loadVotes) null else 0)
+                    var story = getStory(blog, author, permLink, if (loadVotes) null else 0)
 
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
-                    val position = liveData.value?.items?.indexOfFirst { it.rootStory()?.id == story.rootStory()?.id }?:-1
+                    val position = liveData.value?.items?.indexOfFirst { it.rootStory()?.id == story.rootStory()?.id }
+                            ?: -1
                     mMainThreadExecutor.execute {
                         liveData.value = StoriesFeed(
                                 if (position == -1) liveData.value?.items.orEmpty().toArrayList().apply {
                                     add(story)
                                 } else liveData.value?.items.orEmpty().toArrayList().apply {
+                                    val oldStory = this[position]
+                                    if (!loadVotes) story.rootStory()?.activeVotes?.addAll(oldStory.rootStory()?.activeVotes.orEmpty())
                                     this[position] = story
                                 },
                                 FeedType.UNCLASSIFIED,
@@ -929,8 +932,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             liveData.value = listOf()
             return liveData
         }
-        Timber.e("ld = ${liveData.value}")
-
         workerExecutor.execute {
             item.let {
 
@@ -999,7 +1000,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                     }
                                 }
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
-
                     }
 
                 }
@@ -1041,7 +1041,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 storiesToSave
 
                         .flatMap { it.value.items }
-                        .mapNotNull { it.rootStory()}
+                        .mapNotNull { it.rootStory() }
                         .forEach {
                             var items = it.activeVotes.distinct().toArrayList()
                             if (items.size > 100) {
@@ -1052,10 +1052,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             it.activeVotes.clear()
                             it.activeVotes.addAll(items)
                         }
-
-                storiesToSave.forEach {
-                    Timber.e("request = ${it.key}  stories size is ${it.value.items.size}")
-                }
 
                 mPersister.saveStories(storiesToSave)
 

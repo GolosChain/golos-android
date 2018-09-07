@@ -13,6 +13,7 @@ import io.golos.golos.screens.tags.TagAndUsersSearchActivity
 import io.golos.golos.screens.tags.TagsCloudActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.01.18.
