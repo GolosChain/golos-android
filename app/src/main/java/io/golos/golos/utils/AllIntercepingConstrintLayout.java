@@ -7,11 +7,12 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AllIntercepingConstrintLayout extends ConstraintLayout {
-    private List<View> mExceptedViews = new ArrayList<>();
+    private Set<View> mExceptedViews = new HashSet<>();
 
     public AllIntercepingConstrintLayout(Context context) {
         super(context);
@@ -42,9 +43,13 @@ public class AllIntercepingConstrintLayout extends ConstraintLayout {
         }
     }
 
-    public void setExcpetedViews(List<View> views) {
+    public void removeExceptions(List<View> views) {
+        mExceptedViews.removeAll(views);
+    }
+
+    public void addExceptions(List<View> views) {
         for (View v : views) {
-            if (v.getParent() == this) {
+            if (v != this && v.getParent() == this) {
                 mExceptedViews.add(v);
             }
         }

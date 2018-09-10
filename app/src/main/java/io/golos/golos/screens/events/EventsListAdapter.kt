@@ -13,18 +13,19 @@ import io.golos.golos.R
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                         var clickListener: (EventListItem) -> Unit = {},
                         var onBottomReach: () -> Unit = {},
                         var onSubscribeClick: (EventListItem) -> Unit = {},
+                        var onItemAuthorClick: (EventListItem) -> Unit = {},
                         private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal data class NotificationWrapper(val notification: EventContainingItem,
                                             val clickListener: (GolosViewHolder) -> Unit,
                                             val onSubscribeClick: (GolosViewHolder) -> Unit,
+                                            val onAvatarClick: (GolosViewHolder) -> Unit,
                                             val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
 
     private val mHashes = HashMap<EventsListItemWrapper, Int>()
@@ -85,7 +86,11 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
 
                 onSubscribeClick((items.getOrNull(it.adapterPosition)  as? EventContainingItem)?.event
                         ?: return@NotificationWrapper)
-            })
+            },
+                    {
+                        onItemAuthorClick.invoke((items.getOrNull(it.adapterPosition) as? EventContainingItem)?.event
+                                ?: return@NotificationWrapper)
+                    })
         } else if (item is DateMarkContainingItem) {
             (holder as EventDateViewHolder).dateString = item.date
         }
@@ -111,7 +116,7 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
 
         init {
             mText.movementMethod = GolosMovementMethod.instance
-            mView.setExcpetedViews(listOf(mSubscribeButton))
+            mView.addExceptions(listOf(mSubscribeButton))
         }
 
         internal var state: NotificationWrapper? = null
@@ -165,6 +170,13 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                 } else {
                     mImage.setImageResource(appearance.bigIconId)
                     mSecondaryImage.setViewGone()
+                }
+                if (notification.event.isAuthorClickable) {
+                    mView.addExceptions(listOf(mImage))
+                    mImage.setOnClickListener { field?.onAvatarClick?.invoke(this) }
+                } else {
+                    mImage.setOnClickListener(null)
+                    mView.removeExceptions(listOf(mView))
                 }
                 val event = notification.event as? SubscribeEventListItem
                 if (event?.showSubscribeButton == true) {

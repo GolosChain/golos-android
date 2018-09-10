@@ -346,10 +346,10 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             addSubscribers(mPersister.getGolosUsersSubscribers())
         }
         mCurrentUserSubscriptions.addSource(mCurrentUserInfo.appUserData) {
-            mLastName = it?.name
+
             if (it?.isLogged == true && mLastName != null) {
                 if (!isSubscribedOnCurrentUserSubscriptions) {
-
+                    mLastName = it.name
                     mCurrentUserSubscriptions.addSource(getGolosUserSubscriptions(mLastName.orEmpty())) {
                         val subscribers = it.orEmpty()
                         val oldValue = mCurrentUserSubscriptions.value.orEmpty()

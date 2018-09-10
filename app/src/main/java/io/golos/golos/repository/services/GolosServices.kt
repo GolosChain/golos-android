@@ -83,9 +83,10 @@ class GolosServicesImpl(
                     notificationsPersister.setUserSubscribedOnNotificationsThroughServices(false)
                     isAuthComplete = false
                     isAuthInProgress = false
-                    allEvents.value = null
+
                     mainThreadExecutor.execute {
                         mEventsMap.forEach { it.value.value = null }
+                        allEvents.value = null
                     }
                 }
             }

@@ -77,7 +77,8 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
             mViewModel?.onEventClick(activity ?: return@EventsListAdapter, it)
         },
                 { mViewModel?.onScrollToTheEnd() },
-                { mViewModel?.onFollowClick(it) })
+                { mViewModel?.onFollowClick(it) },
+                { mViewModel?.onAvatarClick(it, activity ?: return@EventsListAdapter) })
         mViewModel?.updateState?.observe(this, Observer<Boolean> {
 
         })

@@ -3,7 +3,9 @@ package io.golos.golos.screens.events
 import io.golos.golos.repository.services.*
 import io.golos.golos.screens.story.model.SubscribeStatus
 
-sealed class EventListItem(open val golosEvent: GolosEvent, open val avatarPath: String?) {
+sealed class EventListItem(open val golosEvent: GolosEvent,
+                           open val avatarPath: String?,
+                           open val isAuthorClickable: Boolean = false) {
 
 
     protected companion object {
@@ -27,17 +29,23 @@ sealed class EventListItem(open val golosEvent: GolosEvent, open val avatarPath:
 
 data class VoteEventListItem(override val golosEvent: GolosVoteEvent,
                              override val avatarPath: String? = null,
-                             val title: String = "") : EventListItem(golosEvent, avatarPath) {
+                             val title: String = "",
+                             override val isAuthorClickable: Boolean) : EventListItem(golosEvent, avatarPath) {
 
     companion object {
         fun create(golosEvent: GolosVoteEvent,
                    avatarPath: String? = null,
-                   title: String = ""): VoteEventListItem {
+                   title: String = "",
+                   isAuthorClickable: Boolean): VoteEventListItem {
 
             val list = getCashedItems<VoteEventListItem>(golosEvent)
-            var item = list.find { it.title == title && avatarPath == it.avatarPath }
+            var item = list.find {
+                it.title == title
+                        && avatarPath == it.avatarPath
+                        && it.isAuthorClickable == isAuthorClickable
+            }
             if (item == null) {
-                item = VoteEventListItem(golosEvent, avatarPath, title)
+                item = VoteEventListItem(golosEvent, avatarPath, title, isAuthorClickable)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -48,16 +56,22 @@ data class VoteEventListItem(override val golosEvent: GolosVoteEvent,
 
 data class FlagEventListItem(override val golosEvent: GolosFlagEvent,
                              override val avatarPath: String? = null,
-                             val title: String = "") : EventListItem(golosEvent, avatarPath) {
+                             val title: String = "",
+                             override val isAuthorClickable: Boolean) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosFlagEvent,
                    avatarPath: String? = null,
-                   title: String = ""): FlagEventListItem {
+                   title: String = "",
+                   isAuthorClickable: Boolean): FlagEventListItem {
 
             val list = getCashedItems<FlagEventListItem>(golosEvent)
-            var item = list.find { it.title == title && it.avatarPath == avatarPath }
+            var item = list.find {
+                it.title == title
+                        && it.avatarPath === avatarPath
+                        && it.isAuthorClickable == isAuthorClickable
+            }
             if (item == null) {
-                item = FlagEventListItem(golosEvent, avatarPath, title)
+                item = FlagEventListItem(golosEvent, avatarPath, title, isAuthorClickable)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -66,15 +80,17 @@ data class FlagEventListItem(override val golosEvent: GolosFlagEvent,
 }
 
 data class TransferEventListItem(override val golosEvent: GolosTransferEvent,
-                                 override val avatarPath: String? = null) : EventListItem(golosEvent, avatarPath) {
+                                 override val avatarPath: String? = null,
+                                 override val isAuthorClickable: Boolean) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosTransferEvent,
-                   avatarPath: String? = null): TransferEventListItem {
+                   avatarPath: String? = null,
+                   isAuthorClickable: Boolean): TransferEventListItem {
 
             val list = getCashedItems<TransferEventListItem>(golosEvent)
-            var item = list.find { it.avatarPath == avatarPath }
+            var item = list.find { it.avatarPath == avatarPath && isAuthorClickable == it.isAuthorClickable }
             if (item == null) {
-                item = TransferEventListItem(golosEvent, avatarPath)
+                item = TransferEventListItem(golosEvent, avatarPath, isAuthorClickable)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -85,10 +101,12 @@ data class TransferEventListItem(override val golosEvent: GolosTransferEvent,
 data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
                                   override val avatarPath: String? = null,
                                   val authorSubscriptionState: SubscribeStatus = SubscribeStatus.UnsubscribedStatus,
-                                  val showSubscribeButton: Boolean = false) : EventListItem(golosEvent, avatarPath) {
+                                  val showSubscribeButton: Boolean = false,
+                                  override val isAuthorClickable: Boolean) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosSubscribeEvent,
                    avatarPath: String? = null,
+                   isAuthorClickable: Boolean,
                    authorSubscriptionState: SubscribeStatus = SubscribeStatus.UnsubscribedStatus,
                    showSubscribeButton: Boolean = false): SubscribeEventListItem {
 
@@ -97,9 +115,10 @@ data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
                 it.avatarPath == avatarPath
                         && it.authorSubscriptionState == authorSubscriptionState
                         && showSubscribeButton == it.showSubscribeButton
+                        && it.isAuthorClickable == isAuthorClickable
             }
             if (item == null) {
-                item = SubscribeEventListItem(golosEvent, avatarPath, authorSubscriptionState, showSubscribeButton)
+                item = SubscribeEventListItem(golosEvent, avatarPath, authorSubscriptionState, showSubscribeButton, isAuthorClickable)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -108,17 +127,22 @@ data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
 }
 
 data class UnSubscribeEventListItem(override val golosEvent: GolosUnSubscribeEvent,
-                                    override val avatarPath: String? = null)
+                                    override val avatarPath: String? = null,
+                                    override val isAuthorClickable: Boolean)
     : EventListItem(golosEvent, avatarPath) {
 
     companion object {
         fun create(golosEvent: GolosUnSubscribeEvent,
-                   avatarPath: String? = null): UnSubscribeEventListItem {
+                   avatarPath: String? = null,
+                   isAuthorClickable: Boolean): UnSubscribeEventListItem {
 
             val list = getCashedItems<UnSubscribeEventListItem>(golosEvent)
-            var item = list.find { it.avatarPath == avatarPath }
+            var item = list.find {
+                it.avatarPath == avatarPath &&
+                        it.isAuthorClickable == isAuthorClickable
+            }
             if (item == null) {
-                item = UnSubscribeEventListItem(golosEvent, avatarPath)
+                item = UnSubscribeEventListItem(golosEvent, avatarPath, isAuthorClickable)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -128,16 +152,18 @@ data class UnSubscribeEventListItem(override val golosEvent: GolosUnSubscribeEve
 
 data class ReplyEventListItem(override val golosEvent: GolosReplyEvent,
                               override val avatarPath: String? = null,
+                              override val isAuthorClickable: Boolean,
                               val title: String = "") : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosReplyEvent,
+                   isAuthorClickable: Boolean,
                    avatarPath: String? = null,
                    title: String = ""): ReplyEventListItem {
 
             val list = getCashedItems<ReplyEventListItem>(golosEvent)
-            var item = list.find { it.title == title && it.avatarPath == avatarPath }
+            var item = list.find { it.title == title && it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
             if (item == null) {
-                item = ReplyEventListItem(golosEvent, avatarPath, title)
+                item = ReplyEventListItem(golosEvent, avatarPath, isAuthorClickable, title)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -146,17 +172,19 @@ data class ReplyEventListItem(override val golosEvent: GolosReplyEvent,
 }
 
 data class MentionEventListItem(override val golosEvent: GolosMentionEvent,
+                                override val isAuthorClickable: Boolean,
                                 override val avatarPath: String? = null,
                                 val title: String = "") : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosMentionEvent,
+                   isAuthorClickable: Boolean,
                    avatarPath: String? = null,
                    title: String = ""): MentionEventListItem {
 
             val list = getCashedItems<MentionEventListItem>(golosEvent)
-            var item = list.find { it.title == title && it.avatarPath == avatarPath }
+            var item = list.find { it.title == title && it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
             if (item == null) {
-                item = MentionEventListItem(golosEvent, avatarPath, title)
+                item = MentionEventListItem(golosEvent, isAuthorClickable, title)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -165,17 +193,19 @@ data class MentionEventListItem(override val golosEvent: GolosMentionEvent,
 }
 
 data class RepostEventListItem(override val golosEvent: GolosRepostEvent,
+                               override val isAuthorClickable: Boolean,
                                override val avatarPath: String? = null,
                                val title: String = "") : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosRepostEvent,
+                   isAuthorClickable: Boolean,
                    avatarPath: String? = null,
                    title: String = ""): RepostEventListItem {
 
             val list = getCashedItems<RepostEventListItem>(golosEvent)
-            var item = list.find { it.title == title && it.avatarPath == avatarPath }
+            var item = list.find { it.title == title && it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
             if (item == null) {
-                item = RepostEventListItem(golosEvent, avatarPath, title)
+                item = RepostEventListItem(golosEvent, isAuthorClickable, avatarPath, title)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -186,7 +216,7 @@ data class RepostEventListItem(override val golosEvent: GolosRepostEvent,
 data class AwardEventListItem(override val golosEvent: GolosAwardEvent,
                               val actualGolosPowerAward: Float,
                               val title: String = "")
-    : EventListItem(golosEvent, null) {
+    : EventListItem(golosEvent, null, isAuthorClickable = false) {
 
     companion object {
         fun create(golosEvent: GolosAwardEvent,
@@ -207,7 +237,7 @@ data class AwardEventListItem(override val golosEvent: GolosAwardEvent,
 data class CuratorAwardEventListItem(override val golosEvent: GolosCuratorAwardEvent,
                                      val actualGolosPowerAward: Float,
                                      val title: String = "")
-    : EventListItem(golosEvent, null) {
+    : EventListItem(golosEvent, null, isAuthorClickable = false) {
 
     companion object {
         fun create(golosEvent: GolosCuratorAwardEvent,
@@ -243,15 +273,17 @@ data class MessageEventListItem(override val golosEvent: GolosMessageEvent,
 }
 
 data class WitnessVoteEventListItem(override val golosEvent: GolosWitnessVoteEvent,
+                                    override val isAuthorClickable: Boolean,
                                     override val avatarPath: String? = null) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosWitnessVoteEvent,
+                   isAuthorClickable: Boolean,
                    avatarPath: String? = null): WitnessVoteEventListItem {
 
             val list = getCashedItems<WitnessVoteEventListItem>(golosEvent)
-            var item = list.find { it.avatarPath == avatarPath }
+            var item = list.find { it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
             if (item == null) {
-                item = WitnessVoteEventListItem(golosEvent, avatarPath)
+                item = WitnessVoteEventListItem(golosEvent, isAuthorClickable, avatarPath)
                 putItemToCash(golosEvent, item)
             }
             return item
@@ -260,15 +292,17 @@ data class WitnessVoteEventListItem(override val golosEvent: GolosWitnessVoteEve
 }
 
 data class WitnessCancelVoteEventListItem(override val golosEvent: GolosWitnessCancelVoteEvent,
+                                          override val isAuthorClickable: Boolean,
                                           override val avatarPath: String? = null) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosWitnessCancelVoteEvent,
+                   isAuthorClickable: Boolean,
                    avatarPath: String? = null): WitnessCancelVoteEventListItem {
 
             val list = getCashedItems<WitnessCancelVoteEventListItem>(golosEvent)
-            var item = list.find { it.avatarPath == avatarPath }
+            var item = list.find { it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
             if (item == null) {
-                item = WitnessCancelVoteEventListItem(golosEvent, avatarPath)
+                item = WitnessCancelVoteEventListItem(golosEvent, isAuthorClickable, avatarPath)
                 putItemToCash(golosEvent, item)
             }
             return item

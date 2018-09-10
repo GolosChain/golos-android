@@ -1,6 +1,7 @@
 package io.golos.golos.screens.events
 
 import android.arch.lifecycle.*
+import android.content.Context
 import android.support.v4.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.*
@@ -88,7 +89,8 @@ class EventsViewModel : ViewModel() {
                         }
                         VoteEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
-                                discussion?.title.orEmpty())
+                                discussion?.title.orEmpty(),
+                                it.counter == 1)
                     }
                     is GolosFlagEvent -> {
                         val discussion = stories[it.permlink]
@@ -99,20 +101,22 @@ class EventsViewModel : ViewModel() {
                         }
                         FlagEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
-                                discussion?.title.orEmpty())
+                                discussion?.title.orEmpty(),
+                                it.counter == 1)
                     }
-                    is GolosTransferEvent -> TransferEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosTransferEvent -> TransferEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.counter == 1)
                     is GolosSubscribeEvent -> {
                         val subscribeStatus: SubscribeStatus =
                                 SubscribeStatus.create(currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty())
                                         , currentSubscriptionsProgress[it.fromUsers.firstOrNull().orEmpty()]
                                         ?: UpdatingState.DONE)
-                        val out = SubscribeEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()],
-
-                                subscribeStatus, !currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty()))
+                        val out = SubscribeEventListItem.create(it,
+                                avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.counter == 1, subscribeStatus,
+                                !currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty()))
                         out
                     }
-                    is GolosUnSubscribeEvent -> UnSubscribeEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosUnSubscribeEvent -> UnSubscribeEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.counter == 1)
                     is GolosReplyEvent -> {
                         val discussion = stories[it.parentPermlink]
                         if (discussion == null) {
@@ -121,6 +125,7 @@ class EventsViewModel : ViewModel() {
                             permlink = it.parentPermlink
                         }
                         ReplyEventListItem.create(it,
+                                it.counter == 1,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
                                 discussion?.title.orEmpty())
                     }
@@ -132,6 +137,7 @@ class EventsViewModel : ViewModel() {
                             permlink = it.permlink
                         }
                         RepostEventListItem.create(it,
+                                it.counter == 1,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
                                 discussion?.title.orEmpty())
                     }
@@ -143,6 +149,7 @@ class EventsViewModel : ViewModel() {
                             permlink = it.permlink
                         }
                         MentionEventListItem.create(it,
+                                it.counter == 1,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()])
                     }
                     is GolosAwardEvent -> {
@@ -172,8 +179,8 @@ class EventsViewModel : ViewModel() {
                                 stories[it.permlink]?.title.orEmpty())
                     }
                     is GolosMessageEvent -> MessageEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
-                    is GolosWitnessVoteEvent -> WitnessVoteEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
-                    is GolosWitnessCancelVoteEvent -> WitnessCancelVoteEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosWitnessVoteEvent -> WitnessVoteEventListItem.create(it, it.counter == 1, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosWitnessCancelVoteEvent -> WitnessCancelVoteEventListItem.create(it, it.counter == 1, avatars[it.fromUsers.firstOrNull().orEmpty()])
                 }
                 if (needToLoadDisussion) mStoriesProvider.requestStoryUpdate(author, permlink, null, false, false, FeedType.UNCLASSIFIED)
                 out.add(item)
@@ -194,6 +201,13 @@ class EventsViewModel : ViewModel() {
 
                 if (authorsWithNoAvatars.isNotEmpty()) mUsersProvider.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
             }
+        }
+    }
+
+    fun onAvatarClick(item: EventListItem, context: Context) {
+        val events = item.golosEvent
+        if (events is Authorable) {
+            UserProfileActivity.start(context, events.getAuthors().firstOrNull() ?: return)
         }
     }
 
