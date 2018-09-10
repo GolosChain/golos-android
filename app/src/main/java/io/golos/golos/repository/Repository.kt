@@ -1,7 +1,6 @@
 package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.support.annotation.AnyThread
 import android.support.annotation.MainThread
@@ -33,13 +32,18 @@ interface UserDataProvider {
 interface EventsProvider {
     @MainThread
     fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>>
+
     fun requestEventsUpdate(type: List<EventType>?,
                             fromId: String? = null,
                             limit: Int = 40,
                             completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 }
 
-interface StoriesProvider{
+interface ExchangeDataProvider {
+    fun getExchangeLiveData(): LiveData<ExchangeValues>
+}
+
+interface StoriesProvider {
     @MainThread
     abstract fun getStories(type: FeedType, filter: StoryFilter? = null): LiveData<StoriesFeed>
 
@@ -50,6 +54,7 @@ interface StoriesProvider{
                                           startAuthor: String? = null,
                                           startPermlink: String? = null,
                                           completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
+
     @MainThread
     abstract fun lastCreatedPost(): LiveData<CreatePostResult>
 
@@ -69,7 +74,7 @@ interface StoriesProvider{
                                     blog: String?,
                                     loadVotes: Boolean = true,
                                     loadChildStories: Boolean = true,
-                                    feedType: FeedType ,
+                                    feedType: FeedType,
                                     completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
@@ -94,7 +99,7 @@ interface StoriesProvider{
     abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
 }
 
-abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository, StoriesProvider {
+abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository, StoriesProvider, ExchangeDataProvider {
 
     companion object {
         private var instance: Repository? = null
@@ -134,7 +139,8 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     }
 
     @MainThread
-    open fun onAppCreate(ctx: Context) {}
+    open fun onAppCreate(ctx: Context) {
+    }
 
 
     @MainThread
@@ -155,7 +161,6 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
 
     @MainThread
     abstract fun deleteUserdata()
-
 
 
     @AnyThread
@@ -186,14 +191,6 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
 
     @MainThread
     abstract fun requestInitRetry()
-
-    @MainThread
-    open fun getExchangeLiveData(): LiveData<ExchangeValues> {
-        val liveData = MutableLiveData<ExchangeValues>()
-        liveData.value = ExchangeValues(00.04106528f, 00.04106528f * 56)
-        return liveData
-    }
-
 
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "${BuildConfig.BASE_URL}${item.categoryName}/@${item.author}/${item.permlink}"

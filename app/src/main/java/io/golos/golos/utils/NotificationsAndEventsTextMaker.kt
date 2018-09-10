@@ -9,9 +9,12 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.events.*
+import timber.log.Timber
+import java.util.*
 
 data class NotificationAppearance(val title: CharSequence? = null,
                                   val body: CharSequence,
@@ -84,9 +87,9 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosRepostEvent -> GolosRepostNotification(golosEvent.fromUsers.first(), golosEvent.permlink, golosEvent.counter)
             is GolosWitnessVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosWitnessCancelVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
+            is GolosAwardEvent -> GolosRewardNotification(golosEvent.permlink, golosEvent.award.golos, golosEvent.award.golosPower, golosEvent.award.gbg, golosEvent.counter)
+            is GolosCuratorAwardEvent -> GolosCuratorRewardNotification(golosEvent.author, golosEvent.permlink, golosEvent.award.golosPower, golosEvent.counter)//unsupported
 
-            is GolosAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
-            is GolosCuratorAwardEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
             is GolosMessageEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
         }, currentUserName, when (eventListItem) {
             is VoteEventListItem -> eventListItem.title
@@ -156,7 +159,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         mEmojisMap[R.string.userr_voted_several])
 
                 return NotificationAppearance(title = null, body = text.setLinkSpan(title)
-                , iconId = R.drawable.ic_like_40dp_white_on_blue)
+                        , iconId = R.drawable.ic_like_40dp_white_on_blue)
             }
             is GolosDownVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_downvoted,
@@ -253,6 +256,33 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_canceled_vote_for_you_several]}")
                 return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnesscancelvote_w_40dp)
+            }
+
+            is GolosRewardNotification -> {
+                val gpModifier = (Repository.get.getExchangeLiveData().value
+                        ?: ExchangeValues.nullValues).vSharesToGolosPowerMultiplier
+
+                val rewardString = "".let { if (golosNotification.gbgAward != 0.0) it + "${golosNotification.gbgAward} GBG, " else it }
+                        .let { if (golosNotification.golosAward != 0.0) it + "${golosNotification.golosAward} GOLOS, " else it }
+                        .let { if (golosNotification.golosPowerAward != 0.0) it + "${String.format(Locale.US, "%.3f", golosNotification.golosPowerAward * gpModifier)} ${context.getString(R.string.golos_power_for_events)} " else it }
+                val text = if (numOfSameNotifications == 1) context.getString(R.string.reward_for_entry,
+                        rewardString, title)
+                else context.getString(R.string.reward_for_entries, rewardString)
+
+                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_award_40dp)
+            }
+
+            is GolosCuratorRewardNotification -> {
+                val gpModifier = (Repository.get.getExchangeLiveData().value
+                        ?: ExchangeValues.nullValues).vSharesToGolosPowerMultiplier
+
+                val rewardString = "${String.format(Locale.US, "%.3f", golosNotification.golosPowerReward * gpModifier)} ${context.getString(R.string.golos_power)}"
+
+                val text = if (numOfSameNotifications == 1) context.getString(R.string.curator_reward_for_entry,
+                        rewardString, title)
+                else context.getString(R.string.curator_reward_for_entries, rewardString)
+
+                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_curator_award_40dp)
             }
         }
     }

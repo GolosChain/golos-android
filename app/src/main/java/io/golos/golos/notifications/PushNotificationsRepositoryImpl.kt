@@ -82,6 +82,8 @@ internal class PushNotificationsRepositoryImpl(private val settingsRepository: U
                 is GolosWitnessVoteNotification -> settings?.showWitnessVote ?: true
                 is WitnessCancelVoteGolosNotification -> settings?.showWitnessCancelVote ?: true
                 is GolosRepostNotification -> settings?.showReblog ?: true
+                is GolosRewardNotification -> settings?.showAward ?: true
+                is GolosCuratorRewardNotification -> settings?.showCurationAward ?: true
             }
 
         } ?: listOf()

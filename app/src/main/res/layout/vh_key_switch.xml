@@ -7,17 +7,20 @@
     android:paddingStart="@dimen/material_big">
 
     <TextView
-        style="@style/SettingTextViewStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/key_tv"
-         />
+        style="@style/SettingTextViewStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.8"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:maxLines="2" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/value_switch"
         android:layout_width="0dp"
 
         android:layout_height="match_parent"
-        android:layout_weight="0.9"
+        android:layout_weight="0.2"
         android:gravity="end|center_vertical" />
 </LinearLayout>

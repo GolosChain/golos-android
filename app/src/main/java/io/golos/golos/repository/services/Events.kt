@@ -129,7 +129,9 @@ data class RepostEvent(@JsonProperty("permlink") val permlink: String) : Event(E
 data class AwardEvent(@JsonProperty("reward") val reward: Award, @JsonProperty("permlink") val permlink: String)
     : Event(EventType.REWARD.toString())
 
-data class CuratorAwardEvent(@JsonProperty("permlink") val permlink: String, @JsonProperty("award") val award: Award)
+data class CuratorAwardEvent(@JsonProperty("permlink") val permlink: String,
+                             @JsonProperty("curatorTargetAuthor") val curatorTargetAuthor: String,
+                             @JsonProperty("award") val award: Award)
     : Event(EventType.CURATOR_AWARD.toString())
 
 class MessageEvent : Event(EventType.MESSAGE.toString())
@@ -183,8 +185,8 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
                 is ReplyEvent -> GolosReplyEvent(event._id, event.createdAt, event.counter, event.permlink, event.parentPermlink, event.fromUsers)
                 is RepostEvent -> GolosRepostEvent(event._id, event.createdAt, event.counter, event.permlink, event.fromUsers)
                 is MentionEvent -> GolosMentionEvent(event._id, event.createdAt, event.counter, event.permlink, event.parentPermlink, event.fromUsers)
-                is AwardEvent -> GolosAwardEvent(event._id, event.createdAt, event.counter, event.reward,event.permlink)
-                is CuratorAwardEvent -> GolosCuratorAwardEvent(event._id, event.createdAt, event.counter, event.permlink, event.award)
+                is AwardEvent -> GolosAwardEvent(event._id, event.createdAt, event.counter, event.reward, event.permlink)
+                is CuratorAwardEvent -> GolosCuratorAwardEvent(event._id, event.createdAt, event.counter, event.permlink, event.curatorTargetAuthor, event.award)
                 is MessageEvent -> GolosMessageEvent(event._id, event.createdAt, event.counter, event.fromUsers)
                 is WitnessVoteEvent -> GolosWitnessVoteEvent(event._id, event.createdAt, event.counter, event.fromUsers)
                 is WitnessCancelVoteEvent -> GolosWitnessCancelVoteEvent(event._id, event.createdAt, event.counter, event.fromUsers)
@@ -197,7 +199,7 @@ sealed class GolosEvent(val id: String, val creationTime: Long, val counter: Int
 class GolosVoteEvent(id: String,
                      creationTime: Long,
                      counter: Int,
-                    val permlink: String,
+                     val permlink: String,
                      val fromUsers: List<String>) : GolosEvent(id, creationTime, counter), PostLinkable, Authorable {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun getAuthors() = fromUsers
@@ -424,7 +426,7 @@ class GolosRepostEvent(id: String, creationTime: Long, counter: Int,
 }
 
 class GolosAwardEvent(id: String, creationTime: Long, counter: Int,
-                      val award: Award, val permlink:String) : GolosEvent(id, creationTime, counter) {
+                      val award: Award, val permlink: String) : GolosEvent(id, creationTime, counter) {
 
 
     override fun equals(other: Any?): Boolean {
@@ -453,6 +455,7 @@ class GolosAwardEvent(id: String, creationTime: Long, counter: Int,
 
 class GolosCuratorAwardEvent(id: String, creationTime: Long, counter: Int,
                              val permlink: String,
+                             val author: String,
                              val award: Award) : PostLinkable, GolosEvent(id, creationTime, counter) {
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {

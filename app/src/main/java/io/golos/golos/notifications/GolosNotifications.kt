@@ -20,6 +20,8 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
                 is WitnessVoteNotification -> GolosWitnessVoteNotification(notification.from, notification.counter)
                 is WitnessCancelVoteNotification -> WitnessCancelVoteGolosNotification(notification.from, notification.counter)
                 is RepostNotification -> GolosRepostNotification(notification.reposter, notification.permlink, notification.counter)
+                is RewardNotification -> GolosRewardNotification(notification.permlink, notification.golos, notification.golosPower, notification.gbg, notification.counter)
+                is CuratorRewardNotification -> GolosCuratorRewardNotification(notification.author, notification.permlink, notification.reward, notification.counter)
             }
         }
     }
@@ -70,6 +72,20 @@ class GolosRepostNotification(val fromUser: String,
     override val id: String = UUID.randomUUID().toString()
 
 
+}
+
+data class GolosRewardNotification(val permlink: String, val golosAward: Double,
+                                   val golosPowerAward: Double, val gbgAward: Double, override val numberOfSameType: Int) : GolosNotification() {
+    private val _id = UUID.randomUUID().toString()
+    override val id: String
+        get() = _id
+}
+
+data class GolosCuratorRewardNotification(val author: String,
+                                          val permlink: String, val golosPowerReward: Double, override val numberOfSameType: Int) : GolosNotification() {
+    private val _id = UUID.randomUUID().toString()
+    override val id: String
+        get() = _id
 }
 
 class WitnessCancelVoteGolosNotification(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {

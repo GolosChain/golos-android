@@ -34,6 +34,8 @@ internal class UserSettingsImpl : UserSettingsRepository {
                 true,
                 true,
                 true,
+                true,
+                true,
                 true)
 
         val currencyString = ctx.getSharedPreferences(sharedPrefName, Context.MODE_PRIVATE).getString("goloscurrency", null)

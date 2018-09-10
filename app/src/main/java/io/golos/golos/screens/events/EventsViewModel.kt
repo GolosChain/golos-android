@@ -3,10 +3,8 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.*
 import android.support.v4.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
-import io.golos.golos.repository.EventsProvider
-import io.golos.golos.repository.GolosUsersRepository
-import io.golos.golos.repository.StoriesProvider
-import io.golos.golos.repository.UserDataProvider
+import io.golos.golos.repository.*
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
@@ -33,6 +31,7 @@ class EventsViewModel : ViewModel() {
     private lateinit var mUsersProvider: GolosUsersRepository
     private lateinit var mUserDataProvider: UserDataProvider
     private lateinit var mStoriesProvider: StoriesProvider
+    private lateinit var mExchangesProvider: ExchangeDataProvider
     private val updateLimit = 15
 
     fun onCreate(eventTypes: List<EventType>?,
@@ -40,7 +39,8 @@ class EventsViewModel : ViewModel() {
                  eventsSorter: EventsSorterUseCase,
                  usersProvider: GolosUsersRepository,
                  userStatusProvider: UserDataProvider,
-                 storiesProvider: StoriesProvider) {
+                 storiesProvider: StoriesProvider,
+                 exchangesProvider: ExchangeDataProvider) {
 
 
         mEventsProvider = eventsProvider
@@ -54,6 +54,7 @@ class EventsViewModel : ViewModel() {
         mUsersProvider = usersProvider
         mUserDataProvider = userStatusProvider
         mStoriesProvider = storiesProvider
+        mExchangesProvider = exchangesProvider
     }
 
     private fun onLiveDataChanged() {
@@ -145,6 +146,8 @@ class EventsViewModel : ViewModel() {
                                 avatars[it.fromUsers.firstOrNull().orEmpty()])
                     }
                     is GolosAwardEvent -> {
+                        val exchangesValue = mExchangesProvider.getExchangeLiveData().value
+                                ?: ExchangeValues.nullValues
                         val discussion = stories[it.permlink]
                         if (discussion == null) {
                             needToLoadDisussion = true
@@ -152,10 +155,12 @@ class EventsViewModel : ViewModel() {
                             permlink = it.permlink
                         }
                         AwardEventListItem.create(it,
-                                0.0f,
+                                (exchangesValue.vSharesToGolosPowerMultiplier * it.award.golosPower).toFloat(),
                                 stories[it.permlink]?.title.orEmpty())
                     }
                     is GolosCuratorAwardEvent -> {
+                        val exchangesValue = mExchangesProvider.getExchangeLiveData().value
+                                ?: ExchangeValues.nullValues
                         val discussion = stories[it.permlink]
                         if (discussion == null) {
                             needToLoadDisussion = true
@@ -163,7 +168,7 @@ class EventsViewModel : ViewModel() {
                             permlink = it.permlink
                         }
                         CuratorAwardEventListItem.create(it,
-                                0.0f,
+                                (exchangesValue.vSharesToGolosPowerMultiplier * it.award.golosPower).toFloat(),
                                 stories[it.permlink]?.title.orEmpty())
                     }
                     is GolosMessageEvent -> MessageEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])

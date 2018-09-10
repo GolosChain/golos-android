@@ -238,6 +238,13 @@
     <string name="empty">Empty</string>
     <string name="yestarday">Yesterday</string>
     <string name="year_perion" />
+    <string name="reward_for_entry">%s your author reward of entry %s</string>
+    <string name="reward_for_entries">%s your author rewards</string>
+    <string name="curator_reward_for_entry" >>%s your curation reward of entry %s</string>
+    <string name="golos_power_for_events" >Golos Power</string>
+    <string name="curator_reward_for_entries" >%s your curation rewards</string>
+    <string name="post_reward">Reward for the entry</string>
+    <string name="curation_reward">Curation reward</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

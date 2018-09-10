@@ -28,7 +28,11 @@ class NotificationsDisplaySetting(
         @JsonProperty("showWitnessVote")
         val showWitnessVote: Boolean,
         @JsonProperty("showWitnessCancelVote")
-        val showWitnessCancelVote: Boolean) {
+        val showWitnessCancelVote: Boolean,
+        @JsonProperty("showAward")
+        val showAward: Boolean,
+        @JsonProperty("showCurationAward")
+        val showCurationAward: Boolean) {
 
     private fun createNew(
             playSoundWhenAppStopped: Boolean = this.playSoundWhenAppStopped,
@@ -41,11 +45,13 @@ class NotificationsDisplaySetting(
             showMentions: Boolean = this.showMentions,
             showReblog: Boolean = this.showReblog,
             showWitnessVote: Boolean = this.showWitnessVote,
-            showWitnessCancelVote: Boolean = this.showWitnessCancelVote): NotificationsDisplaySetting {
+            showWitnessCancelVote: Boolean = this.showWitnessCancelVote,
+            showAward: Boolean = this.showAward,
+            showCurationAward: Boolean = this.showCurationAward): NotificationsDisplaySetting {
 
         return NotificationsDisplaySetting(playSoundWhenAppStopped, showUpvoteNotifs, showFlagNotifs,
                 showNewCommentNotifs, showTransferNotifs, showSubscribeNotifs, showUnSubscribeNotifs,
-                showMentions, showReblog, showWitnessVote, showWitnessCancelVote)
+                showMentions, showReblog, showWitnessVote, showWitnessCancelVote, showAward, showCurationAward)
     }
 
 
@@ -59,7 +65,16 @@ class NotificationsDisplaySetting(
     fun setShowMentionsNotifs(show: Boolean) = createNew(showMentions = show)
     fun setShowReblogNotifs(show: Boolean) = createNew(showReblog = show)
     fun setShowWitnessVote(show: Boolean) = createNew(showWitnessVote = show)
+    fun setShowAward(show: Boolean) = createNew(showAward = show)
+    fun setShowCurationAward(show: Boolean) = createNew(showCurationAward = show)
     fun setShowWitnessCancelVote(show: Boolean) = createNew(showWitnessCancelVote = show)
+
+
+
+
+    override fun toString(): String {
+        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, showUpvoteNotifs=$showUpvoteNotifs, showFlagNotifs=$showFlagNotifs, showNewCommentNotifs=$showNewCommentNotifs, showTransferNotifs=$showTransferNotifs, showSubscribeNotifs=$showSubscribeNotifs, showUnSubscribeNotifs=$showUnSubscribeNotifs, showMentions=$showMentions, showReblog=$showReblog, showWitnessVote=$showWitnessVote, showWitnessCancelVote=$showWitnessCancelVote)"
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -76,6 +91,8 @@ class NotificationsDisplaySetting(
         if (showReblog != other.showReblog) return false
         if (showWitnessVote != other.showWitnessVote) return false
         if (showWitnessCancelVote != other.showWitnessCancelVote) return false
+        if (showAward != other.showAward) return false
+        if (showCurationAward != other.showCurationAward) return false
 
         return true
     }
@@ -92,12 +109,9 @@ class NotificationsDisplaySetting(
         result = 31 * result + showReblog.hashCode()
         result = 31 * result + showWitnessVote.hashCode()
         result = 31 * result + showWitnessCancelVote.hashCode()
+        result = 31 * result + showAward.hashCode()
+        result = 31 * result + showCurationAward.hashCode()
         return result
-    }
-
-
-    override fun toString(): String {
-        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, showUpvoteNotifs=$showUpvoteNotifs, showFlagNotifs=$showFlagNotifs, showNewCommentNotifs=$showNewCommentNotifs, showTransferNotifs=$showTransferNotifs, showSubscribeNotifs=$showSubscribeNotifs, showUnSubscribeNotifs=$showUnSubscribeNotifs, showMentions=$showMentions, showReblog=$showReblog, showWitnessVote=$showWitnessVote, showWitnessCancelVote=$showWitnessCancelVote)"
     }
 
 

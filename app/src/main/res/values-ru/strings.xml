@@ -239,6 +239,13 @@
     <string name="empty">Поска здесь пусто</string>
     <string name="yestarday">Вчера</string>
     <string name="year_perion" >г.</string>
+    <string name="reward_for_entry">Ваша авторская награда %s за запись %s</string>
+    <string name="golos_power_for_events">Силы Голоса</string>
+    <string name="reward_for_entries" >Ваша авторская награда %s</string>
+    <string name="curator_reward_for_entry" >>Ваша кураторская награда %s за запись %s</string>
+    <string name="curator_reward_for_entries" >Ваша кураторская награда %s</string>
+    <string name="post_reward" >Награда за запись</string>
+    <string name="curation_reward">Награда куратора</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

@@ -30,6 +30,8 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                     .setSwitch(NotificationSettings.REBLOG, R.string.reblog, t.showReblog)
                     .setSwitch(NotificationSettings.WITNESS_VOTE, R.string.witness_vote, t.showWitnessVote)
                     .setSwitch(NotificationSettings.WITNESS_CANCEL, R.string.witness_cancel_vote, t.showWitnessCancelVote)
+                    .setSwitch(NotificationSettings.POST_REWARD, R.string.post_reward, t.showAward)
+                    .setSwitch(NotificationSettings.CURATION_REWARD, R.string.curation_reward, t.showCurationAward)
 
                     .build { id, oldValue, newValue ->
                         val settings = Repository.get.userSettingsRepository.getNotificationsSettings().value
@@ -48,6 +50,8 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
                                 NotificationSettings.REBLOG -> notifSettingsRepo.setNotificationSettings(settings.setShowReblogNotifs(newValue))
                                 NotificationSettings.WITNESS_VOTE -> notifSettingsRepo.setNotificationSettings(settings.setShowWitnessVote(newValue))
                                 NotificationSettings.WITNESS_CANCEL -> notifSettingsRepo.setNotificationSettings(settings.setShowWitnessCancelVote(newValue))
+                                NotificationSettings.POST_REWARD -> notifSettingsRepo.setNotificationSettings(settings.setShowAward(newValue))
+                                NotificationSettings.CURATION_REWARD -> notifSettingsRepo.setNotificationSettings(settings.setShowCurationAward(newValue))
                             }
                         }
                     }
@@ -56,7 +60,7 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
 
     enum class NotificationSettings {
         SHOW_UPVOTE, SHOW_FLAG, SHOW_TRANSFER, SHOW_NEW_COMMENT, PLAY_SOUND, SUBSCRIBE_ON_BLOG,
-        UNSUBSCRIBE_FROM_BLOG, MENTIONS, REBLOG, WITNESS_VOTE, WITNESS_CANCEL
+        UNSUBSCRIBE_FROM_BLOG, MENTIONS, REBLOG, WITNESS_VOTE, WITNESS_CANCEL, POST_REWARD, CURATION_REWARD
     }
 
 
