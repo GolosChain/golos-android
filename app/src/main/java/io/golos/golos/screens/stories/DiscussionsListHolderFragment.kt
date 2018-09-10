@@ -22,6 +22,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.OneShotLiveData
 import io.golos.golos.utils.ReselectionEmitter
+import timber.log.Timber
 
 
 /**
@@ -34,6 +35,7 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
     private lateinit var mFab: FloatingActionButton
     private val mFeedPositions: List<FeedType>
     private lateinit var mAuthModel: AuthViewModel
+    private lateinit var mTabLo: TabLayout
     private val mReselectEmitter = MutableLiveData<Int>()
 
     init {
@@ -54,19 +56,30 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
         setup(view)
         mAuthModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
         mAuthModel.userAuthState.observe(this, android.arch.lifecycle.Observer {
+            Timber.e("on auth state change $it")
+
             if (it?.isLoggedIn == true) {
                 if (mFab.visibility != View.VISIBLE) mFab.show()
                 if (mPager.adapter == null
                         || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == false) {
+
                     mPager.adapter = createPagerAdapter(true)
-                    mPager.adapter?.notifyDataSetChanged()
+                    mPager.post {
+                        mPager.adapter?.notifyDataSetChanged()
+                        mTabLo.setupWithViewPager(mPager)
+                    }
+
                 }
             } else {
                 mFab.visibility = View.GONE
                 if (mPager.adapter == null
                         || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == true) {
                     mPager.adapter = createPagerAdapter(false)
-                    mPager.adapter?.notifyDataSetChanged()
+                    mPager.post {
+                        mPager.adapter?.notifyDataSetChanged()
+                        mTabLo.setupWithViewPager(mPager)
+                    }
+
                 }
             }
         })
@@ -99,10 +112,10 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
         }
         mPager = root.findViewById(R.id.holder_view_pager)
         mPager.offscreenPageLimit = 1
-        val tabLo: TabLayout = root.findViewById(R.id.tab_lo)
-        tabLo.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        mTabLo = root.findViewById(R.id.tab_lo)
+        mTabLo.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                mReselectEmitter.value = tabLo.selectedTabPosition
+                mReselectEmitter.value = mTabLo.selectedTabPosition
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -113,7 +126,7 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
 
             }
         })
-        tabLo.setupWithViewPager(mPager)
+        mTabLo.setupWithViewPager(mPager)
     }
 
 

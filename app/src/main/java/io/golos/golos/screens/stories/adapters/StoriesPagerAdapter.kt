@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.DiscussionsListFragment
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
+import timber.log.Timber
 
 class StoriesPagerAdapter(val context: Context,
                           manager: FragmentManager,
@@ -18,9 +19,13 @@ class StoriesPagerAdapter(val context: Context,
     fun enumerateSupportedFeedTypes() = supportedFeedTypes.map { it.first }
 
 
+    init {
+        Timber.e("new adapter $supportedFeedTypes")
+    }
     override fun getItem(position: Int): Fragment {
         return if (position > supportedFeedTypes.lastIndex) GolosFragment()
         else {
+            Timber.e("getItem pos = $position args = ${supportedFeedTypes[position]}")
             DiscussionsListFragment.getInstance(supportedFeedTypes[position].first, position, supportedFeedTypes[position].second)
         }
     }
@@ -40,11 +45,7 @@ class StoriesPagerAdapter(val context: Context,
     }
 
     override fun getItemPosition(`object`: Any): Int {
-        if (`object` is DiscussionsListFragment) {
-            val args = `object`.getArgs()
-            val position = supportedFeedTypes.indexOf(args)
-            return if (position > 0) position else PagerAdapter.POSITION_NONE
-        }
+
         return PagerAdapter.POSITION_NONE
     }
 

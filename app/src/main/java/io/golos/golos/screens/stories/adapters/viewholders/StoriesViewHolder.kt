@@ -25,9 +25,7 @@ abstract class StoriesViewHolder(resId: Int,
     private val mGlide = Glide.with(parent.context)
     private val mStringBuilder: StringBuilder = StringBuilder("")
 
-    init {
 
-    }
 
     var state: StripeWrapper? = null
         set(value) {

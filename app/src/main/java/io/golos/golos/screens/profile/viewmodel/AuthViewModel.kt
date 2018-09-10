@@ -86,7 +86,6 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
     }
 
     fun onLoginClick() {
-        Timber.e("onLoginClick input = $mLastUserInput")
         if (mLastUserInput.login.isEmpty()) {
             showAuthError(GolosError(ErrorCode.ERROR_AUTH,
                     localizedMessage = R.string.enter_login,
