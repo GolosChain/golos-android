@@ -39,7 +39,7 @@ class UserListViewModel : ViewModel() {
 
     private val mUserDataObserver = Observer<ApplicationUser> {
         if (it?.isLogged == true) {
-            if (!isSubscribed){
+            if (!isSubscribed) {
                 val userName = it.name
                 mLastUserName = userName
                 mLiveData.addSource(mRepository.getGolosUserSubscriptions(userName)) {
@@ -61,7 +61,7 @@ class UserListViewModel : ViewModel() {
 
 
     fun onStart() {
-        Timber.e("onStart")
+
 
         mRepository.appUserData.observeForever(mUserDataObserver)
         if (mListType == ListType.SUBSCRIPTIONS || mListType == ListType.SUBSCRIBERS) {
@@ -73,8 +73,13 @@ class UserListViewModel : ViewModel() {
                     ?: return)
             else mRepository.getGolosUserSubscribers(userName ?: return)
 
-            if (mListType != ListType.SUBSCRIPTIONS && userName != mRepository.appUserData.value?.name)//if it is subscriptions for current users - we already subscribed
+            if (mListType == ListType.SUBSCRIPTIONS && userName == mRepository.appUserData.value?.name) {//if it is subscriptions for current users - we already subscribed
+
+
+            }else {
+                Timber.e("adding source")
                 mLiveData.addSource(ld) { onValueChanged() }
+            }
 
 
         } else {
@@ -93,7 +98,7 @@ class UserListViewModel : ViewModel() {
     }
 
     fun onStop() {
-        Timber.e("onStop")
+
         userName?.let {
             mLiveData.removeSource(mRepository.getGolosUserSubscriptions(it))
             mLiveData.removeSource(mRepository.getGolosUserSubscribers(it))
@@ -107,8 +112,6 @@ class UserListViewModel : ViewModel() {
     }
 
     private fun onValueChanged() {
-
-
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
         val currentUserSubscriptions =
                 (if (mRepository.appUserData.value?.isLogged == true)
@@ -121,18 +124,23 @@ class UserListViewModel : ViewModel() {
             val userName = userName ?: return
             val users = if (mListType == ListType.SUBSCRIPTIONS) mRepository.getGolosUserSubscriptions(userName)
             else mRepository.getGolosUserSubscribers(userName)
+            if (users.value == null) {
 
-            mLiveData.value = UserListViewState(mTitle,
-                    users.value
-                            .orEmpty()
-                            .map {
-                                UserListRowData(it,
-                                        userAvatars[it],
-                                        null,
-                                        SubscribeStatus.create(currentUserSubscriptions.contains(it),
-                                                updatingStates[it] ?: UpdatingState.DONE))
-                            },
-                    null)
+                mLiveData.value = null
+            } else {
+                mLiveData.value = UserListViewState(mTitle,
+                        users.value
+                                .orEmpty()
+                                .map {
+                                    UserListRowData(it,
+                                            userAvatars[it],
+                                            null,
+                                            SubscribeStatus.create(currentUserSubscriptions.contains(it),
+                                                    updatingStates[it] ?: UpdatingState.DONE))
+                                },
+                        null)
+            }
+
 
         } else {
             val exchangeValues = mRepository.getExchangeLiveData().value
@@ -177,7 +185,6 @@ class UserListViewModel : ViewModel() {
     }
 
 
-
     fun onCreate(userName: String?,
                  storyId: Long?,
                  type: ListType,
@@ -196,7 +203,7 @@ class UserListViewModel : ViewModel() {
         }, null)
 
         if (mListType == ListType.SUBSCRIBERS) mRepository.requestGolosUserSubscribersUpdate(userName.orEmpty())
-        else mRepository.requestGolosUserSubscriptionsUpdate(userName.orEmpty())
+        else if (mListType == ListType.SUBSCRIPTIONS) mRepository.requestGolosUserSubscriptionsUpdate(userName.orEmpty())
 
     }
 

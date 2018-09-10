@@ -100,9 +100,9 @@ data class TransferEventListItem(override val golosEvent: GolosTransferEvent,
 
 data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
                                   override val avatarPath: String? = null,
+                                  override val isAuthorClickable: Boolean,
                                   val authorSubscriptionState: SubscribeStatus = SubscribeStatus.UnsubscribedStatus,
-                                  val showSubscribeButton: Boolean = false,
-                                  override val isAuthorClickable: Boolean) : EventListItem(golosEvent, avatarPath) {
+                                  val showSubscribeButton: Boolean = false) : EventListItem(golosEvent, avatarPath) {
     companion object {
         fun create(golosEvent: GolosSubscribeEvent,
                    avatarPath: String? = null,
@@ -118,9 +118,10 @@ data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
                         && it.isAuthorClickable == isAuthorClickable
             }
             if (item == null) {
-                item = SubscribeEventListItem(golosEvent, avatarPath, authorSubscriptionState, showSubscribeButton, isAuthorClickable)
+                item = SubscribeEventListItem(golosEvent, avatarPath, isAuthorClickable,authorSubscriptionState, showSubscribeButton)
                 putItemToCash(golosEvent, item)
             }
+
             return item
         }
     }

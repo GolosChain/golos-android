@@ -112,7 +112,8 @@ class EventsViewModel : ViewModel() {
                                         ?: UpdatingState.DONE)
                         val out = SubscribeEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
-                                it.counter == 1, subscribeStatus,
+                                it.counter == 1,
+                                subscribeStatus,
                                 !currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty()))
                         out
                     }

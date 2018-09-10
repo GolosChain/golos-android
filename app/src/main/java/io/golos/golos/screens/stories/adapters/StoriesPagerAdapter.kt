@@ -19,13 +19,9 @@ class StoriesPagerAdapter(val context: Context,
     fun enumerateSupportedFeedTypes() = supportedFeedTypes.map { it.first }
 
 
-    init {
-        Timber.e("new adapter $supportedFeedTypes")
-    }
     override fun getItem(position: Int): Fragment {
         return if (position > supportedFeedTypes.lastIndex) GolosFragment()
         else {
-            Timber.e("getItem pos = $position args = ${supportedFeedTypes[position]}")
             DiscussionsListFragment.getInstance(supportedFeedTypes[position].first, position, supportedFeedTypes[position].second)
         }
     }

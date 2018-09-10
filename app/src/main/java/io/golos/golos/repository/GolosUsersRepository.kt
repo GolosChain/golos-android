@@ -1,6 +1,9 @@
 package io.golos.golos.repository
 
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.support.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
@@ -252,7 +255,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             }
             return
         }
-
+        Timber.e("subscribin")
 
         val updatingStates = mUpdatingStates.value ?: hashMapOf()
         updatingStates[user] = UpdatingState.UPDATING
@@ -347,7 +350,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         }
         mCurrentUserSubscriptions.addSource(mCurrentUserInfo.appUserData) {
 
-            if (it?.isLogged == true && mLastName != null) {
+            if (it?.isLogged == true) {
                 if (!isSubscribedOnCurrentUserSubscriptions) {
                     mLastName = it.name
                     mCurrentUserSubscriptions.addSource(getGolosUserSubscriptions(mLastName.orEmpty())) {
