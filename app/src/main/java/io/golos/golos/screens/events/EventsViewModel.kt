@@ -3,7 +3,9 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.*
 import android.content.Context
 import android.support.v4.app.FragmentActivity
+import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.PostLinkable
+import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
@@ -33,6 +35,21 @@ class EventsViewModel : ViewModel() {
     private lateinit var mUserDataProvider: UserDataProvider
     private lateinit var mStoriesProvider: StoriesProvider
     private lateinit var mExchangesProvider: ExchangeDataProvider
+    private lateinit var mNotificationRepository: PushNotificationsRepository
+
+    private val mPushesObserver: Observer<GolosNotifications> = Observer<GolosNotifications> {
+        Timber.e("on new pushes")
+        val last = it?.notifications?.firstOrNull() ?: return@Observer
+        if (!::mEventsProvider.isInitialized) return@Observer
+        Timber.e("requesting")
+        if (mEventTypes == null) {
+            mEventsProvider.requestEventsUpdate(null, limit = updateLimit)
+        } else {
+            if (mEventTypes?.contains(last.toEventType()) == true) {
+                mEventsProvider.requestEventsUpdate(last.toEventType().toSingletoneList(), limit = updateLimit)
+            }
+        }
+    }
     private val updateLimit = 15
 
     fun onCreate(eventTypes: List<EventType>?,
@@ -41,7 +58,8 @@ class EventsViewModel : ViewModel() {
                  usersProvider: GolosUsersRepository,
                  userStatusProvider: UserDataProvider,
                  storiesProvider: StoriesProvider,
-                 exchangesProvider: ExchangeDataProvider) {
+                 exchangesProvider: ExchangeDataProvider,
+                 notificationRepository: PushNotificationsRepository) {
 
 
         mEventsProvider = eventsProvider
@@ -56,6 +74,7 @@ class EventsViewModel : ViewModel() {
         mUserDataProvider = userStatusProvider
         mStoriesProvider = storiesProvider
         mExchangesProvider = exchangesProvider
+        mNotificationRepository = notificationRepository
     }
 
     private fun onLiveDataChanged() {
@@ -254,6 +273,7 @@ class EventsViewModel : ViewModel() {
             mEventsList.addSource(mUsersProvider.currentUserSubscriptionsUpdateStatus) { onLiveDataChanged() }
         }
         mEventsList.addSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null)) { onLiveDataChanged() }
+        mNotificationRepository.notifications.observeForever(mPushesObserver)
     }
 
 
@@ -264,6 +284,7 @@ class EventsViewModel : ViewModel() {
         mEventsList.removeSource(mUsersProvider.currentUserSubscriptions)
         mEventsList.removeSource(mUsersProvider.currentUserSubscriptionsUpdateStatus)
         mEventsList.removeSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null))
+        mNotificationRepository.notifications.removeObserver(mPushesObserver)
     }
 
     fun onEventClick(fragmentActivity: FragmentActivity, it: EventListItem) {

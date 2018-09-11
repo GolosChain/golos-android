@@ -103,7 +103,8 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 Repository.get,
                 Repository.get,
                 Repository.get,
-                Repository.get)
+                Repository.get,
+                Repository.get.notificationsRepository)
         mViewModel?.eventsList?.observe(this, this)
         (parentFragment as? ReselectionEmitter)?.reselectLiveData?.observe(this, Observer {
             if (it == arguments?.getInt(POSITION, Int.MIN_VALUE) && mRecycler?.childCount != 0) {
