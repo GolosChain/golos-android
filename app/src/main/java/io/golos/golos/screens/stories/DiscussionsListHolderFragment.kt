@@ -20,9 +20,7 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
-import io.golos.golos.utils.OneShotLiveData
 import io.golos.golos.utils.ReselectionEmitter
-import timber.log.Timber
 
 
 /**
@@ -56,8 +54,6 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
         setup(view)
         mAuthModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
         mAuthModel.userAuthState.observe(this, android.arch.lifecycle.Observer {
-            Timber.e("on auth state change $it")
-
             if (it?.isLoggedIn == true) {
                 if (mFab.visibility != View.VISIBLE) mFab.show()
                 if (mPager.adapter == null

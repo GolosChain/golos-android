@@ -95,7 +95,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 }
                 .flatMap { it }
                 .mapNotNull { it.rootStory() }
-        DiscussionItemsTable.save(discussionItem, VotesTable, AvatarsTable, writableDatabase)
+        DiscussionItemsTable.save(discussionItem, VotesTable, writableDatabase)
         val storiesIds = stories
                 .map {
                     FilteredStoriesIds(it.key, it.value.items
@@ -114,7 +114,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
         val votes = VotesTable.getAll(writableDatabase)
 
-        val stories = DiscussionItemsTable.getAll(AvatarsTable, writableDatabase)
+        val stories = DiscussionItemsTable.getAll(writableDatabase)
 
         return storiesIds
                 .groupBy { it }
@@ -521,7 +521,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
-                 avatarTable: AvatarsTable,
                  db: SQLiteDatabase) {
 
             if (items.isEmpty()) return
@@ -567,16 +566,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
                 db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-            val avatars = savingItems.filter { it.avatarPath != null }.map { UserAvatar(it.author, it.avatarPath, System.currentTimeMillis()) }
-
-            avatarTable.save(avatars, db)
 
             db.setTransactionSuccessful()
             db.endTransaction()
         }
 
         fun get(ids: List<Long>,
-                avatarTable: AvatarsTable,
+
                 db: SQLiteDatabase): List<GolosDiscussionItem> {
             if (ids.isEmpty()) return listOf()
 
@@ -654,13 +650,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             return out
         }
 
-        fun getAll(avatarTable: AvatarsTable,
-                   db: SQLiteDatabase): Map<Long, GolosDiscussionItem> {
+        fun getAll(
+                db: SQLiteDatabase): Map<Long, GolosDiscussionItem> {
 
             val cursor = db.rawQuery("select * from $databaseName", null)
             val out = ArrayList<GolosDiscussionItem>(cursor.count)
 
-            val avatars = avatarTable.getAllAvatars(db).associateBy { it.userName }
+
 
             if (cursor.count != 0) {
                 cursor.moveToFirst()
@@ -698,7 +694,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getLong(bodyLength),
                             author.orEmpty(),
                             if (format != null) GolosDiscussionItem.Format.valueOf(format) else GolosDiscussionItem.Format.HTML,
-                            avatars[author.orEmpty()]?.avatarPath,
+                            null,
                             arrayListOf(),
                             cursor.getString(parentPermlink) ?: "",
                             cursor.getString(parentAuthor) ?: "",

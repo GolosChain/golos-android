@@ -27,7 +27,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
-import io.golos.golos.screens.stories.viewmodel.StoriesViewModel
+import io.golos.golos.screens.stories.viewmodel.DiscussionsViewModel
 import io.golos.golos.screens.stories.viewmodel.StoriesViewState
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
@@ -37,7 +37,7 @@ import io.golos.golos.utils.*
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
     private var mRecycler: RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
-    private var mViewModel: StoriesViewModel? = null
+    private var mViewModel: DiscussionsViewModel? = null
     private var mRefreshButton: TextView? = null
     private lateinit var mAdapter: StoriesRecyclerAdapter
     private lateinit var mFullscreenMessageLabel: TextView
@@ -279,8 +279,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         super.setUserVisibleHint(isVisibleToUser)
         isVisibleBacking = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
-
-
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

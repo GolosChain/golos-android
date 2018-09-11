@@ -8,7 +8,6 @@ import android.support.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.TreeSet
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -98,7 +97,6 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
 
     private var isSubscribedOnCurrentUserSubscriptions = false
     private var mLastName: String? = null
-
 
     override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
         return mGolosUsers
@@ -255,8 +253,6 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             }
             return
         }
-        Timber.e("subscribin")
-
         val updatingStates = mUpdatingStates.value ?: hashMapOf()
         updatingStates[user] = UpdatingState.UPDATING
         mUpdatingStates.value = updatingStates

@@ -1,17 +1,9 @@
 package io.golos.golos.repository.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.JsonNode
-import eu.bittrade.libs.golosj.base.models.Discussion
-import eu.bittrade.libs.golosj.base.models.ExtendedAccount
 import eu.bittrade.libs.golosj.base.models.VoteLight
-import io.golos.golos.screens.story.model.*
-import io.golos.golos.utils.Regexps
-import io.golos.golos.utils.mapper
-import io.golos.golos.utils.toArrayList
-import org.json.JSONException
-import org.json.JSONObject
-import timber.log.Timber
+import io.golos.golos.screens.story.model.Row
+import io.golos.golos.screens.story.model.StoryWrapper
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosDiscussionItem internal constructor(val url: String,
@@ -47,160 +39,9 @@ data class GolosDiscussionItem internal constructor(val url: String,
                                                     val parts: MutableList<Row> = ArrayList()) : Cloneable {
 
 
-    fun changeField(url: String = this.url,
-                    id: Long = this.id,
-                    title: String = this.title,
-                    categoryName: String = this.categoryName,
-                    tags: List<String> = this.tags,
-                    images: MutableList<String> = this.images,
-                    links: List<String> = this.links,
-                    votesNum: Int = this.votesNum,
-                    votesRshares: Long = this.votesRshares,
-                    commentsCount: Int = this.commentsCount,
-                    permlink: String = this.permlink,
-                    gbgAmount: Double = this.gbgAmount,
-                    body: String = this.body,
-                    bodyLength: Long = this.bodyLength,
-                    author: String = this.author,
-                    format: Format = this.format,
-                    avatarPath: String? = this.avatarPath,
-                    children: MutableList<StoryWrapper> = this.children,
-                    parentPermlink: String = this.parentPermlink,
-                    parentAuthor: String = this.parentAuthor,
-                    childrenCount: Int = this.childrenCount,
-                    level: Int = this.level,
-                    reputation: Long = this.reputation,
-                    lastUpdated: Long = this.lastUpdated,
-                    created: Long = this.created,
-                    userVotestatus: UserVoteType = this.userVotestatus,
-                    activeVotes: MutableList<VoteLight> = this.activeVotes,
-                    type: ItemType = this.type,
-                    firstRebloggedBy: String = this.firstRebloggedBy,
-                    cleanedFromImages: String = this.cleanedFromImages,
-                    parts: MutableList<Row> = this.parts): GolosDiscussionItem {
-
-        return GolosDiscussionItem(url, id, title, categoryName, tags, images, links, votesNum, votesRshares, commentsCount,
-                permlink, gbgAmount, body, bodyLength, author, format, avatarPath, children, parentPermlink, parentAuthor,
-                childrenCount, level, reputation, lastUpdated, created, userVotestatus, activeVotes, type, firstRebloggedBy, cleanedFromImages, parts)
-    }
-
-
     val isRootStory: Boolean
         get() = tags.contains(parentPermlink)
 
-/*
-    constructor(discussion: Discussion, account: ExtendedAccount?) : this(
-            url = discussion.url ?: "",
-            id = discussion.id,
-            title = discussion.title ?: "",
-            categoryName = discussion.category ?: "",
-            votesNum = discussion.netVotes,
-            votesRshares = discussion.voteRshares,
-            commentsCount = discussion.children,
-            permlink = discussion.permlink?.link ?: "",
-            gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0,
-            body = discussion.body ?: "",
-            bodyLength = discussion.bodyLength.toLongOrNull() ?: 0L,
-            author = discussion.author?.name ?: "",
-            parentPermlink = discussion.parentPermlink.link ?: "",
-            parentAuthor = discussion.parentAuthor.name ?: "",
-            childrenCount = discussion.children,
-            reputation = discussion.authorReputation,
-            lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0,
-            created = discussion.created?.dateTimeAsTimestamp ?: 0,
-            firstRebloggedBy = discussion.firstRebloggedBy?.name ?: "",
-            cleanedFromImages = "") {
-
-
-        val tagsString = discussion.jsonMetadata
-
-        activeVotes.addAll(discussion.activeVotes.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) })
-
-        var json: JSONObject? = null
-        try {
-            json = JSONObject(tagsString)
-            if (json.has("tags")) {
-                val tagsArray = json.getJSONArray("tags")
-                if (tagsArray.length() > 0) {
-                    (0 until tagsArray.length()).mapTo(tags) { tagsArray[it].toString() }
-                }
-            }
-        } catch (e: JSONException) {
-            Timber.e(tagsString)
-            e.printStackTrace()
-        }
-        if (json != null) {
-            try {
-                if (json.has("format")) {
-                    val format = json.getString("format")
-                    this.format = if (format.equals("markdown", true)) Format.MARKDOWN else Format.HTML
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        if (json != null) {
-            try {
-                if (json.has("image")) {
-                    val imageArray = json.getJSONArray("image")
-                    if (imageArray.length() > 0) {
-                        (0 until imageArray.length()).mapTo(images) { imageArray[it].toString() }
-                    }
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        if (json != null) {
-            try {
-                if (json.has("links")) {
-                    val linksArray = json.getJSONArray("links")
-                    if (linksArray.length() > 0) {
-                        (0 until linksArray.length()).mapTo(links) { linksArray[it].toString() }
-                    }
-                }
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-
-        val toRowsParser = StoryParserToRows
-        parts = toRowsParser.parse(this).toArrayList()
-        if (parts.size == 0) {
-            Timber.e("fail on story id is ${id}\n body =  ${body}")
-        } else {
-            if (parts[0] is ImageRow) {
-                type = ItemType.IMAGE_FIRST
-            } else {
-                if (images.size != 0) type = ItemType.PLAIN_WITH_IMAGE
-            }
-        }
-        cleanedFromImages = if (parts.size == 0)
-            body.replace(Regexps.markdownImageRegexp, "")
-                    .replace(Regexps.anyImageLink, "")
-                    .replace(Regex("(\\*)"), "*")
-        else {
-            parts.joinToString("\n") {
-                if (it is TextRow) it.text.replace(Regexps.markdownImageRegexp, "")
-                        .replace(Regex("(\\*)"), "*")
-                else ""
-            }
-        }
-        if (account != null) {
-            try {
-                val node: JsonNode? = mapper.readTree(account.jsonMetadata)
-                avatarPath = node?.get("profile")?.get("profile_image")?.asText()
-            } catch (e: Exception) {
-                Timber.e("error parsing string ${account.jsonMetadata}")
-                e.printStackTrace()
-            }
-        }
-
-    }*/
-
-    override public fun clone(): Any {
-        return super.clone()
-    }
 
     override fun toString(): String {
         return "Comment(id=$id, title='$title', permlink='$permlink')"

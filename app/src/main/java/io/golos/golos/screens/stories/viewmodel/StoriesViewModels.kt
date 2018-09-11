@@ -23,7 +23,6 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.isNullOrEmpty
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -35,14 +34,14 @@ object StoriesModelFactory {
     fun getStoriesViewModel(type: FeedType,
                             activity: FragmentActivity?,
                             fragment: Fragment?,
-                            filter: StoryFilter?): StoriesViewModel {
+                            filter: StoryFilter?): DiscussionsViewModel {
 
         val provider = if (activity != null) ViewModelProviders.of(activity)
         else {
             if (fragment == null) throw IllegalStateException("activity or fragment must be not null")
             else ViewModelProviders.of(fragment)
         }
-        var viewModel: StoriesViewModel
+        var viewModel: DiscussionsViewModel
 
 
         viewModel = when (type) {
@@ -87,7 +86,7 @@ class BlogViewModel : FeedViewModel() {
         get() = FeedType.BLOG
 }
 
-open class FeedViewModel : StoriesViewModel() {
+open class FeedViewModel : DiscussionsViewModel() {
     override val type: FeedType
         get() = FeedType.PERSONAL_FEED
 
@@ -114,28 +113,28 @@ open class FeedViewModel : StoriesViewModel() {
 }
 
 
-class NewViewModel : StoriesViewModel() {
+class NewViewModel : DiscussionsViewModel() {
     override val type: FeedType
         get() = FeedType.NEW
 }
 
-class ActualViewModle : StoriesViewModel() {
+class ActualViewModle : DiscussionsViewModel() {
     override val type: FeedType
         get() = FeedType.ACTUAL
 }
 
-class PopularViewModel : StoriesViewModel() {
+class PopularViewModel : DiscussionsViewModel() {
     override val type: FeedType
         get() = FeedType.POPULAR
 }
 
-class PromoViewModel : StoriesViewModel() {
+class PromoViewModel : DiscussionsViewModel() {
     override val type: FeedType
         get() = FeedType.PROMO
 }
 
 
-abstract class StoriesViewModel : ViewModel() {
+abstract class DiscussionsViewModel : ViewModel() {
     protected abstract val type: FeedType
     private val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
     private val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
@@ -180,23 +179,14 @@ abstract class StoriesViewModel : ViewModel() {
 
         mStoriesLiveData.addSource(mRepository.usersAvatars) { usersMap ->
             usersMap ?: return@addSource
+
             val new = mStoriesLiveData.value?.items?.onEach {
                 it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
             }.orEmpty()
-            val old = mStoriesLiveData.value?.items.orEmpty()
 
-            var isNeedToUpdate = false
-            if (new.size != old.size) isNeedToUpdate = true
-            new.forEachIndexed { index, storyWithComments ->
-                if (storyWithComments != old.getOrNull(index)) isNeedToUpdate = true
-            }
+            mStoriesLiveData.value = mStoriesLiveData.value?.copy(items = new)
 
-            if (isNeedToUpdate) {
-                mStoriesLiveData.value = mStoriesLiveData
-                        .value?.copy(
-                        items = new
-                )
-            }
+
         }
         if (mObserver == null) {
             mObserver = Observer {
@@ -242,13 +232,10 @@ abstract class StoriesViewModel : ViewModel() {
         }.onEach {
             it.avatarPath = mRepository.usersAvatars.value?.get(it.author)
         }
-
-
-        val authorsWithNoAvatars = state
-                .items
+        val authorsWithNoAvatars = state.items
                 .filter { it.rootStory()?.avatarPath == null }
                 .mapNotNull { it.rootStory()?.author }
-                .filter { !mRepository.getGolosUserAccountInfos().value.orEmpty().containsKey(it) }
+                .filter { !mRepository.usersAvatars.value.orEmpty().containsKey(it) }
         mRepository.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
         return state
     }
