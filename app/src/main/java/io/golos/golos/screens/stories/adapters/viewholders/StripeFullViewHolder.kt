@@ -72,7 +72,7 @@ class StripeFullViewHolder(parent: ViewGroup,
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
-        itemView.setOnClickListener({ onCardClick.onClick(this) })
+        itemView.setOnClickListener { onCardClick.onClick(this) }
 
     }
 

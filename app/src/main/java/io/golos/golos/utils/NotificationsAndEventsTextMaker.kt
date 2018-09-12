@@ -276,7 +276,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                 val gpModifier = (Repository.get.getExchangeLiveData().value
                         ?: ExchangeValues.nullValues).vSharesToGolosPowerMultiplier
 
-                val rewardString = "${String.format(Locale.US, "%.3f", golosNotification.golosPowerReward * gpModifier)} ${context.getString(R.string.golos_power)}"
+                val rewardString = "${String.format(Locale.US, "%.3f", golosNotification.golosPowerReward * gpModifier)} ${context.getString(R.string.golos_power_for_events)}"
 
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.curator_reward_for_entry,
                         rewardString, title)

@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
-import io.golos.golos.repository.persistence.model.UserAvatar
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
@@ -22,7 +21,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL(TagsTable.createTableString)
-        db?.execSQL(AvatarsTable.createTableString)
         db?.execSQL(UserFilterTable.createTableString)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
@@ -35,7 +33,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
 
         db?.execSQL(TagsTable.createTableString)
-        db?.execSQL(AvatarsTable.createTableString)
         db?.execSQL(UserFilterTable.createTableString)
         db?.execSQL(VotesTable.createTableString)
         db?.execSQL(StoriesRequestsTable.createTableString)
@@ -52,21 +49,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         }
     }
 
-    fun saveAvatar(avatar: UserAvatar) {
-        AvatarsTable.saveAvatarToTable(writableDatabase, avatar)
-    }
-
-    fun saveAvatars(avatars: List<UserAvatar>) {
-        AvatarsTable.save(avatars, writableDatabase)
-    }
-
-    fun getAvatar(userName: String): UserAvatar? {
-        return AvatarsTable.get(userName, writableDatabase)
-    }
-
-    fun getAvatars(userName: List<String>): Map<String, UserAvatar?> {
-        return AvatarsTable.getAvatarsFromDb(writableDatabase, userName)
-    }
 
     fun saveTags(list: List<Tag>) {
         TagsTable.save(list, writableDatabase)
@@ -142,10 +124,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         DiscussionItemsTable.deleteAll(writableDatabase)
     }
 
-    fun getAllAvatars(): List<UserAvatar> {
-        return AvatarsTable.getAllAvatars(writableDatabase)
-
-    }
 
     fun saveGolosUsersAccountInfo(list: List<GolosUserAccountInfo>) {
         UsersTable.saveGolosUsersAccountInfo(writableDatabase, list)
@@ -172,127 +150,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
     fun getGolosUsersSubscriptions(): Map<String, List<String>> {
         return SubscriptionsTable.getGolosUsersSubscriptions(writableDatabase)
-    }
-
-    private object AvatarsTable {
-        private val databaseName = "avatars"
-        private val avatarPathColumn = "avatar_path"
-        private val userNameColumn = "user_name"
-        private val dateColumn = "date"
-        val createTableString = "create table if not exists $databaseName ( $userNameColumn text primary key," +
-                "$avatarPathColumn text, $dateColumn integer)"
-
-        fun saveAvatarToTable(db: SQLiteDatabase, avatar: UserAvatar) {
-            val values = ContentValues()
-            values.put(avatarPathColumn, avatar.avatarPath)
-            values.put(userNameColumn, avatar.userName)
-            values.put(dateColumn, avatar.dateUpdated)
-            db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
-        }
-
-        fun save(avatars: List<UserAvatar>, db: SQLiteDatabase) {
-            if (avatars.isEmpty()) return
-            db.beginTransaction()
-            val values = ContentValues()
-            avatars.forEach {
-                values.put(avatarPathColumn, it.avatarPath)
-                values.put(userNameColumn, it.userName)
-                values.put(dateColumn, it.dateUpdated)
-                db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
-            }
-            db.setTransactionSuccessful()
-            db.endTransaction()
-        }
-
-        fun get(forUser: String, db: SQLiteDatabase): UserAvatar? {
-            val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
-                    "$userNameColumn = \'$forUser\'", null, null, null, null)
-            if (cursor.count == 0) return null
-            cursor.moveToFirst()
-            val avatar = UserAvatar(cursor.getString(userNameColumn) ?: return null,
-                    cursor.getString(avatarPathColumn),
-                    cursor.getLong(dateColumn))
-            cursor.close()
-            return avatar
-        }
-
-
-        fun getAvatarsFromDb(db: SQLiteDatabase, usernames: List<String>): Map<String, UserAvatar?> {
-            if (usernames.isEmpty()) return hashMapOf()
-
-            val users = usernames.distinct().filter { it.isNotEmpty() }
-            if (users.isEmpty()) return hashMapOf()
-
-            val map = HashMap<String, UserAvatar?>(users.size)
-
-            val numberOfLists = users.size / 500 + 1
-
-            val listOfUsers = ArrayList<List<String>>(numberOfLists)
-
-
-            (0 until numberOfLists).forEach {
-                var upperBound = 500 * (it + 1)
-                upperBound = if (upperBound > users.size) users.size else upperBound
-                listOfUsers.add(users.subList(500 * it, upperBound))
-            }
-
-            listOfUsers.forEach {
-                val selection = StringBuilder()
-                selection.append("( ")
-                var disabled = false
-                it.forEachIndexed { _, username ->
-                    if (disabled) {
-                        selection.append(" or ")
-                    } else {
-                        disabled = true
-                    }
-                    selection.append("$userNameColumn = \'$username\'")
-                }
-                selection.append(" )")
-                val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
-                        selection.toString(), null, null, null, null)
-                if (cursor.count == 0) return map
-                cursor.moveToFirst()
-                while (!cursor.isAfterLast) {
-                    val name = cursor.getString(userNameColumn)
-                    if (name != null) {
-                        val avatar = UserAvatar(name,
-                                cursor.getString(avatarPathColumn),
-                                cursor.getLong(dateColumn))
-                        map.put(name, avatar)
-                    }
-
-                    cursor.moveToNext()
-                }
-                cursor.close()
-            }
-
-            return map
-        }
-
-        fun getAllAvatars(db: SQLiteDatabase): List<UserAvatar> {
-            val cursor = db.query(databaseName, arrayOf(avatarPathColumn, userNameColumn, dateColumn),
-                    null, null, null, null, null)
-            if (cursor.count == 0) {
-                cursor.close()
-                return emptyList()
-            }
-            val out = ArrayList<UserAvatar>(100)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                val name = cursor.getString(userNameColumn)
-                if (name != null) {
-                    val avatar = UserAvatar(name,
-                            cursor.getString(avatarPathColumn),
-                            cursor.getLong(dateColumn))
-                    out.add(avatar)
-                }
-
-                cursor.moveToNext()
-            }
-            cursor.close()
-            return out
-        }
     }
 
     private object SubscribersTable {

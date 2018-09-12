@@ -51,14 +51,14 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val rootStoryId = field?.rootStoryId
             val workingItemId = field?.workingItemId
             if (feedType == null && rootStoryId == null && workingItemId == null) {//root story editor
-                mDraftsPersister?.getDraft(mode ?: return, { items, title, tags ->
+                mDraftsPersister?.getDraft(mode ?: return) { items, title, tags ->
                     if (items.isNotEmpty()) {
                         editorLiveData.value = EditorState(null, false, null, items, title, tags)
                     } else {
 
                         editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
                     }
-                })
+                }
             }
             if (feedType != null && rootStoryId != null && workingItemId != null) {
                 Repository
@@ -91,16 +91,16 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         val editorType = mode?.editorType ?: return
 
         if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.CREATE_POST) {
-            mDraftsPersister?.getDraft(mode ?: return, { items, title, tags ->
+            mDraftsPersister?.getDraft(mode ?: return) { items, title, tags ->
                 if (items.isNotEmpty()) {
                     editorLiveData.value = EditorState(null, false, null, items, title, tags)
                 } else {
                     editorLiveData.value = EditorState(parts = mTextProcessor.getInitialState(), title = "", tags = listOf())
                 }
-            })
+            }
         } else if (editorType == EditorActivity.EditorType.EDIT_POST || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
             mWorkingItem?.story?.let {
-                var parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it, skipHtmlClean = true) else it.parts)
+                val parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it, skipHtmlClean = true) else it.parts)
                         .map {
                             when (it) {
                                 is TextRow -> EditorTextPart(UUID.randomUUID().toString(),

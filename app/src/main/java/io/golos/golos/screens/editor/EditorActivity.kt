@@ -91,7 +91,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         setContentView(R.layout.a_editor)
         mRecycler = findViewById(R.id.recycler)
         mRecycler.layoutManager = MyLinearLayoutManager(this)
-        findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener({ finish() })
+        findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
         mToolbar = findViewById(R.id.toolbar)
         mTitle = findViewById(R.id.title)
         mFooter = findViewById(R.id.footer)
