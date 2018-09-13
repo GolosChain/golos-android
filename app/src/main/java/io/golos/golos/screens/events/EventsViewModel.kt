@@ -38,10 +38,8 @@ class EventsViewModel : ViewModel() {
     private lateinit var mNotificationRepository: PushNotificationsRepository
 
     private val mPushesObserver: Observer<GolosNotifications> = Observer<GolosNotifications> {
-        Timber.e("on new pushes")
         val last = it?.notifications?.firstOrNull() ?: return@Observer
         if (!::mEventsProvider.isInitialized) return@Observer
-        Timber.e("requesting")
         if (mEventTypes == null) {
             mEventsProvider.requestEventsUpdate(null, limit = updateLimit)
         } else {
@@ -170,7 +168,8 @@ class EventsViewModel : ViewModel() {
                         }
                         MentionEventListItem.create(it,
                                 it.counter == 1,
-                                avatars[it.fromUsers.firstOrNull().orEmpty()])
+                                avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                discussion?.title.orEmpty())
                     }
                     is GolosAwardEvent -> {
                         val exchangesValue = mExchangesProvider.getExchangeLiveData().value

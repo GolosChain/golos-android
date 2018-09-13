@@ -43,7 +43,7 @@ class EditorTitle : FrameLayout, TextWatcher, InputFilter {
         LayoutInflater.from(context).inflate(R.layout.v_editor_title, this)
         mTitleEt = findViewById(R.id.title_et)
         mSubtitleText = findViewById(R.id.subtitle_text)
-        mTitleEt.filters = arrayOf<InputFilter>(this, InputFilter.LengthFilter(255))
+        mTitleEt.filters = arrayOf(this, InputFilter.LengthFilter(255))
     }
 
     var state: EditorTitleState = EditorTitleState()

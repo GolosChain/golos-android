@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.preference.PreferenceManager
 import android.support.multidex.MultiDexApplication
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
@@ -24,6 +25,7 @@ import io.golos.golos.notifications.*
 import io.golos.golos.repository.AppLifecycleRepository
 import io.golos.golos.repository.LifeCycleEvent
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
@@ -57,6 +59,12 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         }
         Fabric.with(this, Crashlytics())
         mLiveData.value = LifeCycleEvent.APP_CREATE
+
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("is_flag_erased_1", false)){
+            Persister.get.setUserSubscribedOnNotificationsThroughServices(false)
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("is_flag_erased_1", true).commit()
+        }
+
         Repository.get.onAppCreate(this)
 
         val ce = if (resources.getBoolean(R.bool.isTablet)) CustomEvent("app launched on tablet")

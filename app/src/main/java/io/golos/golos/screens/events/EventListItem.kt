@@ -118,7 +118,7 @@ data class SubscribeEventListItem(override val golosEvent: GolosSubscribeEvent,
                         && it.isAuthorClickable == isAuthorClickable
             }
             if (item == null) {
-                item = SubscribeEventListItem(golosEvent, avatarPath, isAuthorClickable,authorSubscriptionState, showSubscribeButton)
+                item = SubscribeEventListItem(golosEvent, avatarPath, isAuthorClickable, authorSubscriptionState, showSubscribeButton)
                 putItemToCash(golosEvent, item)
             }
 
@@ -183,9 +183,13 @@ data class MentionEventListItem(override val golosEvent: GolosMentionEvent,
                    title: String = ""): MentionEventListItem {
 
             val list = getCashedItems<MentionEventListItem>(golosEvent)
-            var item = list.find { it.title == title && it.avatarPath == avatarPath && it.isAuthorClickable == isAuthorClickable }
+            var item = list.find {
+                it.title == title
+                        && it.avatarPath == avatarPath
+                        && it.isAuthorClickable == isAuthorClickable
+            }
             if (item == null) {
-                item = MentionEventListItem(golosEvent, isAuthorClickable, title)
+                item = MentionEventListItem(golosEvent, isAuthorClickable, avatarPath, title)
                 putItemToCash(golosEvent, item)
             }
             return item

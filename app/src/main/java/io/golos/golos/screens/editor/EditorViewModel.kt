@@ -5,6 +5,8 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.support.annotation.MainThread
 import android.text.SpannableStringBuilder
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.answers.CustomEvent
 import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -211,12 +213,14 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         result?.permlink ?: "")
 
             }
-
             if (editorType == EditorActivity.EditorType.CREATE_POST) {
                 mRepository.createPost(editorLiveData.value?.title ?: return,
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
                         listener)
+                try {
+                    Answers.getInstance().logCustom(CustomEvent("created post"))
+                }catch (e: Exception){e.printStackTrace()}
             } else if (editorType == EditorActivity.EditorType.EDIT_POST) {
 
                 if (mRootStory == null || mWorkingItem == null) return
@@ -225,6 +229,9 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
                         mRootStory?.storyWithState() ?: return, listener)
+                try {
+                    Answers.getInstance().logCustom(CustomEvent("edited post"))
+                }catch (e: Exception){e.printStackTrace()}
             }
         } else if (editorType == EditorActivity.EditorType.CREATE_COMMENT || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
 
@@ -250,14 +257,26 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     ?: ArrayList(),
                     title = editorLiveData.value?.title ?: "",
                     tags = editorLiveData.value?.tags ?: listOf())
+
+            try {
+                Answers.getInstance().logCustom(CustomEvent("created comment"))
+            }catch (e: Exception){e.printStackTrace()}
+
             if (editorType == EditorActivity.EditorType.CREATE_COMMENT) {
                 mRepository.createComment(mWorkingItem ?: return,
                         editorLiveData.value?.parts ?: ArrayList(),
                         listener)
+                try {
+                    Answers.getInstance().logCustom(CustomEvent("created comment"))
+                }catch (e: Exception){e.printStackTrace()}
             } else if (editorType == EditorActivity.EditorType.EDIT_COMMENT) {
                 mRepository.editComment(mWorkingItem ?: return,
                         editorLiveData.value?.parts ?: return,
                         listener)
+
+                try {
+                    Answers.getInstance().logCustom(CustomEvent("edited comment"))
+                }catch (e: Exception){e.printStackTrace()}
             }
         }
     }

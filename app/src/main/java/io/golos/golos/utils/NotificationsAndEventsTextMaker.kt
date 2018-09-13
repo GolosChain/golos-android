@@ -221,7 +221,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications,
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_mentioned_several]}")
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_mention_w_40dp)
+                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_mention_w_40dp)
             }
             is GolosRepostNotification -> {
 
