@@ -59,10 +59,10 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
             }
         }
         communicationHandler.requestAuth()
-        synchronized(this, {
+        synchronized(this) {
             if (authLatch.count == 0L) authLatch = CountDownLatch(1)
             authLatch.await()
-        })
+        }
 
 
         val authRequest = authRequest ?: throw IllegalStateException("multithreading not supported")

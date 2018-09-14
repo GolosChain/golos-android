@@ -15,10 +15,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.utils.FabricExceptionLogger
-import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.MainThreadExecutor
-import io.golos.golos.utils.Regexps
+import io.golos.golos.utils.*
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.PriorityBlockingQueue
@@ -37,6 +34,9 @@ interface EventsProvider {
                             fromId: String? = null,
                             limit: Int = 40,
                             completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
+
+    @MainThread
+    fun getRequestStatus(forType: EventType?): LiveData<UpdatingState>
 }
 
 interface ExchangeDataProvider {

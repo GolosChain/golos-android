@@ -236,7 +236,7 @@
     <string name="replys">Ответы</string>
     <string name="social">Социальные</string>
     <string name="mentions">Упоминания</string>
-    <string name="empty">Поска здесь пусто</string>
+    <string name="empty">Пока здесь пусто</string>
     <string name="yestarday">Вчера</string>
     <string name="year_perion" >г.</string>
     <string name="reward_for_entry">Ваша авторская награда %s за запись %s</string>

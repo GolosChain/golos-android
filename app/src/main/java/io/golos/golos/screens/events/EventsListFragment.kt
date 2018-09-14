@@ -19,31 +19,44 @@ import io.golos.golos.repository.services.EventType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.*
 
-class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<List<EventsListItemWrapper>> {
+class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<EventsListState> {
     private var parcelable: Parcelable? = null
 
 
-    override fun onChanged(t: List<EventsListItemWrapper>?) {
+    override fun onChanged(t: EventsListState?) {
 
         t?.let { eventsList ->
 
+            val list = eventsList.events
+            val updatingState = eventsList.updatingState
+
             if (mSwipeToRefresh?.isRefreshing == true) mSwipeToRefresh?.isRefreshing = false
-            if (eventsList.isEmpty()) {
-                mSwipeToRefresh?.setViewGone()
-                mLabel?.setViewVisible()
-            } else {
-                mSwipeToRefresh?.setViewVisible()
-                mLabel?.setViewGone()
-                mRecycler?.post {
-                    (mRecycler?.adapter as?  EventsListAdapter)?.items = eventsList
-
-                    if (parcelable != null && eventsList.isNotEmpty()) {
-
-                        (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parcelable)
-                        parcelable = null
-                    }
+            when {
+                updatingState == UpdatingState.UPDATING && list.isEmpty() -> {
+                    mProgressView?.setViewVisible()
+                    mSwipeToRefresh?.setViewGone()
+                    mLabel?.setViewGone()
                 }
+                list.isEmpty() -> {
+                    mSwipeToRefresh?.setViewGone()
+                    mProgressView?.setViewGone()
+                    mLabel?.setViewVisible()
+                }
+                else -> {
+                    mSwipeToRefresh?.setViewVisible()
+                    mLabel?.setViewGone()
+                    mProgressView?.setViewGone()
+                    mRecycler?.post {
+                        (mRecycler?.adapter as?  EventsListAdapter)?.items = list
 
+                        if (parcelable != null && list.isNotEmpty()) {
+
+                            (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parcelable)
+                            parcelable = null
+                        }
+                    }
+
+                }
             }
         }
     }
@@ -59,6 +72,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     private var mViewModel: EventsViewModel? = null
     private var mLoadingProgress: View? = null
     private var isVisibleToUser: Boolean = false
+    private var mProgressView: View? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -69,6 +83,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         mLabel = view.findViewById(R.id.fullscreen_label)
         mViewModel = ViewModelProviders.of(this).get(EventsViewModel::class.java)
         mLoadingProgress = view.findViewById(R.id.loading_progress)
+        mProgressView = view.findViewById(R.id.progress)
         mSwipeToRefresh?.setOnRefreshListener(this)
         mSwipeToRefresh?.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh?.setColorSchemeColors(ContextCompat.getColor(view.context, R.color.blue_dark))

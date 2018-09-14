@@ -3,7 +3,6 @@ package io.golos.golos.repository.services
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
-import android.support.annotation.AnyThread
 import android.support.annotation.MainThread
 import android.support.annotation.WorkerThread
 import io.golos.golos.notifications.FCMTokenProvider
@@ -29,13 +28,16 @@ interface GolosServices {
 
     fun getEvents(eventType: List<EventType>? = null): LiveData<List<GolosEvent>>
 
-    @AnyThread
+    @MainThread
     fun requestEventsUpdate(
             /**null if update all events**/
             eventTypes: List<EventType>? = null,
             fromId: String? = null,
             limit: Int? = 20,
             completionHandler: (Unit, GolosError?) -> Unit)
+
+    @MainThread
+    fun getRequestStatus(forType: EventType?): LiveData<UpdatingState>
 }
 
 class GolosServicesImpl(
@@ -60,6 +62,15 @@ class GolosServicesImpl(
             this[eventType] = MutableLiveData()
         }
     }
+    private val mStatus: HashMap<EventType?, MutableLiveData<UpdatingState>> = HashMap<EventType?, MutableLiveData<UpdatingState>>().apply {
+        EventType.values().forEach { eventType ->
+            this[eventType] = MutableLiveData()
+            this[eventType]!!.value = UpdatingState.DONE
+        }
+        this[null] = MutableLiveData()
+        this[null]!!.value = UpdatingState.DONE
+    }
+
     private val allEvents = MutableLiveData<List<GolosEvent>>()
 
 
@@ -72,6 +83,10 @@ class GolosServicesImpl(
         }
 
         instance = this
+    }
+
+    override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
+        return mStatus[forType]!!
     }
 
     private fun onTokenOrAuthStateChanged() {
@@ -111,7 +126,9 @@ class GolosServicesImpl(
     @WorkerThread
     private fun onAuthComplete() {
         subscribeToPushIfNeeded()
-        requestEventsUpdate(completionHandler = { _, _ -> })
+        mainThreadExecutor.execute {
+            requestEventsUpdate(completionHandler = { _, _ -> })
+        }
     }
 
     private fun subscribeToPushIfNeeded() {
@@ -160,10 +177,18 @@ class GolosServicesImpl(
         }
     }
 
+    @MainThread
     override fun requestEventsUpdate(eventTypes: List<EventType>?,
                                      fromId: String?,
                                      limit: Int?,
                                      completionHandler: (Unit, GolosError?) -> Unit) {
+
+        if (eventTypes == null) mStatus[null]?.value = UpdatingState.UPDATING
+        else {
+            eventTypes.forEach {
+                mStatus[it]?.value = UpdatingState.UPDATING
+            }
+        }
         workerExecutor.execute {
             try {
                 val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, limit)
@@ -176,27 +201,33 @@ class GolosServicesImpl(
                     set.addAll(mEventsMap[it.key]!!.value.orEmpty())
                     val list = set.toList()
                     mainThreadExecutor.execute {
+
                         mEventsMap[it.key]!!.value = list
+                        mStatus[it.key]!!.value = UpdatingState.DONE
+
                     }
                 }
                 if (eventsMap.isEmpty()) {
                     eventTypes?.forEach {
                         mainThreadExecutor.execute {
                             mEventsMap[it]!!.value = mEventsMap[it]!!.value
+                            mStatus[it]!!.value = UpdatingState.DONE
                         }
-
                     }
                     if (eventTypes == null)
                         mainThreadExecutor.execute {
                             allEvents.value = allEvents.value
+                            mStatus[null]!!.value = UpdatingState.DONE
                         }
+
                 }
 
-                if (eventTypes == null) {
+                if (eventsMap.isNotEmpty() && eventTypes == null) {
                     set.addAll(allEvents.value ?: emptyList())
                     set.addAll(golosEvents)
                     mainThreadExecutor.execute {
                         allEvents.value = set.toList()
+                        mStatus[null]!!.value = UpdatingState.DONE
                     }
                 }
                 mainThreadExecutor.execute { completionHandler(Unit, null) }
@@ -216,6 +247,9 @@ class GolosServicesImpl(
         val errorCode = rpcErrorFromCode(e.golosServicesError.code)
         if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
                 && userDataProvider.appUserData.value?.isLogged == true) {
+
+            isAuthComplete = false
+            isAuthInProgress = true
             mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
                     ?: return false)
             isAuthComplete = true

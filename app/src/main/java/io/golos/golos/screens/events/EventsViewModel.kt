@@ -18,14 +18,17 @@ import io.golos.golos.utils.UpdatingState
 import timber.log.Timber
 import java.util.concurrent.Executors
 
-data class EventsList(val events: List<EventListItem>)
+private data class EventsList(val events: List<EventListItem>)
+
+data class EventsListState(val events: List<EventsListItemWrapper>, val updatingState: UpdatingState)
 
 class EventsViewModel : ViewModel() {
     private val mMainTreadExecutor = MainThreadExecutor()
 
     private val mEventsList = MediatorLiveData<EventsList>()
-    val eventsList: LiveData<List<EventsListItemWrapper>> = Transformations.map(mEventsList) {
-        getSorter().getListItems(it.events)
+    val eventsList: LiveData<EventsListState> = Transformations.map(mEventsList) {
+        EventsListState(getSorter().getListItems(it.events), mUpdatingStatusObserver.value
+                ?: UpdatingState.DONE)
     }
     val updateState = MutableLiveData<Boolean>() as LiveData<Boolean>
     private lateinit var mEventsProvider: EventsProvider
@@ -36,6 +39,8 @@ class EventsViewModel : ViewModel() {
     private lateinit var mStoriesProvider: StoriesProvider
     private lateinit var mExchangesProvider: ExchangeDataProvider
     private lateinit var mNotificationRepository: PushNotificationsRepository
+    private val mUpdatingStatusObserver = MediatorLiveData<UpdatingState>()
+    private val mUpdatingObserver = Observer<UpdatingState> { }
 
     private val mPushesObserver: Observer<GolosNotifications> = Observer<GolosNotifications> {
         val last = it?.notifications?.firstOrNull() ?: return@Observer
@@ -273,8 +278,22 @@ class EventsViewModel : ViewModel() {
         }
         mEventsList.addSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null)) { onLiveDataChanged() }
         mNotificationRepository.notifications.observeForever(mPushesObserver)
-    }
 
+        if (mEventTypes == null) mUpdatingStatusObserver.addSource(mEventsProvider.getRequestStatus(null)) {
+            mUpdatingStatusObserver.value = it ?: UpdatingState.DONE
+        } else {
+            mEventTypes?.forEach {
+                mUpdatingStatusObserver.addSource(mEventsProvider.getRequestStatus(it)) {
+                    mUpdatingStatusObserver.value = mEventTypes
+                            ?.mapNotNull { mEventsProvider.getRequestStatus(it).value }
+                            ?.reduce { prev, curr -> if (prev == UpdatingState.UPDATING || curr == UpdatingState.UPDATING) UpdatingState.UPDATING else UpdatingState.DONE }
+
+                }
+            }
+        }
+
+        mUpdatingStatusObserver.observeForever(mUpdatingObserver)
+    }
 
     fun onStop() {
         mEventsProvider.let { mEventsList.removeSource(it.getEvents(mEventTypes?.toList())) }
@@ -284,6 +303,11 @@ class EventsViewModel : ViewModel() {
         mEventsList.removeSource(mUsersProvider.currentUserSubscriptionsUpdateStatus)
         mEventsList.removeSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null))
         mNotificationRepository.notifications.removeObserver(mPushesObserver)
+        if (mEventTypes == null) mUpdatingStatusObserver.removeSource(mEventsProvider.getRequestStatus(null))
+        else mEventTypes?.forEach {
+            mUpdatingStatusObserver.removeSource(mEventsProvider.getRequestStatus(it))
+        }
+        mUpdatingStatusObserver.removeObserver(mUpdatingObserver)
     }
 
     fun onEventClick(fragmentActivity: FragmentActivity, it: EventListItem) {

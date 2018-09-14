@@ -170,9 +170,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mGolosServices.requestEventsUpdate(type, fromId, limit, completionHandler)
     }
 
+    override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
+        return mGolosServices.getRequestStatus(forType)
+    }
+
     override fun lookupUsers(username: String): LiveData<List<String>> {
         return mUsersRepository.lookupUsers(username)
     }
+
 
     private fun getStory(blog: String?,
                          author: String,

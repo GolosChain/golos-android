@@ -9,7 +9,7 @@ import io.golos.golos.utils.mapper
 
 
 internal class UserSettingsImpl : UserSettingsRepository {
-    private val sharedPrefName = "UserSettings"
+    private val sharedPrefName = "u_settings"
     private val mCompactLiveData = MutableLiveData<Boolean>()
     private val mShowImageLiveData = MutableLiveData<Boolean>()
     private val mShowNSFWLiveData = MutableLiveData<Boolean>()
