@@ -34,8 +34,7 @@
         android:padding="@dimen/margin_material"
         android:paddingTop="100dp"
         android:text="@string/empty"
-
-        android:textSize="@dimen/font_big"
+        android:textSize="@dimen/font_medium"
         android:visibility="gone" />
 
     <ProgressBar

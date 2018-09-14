@@ -69,7 +69,5 @@ internal class ExchangesRepository(private val worker: Executor,
                 Timber.e(e)
             }
         }
-
-
     }
 }

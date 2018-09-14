@@ -13,7 +13,6 @@ import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.events.*
-import timber.log.Timber
 import java.util.*
 
 data class NotificationAppearance(val title: CharSequence? = null,
@@ -88,7 +87,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosWitnessVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosWitnessCancelVoteEvent -> GolosWitnessVoteNotification(golosEvent.fromUsers.first(), golosEvent.counter)
             is GolosAwardEvent -> GolosRewardNotification(golosEvent.permlink, golosEvent.award.golos, golosEvent.award.golosPower, golosEvent.award.gbg, golosEvent.counter)
-            is GolosCuratorAwardEvent -> GolosCuratorRewardNotification(golosEvent.author, golosEvent.permlink, golosEvent.award.golosPower, golosEvent.counter)//unsupported
+            is GolosCuratorAwardEvent -> GolosCuratorRewardNotification(golosEvent.author, golosEvent.permlink, golosEvent.awardInVShares, golosEvent.counter)//unsupported
 
             is GolosMessageEvent -> GolosWitnessVoteNotification("", golosEvent.counter)//unsupported
         }, currentUserName, when (eventListItem) {

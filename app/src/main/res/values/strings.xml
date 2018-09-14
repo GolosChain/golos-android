@@ -245,6 +245,10 @@
     <string name="curator_reward_for_entries" >%s your curation rewards</string>
     <string name="post_reward">Reward for the entry</string>
     <string name="curation_reward">Curation reward</string>
+    <string name="no_events_all">Start posting and commenting to receive users feedback.</string>
+    <string name="no_events_replies">Start posting interesting content to receive comments.</string>
+    <string name="no_events_social">Follow other authors and post interesting content to expand your audience.</string>
+    <string name="no_events_mentions">Get Golos users excited about your blog in order they mention you.</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -246,6 +246,10 @@
     <string name="curator_reward_for_entries" >Ваша кураторская награда %s</string>
     <string name="post_reward" >Награда за запись</string>
     <string name="curation_reward">Награда куратора</string>
+    <string name="no_events_all">Начни писать посты и комментарии, чтобы получать реакцию пользователей.</string>
+    <string name="no_events_replies">Начни писать и будешь получать комментарии от пользователей.</string>
+    <string name="no_events_social">Подписывайся на авторов и создавай интересный контент, чтобы подписывались на тебя.</string>
+    <string name="no_events_mentions">Заинтересуй пользователей Голоса, чтобы они упоминали тебя.</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

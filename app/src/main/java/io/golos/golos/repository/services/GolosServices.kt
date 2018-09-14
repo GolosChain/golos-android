@@ -3,6 +3,7 @@ package io.golos.golos.repository.services
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
+import android.support.annotation.AnyThread
 import android.support.annotation.MainThread
 import android.support.annotation.WorkerThread
 import io.golos.golos.notifications.FCMTokenProvider
@@ -28,7 +29,7 @@ interface GolosServices {
 
     fun getEvents(eventType: List<EventType>? = null): LiveData<List<GolosEvent>>
 
-    @MainThread
+    @AnyThread
     fun requestEventsUpdate(
             /**null if update all events**/
             eventTypes: List<EventType>? = null,
@@ -177,68 +178,70 @@ class GolosServicesImpl(
         }
     }
 
-    @MainThread
+    @AnyThread
     override fun requestEventsUpdate(eventTypes: List<EventType>?,
                                      fromId: String?,
                                      limit: Int?,
                                      completionHandler: (Unit, GolosError?) -> Unit) {
-
-        if (eventTypes == null) mStatus[null]?.value = UpdatingState.UPDATING
-        else {
-            eventTypes.forEach {
-                mStatus[it]?.value = UpdatingState.UPDATING
-            }
-        }
-        workerExecutor.execute {
-            try {
-                val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, limit)
-                val eventsMap = groupEventsByType(golosEvents)
-                val set = TreeSet<GolosEvent>()
-
-                eventsMap.forEach {
-                    set.clear()
-                    set.addAll(it.value)
-                    set.addAll(mEventsMap[it.key]!!.value.orEmpty())
-                    val list = set.toList()
-                    mainThreadExecutor.execute {
-
-                        mEventsMap[it.key]!!.value = list
-                        mStatus[it.key]!!.value = UpdatingState.DONE
-
-                    }
+        mainThreadExecutor.execute {
+            if (eventTypes == null) mStatus[null]?.value = UpdatingState.UPDATING
+            else {
+                eventTypes.forEach {
+                    mStatus[it]?.value = UpdatingState.UPDATING
                 }
-                if (eventsMap.isEmpty()) {
-                    eventTypes?.forEach {
+            }
+            workerExecutor.execute {
+                try {
+                    val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, limit)
+                    val eventsMap = groupEventsByType(golosEvents)
+                    val set = TreeSet<GolosEvent>()
+
+                    eventsMap.forEach {
+                        set.clear()
+                        set.addAll(it.value)
+                        set.addAll(mEventsMap[it.key]!!.value.orEmpty())
+                        val list = set.toList()
                         mainThreadExecutor.execute {
-                            mEventsMap[it]!!.value = mEventsMap[it]!!.value
-                            mStatus[it]!!.value = UpdatingState.DONE
+
+                            mEventsMap[it.key]!!.value = list
+                            mStatus[it.key]!!.value = UpdatingState.DONE
+
                         }
                     }
-                    if (eventTypes == null)
+                    if (eventsMap.isEmpty()) {
+                        eventTypes?.forEach {
+                            mainThreadExecutor.execute {
+                                mEventsMap[it]!!.value = mEventsMap[it]!!.value
+                                mStatus[it]!!.value = UpdatingState.DONE
+                            }
+                        }
+                        if (eventTypes == null)
+                            mainThreadExecutor.execute {
+                                allEvents.value = allEvents.value
+                                mStatus[null]!!.value = UpdatingState.DONE
+                            }
+
+                    }
+
+                    if (eventsMap.isNotEmpty() && eventTypes == null) {
+                        set.addAll(allEvents.value ?: emptyList())
+                        set.addAll(golosEvents)
                         mainThreadExecutor.execute {
-                            allEvents.value = allEvents.value
+                            allEvents.value = set.toList()
                             mStatus[null]!!.value = UpdatingState.DONE
                         }
-
-                }
-
-                if (eventsMap.isNotEmpty() && eventTypes == null) {
-                    set.addAll(allEvents.value ?: emptyList())
-                    set.addAll(golosEvents)
-                    mainThreadExecutor.execute {
-                        allEvents.value = set.toList()
-                        mStatus[null]!!.value = UpdatingState.DONE
                     }
-                }
-                mainThreadExecutor.execute { completionHandler(Unit, null) }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (e is GolosServicesException) {
-                    if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, completionHandler)
-                } else {
-                    mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
-                }
+                    mainThreadExecutor.execute { completionHandler(Unit, null) }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    if (e is GolosServicesException) {
 
+                        if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, completionHandler)
+                    } else {
+                        mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
+                    }
+
+                }
             }
         }
     }

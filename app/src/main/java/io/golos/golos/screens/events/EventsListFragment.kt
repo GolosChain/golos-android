@@ -98,6 +98,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
         })
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        mLabel?.text = getTextForNoEvents()
         return view
     }
 
@@ -150,6 +151,23 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         super.onStart()
         mViewModel?.onStart()
         if (isVisibleToUser) mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+    }
+
+    fun getTextForNoEvents(): CharSequence {
+        val start = getString(R.string.empty)
+        val types = getEventTypes(arguments ?: return start)
+        return when {
+            types == null -> start.plus("\n").plus(getString(R.string.no_events_all))
+            types.compareContents(listOf(EventType.REWARD, EventType.CURATOR_AWARD)) ->
+                start
+            types.compareContents(listOf(EventType.REPLY)) ->
+                start.plus("\n").plus(getString(R.string.no_events_replies))
+            types.compareContents(listOf(EventType.VOTE, EventType.FLAG, EventType.SUBSCRIBE, EventType.UNSUBSCRIBE, EventType.REPOST)) ->
+                start.plus("\n").plus(getString(R.string.no_events_social))
+            types.compareContents(listOf(EventType.MENTION)) ->
+                start.plus("\n").plus(getString(R.string.no_events_mentions))
+            else -> start
+        }
     }
 
 

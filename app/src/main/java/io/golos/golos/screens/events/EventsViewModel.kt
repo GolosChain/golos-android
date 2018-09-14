@@ -195,11 +195,11 @@ class EventsViewModel : ViewModel() {
                         val discussion = stories[it.permlink]
                         if (discussion == null) {
                             needToLoadDisussion = true
-                            author = mUserDataProvider.appUserData.value?.name.orEmpty()
+                            author = it.author
                             permlink = it.permlink
                         }
                         CuratorAwardEventListItem.create(it,
-                                (exchangesValue.vSharesToGolosPowerMultiplier * it.award.golosPower).toFloat(),
+                                (exchangesValue.vSharesToGolosPowerMultiplier * it.awardInVShares).toFloat(),
                                 stories[it.permlink]?.title.orEmpty())
                     }
                     is GolosMessageEvent -> MessageEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])

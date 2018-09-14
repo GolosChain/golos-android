@@ -82,7 +82,9 @@ data class GolosRewardNotification(val permlink: String, val golosAward: Double,
 }
 
 data class GolosCuratorRewardNotification(val author: String,
-                                          val permlink: String, val golosPowerReward: Double, override val numberOfSameType: Int) : GolosNotification() {
+                                          val permlink: String,
+                                          val golosPowerReward: Double,
+                                          override val numberOfSameType: Int) : GolosNotification() {
     private val _id = UUID.randomUUID().toString()
     override val id: String
         get() = _id
