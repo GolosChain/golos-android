@@ -2,7 +2,6 @@ package io.golos.golos.screens.profile
 
 import android.app.Activity
 import android.app.Dialog
-import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,7 +28,7 @@ import timber.log.Timber
 /**
  * Created by yuri on 30.10.17.
  */
-class UserNotLoggedInFragment : Fragment() {
+class AuthFragment : Fragment() {
     private val SCAN_POSTING_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_PERMISSION = nextInt()
@@ -96,34 +95,36 @@ class UserNotLoggedInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        mViewModel.userProfileState.observe(activity as LifecycleOwner, android.arch.lifecycle.Observer {
-            if (context != null) {
-                if (it?.isPostingKeyVisible == true) {
-                    mPostingKeyMenu.visibility = View.VISIBLE
-                    mActiveKeyMenu.visibility = View.GONE
-                    mLogOptionButton.text = getString(R.string.enter_with_active_key)
-                } else {
-                    mPostingKeyMenu.visibility = View.GONE
-                    mActiveKeyMenu.visibility = View.VISIBLE
-                    mLogOptionButton.text = getString(R.string.enter_with_posting_key)
-                }
-                mLogInEt.setText(it?.userName)
-                mProgressDialog?.let {
-                    it.dismiss()
-                    mProgressDialog = null
-                }
+        mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
 
-                if (it?.isLoading == true) {
-                    mProgressDialog = showProgressDialog()
-                    view.findFocus()?.let { context?.hideKeyboard(it) }
-                }
-                if (it?.error != null) {
-                    view.findFocus()?.let { context?.hideKeyboard(it) }
-                    Snackbar.make(mLogInEt,
-                            Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage
-                                    ?: 0)}</font>"),
-                            Toast.LENGTH_SHORT).show()
-                }
+            if (it?.isPostingKeyVisible == true) {
+                mPostingKeyMenu.visibility = View.VISIBLE
+                mActiveKeyMenu.visibility = View.GONE
+                mLogOptionButton.text = getString(R.string.enter_with_active_key)
+            } else {
+                mPostingKeyMenu.visibility = View.GONE
+                mActiveKeyMenu.visibility = View.VISIBLE
+                mLogOptionButton.text = getString(R.string.enter_with_posting_key)
+            }
+            mLogInEt.setText(it?.userName)
+
+            val pd = mProgressDialog
+            if (pd != null) {
+                pd.dismiss()
+                mProgressDialog = null
+            }
+
+            if (it?.isLoading == true) {
+
+                mProgressDialog = showProgressDialog()
+                view.findFocus()?.let { context?.hideKeyboard(it) }
+            }
+            if (it?.error != null) {
+                view.findFocus()?.let { context?.hideKeyboard(it) }
+                Snackbar.make(mLogInEt,
+                        Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage
+                                ?: 0)}</font>"),
+                        Toast.LENGTH_SHORT).show()
             }
         })
         mLogOptionButton.setOnClickListener { mViewModel.onChangeKeyTypeClick() }
@@ -137,21 +138,21 @@ class UserNotLoggedInFragment : Fragment() {
                 mViewModel.onUserInput(collectInputData())
             }
         })
-        mPostingEt.setOnEditorActionListener({ _, _, _ ->
+        mPostingEt.setOnEditorActionListener { _, _, _ ->
             mViewModel.onLoginClick()
             true
-        })
-        mActiveKeyEt.setOnEditorActionListener({ _, _, _ ->
+        }
+        mActiveKeyEt.setOnEditorActionListener { _, _, _ ->
             mViewModel.onLoginClick()
             true
-        })
+        }
         mActiveKeyEt.addTextChangedListener(object : LateTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
                 mViewModel.onUserInput(collectInputData())
             }
         })
-        mCancelButton.setOnClickListener({ mViewModel.onCancelClick() })
-        mEnterButton.setOnClickListener({ mViewModel.onLoginClick() })
+        mCancelButton.setOnClickListener { mViewModel.onCancelClick() }
+        mEnterButton.setOnClickListener { mViewModel.onLoginClick() }
         view.findViewById<View>(R.id.login_help_posting)?.setOnClickListener {
             LoginHelperFragment
                     .getInstance(LoginHelpType.FOR_POSTING_KEY)
@@ -166,8 +167,9 @@ class UserNotLoggedInFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        var resultCode = PreferenceManager.getDefaultSharedPreferences(activity?:return).getInt(BarcodeScannerActivity.LAST_RESULT_CODE, Activity.RESULT_CANCELED)
-        var out = PreferenceManager.getDefaultSharedPreferences(activity).getString(BarcodeScannerActivity.LAST_RESULT_TEXT, null)
+        val resultCode = PreferenceManager.getDefaultSharedPreferences(activity
+                ?: return).getInt(BarcodeScannerActivity.LAST_RESULT_CODE, Activity.RESULT_CANCELED)
+        val out = PreferenceManager.getDefaultSharedPreferences(activity).getString(BarcodeScannerActivity.LAST_RESULT_TEXT, null)
         //fix of a problem for some old samsung phones
 
         if (resultCode == Activity.RESULT_OK) {
@@ -194,6 +196,12 @@ class UserNotLoggedInFragment : Fragment() {
                 mActiveKeyEt.text.toString())
     }
 
+    override fun onDestroy() {
+        if (mProgressDialog != null) mProgressDialog!!.dismiss()
+        super.onDestroy()
+
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -209,8 +217,8 @@ class UserNotLoggedInFragment : Fragment() {
     }
 
     companion object {
-        fun getInstance(): UserNotLoggedInFragment {
-            val fr = UserNotLoggedInFragment()
+        fun getInstance(): AuthFragment {
+            val fr = AuthFragment()
             return fr
         }
     }

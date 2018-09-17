@@ -57,7 +57,7 @@ class ProfileRootFragment : GolosFragment(), Observer<AuthState> {
             if (oldFragment == null) {
                 childFragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.fade_in, 0)
-                        .replace(mRoot.id, UserNotLoggedInFragment.getInstance(), mNotLoggedFTag)
+                        .replace(mRoot.id, AuthFragment.getInstance(), mNotLoggedFTag)
                         .commit()
             } else {
                 childFragmentManager.beginTransaction()

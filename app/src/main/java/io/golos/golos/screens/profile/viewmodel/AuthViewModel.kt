@@ -1,14 +1,16 @@
 package io.golos.golos.screens.profile.viewmodel
 
 import android.app.Application
-import android.arch.lifecycle.*
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.Transformations
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 
 data class UserProfileState(val isLoggedIn: Boolean,
                             val isLoading: Boolean,
@@ -45,7 +47,6 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
     }!!
     private var mLastUserInput = AuthUserInput("")
     private val mRepository = Repository.get
-    private val mMediator = MediatorLiveData<Any>()
 
     init {
         mRepository
@@ -172,14 +173,5 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
                 accountWorth = appUserData.accountWorth,
                 isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
 
-    }
-
-    fun onLogoutClick() {
-        mRepository.deleteUserdata()
-        userProfileState.value = UserProfileState(false,
-                false,
-                avatarPath = null,
-                isPostingKeyVisible = true,
-                userName = "")
     }
 }
