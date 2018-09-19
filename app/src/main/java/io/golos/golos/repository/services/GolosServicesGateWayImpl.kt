@@ -39,7 +39,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
 
     private enum class ServicesMethod {
-        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT;
+        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT, SECRET_REQUEST;
 
         fun stringRepresentation() =
                 when (this) {
@@ -48,6 +48,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                     GET_NOTIFS_HISTORY -> "getNotifyHistory"
                     MARK_VIEWED -> "markAsViewed"
                     GET_UNREAD_COUNT -> "getNotifyHistoryFresh"
+                    SECRET_REQUEST -> "getSecret"
                 }
     }
 
@@ -69,29 +70,34 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                 }
             }
         }
-        communicationHandler.requestAuth()
+        communicationHandler.connect()
         synchronized(this) {
             if (authLatch.count == 0L) authLatch = CountDownLatch(1)
             authLatch.await()
         }
 
 
-        val authRequest = authRequest ?: throw IllegalStateException("multithreading not supported")
+        authRequest ?: throw IllegalStateException("multithreading not supported")
+        authInternal(userName)
+    }
+
+    private fun authInternal(userName: String){
+        val secret = communicationHandler.sendMessage(GetSecretRequest(), ServicesMethod.SECRET_REQUEST.stringRepresentation())
 
         try {
             val authResult = communicationHandler.sendMessage(GolosAuthRequest(userName,
-                    signHandler.sign(userName, authRequest.secret)), ServicesMethod.AUTH.stringRepresentation())
-            println("$authResult")
+                    signHandler.sign(userName, secret.getSecret())), ServicesMethod.AUTH.stringRepresentation())
+
             if (authResult.isAuthSuccessMessage()) {
                 authCounter.set(1)
             } else {
-                communicationHandler.requestAuth()
+                authInternal(userName)
             }
         } catch (e: GolosServicesException) {
             Timber.e("error $e")
             if (e.getErrorType() == JsonRpcError.AUTH_ERROR) {
                 if (authCounter.incrementAndGet() < 30)
-                    auth(userName)
+                    authInternal(userName)
             } else throw e
         }
     }
@@ -121,7 +127,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
     }
 
     override fun getUnreadCount(): Int {
-        return communicationHandler.sendMessage(GetUnreadCount(),
+        return communicationHandler.sendMessage(GetUnreadCountRequest(),
                 ServicesMethod.GET_UNREAD_COUNT.stringRepresentation()).getUnreadCount()
     }
 }

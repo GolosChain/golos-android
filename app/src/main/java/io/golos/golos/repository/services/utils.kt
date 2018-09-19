@@ -40,12 +40,22 @@ enum class EventType {
 
 
 fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
-    try {
+    return try {
         val succes = mapper.convertValue<Success>(result)
-        return succes.status.equals("ok", true)
+        succes.status.equals("ok", true)
     } catch (e: Exception) {
         e.printStackTrace()
-        return false
+        false
+    }
+}
+
+fun GolosServicesResponse.getSecret(): String {
+    return try {
+        mapper.convertValue<GolosServerAuthRequest.Secret>(result).secret
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ""
     }
 }
 

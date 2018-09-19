@@ -56,9 +56,11 @@ class MarkAsReadRequest(
         val ids: List<String>)
     : GolosServicesRequest()
 
-class GetUnreadCount
+class GetUnreadCountRequest
     : GolosServicesRequest()
 
+class GetSecretRequest
+    : GolosServicesRequest()
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class IdentifiableImpl(@JsonProperty("id") override val id: Long) : Identifiable

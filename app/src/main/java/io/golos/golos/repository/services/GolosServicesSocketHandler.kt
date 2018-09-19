@@ -83,8 +83,8 @@ class GolosServicesSocketHandler(private val gateUrl: String,
     }
 
     @Synchronized
-    override fun requestAuth() {
-        if (mSession?.isOpen == true) mSession?.close()
+    override fun connect() {
+        if (mSession?.isOpen == true) return
         mClient.connectToServer(this, ClientEndpointConfig.Builder.create().build(), URI(gateUrl))
 
     }
@@ -92,7 +92,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
     @Throws(IOException::class, DeploymentException::class, JSONException::class)
     override fun sendMessage(message: GolosServicesRequest, method: String): GolosServicesResponse {
         if (mSession?.isOpen != true) {
-            requestAuth()
+            connect()
         }
 
         val messageToSend = GolosServicesMessagesWrapper(method, message)
@@ -153,7 +153,7 @@ interface GolosServicesCommunicator {
     fun sendMessage(message: GolosServicesRequest, method: String): GolosServicesResponse
 
     @WorkerThread
-    fun requestAuth()
+    fun connect()
 
     @WorkerThread
     fun dropConnection()
