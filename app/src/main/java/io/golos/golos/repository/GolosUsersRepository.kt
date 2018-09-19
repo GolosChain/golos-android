@@ -363,6 +363,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                 if (mCurrentUserSubscriptions.value != null) mCurrentUserSubscriptions.value = null
             }
         }
+        mCurrentUserSubscriptions.observeForever {}
     }
 
     private fun addSubscribers(golosUsersSubscribers: Map<String, List<String>>) {

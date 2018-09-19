@@ -145,7 +145,7 @@ object DiscussionItemFactory {
         }
         if (json != null) {
             try {
-                if (json.has("image")) {
+                if (json.has("image") && json.get("image") != null) {
                     val imageArray = json.getJSONArray("image")
                     if (imageArray.length() > 0) {
                         (0 until imageArray.length()).mapTo(metadata.images) { imageArray[it].toString() }
@@ -157,13 +157,14 @@ object DiscussionItemFactory {
         }
         if (json != null) {
             try {
-                if (json.has("links")) {
+                if (json.has("links") && json.get("links") != null) {
                     val linksArray = json.getJSONArray("links")
                     if (linksArray.length() > 0) {
                         (0 until linksArray.length()).mapTo(metadata.links) { linksArray[it].toString() }
                     }
                 }
             } catch (e: JSONException) {
+                Timber.e(" links = ${json.get("links")}")
                 e.printStackTrace()
             }
         }

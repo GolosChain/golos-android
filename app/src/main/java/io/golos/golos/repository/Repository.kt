@@ -33,10 +33,14 @@ interface EventsProvider {
     fun requestEventsUpdate(type: List<EventType>?,
                             fromId: String? = null,
                             limit: Int = 40,
+                            markAsRead: Boolean,
                             completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
     fun getRequestStatus(forType: EventType?): LiveData<UpdatingState>
+
+    fun getUnreadEventsCount(): LiveData<Int>
+
 }
 
 interface ExchangeDataProvider {

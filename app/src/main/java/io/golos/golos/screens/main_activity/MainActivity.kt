@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -27,6 +26,7 @@ import io.golos.golos.screens.main_activity.adapters.MainPagerAdapter
 import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.widgets.GolosBottomNavView
 import io.golos.golos.utils.*
 import timber.log.Timber
 import java.util.*
@@ -41,6 +41,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
     private lateinit var mNotificationsRecycler: RecyclerView
     private val mHandler = Handler()
     private val mSelectLiveData = OneShotLiveData<FeedType>()
+    private lateinit var mPager: ViewPager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,31 +55,31 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
         mNotificationsIndicator = findViewById(R.id.notifications_count_tv)
         mNotificationsContainer = findViewById(R.id.notifications_container)
 
-        val pager: ViewPager = findViewById(R.id.content_pager)
-        pager.adapter = MainPagerAdapter(supportFragmentManager)
+        mPager = findViewById(R.id.content_pager)
+        mPager.adapter = MainPagerAdapter(supportFragmentManager)
 
-        pager.offscreenPageLimit = 1
+        mPager.offscreenPageLimit = 1
 
-        pager.setPageTransformer(false) { page, pos ->
+        mPager.setPageTransformer(false) { page, pos ->
             val posAbs = Math.abs(pos)
             if (pos > 0.99) page.alpha = 0.0f
             else page.alpha = 1 - posAbs
         }
 
-        val bottomNavView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
+        val bottomNavView: GolosBottomNavView = findViewById(R.id.bottom_nav_view)
         bottomNavView.setOnNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.stories -> {
-                    pager.currentItem = STORIES_FRAGMENT_POSITION
+                    mPager.currentItem = STORIES_FRAGMENT_POSITION
                     true
                 }
                 R.id.groups -> {
-                    pager.currentItem = FILTERED_BY_TAG_STORIES
+                    mPager.currentItem = FILTERED_BY_TAG_STORIES
                     true
                 }
                 R.id.notifications -> {
                     if (Repository.get.isUserLoggedIn()) {
-                        pager.currentItem = NOTIFICATIONS_HISTORY
+                        mPager.currentItem = NOTIFICATIONS_HISTORY
                         true
                     } else {
                         bottomNavView.showSnackbar(R.string.must_be_logged_in_for_this_action)
@@ -95,7 +96,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                     }
                 }
                 R.id.profile -> {
-                    pager.currentItem = PROFILE_FRAGMENT_POSITION
+                    mPager.currentItem = PROFILE_FRAGMENT_POSITION
                     true
                 }
                 else -> true
@@ -170,9 +171,25 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                 }
             }
         })
+
         mNotificationsIndicator.setOnClickListener {
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
+        Repository.get.getUnreadEventsCount().observe(this, Observer {
+            Timber.e("on changed $it")
+            bottomNavView.setCounterAt(3, it ?: 0)
+        })
+        Repository.get.notificationsRepository.notifications.observe(this, object : Observer<GolosNotifications> {
+            var lastNotifsCount = 0
+            override fun onChanged(t: GolosNotifications?) {
+                t ?: return
+                if (lastNotifsCount < t.notifications.size) {
+                    Repository.get.requestEventsUpdate(null, limit = 10, markAsRead = mPager.currentItem == NOTIFICATIONS_HISTORY)
+                }
+                lastNotifsCount = t.notifications.size
+            }
+        })
+
         checkpreSelect(intent)
 
     }

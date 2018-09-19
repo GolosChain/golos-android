@@ -16,55 +16,68 @@ abstract class GolosServicesRequest : JsonConvertable {
 }
 
 
-data class GolosAuthRequest(
+class GolosAuthRequest(
         @JsonProperty("user")
         val user: String,
         @JsonProperty("sign")
         val sign: String) : GolosServicesRequest()
 
-data class GolosPushSubscribeRequest(
+class GolosPushSubscribeRequest(
         @JsonProperty("profile")
         val profile: String,
         @JsonProperty("deviceType")
         val deviceType: String = "android") : GolosServicesRequest()
 
-data class GolosEventRequest(
+class GolosEventRequest(
         @JsonProperty("fromId")
         val fromId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
         val limit: Int = 40,
         @JsonProperty("types")
-        val types: List<String>) : GolosServicesRequest()
+        val types: List<String>,
+        @JsonProperty("markAsViewed")
+        val markAsViewed: Boolean?) : GolosServicesRequest()
 
-data class GolosAllEventRequest(
+class GolosAllEventRequest(
         @JsonProperty("fromId")
         val fromId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
         val limit: Int = 40,
+        @JsonProperty("markAsViewed")
+        val markAsViewed: Boolean?,
         @JsonProperty("types")
-        val types: String = "all") : GolosServicesRequest()
+        val types: String = "all"
+) : GolosServicesRequest()
+
+class MarkAsReadRequest(
+        @JsonProperty("ids")
+        val ids: List<String>)
+    : GolosServicesRequest()
+
+class GetUnreadCount
+    : GolosServicesRequest()
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class IdentifiableImpl(@JsonProperty("id") override val id: Long) : Identifiable
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GolosServicesError(
+class GolosServicesError(
         @JsonProperty("code")
         val code: Int,
         @JsonProperty("message")
         val message: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GolosServicesResponse(@JsonProperty("id")
-                                 override val id: Long,
-                                 @JsonProperty("result")
-                                 val result: Any) : IdentifiableImpl(id)
+class GolosServicesResponse(@JsonProperty("id")
+                            override val id: Long,
+                            @JsonProperty("result")
+                            val result: Any) : IdentifiableImpl(id)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GolosServicesErrorMessage(
+class GolosServicesErrorMessage(
         @JsonProperty("id")
         override val id: Long,
         @JsonProperty("error")
@@ -89,7 +102,7 @@ class GolosServerAuthRequest(
 
     val secret = params.secret
 
-    data class Secret(@JsonProperty("secret") val secret: String)
+    class Secret(@JsonProperty("secret") val secret: String)
 }
 
 

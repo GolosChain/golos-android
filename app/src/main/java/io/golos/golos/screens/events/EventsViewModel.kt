@@ -3,7 +3,6 @@ package io.golos.golos.screens.events
 import android.arch.lifecycle.*
 import android.content.Context
 import android.support.v4.app.FragmentActivity
-import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
@@ -41,18 +40,9 @@ class EventsViewModel : ViewModel() {
     private lateinit var mNotificationRepository: PushNotificationsRepository
     private val mUpdatingStatusObserver = MediatorLiveData<UpdatingState>()
     private val mUpdatingObserver = Observer<UpdatingState> { }
+    private var isVisibleToUser = false
 
-    private val mPushesObserver: Observer<GolosNotifications> = Observer<GolosNotifications> {
-        val last = it?.notifications?.firstOrNull() ?: return@Observer
-        if (!::mEventsProvider.isInitialized) return@Observer
-        if (mEventTypes == null) {
-            mEventsProvider.requestEventsUpdate(null, limit = updateLimit)
-        } else {
-            if (mEventTypes?.contains(last.toEventType()) == true) {
-                mEventsProvider.requestEventsUpdate(last.toEventType().toSingletoneList(), limit = updateLimit)
-            }
-        }
-    }
+
     private val updateLimit = 15
 
     fun onCreate(eventTypes: List<EventType>?,
@@ -237,8 +227,14 @@ class EventsViewModel : ViewModel() {
 
 
     fun onChangeVisibilityToUser(visibleToUser: Boolean) {
+        if (isVisibleToUser == visibleToUser) return
+        isVisibleToUser = visibleToUser
         if (visibleToUser) {
-            mEventsProvider.requestEventsUpdate(mEventTypes?.toList(), limit = updateLimit, fromId = null)
+            mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
+                    fromId = null,
+                    limit = Math.max(updateLimit, mEventsProvider.getUnreadEventsCount().value
+                            ?: 0),
+                    markAsRead = true)
         }
     }
 
@@ -256,7 +252,7 @@ class EventsViewModel : ViewModel() {
 
     fun onScrollToTheEnd() {
         mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
-                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit) { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
+                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit, true) { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
         (updateState as MutableLiveData<Boolean>).value = true
     }
 
@@ -277,7 +273,7 @@ class EventsViewModel : ViewModel() {
             mEventsList.addSource(mUsersProvider.currentUserSubscriptionsUpdateStatus) { onLiveDataChanged() }
         }
         mEventsList.addSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null)) { onLiveDataChanged() }
-        mNotificationRepository.notifications.observeForever(mPushesObserver)
+
 
         if (mEventTypes == null) mUpdatingStatusObserver.addSource(mEventsProvider.getRequestStatus(null)) {
             mUpdatingStatusObserver.value = it ?: UpdatingState.DONE
@@ -302,7 +298,7 @@ class EventsViewModel : ViewModel() {
         mEventsList.removeSource(mUsersProvider.currentUserSubscriptions)
         mEventsList.removeSource(mUsersProvider.currentUserSubscriptionsUpdateStatus)
         mEventsList.removeSource(mStoriesProvider.getStories(FeedType.UNCLASSIFIED, null))
-        mNotificationRepository.notifications.removeObserver(mPushesObserver)
+
         if (mEventTypes == null) mUpdatingStatusObserver.removeSource(mEventsProvider.getRequestStatus(null))
         else mEventTypes?.forEach {
             mUpdatingStatusObserver.removeSource(mEventsProvider.getRequestStatus(it))
@@ -323,8 +319,14 @@ class EventsViewModel : ViewModel() {
     }
 
     fun requestUpdate() {
-        onChangeVisibilityToUser(true)
+        mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
+                fromId = null,
+                limit = Math.max(updateLimit, mEventsProvider.getUnreadEventsCount().value
+                        ?: 0),
+                markAsRead = true)
     }
+
+    private fun updateFromBeginning(){}
 
     companion object {
         @JvmStatic

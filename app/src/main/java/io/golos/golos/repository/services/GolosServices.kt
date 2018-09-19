@@ -35,10 +35,17 @@ interface GolosServices {
             eventTypes: List<EventType>? = null,
             fromId: String? = null,
             limit: Int? = 20,
+            markAsRead: Boolean,
             completionHandler: (Unit, GolosError?) -> Unit)
 
     @MainThread
     fun getRequestStatus(forType: EventType?): LiveData<UpdatingState>
+
+    fun getFreshEventsCount(): LiveData<Int>
+
+    fun markAsRead(eventsIds: List<String>)
+
+
 }
 
 class GolosServicesImpl(
@@ -73,6 +80,7 @@ class GolosServicesImpl(
     }
 
     private val allEvents = MutableLiveData<List<GolosEvent>>()
+    private val mUnreadCountLiveData = MutableLiveData<Int>()
 
 
     override fun setUp() {
@@ -86,8 +94,22 @@ class GolosServicesImpl(
         instance = this
     }
 
+    override fun markAsRead(eventsIds: List<String>) {
+        workerExecutor.execute {
+            mGolosServicesGateWay.markAsRead(eventsIds)
+            val unreadCount = mGolosServicesGateWay.getUnreadCount()
+            mainThreadExecutor.execute {
+                mUnreadCountLiveData.value = unreadCount
+            }
+        }
+    }
+
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
         return mStatus[forType]!!
+    }
+
+    override fun getFreshEventsCount(): LiveData<Int> {
+        return mUnreadCountLiveData
     }
 
     private fun onTokenOrAuthStateChanged() {
@@ -128,7 +150,7 @@ class GolosServicesImpl(
     private fun onAuthComplete() {
         subscribeToPushIfNeeded()
         mainThreadExecutor.execute {
-            requestEventsUpdate(completionHandler = { _, _ -> })
+            requestEventsUpdate(markAsRead = false, completionHandler = { _, _ -> })
         }
     }
 
@@ -182,7 +204,9 @@ class GolosServicesImpl(
     override fun requestEventsUpdate(eventTypes: List<EventType>?,
                                      fromId: String?,
                                      limit: Int?,
+                                     markAsRead: Boolean,
                                      completionHandler: (Unit, GolosError?) -> Unit) {
+        if (!isAuthComplete) return
         mainThreadExecutor.execute {
             if (eventTypes == null) mStatus[null]?.value = UpdatingState.UPDATING
             else {
@@ -192,8 +216,9 @@ class GolosServicesImpl(
             }
             workerExecutor.execute {
                 try {
-                    val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, limit)
-                    val eventsMap = groupEventsByType(golosEvents)
+                    val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, markAsRead, limit)
+                    val events = golosEvents.events
+                    val eventsMap = groupEventsByType(events)
                     val set = TreeSet<GolosEvent>()
 
                     eventsMap.forEach {
@@ -225,19 +250,25 @@ class GolosServicesImpl(
 
                     if (eventsMap.isNotEmpty() && eventTypes == null) {
                         set.addAll(allEvents.value ?: emptyList())
-                        set.addAll(golosEvents)
+                        set.addAll(events)
                         mainThreadExecutor.execute {
                             allEvents.value = set.toList()
                             mStatus[null]!!.value = UpdatingState.DONE
                         }
                     }
-                    mainThreadExecutor.execute { completionHandler(Unit, null) }
+                    mainThreadExecutor.execute {
+
+                        completionHandler(Unit, null)
+                    }
+                    val freshCount = mGolosServicesGateWay.getUnreadCount()
+                    mainThreadExecutor.execute {
+                        mUnreadCountLiveData.value = freshCount
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    if (e is GolosServicesException) {
 
-                        if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, completionHandler)
-                    } else {
+                    if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, markAsRead, completionHandler)
+                    else {
                         mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
                     }
 
@@ -246,7 +277,10 @@ class GolosServicesImpl(
         }
     }
 
-    private fun reauthIfNeeded(e: GolosServicesException): Boolean {
+
+    private fun reauthIfNeeded(e: Exception): Boolean {
+        if (e !is GolosServicesException) return false
+
         val errorCode = rpcErrorFromCode(e.golosServicesError.code)
         if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
                 && userDataProvider.appUserData.value?.isLogged == true) {

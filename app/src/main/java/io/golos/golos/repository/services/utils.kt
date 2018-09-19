@@ -1,6 +1,5 @@
 package io.golos.golos.repository.services
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.golos.golos.utils.JsonRpcError
@@ -10,8 +9,11 @@ import io.golos.golos.utils.rpcErrorFromCode
 private class Success(@JsonProperty("status") val status: String)
 
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-private class EventData(@JsonProperty("data") val data: List<Event>)
+private data class EventsData(@JsonProperty("total") val total: Int,
+                              @JsonProperty("fresh") val fresh: Int,
+                              @JsonProperty("data") val data: List<Event>)
+
+data class GolosEvents(val freshCount: Int, val events: List<GolosEvent>)
 
 enum class EventType {
     VOTE, FLAG, TRANSFER, REPLY, SUBSCRIBE, UNSUBSCRIBE, MENTION, REPOST, REWARD, CURATOR_AWARD, MESSAGE,
@@ -57,13 +59,26 @@ fun GolosServicesResponse.isPushSubscribeSuccesMessage(): Boolean {
     }
 }
 
-fun GolosServicesResponse.getEventData(): List<Event> {
-    try {
-        val eventData = mapper.convertValue<EventData>(result)
-        return eventData.data
+fun GolosServicesResponse.getUnreadCount(): Int {
+    return try {
+        mapper.convertValue<FreshResult>(result).fresh
     } catch (e: Exception) {
         e.printStackTrace()
-        return emptyList()
+        0
+    }
+}
+
+class FreshResult(@JsonProperty("fresh") val fresh: Int)
+
+fun GolosServicesResponse.getEventData(): GolosEvents {
+    return try {
+        mapper.convertValue<EventsData>(result).let {
+            GolosEvents(it.fresh,
+                    it.data.map { GolosEvent.fromEvent(it) })
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        GolosEvents(0, emptyList())
     }
 }
 

@@ -127,6 +127,12 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 mRecycler?.post { mRecycler?.scrollToPosition(0) }
             }
         })
+        (parentFragment as ParentVisibilityChangeEmitter?)?.status?.observe(this, Observer {
+            it ?: return@Observer
+            val myPosition = arguments?.getInt(POSITION, Int.MIN_VALUE) ?: return@Observer
+            if (myPosition != it.currentSelectedFragment) return@Observer
+            mViewModel?.onChangeVisibilityToUser(it.isParentVisible)
+        })
     }
 
 

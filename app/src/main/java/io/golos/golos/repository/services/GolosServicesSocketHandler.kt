@@ -98,7 +98,7 @@ class GolosServicesSocketHandler(private val gateUrl: String,
         val messageToSend = GolosServicesMessagesWrapper(method, message)
         val messageString = mapper.writeValueAsString(messageToSend)
 
-        println("sendMessage $messageString from ${Thread.currentThread().name}")
+        Timber.i("sendMessage $messageString from ${Thread.currentThread().name}")
 
 
         mSession?.basicRemote?.sendText(messageString)

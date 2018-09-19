@@ -2,6 +2,7 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.Transformations
 import android.content.Context
 import android.support.annotation.WorkerThread
@@ -11,6 +12,7 @@ import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
+import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.notifications.PushNotificationsRepositoryImpl
 import io.golos.golos.repository.api.GolosApi
@@ -37,7 +39,7 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 @Suppress("NAME_SHADOWING", "LABEL_NAME_CLASH")
-internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newFixedThreadPool(2),
+internal class RepositoryImpl(private val networkExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister = Persister.get,
@@ -48,7 +50,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               avatarsRepository: GolosUsersRepository? = null,
                               golosServices: GolosServices? = null,
                               private val mHtmlizer: Htmlizer = KnifeHtmlizer,
-                              private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), mMainThreadExecutor),
+                              private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), MainThreadExecutor()),
                               private val mLogger: ExceptionLogger?) : Repository() {
 
 
@@ -155,8 +157,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
         mGolosServices.setUp()
         (mUsersRepository as UsersRepositoryImpl).setUp()
-
         prepareForLaunch()
+    }
+
+    override fun getUnreadEventsCount(): LiveData<Int> {
+        return mGolosServices.getFreshEventsCount()
     }
 
     override fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>> {
@@ -166,8 +171,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     override val currentUserSubscriptions: LiveData<List<String>>
         get() = mUsersRepository.currentUserSubscriptions
 
-    override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int, completionHandler: (Unit, GolosError?) -> Unit) {
-        mGolosServices.requestEventsUpdate(type, fromId, limit, completionHandler)
+    override fun requestEventsUpdate(type: List<EventType>?, fromId: String?, limit: Int, markAsRead: Boolean, completionHandler: (Unit, GolosError?) -> Unit) {
+        mGolosServices.requestEventsUpdate(type, fromId, limit, markAsRead, completionHandler)
     }
 
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {

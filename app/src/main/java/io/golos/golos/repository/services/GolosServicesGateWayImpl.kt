@@ -19,9 +19,18 @@ interface GolosServicesGateWay {
     fun subscribeOnNotifications(fcmToken: String)
 
     @WorkerThread
-    fun getEvents(fromId: String?, eventType: List<EventType>?, limit: Int? = 100): List<GolosEvent>
+    fun getEvents(fromId: String?,
+                  eventType: List<EventType>?,
+                  markAsRead: Boolean,
+                  limit: Int? = 100): GolosEvents
 
+    @WorkerThread
+    fun markAsRead(ids: List<String>)
+
+    @WorkerThread
+    fun getUnreadCount(): Int
 }
+
 
 class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCommunicator
                                = GolosServicesSocketHandler(BuildConfig.GATE_URL),
@@ -30,13 +39,15 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
 
     private enum class ServicesMethod {
-        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY;
+        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT;
 
         fun stringRepresentation() =
                 when (this) {
                     AUTH -> this.toString().toLowerCase()
                     PUSH_SUBSCRIBE -> "pushNotifyOn"
                     GET_NOTIFS_HISTORY -> "getNotifyHistory"
+                    MARK_VIEWED -> "markAsViewed"
+                    GET_UNREAD_COUNT -> "getNotifyHistoryFresh"
                 }
     }
 
@@ -97,12 +108,21 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         authCounter.set(1)
     }
 
-    override fun getEvents(fromId: String?, eventType: List<EventType>?, limit: Int?): List<GolosEvent> {
-        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 40)
-        else GolosEventRequest(fromId, limit ?: 40, eventType.map { it.toString() })
+    override fun getEvents(fromId: String?, eventType: List<EventType>?, markAsRead: Boolean, limit: Int?): GolosEvents {
+        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 40, markAsRead)
+        else GolosEventRequest(fromId, limit ?: 40, eventType.map { it.toString() }, markAsRead)
         return communicationHandler.sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY.stringRepresentation())
                 .getEventData()
-                .map { GolosEvent.fromEvent(it) }
+    }
+
+    override fun markAsRead(ids: List<String>) {
+        communicationHandler.sendMessage(MarkAsReadRequest(ids),
+                ServicesMethod.MARK_VIEWED.stringRepresentation())
+    }
+
+    override fun getUnreadCount(): Int {
+        return communicationHandler.sendMessage(GetUnreadCount(),
+                ServicesMethod.GET_UNREAD_COUNT.stringRepresentation()).getUnreadCount()
     }
 }
 

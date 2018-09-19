@@ -22,7 +22,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService1() {
 
             val notification = mapper.readValue<Notification>(p0?.data?.get("body")
                     ?: return, Notification::class.java)
-            Timber.e("notification = $notification")
+
             Handler(Looper.getMainLooper()).post {
                 Repository.get.notificationsRepository.onReceivePushNotifications(listOf(notification))
             }

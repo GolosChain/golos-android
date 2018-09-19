@@ -10,9 +10,9 @@ import io.golos.golos.utils.StringProvider
 
 class EventsPagerAdapter(private val textProvider: StringProvider,
                          fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-    private val fragments: HashMap<Int, GolosFragment> = hashMapOf()
+
     override fun getItem(position: Int): Fragment {
-        fragments[position] = when (position) {
+        return when (position) {
             0 -> EventsListFragment.getInstance(null, position)
             1 -> EventsListFragment.getInstance(listOf(EventType.REWARD, EventType.CURATOR_AWARD), position)
             2 -> EventsListFragment.getInstance(listOf(EventType.REPLY), position)
@@ -20,7 +20,7 @@ class EventsPagerAdapter(private val textProvider: StringProvider,
             4 -> EventsListFragment.getInstance(listOf(EventType.MENTION), position)
             else -> EventsListFragment.getInstance(null, position)
         }
-        return fragments[position]!!
+
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
@@ -35,7 +35,5 @@ class EventsPagerAdapter(private val textProvider: StringProvider,
     }
 
     override fun getCount(): Int = 5
-    fun onUserVisibilityChanged(visibleToUser: Boolean, position: Int) {
-        fragments[position]?.userVisibleHint = visibleToUser
-    }
+
 }

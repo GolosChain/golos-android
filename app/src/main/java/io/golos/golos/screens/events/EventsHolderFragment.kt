@@ -14,9 +14,10 @@ import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.StringProvider
 import timber.log.Timber
 
-class EventsHolderFragment : GolosFragment(), ReselectionEmitter {
+class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibilityChangeEmitter {
     private val mReselectLiveData = MutableLiveData<Int>()
     private var mPager: ViewPager? = null
+    private val mStatusChange = MutableLiveData<VisibilityStatus>()
 
     override val reselectLiveData: LiveData<Int>
         get() = mReselectLiveData
@@ -31,7 +32,7 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter {
         }, childFragmentManager)
         val tabLo = v.findViewById<TabLayout>(R.id.tab_lo)
         tabLo.setupWithViewPager(mPager)
-        tabLo.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener{
+        tabLo.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
                 mReselectLiveData.value = tabLo.selectedTabPosition
             }
@@ -48,9 +49,18 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter {
         return v
     }
 
+    override val status: LiveData<VisibilityStatus>
+        get() = mStatusChange
+
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
-        (mPager?.adapter as? EventsPagerAdapter)?.onUserVisibilityChanged(isVisibleToUser, mPager?.currentItem
-                ?: return)
+        mStatusChange.value = VisibilityStatus(isVisibleToUser, mPager?.currentItem ?: 0)
     }
 }
+
+interface ParentVisibilityChangeEmitter {
+    val status: LiveData<VisibilityStatus>
+}
+
+data class VisibilityStatus(val isParentVisible: Boolean,
+                            val currentSelectedFragment: Int)

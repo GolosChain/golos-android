@@ -1,12 +1,14 @@
 package io.golos.golos.screens.story
 
 import android.app.Activity
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.Tag
@@ -17,8 +19,9 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 
-class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
+class StoryViewModel : ViewModel() {
 
 
     private val mStoryLiveData = MediatorLiveData<StoryViewState>()
@@ -67,25 +70,9 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
 
     }
 
-    override fun onChanged(t: ApplicationUser?) {
-        if (t == null || !t.isLogged) {
-            mSubscriptionsLiveData.removeSource(mRepository.getGolosUserSubscriptions(curentUserName
-                    ?: return))
-            mSubscriptionsLiveData.value = StorySubscriptionBlockState(false, SubscribeStatus.UnsubscribedStatus, SubscribeStatus.UnsubscribedStatus)
-            curentUserName = null
-        } else {
-            curentUserName = t.name
-            mStoryLiveData.value = mStoryLiveData.value?.copy(isStoryCommentButtonShown = true)
-
-            mSubscriptionsLiveData.addSource(mRepository.getGolosUserSubscriptions(t.name)) {
-                onGolosUserSubscriptionsStateChanged()
-            }
-        }
-    }
-
     private fun onGolosUserSubscriptionsStateChanged() {
-        val currentSubscriptions = mRepository.getGolosUserSubscriptions(mRepository.appUserData.value?.name
-                ?: return).value.orEmpty()
+        val currentSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
+
         val currentSubscriptionsStates = mRepository.currentUserSubscriptionsUpdateStatus.value.orEmpty()
         mSubscriptionsLiveData.value = mSubscriptionsLiveData
                 .value
@@ -101,6 +88,14 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
                 it.rootStory()?.author == this.author
                         && it.rootStory()?.permlink == this.permLink
             }?.let {
+                val currentSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
+
+                val currentSubscriptionsStates = mRepository.currentUserSubscriptionsUpdateStatus.value.orEmpty()
+                mSubscriptionsLiveData.value = mSubscriptionsLiveData
+                        .value
+                        ?.copy(subscribeOnStoryAuthorStatus = SubscribeStatus.create(currentSubscriptions.contains(author),
+                                currentSubscriptionsStates[author] ?: UpdatingState.DONE))
+
                 val story = it.rootStory() ?: return@let
                 val mustHaveComments = story.commentsCount
                 val commentsSize = it.comments().size
@@ -113,28 +108,30 @@ class StoryViewModel : ViewModel(), Observer<ApplicationUser> {
                         tags = it.rootStory()?.tags.orEmpty().toArrayList(),
                         storyTree = it,
                         isStoryCommentButtonShown = mRepository.isUserLoggedIn())
+
                 this.blog = mStoryLiveData.value?.storyTree?.rootStory()?.categoryName
             }
         }
 
-        mRepository.appUserData.observeForever(this)
+
 
         mSubscriptionsLiveData.addSource(mRepository.getUserSubscribedTags()) {
             val tagItem = it?.find { it.name == this.blog }
             mSubscriptionsLiveData.value = mSubscriptionsLiveData.value?.copy(
                     subscribeOnTagStatus = SubscribeStatus(tagItem != null, UpdatingState.DONE))
         }
-        mSubscriptionsLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onGolosUserSubscriptionsStateChanged() }
-        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog,true,true, feedType) { _, _ -> }
+        mSubscriptionsLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) {
+            onGolosUserSubscriptionsStateChanged()
+        }
+
+        mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, true, true, feedType) { _, _ -> }
     }
 
     fun onStop() {
         mStoryLiveData.removeSource(mRepository.getStories(feedType, filter))
-        mStoryLiveData.removeSource(mRepository.appUserData)
-        mSubscriptionsLiveData.removeSource(mRepository.getGolosUserSubscriptions(mRepository.appUserData.value?.name.orEmpty()))
         mSubscriptionsLiveData.removeSource(mRepository.getUserSubscribedTags())
         mSubscriptionsLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
-        mRepository.appUserData.removeObserver(this)
+
     }
 
     data class ImageClickData(val position: Int, val images: List<String>)
