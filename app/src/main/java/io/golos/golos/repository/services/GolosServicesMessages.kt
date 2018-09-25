@@ -1,9 +1,6 @@
 package io.golos.golos.repository.services
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.*
 import io.golos.golos.utils.JsonConvertable
 import io.golos.golos.utils.mapper
 
@@ -28,23 +25,25 @@ class GolosPushSubscribeRequest(
         @JsonProperty("deviceType")
         val deviceType: String = "android") : GolosServicesRequest()
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class GolosEventRequest(
         @JsonProperty("fromId")
         val fromId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
-        val limit: Int = 40,
+        val limit: Int ,
         @JsonProperty("types")
         val types: List<String>,
         @JsonProperty("markAsViewed")
         val markAsViewed: Boolean?) : GolosServicesRequest()
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class GolosAllEventRequest(
         @JsonProperty("fromId")
         val fromId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
-        val limit: Int = 40,
+        val limit: Int,
         @JsonProperty("markAsViewed")
         val markAsViewed: Boolean?,
         @JsonProperty("types")
@@ -57,6 +56,9 @@ class MarkAsReadRequest(
     : GolosServicesRequest()
 
 class GetUnreadCountRequest
+    : GolosServicesRequest()
+
+class MarkAllReadRequest
     : GolosServicesRequest()
 
 class GetSecretRequest

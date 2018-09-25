@@ -15,10 +15,11 @@ import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.utils.*
 import timber.log.Timber
-import java.util.TreeSet
+import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.collections.set
 
 interface GolosServices {
@@ -34,7 +35,7 @@ interface GolosServices {
             /**null if update all events**/
             eventTypes: List<EventType>? = null,
             fromId: String? = null,
-            limit: Int? = 20,
+            limit: Int = 15,
             markAsRead: Boolean,
             completionHandler: (Unit, GolosError?) -> Unit)
 
@@ -45,7 +46,6 @@ interface GolosServices {
 
     fun markAsRead(eventsIds: List<String>)
 
-
 }
 
 class GolosServicesImpl(
@@ -55,6 +55,9 @@ class GolosServicesImpl(
         golosServicesGateWay: GolosServicesGateWay? = null,
         private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
         private val mainThreadExecutor: Executor = MainThreadExecutor()) : GolosServices {
+
+
+    private val mSendingQue = Collections.synchronizedSet(HashSet<String>())
 
     @Volatile
     private var isAuthComplete: Boolean = false
@@ -95,12 +98,36 @@ class GolosServicesImpl(
     }
 
     override fun markAsRead(eventsIds: List<String>) {
-        workerExecutor.execute {
-            mGolosServicesGateWay.markAsRead(eventsIds)
-            val unreadCount = mGolosServicesGateWay.getUnreadCount()
-            mainThreadExecutor.execute {
-                mUnreadCountLiveData.value = unreadCount
+
+        val allEvents = allEvents.value.orEmpty().associateBy { it.id }
+
+        val copy = eventsIds.toArrayList()
+        eventsIds.forEach {
+            val event = allEvents[it] ?: return@forEach
+            if (!event.fresh) {
+
+                copy.remove(it)
             }
+        }
+        if (copy.isEmpty()) {
+
+            return
+        }
+
+        workerExecutor.execute {
+
+            try {
+                mGolosServicesGateWay.markAsRead(copy)
+
+                val unreadCount = mGolosServicesGateWay.getUnreadCount()
+                mainThreadExecutor.execute {
+                    mUnreadCountLiveData.value = unreadCount
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                if (reauthIfNeeded(e)) markAsRead(eventsIds)
+            }
+
         }
     }
 
@@ -182,20 +209,20 @@ class GolosServicesImpl(
             allEvents
         } else {
             val liveData = MediatorLiveData<List<GolosEvent>>()
-            val allData = TreeSet<GolosEvent>()
-            val set = TreeSet<GolosEvent>()
+            val allData = HashSet<GolosEvent>()
+            val set = HashSet<GolosEvent>()
 
             eventType.forEach {
                 liveData.addSource(mEventsMap[it] as LiveData<List<GolosEvent>>) {
                     set.clear()
                     set.addAll(liveData.value ?: emptyList())
                     set.addAll(it ?: emptyList())
-                    liveData.value = set.toList()
+                    liveData.value = set.toList().sorted()
                 }
                 allData.addAll(mEventsMap[it]!!.value.orEmpty())
             }
 
-            liveData.value = allData.toList()
+            liveData.value = allData.toList().sorted()
             liveData
         }
     }
@@ -203,7 +230,7 @@ class GolosServicesImpl(
     @AnyThread
     override fun requestEventsUpdate(eventTypes: List<EventType>?,
                                      fromId: String?,
-                                     limit: Int?,
+                                     limit: Int,
                                      markAsRead: Boolean,
                                      completionHandler: (Unit, GolosError?) -> Unit) {
         if (!isAuthComplete) return
@@ -218,19 +245,19 @@ class GolosServicesImpl(
                 try {
                     val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, markAsRead, limit)
                     val events = golosEvents.events
+
                     val eventsMap = groupEventsByType(events)
-                    val set = TreeSet<GolosEvent>()
+                    val set = HashSet<GolosEvent>()
 
                     eventsMap.forEach {
                         set.clear()
                         set.addAll(it.value)
                         set.addAll(mEventsMap[it.key]!!.value.orEmpty())
-                        val list = set.toList()
+                        val list = set.toMutableList()
+                        list.sorted()
                         mainThreadExecutor.execute {
-
                             mEventsMap[it.key]!!.value = list
                             mStatus[it.key]!!.value = UpdatingState.DONE
-
                         }
                     }
                     if (eventsMap.isEmpty()) {
@@ -248,22 +275,30 @@ class GolosServicesImpl(
 
                     }
 
-                    if (eventsMap.isNotEmpty() && eventTypes == null) {
+                    if (events.isNotEmpty()) {
+                        set.clear()
                         set.addAll(allEvents.value ?: emptyList())
                         set.addAll(events)
+                        val sortedEvents = set.toList().sorted()
                         mainThreadExecutor.execute {
-                            allEvents.value = set.toList()
+                            allEvents.value = sortedEvents
+
                             mStatus[null]!!.value = UpdatingState.DONE
                         }
                     }
-                    mainThreadExecutor.execute {
 
+                    mainThreadExecutor.execute {
+                        mUnreadCountLiveData.value = golosEvents.freshCount
                         completionHandler(Unit, null)
                     }
-                    val freshCount = mGolosServicesGateWay.getUnreadCount()
-                    mainThreadExecutor.execute {
-                        mUnreadCountLiveData.value = freshCount
+
+                    if (events.size != limit && eventTypes == null) {
+                        mGolosServicesGateWay.markAllEventsAsRead()
+                        mainThreadExecutor.execute {
+                            mUnreadCountLiveData.value = 0
+                        }
                     }
+
                 } catch (e: Exception) {
                     e.printStackTrace()
 
@@ -291,7 +326,7 @@ class GolosServicesImpl(
                     ?: return false)
             isAuthComplete = true
             isAuthInProgress = false
-            onAuthComplete()
+
             return true
         } else if (userDataProvider.appUserData.value?.isLogged != true) {
             mGolosServicesGateWay.logout()

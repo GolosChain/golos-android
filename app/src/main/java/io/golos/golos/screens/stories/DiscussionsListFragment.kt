@@ -159,6 +159,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     private val reselectObserver = object : Observer<Int> {
         override fun onChanged(it: Int?) {
+            it?:return
             val pagePositon = arguments?.getInt(PAGE_POSITION, Int.MIN_VALUE)
             if (it == pagePositon && getRecycler().childCount != 0) {
                 getRecycler().scrollToPosition(0)

@@ -28,19 +28,19 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosNotification) return false
+        if (javaClass != other?.javaClass) return false
+
+        other as GolosNotification
 
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = numberOfSameType
-        result = 31 * result + id.hashCode()
-        return result
+        return numberOfSameType
     }
+
 }
 
 class GolosRepostNotification(val fromUser: String,
@@ -49,13 +49,14 @@ class GolosRepostNotification(val fromUser: String,
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosRepostNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosRepostNotification
 
         if (fromUser != other.fromUser) return false
         if (permlink != other.permlink) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -65,7 +66,6 @@ class GolosRepostNotification(val fromUser: String,
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + permlink.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -74,32 +74,78 @@ class GolosRepostNotification(val fromUser: String,
 
 }
 
-data class GolosRewardNotification(val permlink: String, val golosAward: Double,
+ class GolosRewardNotification(val permlink: String, val golosAward: Double,
                                    val golosPowerAward: Double, val gbgAward: Double, override val numberOfSameType: Int) : GolosNotification() {
-    private val _id = UUID.randomUUID().toString()
-    override val id: String
-        get() = _id
-}
+     override val id: String = UUID.randomUUID().toString()
+     override fun equals(other: Any?): Boolean {
+         if (this === other) return true
+         if (javaClass != other?.javaClass) return false
+         if (!super.equals(other)) return false
 
-data class GolosCuratorRewardNotification(val author: String,
+         other as GolosRewardNotification
+
+         if (permlink != other.permlink) return false
+         if (golosAward != other.golosAward) return false
+         if (golosPowerAward != other.golosPowerAward) return false
+         if (gbgAward != other.gbgAward) return false
+         if (numberOfSameType != other.numberOfSameType) return false
+
+         return true
+     }
+
+     override fun hashCode(): Int {
+         var result = super.hashCode()
+         result = 31 * result + permlink.hashCode()
+         result = 31 * result + golosAward.hashCode()
+         result = 31 * result + golosPowerAward.hashCode()
+         result = 31 * result + gbgAward.hashCode()
+         result = 31 * result + numberOfSameType
+         return result
+     }
+
+ }
+
+ class GolosCuratorRewardNotification(val author: String,
                                           val permlink: String,
                                           val golosPowerReward: Double,
                                           override val numberOfSameType: Int) : GolosNotification() {
-    private val _id = UUID.randomUUID().toString()
-    override val id: String
-        get() = _id
-}
+     override fun equals(other: Any?): Boolean {
+         if (this === other) return true
+         if (javaClass != other?.javaClass) return false
+         if (!super.equals(other)) return false
+
+         other as GolosCuratorRewardNotification
+
+         if (author != other.author) return false
+         if (permlink != other.permlink) return false
+         if (golosPowerReward != other.golosPowerReward) return false
+         if (numberOfSameType != other.numberOfSameType) return false
+
+         return true
+     }
+     override val id: String = UUID.randomUUID().toString()
+
+     override fun hashCode(): Int {
+         var result = super.hashCode()
+         result = 31 * result + author.hashCode()
+         result = 31 * result + permlink.hashCode()
+         result = 31 * result + golosPowerReward.hashCode()
+         result = 31 * result + numberOfSameType
+         return result
+     }
+ }
 
 class WitnessCancelVoteGolosNotification(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is WitnessCancelVoteGolosNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as WitnessCancelVoteGolosNotification
 
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -108,7 +154,6 @@ class WitnessCancelVoteGolosNotification(val fromUser: String, override val numb
         var result = super.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -118,12 +163,13 @@ class GolosWitnessVoteNotification(val fromUser: String, override val numberOfSa
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosWitnessVoteNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosWitnessVoteNotification
 
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -132,7 +178,6 @@ class GolosWitnessVoteNotification(val fromUser: String, override val numberOfSa
         var result = super.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -143,16 +188,16 @@ class GolosMentionNotification(val permlink: String,
                                override val numberOfSameType: Int) : GolosNotification(), PostLinkable {
 
     override fun getLink() = PostLinkExtractedData(fromUser, null, permlink)
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosMentionNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosMentionNotification
 
         if (permlink != other.permlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -162,7 +207,6 @@ class GolosMentionNotification(val permlink: String,
         result = 31 * result + permlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -175,12 +219,13 @@ class GolosSubscribeNotification(val fromUser: String, override val numberOfSame
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosSubscribeNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosSubscribeNotification
 
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -189,7 +234,6 @@ class GolosSubscribeNotification(val fromUser: String, override val numberOfSame
         var result = super.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -200,12 +244,13 @@ class GolosUnSubscribeNotification(val fromUser: String, override val numberOfSa
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosUnSubscribeNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosUnSubscribeNotification
 
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -214,7 +259,6 @@ class GolosUnSubscribeNotification(val fromUser: String, override val numberOfSa
         var result = super.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -224,13 +268,14 @@ class GolosUpVoteNotification(val permlink: String, val fromUser: String, overri
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosUpVoteNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosUpVoteNotification
 
         if (permlink != other.permlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -240,7 +285,6 @@ class GolosUpVoteNotification(val permlink: String, val fromUser: String, overri
         result = 31 * result + permlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -262,13 +306,14 @@ class GolosDownVoteNotification(val permlink: String,
     override fun getLink() = permlink.makeLinkFromPermlink()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosDownVoteNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosDownVoteNotification
 
         if (permlink != other.permlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -278,9 +323,9 @@ class GolosDownVoteNotification(val permlink: String,
         result = 31 * result + permlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
+
 }
 
 
@@ -295,13 +340,14 @@ class GolosCommentNotification(val permlink: String,
     override fun getLink() = PostLinkExtractedData(fromUser, null, permlink)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosCommentNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosCommentNotification
 
         if (permlink != other.permlink) return false
         if (fromUser != other.fromUser) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -311,7 +357,6 @@ class GolosCommentNotification(val permlink: String,
         result = 31 * result + permlink.hashCode()
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 
@@ -323,13 +368,14 @@ class GolosTransferNotification(val fromUser: String, val amount: String, overri
     override val id: String = UUID.randomUUID().toString()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is GolosTransferNotification) return false
+        if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
+
+        other as GolosTransferNotification
 
         if (fromUser != other.fromUser) return false
         if (amount != other.amount) return false
         if (numberOfSameType != other.numberOfSameType) return false
-        if (id != other.id) return false
 
         return true
     }
@@ -339,7 +385,6 @@ class GolosTransferNotification(val fromUser: String, val amount: String, overri
         result = 31 * result + fromUser.hashCode()
         result = 31 * result + amount.hashCode()
         result = 31 * result + numberOfSameType
-        result = 31 * result + id.hashCode()
         return result
     }
 

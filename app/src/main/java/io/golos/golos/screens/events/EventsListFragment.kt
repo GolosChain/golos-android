@@ -47,6 +47,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                     mLabel?.setViewGone()
                     mProgressView?.setViewGone()
                     mRecycler?.post {
+
                         (mRecycler?.adapter as?  EventsListAdapter)?.items = list
 
                         if (parcelable != null && list.isNotEmpty()) {
@@ -93,24 +94,23 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         },
                 { mViewModel?.onScrollToTheEnd() },
                 { mViewModel?.onFollowClick(it) },
-                { mViewModel?.onAvatarClick(it, activity ?: return@EventsListAdapter) })
+                { mViewModel?.onAvatarClick(it, activity ?: return@EventsListAdapter) },
+                object : OnItemShowListener {
+                    override fun onItemShow(item: EventListItem) {
+                        mViewModel?.onItemShow(item)
+                    }
+                })
         mViewModel?.updateState?.observe(this, Observer<Boolean> {
 
         })
         (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         mLabel?.text = getTextForNoEvents()
+
+        setUp()
         return view
     }
 
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        this.isVisibleToUser = isVisibleToUser
-        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
-    }
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setUp() {
         mViewModel?.onCreate(getEventTypes(arguments
                 ?: return), Repository.get,
                 EventsSorterUseCase(object : StringProvider {
@@ -123,7 +123,10 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 Repository.get.notificationsRepository)
         mViewModel?.eventsList?.observe(this, this)
         (parentFragment as? ReselectionEmitter)?.reselectLiveData?.observe(this, Observer {
-            if (it == arguments?.getInt(POSITION, Int.MIN_VALUE) && mRecycler?.childCount != 0) {
+            it ?: return@Observer
+
+            if (it == arguments?.getInt(POSITION, Int.MIN_VALUE)
+                    && mRecycler?.childCount != 0) {
                 mRecycler?.post { mRecycler?.scrollToPosition(0) }
             }
         })
@@ -135,6 +138,11 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         })
     }
 
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        this.isVisibleToUser = isVisibleToUser
+        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable("EventsListFragment123", mRecycler?.layoutManager?.onSaveInstanceState())

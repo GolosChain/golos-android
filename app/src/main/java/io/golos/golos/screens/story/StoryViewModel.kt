@@ -19,7 +19,6 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StoryViewModel : ViewModel() {
 
@@ -217,7 +216,7 @@ class StoryViewModel : ViewModel() {
 
     fun onEditClick(ctx: Context, item: GolosDiscussionItem) {
         if (mRepository.isUserLoggedIn()
-                && mRepository.appUserData.value?.name == mStoryLiveData.value?.storyTree?.rootStory()?.author) {
+                && mRepository.appUserData.value?.name == item.author) {
 
             mStoryLiveData.value?.let {
                 EditorActivity.startEditPostOrComment(ctx,
@@ -226,8 +225,6 @@ class StoryViewModel : ViewModel() {
                         feedType,
                         filter)
             }
-        } else {
-            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.you_must_have_more_repo_for_action))
         }
     }
 

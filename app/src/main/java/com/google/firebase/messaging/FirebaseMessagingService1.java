@@ -160,6 +160,7 @@ public class FirebaseMessagingService1 extends zzb {
                                     zzd.zzf(this, var1);
                                 } catch (Exception e) {
                                     e.printStackTrace();
+                                    return;
                                 }
 
                             }
@@ -182,6 +183,7 @@ public class FirebaseMessagingService1 extends zzb {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
+                                    return;
                                 }
                             }
 

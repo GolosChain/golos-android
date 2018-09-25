@@ -154,7 +154,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
 
                 } else {
                     mNotificationsContainer.setViewVisible()
-                    if (mButtonContainer.alpha == 0f) {
+                    if (mButtonContainer.alpha < 1f) {
 
                         mButtonContainer.animate().alpha(1f).setDuration(200).setListener(object : EndAnimationListener() {
                             override fun onAnimationEnd(p0: Animator?) {
@@ -184,7 +184,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             override fun onChanged(t: GolosNotifications?) {
                 t ?: return
                 if (lastNotifsCount < t.notifications.size) {
-                    Repository.get.requestEventsUpdate(null, limit = 10, markAsRead = mPager.currentItem == NOTIFICATIONS_HISTORY)
+                    Repository.get.requestEventsUpdate(null, limit = 15, markAsRead = false)
                 }
                 lastNotifsCount = t.notifications.size
             }

@@ -14,11 +14,16 @@ import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
 
+interface OnItemShowListener {
+    fun onItemShow(item: EventListItem)
+}
+
 class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                         var clickListener: (EventListItem) -> Unit = {},
                         var onBottomReach: () -> Unit = {},
                         var onSubscribeClick: (EventListItem) -> Unit = {},
                         var onItemAuthorClick: (EventListItem) -> Unit = {},
+                        var onItemGoingToShow: OnItemShowListener,
                         private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -77,7 +82,11 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
+
         if (item is EventContainingItem) {
+
+            onItemGoingToShow.onItemShow(item.event)
+
             (holder as EventsListAdapterViewHolder).state = NotificationWrapper(item,
                     {
                         clickListener.invoke((items.getOrNull(it.adapterPosition) as? EventContainingItem)?.event

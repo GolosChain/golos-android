@@ -65,7 +65,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
             val linkregexp = "\\b((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])".toRegex()
 
 
-            out.replace(linkregexp, { string ->
+            out.replace(linkregexp) { string ->
                 val foundString = string.value
                 if (foundString.endsWith("zip", true)
                         || foundString.endsWith("rar", true)
@@ -74,7 +74,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
                         || foundString.endsWith("7z", true))
                     "*[link removed]*"
                 else foundString
-            })
+            }
             Timber.e("text = $text out = $out")
 
             return out

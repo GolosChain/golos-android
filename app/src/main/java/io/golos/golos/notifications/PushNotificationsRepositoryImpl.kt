@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData
 import android.support.annotation.MainThread
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.utils.toArrayList
 
 interface PushNotificationsRepository {
     val notifications: LiveData<GolosNotifications>
@@ -13,7 +12,7 @@ interface PushNotificationsRepository {
     fun setUp()
 
     @MainThread
-    fun onReceivePushNotifications(notifications: List<Notification>)
+    fun onReceivePushNotifications(notifications: Notification)
 
     @MainThread
     fun dismissNotification(notification: GolosNotification)
@@ -49,9 +48,10 @@ internal class PushNotificationsRepositoryImpl(private val settingsRepository: U
     }
 
     @MainThread
-    override fun onReceivePushNotifications(notifications: List<Notification>) {
-        val newNotifications = ArrayList(notifications.map { GolosNotification.fromNotification(it) }) + (mNotifications.value?.notifications
-                ?: listOf()).toArrayList()
+    override fun onReceivePushNotifications(notifications: Notification) {
+        val new = GolosNotification.fromNotification(notifications)
+        if (mNotifications.value?.notifications.orEmpty().contains(new)) return
+        val newNotifications = listOf(new) + mNotifications.value?.notifications.orEmpty()
         mNotifications.value = GolosNotifications(newNotifications)
     }
 

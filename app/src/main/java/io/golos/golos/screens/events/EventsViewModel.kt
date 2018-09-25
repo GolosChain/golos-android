@@ -41,6 +41,7 @@ class EventsViewModel : ViewModel() {
     private val mUpdatingStatusObserver = MediatorLiveData<UpdatingState>()
     private val mUpdatingObserver = Observer<UpdatingState> { }
     private var isVisibleToUser = false
+    private val mPendingList = ArrayList<String>()
 
 
     private val updateLimit = 15
@@ -230,11 +231,16 @@ class EventsViewModel : ViewModel() {
         if (isVisibleToUser == visibleToUser) return
         isVisibleToUser = visibleToUser
         if (visibleToUser) {
+            Timber.e("requestEventsUpdate")
+            if (mPendingList.isNotEmpty()) {
+                mEventsProvider.setEventsRead(mPendingList)
+                mPendingList.clear()
+            }
+
             mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
                     fromId = null,
-                    limit = Math.max(updateLimit, mEventsProvider.getUnreadEventsCount().value
-                            ?: 0),
-                    markAsRead = true)
+                    limit = updateLimit,
+                    markAsRead = false)
         }
     }
 
@@ -252,7 +258,7 @@ class EventsViewModel : ViewModel() {
 
     fun onScrollToTheEnd() {
         mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
-                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit, true) { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
+                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit, false) { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
         (updateState as MutableLiveData<Boolean>).value = true
     }
 
@@ -323,10 +329,18 @@ class EventsViewModel : ViewModel() {
                 fromId = null,
                 limit = Math.max(updateLimit, mEventsProvider.getUnreadEventsCount().value
                         ?: 0),
-                markAsRead = true)
+                markAsRead = false)
     }
 
-    private fun updateFromBeginning(){}
+
+    fun onItemShow(it: EventListItem) {
+
+        if (!isVisibleToUser) {
+            mPendingList.add(it.golosEvent.id)
+            return
+        }
+        mEventsProvider.setEventsRead(it.golosEvent.id.toSingletoneList())
+    }
 
     companion object {
         @JvmStatic

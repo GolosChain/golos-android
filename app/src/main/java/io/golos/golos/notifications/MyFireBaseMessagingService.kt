@@ -24,7 +24,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService1() {
                     ?: return, Notification::class.java)
 
             Handler(Looper.getMainLooper()).post {
-                Repository.get.notificationsRepository.onReceivePushNotifications(listOf(notification))
+                Repository.get.notificationsRepository.onReceivePushNotifications(notification)
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -2,7 +2,6 @@ package io.golos.golos.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.Transformations
 import android.content.Context
 import android.support.annotation.WorkerThread
@@ -12,7 +11,6 @@ import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
-import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.notifications.PushNotificationsRepositoryImpl
 import io.golos.golos.repository.api.GolosApi
@@ -162,6 +160,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun getUnreadEventsCount(): LiveData<Int> {
         return mGolosServices.getFreshEventsCount()
+    }
+
+    override fun setEventsRead(listOfEventsIds: List<String>) {
+        mGolosServices.markAsRead(listOfEventsIds)
     }
 
     override fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>> {

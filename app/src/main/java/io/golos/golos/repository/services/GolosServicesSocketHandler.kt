@@ -27,7 +27,7 @@ import javax.net.ssl.HostnameVerifier
 import javax.websocket.*
 
 class GolosServicesSocketHandler(private val gateUrl: String,
-                                 maxTimeOut: Int = 45_000,
+                                 maxTimeOut: Int = 90_000,
                                  @Volatile
                                  var onServiceNotification: ((GolosServicesNotification) -> Unit)? = null) : Endpoint(), MessageHandler.Whole<String>, GolosServicesCommunicator {
     private var mMapper: ObjectMapper? = getObjectMapper()

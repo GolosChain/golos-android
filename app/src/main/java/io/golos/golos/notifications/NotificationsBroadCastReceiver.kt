@@ -21,7 +21,7 @@ class NotificationsBroadCastReceiver : BroadcastReceiver() {
                     .notificationsRepository
                     .notifications
                     .value?.notifications?.find { it.hashCode() == hashCode }
-            Timber.e("found = $notification")
+            Timber.i("found = $notification")
             Repository.get.notificationsRepository.dismissNotification(notification ?: return)
         }
     }

@@ -21,7 +21,7 @@ class MyInstanceIdService : FirebaseInstanceIdService() {
     override fun onTokenRefresh() {
         super.onTokenRefresh()
         val token = FirebaseInstanceId.getInstance().token
-        Timber.e("onTokenRefresh $token")
+        Timber.i("onTokenRefresh $token")
         FirebaseMessaging.getInstance().subscribeToTopic("all")
         FirebaseMessaging.getInstance().subscribeToTopic("all_android")
 
@@ -54,7 +54,7 @@ object FCMTokenProviderImpl : FCMTokenProvider {
     }
 
     internal fun setFcmToken(token: FCMTokens) {
-        Timber.e("setFcmToken $token")
+        Timber.i("setFcmToken $token")
         Handler(Looper.getMainLooper()).post {
             mLiveData.value = token
         }

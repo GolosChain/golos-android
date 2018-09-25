@@ -3,6 +3,7 @@ package io.golos.golos.repository.services
 import android.support.annotation.WorkerThread
 import io.golos.golos.BuildConfig
 import io.golos.golos.utils.JsonRpcError
+import io.golos.golos.utils.rpcErrorFromCode
 import timber.log.Timber
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,6 +30,8 @@ interface GolosServicesGateWay {
 
     @WorkerThread
     fun getUnreadCount(): Int
+
+    fun markAllEventsAsRead()
 }
 
 
@@ -39,16 +42,17 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
 
     private enum class ServicesMethod {
-        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT, SECRET_REQUEST;
+        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT, SECRET_REQUEST, MARK_VIEWED_ALL;
 
         fun stringRepresentation() =
                 when (this) {
                     AUTH -> this.toString().toLowerCase()
                     PUSH_SUBSCRIBE -> "pushNotifyOn"
                     GET_NOTIFS_HISTORY -> "getNotifyHistory"
-                    MARK_VIEWED -> "markAsViewed"
+                    MARK_VIEWED -> "notify.markAsViewed"
                     GET_UNREAD_COUNT -> "getNotifyHistoryFresh"
                     SECRET_REQUEST -> "getSecret"
+                    MARK_VIEWED_ALL -> "notify.markAllAsViewed"
                 }
     }
 
@@ -59,6 +63,8 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
     @Volatile
     private var authLatch: CountDownLatch = CountDownLatch(1)
+
+    private var userName: String? = null
 
 
     override fun auth(userName: String) {
@@ -81,7 +87,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         authInternal(userName)
     }
 
-    private fun authInternal(userName: String){
+    private fun authInternal(userName: String) {
         val secret = communicationHandler.sendMessage(GetSecretRequest(), ServicesMethod.SECRET_REQUEST.stringRepresentation())
 
         try {
@@ -89,6 +95,7 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                     signHandler.sign(userName, secret.getSecret())), ServicesMethod.AUTH.stringRepresentation())
 
             if (authResult.isAuthSuccessMessage()) {
+                this.userName = userName
                 authCounter.set(1)
             } else {
                 authInternal(userName)
@@ -112,23 +119,45 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
     override fun logout() {
         communicationHandler.dropConnection()
         authCounter.set(1)
+        userName = null
     }
 
     override fun getEvents(fromId: String?, eventType: List<EventType>?, markAsRead: Boolean, limit: Int?): GolosEvents {
-        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 40, markAsRead)
-        else GolosEventRequest(fromId, limit ?: 40, eventType.map { it.toString() }, markAsRead)
-        return communicationHandler.sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY.stringRepresentation())
+        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 15, if (markAsRead) null else false)
+        else GolosEventRequest(fromId, limit ?: 15, eventType.map { it.toString() }, if (markAsRead) null else false)
+        return sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY)
                 .getEventData()
     }
 
+    private fun sendMessage(request: GolosServicesRequest, method: ServicesMethod): GolosServicesResponse {
+        return try {
+            communicationHandler.sendMessage(request, method.stringRepresentation())
+        } catch (e: Exception) {
+
+            if (e !is GolosServicesException) throw e
+
+            val errorCode = rpcErrorFromCode(e.golosServicesError.code)
+            if (errorCode == JsonRpcError.AUTH_ERROR && userName != null) {
+
+                authInternal(userName!!)
+                return sendMessage(request, method)
+            } else throw e
+        }
+    }
+
     override fun markAsRead(ids: List<String>) {
-        communicationHandler.sendMessage(MarkAsReadRequest(ids),
-                ServicesMethod.MARK_VIEWED.stringRepresentation())
+        sendMessage(MarkAsReadRequest(ids),
+                ServicesMethod.MARK_VIEWED)
+    }
+
+    override fun markAllEventsAsRead() {
+        sendMessage(MarkAllReadRequest(),
+                ServicesMethod.MARK_VIEWED_ALL)
     }
 
     override fun getUnreadCount(): Int {
-        return communicationHandler.sendMessage(GetUnreadCountRequest(),
-                ServicesMethod.GET_UNREAD_COUNT.stringRepresentation()).getUnreadCount()
+        return sendMessage(GetUnreadCountRequest(),
+                ServicesMethod.GET_UNREAD_COUNT).getUnreadCount()
     }
 }
 
