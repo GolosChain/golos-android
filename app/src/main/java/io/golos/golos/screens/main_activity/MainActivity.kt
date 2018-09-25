@@ -176,7 +176,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
             NotificationsDialog().show(supportFragmentManager, "NotificationsDialog")
         }
         Repository.get.getUnreadEventsCount().observe(this, Observer {
-            Timber.e("on changed $it")
+
             bottomNavView.setCounterAt(3, it ?: 0)
         })
         Repository.get.notificationsRepository.notifications.observe(this, object : Observer<GolosNotifications> {

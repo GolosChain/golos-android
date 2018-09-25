@@ -48,44 +48,55 @@ internal class ApiImpl : GolosApi() {
     }
 
     override fun getStories(limit: Int, type: FeedType,
-                            truncateBody: Int, filter: StoryFilter?,
+                            truncateBody: Int,
+                            filter: StoryFilter?,
                             startAuthor: String?,
                             startPermlink: String?): List<StoryWithComments> {
-        val discussionSortType =
-                when (type) {
-                    FeedType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
-                    FeedType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
-                    FeedType.NEW -> DiscussionSortType.GET_DISCUSSIONS_BY_CREATED
-                    FeedType.PROMO -> DiscussionSortType.GET_DISCUSSIONS_BY_PROMOTED
-                    FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
-                    FeedType.BLOG -> DiscussionSortType.GET_DISCUSSIONS_BY_BLOG
-                    FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
-                    else -> throw IllegalStateException(" type $type is unsupported")
-                }
 
-        val query = DiscussionQuery()
-        query.limit = limit
-
-        if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
-        if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
-
-        filter?.userNameFilter?.let {
-            query.selectAuthors = it.map { AccountName(it) }
-        }
-
-        if (startAuthor == null && (type == FeedType.COMMENTS)) {
-            query.startAuthor = AccountName(filter!!.userNameFilter.first())
-            query.selectAuthors = null
-        }
-
-        query.truncateBody = truncateBody
-        filter?.let {
-            it.tagFilter.let {
-                query.selectTags = it
-            }
-        }
-        val discussions = mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
         val out = ArrayList<StoryWithComments>()
+
+        val discussions = if (type == FeedType.ANSWERS) {
+            if (startAuthor == null && filter == null) throw IllegalArgumentException(" for this type of feed, start author must be not null")
+            mGolosApi.databaseMethods.getRepliesLightByLastUpdate(AccountName(startAuthor?:filter?.userNameFilter?.first()),
+                    if (startPermlink != null) Permlink(startPermlink) else null, limit)
+        } else {
+            val discussionSortType =
+                    when (type) {
+                        FeedType.ACTUAL -> DiscussionSortType.GET_DISCUSSIONS_BY_HOT
+                        FeedType.POPULAR -> DiscussionSortType.GET_DISCUSSIONS_BY_TRENDING
+                        FeedType.NEW -> DiscussionSortType.GET_DISCUSSIONS_BY_CREATED
+                        FeedType.PROMO -> DiscussionSortType.GET_DISCUSSIONS_BY_PROMOTED
+                        FeedType.PERSONAL_FEED -> DiscussionSortType.GET_DISCUSSIONS_BY_FEED
+                        FeedType.BLOG -> DiscussionSortType.GET_DISCUSSIONS_BY_BLOG
+                        FeedType.COMMENTS -> DiscussionSortType.GET_DISCUSSIONS_BY_COMMENTS
+
+                        else -> throw IllegalStateException(" type $type is unsupported")
+                    }
+
+            val query = DiscussionQuery()
+            query.limit = limit
+
+            if (startAuthor != null) query.startAuthor = AccountName(startAuthor)
+            if (startPermlink != null) query.startPermlink = Permlink(startPermlink)
+
+            filter?.userNameFilter?.let {
+                query.selectAuthors = it.map { AccountName(it) }
+            }
+
+            if (startAuthor == null && (type == FeedType.COMMENTS)) {
+                query.startAuthor = AccountName(filter!!.userNameFilter.first())
+                query.selectAuthors = null
+            }
+
+            query.truncateBody = truncateBody
+            filter?.let {
+                it.tagFilter.let {
+                    query.selectTags = it
+                }
+            }
+            mGolosApi.databaseMethods.getDiscussionsLightBy(query, discussionSortType)
+        }
+
         discussions.forEach {
             if (it != null) {
                 val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())

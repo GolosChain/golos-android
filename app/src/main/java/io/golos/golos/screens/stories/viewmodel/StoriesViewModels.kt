@@ -52,6 +52,7 @@ object StoriesModelFactory {
             FeedType.PERSONAL_FEED -> provider.get(FeedViewModel::class.java)
             FeedType.BLOG -> provider.get(BlogViewModel::class.java)
             FeedType.COMMENTS -> provider.get(CommentsViewModel::class.java)
+            FeedType.ANSWERS -> provider.get(AnswersViewModel::class.java)
             else -> throw IllegalStateException(" $type is unsupported")
         }
         if ((viewModel is FeedViewModel
@@ -84,6 +85,11 @@ class CommentsViewModel : FeedViewModel() {
 class BlogViewModel : FeedViewModel() {
     override val type: FeedType
         get() = FeedType.BLOG
+}
+
+class AnswersViewModel : FeedViewModel() {
+    override val type: FeedType
+        get() = FeedType.ANSWERS
 }
 
 open class FeedViewModel : DiscussionsViewModel() {

@@ -3,7 +3,7 @@ package io.golos.golos.screens.profile.adapters
 import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.UserInformationFragment
@@ -16,13 +16,14 @@ import io.golos.golos.screens.widgets.GolosFragment
  */
 class ProfileFragmentsAdapter(manager: FragmentManager,
                               private val context: Context,
-                              private val profileUserName: String) : FragmentPagerAdapter(manager) {
-    val size = 3
+                              private val profileUserName: String) : FragmentStatePagerAdapter(manager) {
+    val size = 4
     override fun getItem(position: Int): Fragment {
         return when (position) {
             0 -> DiscussionsListFragment.getInstance(FeedType.BLOG, position, StoryFilter(userNameFilter = profileUserName))
             1 -> DiscussionsListFragment.getInstance(FeedType.COMMENTS, position, StoryFilter(userNameFilter = profileUserName))
-            2 -> UserInformationFragment()
+            2 -> DiscussionsListFragment.getInstance(FeedType.ANSWERS, position, StoryFilter(userNameFilter = profileUserName))
+            3 -> UserInformationFragment()
             else -> GolosFragment()
         }
     }
@@ -30,8 +31,9 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
     override fun getPageTitle(position: Int): CharSequence? {
         return when (position) {
             0 -> context.getString(R.string.blog)
-            1 -> context.getString(R.string.answers)
-            2 -> context.getString(R.string.information)
+            1 -> context.getString(R.string.comments)
+            2 -> context.getString(R.string.answers)
+            3 -> context.getString(R.string.information)
             else -> ""
         }
     }
@@ -39,6 +41,7 @@ class ProfileFragmentsAdapter(manager: FragmentManager,
     fun getPositionOf(feedType: FeedType?) = when (feedType) {
         FeedType.BLOG -> 0
         FeedType.COMMENTS -> 1
+        FeedType.ANSWERS -> 2
         else -> null
     }
 

@@ -45,7 +45,7 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibili
 
             }
         })
-        mPager?.offscreenPageLimit = 5
+        mPager?.offscreenPageLimit = 1
         return v
     }
 

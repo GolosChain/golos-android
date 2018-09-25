@@ -89,7 +89,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionE
             val adapter = ProfileFragmentsAdapter(childFragmentManager,
                     activity!!,
                     arguments!!.getString(USERNAME_TAG))
-            mProfilePager.offscreenPageLimit = adapter.size
+            mProfilePager.offscreenPageLimit = 1
             mProfilePager.adapter = adapter
 
         }
