@@ -41,7 +41,7 @@ import timber.log.Timber
 /**
  * Created by yuri on 06.11.17.
  */
-class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
+class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var mViewModel: StoryViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mFab: FloatingActionButton
@@ -550,7 +550,7 @@ class StoryActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
                            feedType: FeedType,
                            filter: StoryFilter?,
                            scrollToComments: Boolean = false): Intent {
-            val intent = Intent(ctx, StoryActivity::class.java)
+            val intent = Intent(ctx, DiscussionActivity::class.java)
             intent.putExtra(AUTHOR_TAG, author)
             intent.putExtra(BLOG_TAG, blog)
             intent.putExtra(PERMLINK_TAG, permlink)

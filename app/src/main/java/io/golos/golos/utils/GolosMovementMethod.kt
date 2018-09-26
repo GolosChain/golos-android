@@ -15,7 +15,7 @@ import android.widget.TextView
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.webview.WebViewActivity
 
 /**
@@ -35,7 +35,7 @@ class GolosMovementMethod protected constructor() : LinkMovementMethod() {
         override fun onClick(textView: TextView, url: String): Boolean {
             val matchResult = GolosLinkMatcher.match(url)
             if (matchResult is StoryLinkMatch) {
-                StoryActivity.start(textView.context,
+                DiscussionActivity.start(textView.context,
                         matchResult.author,
                         matchResult.blog,
                         matchResult.permlink,

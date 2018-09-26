@@ -16,7 +16,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.utils.asIntentToShowUrl
 
 /**
@@ -31,14 +31,14 @@ class SettingsActivity : GolosActivity() {
             startActivity("https://wiki.golos.io/".asIntentToShowUrl())
         }
         findViewById<View>(R.id.about_golos_tv).setOnClickListener {
-            StoryActivity.start(this,
+            DiscussionActivity.start(this,
                     "golos", "ru--golos",
                     "golos-russkoyazychnaya-socialno-mediinaya-blokchein-platforma",
                     FeedType.UNCLASSIFIED,
                     null)
         }
         findViewById<View>(R.id.privacy_policy_tv).setOnClickListener {
-            StoryActivity.start(this,
+            DiscussionActivity.start(this,
                     "golos", "ru--konfidenczialxnostx",
                     "politika-konfidencialnosti",
                     FeedType.UNCLASSIFIED,

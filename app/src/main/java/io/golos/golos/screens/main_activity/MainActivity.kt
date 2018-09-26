@@ -25,10 +25,9 @@ import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper
 import io.golos.golos.screens.main_activity.adapters.MainPagerAdapter
 import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.widgets.GolosBottomNavView
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.*
 
 class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePreselect {
@@ -111,7 +110,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                     if (it is PostLinkable) {
                         it.getLink()?.let {
 
-                            StoryActivity.start(this, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
+                            DiscussionActivity.start(this, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
                         mHandler.post({ Repository.get.notificationsRepository.dismissNotification(it) })
                     } else {
@@ -202,7 +201,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
 
     override fun onChanged(it: CreatePostResult?) {
         if (it?.isPost == true) {
-            StoryActivity.start(this,
+            DiscussionActivity.start(this,
                     it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
         }
     }

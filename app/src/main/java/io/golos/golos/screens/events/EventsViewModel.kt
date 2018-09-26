@@ -10,7 +10,7 @@ import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.utils.MainThreadExecutor
 import io.golos.golos.utils.UpdatingState
@@ -315,7 +315,7 @@ class EventsViewModel : ViewModel() {
     fun onEventClick(fragmentActivity: FragmentActivity, it: EventListItem) {
         if (it.golosEvent is PostLinkable) {
             (it.golosEvent as? PostLinkable)?.getLink()?.let {
-                StoryActivity.start(fragmentActivity, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
+                DiscussionActivity.start(fragmentActivity, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
             }
         } else if (it.golosEvent is Authorable) {
             val auth = it.golosEvent as Authorable

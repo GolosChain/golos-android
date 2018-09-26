@@ -253,7 +253,7 @@ class StoryViewModel : ViewModel() {
     }
 
     fun onCommentClick(context: Context, comment: GolosDiscussionItem) {
-        StoryActivity.start(context, comment.author,
+        DiscussionActivity.start(context, comment.author,
                 comment.categoryName,
                 comment.permlink,
                 FeedType.UNCLASSIFIED,

@@ -8,7 +8,7 @@ import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.utils.*
 import timber.log.Timber
 
@@ -28,7 +28,7 @@ public class RouteActivity : GolosActivity() {
             when (match) {
                 is StoryLinkMatch -> {
                     startActivities(arrayOf(startMainActivityIntent,
-                            StoryActivity.getStartIntent(this, match.author, match.blog, match.permlink, FeedType.UNCLASSIFIED, null)))
+                            DiscussionActivity.getStartIntent(this, match.author, match.blog, match.permlink, FeedType.UNCLASSIFIED, null)))
                 }
                 is UserLinkMatch -> {
                     startActivities(arrayOf(startMainActivityIntent, UserProfileActivity.getStartIntent(this, match.user)))

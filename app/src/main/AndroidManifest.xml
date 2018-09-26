@@ -35,7 +35,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".screens.story.StoryActivity"
+            android:name=".screens.story.DiscussionActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.widgets.PhotoActivity"

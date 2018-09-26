@@ -28,7 +28,7 @@ import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.utils.getVectorAsBitmap
 import timber.log.Timber
@@ -155,7 +155,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
                 (notification as? PostLinkable)?.getLink()?.let {
                     builder.setContentIntent(PendingIntent.getActivities(this, 0, arrayOf(resultIntent,
-                            StoryActivity.getStartIntent(this, it.author, it.blog, it.permlink,
+                            DiscussionActivity.getStartIntent(this, it.author, it.blog, it.permlink,
                                     FeedType.UNCLASSIFIED, null), dismissIntent), PendingIntent.FLAG_UPDATE_CURRENT))
                 }
                 val appearance = NotificationsAndEventsAppearanceMakerImpl.makeAppearance(notification)

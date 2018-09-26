@@ -18,7 +18,7 @@ import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.screens.main_activity.adapters.DissmissTouchHelper
 import io.golos.golos.screens.main_activity.adapters.NotificationsAdapter
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 
 class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
     private lateinit var mRecyclerView: RecyclerView
@@ -52,7 +52,7 @@ class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
                 {
                     if (it is PostLinkable) {
                         it.getLink()?.let {
-                            StoryActivity.start(context
+                            DiscussionActivity.start(context
                                     ?: return@NotificationsAdapter, it.author, it.blog, it.permlink, FeedType.UNCLASSIFIED, null)
                         }
                         mHandler.postDelayed({ Repository.get.notificationsRepository.dismissNotification(it) }, 1000)

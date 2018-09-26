@@ -16,7 +16,7 @@ import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
-import io.golos.golos.screens.story.StoryActivity
+import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.ErrorCode
@@ -316,7 +316,7 @@ abstract class DiscussionsViewModel : ViewModel() {
     open fun onCardClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
 
-        StoryActivity.start(context, it.rootStory()?.author ?: return,
+        DiscussionActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
                 type, filter)
@@ -324,7 +324,7 @@ abstract class DiscussionsViewModel : ViewModel() {
 
     open fun onCommentsClick(it: StoryWithComments, context: Context?) {
         if (context == null) return
-        StoryActivity.start(context, it.rootStory()?.author ?: return,
+        DiscussionActivity.start(context, it.rootStory()?.author ?: return,
                 it.rootStory()?.categoryName ?: return,
                 it.rootStory()?.permlink ?: return,
                 type,
