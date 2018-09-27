@@ -50,6 +50,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -96,6 +97,10 @@ fun Cursor.getLong(columnName: String): Long {
     if (columnNumber < 0) return 0L
     return this.getLong(this.getColumnIndex(columnName))
 }
+
+fun GolosDiscussionItem.isStory() = this.parentAuthor.isEmpty()
+
+fun GolosDiscussionItem.isComment() = this.parentAuthor.isNotEmpty()
 
 fun Cursor.getBool(columnName: String): Boolean {
     val columnNumber = this.getColumnIndex(columnName)

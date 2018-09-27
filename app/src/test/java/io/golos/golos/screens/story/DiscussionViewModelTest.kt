@@ -22,12 +22,12 @@ import java.util.concurrent.Executor
 /**
  * Created by yuri on 13.12.17.
  */
-class StoryViewModelTest {
+class DiscussionViewModelTest {
     @Rule
     @JvmField
     public val rule = InstantTaskExecutorRule()
     private lateinit var repo: RepositoryImpl
-    private lateinit var storyViewModel: StoryViewModel
+    private lateinit var discussionViewModel: DiscussionViewModel
     val executor: Executor
         get() {
             return Executor { it.run() }
@@ -50,19 +50,19 @@ class StoryViewModelTest {
                 }
         )
         Repository.setSingletoneInstance(repo)
-        storyViewModel = StoryViewModel()
-        storyViewModel.mRepository = repo
+        discussionViewModel = DiscussionViewModel()
+        discussionViewModel.mRepository = repo
     }
 
     @Test
     fun onCreate() {
         var state: StoryViewState? = null
-        storyViewModel.storyLiveData.observeForever { t -> state = t }
+        discussionViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
         var story = repo.getStories(FeedType.UNCLASSIFIED, null)
         repo.requestStoryUpdate(result.author, result.permlink, result.blog,,, FeedType.UNCLASSIFIED) { _, e -> }
-        storyViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
+        discussionViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true
             }
@@ -77,10 +77,10 @@ class StoryViewModelTest {
         repo.requestStoriesListUpdate(20, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), completionHandler = { _, _ -> })
         Assert.assertNotNull(stories.value)
         var state: StoryViewState? = null
-        storyViewModel.storyLiveData.observeForever { t -> state = t }
+        discussionViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
         val story = stories.value!!.items.first().rootStory()!!
-        storyViewModel.onCreate(story.author, story.permlink,
+        discussionViewModel.onCreate(story.author, story.permlink,
                 story.categoryName, FeedType.PERSONAL_FEED, StoryFilter(userNameFilter = "yuri-vlad-second"), object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true
@@ -97,11 +97,11 @@ class StoryViewModelTest {
         repo.unSubscribeOnUserBlog("sinte", { _, _ -> })
 
         var state: StoryViewState? = null
-        storyViewModel.storyLiveData.observeForever { t -> state = t }
+        discussionViewModel.storyLiveData.observeForever { t -> state = t }
         Assert.assertNull(state)
 
         val result = GolosLinkMatcher.match("https://goldvoice.club/@sinte/o-socialnykh-psikhopatakh-chast-3-o-tikhonyakh-mechtatelyakh-stesnitelnykh/") as StoryLinkMatch
-        storyViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
+        discussionViewModel.onCreate(result.author, result.permlink, result.blog, FeedType.UNCLASSIFIED, null, object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {
                 return true
             }
@@ -111,8 +111,8 @@ class StoryViewModelTest {
         Assert.assertFalse(state!!.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed)
         Assert.assertFalse(state!!.subscribeOnTagStatus.isCurrentUserSubscribed)
 
-        storyViewModel.onSubscribeToMainTagClick()
-        storyViewModel.onSubscribeToBlogButtonClick()
+        discussionViewModel.onSubscribeToMainTagClick()
+        discussionViewModel.onSubscribeToBlogButtonClick()
 
         Assert.assertTrue(state!!.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed)
         Assert.assertTrue(state!!.subscribeOnTagStatus.isCurrentUserSubscribed)

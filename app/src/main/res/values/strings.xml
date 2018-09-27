@@ -249,6 +249,8 @@
     <string name="no_events_replies">Start posting interesting content to receive comments.</string>
     <string name="no_events_social">Follow other authors and post interesting content to expand your audience.</string>
     <string name="no_events_mentions">Get Golos users excited about your blog in order they mention you.</string>
+    <string name="write_a_comment">Write a comments</string>
+    <string name="login_to_write_comment">Login to write a comment</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

@@ -20,7 +20,7 @@ import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
 
-class StoryViewModel : ViewModel() {
+class DiscussionViewModel : ViewModel() {
 
 
     private val mStoryLiveData = MediatorLiveData<StoryViewState>()
@@ -34,7 +34,6 @@ class StoryViewModel : ViewModel() {
     private lateinit var mInternetStatusNotifier: InternetStatusNotifier
     private val mImageClickEvents = MutableLiveData<ImageClickData>()
     public val imageDialogShowEvent: LiveData<ImageClickData> = mImageClickEvents
-    private var curentUserName: String? = null
 
 
     fun onCreate(author: String,
@@ -106,7 +105,8 @@ class StoryViewModel : ViewModel() {
                         storyTitle = it.rootStory()?.title.orEmpty(),
                         tags = it.rootStory()?.tags.orEmpty().toArrayList(),
                         storyTree = it,
-                        isStoryCommentButtonShown = mRepository.isUserLoggedIn())
+                        discussionType = if (story.isStory()) DiscussionType.STORY else DiscussionType.COMMENT,
+                        canUserCommentThis = mRepository.isUserLoggedIn())
 
                 this.blog = mStoryLiveData.value?.storyTree?.rootStory()?.categoryName
             }
