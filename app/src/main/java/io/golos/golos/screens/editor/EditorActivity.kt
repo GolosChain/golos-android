@@ -76,7 +76,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     private lateinit var mRecycler: RecyclerView
     private lateinit var mToolbar: Toolbar
     private lateinit var mAdapter: EditorAdapter
-    private lateinit var mTitle: EditorTitle
+    private lateinit var mTitleView: EditorTitleView
     private lateinit var mFooter: EditorFooter
     private lateinit var mViewModel: EditorViewModel
     private lateinit var mSubmitBtn: Button
@@ -93,7 +93,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mRecycler.layoutManager = MyLinearLayoutManager(this)
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
         mToolbar = findViewById(R.id.toolbar)
-        mTitle = findViewById(R.id.title)
+        mTitleView = findViewById(R.id.title)
         mFooter = findViewById(R.id.footer)
         mSubmitBtn = findViewById(R.id.submit_btn)
         mAdapter = EditorAdapter(interactor = this)
@@ -131,18 +131,14 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mViewModel.onCreate(DraftsPersister(this, htmlHandler), htmlHandler)
         mViewModel.mode = mMode
         mViewModel.editorLiveData.observe(this, this)
-        mTitle.state = EditorTitleState(mMode?.title
-                ?: "", mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
-                {
-                    mViewModel.onTitleChanged(it)
-                },
-                {
-                    mAdapter.focusFirstTextPart(mRecycler)
+        mTitleView.state = EditorTitleState(PostEditorTitle(TitleTextField("", false, null)),
+                { mViewModel.onTitleChanged(it) },
+                { mAdapter.focusFirstTextPart(mRecycler) })
 
-                }, if (mMode?.editorType == EditorType.CREATE_COMMENT) mMode?.subtitle
-                ?: "" else "",
+        mViewModel.titleLiveData.observe(this, Observer<EditorTitle> { t ->
+            mTitleView.state = mTitleView.state?.copy(type = t ?: return@Observer)
+        })
 
-                isHidden = isTitleHidden())
 
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringProvider {
@@ -156,10 +152,10 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             resources.getString(R.string.text) else resources.getString(R.string.comment)
 
 
-        mSubmitBtn.setOnClickListener({
+        mSubmitBtn.setOnClickListener {
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
-        })
+        }
         mRecycler.preserveFocusAfterLayout = true
         mRecycler.itemAnimator = null
 
@@ -184,14 +180,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 mProgressDialog = null
             }
         }
-        if (mMode?.editorType == EditorType.CREATE_POST) {
-            mTitle.state = EditorTitleState(it.title,
-                    mTitle.state.isTitleEditable,
-                    mTitle.state.onTitleChanges,
-                    mTitle.state.onEnter,
-                    mTitle.state.subtitle,
-                    mTitle.state.isHidden)
-        }
+
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 mFooter.state.tagsValidator,
                 it.tags.toArrayList(),
@@ -662,6 +651,16 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
             }
         }
         return false
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mViewModel.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mViewModel.onStop()
     }
 
     private fun isTitleHidden(): Boolean {

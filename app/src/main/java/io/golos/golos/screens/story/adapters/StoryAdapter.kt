@@ -24,14 +24,13 @@ import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.GolosMovementMethod
 import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.createGolosSpan
-import timber.log.Timber
 
 class RowWrapper(val row: Row,
                  val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
 
 class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onRowClick: ((Row, ImageView?) -> Unit)? = null
-    var items = ArrayList<Row>()
+    var items : List<Row> = emptyList()
         set(value) {
             val newItems = value
 
@@ -50,16 +49,16 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == 0) return TextBlockHolder(parent)
-        else return ImageBlockHolder(parent)
+        return if (viewType == 0) TextBlockHolder(parent)
+        else ImageBlockHolder(parent)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is TextBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
+            is TextBlockHolder -> holder.state = RowWrapper(items[position]) { vh, _ ->
                 if (vh.adapterPosition == -1) return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], null)
-            })
+            }
             is ImageBlockHolder -> holder.state = RowWrapper(items[position], { vh, v ->
                 if (vh.adapterPosition == -1) return@RowWrapper
                 onRowClick?.invoke(items[vh.adapterPosition], v as? ImageView)

@@ -1,29 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/title_et"
         style="@style/EditTextWithPinkCursor"
-        android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material"
         android:hint="@string/enter_post_title"
         android:maxLength="10"
-        android:paddingBottom="4dp"
         android:paddingTop="@dimen/margin_material"
+        android:paddingBottom="4dp"
         android:text=""
 
-        android:textSize="@dimen/font_medium" />
+        android:textSize="@dimen/font_medium"/>
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/subtitle_text"
         style="@style/EditTextWithPinkCursor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material"
         android:text=""
-        android:visibility="gone" />
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/cut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/title_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"/>
+
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/fold_btn"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/shape_white_cut"
+            app:srcCompat="@drawable/ic_chevron_down_12dp_gray_editor"/>
+    </FrameLayout>
 </LinearLayout>

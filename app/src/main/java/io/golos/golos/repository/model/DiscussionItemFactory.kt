@@ -54,7 +54,8 @@ object DiscussionItemFactory {
                 avatarPath = account?.avatarPath,
                 activeVotes = discussion.activeVotes
                         ?.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) }.orEmpty().toArrayList(),
-                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
+                level = discussion.depth.toInt())
 
 
         setTypeOfItem(item)
@@ -97,7 +98,8 @@ object DiscussionItemFactory {
                 tags = metadata.tags,
                 avatarPath = account?.avatarPath,
                 activeVotes = discussion.votes,
-                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
+                level = discussion.depth.toInt())
 
         setTypeOfItem(item)
         checkImages(item)

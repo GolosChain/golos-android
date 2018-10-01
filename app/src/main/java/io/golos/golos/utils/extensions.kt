@@ -102,6 +102,8 @@ fun GolosDiscussionItem.isStory() = this.parentAuthor.isEmpty()
 
 fun GolosDiscussionItem.isComment() = this.parentAuthor.isNotEmpty()
 
+
+
 fun Cursor.getBool(columnName: String): Boolean {
     val columnNumber = this.getColumnIndex(columnName)
     if (columnNumber < 0) return false

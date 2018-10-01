@@ -40,7 +40,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
 
 
     val isRootStory: Boolean
-        get() = tags.contains(parentPermlink)
+        get() = parentAuthor.isEmpty()
 
 
     override fun toString(): String {
