@@ -1,10 +1,10 @@
 package io.golos.golos.screens.profile
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.text.SpannableString
 import android.text.style.TextAppearanceSpan
 import android.view.LayoutInflater
@@ -45,12 +45,12 @@ class UserInformationFragment : GolosFragment(), Observer<UserAccountModel> {
         (mRecyclerView.adapter as? KeyValueAdapter)?.values = rows
     }
 
-    private lateinit var mRecyclerView: RecyclerView
+    private lateinit var mRecyclerView: androidx.recyclerview.widget.RecyclerView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_information, container, false)
-        mRecyclerView = v as RecyclerView
+        mRecyclerView = v as androidx.recyclerview.widget.RecyclerView
         mRecyclerView.layoutManager = MyLinearLayoutManager(activity!!)
         mRecyclerView.adapter = KeyValueAdapter(listOf(), {})
 

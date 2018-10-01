@@ -1,18 +1,18 @@
 package io.golos.golos.screens.story
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
-import android.support.v7.widget.Toolbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -59,9 +59,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     private lateinit var mFlagTv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
     private lateinit var mNoCommentsTv: TextView
-    private lateinit var mStoryRecycler: RecyclerView
-    private lateinit var mCommentsRecycler: RecyclerView
-    private lateinit var mBottomImagesRecycler: RecyclerView
+    private lateinit var mStoryRecycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var mCommentsRecycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var mBottomImagesRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mFlow: FlowLayout
     private lateinit var mCommentsCountBtn: TextView
     private lateinit var mVotingProgress: ProgressBar
@@ -429,7 +429,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
         mStoryRecycler.layoutManager = MyLinearLayoutManager(this)
         mCommentsRecycler.layoutManager = MyLinearLayoutManager(this)
-        mBottomImagesRecycler.layoutManager = MyLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        mBottomImagesRecycler.layoutManager = MyLinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
         mCommentsRecycler.adapter = CommentsAdapter(
                 onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
@@ -442,8 +442,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mVotesIv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
         mCommentsCountBtn.visibility = View.INVISIBLE
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
-        (mStoryRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        (mCommentsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        (mStoryRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
+        (mCommentsRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
 
         (mStoryRecycler.adapter as StoryAdapter).onRowClick = { row, iv ->
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)

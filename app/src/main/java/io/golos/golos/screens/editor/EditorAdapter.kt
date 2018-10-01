@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.text.Selection
 import android.view.ViewGroup
 import io.golos.golos.BuildConfig.DEBUG_EDITOR
@@ -37,14 +37,14 @@ abstract class EditorAdapterModel(open val id: String) {
 }
 
 data class EditorAdapterTextPart(val textPart: EditorTextPart,
-                                 val onFocusChanged: (RecyclerView.ViewHolder, Boolean) -> Unit = { _, _ -> },
-                                 val onNewText: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
-                                 val onCursorChange: (RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
+                                 val onFocusChanged: (androidx.recyclerview.widget.RecyclerView.ViewHolder, Boolean) -> Unit = { _, _ -> },
+                                 val onNewText: (androidx.recyclerview.widget.RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
+                                 val onCursorChange: (androidx.recyclerview.widget.RecyclerView.ViewHolder, EditorTextPart) -> Unit = { _, _ -> },
                                  val showHint: Boolean = false) : EditorAdapterModel(textPart.id)
 
 data class EditorAdapterImagePart(val imagePart: EditorImagePart,
                                   val isLoading: Boolean = false,
-                                  val onImageDelete: (RecyclerView.ViewHolder, String, String)
+                                  val onImageDelete: (androidx.recyclerview.widget.RecyclerView.ViewHolder, String, String)
                                   /** second - part id, third - src **/
                                   -> Unit = { _, _, _ -> }) : EditorAdapterModel(imagePart.id)
 
@@ -55,7 +55,7 @@ interface EditorAdapterInteractions {
 }
 
 class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
-    : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private val callback = MyCallback()
 
@@ -85,7 +85,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         }
     }
 
-    fun onTextSizeChanged(mRecycler: RecyclerView) {
+    fun onTextSizeChanged(mRecycler: androidx.recyclerview.widget.RecyclerView) {
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)
@@ -94,7 +94,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     @Suppress("NAME_SHADOWING")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is EditorEditTextViewHolder -> {
                 val part = parts[position] as EditorTextPart
@@ -135,7 +135,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         return parts.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         Timber.e("onCreateViewHolder")
         return when (viewType) {
             0 -> EditorEditTextViewHolder(R.layout.vh_edit_text, parent)
@@ -149,7 +149,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         else 1
     }
 
-    fun onRequestFocus(mRecycler: RecyclerView) {
+    fun onRequestFocus(mRecycler: androidx.recyclerview.widget.RecyclerView) {
         Timber.e("onRequestFocus")
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
@@ -158,7 +158,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         }
     }
 
-    fun focusFirstTextPart(mRecycler: RecyclerView) {
+    fun focusFirstTextPart(mRecycler: androidx.recyclerview.widget.RecyclerView) {
         Timber.e("onRequestFocus")
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
@@ -170,7 +170,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         }
     }
 
-    fun beforeTextSizeChange(mRecycler: RecyclerView) {
+    fun beforeTextSizeChange(mRecycler: androidx.recyclerview.widget.RecyclerView) {
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)
@@ -178,7 +178,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
         }
     }
 
-    fun afterTextSizeChange(mRecycler: RecyclerView) {
+    fun afterTextSizeChange(mRecycler: androidx.recyclerview.widget.RecyclerView) {
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)

@@ -1,18 +1,16 @@
 package io.golos.golos.screens
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutCompat
+import androidx.appcompat.widget.LinearLayoutCompat
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.dialogs.GolosDialog
@@ -49,7 +47,7 @@ class VoteForAppDialog : GolosDialog() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.VoteForAppDialogStyle)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.VoteForAppDialogStyle)
 
     }
 

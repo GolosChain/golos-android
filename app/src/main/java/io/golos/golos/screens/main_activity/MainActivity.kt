@@ -1,14 +1,14 @@
 package io.golos.golos.screens.main_activity
 
 import android.animation.Animator
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -37,7 +37,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
     private lateinit var mButtonContainer: ViewGroup
     private lateinit var mNotificationsContainer: ViewGroup
 
-    private lateinit var mNotificationsRecycler: RecyclerView
+    private lateinit var mNotificationsRecycler: androidx.recyclerview.widget.RecyclerView
     private val mHandler = Handler()
     private val mSelectLiveData = OneShotLiveData<FeedType>()
     private lateinit var mPager: ViewPager

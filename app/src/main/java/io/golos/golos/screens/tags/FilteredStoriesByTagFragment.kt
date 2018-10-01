@@ -1,16 +1,16 @@
 package io.golos.golos.screens.tags
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.design.widget.TabLayout
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
+import com.google.android.material.tabs.TabLayout
+import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +27,6 @@ import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagFragmentViewMod
 import io.golos.golos.screens.tags.viewmodel.FilteredStoriesByTagViewModel
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.01.18.
@@ -35,7 +34,7 @@ import timber.log.Timber
 class FilteredStoriesByTagFragment : GolosFragment(),
         Observer<FilteredStoriesByTagViewModel>,
         ReselectionEmitter {
-    private lateinit var mTagsRecycler: RecyclerView
+    private lateinit var mTagsRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mViewPager: ViewPager
     private lateinit var mNoTagsTv: TextView
     private lateinit var mPopularNowTv: TabLayout
@@ -68,8 +67,8 @@ class FilteredStoriesByTagFragment : GolosFragment(),
             }
         })
 
-        (mTagsRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        mTagsRecycler.layoutManager = MyLinearLayoutManager(activity!!, LinearLayoutManager.HORIZONTAL, false)
+        (mTagsRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
+        mTagsRecycler.layoutManager = MyLinearLayoutManager(activity!!, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
         mViewModel = ViewModelProviders.of(activity!!).get(FilteredStoriesByTagFragmentViewModel::class.java)
 
         mViewModel?.getTagsLiveData()?.observe(this, this)
@@ -104,7 +103,7 @@ class FilteredStoriesByTagFragment : GolosFragment(),
                 items.add(0, LocalizedTag(Tag("", 0.0, 0L, 0L)))
                 (mTagsRecycler.adapter as SubscribedTagsAdapter).tags = items
                 if (mTagsSavedState != null) {
-                    mTagsRecycler.layoutManager.onRestoreInstanceState(mTagsSavedState)
+                    mTagsRecycler.layoutManager?.onRestoreInstanceState(mTagsSavedState)
                     mTagsSavedState = null
                 }
 
@@ -129,7 +128,7 @@ class FilteredStoriesByTagFragment : GolosFragment(),
 
 
     override fun onSaveInstanceState(outState: Bundle) {
-        val parc = mTagsRecycler.layoutManager.onSaveInstanceState()
+        val parc = mTagsRecycler.layoutManager?.onSaveInstanceState()
         outState.putParcelable("FilteredStoriesByTagFragment", parc)
         super.onSaveInstanceState(outState)
     }

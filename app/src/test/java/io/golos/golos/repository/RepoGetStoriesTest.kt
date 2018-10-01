@@ -1,6 +1,6 @@
 package io.golos.golos.repository
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.base.models.AccountName
 import io.golos.golos.MockPersister

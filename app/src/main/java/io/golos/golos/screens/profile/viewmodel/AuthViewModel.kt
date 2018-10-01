@@ -1,10 +1,10 @@
 package io.golos.golos.screens.profile.viewmodel
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.Transformations
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.Transformations
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ApplicationUser

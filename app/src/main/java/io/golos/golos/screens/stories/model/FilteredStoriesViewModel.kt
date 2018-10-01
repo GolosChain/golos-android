@@ -1,8 +1,8 @@
 package io.golos.golos.screens.stories.model
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.Tag

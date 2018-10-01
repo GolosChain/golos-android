@@ -1,7 +1,7 @@
 package io.golos.golos.screens.userslist
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -21,11 +21,11 @@ import io.golos.golos.utils.setViewVisible
  * Created by yuri on 22.12.17.
  */
 data class UserListItemState(val item: UserListRowData,
-                             val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                             val onSubscribeClick: (RecyclerView.ViewHolder) -> Unit)
+                             val onUserClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                             val onSubscribeClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
 class UserListAdapter(private var onUserClick: (UserListRowData) -> Unit = { _ -> },
-                      private var onSubscribeClick: (UserListRowData) -> Unit = { _ -> }) : RecyclerView.Adapter<UserListViewHolder>() {
+                      private var onSubscribeClick: (UserListRowData) -> Unit = { _ -> }) : androidx.recyclerview.widget.RecyclerView.Adapter<UserListViewHolder>() {
     private val mHashes = HashMap<String, Int>()
     var listItems: List<UserListRowData> = ArrayList()
         set(value) {

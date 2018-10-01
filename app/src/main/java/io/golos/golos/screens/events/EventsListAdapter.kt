@@ -1,8 +1,8 @@
 package io.golos.golos.screens.events
 
-import android.support.constraint.ConstraintLayout
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -25,7 +25,7 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
                         var onItemAuthorClick: (EventListItem) -> Unit = {},
                         var onItemGoingToShow: OnItemShowListener,
                         private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl)
-    : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     internal data class NotificationWrapper(val notification: EventContainingItem,
                                             val clickListener: (GolosViewHolder) -> Unit,
@@ -69,7 +69,7 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
         }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         return when (viewType) {
             R.layout.vh_event_date_delimeter -> EventDateViewHolder(parent)
             R.layout.vh_event -> EventsListAdapterViewHolder(parent)
@@ -80,7 +80,7 @@ class EventsListAdapter(notifications: List<EventsListItemWrapper>,
     override fun getItemCount() = items.size
 
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
 
         if (item is EventContainingItem) {

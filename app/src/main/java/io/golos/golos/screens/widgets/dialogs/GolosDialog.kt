@@ -1,7 +1,7 @@
 package io.golos.golos.screens.widgets.dialogs
 
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
 
 /**
@@ -10,6 +10,6 @@ import io.golos.golos.R
 open class GolosDialog : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.GolosDialogTheme)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.GolosDialogTheme)
     }
 }

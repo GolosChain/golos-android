@@ -1,9 +1,9 @@
 package io.golos.golos.repository.services
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.enums.PrivateKeyType

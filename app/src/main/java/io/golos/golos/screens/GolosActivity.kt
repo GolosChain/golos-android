@@ -2,14 +2,14 @@ package io.golos.golos.screens
 
 import android.app.Activity
 import android.app.UiModeManager
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import android.text.Html
 import android.view.KeyEvent
 import android.widget.Toast

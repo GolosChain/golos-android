@@ -1,7 +1,7 @@
 package io.golos.golos.screens.tags.adapters
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
@@ -16,9 +16,9 @@ import io.golos.golos.utils.getVectorDrawable
 
 
 data class SearchTagState(val tag: LocalizedTag,
-                          val onTagClickListener: (RecyclerView.ViewHolder) -> Unit)
+                          val onTagClickListener: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
-class SearchTagAdapter(var onTagClick: TagsAndUsersPager.OnTagClickListener?) : RecyclerView.Adapter<TagWithSearchIconVh>() {
+class SearchTagAdapter(var onTagClick: TagsAndUsersPager.OnTagClickListener?) : androidx.recyclerview.widget.RecyclerView.Adapter<TagWithSearchIconVh>() {
 
     var tags: List<LocalizedTag> = ArrayList()
         set(value) {

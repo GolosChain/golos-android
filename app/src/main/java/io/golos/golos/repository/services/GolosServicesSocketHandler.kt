@@ -1,6 +1,6 @@
 package io.golos.golos.repository.services
 
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper

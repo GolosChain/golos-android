@@ -3,7 +3,7 @@ package io.golos.golos.screens.editor
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.text.*
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -41,7 +41,7 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
     private val mSubtitleText: TextView
     private val mCutView: View
     private val mFoldButton: View
-    private val mRecycler: RecyclerView
+    private val mRecycler: androidx.recyclerview.widget.RecyclerView
     private val mAdapter: StoryAdapter
 
     init {

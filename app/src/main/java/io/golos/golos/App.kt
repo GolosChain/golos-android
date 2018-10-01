@@ -3,8 +3,8 @@ package io.golos.golos
 import android.annotation.SuppressLint
 import android.app.*
 import android.app.Notification
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -13,10 +13,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import android.support.multidex.MultiDexApplication
-import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatDelegate
+import androidx.multidex.MultiDexApplication
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatDelegate
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent

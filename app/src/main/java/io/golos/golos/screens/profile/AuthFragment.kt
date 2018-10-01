@@ -2,15 +2,15 @@ package io.golos.golos.screens.profile
 
 import android.app.Activity
 import android.app.Dialog
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import android.text.Editable
 import android.text.Html
 import android.view.LayoutInflater
@@ -23,7 +23,6 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 30.10.17.
@@ -95,7 +94,7 @@ class AuthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        mViewModel.userProfileState.observe(this, android.arch.lifecycle.Observer {
+        mViewModel.userProfileState.observe(this, androidx.lifecycle.Observer {
 
             if (it?.isPostingKeyVisible == true) {
                 mPostingKeyMenu.visibility = View.VISIBLE

@@ -1,7 +1,7 @@
 package io.golos.golos.screens.tags.viewmodel
 
 import android.app.Activity
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.content.Intent
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.persistence.model.GolosUserWithAvatar

@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor
 
 import android.content.Context
-import android.support.v7.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +11,6 @@ import android.widget.ProgressBar
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
-import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 24/10/2017.

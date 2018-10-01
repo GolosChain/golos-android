@@ -1,16 +1,15 @@
 package io.golos.golos.screens.stories.adapters
 
 import android.content.Context
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.PagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.stories.DiscussionsListFragment
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
-import timber.log.Timber
 
 class StoriesPagerAdapter(val context: Context,
                           manager: FragmentManager,

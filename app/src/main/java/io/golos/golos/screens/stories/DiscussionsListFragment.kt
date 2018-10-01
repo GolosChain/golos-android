@@ -1,15 +1,15 @@
 package io.golos.golos.screens.stories
 
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import android.text.SpannableStringBuilder
 import android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
 import android.view.LayoutInflater
@@ -35,7 +35,7 @@ import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
-    private var mRecycler: RecyclerView? = null
+    private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: DiscussionsViewModel? = null
     private var mRefreshButton: TextView? = null
@@ -52,7 +52,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         return view
     }
 
-    private fun getRecycler(): RecyclerView = mRecycler!!
+    private fun getRecycler(): androidx.recyclerview.widget.RecyclerView = mRecycler!!
 
     private fun bindViews(view: View) {
         mRecycler = view.findViewById(R.id.recycler)
@@ -139,11 +139,11 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                                 UserSettingsRepository.GolosBountyDisplay.THREE_PLACES))
 
         mRecycler?.adapter = mAdapter
-        (mRecycler?.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+        (mRecycler?.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
+        mRecycler?.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val position = (mRecycler?.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
+                val position = (mRecycler?.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findLastCompletelyVisibleItemPosition()
                 if (position + 10 > mAdapter.itemCount
                         && ((System.currentTimeMillis() - lastSentUpdateRequestTime) > 1_000)) {
                     mViewModel?.onScrollToTheEnd()
@@ -229,7 +229,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
             mRecycler?.post {
                 mAdapter.setStripesCustom(t.items)
                 if (parc != null) {
-                    (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
+                    (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
                     parc = null
                 }
             }
@@ -283,7 +283,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        val parc = mRecycler?.layoutManager as? LinearLayoutManager
+        val parc = mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager
         parc?.onSaveInstanceState().let {
             outState.putParcelable("StoriesFragmentRC", it)
         }
@@ -295,7 +295,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         super.onViewStateRestored(savedInstanceState)
         parc = savedInstanceState?.getParcelable<Parcelable>("StoriesFragmentRC")
         parc?.let {
-            (mRecycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(parc)
+            (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
         }
     }
 

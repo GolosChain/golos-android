@@ -1,6 +1,6 @@
 package io.golos.golos.screens.stories.model
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MainThreadExecutor
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.Repository

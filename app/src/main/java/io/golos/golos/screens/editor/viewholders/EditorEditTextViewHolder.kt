@@ -1,7 +1,7 @@
 package io.golos.golos.screens.editor.viewholders
 
 import android.content.Context
-import android.support.annotation.LayoutRes
+import androidx.annotation.LayoutRes
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -62,7 +62,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                 if (DEBUG_EDITOR) Timber.e("setting new text \nold = ${mEditText.text}" +
                         " new = ${textPart}")
                 mEditText.setTextKeepState(textPart.text)
-                mLastTextSize = mEditText.text.length
+                mLastTextSize = mEditText.text.orEmpty().length
 
 
                 textChanged = true
@@ -72,8 +72,8 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     if (DEBUG_EDITOR) Timber.e("setting new selection state = ${value.textPart}\n start = ${start} " +
                             "end = ${end}")
 
-                    if (start > mEditText.text.length) start = mEditText.length()
-                    if (end > mEditText.text.length) end = mEditText.length()
+                    if (start > mEditText.text.orEmpty().length) start = mEditText.length()
+                    if (end > mEditText.text.orEmpty().length) end = mEditText.length()
 
                     if (start > -1 && end > -1)
                         mEditText.setSelection(start, end)
@@ -120,7 +120,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         if (v != null && v == mEditText) {
             val currentState = state ?: return
 
-            if (mEditText.text.isEmpty()) mEditText.text.append(" ")
+            if (mEditText.text.isEmpty()) mEditText.text.orEmpty().append(" ")
 
 
             if (hasFocus) {
@@ -147,7 +147,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
 
 
         val spans = s.getSpans(mEditText.selectionStart, mEditText.selectionEnd, MetricAffectingSpan::class.java)
-        if (mEditText.text.isNotEmpty()) {
+        if (!mEditText.text.isEmpty()) {
             spans.forEach {
                 val spanStart = s.getSpanStart(it)
                 val spanEnd = s.getSpanEnd(it)
@@ -236,7 +236,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         if (mEditText.selectionStart > currentState.textPart.startPointer) currentState.textPart.startPointer = mEditText.selectionStart
         if (mEditText.selectionEnd > currentState.textPart.endPointer) currentState.textPart.endPointer = mEditText.selectionEnd
 
-        val newState = currentState.textPart.setText(mEditText.text)
+        val newState = currentState.textPart.setText(mEditText.text.orEmpty())
         state = EditorAdapterTextPart(newState,
                 currentState.onFocusChanged,
                 currentState.onNewText,
@@ -284,7 +284,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
         if (ignoreSelectionChange) return
         if (DEBUG_EDITOR) Timber.e("")
         val currentState = state ?: return
-        val spans = mEditText.text.getSpans(start, end, LeadingMarginSpan::class.java)
+        val spans = mEditText.text.orEmpty().getSpans(start, end, LeadingMarginSpan::class.java)
         if (spans.size > 1) {
             if (DEBUG_EDITOR) Timber.e("removing leading spans")
             val classOfFirstSpan = spans[0]::class.java
@@ -295,18 +295,18 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
                     if (spans[it]::class.java == classOfFirstSpan) {
                         listOfSameSpans.second.add(spans[it])
                     } else {
-                        mEditText.text.removeSpan(spans[it])
+                        mEditText.text.orEmpty().removeSpan(spans[it])
                     }
                 }
             }
             if (listOfSameSpans.second.size > 1) {
-                val spanStart = listOfSameSpans.second.map { mEditText.text.getSpanStart(it) }.min()
+                val spanStart = listOfSameSpans.second.map { mEditText.text.orEmpty().getSpanStart(it) }.min()
                         ?: 0
-                val spanEnd = listOfSameSpans.second.map { mEditText.text.getSpanEnd(it) }.max()
+                val spanEnd = listOfSameSpans.second.map { mEditText.text.orEmpty().getSpanEnd(it) }.max()
                         ?: 0
                 if (spanEnd >= spanStart) {
-                    listOfSameSpans.second.forEach { mEditText.text.removeSpan(it) }
-                    mEditText.text.setSpan(listOfSameSpans.second.first(), spanStart, spanEnd, INCLUSIVE_INCLUSIVE)
+                    listOfSameSpans.second.forEach { mEditText.text.orEmpty().removeSpan(it) }
+                    mEditText.text.orEmpty().setSpan(listOfSameSpans.second.first(), spanStart, spanEnd, INCLUSIVE_INCLUSIVE)
                 }
 
             }

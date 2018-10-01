@@ -1,9 +1,9 @@
 package io.golos.golos.repository
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import android.content.Context
-import android.support.annotation.AnyThread
-import android.support.annotation.MainThread
+import androidx.annotation.AnyThread
+import androidx.annotation.MainThread
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.golos.golos.BuildConfig
 import io.golos.golos.notifications.PushNotificationsRepository

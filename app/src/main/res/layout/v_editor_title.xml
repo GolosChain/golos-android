@@ -5,7 +5,7 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-    <android.support.v7.widget.AppCompatEditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/title_et"
         style="@style/EditTextWithPinkCursor"
         android:layout_marginStart="@dimen/margin_material"
@@ -18,7 +18,7 @@
 
         android:textSize="@dimen/font_medium"/>
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/subtitle_text"
         style="@style/EditTextWithPinkCursor"
         android:layout_width="match_parent"
@@ -33,13 +33,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/title_recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"/>
 
-        <android.support.v7.widget.AppCompatImageButton
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/fold_btn"
             android:layout_width="match_parent"
             android:layout_height="64dp"

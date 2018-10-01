@@ -1,8 +1,8 @@
 package io.golos.golos.screens.events
 
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.content.Context
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*

@@ -1,9 +1,9 @@
 package io.golos.golos.screens
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import fr.castorflex.android.circularprogressbar.CircularProgressBar
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -11,7 +11,6 @@ import io.golos.golos.repository.model.ReadyStatus
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.utils.setViewGone
 import io.golos.golos.utils.setViewVisible
-import timber.log.Timber
 
 /**
  * Created by yuri on 27.12.17.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.AppCompatImageButton xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Base.Widget.AppCompat.Button.Borderless.AddButtonBluePlus"
-    android:layout_height="@dimen/tags_reycler_height"
-    android:layout_margin="0dp"
-    app:srcCompat="@drawable/ic_add_white_24dp" />
+<androidx.appcompat.widget.AppCompatImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+                                                xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                style="@style/Base.Widget.AppCompat.Button.Borderless.AddButtonBluePlus"
+                                                android:layout_height="@dimen/tags_reycler_height"
+                                                android:layout_margin="0dp"
+                                                app:srcCompat="@drawable/ic_add_white_24dp" />

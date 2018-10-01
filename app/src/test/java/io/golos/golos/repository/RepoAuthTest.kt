@@ -1,6 +1,6 @@
 package io.golos.golos.repository
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MockPersister
 import io.golos.golos.MockUserSettings
 import io.golos.golos.R

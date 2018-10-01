@@ -4,13 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
-import android.support.annotation.DimenRes
-import android.support.annotation.WorkerThread
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.*
+import androidx.annotation.DimenRes
+import androidx.annotation.WorkerThread
 import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -53,6 +53,12 @@ public fun formatUrl(rawUrl: String): String {
     else if (shownLink.startsWith("www.")) shownLink = "https://$shownLink"
     return shownLink
 }
+
+fun Editable?.orEmpty(): Editable {
+    return this ?: SpannableStringBuilder()
+}
+
+fun Editable?.isEmpty(): Boolean = this == null || this.length == 0
 
 fun compareGolosSpannables(first: Editable, second: Editable): Boolean {
     val firstText = first.toString()

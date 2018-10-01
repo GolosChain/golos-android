@@ -1,10 +1,10 @@
 package io.golos.golos.screens.tags.viewmodel
 
 import android.app.Activity
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.Tag
@@ -13,7 +13,6 @@ import io.golos.golos.screens.tags.TagAndUsersSearchActivity
 import io.golos.golos.screens.tags.TagsCloudActivity
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.01.18.

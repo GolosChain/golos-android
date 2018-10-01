@@ -1,7 +1,7 @@
 package io.golos.golos
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.NotificationsDisplaySetting

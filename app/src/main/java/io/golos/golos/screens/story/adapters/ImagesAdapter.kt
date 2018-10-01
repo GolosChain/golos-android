@@ -1,6 +1,6 @@
 package io.golos.golos.screens.story.adapters
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.Glide
@@ -14,10 +14,10 @@ import io.golos.golos.utils.ImageUriResolver
  * Created by yuri on 26.12.17.
  */
 data class ImageHolderState(val imageRow: ImageRow,
-                            val onImageClick: (RecyclerView.ViewHolder) -> Unit)
+                            val onImageClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
 class ImagesAdapter(private var onImageClick: (ImageRow) -> Unit = { print(it) },
-                    images: ArrayList<ImageRow>) : RecyclerView.Adapter<StoryBottomImagesViewHolder>() {
+                    images: ArrayList<ImageRow>) : androidx.recyclerview.widget.RecyclerView.Adapter<StoryBottomImagesViewHolder>() {
 
     private var list = ArrayList<ImageRow>()
 

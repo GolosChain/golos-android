@@ -1,10 +1,10 @@
 package io.golos.golos.screens.story.adapters
 
-import android.support.constraint.ConstraintLayout
-import android.support.v4.content.ContextCompat
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.ListPopupWindow
-import android.support.v7.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.appcompat.widget.ListPopupWindow
+import androidx.recyclerview.widget.RecyclerView
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -30,13 +30,13 @@ import kotlin.collections.HashMap
 
 
 data class CommentHolderState(val comment: StoryWrapper,
-                              val onUpvoteClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onDownVoteClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onAnswerClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onUserClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onCommentsClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onUserVotesClick: (RecyclerView.ViewHolder) -> Unit,
-                              val onEditClick: (RecyclerView.ViewHolder) -> Unit)
+                              val onUpvoteClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onDownVoteClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onAnswerClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onUserClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onCommentsClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onUserVotesClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onEditClick: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
 
 class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
@@ -45,7 +45,7 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
                       var onUserClick: (StoryWrapper) -> Unit = { print(it) },
                       var onCommentsClick: (StoryWrapper) -> Unit = { print(it) },
                       var onUserVotesClick: (StoryWrapper) -> Unit = { print(it) },
-                      var onEditClick: (StoryWrapper) -> Unit = { print(it) }) : RecyclerView.Adapter<CommentViewHolder>() {
+                      var onEditClick: (StoryWrapper) -> Unit = { print(it) }) : androidx.recyclerview.widget.RecyclerView.Adapter<CommentViewHolder>() {
 
 
     private val mHashes: HashMap<Long, Int> = HashMap()
@@ -91,7 +91,7 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
 }
 
 
-class CommentViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
+class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
        return itemView.context.createGolosSpan(type)
     }

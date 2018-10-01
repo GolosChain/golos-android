@@ -1,8 +1,8 @@
 package io.golos.golos.screens.main_activity.adapters
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +25,7 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
                            var clickListener: (GolosNotification) -> Unit = {},
                            var cancelListener: (GolosNotification) -> Unit = {},
                            private val showOnlyFirst: Boolean,
-                           private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl) : RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
+                           private val appearanceHandler: NotificationsAndEventsAppearanceMaker = NotificationsAndEventsAppearanceMakerImpl) : androidx.recyclerview.widget.RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>() {
 
     internal data class NotificationWrapper(val notification: GolosNotification,
                                             val clickListener: (GolosViewHolder) -> Unit,
@@ -131,15 +131,16 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 }
 
 class DissmissTouchHelper(adapter: NotificationsAdapter) : ItemTouchHelper(object : ItemTouchHelper.Callback() {
-    override fun getMovementFlags(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?): Int {
+    override fun getMovementFlags(recyclerView: androidx.recyclerview.widget.RecyclerView, viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Int {
         return ItemTouchHelper.Callback.makeMovementFlags(0, ItemTouchHelper.END)
     }
 
-    override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, target: RecyclerView.ViewHolder?): Boolean {
+
+    override fun onMove(recyclerView: androidx.recyclerview.widget.RecyclerView, viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, target: androidx.recyclerview.widget.RecyclerView.ViewHolder): Boolean {
         return false
     }
 
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
+    override fun onSwiped(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
         val position = viewHolder?.adapterPosition ?: -1
         val adapter = adapter.notification
         if (position > -1) Repository.get.notificationsRepository.dismissNotification(adapter[position])

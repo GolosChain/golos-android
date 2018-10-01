@@ -1,7 +1,7 @@
 package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -17,7 +17,6 @@ import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,

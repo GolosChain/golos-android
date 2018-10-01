@@ -1,8 +1,8 @@
 package io.golos.golos.screens.tags.fragments
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +15,7 @@ import io.golos.golos.utils.MyLinearLayoutManager
 import kotlin.reflect.KProperty
 
 class TagsListFragment : GolosFragment() {
-    private var mRecycler: RecyclerView? = null
+    private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.f_tags_list, container, false)

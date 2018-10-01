@@ -1,13 +1,13 @@
 package io.golos.golos.screens.main_activity
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.DialogFragment
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +21,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.DiscussionActivity
 
 class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
-    private lateinit var mRecyclerView: RecyclerView
+    private lateinit var mRecyclerView: androidx.recyclerview.widget.RecyclerView
     private val mHandler = Handler()
 
     override fun onChanged(t: GolosNotifications?) {
@@ -33,7 +33,7 @@ class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.NotificationsDialog)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.NotificationsDialog)
     }
 
     override fun onStart() {
@@ -45,7 +45,8 @@ class NotificationsDialog : DialogFragment(), Observer<GolosNotifications> {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.d_notifications, container, false)
         mRecyclerView = v.findViewById(R.id.recycler)
-        val decor = DividerItemDecoration(context ?: return null, LinearLayoutManager.VERTICAL)
+        val decor = androidx.recyclerview.widget.DividerItemDecoration(context
+                ?: return null, androidx.recyclerview.widget.LinearLayoutManager.VERTICAL)
         decor.setDrawable(ContextCompat.getDrawable(context!!, R.drawable.shape_gray_line)!!)
         mRecyclerView.addItemDecoration(decor)
         mRecyclerView.adapter = NotificationsAdapter(listOf(),

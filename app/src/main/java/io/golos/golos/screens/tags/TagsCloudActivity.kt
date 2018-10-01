@@ -1,11 +1,11 @@
 package io.golos.golos.screens.tags
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.SearchView
+import androidx.appcompat.widget.SearchView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -44,7 +44,7 @@ class TagsCloudActivity : GolosActivity(), Observer<FiltersScreenState> {
 
     private fun setup() {
         findViewById<View>(R.id.back_btn).setOnClickListener { onBackPressed() }
-        val sv = findViewById<android.support.v7.widget.SearchView>(R.id.search_view)
+        val sv = findViewById<androidx.appcompat.widget.SearchView>(R.id.search_view)
         sv.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 return false

@@ -66,7 +66,8 @@ public static ** valueOf(java.lang.String);
 -keep class android.support.design.** { *; }
 -keep interface android.support.design.** { *; }
 -keep public class android.support.design.R$* { *; }
-
+-keep class android.support.design.widget.** { *; }
+-keep interface android.support.design.widget.** { *; }
 -keep class com.fasterxml.jackson.annotation.** { *; }
 -keepattributes Signature,InnerClasses,*Annotation*
 -keep,includedescriptorclasses  class org.glassfish.tyrus.** {  *; }

@@ -1,9 +1,8 @@
 package io.golos.golos.utils;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import androidx.annotation.NonNull;
+
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;

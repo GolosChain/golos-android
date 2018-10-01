@@ -1,14 +1,13 @@
 package io.golos.golos.screens.settings
 
 import android.content.Context
-import android.support.annotation.ArrayRes
+import androidx.annotation.ArrayRes
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.inflate
-import io.golos.golos.utils.setViewGone
 
 /**
  * Created by yuri on 06.02.18.

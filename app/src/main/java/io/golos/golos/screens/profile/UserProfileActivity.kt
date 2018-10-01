@@ -1,6 +1,6 @@
 package io.golos.golos.screens.profile
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -22,7 +22,7 @@ class UserProfileActivity : GolosActivity(), ProfileSectionPreselector {
         if (intent.hasExtra(USERNAME_TAG)) {
             fragment = UserProfileFragment.getInstance(intent.getStringExtra(USERNAME_TAG))
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.root_lo, fragment).commit()
+                    .replace(R.id.root_lo, fragment?:return).commit()
         }
         checkPreselection(intent)
     }

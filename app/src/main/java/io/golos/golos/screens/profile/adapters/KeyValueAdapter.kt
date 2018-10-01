@@ -1,7 +1,7 @@
 package io.golos.golos.screens.profile.adapters
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
@@ -13,7 +13,7 @@ data class KeyValueRowWrapper(val keyValueRow: KeyValueRow,
                               val onClickListener: (KeyValueRow) -> Unit)
 
 class KeyValueAdapter(initialValues: List<KeyValueRow>,
-                      val clickListener: (KeyValueRow) -> Unit) : RecyclerView.Adapter<KeyValueViewHolder>() {
+                      val clickListener: (KeyValueRow) -> Unit) : androidx.recyclerview.widget.RecyclerView.Adapter<KeyValueViewHolder>() {
 
     var values = initialValues
         set(value) {

@@ -1,7 +1,6 @@
 package io.golos.golos.screens.widgets;
 
 import android.content.Context;
-import android.support.v4.view.GravityCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,15 +9,19 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 
+
+import androidx.core.view.GravityCompat;
 import io.golos.golos.R;
+import io.golos.golos.utils.BottomViewEx;
 
 /**
  * Created by yuri on 05.12.17.
  */
 
-public class GolosBottomNavView extends BottomNavigationViewEx {
+public class GolosBottomNavView extends BottomNavigationView {
     public GolosBottomNavView(Context context) {
         super(context);
         init();
@@ -35,10 +38,11 @@ public class GolosBottomNavView extends BottomNavigationViewEx {
     }
 
     private void init() {
-        enableShiftingMode(false);
-        setTextVisibility(false);
-        enableItemShiftingMode(false);
-        enableAnimation(true);
+
+        setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_UNLABELED);
+        //setTextVisibility(false);
+        setItemHorizontalTranslationEnabled(false);
+      //  enableAnimation(true);
     }
 
     public void setCounterAt(int positionOfMenuItem, int count) {

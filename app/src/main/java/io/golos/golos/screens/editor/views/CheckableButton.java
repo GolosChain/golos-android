@@ -3,8 +3,8 @@ package io.golos.golos.screens.editor.views;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatImageButton;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -39,7 +39,7 @@ public class CheckableButton extends AppCompatImageButton implements View.OnClic
     }
 
     @Override
-    public void setOnClickListener(@android.support.annotation.Nullable OnClickListener l) {
+    public void setOnClickListener(@androidx.annotation.Nullable OnClickListener l) {
         if (l == this) super.setOnClickListener(l);
         else mOnClickListener = l;
     }

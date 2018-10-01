@@ -1,9 +1,9 @@
 package io.golos.golos.screens.settings
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.os.Bundle
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.NotificationsDisplaySetting
@@ -64,7 +64,7 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
     }
 
 
-    private lateinit var mRecycler: RecyclerView
+    private lateinit var mRecycler: androidx.recyclerview.widget.RecyclerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_notification_settings)

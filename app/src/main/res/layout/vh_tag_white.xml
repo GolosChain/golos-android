@@ -5,7 +5,7 @@
     android:paddingBottom="2dp"
     android:background="@drawable/rect_round_corners_stroke_blue">
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tag_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

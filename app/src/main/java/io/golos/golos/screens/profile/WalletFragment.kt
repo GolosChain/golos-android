@@ -1,8 +1,8 @@
 package io.golos.golos.screens.profile
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.TextAppearanceSpan
@@ -15,7 +15,6 @@ import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.setVectorDrawableEnd
-import io.golos.golos.utils.setVectorDrawableStart
 
 /**
  * Created by yuri on 08.12.17.

@@ -18,14 +18,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
-import android.support.annotation.*
-import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.content.res.AppCompatResources
-import android.support.v7.widget.SearchView
+import androidx.annotation.*
+import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SearchView
 import android.text.Html
 import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
@@ -244,7 +244,7 @@ fun Context.hideKeyboard(currentFocus: View) {
 
 fun SearchView.setTextColorHint(@ColorRes coloId: Int) {
     try {
-        (this.findViewById<EditText>(android.support.v7.appcompat.R.id.search_src_text) as EditText)
+        (this.findViewById<EditText>(androidx.appcompat.R.id.search_src_text) as EditText)
                 .setHintTextColor(this.getColorCompat(R.color.text_color_white_black))
     } catch (e: Exception) {
         e.printStackTrace()

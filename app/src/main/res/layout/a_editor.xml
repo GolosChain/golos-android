@@ -4,20 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/scroll_bottom_lo"
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
-        <android.support.design.widget.AppBarLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
 
-            <android.support.design.widget.CollapsingToolbarLayout
+            <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white_black_toolbar_color"
@@ -26,7 +26,7 @@
                 app:contentScrim="@color/white_black_toolbar_color"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
-                <android.support.v7.widget.Toolbar
+                <androidx.appcompat.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                     app:title="Текст"
                     app:titleTextColor="@color/textColorP">
 
-                    <android.support.v7.widget.AppCompatButton
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/submit_btn"
                         style="@style/Base.Widget.AppCompat.Button.Borderless"
                         android:layout_width="match_parent"
@@ -50,16 +50,16 @@
                         android:textSize="@dimen/font_medium"
                         android:textStyle="normal" />
 
-                </android.support.v7.widget.Toolbar>
-            </android.support.design.widget.CollapsingToolbarLayout>
-        </android.support.design.widget.AppBarLayout>
+                </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
 
-        <android.support.v4.widget.NestedScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -72,7 +72,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -84,8 +84,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
-    </android.support.design.widget.CoordinatorLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <View
         android:layout_width="match_parent"
@@ -160,7 +160,7 @@
 
                 app:srcCompat="@drawable/ic_link_24dp" />
 
-            <android.support.v7.widget.AppCompatImageButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/btn_insert_image"
                 style="@style/BottomButtonStyle"
                 app:srcCompat="@drawable/ic_image_24dp" />

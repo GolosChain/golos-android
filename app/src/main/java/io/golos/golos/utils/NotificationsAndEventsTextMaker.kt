@@ -1,8 +1,8 @@
 package io.golos.golos.utils
 
 import android.os.Build
-import android.support.annotation.DrawableRes
-import android.support.v4.content.ContextCompat
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import io.golos.golos.App

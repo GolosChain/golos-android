@@ -1,11 +1,10 @@
 package io.golos.golos.screens.events
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import io.golos.golos.R
 import io.golos.golos.repository.services.EventType
-import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.StringProvider
 
 class EventsPagerAdapter(private val textProvider: StringProvider,

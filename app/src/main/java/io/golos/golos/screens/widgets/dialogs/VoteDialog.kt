@@ -3,8 +3,7 @@ package io.golos.golos.screens.widgets.dialogs
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.support.v7.widget.AppCompatButton
-import android.support.v7.widget.AppCompatSeekBar
+import androidx.appcompat.widget.AppCompatSeekBar
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View

@@ -1,7 +1,7 @@
 package io.golos.golos.screens.stories.adapters
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
@@ -33,7 +33,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                              private var onUserClick: StoryWithCommentsClickListener,
                              private var onVotersClick: StoryWithCommentsClickListener,
                              feedCellSettings: FeedCellSettings)
-    : RecyclerView.Adapter<StoriesViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<StoriesViewHolder>() {
 
 
     var feedCellSettings = feedCellSettings
@@ -105,64 +105,64 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoriesViewHolder {
         return if (viewType == R.layout.vh_stripe_full_size) StripeFullViewHolder(parent,
                 onUpvoteClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUpvoteClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onCardClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onCardClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onCommentsClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onShareClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onShareClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onBlogClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onUserClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onVotersClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onVotersClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 })
         else StripeCompactViewHolder(parent,
                 onUpvoteClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUpvoteClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onCardClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onCardClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onCommentsClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
 
                 onBlogClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onUserClick = object : HolderClickListener {
-                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 })
@@ -178,7 +178,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
         }
     }
 
-    private fun getStoryForPosition(holder: RecyclerView.ViewHolder): StoryWithComments? {
+    private fun getStoryForPosition(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder): StoryWithComments? {
         val pos = holder.adapterPosition
         if (pos < 0) return null
         return if (pos < mStripes.size) return mStripes[pos] else null

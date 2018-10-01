@@ -9,16 +9,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethod.SHOW_EXPLICIT
-import android.view.inputmethod.InputMethod.SHOW_FORCED
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
 import io.golos.golos.utils.setViewGone
 
 /**
  * Created by yuri on 22.11.17.
  */
-class SendLinkDialog : android.support.v4.app.DialogFragment(), TextWatcher, DialogInterface {
+class SendLinkDialog : DialogFragment(), TextWatcher, DialogInterface {
     override fun cancel() {
         listener?.onDismissLinkDialog()
     }

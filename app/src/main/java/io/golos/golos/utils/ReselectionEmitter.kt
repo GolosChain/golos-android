@@ -1,6 +1,6 @@
 package io.golos.golos.utils
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 
 interface ReselectionEmitter {
     val reselectLiveData: LiveData<Int>

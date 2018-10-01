@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:background="?selectableItemBackground"
-    android:paddingTop="12dp">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:clickable="true"
+                                                   android:background="?selectableItemBackground"
+                                                   android:paddingTop="12dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
@@ -18,14 +18,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:riv_corner_radius="16dp" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/user_name"
         style="@style/TitleUserNameStyle"
         android:background="@drawable/img_round_ripple_gray"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
         app:layout_constraintStart_toEndOf="@id/user_name"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/blog_name_tv"
         style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
         android:layout_marginTop="0dp"
@@ -48,7 +48,7 @@
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
         style="@style/StripeTitle"
         android:layout_width="match_parent"
@@ -63,7 +63,7 @@
         app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
         app:textAllCaps="false" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text"
 
         android:layout_width="match_parent"
@@ -82,7 +82,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
-    <android.support.constraint.Barrier
+    <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="text, image_main, title " />
 
-    <android.support.v7.widget.LinearLayoutCompat
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/bottom_buttons_lo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/post_bottom_controls_height"
@@ -144,7 +144,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v7.widget.AppCompatImageButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/share_btn"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
@@ -154,7 +154,7 @@
                 app:srcCompat="@drawable/ic_share_gray_20dp" />
         </FrameLayout>
 
-    </android.support.v7.widget.LinearLayoutCompat>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <View
         android:id="@+id/delimeter"
@@ -163,4 +163,4 @@
         android:layout_marginTop="@dimen/margin_material_half"
         android:background="@color/delimeter_color_feed"
         app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

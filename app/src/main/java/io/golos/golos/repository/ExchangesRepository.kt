@@ -1,7 +1,7 @@
 package io.golos.golos.repository
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request

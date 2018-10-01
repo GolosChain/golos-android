@@ -1,9 +1,9 @@
 package io.golos.golos.screens.settings
 
-import android.support.annotation.DimenRes
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SwitchCompat
+import androidx.annotation.DimenRes
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.SwitchCompat
 import android.view.ViewGroup
 import android.widget.TextView
 import io.golos.golos.R
@@ -12,7 +12,7 @@ import java.util.*
 
 class SettingsAdapter(list: List<SettingRow>,
                       var onSwitch: (id: Any, oldValue: Boolean, newValue: Boolean) -> Unit = { _, _, _ -> }) :
-        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     var rows: List<SettingRow> = list
         set(value) {
@@ -33,7 +33,7 @@ class SettingsAdapter(list: List<SettingRow>,
             field = value
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         return when (viewType) {
             R.layout.vh_key_title -> TitleViewHolder(parent)
             R.layout.vh_key_delimeter -> DelimeterRowHolder(parent)
@@ -45,7 +45,7 @@ class SettingsAdapter(list: List<SettingRow>,
 
     override fun getItemCount() = rows.size
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         val item = rows[position]
         when (item) {
             is TitleRow -> (holder as? TitleViewHolder)?.state = item

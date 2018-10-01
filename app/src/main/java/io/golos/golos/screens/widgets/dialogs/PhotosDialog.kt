@@ -2,13 +2,13 @@ package io.golos.golos.screens.widgets.dialogs
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutCompat
-import android.support.v7.widget.Toolbar
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.appcompat.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,7 +73,7 @@ class  PhotosDialog : DialogFragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, R.style.GolosPhotoDialogTheme)
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.GolosPhotoDialogTheme)
         super.onCreate(savedInstanceState)
     }
 

@@ -1,7 +1,7 @@
 package io.golos.golos.screens.tags.adapters
 
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -12,15 +12,15 @@ import io.golos.golos.screens.widgets.GolosViewHolder
 /**
  * Created by yuri on 06.01.18.
  */
-data class AddButtonState(val clickListener: (RecyclerView.ViewHolder) -> Unit)
+data class AddButtonState(val clickListener: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
 data class SubscribedTagState(val tag: LocalizedTag,
-                              val onTagClickListener: (RecyclerView.ViewHolder) -> Unit,
-                              val onTagDeleteClickListener: (RecyclerView.ViewHolder) -> Unit)
+                              val onTagClickListener: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit,
+                              val onTagDeleteClickListener: (androidx.recyclerview.widget.RecyclerView.ViewHolder) -> Unit)
 
 class SubscribedTagsAdapter(var onAddClick: (Unit) -> Unit,
                             var onTagClick: (LocalizedTag) -> Unit,
-                            var onDeleteTagClick: (LocalizedTag) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                            var onDeleteTagClick: (LocalizedTag) -> Unit) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     var tags: ArrayList<LocalizedTag> = ArrayList()
         set(value) {
@@ -38,7 +38,7 @@ class SubscribedTagsAdapter(var onAddClick: (Unit) -> Unit,
             field = value
         }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         if (holder is AddButtonVh) {
             holder.state = AddButtonState(clickListener = { onAddClick.invoke(Unit) })
         } else if (holder is TagVh) {
@@ -49,7 +49,7 @@ class SubscribedTagsAdapter(var onAddClick: (Unit) -> Unit,
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         if (viewType == R.layout.vh_add_btn) return AddButtonVh(parent!!)
         else return TagVh(parent!!)
     }

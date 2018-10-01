@@ -1,13 +1,13 @@
 package io.golos.golos.screens.userslist
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
-import android.support.v7.widget.Toolbar
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -23,7 +23,7 @@ import timber.log.Timber
  */
 class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
     private lateinit var mTitle: TextView
-    private lateinit var mRecycler: RecyclerView
+    private lateinit var mRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mProgress: ProgressBar
     private lateinit var mViewModel: UserListViewModel
     private lateinit var mNothigHereLabel: View
@@ -62,7 +62,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mRecycler.setViewGone()
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
         mRecycler.layoutManager = MyLinearLayoutManager(this)
-        (mRecycler.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        (mRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         mRecycler.adapter = UserListAdapter({
             mViewModel.onUserClick(this, it)
         },

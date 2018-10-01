@@ -2,8 +2,8 @@ package io.golos.golos.screens.story.adapters
 
 import android.graphics.Bitmap
 import android.os.Looper
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,9 +26,9 @@ import io.golos.golos.utils.ImageUriResolver
 import io.golos.golos.utils.createGolosSpan
 
 class RowWrapper(val row: Row,
-                 val clickListener: (RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
+                 val clickListener: (androidx.recyclerview.widget.RecyclerView.ViewHolder, View) -> Unit = { _, _ -> print("clicked") })
 
-class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class StoryAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
     var onRowClick: ((Row, ImageView?) -> Unit)? = null
     var items : List<Row> = emptyList()
         set(value) {
@@ -48,12 +48,12 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             field = newItems
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         return if (viewType == 0) TextBlockHolder(parent)
         else ImageBlockHolder(parent)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is TextBlockHolder -> holder.state = RowWrapper(items[position]) { vh, _ ->
                 if (vh.adapterPosition == -1) return@RowWrapper
@@ -76,7 +76,7 @@ class StoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 }
 
-class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)) {
+class ImageBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.RecyclerView.ViewHolder(this.inflate(parent)) {
     private val mImageFullWidth: ImageView = itemView.findViewById(R.id.image_full_width)
     private val mSmallImage: ImageView = itemView.findViewById(R.id.small_image)
     private val mMediumImage: ImageView = itemView.findViewById(R.id.medium_image)
@@ -176,7 +176,7 @@ class ImageBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate
     }
 }
 
-class TextBlockHolder(parent: ViewGroup) : RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
+class TextBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
         return itemView.context.createGolosSpan(type)
     }

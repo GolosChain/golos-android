@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:background="?selectableItemBackground"
-    android:animateLayoutChanges="true">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:clickable="true"
+                                                   android:background="?selectableItemBackground"
+                                                   android:animateLayoutChanges="true">
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
         style="@style/StripeTitle"
         android:layout_width="0dp"
@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="@id/controls_lo"
         app:textAllCaps="false" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/user_name"
         android:background="@drawable/img_round_ripple_gray"
         style="@style/TitleUserNameStyle"
@@ -32,7 +32,7 @@
         app:layout_constraintStart_toEndOf="@id/controls_lo"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
         style="@style/TitleUserNameStyle"
         android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
         app:layout_constraintStart_toEndOf="@id/user_name"
         app:layout_constraintTop_toTopOf="@+id/user_name" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/blog_name_tv"
         android:background="@drawable/img_round_ripple_gray"
         android:layout_width="wrap_content"
@@ -130,4 +130,4 @@
         android:layout_marginTop="@dimen/quater"
         android:background="@color/delimeter_color_feed"
         app:layout_constraintTop_toBottomOf="@+id/controls_lo" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,8 @@
 package io.golos.golos.screens.main_activity.adapters
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import io.golos.golos.screens.events.EventsHolderFragment
 import io.golos.golos.screens.main_activity.MainActivity.Companion.FILTERED_BY_TAG_STORIES
 import io.golos.golos.screens.main_activity.MainActivity.Companion.NOTIFICATIONS_HISTORY

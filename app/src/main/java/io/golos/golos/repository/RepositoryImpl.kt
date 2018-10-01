@@ -1,10 +1,10 @@
 package io.golos.golos.repository
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import android.content.Context
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.enums.PrivateKeyType

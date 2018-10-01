@@ -1,9 +1,9 @@
 package io.golos.golos.screens.profile.viewmodel
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -15,7 +15,6 @@ import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
 import io.golos.golos.utils.InternetStatusNotifier
 import io.golos.golos.utils.UpdatingState
-import timber.log.Timber
 
 data class UserAccountModel(val accountInfo: GolosUserAccountInfo,
                             val followButtonText: Int,

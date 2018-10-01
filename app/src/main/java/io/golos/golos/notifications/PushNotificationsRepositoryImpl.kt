@@ -1,8 +1,8 @@
 package io.golos.golos.notifications
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.support.annotation.MainThread
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.annotation.MainThread
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 

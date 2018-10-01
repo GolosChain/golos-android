@@ -2,12 +2,12 @@ package io.golos.golos.screens.profile
 
 import android.animation.ObjectAnimator
 import android.animation.TypeEvaluator
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewPager
+import com.google.android.material.tabs.TabLayout
+import androidx.fragment.app.Fragment
+import androidx.viewpager.widget.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -101,7 +101,7 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionE
             val i = Intent(activity!!, SettingsActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         }
-        tabbar.addOnTabSelectedListener(object :TabLayout.OnTabSelectedListener{
+        tabbar.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
               mReselectionsEmitter.value = tabbar.selectedTabPosition
             }

@@ -1,13 +1,13 @@
 package io.golos.golos.screens.stories
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.TabLayout
-import android.support.v4.view.ViewPager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
+import androidx.viewpager.widget.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,7 +53,7 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
         val view = inflater.inflate(R.layout.f_stripes, container, false)
         setup(view)
         mAuthModel = ViewModelProviders.of(activity!!).get(AuthViewModel::class.java)
-        mAuthModel.userAuthState.observe(this, android.arch.lifecycle.Observer {
+        mAuthModel.userAuthState.observe(this, androidx.lifecycle.Observer {
             if (it?.isLoggedIn == true) {
                 if (mFab.visibility != View.VISIBLE) mFab.show()
                 if (mPager.adapter == null

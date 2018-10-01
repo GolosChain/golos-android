@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                     xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                     android:layout_width="match_parent"
+                                                     android:layout_height="match_parent"
+                                                     android:animateLayoutChanges="true">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
 
 
-        <android.support.design.widget.CollapsingToolbarLayout
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:contentScrim="@color/white_black_toolbar_color"
             app:layout_scrollFlags="scroll|enterAlways">
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
                             android:clickable="false"
                             app:srcCompat="@drawable/ic_chevron_left_gray_24dp_7d" />
 
-                        <android.support.v7.widget.SearchView
+                        <androidx.appcompat.widget.SearchView
                             android:id="@+id/search_view"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
 
                             app:submitBackground="@color/textColorP" />
 
-                        <android.support.v7.widget.SearchView
+                        <androidx.appcompat.widget.SearchView
                             android:id="@+id/users_search_view"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
                     </LinearLayout>
 
 
-                    <android.support.design.widget.TabLayout
+                    <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tab_lo"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -90,20 +90,20 @@
                         app:tabTextColor="@color/profile_tabs_color" />
                 </LinearLayout>
 
-            </android.support.v7.widget.Toolbar>
-        </android.support.design.widget.CollapsingToolbarLayout>
-    </android.support.design.widget.AppBarLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
 
     <io.golos.golos.screens.tags.views.TagsAndUsersPager
         android:id="@+id/tags_and_users_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
 
     <ProgressBar
         android:id="@+id/progress"
         style="@style/FullscreenProgressStyle"
         android:visibility="visible" />
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

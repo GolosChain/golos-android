@@ -1,6 +1,6 @@
 package io.golos.golos.screens.userslist
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.golos.golos.MockPersister
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.RepositoryImpl

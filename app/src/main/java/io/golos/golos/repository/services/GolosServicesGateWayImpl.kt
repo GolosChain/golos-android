@@ -1,6 +1,6 @@
 package io.golos.golos.repository.services
 
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import io.golos.golos.BuildConfig
 import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.rpcErrorFromCode
