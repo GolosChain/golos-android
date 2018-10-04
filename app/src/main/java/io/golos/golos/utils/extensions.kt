@@ -18,17 +18,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
-import androidx.annotation.*
-import com.google.android.material.snackbar.Snackbar
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.SearchView
 import android.text.Html
 import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
+import android.text.style.QuoteSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,10 +29,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
+import androidx.annotation.*
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.android.material.snackbar.Snackbar
 import eu.bittrade.libs.golosj.base.models.Account
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.base.models.operations.CommentOperation
@@ -61,6 +61,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -101,7 +102,6 @@ fun Cursor.getLong(columnName: String): Long {
 fun GolosDiscussionItem.isStory() = this.parentAuthor.isEmpty()
 
 fun GolosDiscussionItem.isComment() = this.parentAuthor.isNotEmpty()
-
 
 
 fun Cursor.getBool(columnName: String): Boolean {
@@ -251,6 +251,14 @@ fun SearchView.setTextColorHint(@ColorRes coloId: Int) {
     }
 }
 
+fun Long.hoursElapsedFromTimeStamp(): Int {
+    val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+    val dif = currentTime - this
+    val hour = 1000 * 60 * 60
+    val hoursAgo = dif / hour
+    return hoursAgo.toInt()
+}
+
 val Account.avatarPath: String?
     get() {
         var avatarPath: String? = null
@@ -363,6 +371,9 @@ fun <T : Any?> Context.createGolosSpan(type: Class<*>): T {
                 getDimen(R.dimen.quint).toInt(),
                 getDimen(R.dimen.quater).toInt()) as T
         AbsoluteSizeSpan::class.java -> AbsoluteSizeSpan(getDimen(R.dimen.font_medium).toInt()) as T
+        QuoteSpan::class.java -> KnifeBulletSpan(getColorCompat(R.color.blue_light),
+                getDimen(R.dimen.quint).toInt(),
+                getDimen(R.dimen.quater).toInt()) as T
         else -> Any() as T
     }
 
@@ -378,13 +389,13 @@ fun SwipeRefreshLayout.setRefreshingS(isRefreshing: Boolean) {
 fun View.showSnackbar(message: Int) {
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
-            Toast.LENGTH_SHORT).show()
+            Snackbar.LENGTH_SHORT).show()
 }
 
 fun View.showSnackbar(message: String) {
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${message}</font>"),
-            Toast.LENGTH_SHORT).show()
+            Snackbar.LENGTH_SHORT).show()
 }
 
 fun View.setViewGone() {

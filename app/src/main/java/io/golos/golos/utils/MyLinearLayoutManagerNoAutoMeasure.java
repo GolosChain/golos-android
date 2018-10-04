@@ -6,18 +6,18 @@ import android.util.AttributeSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MyLinearLayoutManager extends LinearLayoutManager {
+public class MyLinearLayoutManagerNoAutoMeasure extends LinearLayoutManager {
     private boolean canScroll = true;
 
-    public MyLinearLayoutManager(Context context) {
+    public MyLinearLayoutManagerNoAutoMeasure(Context context) {
         super(context);
     }
 
-    public MyLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
+    public MyLinearLayoutManagerNoAutoMeasure(Context context, int orientation, boolean reverseLayout) {
         super(context, orientation, reverseLayout);
     }
 
-    public MyLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MyLinearLayoutManagerNoAutoMeasure(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -32,7 +32,7 @@ public class MyLinearLayoutManager extends LinearLayoutManager {
 
     @Override
     public boolean isAutoMeasureEnabled() {
-        return true;
+        return false;
     }
 
     @Override

@@ -183,9 +183,12 @@ object TextProcessor {
         return out
     }
 
-    fun getInitialState(): List<EditorPart> {
+    fun getInitialState(additionToStart: CharSequence? = null): List<EditorPart> {
         val out = ArrayList<EditorPart>()
-        out.add(EditorTextPart(text = SpannableStringBuilder.valueOf("")))
+        val text = SpannableStringBuilder.valueOf("").apply { if (additionToStart != null) this.append(additionToStart) }
+        out.add(EditorTextPart(text = text,
+                startPointer = text.length, endPointer = text.length))
+
         return out
     }
 }

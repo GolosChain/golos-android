@@ -12,10 +12,8 @@ import android.widget.TextView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.LabelVisibilityMode;
 
-
 import androidx.core.view.GravityCompat;
 import io.golos.golos.R;
-import io.golos.golos.utils.BottomViewEx;
 
 /**
  * Created by yuri on 05.12.17.
@@ -38,11 +36,8 @@ public class GolosBottomNavView extends BottomNavigationView {
     }
 
     private void init() {
-
         setLabelVisibilityMode(LabelVisibilityMode.LABEL_VISIBILITY_UNLABELED);
-        //setTextVisibility(false);
         setItemHorizontalTranslationEnabled(false);
-      //  enableAnimation(true);
     }
 
     public void setCounterAt(int positionOfMenuItem, int count) {
@@ -54,6 +49,7 @@ public class GolosBottomNavView extends BottomNavigationView {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.gravity = GravityCompat.END | Gravity.TOP;
             lp.rightMargin = (int) getContext().getResources().getDimension(R.dimen.material_big);
+            lp.topMargin = (int) getContext().getResources().getDimension(R.dimen.quater);
             counter.setLayoutParams(lp);
             menuItem.addView(counter);
             counter.setFocusableInTouchMode(false);

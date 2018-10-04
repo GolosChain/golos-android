@@ -293,7 +293,7 @@ fun CharSequence.getParagraphBounds(pointerPosition: Int): Pair<Int, Int> {
     return out
 }
 
-fun Char.isWordBreaker() = !this.isLetter() && !this.isDigit() && this != '"'
+fun Char.isWordBreaker() = !this.isLetter() && !this.isDigit() && this != '"'  && this != '@'
 
 fun Char.isPartOfWord() = !isWordBreaker()
 

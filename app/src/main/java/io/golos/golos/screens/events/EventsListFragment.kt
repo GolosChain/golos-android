@@ -1,18 +1,15 @@
 package io.golos.golos.screens.events
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.core.content.ContextCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.EventType
@@ -72,7 +69,8 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     private var mLabel: TextView? = null
     private var mViewModel: EventsViewModel? = null
     private var mLoadingProgress: View? = null
-    private var isVisibleToUser: Boolean = false
+    private var isVisibleToUserHint: Boolean = false
+    private var isParentVisible: Boolean = false
     private var mProgressView: View? = null
 
 
@@ -132,6 +130,8 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         })
         (parentFragment as ParentVisibilityChangeEmitter?)?.status?.observe(this, Observer {
             it ?: return@Observer
+
+            isParentVisible = it.isParentVisible
             val myPosition = arguments?.getInt(POSITION, Int.MIN_VALUE) ?: return@Observer
             if (myPosition != it.currentSelectedFragment) return@Observer
             mViewModel?.onChangeVisibilityToUser(it.isParentVisible)
@@ -140,8 +140,9 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
-        this.isVisibleToUser = isVisibleToUser
-        mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+
+        this.isVisibleToUserHint = isVisibleToUser
+        mViewModel?.onChangeVisibilityToUser(isVisibleToUser && isParentVisible)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -164,7 +165,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
     override fun onStart() {
         super.onStart()
         mViewModel?.onStart()
-        if (isVisibleToUser) mViewModel?.onChangeVisibilityToUser(isVisibleToUser)
+        if (isVisibleToUserHint) mViewModel?.onChangeVisibilityToUser(isVisibleToUserHint && isParentVisible)
     }
 
     fun getTextForNoEvents(): CharSequence {

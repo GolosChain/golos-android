@@ -136,7 +136,6 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
-        Timber.e("onCreateViewHolder")
         return when (viewType) {
             0 -> EditorEditTextViewHolder(R.layout.vh_edit_text, parent)
             1 -> EditorImageViewHolder(parent)
@@ -150,7 +149,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     fun onRequestFocus(mRecycler: androidx.recyclerview.widget.RecyclerView) {
-        Timber.e("onRequestFocus")
+
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part?.isFocused() == true)
@@ -159,7 +158,7 @@ class EditorAdapter(var interactor: EditorAdapterInteractions? = null)
     }
 
     fun focusFirstTextPart(mRecycler: androidx.recyclerview.widget.RecyclerView) {
-        Timber.e("onRequestFocus")
+
         (0 until itemCount).forEach {
             val part = parts[it] as? EditorTextPart
             if (part != null) {

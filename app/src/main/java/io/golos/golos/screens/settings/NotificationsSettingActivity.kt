@@ -67,7 +67,7 @@ class NotificationsSettingActivity : GolosActivity(), Observer<NotificationsDisp
     private lateinit var mRecycler: androidx.recyclerview.widget.RecyclerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.a_notification_settings)
+      setContentView(R.layout.a_notification_settings)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { onBackPressed() }
         Repository.get.userSettingsRepository.getNotificationsSettings().observe(this, this)

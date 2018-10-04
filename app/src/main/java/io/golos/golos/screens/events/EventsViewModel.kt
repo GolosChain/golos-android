@@ -1,8 +1,8 @@
 package io.golos.golos.screens.events
 
-import androidx.lifecycle.*
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.*
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
@@ -231,7 +231,7 @@ class EventsViewModel : ViewModel() {
         if (isVisibleToUser == visibleToUser) return
         isVisibleToUser = visibleToUser
         if (visibleToUser) {
-            Timber.e("requestEventsUpdate")
+
             if (mPendingList.isNotEmpty()) {
                 mEventsProvider.setEventsRead(mPendingList)
                 mPendingList.clear()

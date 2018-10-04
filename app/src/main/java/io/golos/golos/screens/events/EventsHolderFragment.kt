@@ -12,6 +12,7 @@ import io.golos.golos.R
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.StringProvider
+import timber.log.Timber
 
 class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibilityChangeEmitter {
     private val mReselectLiveData = MutableLiveData<Int>()
@@ -54,6 +55,7 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibili
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
+
         mStatusChange.value = VisibilityStatus(isVisibleToUser, mPager?.currentItem ?: return)
     }
 }

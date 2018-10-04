@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:background="?selectableItemBackground"
         android:clickable="true"
-        android:minHeight="80dp"
+        android:minHeight="160dp"
         android:scaleType="fitCenter"
         >
 

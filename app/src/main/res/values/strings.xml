@@ -251,6 +251,8 @@
     <string name="no_events_mentions">Get Golos users excited about your blog in order they mention you.</string>
     <string name="write_a_comment">Write a comments</string>
     <string name="login_to_write_comment">Login to write a comment</string>
+    <string name="copy_link">Copy link</string>
+    <string name="save_image">Save</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

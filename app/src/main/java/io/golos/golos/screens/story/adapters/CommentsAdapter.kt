@@ -1,10 +1,5 @@
 package io.golos.golos.screens.story.adapters
 
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DiffUtil
-import androidx.appcompat.widget.ListPopupWindow
-import androidx.recyclerview.widget.RecyclerView
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +8,10 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.ListPopupWindow
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
@@ -24,9 +23,6 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.*
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 data class CommentHolderState(val comment: StoryWrapper,
@@ -93,7 +89,7 @@ class CommentsAdapter(var onUpvoteClick: (StoryWrapper) -> Unit = { print(it) },
 
 class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.RecyclerView.ViewHolder(this.inflate(parent)), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
-       return itemView.context.createGolosSpan(type)
+        return itemView.context.createGolosSpan(type)
     }
 
     private val mGlide = Glide.with(itemView)
@@ -160,7 +156,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     popup.setContentWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                             140.0f,
                             itemView.context.resources.displayMetrics).toInt())
-                    popup.setOnItemClickListener({ _, _, position, _ ->
+                    popup.setOnItemClickListener { _, _, position, _ ->
                         val item = items[position]
                         when (item) {
                             CommentListAdapter.CommentListAdapterItems.FLAG_GRAY -> state?.onDownVoteClick?.invoke(this)
@@ -168,7 +164,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                             CommentListAdapter.CommentListAdapterItems.EDIT -> state?.onEditClick?.invoke(this)
                         }
                         popup.dismiss()
-                    })
+                    }
                     popup.show()
                 }
 
@@ -184,12 +180,8 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                 mUsernameTv.text = comment.author
 
 
-                val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-
-                val dif = currentTime - comment.created
-                val hour = 1000 * 60 * 60
-                val hoursAgo = dif / hour
-                if (hoursAgo == 0L) {
+                val hoursAgo = comment.created.hoursElapsedFromTimeStamp()
+                if (hoursAgo == 0) {
                     mTimeTv.text = itemView.resources.getString(R.string.less_then_hour_ago)
                 } else if (hoursAgo < 24) {
                     mTimeTv.text = "$hoursAgo ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"

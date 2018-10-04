@@ -61,6 +61,7 @@ class EditorEditTextViewHolder(@LayoutRes res: Int, parent: ViewGroup) :
             if (textPart.text != mEditText.text) {
                 if (DEBUG_EDITOR) Timber.e("setting new text \nold = ${mEditText.text}" +
                         " new = ${textPart}")
+
                 mEditText.setTextKeepState(textPart.text)
                 mLastTextSize = mEditText.text.orEmpty().length
 

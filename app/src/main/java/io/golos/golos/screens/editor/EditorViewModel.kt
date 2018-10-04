@@ -1,11 +1,15 @@
 package io.golos.golos.screens.editor
 
+import android.graphics.Typeface
+import android.text.Editable
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
+import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import androidx.annotation.MainThread
-import android.text.SpannableStringBuilder
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.golos.golos.BuildConfig.DEBUG_EDITOR
@@ -24,7 +28,7 @@ import java.util.*
 
 sealed class EditorTitle
 
-data class TitleTextField(val text: CharSequence, val isEditable: Boolean, val hintId: Int?) : EditorTitle()
+data class TitleTextField(val text: String, val isEditable: Boolean, val hintId: Int?) : EditorTitle()
 
 data class PostEditorTitle(val title: TitleTextField) : EditorTitle()
 
@@ -124,6 +128,12 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         val editorType = mode?.editorType ?: return
         val isParentComment = mWorkingItem?.story?.isComment() == true
 
+        fun createBoldText(forString: String): Editable {
+            val ssb = SpannableStringBuilder.valueOf(forString)
+            ssb.setSpan(StyleSpan(Typeface.BOLD), 0, ssb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            return ssb
+        }
+
 
         if (editorType == EditorActivity.EditorType.CREATE_COMMENT) {
             mDraftsPersister?.getDraft(mode ?: return) { items, _, tags ->
@@ -132,7 +142,10 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     mTitleLiveData.value = if (isParentComment) AnswerOnCommentEditorTitle(workingItem.story.author, workingItem.story.created, workingItem.story.parts)
                     else RootCommentEditorTitle(TitleTextField(workingItem.story.title, false, null), workingItem.story.author)
 
-                    mEditorLiveData.value = EditorState(parts = if (items.isNotEmpty()) items else mTextProcessor.getInitialState(),
+                    val parts = if (items.isNotEmpty() && !(items.size == 1 && items[0] is EditorTextPart && (items[0] as EditorTextPart).text.toString().trim().isEmpty())) items
+                    else mTextProcessor.getInitialState(if (isParentComment) createBoldText("@${workingItem.story.author}  ") else null)
+
+                    mEditorLiveData.value = EditorState(parts = parts,
                             tags = tags)
                 }
             }
@@ -172,10 +185,11 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     }
 
     @MainThread
-    fun onTitleChanged(it: CharSequence) {
-        /*mEditorLiveData.value = EditorState(parts = editorLiveData.value?.parts
-                ?: listOf(), title = it.toString(),
-                tags = editorLiveData.value?.tags ?: listOf())*/
+    fun onTitleChanged(input: String) {
+        val title = mTitleLiveData.value as? PostEditorTitle
+        title?.let {
+            mTitleLiveData.value = it.copy(title = it.title.copy(text = input))
+        }
     }
 
     @MainThread
@@ -228,15 +242,17 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 if (error == null) {
                     wasSent = true
                     if (mode != null) mDraftsPersister?.deleteDraft(mode!!, {})
+                    mEditorLiveData.value = mEditorLiveData.value?.copy(error = null,
+                            isLoading = false, completeMessage = R.string.send_post_success)
+                    postStatusLiveData.value = PostSendStatus(result?.author
+                            ?: "",
+                            result?.blog ?: "",
+                            result?.permlink ?: "")
 
+                } else {
+                    mEditorLiveData.value = mEditorLiveData.value?.copy(error = error,
+                            isLoading = false)
                 }
-                mEditorLiveData.value = mEditorLiveData.value?.copy(error = error,
-                        isLoading = false)
-                postStatusLiveData.value = PostSendStatus(result?.author
-                        ?: "",
-                        result?.blog ?: "",
-                        result?.permlink ?: "")
-
             }
             if (editorType == EditorActivity.EditorType.CREATE_POST) {
                 mRepository.createPost(titleText,
@@ -271,10 +287,12 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                     wasSent = true
                     if (mode != null)
                         mDraftsPersister?.deleteDraft(mode!!, {})
+                    mEditorLiveData.value = mEditorLiveData.value?.copy(error = null,
+                            isLoading = false, completeMessage = R.string.send_comment_success)
+                } else {
+                    mEditorLiveData.value = mEditorLiveData.value?.copy(error = error,
+                            isLoading = false)
                 }
-
-                mEditorLiveData.value = mEditorLiveData.value?.copy(error = error,
-                        isLoading = false)
             }
             mEditorLiveData.value = mEditorLiveData.value?.copy(isLoading = true, error = null)
 

@@ -28,23 +28,71 @@
         android:text=""
         android:visibility="gone"/>
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cut"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/shape_white_cut"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/author_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_big"
+            android:layout_marginTop="@dimen/margin_material"
+            android:textColor="@color/stripe_subtitle"
+            android:textSize="@dimen/font_regular"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/time_elapsed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/material_big"
+            android:textColor="@color/gray_82"
+            android:textSize="@dimen/font_very_small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/author_tv"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/title_recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"/>
+            app:layout_constrainedHeight="true"
+            android:layout_marginTop="@dimen/quater"
+            android:isScrollContainer="false"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="io.golos.golos.utils.MyLinearLayoutManager"
+            app:layout_constraintHeight_max="@dimen/cut_height"
+            app:layout_constraintTop_toBottomOf="@id/author_tv"/>
+
+        <View
+            android:id="@+id/shade"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@drawable/shape_white_cut"
+            app:layout_constraintBottom_toBottomOf="@id/title_recycler"
+            />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/fold_btn"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/shape_white_cut"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?selectableItemBackground"
+            app:layout_constraintBottom_toBottomOf="@id/title_recycler"
             app:srcCompat="@drawable/ic_chevron_down_12dp_gray_editor"/>
-    </FrameLayout>
+
+        <View
+
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/quater"
+            android:background="#dbdbdb"
+            app:layout_constraintTop_toBottomOf="@id/fold_btn"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
