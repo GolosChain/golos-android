@@ -1,12 +1,15 @@
 package io.golos.golos.screens.editor
 
+import android.Manifest
 import android.annotation.TargetApi
 import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.text.*
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -15,20 +18,21 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.PermissionChecker
 import io.golos.golos.R
 import io.golos.golos.screens.story.adapters.OnImagePopup
 import io.golos.golos.screens.story.adapters.StoryAdapter
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.TextRow
-import io.golos.golos.utils.hoursElapsedFromTimeStamp
-import io.golos.golos.utils.setFullAnimationToViewGroup
-import io.golos.golos.utils.setViewGone
-import io.golos.golos.utils.setViewVisible
+import io.golos.golos.utils.*
 
 data class EditorTitleState(val type: EditorTitle,
                             val onTitleChanges: (String) -> Unit = {},
                             val onEnter: () -> Unit = {})
+
+private const val WRITE_EXTERNAL_PERMISSION_REQUEST = 457;
 
 class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
 
@@ -56,6 +60,7 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
     private val mShade: View
     private val mAuthorTv: TextView
     private val mCommentTimeStamp: TextView
+    private var mLastImageRowSrc: String? = null
 
 
     init {
@@ -69,13 +74,19 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
         mShade = findViewById(R.id.shade)
         mAdapter = StoryAdapter(resources.getDimension(R.dimen.material_big).toInt(), object : OnImagePopup {
             override fun onLinkSave(row: ImageRow) {
-                (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip = ClipData.newPlainText(row.src, row.src)
+                val link = ImageUriResolver.resolveImageWithSize(row.src)
+                (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip = ClipData.newPlainText(link, link)
             }
 
             override fun onImageSave(row: ImageRow) {
-                (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(DownloadManager.Request(Uri.parse(row.src)).apply {
-                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                })
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        PermissionChecker.checkCallingOrSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                    downloadImage(row.src)
+                else {
+                    mLastImageRowSrc = row.src
+                    (context as AppCompatActivity).requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), WRITE_EXTERNAL_PERMISSION_REQUEST)
+                }
+
             }
         })
         mCommentTimeStamp = findViewById(R.id.time_elapsed)
@@ -99,6 +110,19 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
         }
         mRecycler.isScrollContainer = true
     }
+
+    private fun downloadImage(forPath: String) {
+        val link = ImageUriResolver.resolveImageWithSize(forPath)
+        val request = DownloadManager.Request(Uri.parse(link)).apply {
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            val filename = Uri.parse(link).lastPathSegment ?: return
+            setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, filename)
+            allowScanningByMediaScanner()
+        }
+        (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager)
+                .enqueue(request)
+    }
+
 
     private fun foldComment() {
         val recyclerLayoutParams = (mRecycler.layoutParams as ConstraintLayout.LayoutParams)
@@ -205,6 +229,11 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
         }
         state?.onEnter?.invoke()
         return ssb
+    }
+
+    fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == WRITE_EXTERNAL_PERMISSION_REQUEST && grantResults.getOrNull(0) == PackageManager.PERMISSION_GRANTED)
+            downloadImage(mLastImageRowSrc ?: return)
     }
 }
 

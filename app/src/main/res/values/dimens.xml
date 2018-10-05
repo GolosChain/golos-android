@@ -41,4 +41,5 @@
     <dimen name="notification_big_icon_size">64dp</dimen>
     <dimen name="notification_button_elevation">0dp</dimen>
     <dimen name="cut_height">72dp</dimen>
+    <dimen name="story_comment_height">44dp</dimen>
 </resources>

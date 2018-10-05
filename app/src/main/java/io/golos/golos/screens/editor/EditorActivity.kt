@@ -139,6 +139,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         })
 
 
+
+
+
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringProvider {
                     override fun get(resId: Int, args: String?): String {
@@ -159,6 +162,8 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mRecycler.itemAnimator = null
 
     }
+
+
 
     override fun onChanged(it: EditorState?) {
         if (it == null) return
@@ -728,6 +733,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         if (requestCode == READ_EXTERNAL_PERMISSION &&
                 grantResults.isNotEmpty() &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED) mBottomButtons.performClick(EditorTextModifier.INSERT_IMAGE)
+        else mTitleView.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
 

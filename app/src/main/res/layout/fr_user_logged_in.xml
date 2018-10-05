@@ -352,7 +352,7 @@
                 app:layout_collapseMode="pin"
                 app:tabGravity="fill"
                 app:tabIndicatorColor="@color/blue_white_indicator"
-                app:tabMode="fixed"
+                app:tabMode="scrollable"
                 app:tabTextAppearance="@style/TabTextStyle"
                 app:tabTextColor="@color/profile_tabs_color" />
 

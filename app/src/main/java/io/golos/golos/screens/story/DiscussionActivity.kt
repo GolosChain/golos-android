@@ -1,24 +1,22 @@
 package io.golos.golos.screens.story
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.content.ContextCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
-import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.App
 import io.golos.golos.R
@@ -282,16 +280,21 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     if (it.canUserCommentThis) mFab.show()
                     else mFab.hide()
                     mWriteCommentLo.setViewGone()
+                    mFlow.setViewVisible()
+                    mSwipeToRefresh.setPadding(0, 0, 0, 0)
                 } else if (it.discussionType == DiscussionType.COMMENT) {
                     mFollowBlock.setViewGone()
                     mFab.hide()
                     mWriteCommentLo.setViewVisible()
+                    mFlow.setViewGone()
                     if (!mWriteCommentTv.hasOnClickListeners()) {
                         mWriteCommentLo.setOnClickListener {
                             if (mViewModel.canUserWriteComments()) mViewModel.onWriteRootComment(this)
-                            else Snackbar.make(mWriteCommentLo, R.string.login_to_write_comment, Toast.LENGTH_SHORT).show()
+                            else Snackbar.make(mWriteCommentLo, R.string.login_to_write_comment, Snackbar.LENGTH_SHORT).show()
                         }
                     }
+                    mSwipeToRefresh.setPadding(0, 0, 0, resources.getDimension(R.dimen.story_comment_height).toInt())
+
                 }
 
                 mVoteLo.setViewVisible()
