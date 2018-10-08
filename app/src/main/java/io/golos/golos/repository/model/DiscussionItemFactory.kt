@@ -24,6 +24,7 @@ object DiscussionItemFactory {
         val title = discussion.title ?: ""
         val categoryName = discussion.category ?: ""
 
+
         val votesNum = discussion.netVotes
         val commentsCount = discussion.children
         val permlink = discussion.permlink?.link ?: ""

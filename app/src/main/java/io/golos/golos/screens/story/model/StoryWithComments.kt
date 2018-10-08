@@ -10,6 +10,7 @@ import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.toArrayList
+import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
@@ -37,7 +38,7 @@ data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
 
         fun create(isCurrentUserSubscribed: Boolean,
                    updatingState: UpdatingState): SubscribeStatus {
-          return  if (!isCurrentUserSubscribed && updatingState == UpdatingState.DONE) return unSubscribed
+            return if (!isCurrentUserSubscribed && updatingState == UpdatingState.DONE) return unSubscribed
             else if (isCurrentUserSubscribed && updatingState == UpdatingState.DONE) return subScribed
             else SubscribeStatus(isCurrentUserSubscribed, updatingState)
         }
@@ -127,16 +128,20 @@ class StoryWithComments(rootStory: StoryWrapper?,
         var changes = false
         (0..src.lastIndex)
                 .forEach {
-                    if (src[it].story.childrenCount > 0) {
-                        changes = replaceComment(replaceWith, src[it].story.children) || changes
-                    }
-                    if (replaceWith.story.id == src[it].story.id) {
-                        val replacingItem = src[it].story
+                    val currentStory = src[it]
+
+                    if (replaceWith.story.id == currentStory.story.id) {
+
+                        currentStory.story.children.forEach {
+                            if (!replaceWith.story.children.contains(it)) replaceWith.story.children.add(it)
+                        }
+
+                        replaceWith.story.level = currentStory.story.level
                         src[it] = replaceWith
-                        src[it].story.children.clear()
-                        src[it].story.children.addAll(replacingItem.children)
-                        src[it].story.level = replacingItem.level
+
                         changes = true
+                    }else if (currentStory.story.childrenCount > 0) {
+                        changes = replaceComment(replaceWith, currentStory.story.children) || changes
                     }
                 }
         return changes

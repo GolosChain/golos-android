@@ -18,6 +18,7 @@ class StorySearcherAndReplacer {
                     }
 
         }
+
         inList.forEach {
             isChanged = it.replaceComment(replacer) || isChanged
         }
