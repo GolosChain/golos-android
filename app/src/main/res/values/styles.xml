@@ -158,18 +158,17 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <style name="TitleUserNameStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">@dimen/margin_material_half</item>
-        <item name="android:gravity">top|start</item>
-        <item name="android:textColor">@color/textColorP</item>
+        <item name="android:textColor">@color/text_color_white_black</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Base.Widget.AppCompat.Button.Borderless.BlogButton">
@@ -366,7 +365,7 @@
         <item name="android:clickable">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -396,5 +395,11 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">@dimen/material_big</item>
         <item name="android:background">?selectableItemBackground</item>
+    </style>
+
+    <style name="Style">
+        <item name="android:background">@drawable/img_round_ripple_gray</item>
+        <item name="android:textColor">@color/gray_82</item>
+        <item name="android:textSize">10sp</item>
     </style>
 </resources>

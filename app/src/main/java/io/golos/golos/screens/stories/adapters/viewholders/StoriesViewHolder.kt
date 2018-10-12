@@ -1,11 +1,11 @@
 package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
@@ -15,29 +15,32 @@ import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
-import java.lang.StringBuilder
 
 /**
  * Created by yuri on 19.02.18.
  */
 abstract class StoriesViewHolder(resId: Int,
                                  parent: ViewGroup) : GolosViewHolder(resId, parent) {
+
     private val mGlide = Glide.with(parent.context)
-    private val mStringBuilder: StringBuilder = StringBuilder("")
-
-
+    private var oldAvatar: String? = null
 
     var state: StripeWrapper? = null
         set(value) {
             setUpTheme()
             handleImagePlacing(value, getMainImage())
             handlerStateChange(value, field)
+            handleAvatarLoading(value, field)
             field = value
         }
 
+    init {
+        if (StripeFullViewHolder.noAvatarDrawable == null) StripeFullViewHolder.noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_32dp)
+    }
+
     protected open fun handlerStateChange(newState: StripeWrapper?,
                                           oldState: StripeWrapper?) {
-        val story = newState?.stripe?.rootStory()
+        val story = newState?.stripe?.story
         if (newState == null || story == null) return
 
         if (story.categoryName.startsWith("ru--")) {
@@ -45,45 +48,86 @@ abstract class StoriesViewHolder(resId: Int,
         } else {
             getBlogNameTv().text = story.categoryName
         }
-        getUserNameTv().text = story.author
 
-        if (story.firstRebloggedBy.isNotEmpty()) {
+
+        getDateStampText().text = story.created.hoursElapsedFromTimeStamp().let { elapsedHoursFromPostCreation ->
+            when {
+                elapsedHoursFromPostCreation == 0 -> itemView.resources.getString(R.string.less_then_hour_ago)
+                elapsedHoursFromPostCreation < 24 -> "$elapsedHoursFromPostCreation ${itemView.resources.getQuantityString(R.plurals.hours, elapsedHoursFromPostCreation)} ${itemView.resources.getString(R.string.ago)}"
+                else -> {
+                    val daysAgo = elapsedHoursFromPostCreation / 24
+                    "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo)} ${itemView.resources.getString(R.string.ago)}"
+                }
+            }
+        }
+
+        if (story.rebloggedBy.isNotEmpty()) {
             getReblogedByTv().setViewVisible()
-            getReblogedByTv().text = story.firstRebloggedBy
+            getReblogedByTv().text = story.rebloggedBy
+            getShownUserNameTv().text = newState.stripe.authorAccountInfo?.shownName ?: story.rebloggedBy
+            getUserNickTv().setViewVisible()
+            getUserNickTv().text = story.author
         } else {
             getReblogedByTv().setViewGone()
+            val shownUserName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()
+            getShownUserNameTv().text = if (shownUserName.isNotEmpty()) shownUserName else story.author.capitalize()
+            if (shownUserName.isEmpty()) {
+                getUserNickTv().setViewGone()
+            } else {
+                getUserNickTv().setViewVisible()
+                getUserNickTv().text = story.author
+            }
         }
         if (story.title.length > 2) {
-            mStringBuilder.delete(0, mStringBuilder.length)
-            mStringBuilder.append(story.title.toLowerCase())
-            mStringBuilder.replace(0, 1, story.title.substring(0, 1).toUpperCase())
-            getTitleTv().text = mStringBuilder.toString()
+            getTitleTv().text = story.title.capitalize()
         } else {
             getTitleTv().text = ""
         }
         val bountyDisplay = newState.feedCellSettings.bountyDisplay
         getCommentsTv().text = story.commentsCount.toString()
-        getUpvoteText().text = calculateShownReward(newState.stripe.storyWithState() ?: return,
+        getUpvoteText().text = calculateShownReward(newState.stripe,
                 newState.feedCellSettings.shownCurrency,
                 bountyDisplay,
                 itemView.context)
+    }
+
+    open protected fun handleAvatarLoading(newState: StripeWrapper?,
+                                           oldState: StripeWrapper?) {
+        val wrapper = newState?.stripe
+
+        val newAvatar = wrapper?.authorAccountInfo?.avatarPath
 
 
+        if (newAvatar != null) {
+            if (newAvatar != oldAvatar) {
+                mGlide
+                        .load(ImageUriResolver.resolveImageWithSize(
+                                newAvatar,
+                                wantedwidth = getAuthorAvatar().width))
+                        .apply(RequestOptions().placeholder(StripeFullViewHolder.noAvatarDrawable))
+                        .error(mGlide.load(StripeFullViewHolder.noAvatarDrawable))
+                        .into(getAuthorAvatar())
+                oldAvatar = newAvatar
+            }
+        } else getAuthorAvatar().setImageDrawable(StripeFullViewHolder.noAvatarDrawable)
     }
 
     protected abstract fun getMainImage(): ImageView
     protected abstract fun getTitleTv(): TextView
     protected abstract fun getCommentsTv(): TextView
-    protected abstract fun getUserNameTv(): TextView
+    protected abstract fun getShownUserNameTv(): TextView
+    protected abstract fun getUserNickTv(): TextView
     protected abstract fun getReblogedByTv(): TextView
     protected abstract fun getBlogNameTv(): TextView
     protected abstract fun getDelimeterV(): View
     protected abstract fun getUpvoteText(): TextView
-    protected abstract fun getMainText(): TextView?
+    protected abstract fun getMainText(): TextView
+    protected abstract fun getDateStampText(): TextView
+    protected abstract fun getAuthorAvatar(): ImageView
 
     open fun handleImagePlacing(newState: StripeWrapper?,
                                 imageView: ImageView) {
-        val story = newState?.stripe?.rootStory()
+        val story = newState?.stripe?.story
         getMainImage().setImageDrawable(null)
         if (story == null) {
             return
@@ -173,10 +217,15 @@ abstract class StoriesViewHolder(resId: Int,
     protected open fun setUpTheme() {
         getCommentsTv().setTextColorCompat(R.color.textColorP)
         getTitleTv().setTextColorCompat(R.color.stripe_title)
-        getUserNameTv().setTextColorCompat(R.color.textColorP)
+        getShownUserNameTv().setTextColorCompat(R.color.textColorP)
         getReblogedByTv().setTextColorCompat(R.color.stripe_subtitle)
         getBlogNameTv().setTextColorCompat(R.color.stripe_subtitle)
         getDelimeterV().setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))
+    }
+
+    companion object {
+        @JvmStatic
+        var userVotedvotedDrarawble: Drawable? = null
     }
 }
 

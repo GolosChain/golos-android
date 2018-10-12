@@ -11,7 +11,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -99,7 +98,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         if (!intent.hasExtra(PERMLINK_TAG) ||
                 !intent.hasExtra(FEED_TYPE) ||
                 !intent.hasExtra(PERMLINK_TAG)) {
-            Timber.e(" no story set to activity")
+            Timber.e(" no rootWrapper set to activity")
             finish()
             return
         }
@@ -118,14 +117,14 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     .show(supportFragmentManager, "images")
         })
         mViewModel.storyLiveData.observe(this, Observer {
-            if (it?.storyTree?.rootStory() != null) {
+            if (it?.storyTree?.rootWrapper != null) {
                 setFullscreenProgress(false)
-                if (it.storyTree.rootStory()?.title?.isEmpty() != false) {
+                if (it.storyTree.rootWrapper.story.title.isEmpty()) {
                     mTitleTv.setViewGone()
                 }
                 mSwipeToRefresh.setRefreshingS(it.isLoading)
 
-                val story = it.storyTree.rootStory() ?: return@Observer
+                val story = it.storyTree.rootWrapper.story
 
                 val ets = if (story.parts.isEmpty())
                     StoryParserToRows.parse(story, true).toArrayList() else story.parts
@@ -162,22 +161,20 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     mBlogNameTv.visibility = View.VISIBLE
                     mNameOfAuthorInFollowLo.text = story.author.capitalize()
 
-                    story.avatarPath?.let {
+                    it.storyTree.rootWrapper.authorAccountInfo?.avatarPath?.let { avatarPath ->
                         val glide = Glide.with(this)
 
                         glide
-                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
-                                        ?: "", wantedwidth = mAvatar.width))
+                                .load(ImageUriResolver.resolveImageWithSize(avatarPath, wantedwidth = mAvatar.width))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_24dp))
                                 .into(mAvatar)
                         glide
-                                .load(ImageUriResolver.resolveImageWithSize(story.avatarPath
-                                        ?: "", wantedwidth = mAvatarOfAuthorInFollowLo.width))
+                                .load(ImageUriResolver.resolveImageWithSize(avatarPath, wantedwidth = mAvatarOfAuthorInFollowLo.width))
                                 .apply(RequestOptions().placeholder(R.drawable.ic_person_gray_52dp))
                                 .error(Glide.with(this).load(R.drawable.ic_person_gray_52dp))
                                 .into(mAvatarOfAuthorInFollowLo)
                     }
-                    if (story.avatarPath == null) {
+                    if (it.storyTree.rootWrapper.authorAccountInfo?.avatarPath == null) {
                         mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                         mAvatarOfAuthorInFollowLo.setImageResource(R.drawable.ic_person_gray_52dp)
                     }
@@ -191,7 +188,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
 
                 mCommentsCountBtn.setViewVisible()
-                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                if (it.storyTree.rootWrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     if (mMoneyBtn.tag ?: "" != "green") {
                         mMoneyBtn.setVectorDrawableStart(R.drawable.ic_triangle_in_circle_green_outline_20dp)
                         mMoneyBtn.setTextColor(ContextCompat.getColor(this, R.color.upvote_green))
@@ -205,7 +202,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         mMoneyBtn.tag = "gray"
                     }
                 }
-                if (it.storyTree.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+                if (it.storyTree.rootWrapper.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
                         && mFlagTv.tag ?: "" != "red") {
 
                     mFlagTv.setVectorDrawableStart(R.drawable.ic_flag_20dp_red)
@@ -245,11 +242,11 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 }
 
-                val commentsCountString = it.storyTree.rootStory()?.commentsCount?.toString()
+                val commentsCountString = it.storyTree.rootWrapper.story.commentsCount.toString()
                 if (commentsCountString != mCommentsCountBtn.text.toString()) {
                     mCommentsCountBtn.text = commentsCountString
                 }
-                val votesCountString = it.storyTree.rootStory()?.votesNum?.toString() ?: ""
+                val votesCountString = it.storyTree.rootWrapper.story.votesNum.toString()
                 if (mVotesIv.text != votesCountString) {
                     mVotesIv.text = votesCountString
                 }
@@ -267,7 +264,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         mFlow.addView(view)
                     }
                 }
-                if (it.storyTree.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+                if (it.storyTree.rootWrapper.voteUpdatingState?.state == UpdatingState.UPDATING) {
                     mVotingProgress.setViewVisible()
                     mMoneyBtn.setViewGone()
                 } else {
@@ -298,7 +295,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 }
 
                 mVoteLo.setViewVisible()
-                if (story.commentsCount > 0 && it.storyTree.comments().isEmpty()) {//if comments not downloaded yet
+                if (story.commentsCount > 0 && it.storyTree.comments.isEmpty()) {//if comments not downloaded yet
                     mCommentsTv.setViewGone()
                     mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewVisible()
@@ -307,7 +304,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         mCommentsLoadingProgress.post { mCommentsLoadingProgress.requestFocus() }
 
                     }
-                } else if (story.commentsCount > 0 && it.storyTree.comments().isNotEmpty()) {
+                } else if (story.commentsCount > 0 && it.storyTree.comments.isNotEmpty()) {
                     mCommentsTv.setViewVisible()
                     mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewGone()
@@ -328,14 +325,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         isScrollEventFired = true
                     }
                 }
-                (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.getFlataned())
+                (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.comments)
 
-                mMoneyBtn.text = calculateShownReward(it.storyTree.storyWithState()
-                        ?: return@Observer,
+                mMoneyBtn.text = calculateShownReward(it.storyTree.rootWrapper,
                         ctx = this)
 
-                if (it.storyTree.storyWithState()?.isStoryEditable == true
-                        && mToolbar.menu?.findItem(R.id.of) == null) {
+                if (it.storyTree.rootWrapper.isStoryEditable && mToolbar.menu?.findItem(R.id.of) == null) {
                     mToolbar.menu?.clear()
                     mToolbar.inflateMenu(R.menu.story_menu_editable)
                 }
@@ -458,7 +453,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mMoneyBtn.setOnClickListener {
             if (mViewModel.canUserVote) {
-                val story = mViewModel.storyLiveData.value?.storyTree?.storyWithState()
+                val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
                 if (mViewModel.canUserUpVoteOnThis(story)) {
                     val dialog = VoteDialog.getInstance()
@@ -475,7 +470,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         }
         mFlagTv.setOnClickListener {
             if (mViewModel.canUserVote) {
-                val story = mViewModel.storyLiveData.value?.storyTree?.storyWithState()
+                val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
                 mViewModel.onStoryVote(story, -100)
             } else {
@@ -528,7 +523,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.share -> mViewModel.onShareClick(this)
-            R.id.edit -> mViewModel.onEditClick(this, mViewModel.storyLiveData.value?.storyTree?.rootStory()
+            R.id.edit -> mViewModel.onEditClick(this, mViewModel.storyLiveData.value?.storyTree?.rootWrapper?.story
                     ?: return true)
         }
         return true

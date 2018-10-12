@@ -148,13 +148,13 @@ class rRepoGetStoriesTest {
         items.observeForever {
             feed = it
         }
-        Assert.assertNotNull("after story list update, stories list must be not null", feed)
+        Assert.assertNotNull("after rootWrapper list update, stories list must be not null", feed)
         val workingItem = items.value!!.items.first()
-        Assert.assertEquals("not updated story must have no comments", 0, workingItem.comments().size)
+        Assert.assertEquals("not updated rootWrapper must have no comments", 0, workingItem.comments().size)
 
         repo.requestStoryUpdate(workingItem)
 
-        Assert.assertTrue("updated story must have comments", items.value!!.items.first().comments().isNotEmpty())
+        Assert.assertTrue("updated rootWrapper must have comments", items.value!!.items.first().comments().isNotEmpty())
 
     }
 

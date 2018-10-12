@@ -36,8 +36,8 @@ class CommentsViewModleTest {
     @Test
     fun testGetComments() {
         val filter = StoryFilter(null, "yuri-vlad-second")
-        var state: StoriesViewState? = null
-        storyViewModel.storiesLiveData.observeForever { state = it }
+        var state: DiscussionsViewState? = null
+        storyViewModel.discussionsLiveData.observeForever { state = it }
         Assert.assertNull(state)
         storyViewModel.onCreate(object : InternetStatusNotifier {
             override fun isAppOnline(): Boolean {

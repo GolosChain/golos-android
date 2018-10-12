@@ -1,15 +1,13 @@
 package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import androidx.core.content.ContextCompat
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.knife.KnifeParser
@@ -17,6 +15,7 @@ import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,
@@ -42,20 +41,22 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_btn)
     private val mVotersBtn: TextView = itemView.findViewById(R.id.voters_btn)
+    private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
+    private val mNickNameTv: TextView = itemView.findViewById(R.id.user_nick_name_tv)
     private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
-    private var oldAvatar: String? = null
+    private val mStubV: View = itemView.findViewById(R.id.stub_v)
 
-    private val mGlide = Glide.with(parent.context)
 
     init {
-        if (noAvatarDrawable == null) noAvatarDrawable = itemView.getVectorDrawable(R.drawable.ic_person_gray_32dp)
+
 
         if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
 
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
         mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
+
         mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
 
         mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
@@ -67,34 +68,19 @@ class StripeFullViewHolder(parent: ViewGroup,
         mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
         mVotersBtn.setOnClickListener { onVotersClick.onClick(this) }
 
-
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
         itemView.setOnClickListener { onCardClick.onClick(this) }
-
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
         super.handlerStateChange(newState, oldState)
         if (newState != null) {
 
-            val wrapper = newState.stripe.rootStory() ?: return
-            val newAvatar = wrapper.avatarPath
+            val wrapper = newState.stripe
 
-            if (wrapper.avatarPath != null) {
-                if (newAvatar != oldAvatar) {
-                    mGlide
-                            .load(ImageUriResolver.resolveImageWithSize(
-                                    wrapper.avatarPath ?: "",
-                                    wantedwidth = mAvatar.width))
-                            .apply(RequestOptions().placeholder(noAvatarDrawable))
-                            .error(mGlide.load(noAvatarDrawable))
-                            .into(mAvatar)
-                    oldAvatar = wrapper.avatarPath
-                }
-            } else mAvatar.setImageDrawable(noAvatarDrawable)
-            if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+            if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
@@ -109,32 +95,33 @@ class StripeFullViewHolder(parent: ViewGroup,
                 }
             }
 
-            if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+            if (newState.stripe.voteUpdatingState?.state == UpdatingState.UPDATING) {
                 mVotingProgress.setViewVisible()
                 mUpvoteBtn.setViewGone()
             } else {
                 mVotingProgress.setViewGone()
                 mUpvoteBtn.setViewVisible()
             }
-            mVotersBtn.text = wrapper.votesNum.toString()
-            if (newState.stripe.rootStory()?.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
+            mVotersBtn.text = wrapper.story.votesNum.toString()
+            if (newState.stripe.story.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
                 mMainImageBig.setViewGone()
                 mMainImageBig.setImageDrawable(null)
-                var htmlString = newState.stripe.storyWithState()?.asHtmlString
+                var htmlString = newState.stripe.asHtmlString
                 if (htmlString != null) {
                     if (htmlString.length > 400) htmlString.substring(0..400)
                     mBodyTextMarkwon.text = htmlString
 
                 } else {
-                    htmlString = KnifeParser.fromHtml(wrapper.cleanedFromImages.substring(0,
-                            if (wrapper.cleanedFromImages.length > 400) 400 else wrapper.cleanedFromImages.length), this)
-                    newState.stripe.storyWithState()?.asHtmlString = htmlString
+                    htmlString = KnifeParser.fromHtml(wrapper.story.cleanedFromImages.substring(0,
+                            if (wrapper.story.cleanedFromImages.length > 400) 400 else wrapper.story.cleanedFromImages.length), this)
+                    newState.stripe.asHtmlString = htmlString
                     mBodyTextMarkwon.text = htmlString
                 }
                 mBodyTextMarkwon.setViewVisible()
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
+            if (state?.stripe?.story?.id == 6512069L)Timber.e(state?.stripe?.toString())
         }
     }
 
@@ -144,7 +131,11 @@ class StripeFullViewHolder(parent: ViewGroup,
         mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
     }
 
-    override fun getMainText(): TextView? {
+    override fun getAuthorAvatar(): ImageView {
+        return mAvatar
+    }
+
+    override fun getMainText(): TextView {
         return mBodyTextMarkwon
     }
 
@@ -164,7 +155,7 @@ class StripeFullViewHolder(parent: ViewGroup,
         return mCommentsButton
     }
 
-    override fun getUserNameTv(): TextView {
+    override fun getShownUserNameTv(): TextView {
         return mUserNameTv
     }
 
@@ -188,12 +179,19 @@ class StripeFullViewHolder(parent: ViewGroup,
         return false
     }
 
+    override fun getUserNickTv(): TextView {
+        return mNickNameTv
+    }
+
+    override fun getDateStampText(): TextView {
+        return mTimeTv
+    }
+
     companion object {
 
         @JvmStatic
         var noAvatarDrawable: Drawable? = null
-        @JvmStatic
-        var userVotedvotedDrarawble: Drawable? = null
+
         @JvmStatic
         var errorDrawableS: Drawable? = null
     }

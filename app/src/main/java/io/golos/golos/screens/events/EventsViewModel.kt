@@ -81,7 +81,8 @@ class EventsViewModel : ViewModel() {
 
         val stories = mStoriesProvider
                 .getStories(FeedType.UNCLASSIFIED, null).value?.items.orEmpty()
-                .mapNotNull { it.rootStory() }
+                .asSequence()
+                .mapNotNull { it.rootStory }
                 .associateBy { it.permlink }
 
         val currentUserSubscriptions = mUsersProvider.currentUserSubscriptions.value.orEmpty()

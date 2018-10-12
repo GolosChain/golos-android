@@ -2,8 +2,6 @@ package io.golos.golos.screens.editor
 
 import android.app.Activity
 import android.app.Dialog
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,14 +11,16 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.appcompat.widget.Toolbar
 import android.text.*
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
 import android.widget.Button
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -33,7 +33,6 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.editor.knife.*
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.widgets.dialogs.LinkDialogInterface
 import io.golos.golos.screens.widgets.dialogs.SendLinkDialog
 import io.golos.golos.utils.*
@@ -137,11 +136,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mViewModel.titleLiveData.observe(this, Observer<EditorTitle> { t ->
             mTitleView.state = mTitleView.state?.copy(type = t ?: return@Observer)
         })
-
-
-
-
-
         mFooter.state = EditorFooterState(mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.EDIT_POST,
                 TagsStringValidator(object : StringProvider {
                     override fun get(resId: Int, args: String?): String {
@@ -152,8 +146,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                 this)
         mToolbar.title = if (mMode?.editorType == EditorType.CREATE_POST || mMode?.editorType == EditorType.CREATE_COMMENT)
             resources.getString(R.string.text) else resources.getString(R.string.comment)
-
-
         mSubmitBtn.setOnClickListener {
             mViewModel.onSubmit()
             mRecycler.hideKeyboard()
@@ -162,7 +154,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mRecycler.itemAnimator = null
 
     }
-
 
 
     override fun onChanged(it: EditorState?) {
@@ -200,6 +191,12 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
     override fun onLinkSubmit(linkName: String, linkAddress: String) {
         if (DEBUG_EDITOR) Timber.e("onLinkSubmit linkName = $linkName linkAddress = $linkAddress")
         if (linkAddress.isNullOrEmpty()) return
+        if (linkAddress.matches(Regexps.anyImageLink)) {
+            mViewModel
+                    .onUserInput(EditorInputAction.InsertAction(EditorImagePart(imageName = linkAddress,
+                            imageUrl = linkAddress)))
+            return
+        }
         val linkAddress = if (linkAddress.matches(Regexps.anyImageLink)) linkAddress else formatUrl(linkAddress)
 
         val spannableString = SpannableStringBuilder.valueOf(linkName)
@@ -360,7 +357,7 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
                     }
 
                 } else {
-                    ActivityCompat.requestPermissions(this, Array(1, { android.Manifest.permission.READ_EXTERNAL_STORAGE }), READ_EXTERNAL_PERMISSION)
+                    ActivityCompat.requestPermissions(this, Array(1) { android.Manifest.permission.READ_EXTERNAL_STORAGE }, READ_EXTERNAL_PERMISSION)
                 }
             }
             EditorTextModifier.QUOTATION_MARKS -> {
@@ -667,14 +664,6 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         mViewModel.onStop()
     }
 
-    private fun isTitleHidden(): Boolean {
-        if (mMode?.editorType == EditorType.CREATE_COMMENT && mMode?.rootStoryId != mMode?.workingItemId)//it is reply on some content
-            return true
-        if (mMode?.editorType == EditorType.EDIT_COMMENT) return true//it is edit of comment
-        if (mMode?.editorType == EditorType.CREATE_COMMENT && mMode?.title?.isEmpty() == true)//it is create root comment, but title is empty
-            return true
-        return false
-    }
 
     override fun onTagsSubmit(tags: List<String>) {
         mViewModel.onTagsChanged(tags)
@@ -750,33 +739,33 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
 
 
         fun startRootCommentEditor(ctx: Context,
-                                   rootStory: StoryWithComments,
+                                   rootStory: GolosDiscussionItem,
                                    feedType: FeedType,
                                    storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()!!.title,
-                    rootStory.rootStory()?.author ?: return,
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.title,
+                    rootStory.author,
                     EditorType.CREATE_COMMENT,
-                    rootStory.rootStory()?.id ?: return,
-                    rootStory.rootStory()?.id ?: return,
+                    rootStory.id,
+                    rootStory.id,
                     storyFilter,
                     feedType)))
             ctx.startActivity(intent)
         }
 
         fun startAnswerOnCommentEditor(ctx: Context,
-                                       rootStory: StoryWithComments,
+                                       rootStory: GolosDiscussionItem,
                                        commentToAnswer: GolosDiscussionItem,
                                        feedType: FeedType,
                                        storyFilter: StoryFilter?) {
             val mapper = jacksonObjectMapper()
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()?.title
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.title
                     ?: return,
-                    rootStory.rootStory()?.author ?: return,
+                    rootStory.author,
                     EditorType.CREATE_COMMENT,
-                    rootStory.rootStory()?.id ?: return,
+                    rootStory.id,
                     commentToAnswer.id,
                     storyFilter,
                     feedType)))
@@ -793,16 +782,15 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         }
 
         fun startEditPostOrComment(ctx: Context,
-                                   rootStory: StoryWithComments,
+                                   rootStory: GolosDiscussionItem,
                                    itemToEdit: GolosDiscussionItem,
                                    feedType: FeedType,
                                    storyFilter: StoryFilter?) {
             val intent = Intent(ctx, EditorActivity::class.java)
-            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.rootStory()?.title
-                    ?: return,
-                    rootStory.rootStory()?.author ?: return,
+            intent.putExtra(MODE_TAG, mapper.writeValueAsString(EditorMode(rootStory.title,
+                    rootStory.author,
                     if (itemToEdit.isRootStory) EditorType.EDIT_POST else EditorType.EDIT_COMMENT,
-                    rootStory.rootStory()?.id ?: return,
+                    rootStory.id,
                     itemToEdit.id,
                     storyFilter,
                     feedType)))

@@ -1,6 +1,5 @@
 package io.golos.golos.screens.story.model
 
-import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.utils.Regexps
 import io.golos.golos.utils.Regexps.markdownChecker
@@ -11,7 +10,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
-import timber.log.Timber
 import java.util.*
 
 data class TextRow(val text: String) : Row() {
@@ -29,12 +27,12 @@ object StoryParserToRows {
     fun parse(story: String,
               checkEmptyHtml: Boolean = false,
               skipHtmlClean: Boolean = false): List<Row> {
-        return parse(GolosDiscussionItem("", 0L, "", "", arrayListOf<String>(),
-                arrayListOf<String>(), arrayListOf<String>(), 0, 0L, 0, "",
-                0.0, story, 0L, "", GolosDiscussionItem.Format.HTML, "", arrayListOf<StoryWrapper>(),
+        return parse(GolosDiscussionItem("", 0L, "", "", arrayListOf(),
+                arrayListOf(), arrayListOf<String>(), 0, 0L, 0, "",
+                0.0, story, 0L, "", GolosDiscussionItem.Format.HTML,  arrayListOf(),
                 "", "", 0, 0, 0L, 0L, 0L,
-                GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT, arrayListOf<VoteLight>(),
-                GolosDiscussionItem.ItemType.PLAIN, "", "", arrayListOf<Row>()),
+                arrayListOf(),
+                GolosDiscussionItem.ItemType.PLAIN, "", "", arrayListOf()),
                 checkEmptyHtml, skipHtmlClean)
     }
 

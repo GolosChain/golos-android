@@ -17,6 +17,7 @@
     <color name="delimeter_color_feed">#f2f2f2</color>
     <color name="same_tags_ribbon_back">@android:color/white</color>
     <color name="upvote_green">#3da449</color>
+    <color name="font_gray_black">#333333</color>
     <color name="semi_black">#99000000</color>
     <color name="semi_semi_black">#39000000</color>
     <color name="profile_tabs_color">@color/gray_7d</color>

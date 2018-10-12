@@ -1,8 +1,7 @@
 package io.golos.golos.screens.stories.adapters
 
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
@@ -10,7 +9,7 @@ import io.golos.golos.screens.stories.adapters.viewholders.StripeCompactViewHold
 import io.golos.golos.screens.stories.adapters.viewholders.StripeFullViewHolder
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
-import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 
 data class FeedCellSettings(val isFullSize: Boolean,
@@ -20,7 +19,7 @@ data class FeedCellSettings(val isFullSize: Boolean,
                             val bountyDisplay: UserSettingsRepository.GolosBountyDisplay)
 
 
-data class StripeWrapper(val stripe: StoryWithComments,
+data class StripeWrapper(val stripe: StoryWrapper,
                          val isImagesShown: Boolean,
                          val nswfStrategy: NSFWStrategy,
                          val feedCellSettings: FeedCellSettings)
@@ -45,53 +44,35 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                 field = value
             }
         }
-    private var mStripes = ArrayList<StoryWithComments>()
+    private val mStripes = ArrayList<StoryWrapper>()
     private val mItemsMap = HashMap<Long, Int>()
 
 
-    fun setStripesCustom(newItems: List<StoryWithComments>) {
+    fun setStripes(newItems: List<StoryWrapper>) {
         if (mStripes.isEmpty()) {
-            mStripes = ArrayList(newItems).clone() as ArrayList<StoryWithComments>
+            mStripes.addAll(newItems)
             notifyDataSetChanged()
-            mStripes.forEach {
-                mItemsMap[it.rootStory()?.id ?: 0L] = it.hashCode()
-            }
+
         } else {
             try {
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
                     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        if (mStripes == null
-                                || newItems == null
-                                || mStripes.isEmpty()
-                                || newItems.isEmpty()
-                                || mStripes.lastIndex < oldItemPosition) return false
-
-                        return mStripes[oldItemPosition].rootStory()?.id == newItems[newItemPosition].rootStory()?.id
+                        return mStripes[oldItemPosition].story.id == newItems[newItemPosition].story.id
                     }
 
                     override fun getOldListSize() = mStripes.size
                     override fun getNewListSize() = newItems.size
                     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        if (mStripes == null
-                                || newItems == null
-                                || mStripes.isEmpty()
-                                || newItems.isEmpty()
-                                || mStripes.lastIndex < oldItemPosition
-                                || newItems.size < newItemPosition) return false
-                        val newItem = newItems[newItemPosition].storyWithState() ?: return false
-                        val oldHash = mItemsMap[mStripes[oldItemPosition].rootStory()?.id ?: 0L]
-                        return oldHash == newItem.hashCode()
+                        return mStripes[oldItemPosition] == newItems[newItemPosition]
                     }
                 })
+                mStripes.clear()
+                mStripes.addAll(newItems)
                 result.dispatchUpdatesTo(this)
-                mStripes = ArrayList(newItems)
-                mStripes.forEach {
-                    mItemsMap[it.rootStory()?.id
-                            ?: 0L] = it.storyWithState()?.hashCode() ?: 0
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                mStripes = ArrayList(newItems)
+                mStripes.clear()
+                mStripes.addAll(newItems)
                 notifyDataSetChanged()
             }
         }
@@ -178,7 +159,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
         }
     }
 
-    private fun getStoryForPosition(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder): StoryWithComments? {
+    private fun getStoryForPosition(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder): StoryWrapper? {
         val pos = holder.adapterPosition
         if (pos < 0) return null
         return if (pos < mStripes.size) return mStripes[pos] else null

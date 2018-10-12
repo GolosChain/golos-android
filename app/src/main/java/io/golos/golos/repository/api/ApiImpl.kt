@@ -16,8 +16,8 @@ import io.golos.golos.R
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.story.model.StoryCommentsHierarchyResolver
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.utils.*
 import org.bitcoinj.core.AddressFormatException
 import timber.log.Timber
@@ -26,6 +26,7 @@ import java.io.File
 
 internal class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
+    private val mStoryConverter = StoryCommentsHierarchyResolver
 
 
     override fun getStory(blog: String,
@@ -35,16 +36,17 @@ internal class ApiImpl : GolosApi() {
                           accountDataHandler: (List<GolosUserAccountInfo>) -> Unit): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getStoryWithRepliesAndInvolvedAccounts(AccountName(author), Permlink(permlink), voteLimit
                 ?: -1)
-        val story = StoryWithComments(rawStory!!)
+
+        val story = mStoryConverter.resolve(rawStory!!)
         accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
         return story
     }
 
     override fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int?): StoryWithComments {
-        return StoryWithComments(StoryWrapper(DiscussionItemFactory.create(
-                mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink), voteLimit
-                        ?: -1)!!,
-                null), UpdatingState.DONE), ArrayList())
+        val rawStory = mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink), voteLimit
+                ?: -1)
+        return StoryWithComments(DiscussionItemFactory.create(rawStory!!), arrayListOf())
+
     }
 
     override fun getStories(limit: Int, type: FeedType,
@@ -57,7 +59,8 @@ internal class ApiImpl : GolosApi() {
 
         val discussions = if (type == FeedType.ANSWERS) {
             if (startAuthor == null && filter == null) throw IllegalArgumentException(" for this type of feed, start author must be not null")
-            mGolosApi.databaseMethods.getRepliesLightByLastUpdate(AccountName(startAuthor?:filter?.userNameFilter?.first()),
+            mGolosApi.databaseMethods.getRepliesLightByLastUpdate(AccountName(startAuthor
+                    ?: filter?.userNameFilter?.first()),
                     if (startPermlink != null) Permlink(startPermlink) else null, limit)
         } else {
             val discussionSortType =
@@ -99,7 +102,7 @@ internal class ApiImpl : GolosApi() {
 
         discussions.forEach {
             if (it != null) {
-                val story = StoryWithComments(StoryWrapper(DiscussionItemFactory.create(it, null), UpdatingState.DONE), ArrayList())
+                val story = StoryWithComments(DiscussionItemFactory.create(it), ArrayList())
                 out.add(story)
             }
         }
@@ -255,6 +258,7 @@ internal class ApiImpl : GolosApi() {
         return GolosUserAccountInfo(acc.name.name,
                 acc.avatarPath,
                 acc.moto,
+                acc.shownName,
                 acc.postCount,
                 accWorth,
                 gbgAmount,
@@ -281,7 +285,7 @@ internal class ApiImpl : GolosApi() {
     }
 
     private fun getRootStoryWithoutComments(author: String, permlink: String): GolosDiscussionItem {
-        return DiscussionItemFactory.create(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!, null)
+        return DiscussionItemFactory.create(mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink))!!)
     }
 
     override fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem {

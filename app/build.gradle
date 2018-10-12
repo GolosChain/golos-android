@@ -109,6 +109,7 @@ dependencies {
     implementation 'ru.noties:markwon:1.0.0'
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'com.github.chrisbanes:PhotoView:+'
+    implementation 'com.google.android:flexbox:1.1.0'
     implementation('com.wefika:flowlayout:+') {
         exclude group: 'com.intellij'
     }

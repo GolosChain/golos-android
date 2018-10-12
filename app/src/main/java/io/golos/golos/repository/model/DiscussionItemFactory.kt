@@ -2,13 +2,11 @@ package io.golos.golos.repository.model
 
 import eu.bittrade.libs.golosj.base.models.Discussion
 import eu.bittrade.libs.golosj.base.models.DiscussionLight
-import eu.bittrade.libs.golosj.base.models.ExtendedAccount
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.utils.Regexps
-import io.golos.golos.utils.avatarPath
 import io.golos.golos.utils.toArrayList
 import org.json.JSONArray
 import org.json.JSONException
@@ -16,7 +14,7 @@ import org.json.JSONObject
 import timber.log.Timber
 
 object DiscussionItemFactory {
-    fun create(discussion: Discussion, account: ExtendedAccount?): GolosDiscussionItem {
+    fun create(discussion: Discussion): GolosDiscussionItem {
         val metadata = getMetadataFromItem(discussion.jsonMetadata)
 
         val url = discussion.url ?: ""
@@ -25,7 +23,7 @@ object DiscussionItemFactory {
         val categoryName = discussion.category ?: ""
 
 
-        val votesNum = discussion.netVotes
+        val votesNum = discussion.activeVotesCount?.toInt() ?: discussion.netVotes
         val commentsCount = discussion.children
         val permlink = discussion.permlink?.link ?: ""
         val childrenCount = discussion.children
@@ -33,7 +31,7 @@ object DiscussionItemFactory {
         val lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0
         val created = discussion.created?.dateTimeAsTimestamp ?: 0
         val parentPermlink = discussion.parentPermlink.link ?: ""
-        val firstRebloggedBy = discussion.firstRebloggedBy?.name ?: ""
+        val firstRebloggedBy = ""
         val gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
         val body = discussion.body ?: ""
         val author = discussion.author?.name ?: ""
@@ -47,15 +45,14 @@ object DiscussionItemFactory {
                         ?: 0L, author = author, parentPermlink = parentPermlink,
                 parentAuthor = discussion.parentAuthor.name ?: "", childrenCount = childrenCount,
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
-                firstRebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages,
+                rebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages,
                 format = metadata.format,
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,
-                avatarPath = account?.avatarPath,
+
                 activeVotes = discussion.activeVotes
                         ?.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) }.orEmpty().toArrayList(),
-                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
                 level = discussion.depth.toInt())
 
 
@@ -64,7 +61,7 @@ object DiscussionItemFactory {
         return item
     }
 
-    fun create(discussion: DiscussionLight, account: ExtendedAccount?): GolosDiscussionItem {
+    fun create(discussion: DiscussionLight): GolosDiscussionItem {
         val metadata = getMetadataFromItem(discussion.jsonMetadata)
 
         val url = discussion.url ?: ""
@@ -73,7 +70,7 @@ object DiscussionItemFactory {
 
         val categoryName = discussion.category ?: ""
 
-        val votesNum = discussion.netVotes
+        val votesNum = discussion.activeVotesCount?.toInt() ?: discussion.netVotes
         val commentsCount = discussion.children
         val permlink = discussion.permlink ?: ""
         val childrenCount = discussion.children
@@ -81,7 +78,7 @@ object DiscussionItemFactory {
         val lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0
         val created = discussion.created?.dateTimeAsTimestamp ?: 0
         val parentPermlink = discussion.parentPermlink ?: ""
-        val firstRebloggedBy = discussion.firstRebloggedBy ?: ""
+        val firstRebloggedBy = ""
         val gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
         val body = discussion.body ?: ""
         val author = discussion.author ?: ""
@@ -92,14 +89,12 @@ object DiscussionItemFactory {
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
                 bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, parentAuthor = discussion.parentAuthor
                 ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated,
-                created = created, firstRebloggedBy = firstRebloggedBy,
+                created = created, rebloggedBy = firstRebloggedBy,
                 cleanedFromImages = cleanedFromImages, format = metadata.format,
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,
-                avatarPath = account?.avatarPath,
                 activeVotes = discussion.votes,
-                userVotestatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
                 level = discussion.depth.toInt())
 
         setTypeOfItem(item)
@@ -149,12 +144,14 @@ object DiscussionItemFactory {
         if (json != null) {
             try {
                 if (json.has("image") && json.get("image") != null) {
+
                     val imageArray = json.getJSONArray("image")
                     if (imageArray.length() > 0) {
                         (0 until imageArray.length()).mapTo(metadata.images) { imageArray[it].toString() }
                     }
                 }
             } catch (e: JSONException) {
+                Timber.e(" image = ${json.get("image")}")
                 e.printStackTrace()
             }
         }
@@ -168,6 +165,7 @@ object DiscussionItemFactory {
                 }
             } catch (e: JSONException) {
                 Timber.e(" links = ${json.get("links")}")
+
                 e.printStackTrace()
             }
         }
@@ -185,7 +183,7 @@ object DiscussionItemFactory {
         val toRowsParser = StoryParserToRows
         golosDiscussionItem.parts.addAll(toRowsParser.parse(golosDiscussionItem).toArrayList())
         if (golosDiscussionItem.parts.size == 0) {
-            Timber.e("fail on story id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
+            Timber.e("fail on rootWrapper id is ${golosDiscussionItem.id}\n body =  ${golosDiscussionItem.body}")
         } else {
             if (golosDiscussionItem.parts[0] is ImageRow) {
                 golosDiscussionItem.type = GolosDiscussionItem.ItemType.IMAGE_FIRST

@@ -342,7 +342,7 @@ public class AppUserData implements Cloneable {
                 ", postsCount=" + postsCount +
                 ", safeGbg=" + safeGbg +
                 ", safeGolos=" + safeGolos +
-                ", votingPower=" + votingPower +
+                ", votingStrength=" + votingPower +
                 '}';
     }
 }

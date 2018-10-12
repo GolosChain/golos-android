@@ -3,8 +3,8 @@
                                                    xmlns:app="http://schemas.android.com/apk/res-auto"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="wrap_content"
-                                                   android:clickable="true"
                                                    android:background="?selectableItemBackground"
+                                                   android:clickable="true"
                                                    android:paddingTop="12dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
@@ -16,71 +16,109 @@
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="16dp" />
+        app:riv_corner_radius="16dp"/>
+
+    <TextView
+        android:id="@+id/time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:text="4 дня назад"
+        android:textColor="@color/gray_82"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/user_name"
         style="@style/TitleUserNameStyle"
+        android:layout_marginStart="@dimen/margin_material_half"
         android:background="@drawable/img_round_ripple_gray"
+        android:gravity="center_vertical"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
-        app:layout_constraintTop_toTopOf="parent" />
+
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/blog_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:drawablePadding="2dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/time_tv"
+        app:layout_constraintStart_toEndOf="@id/user_name"
+        />
+
+    <View
+        android:id="@+id/stub_v"
+        android:layout_width="120dp"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/user_nick_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:gravity="center_vertical"
+        android:textColor="@color/gray_82"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:drawablePadding="4dp"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:drawablePadding="2dp"
+        android:gravity="center"
+        android:textColor="@color/gray_82"
         android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"
+        />
 
-        app:layout_constraintStart_toEndOf="@id/user_name"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/blog_name_tv"
-        style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
-        android:layout_marginTop="0dp"
-        android:background="@drawable/img_round_ripple_gray"
-        android:includeFontPadding="false"
-        android:padding="0dp"
-        android:textColor="@color/textColorP"
-        android:textSize="12sp"
-        app:layout_constraintStart_toEndOf="@id/avatar_iv"
-        app:layout_constraintTop_toBottomOf="@+id/user_name" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
         style="@style/StripeTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
-        android:layout_marginTop="@dimen/margin_material_half"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="@dimen/margin_material"
         android:clickable="false"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
-        app:textAllCaps="false" />
+
+        app:textAllCaps="false"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text"
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_material"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="@dimen/margin_material"
         android:background="@drawable/img_round_ripple_gray"
         android:clickable="false"
         android:ellipsize="end"
         android:lines="4"
-        android:textColor="#414548"
+        android:textColor="@color/font_gray_black"
         android:textSize="12sp"
         android:visibility="visible"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"/>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_main"
@@ -88,14 +126,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_material_half"
         android:adjustViewBounds="true"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:cropToPadding="true"
-        android:minHeight="220dp"
         android:clickable="true"
+        android:cropToPadding="true"
+        android:foreground="?selectableItemBackgroundBorderless"
+        android:minHeight="220dp"
         android:scaleType="fitCenter"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"
@@ -103,7 +141,7 @@
         android:layout_height="wrap_content"
         android:visibility="visible"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="text, image_main, title " />
+        app:constraint_referenced_ids="text, image_main, title "/>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/bottom_buttons_lo"
@@ -119,26 +157,26 @@
         <TextView
             android:id="@+id/vote_btn"
             style="@style/VoteButton"
-            android:background="@drawable/img_round_ripple_gray" />
+            android:background="@drawable/img_round_ripple_gray"/>
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
-            android:visibility="gone" />
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/voters_btn"
             style="@style/StoryBottomControlButton"
             android:background="@drawable/img_round_ripple_gray"
-            android:paddingBottom="3dp" />
+            android:paddingBottom="3dp"/>
 
         <TextView
             android:id="@+id/comments_btn"
             style="@style/StoryBottomControlButton"
             android:layout_marginStart="@dimen/margin_material_half"
-            android:background="@drawable/img_round_ripple_gray" />
+            android:background="@drawable/img_round_ripple_gray"/>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -151,7 +189,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
                 android:background="@drawable/img_round_ripple_gray"
-                app:srcCompat="@drawable/ic_share_gray_20dp" />
+                app:srcCompat="@drawable/ic_share_gray_20dp"/>
         </FrameLayout>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -162,5 +200,5 @@
         android:layout_height="2dp"
         android:layout_marginTop="@dimen/margin_material_half"
         android:background="@color/delimeter_color_feed"
-        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo" />
+        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

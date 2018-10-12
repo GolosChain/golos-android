@@ -16,6 +16,7 @@ import io.golos.golos.BuildConfig.DEBUG_EDITOR
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.CreatePostResult
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoriesFeed
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
@@ -56,7 +57,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
     private val mTextProcessor = TextProcessor
     private val mRepository = Repository.get
     private var mRootStory: StoryWithComments? = null
-    private var mWorkingItem: StoryWrapper? = null
+    private var mWorkingItem: GolosDiscussionItem? = null
     private var mDraftsPersister: DraftsPersister? = null
     private var mHtmlHandler: HtmlHandler? = null
     private var wasSent = false
@@ -72,7 +73,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             val feedType = field?.feedType
             val rootStoryId = field?.rootStoryId
             val workingItemId = field?.workingItemId
-            if (feedType == null && rootStoryId == null && workingItemId == null) {//root story editor
+            if (feedType == null && rootStoryId == null && workingItemId == null) {//root rootWrapper editor
                 mDraftsPersister?.getDraft(mode ?: return) { items, title, tags ->
                     if (items.isNotEmpty()) {
                         mTitleLiveData.value = PostEditorTitle(TitleTextField(title, true, R.string.enter_post_title))
@@ -117,16 +118,16 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
         if (mWorkingItem != null || t == null) return
 
-        mRootStory = t.items.findLast { it.rootStory()?.id == mode?.rootStoryId }
+        mRootStory = t.items.findLast { it.rootStory.id == mode?.rootStoryId }
         mRootStory?.let {
-            mWorkingItem = if (it.rootStory()?.id == mode?.workingItemId) it.storyWithState()!!
+            mWorkingItem = if (it.rootStory.id == mode?.workingItemId) it.rootStory
             else {
-                it.getFlataned().findLast { it.story.id == mode?.workingItemId }
+                it.getFlataned().findLast { it.id == mode?.workingItemId }
             }
         }
 
         val editorType = mode?.editorType ?: return
-        val isParentComment = mWorkingItem?.story?.isComment() == true
+        val isParentComment = mWorkingItem?.isComment() == true
 
         fun createBoldText(forString: String): Editable {
             val ssb = SpannableStringBuilder.valueOf(forString)
@@ -139,18 +140,18 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
             mDraftsPersister?.getDraft(mode ?: return) { items, _, tags ->
 
                 mWorkingItem?.let { workingItem ->
-                    mTitleLiveData.value = if (isParentComment) AnswerOnCommentEditorTitle(workingItem.story.author, workingItem.story.created, workingItem.story.parts)
-                    else RootCommentEditorTitle(TitleTextField(workingItem.story.title, false, null), workingItem.story.author)
+                    mTitleLiveData.value = if (isParentComment) AnswerOnCommentEditorTitle(workingItem.author, workingItem.created, workingItem.parts)
+                    else RootCommentEditorTitle(TitleTextField(workingItem.title, false, null), workingItem.author)
 
                     val parts = if (items.isNotEmpty() && !(items.size == 1 && items[0] is EditorTextPart && (items[0] as EditorTextPart).text.toString().trim().isEmpty())) items
-                    else mTextProcessor.getInitialState(if (isParentComment) createBoldText("@${workingItem.story.author}  ") else null)
+                    else mTextProcessor.getInitialState(if (isParentComment) createBoldText("@${workingItem.author}  ") else null)
 
                     mEditorLiveData.value = EditorState(parts = parts,
                             tags = tags)
                 }
             }
         } else if (editorType == EditorActivity.EditorType.EDIT_POST || editorType == EditorActivity.EditorType.EDIT_COMMENT) {
-            mWorkingItem?.story?.let {
+            mWorkingItem?.let {
                 val parts: List<EditorPart> = (if (it.parts.isEmpty()) StoryParserToRows.parse(it, skipHtmlClean = true) else it.parts)
                         .map {
                             when (it) {
@@ -271,7 +272,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 mRepository.editPost(titleText,
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
-                        mRootStory?.storyWithState() ?: return, listener)
+                        mRootStory?.rootStory ?: return, listener)
                 try {
                     Answers.getInstance().logCustom(CustomEvent("edited post"))
                 } catch (e: Exception) {

@@ -49,8 +49,11 @@ import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItemVotingState
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
 import io.golos.golos.screens.editor.knife.KnifeQuoteSpan
@@ -102,6 +105,31 @@ fun Cursor.getLong(columnName: String): Long {
 fun GolosDiscussionItem.isStory() = this.parentAuthor.isEmpty()
 
 fun GolosDiscussionItem.isComment() = this.parentAuthor.isNotEmpty()
+
+fun createStoryWrapper(discussionItem: GolosDiscussionItem,
+                       voteStatuses: List<GolosDiscussionItemVotingState>,
+                       golosUsersAccounts: Map<String, GolosUserAccountInfo>,
+                       currentUser: ApplicationUser?,
+                       exchangeValues: ExchangeValues,
+                       isThereNeedToHtmlize: Boolean,
+                       htmlizer: Htmlizer?): StoryWrapper {
+    if (isThereNeedToHtmlize && htmlizer == null) throw java.lang.IllegalArgumentException("if isThereNeedToHtmlize set to true htmlizer cannot be null")
+
+
+    val out = StoryWrapper(discussionItem,
+            voteStatuses.find { it.storyId == discussionItem.id },
+            if (currentUser == null || !currentUser.isLogged) GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT else discussionItem.isUserVotedOnThis(currentUser.name),
+            if (discussionItem.rebloggedBy.isEmpty()) golosUsersAccounts[discussionItem.author] else golosUsersAccounts[discussionItem.rebloggedBy],
+            exchangeValues,
+            currentUser != null && discussionItem.author == currentUser.name,
+            if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null)
+
+    if (out.story.id == 6512069L) {
+        Timber.e(out.toString())
+
+    }
+    return out
+}
 
 
 fun Cursor.getBool(columnName: String): Boolean {
@@ -277,6 +305,26 @@ val Account.avatarPath: String?
         return avatarPath
     }
 
+
+val Account.shownName: String?
+    get() {
+        var shownName: String? = null
+        try {
+            if (jsonMetadata != null && jsonMetadata.isNotEmpty()) {
+                val node: JsonNode? = CommunicationHandler.getObjectMapper().readTree(jsonMetadata)
+                node?.let {
+                    shownName = node.get("profile")?.get("name")?.asText()
+                }
+            }
+
+        } catch (e: IOException) {
+            println("error parsing metadata " + jsonMetadata)
+            e.printStackTrace()
+        }
+        return shownName
+    }
+
+
 val Account.cover: String?
     get() {
         var avatarPath: String? = null
@@ -387,10 +435,13 @@ fun SwipeRefreshLayout.setRefreshingS(isRefreshing: Boolean) {
 
 
 fun View.showSnackbar(message: Int) {
+    if (message == 0) return
     Snackbar.make(this,
             Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
             Snackbar.LENGTH_SHORT).show()
 }
+
+fun Any?.isNull(): Boolean = this == null
 
 fun View.showSnackbar(message: String) {
     Snackbar.make(this,

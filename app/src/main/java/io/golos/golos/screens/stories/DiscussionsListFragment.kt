@@ -1,21 +1,18 @@
 package io.golos.golos.screens.stories
 
 
-import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import android.text.SpannableStringBuilder
 import android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -26,15 +23,15 @@ import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
-import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.stories.viewmodel.DiscussionsViewModel
-import io.golos.golos.screens.stories.viewmodel.StoriesViewState
-import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.stories.viewmodel.DiscussionsViewState
+import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 
-class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<StoriesViewState> {
+class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<DiscussionsViewState> {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: DiscussionsViewModel? = null
@@ -78,29 +75,30 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
 
-        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, this, filter)
+        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, parentFragment
+                ?: return, filter)
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
                 onCardClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onCardClick(story, activity)
                     }
                 },
                 onCommentsClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onCommentsClick(story, activity)
                     }
                 },
                 onShareClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onShareClick(story, activity)
                     }
                 },
                 onUpvoteClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
-                            if (story.rootStory()?.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
                                 mViewModel?.cancelVote(story)
                             } else {
                                 val dialog = VoteDialog.getInstance()
@@ -117,17 +115,17 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     }
                 },
                 onTagClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onBlogClick(story, activity)
                     }
                 },
                 onUserClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onUserClick(story, activity)
                     }
                 },
                 onVotersClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWithComments) {
+                    override fun onClick(story: StoryWrapper) {
                         mViewModel?.onVotersClick(story, activity)
                     }
                 },
@@ -159,7 +157,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     private val reselectObserver = object : Observer<Int> {
         override fun onChanged(it: Int?) {
-            it?:return
+            it ?: return
             val pagePositon = arguments?.getInt(PAGE_POSITION, Int.MIN_VALUE)
             if (it == pagePositon && getRecycler().childCount != 0) {
                 getRecycler().scrollToPosition(0)
@@ -201,7 +199,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
             mViewModel?.onChangeVisibilityToUser(true)
         }
 
-        mViewModel?.storiesLiveData?.observe(this, this)
+        mViewModel?.discussionsLiveData?.observe(this, this)
 
         val observer = Observer<FeedCellSettings> { it ->
             mAdapter.feedCellSettings = it ?: FeedCellSettings(true,
@@ -213,7 +211,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.cellViewSettingLiveData?.observe(this, observer)
     }
 
-    override fun onChanged(t: StoriesViewState?) {
+    override fun onChanged(t: DiscussionsViewState?) {
         if (t?.isLoading == true) {
             if (mSwipeRefresh?.isRefreshing == false) {
                 mSwipeRefresh?.post { mSwipeRefresh?.isRefreshing = false }
@@ -227,7 +225,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
         if (t?.items != null) {
             mRecycler?.post {
-                mAdapter.setStripesCustom(t.items)
+                mAdapter.setStripes(t.items)
                 if (parc != null) {
                     (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
                     parc = null
@@ -293,20 +291,12 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        parc = savedInstanceState?.getParcelable<Parcelable>("StoriesFragmentRC")
+        parc = savedInstanceState?.getParcelable("StoriesFragmentRC")
         parc?.let {
             (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
         }
     }
 
-
-    fun getArgs(): Pair<FeedType, StoryFilter?> {
-        val type: FeedType = arguments!!.getSerializable(TYPE_TAG) as FeedType
-        val filterString = arguments!!.getString(FILTER_TAG, null)
-        val filter = if (filterString == null || filterString == "null") null else mapper.readValue(filterString, StoryFilter::class.java)
-
-        return Pair(type, filter)
-    }
 
     companion object {
         private const val TYPE_TAG = "TYPE_TAG"

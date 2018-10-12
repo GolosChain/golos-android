@@ -107,7 +107,7 @@ class DiscussionViewModelTest {
             }
         })
 
-        Assert.assertNotNull("we must get parsed story", state)
+        Assert.assertNotNull("we must get parsed rootWrapper", state)
         Assert.assertFalse(state!!.subscribeOnStoryAuthorStatus.isCurrentUserSubscribed)
         Assert.assertFalse(state!!.subscribeOnTagStatus.isCurrentUserSubscribed)
 

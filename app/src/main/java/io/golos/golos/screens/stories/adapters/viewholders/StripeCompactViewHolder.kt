@@ -1,12 +1,12 @@
 package io.golos.golos.screens.stories.adapters.viewholders
 
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
@@ -29,11 +29,15 @@ class StripeCompactViewHolder(parent: ViewGroup,
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image)
     private val mUpvoteValue: TextView = itemView.findViewById(R.id.vote_value)
+    private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
     private val mUpvoteIv: ImageView = itemView.findViewById(R.id.vote_iv)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
     private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_count_tv)
+    private val mMainText: TextView = itemView.findViewById(R.id.main_tv)
+    private val mUserNick: TextView = itemView.findViewById(R.id.user_nick_name_tv)
     private val mCommentsIv: ImageView = itemView.findViewById(R.id.comments_iv)
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
+    private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
 
 
     init {
@@ -56,18 +60,18 @@ class StripeCompactViewHolder(parent: ViewGroup,
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
         super.handlerStateChange(newState, oldState)
 
-        val wrapper = newState?.stripe?.rootStory()
+        val wrapper = newState?.stripe
 
         if (newState != null && wrapper != null) {
 
-            if (wrapper.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+            if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
                 mUpvoteIv.setImageDrawable(userVotedvotedDrarawble)
                 mUpvoteValue.setTextColorCompat(R.color.upvote_green)
             } else {
                 mUpvoteIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp))
                 mUpvoteValue.setTextColorCompat(R.color.textColorP)
             }
-            if (newState.stripe.storyWithState()?.updatingState == UpdatingState.UPDATING) {
+            if (newState.stripe.voteUpdatingState?.state == UpdatingState.UPDATING) {
                 mVotingProgress.visibility = View.VISIBLE
                 mUpvoteValue.visibility = View.GONE
                 mUpvoteIv.visibility = View.GONE
@@ -80,19 +84,30 @@ class StripeCompactViewHolder(parent: ViewGroup,
     }
 
     override fun handleImagePlacing(newState: StripeWrapper?, imageView: ImageView) {
-        super.handleImagePlacing(newState, imageView)
-        if (newState?.stripe?.rootStory()?.images?.isEmpty() == true) {
-            mMainImageBig.setViewGone()
+//        super.handleImagePlacing(newState, imageView)
+//        if (newState?.stripe?.story?.images?.isEmpty() == true) {
+//            mMainImageBig.setViewGone()
+//        }
+    }
 
-        }
+    override fun getAuthorAvatar(): ImageView {
+       return mAvatar
     }
 
     override fun getErrorDrawable(): Drawable {
         return errorDrawableS!!
     }
 
-    override fun getMainText(): TextView? {
-        return null
+    override fun getMainText(): TextView {
+        return mMainText
+    }
+
+    override fun getUserNickTv(): TextView {
+        return mUserNick
+    }
+
+    override fun getDateStampText(): TextView {
+        return mTimeTv
     }
 
     override fun getMainImage(): ImageView {
@@ -108,7 +123,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
         return mCommentsButton
     }
 
-    override fun getUserNameTv(): TextView {
+    override fun getShownUserNameTv(): TextView {
         return mUserNameTv
     }
 

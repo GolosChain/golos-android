@@ -1,76 +1,64 @@
 package io.golos.golos.repository.model
 
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.utils.toArrayList
 
 /**
  * Created by yuri on 17.11.17.
  */
+
+
+data class ReplaceResult(val isChanged: Boolean, val resultingFeed: StoriesFeed)
+
 class StorySearcherAndReplacer {
-    fun findAndReplace(replacer: StoryWrapper, inList: ArrayList<StoryWithComments>): Boolean {
+    fun findAndReplaceStory(replacer: GolosDiscussionItem, inList: StoriesFeed): ReplaceResult {
         var isChanged = false
-        if (inList.any({ it.rootStory()?.id == replacer.story.id })) {
-            isChanged = true
-            (0..inList.lastIndex)
-                    .filter { inList[it].rootStory()?.id == replacer.story.id }
+        val itemsCopy = inList.items.toArrayList()
+
+        if (replacer.isRootStory) {
+
+            (0..itemsCopy.lastIndex)
+                    .filter { itemsCopy[it].rootStory.id == replacer.id }
                     .forEach {
-                        inList[it] = StoryWithComments(replacer, inList[it].commentsWithState())
-                    }
 
-        }
-
-        inList.forEach {
-            isChanged = it.replaceComment(replacer) || isChanged
-        }
-        return isChanged
-    }
-
-    fun findAndReplace(newState: StoryWithComments, source: ArrayList<StoryWithComments>): Boolean {
-        if (source.size == 0) return false
-        var isChanged = false
-        (0..source.lastIndex)
-                .filter { i -> source[i].rootStory()?.id == newState.rootStory()?.id }
-                .forEach { i ->
-                    source[i] = newState
-                    isChanged = true
-                }
-        if (!isChanged) {
-            val root = newState.storyWithState()
-            root?.let {
-                root.story.children.clear()
-                root.story.children.addAll(newState.commentsWithState())
-                source.forEach { storyWithComments ->
-                    val firstLevelComments = storyWithComments.commentsWithState()
-
-                    val isChangedSecondLevel = findAndReplaceInternal(it, firstLevelComments)
-                    if (isChangedSecondLevel) {
                         isChanged = true
-                        storyWithComments.rootStory()?.children?.clear()
-                        storyWithComments.rootStory()?.children?.addAll(firstLevelComments)
+                        itemsCopy[it] = StoryWithComments(replacer, itemsCopy[it].comments)
                     }
-                }
+
+
+        } else {
+            itemsCopy.forEach {
+                isChanged = it.replaceComment(replacer)
             }
         }
-        if (isChanged) source.forEach { it.setUpLevels() }
-        return isChanged
+
+        return ReplaceResult(isChanged, if (isChanged) inList.copy(items = itemsCopy) else inList)
     }
 
-    private fun findAndReplaceInternal(newState: StoryWrapper, source: MutableList<StoryWrapper>): Boolean {
-        var isChanged = false
+    fun findAndReplaceStory(newState: StoryWithComments, source: ArrayList<StoryWithComments>): Boolean {
         if (source.size == 0) return false
+        var isChanged = false
+
         (0..source.lastIndex)
-                .filter { i -> source[i].story.id == newState.story.id }
+                .filter { i -> source[i].rootStory.id == newState.rootStory.id }
                 .forEach { i ->
                     source[i] = newState
                     isChanged = true
                 }
         if (!isChanged) {
 
-            source.forEach {
-                val isChildChanged = findAndReplaceInternal(newState, it.story.children)
-                if (isChildChanged) isChanged = true
+            val root = newState.rootStory
+
+            root.children.clear()
+            root.children.addAll(newState.comments)
+            source.forEachIndexed { index, storyWithComments ->
+                val comments = storyWithComments.getFlataned()
+                if (comments.find { it.id == root.id } != null) {
+                    isChanged = true
+                    storyWithComments.replaceComment(root)
+                }
             }
         }
-        return isChanged;
+        return isChanged
     }
 }

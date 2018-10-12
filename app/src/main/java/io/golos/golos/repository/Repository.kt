@@ -1,9 +1,9 @@
 package io.golos.golos.repository
 
-import androidx.lifecycle.LiveData
 import android.content.Context
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
+import androidx.lifecycle.LiveData
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.golos.golos.BuildConfig
 import io.golos.golos.notifications.PushNotificationsRepository
@@ -13,7 +13,6 @@ import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
-import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.*
 import java.util.*
@@ -64,10 +63,10 @@ interface StoriesProvider {
     abstract fun lastCreatedPost(): LiveData<CreatePostResult>
 
     @MainThread
-    abstract fun vote(comment: StoryWrapper, percents: Short)
+    abstract fun vote(comment: GolosDiscussionItem, percents: Short)
 
     @MainThread
-    abstract fun cancelVote(comment: StoryWrapper)
+    abstract fun cancelVote(comment: GolosDiscussionItem)
 
     @MainThread
     abstract fun requestStoryUpdate(story: StoryWithComments,
@@ -88,15 +87,15 @@ interface StoriesProvider {
 
     @MainThread
     abstract fun editPost(title: String, content: List<EditorPart>, tags: List<String>,
-                          originalPost: StoryWrapper,
+                          originalPost: GolosDiscussionItem,
                           resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
-    abstract fun createComment(toItem: StoryWrapper, content: List<EditorPart>,
+    abstract fun createComment(toItem: GolosDiscussionItem, content: List<EditorPart>,
                                resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
-    abstract fun editComment(originalComment: StoryWrapper,
+    abstract fun editComment(originalComment: GolosDiscussionItem,
                              content: List<EditorPart>,
                              resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
@@ -208,6 +207,8 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     abstract val userSettingsRepository: UserSettingsRepository
 
     abstract val notificationsRepository: PushNotificationsRepository
+
+    abstract val votingStates: LiveData<List<GolosDiscussionItemVotingState>>
 
 }
 

@@ -1,14 +1,15 @@
 package io.golos.golos.screens.story
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.content.Context
-import android.content.Intent
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.repository.model.Tag
@@ -50,7 +51,6 @@ class DiscussionViewModel : ViewModel() {
         this.filter = filter
         this.mInternetStatusNotifier = internetStatusNotifier
         mRepository = repository
-        mStoryLiveData.value = StoryViewState()
         mSubscriptionsLiveData.value = StorySubscriptionBlockState(false, SubscribeStatus.UnsubscribedStatus, SubscribeStatus.UnsubscribedStatus)
     }
 
@@ -83,8 +83,8 @@ class DiscussionViewModel : ViewModel() {
         mStoryLiveData.addSource(mRepository.getStories(feedType, filter)) {
 
             it?.items?.find {
-                it.rootStory()?.author == this.author
-                        && it.rootStory()?.permlink == this.permLink
+                it.rootStory.author == this.author
+                        && it.rootStory.permlink == this.permLink
             }?.let {
                 val currentSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
 
@@ -94,25 +94,35 @@ class DiscussionViewModel : ViewModel() {
                         ?.copy(subscribeOnStoryAuthorStatus = SubscribeStatus.create(currentSubscriptions.contains(author),
                                 currentSubscriptionsStates[author] ?: UpdatingState.DONE))
 
-                val story = it.rootStory() ?: return@let
+                val story = it.rootStory
                 val mustHaveComments = story.commentsCount
-                val commentsSize = it.comments().size
+                val commentsSize = it.comments.size
                 var isLoading = false
                 if (mustHaveComments > 0 && commentsSize == 0) isLoading = true
+                val accounts = mRepository.getGolosUserAccountInfos().value.orEmpty()
+                val voteStates = mRepository.votingStates.value.orEmpty()
+                val currentUser = mRepository.appUserData.value
+                val exchangeValues = mRepository.getExchangeLiveData().value
+                        ?: ExchangeValues.nullValues
 
-                mStoryLiveData.value = mStoryLiveData.value?.copy(
+                val rootStoryWrapper = createStoryWrapper(story, voteStates, accounts, currentUser, exchangeValues,
+                        false, null)
+                val comments = it.getFlataned().map {
+                    createStoryWrapper(it, voteStates, accounts, currentUser, exchangeValues,
+                            false, null)
+                }
+
+                mStoryLiveData.value = StoryViewState(
                         isLoading = isLoading,
-                        storyTitle = it.rootStory()?.title.orEmpty(),
-                        tags = it.rootStory()?.tags.orEmpty().toArrayList(),
-                        storyTree = it,
+                        storyTitle = it.rootStory.title,
+                        tags = it.rootStory.tags,
+                        storyTree = StoryWrapperWithComment(rootStoryWrapper, comments),
                         discussionType = if (story.isStory()) DiscussionType.STORY else DiscussionType.COMMENT,
                         canUserCommentThis = mRepository.isUserLoggedIn())
 
-                this.blog = mStoryLiveData.value?.storyTree?.rootStory()?.categoryName
+                this.blog = story.categoryName
             }
         }
-
-
 
         mSubscriptionsLiveData.addSource(mRepository.getUserSubscribedTags()) {
             val tagItem = it?.find { it.name == this.blog }
@@ -137,14 +147,16 @@ class DiscussionViewModel : ViewModel() {
 
 
     fun onMainStoryImageClick(src: String) {
-        val images = mStoryLiveData.value?.storyTree?.rootStory()?.parts
+        val images = mStoryLiveData.value?.storyTree?.rootWrapper?.story?.parts
+                ?.asSequence()
                 ?.filter { it is ImageRow }
                 ?.map { it as ImageRow }
-                ?.map { it.src } ?: listOf()
+                ?.map { it.src }
+                ?.toList()
+                .orEmpty()
         if (images.isEmpty()) images
                 .toArrayList()
-                .addAll(mStoryLiveData.value?.storyTree?.rootStory()?.images
-                        ?: arrayListOf())
+                .addAll(mStoryLiveData.value?.storyTree?.rootWrapper?.story?.images.orEmpty())
         if (images.isEmpty()) return
 
         val position = images.indexOf(src)
@@ -158,18 +170,18 @@ class DiscussionViewModel : ViewModel() {
         }
 
     fun canUserUpVoteOnThis(story: StoryWrapper): Boolean {
-        return story.story.userVotestatus != GolosDiscussionItem.UserVoteType.VOTED
+        return story.voteStatus != GolosDiscussionItem.UserVoteType.VOTED
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
-        if (story.updatingState == UpdatingState.UPDATING) return
-        if (percent == 0.toShort()) mRepository.cancelVote(story)
+        if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
+        if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
-            if (story.story.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
+            if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
                     && percent < 0) {
-                mRepository.vote(story, 0)
+                mRepository.vote(story.story, 0)
             } else {
-                mRepository.vote(story, percent)
+                mRepository.vote(story.story, percent)
             }
 
         }
@@ -183,16 +195,16 @@ class DiscussionViewModel : ViewModel() {
     fun onWriteRootComment(ctx: Context) {
         if (canUserWriteComments()) {
             val story = mStoryLiveData.value?.storyTree ?: return
-            if (story.rootStory()?.isRootStory == true) {
+            if (story.rootWrapper.story.isRootStory) {
                 EditorActivity.startRootCommentEditor(ctx,
-                        story,
+                        story.rootWrapper.story,
                         feedType,
                         filter)
 
             } else {
                 EditorActivity.startAnswerOnCommentEditor(ctx,
-                        rootStory = story,
-                        commentToAnswer = story.rootStory() ?: return,
+                        rootStory = story.rootWrapper.story,
+                        commentToAnswer = story.rootWrapper.story,
                         feedType = feedType,
                         storyFilter = filter)
             }
@@ -204,7 +216,7 @@ class DiscussionViewModel : ViewModel() {
         if (mRepository.isUserLoggedIn()) {
             mStoryLiveData.value?.let {
                 EditorActivity.startAnswerOnCommentEditor(ctx,
-                        it.storyTree,
+                        it.storyTree.rootWrapper.story,
                         item,
                         feedType,
                         filter)
@@ -220,7 +232,7 @@ class DiscussionViewModel : ViewModel() {
 
             mStoryLiveData.value?.let {
                 EditorActivity.startEditPostOrComment(ctx,
-                        it.storyTree,
+                        it.storyTree.rootWrapper.story,
                         item,
                         feedType,
                         filter)
@@ -228,7 +240,7 @@ class DiscussionViewModel : ViewModel() {
         }
     }
 
-    public fun isPostEditable() = mStoryLiveData.value?.storyTree?.storyWithState()?.isStoryEditable == true
+    public fun isPostEditable() = mStoryLiveData.value?.storyTree?.rootWrapper?.isStoryEditable == true
 
     fun onVoteRejected() {
         showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
@@ -239,7 +251,7 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onShareClick(context: Context) {
-        val link = mRepository.getShareStoryLink(mStoryLiveData.value?.storyTree?.rootStory()
+        val link = mRepository.getShareStoryLink(mStoryLiveData.value?.storyTree?.rootWrapper?.story
                 ?: return)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
@@ -271,12 +283,12 @@ class DiscussionViewModel : ViewModel() {
         }
 
         if (mSubscriptionsLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == true)
-            mRepository.unSubscribeFromGolosUserBlog(mStoryLiveData.value?.storyTree?.rootStory()?.author
+            mRepository.unSubscribeFromGolosUserBlog(mStoryLiveData.value?.storyTree?.rootWrapper?.story?.author
                     ?: return) { _, e ->
                 showError(e ?: return@unSubscribeFromGolosUserBlog)
             }
         else if (mSubscriptionsLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == false) {
-            mRepository.subscribeOnGolosUserBlog(mStoryLiveData.value?.storyTree?.rootStory()?.author
+            mRepository.subscribeOnGolosUserBlog(mStoryLiveData.value?.storyTree?.rootWrapper?.story?.author
                     ?: return) { _, e ->
                 showError(e ?: return@subscribeOnGolosUserBlog)
             }
@@ -284,7 +296,7 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onSubscribeToMainTagClick() {
-        val tag = mStoryLiveData.value?.storyTree?.rootStory()?.categoryName ?: return
+        val tag = mStoryLiveData.value?.storyTree?.rootWrapper?.story?.categoryName ?: return
         if (mSubscriptionsLiveData.value?.subscribeOnTagStatus?.isCurrentUserSubscribed == true) {
             mRepository.unSubscribeOnTag(Tag(tag, 0.0, 0L, 0L))
         } else if (mSubscriptionsLiveData.value?.subscribeOnTagStatus?.isCurrentUserSubscribed == false) mRepository.subscribeOnTag(Tag(tag, 0.0, 0L, 0L))
@@ -299,7 +311,7 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onStoryVotesClick(context: Context) {
-        UsersListActivity.startToShowVoters(context, mStoryLiveData.value?.storyTree?.rootStory()?.id
+        UsersListActivity.startToShowVoters(context, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
                 ?: return)
     }
 

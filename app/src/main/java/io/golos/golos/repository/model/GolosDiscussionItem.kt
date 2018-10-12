@@ -3,40 +3,43 @@ package io.golos.golos.repository.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.screens.story.model.Row
-import io.golos.golos.screens.story.model.StoryWrapper
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GolosDiscussionItem internal constructor(val url: String,
-                                                    val id: Long,
-                                                    val title: String,
-                                                    val categoryName: String,
-                                                    val tags: List<String>,
-                                                    val images: MutableList<String>,
-                                                    val links: List<String>,
-                                                    val votesNum: Int,
-                                                    val votesRshares: Long,
-                                                    val commentsCount: Int,
-                                                    val permlink: String,
-                                                    val gbgAmount: Double,
-                                                    val body: String,
-                                                    val bodyLength: Long,
-                                                    val author: String,
-                                                    val format: Format = Format.HTML,
-                                                    var avatarPath: String? = null,
-                                                    val children: MutableList<StoryWrapper> = ArrayList(),
-                                                    val parentPermlink: String,
-                                                    val parentAuthor: String,
-                                                    val childrenCount: Int,
-                                                    var level: Int = 0,
-                                                    val reputation: Long,
-                                                    val lastUpdated: Long,
-                                                    val created: Long,
-                                                    var userVotestatus: UserVoteType,
-                                                    val activeVotes: MutableList<VoteLight>,
-                                                    var type: ItemType = ItemType.PLAIN,
-                                                    val firstRebloggedBy: String,
-                                                    var cleanedFromImages: String,
-                                                    val parts: MutableList<Row> = ArrayList()) : Cloneable {
+data class GolosDiscussionItem constructor(val url: String,
+                                           val id: Long,
+                                           val title: String,
+                                           val categoryName: String,
+                                           val tags: List<String>,
+                                           val images: MutableList<String>,
+                                           val links: List<String>,
+                                           val votesNum: Int,
+                                           val votesRshares: Long,
+                                           val commentsCount: Int,
+                                           val permlink: String,
+                                           val gbgAmount: Double,
+                                           val body: String,
+                                           val bodyLength: Long,
+                                           val author: String,
+                                           val format: Format = Format.HTML,
+                                           val children: MutableList<GolosDiscussionItem> = ArrayList(),
+                                           val parentPermlink: String,
+                                           val parentAuthor: String,
+                                           val childrenCount: Int,
+                                           var level: Int = 0,
+                                           val reputation: Long,
+                                           val lastUpdated: Long,
+                                           val created: Long,
+                                           val activeVotes: MutableList<VoteLight>,
+                                           var type: ItemType = ItemType.PLAIN,
+                                           val rebloggedBy: String,
+                                           var cleanedFromImages: String,
+                                           val parts: MutableList<Row> = ArrayList()) : Cloneable {
+
+    companion object {
+        val emptyItem = GolosDiscussionItem("", 0L, "", "", emptyList(), arrayListOf(), listOf(),
+                0, 0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
+                activeVotes = arrayListOf(), rebloggedBy = "", childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "")
+    }
 
 
     val isRootStory: Boolean
@@ -48,7 +51,7 @@ data class GolosDiscussionItem internal constructor(val url: String,
     }
 
 
-    fun isUserVotedOnThis(userName: String): UserVoteType {
+    public fun isUserVotedOnThis(userName: String): UserVoteType {
         val item = activeVotes.find { it.name == userName }
         return if (item != null && item.percent > 0) UserVoteType.VOTED
         else if (item != null && item.percent < 0) UserVoteType.FLAGED_DOWNVOTED
@@ -71,14 +74,14 @@ data class GolosDiscussionItem internal constructor(val url: String,
         if (body != other.body) return false
         if (author != other.author) return false
         if (format != other.format) return false
-        if (avatarPath != other.avatarPath) return false
+
         if (parentPermlink != other.parentPermlink) return false
         if (childrenCount != other.childrenCount) return false
         if (level != other.level) return false
         if (reputation != other.reputation) return false
         if (lastUpdated != other.lastUpdated) return false
         if (created != other.created) return false
-        if (userVotestatus != other.userVotestatus) return false
+        //  if (userVotestatus != other.userVotestatus) return false
         if (images != other.images) return false
 
         return true
@@ -96,14 +99,14 @@ data class GolosDiscussionItem internal constructor(val url: String,
         result = 31 * result + body.hashCode()
         result = 31 * result + author.hashCode()
         result = 31 * result + format.hashCode()
-        result = 31 * result + (avatarPath?.hashCode() ?: 0)
+
         result = 31 * result + parentPermlink.hashCode()
         result = 31 * result + childrenCount
         result = 31 * result + level
         result = 31 * result + reputation.hashCode()
         result = 31 * result + lastUpdated.hashCode()
         result = 31 * result + created.hashCode()
-        result = 31 * result + userVotestatus.hashCode()
+        //result = 31 * result + userVotestatus.hashCode()
         result = 31 * result + images.hashCode()
         return result
     }

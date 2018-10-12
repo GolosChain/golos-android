@@ -146,7 +146,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     if (state?.comment?.isStoryEditable == true) {
                         items.add(CommentListAdapter.CommentListAdapterItems.EDIT)
                     }
-                    if (state?.comment?.story?.userVotestatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                    if (state?.comment?.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
                         items.add(CommentListAdapter.CommentListAdapterItems.FLAG_RED)
                     } else {
                         items.add(CommentListAdapter.CommentListAdapterItems.FLAG_GRAY)
@@ -168,11 +168,12 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     popup.show()
                 }
 
-                if (comment.avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+                val avatarPath = state!!.comment.authorAccountInfo?.avatarPath
+
+                if (avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                 else {
                     val error = mGlide.load(R.drawable.ic_person_gray_24dp)
-                    mGlide.load(ImageUriResolver.resolveImageWithSize(comment.avatarPath
-                            ?: "", wantedwidth = mAvatar.width))
+                    mGlide.load(ImageUriResolver.resolveImageWithSize(avatarPath, wantedwidth = mAvatar.width))
                             .error(error)
                             .apply(RequestOptions().fitCenter().placeholder(R.drawable.ic_person_gray_24dp))
                             .into(mAvatar)
@@ -191,7 +192,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                 }
                 mUpvoteBtn.text = calculateShownReward(state!!.comment, ctx = itemView.context)
 
-                if (comment.userVotestatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                if (state!!.comment.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
                     mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_circle_green_outline_20dp, 0, 0, 0)
                 } else {
@@ -199,7 +200,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_cricle_gray_outline_20dp, 0, 0, 0)
                 }
 
-                if (field!!.comment.updatingState == UpdatingState.UPDATING) {
+                if (field!!.comment.voteUpdatingState?.state == UpdatingState.UPDATING) {
                     mUpvoteBtn.setViewGone()
                     mUpvoteBtn.isClickable = false
                     mProgress.setViewVisible()

@@ -1,28 +1,27 @@
 package io.golos.golos.screens.stories.viewmodel
 
-import androidx.lifecycle.*
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.*
 import io.golos.golos.App
 import io.golos.golos.R
+import io.golos.golos.repository.KnifeHtmlizer
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.StoriesFeed
-import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.repository.model.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.story.DiscussionActivity
-import io.golos.golos.screens.story.model.StoryWithComments
+import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.userslist.UsersListActivity
-import io.golos.golos.utils.ErrorCode
-import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.isNullOrEmpty
+import io.golos.golos.utils.*
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -69,12 +68,12 @@ object StoriesModelFactory {
     }
 }
 
-data class StoriesViewState(val isLoading: Boolean,
-                            val showRefreshButton: Boolean,
-                            val items: List<StoryWithComments>,
-                            val error: GolosError?,
-                            val fullscreenMessage: Int?,
-                            val popupMessage: Int?)
+data class DiscussionsViewState(val isLoading: Boolean,
+                                val showRefreshButton: Boolean,
+                                val items: List<StoryWrapper>,
+                                val error: GolosError?,
+                                val fullscreenMessage: Int?,
+                                val popupMessage: Int?)
 
 class CommentsViewModel : FeedViewModel() {
     override val type: FeedType
@@ -112,9 +111,9 @@ open class FeedViewModel : DiscussionsViewModel() {
         super.onScrollToTheEnd()
     }
 
-    override fun onNewItems(items: StoriesFeed?): StoriesViewState {
+    override fun onNewItems(items: StoriesFeed): DiscussionsViewState {
         val state = super.onNewItems(items)
-        return state.copy(fullscreenMessage = if (items?.items?.size?.or(0) == 0) R.string.nothing_here else null)
+        return state.copy(fullscreenMessage = if (items.items.size.or(0) == 0) R.string.nothing_here else null)
     }
 }
 
@@ -142,7 +141,7 @@ class PromoViewModel : DiscussionsViewModel() {
 
 abstract class DiscussionsViewModel : ViewModel() {
     protected abstract val type: FeedType
-    private val mStoriesLiveData: MediatorLiveData<StoriesViewState> = MediatorLiveData()
+    private val mDiscussionsLiveData: MediatorLiveData<DiscussionsViewState> = MediatorLiveData()
     private val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
     private val mRepository = Repository.get
     private val isUpdating = AtomicBoolean(false)
@@ -151,11 +150,12 @@ abstract class DiscussionsViewModel : ViewModel() {
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private var mObserver: Observer<Boolean>? = null
     private val updateSize = 20
+    private var lastError: GolosError? = null
 
 
-    val storiesLiveData: LiveData<StoriesViewState>
+    val discussionsLiveData: LiveData<DiscussionsViewState>
         get() {
-            return mStoriesLiveData
+            return mDiscussionsLiveData
         }
     val cellViewSettingLiveData: LiveData<FeedCellSettings>
         get() {
@@ -166,34 +166,86 @@ abstract class DiscussionsViewModel : ViewModel() {
         this.filter = filter
         this.internetStatusNotifier = internetStatusNotifier
 
-        mStoriesLiveData.value = StoriesViewState(false,
-                mRepository.getStories(type, filter).value?.isFeedActual == false,
-                mRepository.getStories(type, filter).value?.items.orEmpty().apply {
-                    this.onEach {
-                        val story = it.rootStory() ?: return@onEach
-                        story.avatarPath = mRepository.usersAvatars.value?.get(story.author)
-                    }
-                },
-                null, null, null)
     }
 
     fun onStart() {
-        mStoriesLiveData.addSource(mRepository.getStories(type, filter)) {
-            if (it?.type == type && it.filter == filter)
-                mStoriesLiveData.value = onNewItems(it)
+        mDiscussionsLiveData.removeSource(mRepository.getStories(type, filter))
+        mDiscussionsLiveData.addSource(mRepository.getStories(type, filter)) {
+            mExecutor.execute {
+                val newState = onNewItems(it ?: return@execute)
+                propogateNewState(newState)
+            }
         }
 
-        mStoriesLiveData.addSource(mRepository.usersAvatars) { usersMap ->
+        mDiscussionsLiveData.addSource(mRepository.getGolosUserAccountInfos()) { usersMap ->
             usersMap ?: return@addSource
 
-            val new = mStoriesLiveData.value?.items?.onEach {
-                it.rootStory()?.avatarPath = usersMap[it.rootStory()?.author.orEmpty()]
-            }.orEmpty()
+            mExecutor.execute {
+                mDiscussionsLiveData.value?.items ?: return@execute
 
-            mStoriesLiveData.value = mStoriesLiveData.value?.copy(items = new)
+                val newStories = mDiscussionsLiveData.value?.items?.map {
+                    val story = it.story
+                    it.copy(authorAccountInfo = if (story.rebloggedBy.isNotEmpty()) usersMap[story.rebloggedBy] else usersMap[story.author])
+                }.orEmpty()
 
+                val newState = mDiscussionsLiveData.value?.copy(items = newStories)
+                propogateNewState(newState)
+            }
+        }
+
+        mDiscussionsLiveData.addSource(mRepository.votingStates) { voteStates ->
+            if (voteStates.isNullOrEmpty()) return@addSource
+            mExecutor.execute {
+                val currentStories = mDiscussionsLiveData.value?.items ?: return@execute
+                val map = voteStates.associateBy { it.storyId }
+                val storyIds = currentStories.asSequence().map { it.story.id }
+                if (!storyIds.any { map.containsKey(it) }) return@execute
+
+                var errorMsg: GolosError? = null
+
+                val newState = mDiscussionsLiveData.value?.copy(items = currentStories.map {
+                    val voteStateForItem = map[it.story.id] ?: return@map it
+                    if (voteStateForItem.error != null) {
+                        errorMsg = voteStateForItem.error
+                    }
+                    it.copy(voteUpdatingState = voteStateForItem)
+                }, popupMessage = if (lastError != errorMsg) errorMsg?.localizedMessage else null)
+                lastError = errorMsg
+                propogateNewState(newState)
+            }
+        }
+
+        mDiscussionsLiveData.addSource(mRepository.appUserData) { applicationUser ->
+            mExecutor.execute {
+                val currentStories = mDiscussionsLiveData.value?.items ?: return@execute
+                val newState = if (applicationUser == null) {
+                    mDiscussionsLiveData.value?.copy(items = currentStories
+                            .map {
+                                it.copy(voteUpdatingState = null,
+                                        voteStatus = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT)
+                            })
+                } else {
+                    mDiscussionsLiveData.value?.copy(items = currentStories
+                            .map {
+                                it.copy(voteStatus = it.story.isUserVotedOnThis(applicationUser.name))
+                            })
+                }
+
+                propogateNewState(newState)
+            }
 
         }
+
+        mDiscussionsLiveData.addSource(mRepository.getExchangeLiveData()) { t: ExchangeValues? ->
+            mExecutor.execute {
+                val currentStories = mDiscussionsLiveData.value?.items ?: return@execute
+                val newState = mDiscussionsLiveData.value?.copy(items = currentStories.map {
+                    it.copy(exchangeValues = t ?: return@execute)
+                })
+                propogateNewState(newState)
+            }
+        }
+
         if (mObserver == null) {
             mObserver = Observer {
                 mFeedSettingsLiveData.value = getFeedModeSettings()
@@ -214,8 +266,11 @@ abstract class DiscussionsViewModel : ViewModel() {
     }
 
     fun onStop() {
-        mStoriesLiveData.removeSource(mRepository.getStories(type, filter))
-        mStoriesLiveData.removeSource(mRepository.usersAvatars)
+        mDiscussionsLiveData.removeSource(mRepository.getStories(type, filter))
+        mDiscussionsLiveData.removeSource(mRepository.getGolosUserAccountInfos())
+        mDiscussionsLiveData.removeSource(mRepository.votingStates)
+        mDiscussionsLiveData.removeSource(mRepository.appUserData)
+        mDiscussionsLiveData.removeSource(mRepository.getExchangeLiveData())
 
         if (mObserver != null) {
             Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
@@ -227,22 +282,35 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
-    protected open fun onNewItems(items: StoriesFeed?): StoriesViewState {
-        val state = StoriesViewState(false,
-                items?.isFeedActual == false,
-                items?.items ?: ArrayList(),
-                items?.error, null, null)
-
-        state.items.mapNotNull {
-            it.rootStory()
-        }.onEach {
-            it.avatarPath = mRepository.usersAvatars.value?.get(it.author)
+    private fun propogateNewState(state: DiscussionsViewState?) {
+        if (state == mDiscussionsLiveData.value) return
+        mHandler.post {
+            mDiscussionsLiveData.value = state
         }
-        val authorsWithNoAvatars = state.items
-                .filter { it.rootStory()?.avatarPath == null }
-                .mapNotNull { it.rootStory()?.author }
-                .filter { !mRepository.usersAvatars.value.orEmpty().containsKey(it) }
-        mRepository.requestUsersAccountInfoUpdate(authorsWithNoAvatars)
+    }
+
+    companion object {
+        private val mExecutor = Executors.newSingleThreadExecutor()
+        private val mHandler = Handler()
+    }
+
+    protected open fun onNewItems(items: StoriesFeed): DiscussionsViewState {
+        val usersMap = mRepository.getGolosUserAccountInfos().value.orEmpty()
+        val currentUser = mRepository.appUserData.value ?: ApplicationUser("", false)
+        val voteStatuses = mRepository.votingStates.value.orEmpty()
+        val exchangeValues = mRepository.getExchangeLiveData().value ?: ExchangeValues.nullValues
+
+        val state = DiscussionsViewState(false,
+                !items.isFeedActual,
+                items.items.map {
+                    createStoryWrapper(it.rootStory, voteStatuses, usersMap, currentUser, exchangeValues, true, KnifeHtmlizer)
+                },
+                items.error, null, null)
+
+        mRepository.requestUsersAccountInfoUpdate(items.items.asSequence()
+                .map { it.rootStory.author }
+                .plus(items.items.asSequence().filter { it.rootStory.rebloggedBy.isNotEmpty() }.map { it.rootStory.rebloggedBy })
+                .filter { storyAuthor -> !usersMap.containsKey(storyAuthor) }.toList())
         return state
     }
 
@@ -252,14 +320,24 @@ abstract class DiscussionsViewModel : ViewModel() {
             setAppOffline()
             return
         }
-        if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true, error = null, showRefreshButton = false)
+        if (mDiscussionsLiveData.value?.isLoading == false) {
+            mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(isLoading = true, error = null, showRefreshButton = false)
 
             mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ ->
 
             }
             isUpdating.set(true)
         }
+    }
+
+    private fun createHashFromList(list: List<StoryWrapper>) = list.foldRight(0) { wrapper, accumulator -> accumulator + wrapper.hashCode() }
+
+
+    private fun compareStates(new: DiscussionsViewState?, old: DiscussionsViewState?): Boolean {
+        if (new != null && old == null) return false
+        if (new == null && old != null) return false
+        if (new.isNull() && old.isNull()) return true
+        return new === old
     }
 
 
@@ -270,17 +348,23 @@ abstract class DiscussionsViewModel : ViewModel() {
                 setAppOffline()
                 return
             }
-            if (mStoriesLiveData.value?.items.isNullOrEmpty()) {
-                if (isUpdating.get()) return
-                mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true, error = null, showRefreshButton = false)
-                mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
-                isUpdating.set(true)
+            mHandler.post {
+                mExecutor.execute {
+                    if (mDiscussionsLiveData.value?.items.isNullOrEmpty()) {
+                        if (isUpdating.get()) return@execute
+                        mHandler.post {
+                            mDiscussionsLiveData.value = DiscussionsViewState(true, false, emptyList(), null, null, null)
+                            mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
+                            isUpdating.set(true)
+                        }
+                    }
+                }
             }
         }
     }
 
     private fun setAppOffline() {
-        mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = false, error = GolosError(ErrorCode.ERROR_NO_CONNECTION,
+        mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(isLoading = false, error = GolosError(ErrorCode.ERROR_NO_CONNECTION,
                 null,
                 R.string.no_internet_connection))
     }
@@ -300,40 +384,42 @@ abstract class DiscussionsViewModel : ViewModel() {
             setAppOffline()
             return
         }
-        if (mStoriesLiveData.value?.items?.size ?: 0 < 1) return
+        if (mDiscussionsLiveData.value?.items?.size ?: 0 < 1) return
 
         isUpdating.set(true)
-        if (mStoriesLiveData.value?.isLoading == false) {
-            mStoriesLiveData.value = mStoriesLiveData.value?.copy(isLoading = true)
+        if (mDiscussionsLiveData.value?.isLoading == false) {
+            mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(isLoading = true)
         }
+        val lastStory = mDiscussionsLiveData.value?.items?.last()?.story ?: return
 
         mRepository.requestStoriesListUpdate(updateSize,
                 type,
                 filter,
-                mStoriesLiveData.value?.items?.last()?.rootStory()?.author, mStoriesLiveData.value?.items?.last()?.rootStory()?.permlink) { _, _ -> }
+                lastStory.author, lastStory.permlink) { _, _ -> }
     }
 
-    open fun onCardClick(it: StoryWithComments, context: Context?) {
+    open fun onCardClick(it: StoryWrapper, context: Context?) {
         if (context == null) return
 
-        DiscussionActivity.start(context, it.rootStory()?.author ?: return,
-                it.rootStory()?.categoryName ?: return,
-                it.rootStory()?.permlink ?: return,
-                type, filter)
+        DiscussionActivity.start(context, it.story.author,
+                it.story.categoryName,
+                it.story.permlink,
+                type,
+                filter)
     }
 
-    open fun onCommentsClick(it: StoryWithComments, context: Context?) {
+    open fun onCommentsClick(it: StoryWrapper, context: Context?) {
         if (context == null) return
-        DiscussionActivity.start(context, it.rootStory()?.author ?: return,
-                it.rootStory()?.categoryName ?: return,
-                it.rootStory()?.permlink ?: return,
+        DiscussionActivity.start(context, it.story.author,
+                it.story.categoryName,
+                it.story.permlink,
                 type,
                 filter,
                 true)
     }
 
-    open fun onShareClick(it: StoryWithComments, context: Context?) {
-        val link = mRepository.getShareStoryLink(it.rootStory() ?: return)
+    open fun onShareClick(it: StoryWrapper, context: Context?) {
+        val link = mRepository.getShareStoryLink(it.story)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
@@ -341,7 +427,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         context?.startActivity(sendIntent)
     }
 
-    open fun vote(it: StoryWithComments, vote: Short) {
+    open fun vote(it: StoryWrapper, vote: Short) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -350,24 +436,22 @@ abstract class DiscussionsViewModel : ViewModel() {
             return
         }
         if (mRepository.isUserLoggedIn()) {
-            val story = it.storyWithState() ?: return
-            mRepository.vote(story, vote)
+            mRepository.vote(it.story, vote)
         } else {
-            mStoriesLiveData.value =
-                    mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+            mDiscussionsLiveData.value =
+                    mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
     }
 
-    open fun cancelVote(it: StoryWithComments) {
+    open fun cancelVote(it: StoryWrapper) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
         }
         if (mRepository.isUserLoggedIn()) {
-            val story = it.storyWithState() ?: return
-            mRepository.cancelVote(story)
+            mRepository.cancelVote(it.story)
         } else {
-            mStoriesLiveData.value = mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+            mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
     }
 
@@ -375,11 +459,11 @@ abstract class DiscussionsViewModel : ViewModel() {
         return mRepository.isUserLoggedIn()
     }
 
-    fun onVoteRejected(it: StoryWithComments) {
-        mStoriesLiveData.value = mStoriesLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+    fun onVoteRejected(it: StoryWrapper) {
+        mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
     }
 
-    fun onBlogClick(story: StoryWithComments, context: Context?) {
+    fun onBlogClick(story: StoryWrapper, context: Context?) {
 
         context?.let {
             var feedType: FeedType = type
@@ -388,15 +472,15 @@ abstract class DiscussionsViewModel : ViewModel() {
                     || feedType == FeedType.PERSONAL_FEED
                     || feedType == FeedType.UNCLASSIFIED
                     || feedType == FeedType.PROMO) feedType = FeedType.NEW
-            FilteredStoriesActivity.start(it, tagName = story.rootStory()?.categoryName ?: return)
+            FilteredStoriesActivity.start(it, tagName = story.story.categoryName)
         }
     }
 
-    fun onUserClick(it: StoryWithComments, context: Context?) {
-        UserProfileActivity.start(context ?: return, it.rootStory()?.author ?: return)
+    fun onUserClick(it: StoryWrapper, context: Context?) {
+        UserProfileActivity.start(context ?: return, it.story.author)
     }
 
-    fun onVotersClick(it: StoryWithComments, context: Context?) {
-        UsersListActivity.startToShowVoters(context ?: return, it.rootStory()?.id ?: return)
+    fun onVotersClick(it: StoryWrapper, context: Context?) {
+        UsersListActivity.startToShowVoters(context ?: return, it.story.id)
     }
 }

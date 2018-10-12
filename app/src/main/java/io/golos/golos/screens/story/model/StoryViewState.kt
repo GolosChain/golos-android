@@ -1,6 +1,5 @@
 package io.golos.golos.screens.story.model
 
-import eu.bittrade.libs.golosj.base.models.DiscussionWithComments
 import io.golos.golos.utils.GolosError
 
 /**
@@ -15,8 +14,8 @@ data class StoryViewState(val isLoading: Boolean = false,
                           val canUserCommentThis: Boolean = false,
                           val errorCode: GolosError? = null,
                           val discussionType: DiscussionType = DiscussionType.STORY,
-                          val tags: MutableList<String> = arrayListOf(),
-                          val storyTree: StoryWithComments = StoryWithComments(discussionWithComments = DiscussionWithComments()))
+                          val tags: List<String> = arrayListOf(),
+                          val storyTree: StoryWrapperWithComment)
 
 data class StorySubscriptionBlockState(val canUserMakeBlogSubscriptionActions: Boolean,
                                        val subscribeOnStoryAuthorStatus: SubscribeStatus,

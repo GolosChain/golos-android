@@ -16,7 +16,7 @@ object GolosLinkMatcher {
             allGolosUrls().forEach {
                 link = link.removePrefix(it).replace("app/", "")
             }
-            if (link.matches(Regexps.storyLink)) {//it is link a story
+            if (link.matches(Regexps.storyLink)) {//it is link a rootWrapper
                 val parts = link.split("/")
                 if (parts.size == 3) {
                     return StoryLinkMatch(parts[1].substring(1), parts[0], parts[2])

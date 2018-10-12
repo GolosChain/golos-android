@@ -1,31 +1,30 @@
 package io.golos.golos.screens.story.model
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
 import eu.bittrade.libs.golosj.base.models.Discussion
 import eu.bittrade.libs.golosj.base.models.DiscussionWithComments
-import eu.bittrade.libs.golosj.base.models.ExtendedAccount
 import io.golos.golos.repository.model.DiscussionItemFactory
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.GolosDiscussionItemVotingState
+import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.UpdatingState
 import io.golos.golos.utils.toArrayList
-import timber.log.Timber
 
 /**
  * Created by yuri on 06.11.17.
  */
 data class StoryWrapper(
-        @JsonProperty("story")
         val story: GolosDiscussionItem,
-        @JsonProperty("updatingState")
-        var updatingState: UpdatingState,
-        @JsonProperty("exchangeValues")
-        var exchangeValues: ExchangeValues = ExchangeValues.nullValues,
-        @JsonProperty("isStoryEditable")
-        var isStoryEditable: Boolean = false,
-        @JsonProperty("asHtmlString")
-        var asHtmlString: CharSequence? = null)
+        val voteUpdatingState: GolosDiscussionItemVotingState? = null,
+        val voteStatus: GolosDiscussionItem.UserVoteType = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
+        val authorAccountInfo: GolosUserAccountInfo? = null,
+        val exchangeValues: ExchangeValues = ExchangeValues.nullValues,
+        val isStoryEditable: Boolean = false,
+        var asHtmlString: CharSequence? = null) {
+    override fun toString(): String {
+        return "StoryWrapper(story=$story, voteUpdatingState=$voteUpdatingState, voteStatus=$voteStatus, authorAccountInfo=$authorAccountInfo, isStoryEditable=$isStoryEditable)"
+    }
+}
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {
@@ -45,49 +44,88 @@ data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
     }
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-class StoryWithComments(rootStory: StoryWrapper?,
-                        comments: List<StoryWrapper>) : Cloneable {
 
-    @JsonProperty("rootStory")
-    private var mRootStoryWrapper: StoryWrapper? = rootStory
-    @JsonProperty("comments")
-    private var mCommentsWithState: ArrayList<StoryWrapper> = ArrayList(comments)
+data class StoryWrapperWithComment(val rootWrapper: StoryWrapper, val comments: List<StoryWrapper>)
 
 
-    fun rootStory(): GolosDiscussionItem? {
-        return mRootStoryWrapper?.story
+object StoryCommentsHierarchyResolver {
+    fun resolve(discussionWithComments: DiscussionWithComments): StoryWithComments {
+        if (discussionWithComments.discussions.isEmpty()) {
+
+            return StoryWithComments(GolosDiscussionItem.emptyItem, arrayListOf())
+
+        } else {
+            var rootStories = discussionWithComments.discussions.find { it.parentAuthor.isEmpty }
+            if (rootStories == null) {
+                rootStories = discussionWithComments.discussions.find {
+                    val currentDiscussion = it
+                    discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
+                }
+            }
+            if (rootStories == null) throw IllegalStateException("root rootWrapper not found")
+            val rootDiscussionItem = convert(rootStories)
+
+            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories.permlink.link }
+
+            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, rootDiscussionItem.permlink)
+
+            discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
+
+            val allComments = discussionWithComments.discussions.asSequence().map { convert(it) }.toList()
+
+            val comments = firstLevelDiscussion.map { convert(it) }
+
+            comments
+                    .forEach {
+                        it.children.clear()
+                        it.children.addAll(createCommentsTree(ArrayList(allComments), it, 1))
+                    }
+
+            return StoryWithComments(rootDiscussionItem, comments.toArrayList())
+        }
     }
 
-
-    fun comments(): List<GolosDiscussionItem> {
-
-        return mCommentsWithState.map { it.story }
+    private fun findAlldiscussionsWithParentPermlink(discussions: List<Discussion>, permlink: String): List<Discussion> {
+        return discussions.filter { it.parentPermlink.link == permlink }
     }
 
-    fun storyWithState(): StoryWrapper? {
-        return mRootStoryWrapper
+    private fun convert(discussion: Discussion): GolosDiscussionItem {
+        return DiscussionItemFactory.create(discussion)
     }
 
-    fun commentsWithState(): ArrayList<StoryWrapper> {
-        return mCommentsWithState
+    private fun createCommentsTree(from: ArrayList<GolosDiscussionItem>, to: GolosDiscussionItem, level: Int): ArrayList<GolosDiscussionItem> {
+        if (to.childrenCount == 0) return ArrayList()
+        if (from.contains(to)) {
+            from.remove(to)
+        }
+        val out = from.filter { it.parentPermlink == to.permlink }
+        out.forEach {
+            it.level = level
+            it.children.clear()
+            it.children.addAll(createCommentsTree(from, it, level + 1))
+        }
+        return ArrayList(out)
     }
+}
+
+
+data class StoryWithComments(val rootStory: GolosDiscussionItem,
+                             val comments: MutableList<GolosDiscussionItem>) {
+
 
     @Synchronized
     fun setUpLevels() {
-        setUpLevels(0, mRootStoryWrapper
-                ?.story
-                ?.children
-                ?.filter { it?.story != null }
-                ?.toArrayList() ?: return)
+        setUpLevels(0, rootStory
+                .children
+                .toArrayList())
     }
 
-    private fun setUpLevels(currentDepth: Int, stories: List<StoryWrapper>) {
-        stories.forEach { it.story.level = currentDepth }
-        stories.map { it.story.children }.forEach { setUpLevels(currentDepth + 1, it) }
+    private fun setUpLevels(currentDepth: Int, stories: List<GolosDiscussionItem>) {
+        stories.forEach { it.level = currentDepth }
+        stories.map { it.children }.forEach { setUpLevels(currentDepth + 1, it) }
     }
 
-    constructor(discussionWithComments: DiscussionWithComments) : this(null, ArrayList()) {
+    /*constructor(discussionWithComments: DiscussionWithComments) : this(null, ArrayList()) {
         if (discussionWithComments.discussions.isEmpty()) {
             mCommentsWithState = ArrayList()
         } else {
@@ -98,13 +136,13 @@ class StoryWithComments(rootStory: StoryWrapper?,
                     discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
                 }
             }
-            if (rootStories == null) throw IllegalStateException("root story not found")
+            if (rootStories == null) throw IllegalStateException("root rootWrapper not found")
             mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
                     .involvedAccounts
                     .find { it.name.name == rootStories.author.name }!!),
                     UpdatingState.DONE)
             discussionWithComments.discussions.removeAll { it.permlink.link == rootStories.permlink.link }
-            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.story.permlink)
+            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.rootWrapper.permlink)
             discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
             val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
 
@@ -112,110 +150,110 @@ class StoryWithComments(rootStory: StoryWrapper?,
 
             comments
                     .forEach {
-                        it.story.children.clear()
-                        it.story.children.addAll(createCommentsTree(ArrayList(allComments), it, 1))
+                        it.rootWrapper.children.clear()
+                        it.rootWrapper.children.addAll(createCommentsTree(ArrayList(allComments), it, 1))
                     }
 
             mCommentsWithState = ArrayList(comments)
         }
+    }*/
+
+    fun replaceComment(replaceWith: GolosDiscussionItem): Boolean {
+        return replaceComment(replaceWith, comments)
     }
 
-    fun replaceComment(replaceWith: StoryWrapper): Boolean {
-        return replaceComment(replaceWith, mCommentsWithState)
-    }
-
-    private fun replaceComment(replaceWith: StoryWrapper, src: MutableList<StoryWrapper>): Boolean {
+    private fun replaceComment(replaceWith: GolosDiscussionItem, src: MutableList<GolosDiscussionItem>): Boolean {
         var changes = false
         (0..src.lastIndex)
                 .forEach {
                     val currentStory = src[it]
 
-                    if (replaceWith.story.id == currentStory.story.id) {
+                    if (replaceWith.id == currentStory.id) {
 
-                        currentStory.story.children.forEach {
-                            if (!replaceWith.story.children.contains(it)) replaceWith.story.children.add(it)
+                        currentStory.children.forEach {
+                            if (!replaceWith.children.contains(it)) replaceWith.children.add(it)
                         }
 
-                        replaceWith.story.level = currentStory.story.level
+                        replaceWith.level = currentStory.level
                         src[it] = replaceWith
 
                         changes = true
-                    }else if (currentStory.story.childrenCount > 0) {
-                        changes = replaceComment(replaceWith, currentStory.story.children) || changes
+                    } else if (currentStory.childrenCount > 0) {
+                        changes = replaceComment(replaceWith, currentStory.children) || changes
                     }
                 }
         return changes
     }
 
-    private fun findAlldiscussionsWithParentPermlink(discussions: List<Discussion>, permlink: String): List<Discussion> {
-        return discussions.filter { it.parentPermlink.link == permlink }
-    }
+//    private fun findAlldiscussionsWithParentPermlink(discussions: List<Discussion>, permlink: String): List<Discussion> {
+//        return discussions.filter { it.parentPermlink.link == permlink }
+//    }
+//
+//    private fun convert(discussion: Discussion, accounts: List<ExtendedAccount>): GolosDiscussionItem {
+//        return DiscussionItemFactory.create(discussion, accounts.filter { it.name.name == discussion.author.name }.first())
+//    }
 
-    private fun convert(discussion: Discussion, accounts: List<ExtendedAccount>): GolosDiscussionItem {
-        return DiscussionItemFactory.create(discussion, accounts.filter { it.name.name == discussion.author.name }.first())
-    }
-
-    fun getFlataned(): List<StoryWrapper> {
+    fun getFlataned(): List<GolosDiscussionItem> {
         setUpLevels()
-        return mCommentsWithState.flatMap { listOf(it) + getChildren(it) }
+        return comments.flatMap { listOf(it) + getChildren(it) }
     }
 
-    private fun getChildren(of: StoryWrapper): List<StoryWrapper> {
-        if (of.story.children.isEmpty()) return ArrayList()
-        val out = of.story.children
+    private fun getChildren(of: GolosDiscussionItem): List<GolosDiscussionItem> {
+        if (of.children.isEmpty()) return ArrayList()
+        val out = of.children
         return out.flatMap { listOf(it) + getChildren(it) }
     }
 
-
-    private fun createCommentsTree(from: ArrayList<StoryWrapper>, to: StoryWrapper, level: Int): ArrayList<StoryWrapper> {
-        if (to.story.childrenCount == 0) return ArrayList()
-        if (from.contains(to)) {
-            from.remove(to)
-        }
-        val out = from.filter { it.story.parentPermlink == to.story.permlink }
-        out.forEach {
-            it.story.level = level
-            it.story.children.clear()
-            it.story.children.addAll(createCommentsTree(from, it, level + 1))
-        }
-        return ArrayList(out)
-    }
-
-    override fun toString(): String {
-        return "StoryTree(story=${rootStory()}\n," +
-                " comments = ${comments()}"
-    }
-
-    override public fun clone(): Any {
-        return super.clone()
-
-    }
-
-    fun deepCopy(): StoryWithComments {
-        val rootWrapper = if (mRootStoryWrapper != null) {
-            StoryWrapper(mRootStoryWrapper!!.story.copy(),
-                    mRootStoryWrapper!!.updatingState,
-                    mRootStoryWrapper!!.exchangeValues,
-                    mRootStoryWrapper!!.isStoryEditable,
-                    mRootStoryWrapper!!.asHtmlString)
-        } else null
-        return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is StoryWithComments) return false
-
-        if (mRootStoryWrapper != other.mRootStoryWrapper) return false
-        if (mCommentsWithState != other.mCommentsWithState) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = mRootStoryWrapper?.hashCode() ?: 0
-        result = 31 * result + mCommentsWithState.hashCode()
-        return result
-    }
+//
+//    private fun createCommentsTree(from: ArrayList<StoryWrapper>, to: StoryWrapper, level: Int): ArrayList<StoryWrapper> {
+//        if (to.rootWrapper.childrenCount == 0) return ArrayList()
+//        if (from.contains(to)) {
+//            from.remove(to)
+//        }
+//        val out = from.filter { it.rootWrapper.parentPermlink == to.rootWrapper.permlink }
+//        out.forEach {
+//            it.rootWrapper.level = level
+//            it.rootWrapper.children.clear()
+//            it.rootWrapper.children.addAll(createCommentsTree(from, it, level + 1))
+//        }
+//        return ArrayList(out)
+//    }
+//
+//    override fun toString(): String {
+//        return "StoryTree(rootWrapper=${rootStory()}\n," +
+//                " comments = ${comments()}"
+//    }
+//
+//    override public fun clone(): Any {
+//        return super.clone()
+//
+//    }
+//
+//    fun deepCopy(): StoryWithComments {
+//        val rootWrapper = if (mRootStoryWrapper != null) {
+//            StoryWrapper(mRootStoryWrapper!!.rootWrapper.copy(),
+//                    mRootStoryWrapper!!.updatingState,
+//                    mRootStoryWrapper!!.exchangeValues,
+//                    mRootStoryWrapper!!.isStoryEditable,
+//                    mRootStoryWrapper!!.asHtmlString)
+//        } else null
+//        return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
+//    }
+//
+//    override fun equals(other: Any?): Boolean {
+//        if (this === other) return true
+//        if (other !is StoryWithComments) return false
+//
+//        if (mRootStoryWrapper != other.mRootStoryWrapper) return false
+//        if (mCommentsWithState != other.mCommentsWithState) return false
+//
+//        return true
+//    }
+//
+//    override fun hashCode(): Int {
+//        var result = mRootStoryWrapper?.hashCode() ?: 0
+//        result = 31 * result + mCommentsWithState.hashCode()
+//        return result
+//    }
 
 }

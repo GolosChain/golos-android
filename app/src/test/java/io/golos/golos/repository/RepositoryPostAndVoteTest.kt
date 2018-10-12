@@ -163,7 +163,7 @@ class RepositoryPostAndVoteTest {
         val text = EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content ${UUID.randomUUID()}"))
         repo.createComment(notCommentedItem.storyWithState()!!, listOf(text), { _, _ -> })
 
-        assertEquals("comments size in first story in feed must increase",
+        assertEquals("comments size in first rootWrapper in feed must increase",
                 commentSizeBefore + 1, blogItems!!.items.first().comments().size)
         assertEquals("there must be 20 + 1 comments in comments feed",
                 sizeOfItems + 1, allComments!!.items.size)
@@ -222,7 +222,7 @@ class RepositoryPostAndVoteTest {
         var text = EditorTextPart("sdg", SpannableStringBuilder.valueOf(commentText))
         repo.createComment(firstLevelComment, listOf(text), { _, _ -> })
 
-        assertEquals("comments size in first story in feed must increase",
+        assertEquals("comments size in first rootWrapper in feed must increase",
                 commentSizeBefore + 1, blogItems!!.items.first().getFlataned().size)
         assertEquals("second level comment must also appear",
                 updatedItem + 1, blogItems!!.items.first().comments().first().children.size)

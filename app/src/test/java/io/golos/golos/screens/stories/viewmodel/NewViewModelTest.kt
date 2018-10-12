@@ -40,8 +40,8 @@ class NewViewModelTest {
                 return true
             }
         }, StoryFilter(listOf("psk", "ru--foto")))
-        var svm: StoriesViewState? = null
-        storyViewModel.storiesLiveData.observeForever {
+        var svm: DiscussionsViewState? = null
+        storyViewModel.discussionsLiveData.observeForever {
             svm = it
         }
         Assert.assertNull(svm)
