@@ -27,9 +27,11 @@ import io.golos.golos.screens.stories.viewmodel.DiscussionsViewModel
 import io.golos.golos.screens.stories.viewmodel.DiscussionsViewState
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.screens.widgets.dialogs.DialogType
 import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<DiscussionsViewState> {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
@@ -75,36 +77,35 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
 
-        mViewModel = StoriesModelFactory.getStoriesViewModel(type, null, parentFragment
-                ?: return, filter)
+        Timber.e("parent f = $parentFragment")
+
+        mViewModel = if (parentFragment != null) StoriesModelFactory.getStoriesViewModel(type, null, parentFragment
+                ?: return, filter) else StoriesModelFactory.getStoriesViewModel(type, activity, null, filter)
+        Timber.e("mViewModel f = $mViewModel")
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
                 onCardClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onCardClick(story, activity)
+                        mViewModel?.onCardClick(story, activity ?: return)
                     }
                 },
                 onCommentsClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onCommentsClick(story, activity)
+                        mViewModel?.onCommentsClick(story, activity ?: return)
                     }
                 },
-                onShareClick = object : StoryWithCommentsClickListener {
-                    override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onShareClick(story, activity)
-                    }
-                },
-                onUpvoteClick = object : StoryWithCommentsClickListener {
+                mOnDownVoteClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
-                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                                Timber.e("status = ${story.voteStatus}")
                                 mViewModel?.cancelVote(story)
                             } else {
-                                val dialog = VoteDialog.getInstance()
+                                val dialog = VoteDialog.getInstance(DialogType.DOWN_VOTE)
                                 dialog.selectPowerListener = object : OnVoteSubmit {
                                     override fun submitVote(vote: Short) {
-                                        mViewModel?.vote(story, vote)
+                                        mViewModel?.vote(story, -vote)
                                     }
                                 }
                                 dialog.show(activity!!.supportFragmentManager, null)
@@ -114,6 +115,31 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                         }
                     }
                 },
+                onUpvoteClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWrapper) {
+                        if (mViewModel?.canVote() == true) {
+                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                                mViewModel?.cancelVote(story)
+                            } else {
+                                val dialog = VoteDialog.getInstance(DialogType.UPVOTE)
+                                dialog.selectPowerListener = object : OnVoteSubmit {
+                                    override fun submitVote(vote: Short) {
+                                        mViewModel?.vote(story, vote.toInt())
+                                    }
+                                }
+                                dialog.show(activity!!.supportFragmentManager, null)
+                            }
+                        } else {
+                            mViewModel?.onVoteRejected(story)
+                        }
+                    }
+                },
+                mOnReblogClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWrapper) {
+                        mViewModel?.reblog(story)
+                    }
+                }
+                ,
                 onTagClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         mViewModel?.onBlogClick(story, activity)
@@ -126,9 +152,13 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 },
                 onVotersClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onVotersClick(story, activity)
+                        mViewModel?.onVotersClick(story, activity ?: return)
                     }
-                },
+                }, mRebloggedStoryAuthorlick = object : StoryWithCommentsClickListener {
+            override fun onClick(story: StoryWrapper) {
+                mViewModel?.onReblogAuthorClick(story, activity ?: return)
+            }
+        },
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
                         ?: FeedCellSettings(true,
                                 true,

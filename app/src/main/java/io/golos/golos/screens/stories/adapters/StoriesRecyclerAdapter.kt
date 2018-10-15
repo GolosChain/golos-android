@@ -26,8 +26,10 @@ data class StripeWrapper(val stripe: StoryWrapper,
 
 class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickListener,
                              private var onCommentsClick: StoryWithCommentsClickListener,
-                             private var onShareClick: StoryWithCommentsClickListener,
                              private var onUpvoteClick: StoryWithCommentsClickListener,
+                             private var mOnDownVoteClick: StoryWithCommentsClickListener,
+                             private var mOnReblogClick: StoryWithCommentsClickListener,
+                             private var mRebloggedStoryAuthorlick: StoryWithCommentsClickListener,
                              private var onTagClick: StoryWithCommentsClickListener,
                              private var onUserClick: StoryWithCommentsClickListener,
                              private var onVotersClick: StoryWithCommentsClickListener,
@@ -100,17 +102,12 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onShareClick = object : HolderClickListener {
-                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
-                        onShareClick.onClick(getStoryForPosition(holder) ?: return)
-                    }
-                },
                 onBlogClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onUserClick = object : HolderClickListener {
+                onAvatar = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }
@@ -118,6 +115,21 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                 onVotersClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onRebloggerClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mRebloggedStoryAuthorlick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onDownVoteClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mOnDownVoteClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onReblogClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mOnReblogClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 })
         else StripeCompactViewHolder(parent,
@@ -136,13 +148,32 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-
                 onBlogClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onUserClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        onUserClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onDownVoteClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mOnDownVoteClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onRebloggerClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mRebloggedStoryAuthorlick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onVotersClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        onVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onAvatarClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }

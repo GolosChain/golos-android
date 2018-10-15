@@ -52,4 +52,5 @@
     <color name="notification_delimeter">#eeeeee</color>
     <color name="vote_dialog_title">#DE000000</color>
     <color name="vote_for_app_dialog_secondary_text">#FF959595</color>
+    <color name="font_4f_b3">#4F4F4F</color>
 </resources>

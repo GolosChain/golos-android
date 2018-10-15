@@ -21,6 +21,7 @@ import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -40,7 +41,8 @@ object StoriesModelFactory {
             if (fragment == null) throw IllegalStateException("activity or fragment must be not null")
             else ViewModelProviders.of(fragment)
         }
-        var viewModel: DiscussionsViewModel
+        Timber.e("provider of ac = $activity fr = $fragment")
+        val viewModel: DiscussionsViewModel
 
 
         viewModel = when (type) {
@@ -265,6 +267,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
+
     fun onStop() {
         mDiscussionsLiveData.removeSource(mRepository.getStories(type, filter))
         mDiscussionsLiveData.removeSource(mRepository.getGolosUserAccountInfos())
@@ -398,9 +401,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                 lastStory.author, lastStory.permlink) { _, _ -> }
     }
 
-    open fun onCardClick(it: StoryWrapper, context: Context?) {
-        if (context == null) return
-
+    open fun onCardClick(it: StoryWrapper, context: Context) {
         DiscussionActivity.start(context, it.story.author,
                 it.story.categoryName,
                 it.story.permlink,
@@ -408,8 +409,8 @@ abstract class DiscussionsViewModel : ViewModel() {
                 filter)
     }
 
-    open fun onCommentsClick(it: StoryWrapper, context: Context?) {
-        if (context == null) return
+    open fun onCommentsClick(it: StoryWrapper, context: Context) {
+
         DiscussionActivity.start(context, it.story.author,
                 it.story.categoryName,
                 it.story.permlink,
@@ -418,16 +419,16 @@ abstract class DiscussionsViewModel : ViewModel() {
                 true)
     }
 
-    open fun onShareClick(it: StoryWrapper, context: Context?) {
+    open fun onShareClick(it: StoryWrapper, context: Context) {
         val link = mRepository.getShareStoryLink(it.story)
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, link)
         sendIntent.type = "text/plain"
-        context?.startActivity(sendIntent)
+        context.startActivity(sendIntent)
     }
 
-    open fun vote(it: StoryWrapper, vote: Short) {
+    open fun vote(it: StoryWrapper, vote: Int) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -435,12 +436,25 @@ abstract class DiscussionsViewModel : ViewModel() {
         if (!mRepository.isUserLoggedIn()) {
             return
         }
+        val voteStatus = it.voteUpdatingState
+        if (voteStatus?.state == UpdatingState.UPDATING) return
         if (mRepository.isUserLoggedIn()) {
-            mRepository.vote(it.story, vote)
+            mRepository.vote(it.story, vote.toShort())
         } else {
             mDiscussionsLiveData.value =
                     mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
         }
+    }
+
+    fun onReblogAuthorClick(story: StoryWrapper, activity: FragmentActivity) {
+
+        val reblogger = story.story.rebloggedBy
+        if (reblogger.isEmpty()) return
+        UserProfileActivity.start(activity, reblogger)
+    }
+
+    open fun reblog(it: StoryWrapper) {
+        Timber.e("on reblog $it")
     }
 
     open fun cancelVote(it: StoryWrapper) {

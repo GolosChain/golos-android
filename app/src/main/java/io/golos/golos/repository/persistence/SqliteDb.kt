@@ -52,6 +52,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
             db?.execSQL("delete from ${UsersTable.databaseName}")
             db?.execSQL("alter table ${UsersTable.databaseName} add column ${UsersTable.showName} text")
+            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.upvotes} integer")
+            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.downvotes} integer")
         }
     }
 
@@ -369,6 +371,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private const val firstRebloggedBy = "rebloggedBy"
         private const val cleanedFromImages = "cleanedFromImages"
         private const val childrenCount = "childrenCount"
+        const val upvotes = "upvotes"
+        const val downvotes = "downvotes"
         const val bodyLength = "bodyLength"
         const val parentAuthor = "parentAuthor"
 
@@ -379,7 +383,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +
                 "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
                 "$created integer, $isUserUpvotedOnThis integer, $type text, $firstRebloggedBy text," +
-                "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text)"
+                "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text, $upvotes integer," +
+                "$downvotes integer)"
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
@@ -416,6 +421,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.cleanedFromImages, it.cleanedFromImages)
                 values.put(this.childrenCount, it.childrenCount)
                 values.put(this.votesNum, it.votesNum)
+                values.put(this.upvotes, it.upvotesNum)
+                values.put(this.downvotes, it.downvotesNum)
                 values.put(this.votesRshares, it.votesRshares)
                 values.put(this.commentsCount, it.commentsCount)
                 values.put(this.parentAuthor, it.parentAuthor)
@@ -467,6 +474,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             images,
                             links,
                             cursor.getInt(votesNum),
+                            cursor.getInt(upvotes),
+                            cursor.getInt(downvotes),
                             cursor.getLong(votesRshares),
                             cursor.getInt(commentsCount),
                             cursor.getString(permlink) ?: "",
@@ -538,6 +547,8 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             images,
                             links,
                             cursor.getInt(votesNum),
+                            cursor.getInt(upvotes),
+                            cursor.getInt(downvotes),
                             cursor.getLong(votesRshares),
                             cursor.getInt(commentsCount),
                             cursor.getString(permlink) ?: "",

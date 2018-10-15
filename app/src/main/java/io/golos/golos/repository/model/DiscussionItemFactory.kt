@@ -38,6 +38,14 @@ object DiscussionItemFactory {
         val cleanedFromImages = ""
         val totalRshares = discussion.voteRshares
 
+        var upvotes: Int = 0
+        var downvotes: Int = 0
+
+        discussion.activeVotes.forEach {
+            if (it.percent > 0) upvotes += 1
+            else if (it.percent < 0) downvotes += 1
+        }
+
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
@@ -50,7 +58,8 @@ object DiscussionItemFactory {
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,
-
+                upvotesNum = upvotes,
+                downvotesNum = downvotes,
                 activeVotes = discussion.activeVotes
                         ?.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) }.orEmpty().toArrayList(),
                 level = discussion.depth.toInt())
@@ -84,6 +93,13 @@ object DiscussionItemFactory {
         val author = discussion.author ?: ""
         val cleanedFromImages = ""
         val totalRshares = discussion.voteRshares
+
+        var upvotes: Int = 0
+        var downvotes: Int = 0
+        discussion.votes.forEach {
+            if (it.percent > 0) upvotes += 1
+            else if (it.percent < 0) downvotes += 1
+        }
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
@@ -94,6 +110,8 @@ object DiscussionItemFactory {
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,
+                upvotesNum = upvotes,
+                downvotesNum = downvotes,
                 activeVotes = discussion.votes,
                 level = discussion.depth.toInt())
 

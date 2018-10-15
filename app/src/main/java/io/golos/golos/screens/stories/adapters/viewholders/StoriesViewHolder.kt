@@ -41,7 +41,9 @@ abstract class StoriesViewHolder(resId: Int,
     protected open fun handlerStateChange(newState: StripeWrapper?,
                                           oldState: StripeWrapper?) {
         val story = newState?.stripe?.story
-        if (newState == null || story == null) return
+        val wrapper = newState?.stripe
+
+        if (newState == null || wrapper == null || story == null) return
 
         if (story.categoryName.startsWith("ru--")) {
             getBlogNameTv().text = Translit.lat2Ru(story.categoryName.substring(4))
@@ -61,34 +63,58 @@ abstract class StoriesViewHolder(resId: Int,
             }
         }
 
+
+        val shownName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()
+        if (shownName.isEmpty()) getShownUserNameTv().setViewGone()
+        else {
+            getShownUserNameTv().setViewVisible()
+            getShownUserNameTv().text = shownName
+        }
+        getUserNickTv().text = story.author
+
         if (story.rebloggedBy.isNotEmpty()) {
             getReblogedByTv().setViewVisible()
             getReblogedByTv().text = story.rebloggedBy
-            getShownUserNameTv().text = newState.stripe.authorAccountInfo?.shownName ?: story.rebloggedBy
-            getUserNickTv().setViewVisible()
-            getUserNickTv().text = story.author
         } else {
             getReblogedByTv().setViewGone()
-            val shownUserName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()
-            getShownUserNameTv().text = if (shownUserName.isNotEmpty()) shownUserName else story.author.capitalize()
-            if (shownUserName.isEmpty()) {
-                getUserNickTv().setViewGone()
-            } else {
-                getUserNickTv().setViewVisible()
-                getUserNickTv().text = story.author
-            }
         }
+
         if (story.title.length > 2) {
             getTitleTv().text = story.title.capitalize()
         } else {
             getTitleTv().text = ""
         }
         val bountyDisplay = newState.feedCellSettings.bountyDisplay
-        getCommentsTv().text = story.commentsCount.toString()
-        getUpvoteText().text = calculateShownReward(newState.stripe,
+        getCommentsTv()?.text = story.commentsCount.toString()
+        getUpvoteText().text = story.upvotesNum.toString()
+        getDownVoteText().text = story.downvotesNum.toString()
+        getMoneyText().text = calculateShownReward(newState.stripe,
                 newState.feedCellSettings.shownCurrency,
                 bountyDisplay,
                 itemView.context)
+        if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+            if (getUpvoteText().tag != "blue") {
+                getUpvoteText().setVectorDrawableStart(R.drawable.ic_liked_20dp)
+                getUpvoteText().tag = "blue"
+            }
+        } else {
+            if (getUpvoteText().tag != "not_blue") {
+                getUpvoteText().setVectorDrawableStart(R.drawable.ic_like_20dp)
+                getUpvoteText().tag = "not_blue"
+            }
+        }
+
+        if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+            if (getUpvoteText().tag != "red") {
+                getDownVoteText().setVectorDrawableStart(R.drawable.ic_dizliked_20dp)
+                getDownVoteText().tag = "red"
+            }
+        } else {
+            if (getDownVoteText().tag != "not_red") {
+                getDownVoteText().setVectorDrawableStart(R.drawable.ic_dizlike_20dp)
+                getDownVoteText().tag = "not_red"
+            }
+        }
     }
 
     open protected fun handleAvatarLoading(newState: StripeWrapper?,
@@ -114,13 +140,15 @@ abstract class StoriesViewHolder(resId: Int,
 
     protected abstract fun getMainImage(): ImageView
     protected abstract fun getTitleTv(): TextView
-    protected abstract fun getCommentsTv(): TextView
+    protected abstract fun getCommentsTv(): TextView?
     protected abstract fun getShownUserNameTv(): TextView
     protected abstract fun getUserNickTv(): TextView
     protected abstract fun getReblogedByTv(): TextView
     protected abstract fun getBlogNameTv(): TextView
     protected abstract fun getDelimeterV(): View
+    protected abstract fun getMoneyText(): TextView
     protected abstract fun getUpvoteText(): TextView
+    protected abstract fun getDownVoteText(): TextView
     protected abstract fun getMainText(): TextView
     protected abstract fun getDateStampText(): TextView
     protected abstract fun getAuthorAvatar(): ImageView
@@ -151,11 +179,11 @@ abstract class StoriesViewHolder(resId: Int,
                     imageView.setViewVisible()
                     imageView.setImageResource(R.drawable.ic_nswf)
 
-                    getMainText()?.setViewGone()
+                    getMainText().setViewGone()
                 } else {
                     imageView.setViewGone()
                     imageView.setImageDrawable(null)
-                    getMainText()?.setViewVisible()
+                    getMainText().setViewVisible()
                 }
                 return
             }
@@ -215,11 +243,11 @@ abstract class StoriesViewHolder(resId: Int,
 
 
     protected open fun setUpTheme() {
-        getCommentsTv().setTextColorCompat(R.color.textColorP)
-        getTitleTv().setTextColorCompat(R.color.stripe_title)
-        getShownUserNameTv().setTextColorCompat(R.color.textColorP)
-        getReblogedByTv().setTextColorCompat(R.color.stripe_subtitle)
-        getBlogNameTv().setTextColorCompat(R.color.stripe_subtitle)
+        getCommentsTv()?.setTextColorCompat(R.color.text_color_white_black)
+        getTitleTv().setTextColorCompat(R.color.text_color_white_black)
+        getShownUserNameTv().setTextColorCompat(R.color.text_color_white_black)
+        getReblogedByTv().setTextColorCompat(R.color.gray_82)
+        getBlogNameTv().setTextColorCompat(R.color.gray_82)
         getDelimeterV().setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))
     }
 

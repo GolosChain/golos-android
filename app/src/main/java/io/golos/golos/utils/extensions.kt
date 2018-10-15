@@ -123,11 +123,6 @@ fun createStoryWrapper(discussionItem: GolosDiscussionItem,
             exchangeValues,
             currentUser != null && discussionItem.author == currentUser.name,
             if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null)
-
-    if (out.story.id == 6512069L) {
-        Timber.e(out.toString())
-
-    }
     return out
 }
 
@@ -573,6 +568,7 @@ public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
             is Int -> b.putInt(it.first, second)
             is Long -> b.putLong(it.first, second)
             is String -> b.putString(it.first, second)
+            is Serializable -> b.putSerializable(it.first, second)
             is ArrayList<*> -> {
                 if (second.isNotEmpty() && second[0] !is String) {
                     throw IllegalArgumentException("only arraylist of strings supported")

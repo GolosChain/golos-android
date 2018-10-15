@@ -495,6 +495,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         }
                     }
                     mVotesState.value = votingStates
+                    requestStoryUpdate(discussionItem, { _, _ -> })
                 }
             }
         }

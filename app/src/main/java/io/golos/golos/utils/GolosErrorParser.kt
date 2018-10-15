@@ -51,9 +51,9 @@ object GolosErrorParser {
             return R.string.cant_vote_after_payout
         if (message.contains("Discussion is frozen"))
             return R.string.error_discussion_is_frozen
-        if (message.contains("Voter has used the maximum number of vote"))
+        if (message.contains("Voter has used the maximum number of vote changes on this comment"))
             return R.string.user_used_max_comments_chances
-        if (message.contains(" You have already voted in a similar way"))
+        if (message.contains("You have already voted in a similar way"))
             return R.string.you_voted_same_way
         if (message.contains("You may only comment once every 20 seconds"))
             return R.string.you_may_comment_only_tw_sec

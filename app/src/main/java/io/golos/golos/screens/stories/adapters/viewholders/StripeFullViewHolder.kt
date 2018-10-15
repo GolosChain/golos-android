@@ -3,7 +3,6 @@ package io.golos.golos.screens.stories.adapters.viewholders
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -15,15 +14,16 @@ import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class StripeFullViewHolder(parent: ViewGroup,
                            private val onUpvoteClick: HolderClickListener,
+                           private val onDownVoteClick: HolderClickListener,
+                           private val onReblogClick: HolderClickListener,
                            private val onCardClick: HolderClickListener,
                            private val onCommentsClick: HolderClickListener,
-                           private val onShareClick: HolderClickListener,
                            private val onBlogClick: HolderClickListener,
-                           private val onUserClick: HolderClickListener,
+                           private val onAvatar: HolderClickListener,
+                           private val onRebloggerClick: HolderClickListener,
                            private val onVotersClick: HolderClickListener
 ) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
@@ -37,36 +37,35 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
-    private val mUpvoteBtn: TextView = itemView.findViewById(R.id.vote_btn)
-    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
-    private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_btn)
-    private val mVotersBtn: TextView = itemView.findViewById(R.id.voters_btn)
+    private val mUpvoteBtn: TextView = itemView.findViewById(R.id.upvote_btn)
+    private val mDownVoteBtn: TextView = itemView.findViewById(R.id.down_vote_btn)
+    private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
+    private val mReblog: View = itemView.findViewById(R.id.reblog_ibtn)
+    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
+    private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_downvote)
+    private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
     private val mNickNameTv: TextView = itemView.findViewById(R.id.user_nick_name_tv)
-    private val mShareBtn: ImageButton = itemView.findViewById(R.id.share_btn)
+
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
-    private val mStubV: View = itemView.findViewById(R.id.stub_v)
 
 
     init {
-
-
-        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
-
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
-
-        mVotersBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
 
         mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
-        mShareBtn.setOnClickListener { onShareClick.onClick(this) }
+        mDownVoteBtn.setOnClickListener { onDownVoteClick.onClick(this) }
+        mReblog.setOnClickListener { onReblogClick.onClick(this) }
+        mMoneyTv.setOnClickListener { onVotersClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
+
         mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
-        mAvatar.setOnClickListener { onUserClick.onClick(this) }
-        mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
+        mAvatar.setOnClickListener { onAvatar.onClick(this) }
+        mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
+        mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
         mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
-        mVotersBtn.setOnClickListener { onVotersClick.onClick(this) }
 
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
@@ -80,29 +79,48 @@ class StripeFullViewHolder(parent: ViewGroup,
 
             val wrapper = newState.stripe
 
-            if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "green") {
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(userVotedvotedDrarawble, null, null, null)
-                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                    mUpvoteBtn.tag = "green"
-                }
+            wrapper.voteUpdatingState?.let { votingState ->
+                if (votingState.state == UpdatingState.DONE) {
+                    mDownVotingProgress.setViewGone()
+                    mVotingProgress.setViewGone()
+                    mUpvoteBtn.setViewVisible()
+                    mDownVoteBtn.setViewVisible()
+                } else {
+                    when {
+                        votingState.votingStrength < 0 -> {//downvoting progress
+                            mDownVotingProgress.setViewVisible()
+                            mDownVoteBtn.setViewInvisible()
 
-            } else {
-                if (mUpvoteBtn.tag == null || mUpvoteBtn.tag != "gray") {
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp), null, null, null)
-                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
-                    mUpvoteBtn.tag = "gray"
+                            mVotingProgress.setViewGone()
+                            mUpvoteBtn.setViewVisible()
+                        }
+                        votingState.votingStrength > 0 -> {//upvoting progress
+                            mVotingProgress.setViewVisible()
+                            mUpvoteBtn.setViewInvisible()
+
+                            mDownVotingProgress.setViewGone()
+                            mDownVoteBtn.setViewVisible()
+                        }
+                        else -> {//vote removing progress
+                            mDownVotingProgress.setViewVisible()
+                            mVotingProgress.setViewVisible()
+                            mUpvoteBtn.setViewInvisible()
+                            mDownVoteBtn.setViewInvisible()
+                        }
+                    }
                 }
             }
-
-            if (newState.stripe.voteUpdatingState?.state == UpdatingState.UPDATING) {
-                mVotingProgress.setViewVisible()
-                mUpvoteBtn.setViewGone()
-            } else {
-                mVotingProgress.setViewGone()
-                mUpvoteBtn.setViewVisible()
+            val reblogger = wrapper.story.rebloggedBy
+            if (reblogger.isEmpty()){
+                mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
+                mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
+                mAvatar.setOnClickListener { onAvatar.onClick(this) }
+            }else {
+                mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
+                mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
+                mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
+                mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
             }
-            mVotersBtn.text = wrapper.story.votesNum.toString()
             if (newState.stripe.story.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
                 mMainImageBig.setViewGone()
                 mMainImageBig.setImageDrawable(null)
@@ -121,13 +139,13 @@ class StripeFullViewHolder(parent: ViewGroup,
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
-            if (state?.stripe?.story?.id == 6512069L)Timber.e(state?.stripe?.toString())
+
         }
     }
 
     override fun setUpTheme() {
         super.setUpTheme()
-        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
+        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_comments_20dp), null, null, null)
         mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
     }
 
@@ -141,6 +159,14 @@ class StripeFullViewHolder(parent: ViewGroup,
 
     override fun getErrorDrawable(): Drawable {
         return errorDrawableS!!
+    }
+
+    override fun getMoneyText(): TextView {
+        return mMoneyTv
+    }
+
+    override fun getDownVoteText(): TextView {
+        return mDownVoteBtn
     }
 
     override fun getMainImage(): ImageView {

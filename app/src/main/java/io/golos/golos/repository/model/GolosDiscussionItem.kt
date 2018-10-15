@@ -13,6 +13,8 @@ data class GolosDiscussionItem constructor(val url: String,
                                            val images: MutableList<String>,
                                            val links: List<String>,
                                            val votesNum: Int,
+                                           val upvotesNum:Int,
+                                           val downvotesNum: Int,
                                            val votesRshares: Long,
                                            val commentsCount: Int,
                                            val permlink: String,
@@ -37,7 +39,7 @@ data class GolosDiscussionItem constructor(val url: String,
 
     companion object {
         val emptyItem = GolosDiscussionItem("", 0L, "", "", emptyList(), arrayListOf(), listOf(),
-                0, 0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
+                0, 0,0,0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
                 activeVotes = arrayListOf(), rebloggedBy = "", childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "")
     }
 
@@ -74,6 +76,8 @@ data class GolosDiscussionItem constructor(val url: String,
         if (body != other.body) return false
         if (author != other.author) return false
         if (format != other.format) return false
+        if (upvotesNum != other.upvotesNum) return false
+        if (downvotesNum != other.downvotesNum) return false
 
         if (parentPermlink != other.parentPermlink) return false
         if (childrenCount != other.childrenCount) return false
@@ -95,6 +99,8 @@ data class GolosDiscussionItem constructor(val url: String,
         result = 31 * result + votesNum
         result = 31 * result + commentsCount
         result = 31 * result + permlink.hashCode()
+        result = 31 * result + upvotesNum.hashCode()
+        result = 31 * result + downvotesNum.hashCode()
         result = 31 * result + gbgAmount.hashCode()
         result = 31 * result + body.hashCode()
         result = 31 * result + author.hashCode()

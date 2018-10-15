@@ -50,7 +50,7 @@
     <string name="user_used_max_comments_chances">Больше нельзя голосовать за это сообщение</string>
     <string name="vote_canceled">Голос отменен</string>
     <string name="upvoted">Проголосовано</string>
-    <string name="you_voted_same_way">Вы уже проголосовали</string>
+    <string name="you_voted_same_way">Вы уже проголосовали c такой силой голоса</string>
     <string name="login_to_vote">Зайдите или зарегестрируйтесь, чтобы проголосовать</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
     <string name="nothing_here">Пока ничего нет, данные будут заполняться сразу после появления нового контента</string>

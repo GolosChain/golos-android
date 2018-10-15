@@ -16,7 +16,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="16dp"/>
+        app:riv_corner_radius="18dp"/>
 
     <TextView
         android:id="@+id/time_tv"
@@ -33,32 +33,15 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/user_name"
         style="@style/TitleUserNameStyle"
+        android:layout_width="0dp"
         android:layout_marginStart="@dimen/margin_material_half"
         android:background="@drawable/img_round_ripple_gray"
-        android:gravity="center_vertical"
-        app:layout_constraintStart_toEndOf="@id/avatar_iv"
-
-        />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/blog_name_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_material_half"
-        android:drawablePadding="2dp"
         android:ellipsize="end"
-        android:gravity="center_vertical"
+        android:gravity="center_vertical|start"
         android:lines="1"
-        android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@id/time_tv"
-        app:layout_constraintStart_toEndOf="@id/user_name"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
         />
-
-    <View
-        android:id="@+id/stub_v"
-        android:layout_width="120dp"
-        android:layout_height="0dp"
-        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/user_nick_name_tv"
@@ -66,22 +49,60 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material_half"
         android:gravity="center_vertical"
+        android:lines="1"
+
         android:textColor="@color/gray_82"
-        android:textSize="12sp"
+        android:textSize="@dimen/font_small"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
-        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"/>
+        app:layout_constraintTop_toBottomOf="@id/user_name"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:drawablePadding="2dp"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:lines="1"
+        android:textColor="@color/gray_82"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/user_name"
+        />
+
+    <ImageView
+        android:id="@+id/bullet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="@dimen/quater"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@id/user_nick_name_tv"
+        app:srcCompat="@drawable/ic_bullet_10dp"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/blog_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="@dimen/margin_material"
         android:drawablePadding="2dp"
-        android:gravity="center"
-        android:textColor="@color/gray_82"
-        android:textSize="12sp"
-        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
-        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"
+        android:ellipsize="end"
+
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:paddingBottom="2dp"
+
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintBottom_toBottomOf="@id/bullet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bullet"
+        app:layout_constraintTop_toBottomOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toTopOf="@id/bullet"
         />
 
 
@@ -97,7 +118,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@+id/blog_name_tv"
 
         app:textAllCaps="false"/>
 
@@ -143,56 +164,96 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="text, image_main, title "/>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/bottom_buttons_lo"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/post_bottom_controls_height"
+
+    <TextView
         android:layout_marginTop="@dimen/margin_material_half"
-        android:animateLayoutChanges="true"
-        android:gravity="start"
-        android:paddingStart="@dimen/margin_material"
+        android:id="@+id/upvote_btn"
+        style="@style/StripeBtn"
+
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barrier">
+        app:layout_constraintTop_toBottomOf="@+id/barrier"/>
 
-        <TextView
-            android:id="@+id/vote_btn"
-            style="@style/VoteButton"
-            android:background="@drawable/img_round_ripple_gray"/>
+    <ProgressBar
+        android:id="@+id/progress_upvote"
+        style="@style/StripeCardProgress"
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|center_vertical"
-            android:visibility="gone"/>
+        app:layout_constraintBottom_toBottomOf="@id/upvote_btn"
+        app:layout_constraintEnd_toEndOf="@id/upvote_btn"
+        app:layout_constraintStart_toStartOf="@id/upvote_btn"
+        app:layout_constraintTop_toTopOf="@id/upvote_btn"/>
 
-        <TextView
-            android:id="@+id/voters_btn"
-            style="@style/StoryBottomControlButton"
-            android:background="@drawable/img_round_ripple_gray"
-            android:paddingBottom="3dp"/>
 
-        <TextView
-            android:id="@+id/comments_btn"
-            style="@style/StoryBottomControlButton"
-            android:layout_marginStart="@dimen/margin_material_half"
-            android:background="@drawable/img_round_ripple_gray"/>
+    <TextView
+        android:id="@+id/money_tv"
+        style="@style/StripeBtn"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/shape_rect_gray_stroke"
+        android:gravity="center"
+        android:paddingStart="@dimen/margin_material_half"
+        android:paddingTop="2dp"
+        android:paddingEnd="@dimen/margin_material_half"
+        android:paddingBottom="2dp"
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/share_btn"
-                style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:background="@drawable/img_round_ripple_gray"
-                app:srcCompat="@drawable/ic_share_gray_20dp"/>
-        </FrameLayout>
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/upvote_btn"
+        app:layout_constraintTop_toTopOf="@id/upvote_btn"
+        />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    <TextView
+        android:id="@+id/down_vote_btn"
+        style="@style/StripeBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/img_round_ripple_gray"
+
+        app:layout_constraintEnd_toStartOf="@+id/comments_tv"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/money_tv"
+        app:layout_constraintTop_toTopOf="@id/upvote_btn"
+        />
+
+    <ProgressBar
+        android:id="@+id/progress_downvote"
+        style="@style/StripeCardProgress"
+        app:layout_constraintBottom_toBottomOf="@id/down_vote_btn"
+        app:layout_constraintEnd_toEndOf="@id/down_vote_btn"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="@id/down_vote_btn"
+        app:layout_constraintTop_toTopOf="@id/down_vote_btn"
+        app:layout_constraintVertical_chainStyle="spread"/>
+
+
+    <TextView
+        android:id="@+id/comments_tv"
+        style="@style/StripeBtn"
+        app:layout_constraintHorizontal_bias="0.7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material"
+        android:background="@drawable/img_round_ripple_gray"
+
+        android:drawablePadding="@dimen/quater"
+
+        app:layout_constraintBottom_toBottomOf="@id/down_vote_btn"
+        app:layout_constraintEnd_toStartOf="@id/reblog_ibtn"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/down_vote_btn"
+        app:layout_constraintTop_toTopOf="@id/down_vote_btn"/>
+
+
+    <ImageButton
+        android:id="@+id/reblog_ibtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:background="@drawable/img_round_ripple_gray"
+        app:layout_constraintBottom_toBottomOf="@id/comments_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_repost"/>
+
 
     <View
         android:id="@+id/delimeter"
@@ -200,5 +261,5 @@
         android:layout_height="2dp"
         android:layout_marginTop="@dimen/margin_material_half"
         android:background="@color/delimeter_color_feed"
-        app:layout_constraintTop_toBottomOf="@+id/bottom_buttons_lo"/>
+        app:layout_constraintTop_toBottomOf="@+id/reblog_ibtn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

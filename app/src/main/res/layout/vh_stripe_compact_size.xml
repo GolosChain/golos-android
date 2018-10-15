@@ -8,151 +8,182 @@
                                                    android:clickable="true"
                                                    android:minHeight="100dp">
 
-    <LinearLayout
-        android:id="@+id/controls_lo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <TextView
+        android:id="@+id/upvote_btn"
+        style="@style/StripeBtn"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_small"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:drawableStart="@drawable/ic_like_20dp"
 
-        <ImageView
-            android:id="@+id/vote_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/img_round_ripple_gray"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:id="@+id/vote_value"
-            style="@style/ControlsTextStyle"
-            android:layout_height="16dp"
-            android:layout_marginTop="2dp"
+    <ProgressBar
+        android:id="@+id/progress_upvote"
+        style="@style/StripeCardProgress"
 
-            android:background="@drawable/img_round_ripple_gray"/>
+        app:layout_constraintBottom_toBottomOf="@id/upvote_btn"
+        app:layout_constraintEnd_toEndOf="@id/upvote_btn"
+        app:layout_constraintStart_toStartOf="@id/upvote_btn"
+        app:layout_constraintTop_toTopOf="@id/upvote_btn"/>
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_gravity="center"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:visibility="gone"/>
 
-        <ImageView
-            android:id="@+id/comments_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/margin_material_half"
-            android:foreground="@drawable/img_round_ripple_gray"
-            />
+    <TextView
+        android:id="@+id/money_tv"
+        style="@style/StripeBtn"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="@dimen/margin_material_small"
+        android:background="@drawable/shape_rect_gray_stroke"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLength="10"
+        android:paddingStart="@dimen/margin_material_half"
+        android:paddingTop="2dp"
+        android:paddingEnd="@dimen/margin_material_half"
+        android:paddingBottom="2dp"
+        app:layout_constraintStart_toStartOf="@id/upvote_btn"
+        app:layout_constraintTop_toBottomOf="@id/upvote_btn"
 
-        <TextView
-            android:id="@+id/comments_count_tv"
-            style="@style/ControlsTextStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/img_round_ripple_gray"
+        />
 
-            />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/down_vote_btn"
+        style="@style/StripeBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="@dimen/margin_material_small"
+        android:background="@drawable/img_round_ripple_gray"
+        android:drawableStart="@drawable/ic_dizlike_20dp"
+
+        app:layout_constraintStart_toStartOf="@id/upvote_btn"
+        app:layout_constraintTop_toBottomOf="@id/money_tv"
+        />
+
+    <ProgressBar
+        android:id="@+id/progress_downvote"
+        style="@style/StripeCardProgress"
+        app:layout_constraintBottom_toBottomOf="@id/down_vote_btn"
+        app:layout_constraintEnd_toEndOf="@id/down_vote_btn"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="@id/down_vote_btn"
+        app:layout_constraintTop_toTopOf="@id/down_vote_btn"
+        app:layout_constraintVertical_chainStyle="spread"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:layout_width="wrap_content"
+        app:constraint_referenced_ids="down_vote_btn, money_tv, upvote_btn "
+        app:barrierDirection="end"
+        android:id="@+id/barr_1"
+        android:layout_height="wrap_content"/>
 
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/avatar_iv"
+
         android:layout_width="@dimen/feed_story_authe_avatar_size"
         android:layout_height="@dimen/feed_story_authe_avatar_size"
         android:layout_marginStart="@dimen/margin_material"
-        android:layout_marginTop="14dp"
         android:background="@drawable/img_round_ripple_gray"
         android:scaleType="centerCrop"
-        app:layout_constraintStart_toEndOf="@id/controls_lo"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_goneMarginStart="14dp"
-        app:riv_corner_radius="16dp"/>
+        app:layout_constraintStart_toEndOf="@id/barr_1"
+        app:layout_constraintTop_toTopOf="@id/upvote_btn"
+        app:layout_goneMarginStart="@dimen/margin_material_half"
+        app:riv_corner_radius="18dp"/>
 
     <TextView
-
         android:id="@+id/time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_marginEnd="@dimen/margin_material"
-        android:text="4 дня назад"
+
         android:textColor="@color/gray_82"
-        android:textSize="11sp"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/avatar_iv"/>
 
 
-    <com.google.android.flexbox.FlexboxLayout
-        android:id="@+id/flex_lo"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/user_name"
+        style="@style/TitleUserNameStyle"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="12dp"
-        app:alignContent="flex_start"
-        app:flexDirection="row"
-        app:flexWrap="wrap"
-        app:layout_constraintBottom_toBottomOf="@id/avatar_iv"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:background="@drawable/img_round_ripple_gray"
+        android:ellipsize="end"
+        android:gravity="center_vertical|start"
+        android:lines="1"
         app:layout_constraintEnd_toStartOf="@id/time_tv"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
-        app:layout_constraintTop_toTopOf="@id/avatar_iv">
+        app:layout_constraintTop_toTopOf="@id/avatar_iv"
+        />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/user_name"
-            style="@style/TitleUserNameStyle"
-            android:layout_marginStart="@dimen/margin_material_half"
-            android:background="@drawable/img_round_ripple_gray"
-            android:text=""
-            />
+    <TextView
+        android:id="@+id/user_nick_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:gravity="center_vertical"
+        android:lines="1"
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/blog_name_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_material_half"
+        android:textColor="@color/gray_82"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@id/user_name"/>
 
-            android:textSize="11sp"
-            />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/reblogged_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:drawablePadding="2dp"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:lines="1"
+        android:textColor="@color/gray_82"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/user_name"
+        />
 
-        <View
-            android:id="@+id/stub_v"
-            android:layout_width="40dp"
-            android:layout_height="0dp"/>
+    <ImageView
+        android:id="@+id/bullet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="@dimen/quater"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+        app:layout_constraintTop_toBottomOf="@id/user_nick_name_tv"
+        app:srcCompat="@drawable/ic_bullet_10dp"/>
 
-        <TextView
-            android:id="@+id/user_nick_name_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_material_half"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/blog_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="@dimen/margin_material"
+        android:drawablePadding="2dp"
+        android:ellipsize="end"
 
-            android:textColor="@color/gray_82"
-            android:textSize="11sp"/>
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:paddingBottom="2dp"
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/reblogged_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_material_half"
-            android:drawablePadding="4dp"
-            android:textColor="@color/gray_82"
-            android:textSize="11sp"
-            />
-
-
-    </com.google.android.flexbox.FlexboxLayout>
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintBottom_toBottomOf="@id/bullet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bullet"
+        app:layout_constraintTop_toBottomOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toTopOf="@id/bullet"
+        />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
         style="@style/StripeTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_half"
         android:layout_marginEnd="@dimen/margin_material"
         android:clickable="false"
@@ -161,18 +192,18 @@
         android:maxLines="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/avatar_iv"
-        app:layout_constraintTop_toBottomOf="@id/flex_lo"
+        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"
         app:textAllCaps="false"/>
 
     <TextView
         android:id="@+id/main_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_material_half"
+        android:layout_marginTop="@dimen/quater"
         android:ellipsize="end"
         android:lines="1"
-        android:textSize="12sp"
         android:textColor="@color/gray_82"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@id/title"
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@id/title"/>
@@ -187,15 +218,15 @@
         android:scaleType="centerCrop"
         android:visibility="gone"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/controls_lo"
+        app:layout_constraintTop_toTopOf="@+id/upvote_btn"
         app:riv_corner_radius="8dp"/>
 
 
     <View
         android:id="@+id/delimeter"
         android:layout_width="wrap_content"
-        android:layout_height="4dp"
+        android:layout_height="2dp"
         android:layout_marginTop="@dimen/margin_material_half"
         android:background="@color/delimeter_color_feed"
-        app:layout_constraintTop_toBottomOf="@+id/main_tv"/>
+        app:layout_constraintTop_toBottomOf="@+id/down_vote_btn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

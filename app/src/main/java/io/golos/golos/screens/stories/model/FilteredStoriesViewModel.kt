@@ -27,21 +27,21 @@ class FilteredStoriesViewModel : ViewModel() {
     fun onCreate(tagName: String) {
         mTagName = tagName
         mUserSubscribedTags.addAll(mRepository.getUserSubscribedTags().value ?: HashSet())
-        mLiveData.addSource(mRepository.getTrendingTags(), {
+        mLiveData.addSource(mRepository.getTrendingTags()) {
             val foundTag = it?.find { it.name == mTagName }
 
             if (foundTag != null) {
-                var filter = ""
-                if (foundTag.name.length < 5) filter = foundTag.name
+                val filter: String = if (foundTag.name.length < 5) foundTag.name
                 else {
                     if (foundTag.name.startsWith("ru--")) {
-                        if (foundTag.name.length < 9) {
-                            filter = foundTag.name
+                        if (foundTag.name.length
+                                < 9) {
+                            foundTag.name
                         } else {
-                            filter = foundTag.name.substring(0, 9)
+                            foundTag.name.substring(0, 9)
                         }
                     } else {
-                        filter = foundTag.name.substring(0, 5)
+                        foundTag.name.substring(0, 5)
                     }
                 }
                 val filtered = it.filter { it.name.startsWith(filter) }.toArrayList()
@@ -52,8 +52,8 @@ class FilteredStoriesViewModel : ViewModel() {
                         filtered.map { LocalizedTag(it) }
                 )
             }
-        })
-        mLiveData.addSource(mRepository.getUserSubscribedTags(), {
+        }
+        mLiveData.addSource(mRepository.getUserSubscribedTags()) {
             mUserSubscribedTags.clear()
             mUserSubscribedTags.addAll(HashSet(it ?: HashSet()))
             val tag = mLiveData.value?.mainTag?.tag ?: Tag(tagName, 0.0, 0L, 0L)
@@ -61,8 +61,8 @@ class FilteredStoriesViewModel : ViewModel() {
                     mLiveData.value?.postsCount,
                     mUserSubscribedTags.contains(tag),
                     mLiveData.value?.similarTags ?: ArrayList())
-        })
-        if (mRepository.getTrendingTags().value?.size ?: 0 == 0) mRepository.requestTrendingTagsUpdate({ _, _ -> })
+        }
+        if (mRepository.getTrendingTags().value?.size ?: 0 == 0) mRepository.requestTrendingTagsUpdate { _, _ -> }
     }
 
     fun getLiveData(): LiveData<FilteredStoriesViewState> = mLiveData

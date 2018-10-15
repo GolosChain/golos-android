@@ -8,53 +8,55 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import io.golos.golos.R
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
-import io.golos.golos.utils.UpdatingState
-import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.setTextColorCompat
-import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.*
 
 class StripeCompactViewHolder(parent: ViewGroup,
                               private val onUpvoteClick: HolderClickListener,
+                              private val onDownVoteClick: HolderClickListener,
+                              private val onRebloggerClick: HolderClickListener,
                               private val onCardClick: HolderClickListener,
                               private val onCommentsClick: HolderClickListener,
                               private val onBlogClick: HolderClickListener,
-                              private val onUserClick: HolderClickListener)
+                              private val onUserClick: HolderClickListener,
+                              private val onAvatarClick: HolderClickListener,
+                              private val onVotersClick: HolderClickListener)
     : StoriesViewHolder(R.layout.vh_stripe_compact_size, parent) {
     private val mUserNameTv: TextView = itemView.findViewById(R.id.user_name)
     private val mRebloggedByTv: TextView = itemView.findViewById(R.id.reblogged_tv)
     private val mBlogNameTv: TextView = itemView.findViewById(R.id.blog_name_tv)
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image)
-    private val mUpvoteValue: TextView = itemView.findViewById(R.id.vote_value)
+    private val mUpvoteBtn: TextView = itemView.findViewById(R.id.upvote_btn)
+    private val mDownVoteBtn: TextView = itemView.findViewById(R.id.down_vote_btn)
+    private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
-    private val mUpvoteIv: ImageView = itemView.findViewById(R.id.vote_iv)
-    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress)
-    private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_count_tv)
+    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
+    private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_downvote)
+
     private val mMainText: TextView = itemView.findViewById(R.id.main_tv)
     private val mUserNick: TextView = itemView.findViewById(R.id.user_nick_name_tv)
-    private val mCommentsIv: ImageView = itemView.findViewById(R.id.comments_iv)
+
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
 
 
     init {
-        if (userVotedvotedDrarawble == null) userVotedvotedDrarawble = itemView.getVectorDrawable(R.drawable.ic_triangle_in_circle_green_outline_20dp)
+
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error_jpeg)!!
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
 
-        mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
-        mCommentsIv.setOnClickListener { onCommentsClick.onClick(this) }
-        mUpvoteValue.setOnClickListener { onUpvoteClick.onClick(this) }
-        mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
+        mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
+        mDownVoteBtn.setOnClickListener { onDownVoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
         mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
-
+        mUserNick.setOnClickListener { onUserClick.onClick(this) }
+        mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
+        mMoneyTv.setOnClickListener { onVotersClick.onClick(this) }
         mMainImageBig.setOnClickListener { onCardClick.onClick(this) }
         itemView.setOnClickListener { onCardClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onUserClick.onClick(this) }
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -64,21 +66,46 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
         if (newState != null && wrapper != null) {
 
-            if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                mUpvoteIv.setImageDrawable(userVotedvotedDrarawble)
-                mUpvoteValue.setTextColorCompat(R.color.upvote_green)
-            } else {
-                mUpvoteIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_triangle_in_cricle_gray_outline_20dp))
-                mUpvoteValue.setTextColorCompat(R.color.textColorP)
+
+            wrapper.voteUpdatingState?.let { votingState ->
+                if (votingState.state == UpdatingState.DONE) {
+                    mDownVotingProgress.setViewGone()
+                    mVotingProgress.setViewGone()
+                    mUpvoteBtn.setViewVisible()
+                    mDownVoteBtn.setViewVisible()
+                } else {
+                    when {
+                        votingState.votingStrength < 0 -> {//downvoting progress
+                            mDownVotingProgress.setViewVisible()
+                            mDownVoteBtn.setViewInvisible()
+
+                            mVotingProgress.setViewGone()
+                            mUpvoteBtn.setViewVisible()
+                        }
+                        votingState.votingStrength > 0 -> {//upvoting progress
+                            mVotingProgress.setViewVisible()
+                            mUpvoteBtn.setViewInvisible()
+
+                            mDownVotingProgress.setViewGone()
+                            mDownVoteBtn.setViewVisible()
+                        }
+                        else -> {//vote removing progress
+                            mDownVotingProgress.setViewVisible()
+                            mVotingProgress.setViewVisible()
+                            mUpvoteBtn.setViewInvisible()
+                            mDownVoteBtn.setViewInvisible()
+                        }
+                    }
+                }
             }
-            if (newState.stripe.voteUpdatingState?.state == UpdatingState.UPDATING) {
-                mVotingProgress.visibility = View.VISIBLE
-                mUpvoteValue.visibility = View.GONE
-                mUpvoteIv.visibility = View.GONE
-            } else {
-                mVotingProgress.visibility = View.GONE
-                mUpvoteValue.visibility = View.VISIBLE
-                mUpvoteIv.visibility = View.VISIBLE
+
+            val reblogger = wrapper.story.rebloggedBy
+            if (reblogger.isEmpty()){
+                mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
+                mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
+            }else {
+                mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
+                mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
             }
         }
     }
@@ -90,8 +117,16 @@ class StripeCompactViewHolder(parent: ViewGroup,
 //        }
     }
 
+    override fun getMoneyText(): TextView {
+        return mMoneyTv
+    }
+
+    override fun getDownVoteText(): TextView {
+        return mDownVoteBtn
+    }
+
     override fun getAuthorAvatar(): ImageView {
-       return mAvatar
+        return mAvatar
     }
 
     override fun getErrorDrawable(): Drawable {
@@ -119,8 +154,8 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
     }
 
-    override fun getCommentsTv(): TextView {
-        return mCommentsButton
+    override fun getCommentsTv(): TextView? {
+        return null
     }
 
     override fun getShownUserNameTv(): TextView {
@@ -140,17 +175,13 @@ class StripeCompactViewHolder(parent: ViewGroup,
     }
 
     override fun getUpvoteText(): TextView {
-        return mUpvoteValue
+        return mUpvoteBtn
     }
 
     override fun showImageIfNotImageFirst(): Boolean {
         return true
     }
 
-    override fun setUpTheme() {
-        super.setUpTheme()
-        mCommentsIv.setImageDrawable(itemView.getVectorDrawable(R.drawable.ic_chat_gray_20dp))
-    }
 
     companion object {
 

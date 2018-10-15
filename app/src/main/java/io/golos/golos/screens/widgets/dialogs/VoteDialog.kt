@@ -3,7 +3,6 @@ package io.golos.golos.screens.widgets.dialogs
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.appcompat.widget.AppCompatSeekBar
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,7 +10,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatSeekBar
 import io.golos.golos.R
+import io.golos.golos.utils.bundleOf
 
 /**
  * Created by yuri on 13.11.17.
@@ -36,18 +37,18 @@ class VoteDialog : GolosDialog() {
 
             false
         }
-        minusBtn.setOnTouchListener({ _, e ->
+        minusBtn.setOnTouchListener { _, e ->
             if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) isAutoDecrements = false
             false
-        })
-        plusBtn.setOnLongClickListener({
+        }
+        plusBtn.setOnLongClickListener {
             this@VoteDialog.isAutoIncrement = true
             false
-        })
-        plusBtn.setOnTouchListener({ _, e ->
+        }
+        plusBtn.setOnTouchListener { _, e ->
             if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) isAutoIncrement = false
             false
-        })
+        }
         mRepeatingPostHandler.post(UpdateRunnable())
         plusBtn.setOnClickListener({ mSeeker.progress += 1 })
         mSeeker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -61,10 +62,10 @@ class VoteDialog : GolosDialog() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
         })
-        voteBtn.setOnClickListener({
+        voteBtn.setOnClickListener {
             selectPowerListener?.submitVote(mSeeker.progress.toShort())
             dismiss()
-        })
+        }
         return v
     }
 
@@ -78,8 +79,10 @@ class VoteDialog : GolosDialog() {
     }
 
     companion object {
-        fun getInstance(): VoteDialog {
-            return VoteDialog()
+        fun getInstance(type: DialogType = DialogType.UPVOTE): VoteDialog {
+            return VoteDialog().apply {
+                arguments = bundleOf("type" to type)
+            }
         }
     }
 
@@ -90,6 +93,10 @@ class VoteDialog : GolosDialog() {
             mRepeatingPostHandler.postDelayed(UpdateRunnable(), 75)
         }
     }
+}
+
+public enum class DialogType {
+    UPVOTE, DOWN_VOTE
 }
 
 interface OnVoteSubmit {
