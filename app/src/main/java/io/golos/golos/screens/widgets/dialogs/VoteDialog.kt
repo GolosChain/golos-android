@@ -1,5 +1,6 @@
 package io.golos.golos.screens.widgets.dialogs
 
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,11 +9,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatSeekBar
 import io.golos.golos.R
 import io.golos.golos.utils.bundleOf
+import io.golos.golos.utils.getColorCompat
+import io.golos.golos.utils.setViewGone
 
 /**
  * Created by yuri on 13.11.17.
@@ -27,11 +31,30 @@ class VoteDialog : GolosDialog() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fr_vote, container, false)
         val percentTv = v.findViewById<TextView>(R.id.percent_tv)
-        val minusBtn = v.findViewById<View>(R.id.minus_btn)
-        val plusBtn = v.findViewById<View>(R.id.plus_btn)
+        if (getDialogType() == DialogType.DOWN_VOTE) percentTv.setTextColor(getColorCompat(R.color.app_red))
+
+        val minusBtn = v.findViewById<ImageView>(R.id.minus_btn)
+        val plusBtn = v.findViewById<ImageView>(R.id.plus_btn)
+        if (getDialogType() == DialogType.DOWN_VOTE) {
+            minusBtn.drawable.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
+            plusBtn.drawable.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
+        }
         mSeeker = v.findViewById(R.id.seeker)
-        val voteBtn = v.findViewById<Button>(R.id.vote_btn)
-        minusBtn.setOnClickListener({ mSeeker.progress -= 1 })
+        if (getDialogType() == DialogType.DOWN_VOTE) {
+            mSeeker.progressDrawable.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
+            mSeeker.thumb.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
+        }
+        val voteBtn = v.findViewById<TextView>(R.id.vote_btn)
+        if (getDialogType() == DialogType.DOWN_VOTE) {
+            voteBtn.setTextColor(getColorCompat(R.color.app_red))
+            voteBtn.setText(R.string.vote_against)
+        }
+        if (getDialogType() == DialogType.UPVOTE){
+            v.findViewById<View>(R.id.p_2).setViewGone()
+            v.findViewById<View>(R.id.p_1).setViewGone()
+        }
+
+        minusBtn.setOnClickListener { mSeeker.progress -= 1 }
         minusBtn.setOnLongClickListener {
             this@VoteDialog.isAutoDecrements = true
 
@@ -50,7 +73,7 @@ class VoteDialog : GolosDialog() {
             false
         }
         mRepeatingPostHandler.post(UpdateRunnable())
-        plusBtn.setOnClickListener({ mSeeker.progress += 1 })
+        plusBtn.setOnClickListener { mSeeker.progress += 1 }
         mSeeker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 percentTv.text = "% $progress"
@@ -68,6 +91,8 @@ class VoteDialog : GolosDialog() {
         }
         return v
     }
+
+    private fun getDialogType(): DialogType = if (arguments?.getSerializable("type") as? DialogType == DialogType.DOWN_VOTE) DialogType.DOWN_VOTE else DialogType.UPVOTE
 
 
     override fun onStart() {

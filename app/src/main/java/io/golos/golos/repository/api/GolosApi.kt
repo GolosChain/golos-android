@@ -49,6 +49,8 @@ abstract class GolosApi : GolosUsersApi {
                           content: String,
                           tags: Array<String>): CreatePostResult
 
+    abstract fun getBlogEntries(ofAuthor: String, fromId: Int?, limit: Short): List<GolosBlogEntry>
+
     abstract fun sendComment(sendFromAccount: String,
                              authorOfItemToReply: String,
                              permlinkOfItemToReply: String,

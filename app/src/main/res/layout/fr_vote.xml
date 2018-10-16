@@ -13,11 +13,12 @@
         android:layout_marginTop="@dimen/margin_material"
         android:gravity="center_horizontal"
         android:text="@string/choose_vote_power"
-        android:textColor="@color/textColorP"
-        android:textSize="@dimen/font_regular"
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_medium"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/percent_tv"
@@ -30,58 +31,92 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_tv" />
+        app:layout_constraintTop_toBottomOf="@id/title_tv"/>
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/minus_btn"
         style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="48dp"
+        android:layout_width="36dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/margin_material_small"
+        android:layout_marginTop="@dimen/margin_material_small"
         android:background="?selectableItemBackgroundBorderless"
         android:textColor="@color/colorAccent"
-        app:layout_constraintStart_toStartOf="parent"
 
-        app:layout_constraintTop_toTopOf="@id/seeker"
-        app:srcCompat="@drawable/ic_minus_24dp_blue" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/percent_tv"
+        app:srcCompat="@drawable/ic_minus_24dp_blue"/>
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/plus_btn"
         style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="36dp"
+        android:layout_height="0dp"
         android:layout_marginEnd="@dimen/margin_material_small"
         android:background="?selectableItemBackgroundBorderless"
         android:textColor="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="@id/minus_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/seeker"
-        app:srcCompat="@drawable/ic_plus_24dp_blue" />
+        app:layout_constraintTop_toTopOf="@id/minus_btn"
+        app:srcCompat="@drawable/ic_plus_24dp_blue"/>
 
     <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/seeker"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/margin_material_small"
         android:max="100"
+        android:minHeight="36dp"
+        android:maxHeight="100dp"
         android:progress="100"
+        android:progressDrawable="@drawable/ic_line_seeker_vote_progress"
+        android:thumb="@drawable/shape_oval_blue_22dp"
         app:layout_constraintBottom_toBottomOf="@id/minus_btn"
         app:layout_constraintEnd_toStartOf="@id/plus_btn"
         app:layout_constraintStart_toEndOf="@id/minus_btn"
+        app:layout_constraintTop_toTopOf="@id/minus_btn"
 
-        app:layout_constraintTop_toBottomOf="@id/percent_tv" />
+        />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <TextView
+        android:id="@+id/p_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:text="@string/downvote_1_p"
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintTop_toBottomOf="@id/seeker"/>
 
+    <TextView
+        android:id="@+id/p_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_material"
+        android:text="@string/downvote_p2"
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_small"
+
+        app:layout_constraintTop_toBottomOf="@id/p_1"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bar_1"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="p_2, seeker"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/vote_btn"
         style="@style/Base.Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_material_half"
-        android:text="Проголосовать"
+        android:text="@string/vote"
         android:textAllCaps="false"
         android:textColor="@color/colorAccent"
         android:textSize="@dimen/font_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seeker" />
+        app:layout_constraintTop_toBottomOf="@+id/bar_1"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

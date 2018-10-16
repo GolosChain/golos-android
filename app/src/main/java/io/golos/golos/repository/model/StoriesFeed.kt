@@ -7,6 +7,5 @@ import io.golos.golos.utils.GolosError
 data class StoriesFeed(val items: List<StoryWithComments>,
                        val type: FeedType,
                        val filter: StoryFilter?,
-                       val error: GolosError? = null,
                        var isFeedActual: Boolean = true)
 

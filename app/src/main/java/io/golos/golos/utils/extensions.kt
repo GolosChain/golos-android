@@ -64,6 +64,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -280,6 +281,30 @@ fun Long.hoursElapsedFromTimeStamp(): Int {
     val hour = 1000 * 60 * 60
     val hoursAgo = dif / hour
     return hoursAgo.toInt()
+}
+
+
+fun createTimeLable(fromTimeStamp: Long, context: Context): String {
+    val mSdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+    return fromTimeStamp.hoursElapsedFromTimeStamp().let { elapsedHoursFromPostCreation ->
+        when {
+            elapsedHoursFromPostCreation == 0 -> context.resources.getString(R.string.less_then_hour_ago)
+            elapsedHoursFromPostCreation < 24 -> "$elapsedHoursFromPostCreation ${context.resources.getQuantityString(R.plurals.hours, elapsedHoursFromPostCreation)} ${context.resources.getString(R.string.ago)}"
+            else -> {
+                val daysAgo = Math.round(elapsedHoursFromPostCreation.toDouble() / 24)
+
+                if (daysAgo <= 7)
+                    "$daysAgo ${context.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${context.resources.getString(R.string.ago)}"
+                else {
+                    val timeStamp = fromTimeStamp + TimeZone.getDefault().getOffset(fromTimeStamp)
+                    Calendar.getInstance(TimeZone.getDefault()).apply { timeInMillis = timeStamp }.let {
+                        mSdf.format(it.time)
+                    }
+                }
+            }
+        }
+    }
 }
 
 val Account.avatarPath: String?

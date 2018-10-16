@@ -11,6 +11,7 @@ import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
+import io.golos.golos.utils.toArrayList
 
 data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
@@ -57,19 +58,20 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
 
         } else {
             try {
-                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return mStripes[oldItemPosition].story.id == newItems[newItemPosition].story.id
-                    }
-
-                    override fun getOldListSize() = mStripes.size
-                    override fun getNewListSize() = newItems.size
-                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                        return mStripes[oldItemPosition] == newItems[newItemPosition]
-                    }
-                })
+                val old = mStripes.toArrayList()
                 mStripes.clear()
                 mStripes.addAll(newItems)
+                val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return old[oldItemPosition].story.id == newItems[newItemPosition].story.id
+                    }
+
+                    override fun getOldListSize() = old.size
+                    override fun getNewListSize() = newItems.size
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return old[oldItemPosition] == newItems[newItemPosition]
+                    }
+                })
                 result.dispatchUpdatesTo(this)
             } catch (e: Exception) {
                 e.printStackTrace()

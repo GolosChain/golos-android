@@ -41,7 +41,7 @@ object StoriesModelFactory {
             if (fragment == null) throw IllegalStateException("activity or fragment must be not null")
             else ViewModelProviders.of(fragment)
         }
-        Timber.e("provider of ac = $activity fr = $fragment")
+
         val viewModel: DiscussionsViewModel
 
 
@@ -74,8 +74,7 @@ data class DiscussionsViewState(val isLoading: Boolean,
                                 val showRefreshButton: Boolean,
                                 val items: List<StoryWrapper>,
                                 val error: GolosError?,
-                                val fullscreenMessage: Int?,
-                                val popupMessage: Int?)
+                                val fullscreenMessage: Int?)
 
 class CommentsViewModel : FeedViewModel() {
     override val type: FeedType
@@ -152,7 +151,6 @@ abstract class DiscussionsViewModel : ViewModel() {
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private var mObserver: Observer<Boolean>? = null
     private val updateSize = 20
-    private var lastError: GolosError? = null
 
 
     val discussionsLiveData: LiveData<DiscussionsViewState>
@@ -211,8 +209,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                         errorMsg = voteStateForItem.error
                     }
                     it.copy(voteUpdatingState = voteStateForItem)
-                }, popupMessage = if (lastError != errorMsg) errorMsg?.localizedMessage else null)
-                lastError = errorMsg
+                }, error = errorMsg.takeIf { it != mDiscussionsLiveData.value?.error })
                 propogateNewState(newState)
             }
         }
@@ -308,7 +305,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                 items.items.map {
                     createStoryWrapper(it.rootStory, voteStatuses, usersMap, currentUser, exchangeValues, true, KnifeHtmlizer)
                 },
-                items.error, null, null)
+                null, null)
 
         mRepository.requestUsersAccountInfoUpdate(items.items.asSequence()
                 .map { it.rootStory.author }
@@ -356,7 +353,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                     if (mDiscussionsLiveData.value?.items.isNullOrEmpty()) {
                         if (isUpdating.get()) return@execute
                         mHandler.post {
-                            mDiscussionsLiveData.value = DiscussionsViewState(true, false, emptyList(), null, null, null)
+                            mDiscussionsLiveData.value = DiscussionsViewState(true, false, emptyList(), null, null)
                             mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
                             isUpdating.set(true)
                         }

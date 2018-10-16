@@ -253,6 +253,10 @@
     <string name="login_to_write_comment">Login to write a comment</string>
     <string name="copy_link">Copy link</string>
     <string name="save_image">Save</string>
+    <string name="downvote_1_p">Голос против может снять вознаграждения и сделать пост менее видимым.Голосование против должно основываться на:</string>
+    <string name="downvote_p2">\u2022 Несогласие на награды \n\u2022 Мошенничество или плагиат \n\u2022 Разжигание ненависти или Интернет троллинг \n\u2022 Преднамеренная неправильная категоризация контента или спам</string>
+    <string name="vote">Vote</string>
+    <string name="vote_against">DownVote</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

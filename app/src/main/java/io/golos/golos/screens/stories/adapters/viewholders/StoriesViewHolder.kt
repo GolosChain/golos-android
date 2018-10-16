@@ -25,6 +25,7 @@ abstract class StoriesViewHolder(resId: Int,
     private val mGlide = Glide.with(parent.context)
     private var oldAvatar: String? = null
 
+
     var state: StripeWrapper? = null
         set(value) {
             setUpTheme()
@@ -52,16 +53,7 @@ abstract class StoriesViewHolder(resId: Int,
         }
 
 
-        getDateStampText().text = story.created.hoursElapsedFromTimeStamp().let { elapsedHoursFromPostCreation ->
-            when {
-                elapsedHoursFromPostCreation == 0 -> itemView.resources.getString(R.string.less_then_hour_ago)
-                elapsedHoursFromPostCreation < 24 -> "$elapsedHoursFromPostCreation ${itemView.resources.getQuantityString(R.plurals.hours, elapsedHoursFromPostCreation)} ${itemView.resources.getString(R.string.ago)}"
-                else -> {
-                    val daysAgo = elapsedHoursFromPostCreation / 24
-                    "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo)} ${itemView.resources.getString(R.string.ago)}"
-                }
-            }
-        }
+        getDateStampText().text = createTimeLable(story.created, itemView.context)
 
 
         val shownName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()

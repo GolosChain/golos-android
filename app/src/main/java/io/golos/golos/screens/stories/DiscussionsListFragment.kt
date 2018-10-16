@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -43,6 +45,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
     private var isVisibleBacking: Boolean? = null
     private var lastSentUpdateRequestTime = System.currentTimeMillis()
     private var parc: Parcelable? = null
+    private var mLastError: GolosError? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fr_stories, container, false)
@@ -77,11 +80,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         val filter = if (filterString == null || filterString == "null") null
         else mapper.readValue(filterString, StoryFilter::class.java)
 
-        Timber.e("parent f = $parentFragment")
-
         mViewModel = if (parentFragment != null) StoriesModelFactory.getStoriesViewModel(type, null, parentFragment
                 ?: return, filter) else StoriesModelFactory.getStoriesViewModel(type, activity, null, filter)
-        Timber.e("mViewModel f = $mViewModel")
 
         mRecycler?.adapter = null
         mAdapter = StoriesRecyclerAdapter(
@@ -99,7 +99,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
                             if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                                Timber.e("status = ${story.voteStatus}")
                                 mViewModel?.cancelVote(story)
                             } else {
                                 val dialog = VoteDialog.getInstance(DialogType.DOWN_VOTE)
@@ -254,6 +253,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         }
 
         if (t?.items != null) {
+            Timber.e("${arguments?.getSerializable(TYPE_TAG)} new items size = ${t?.items?.size}\nparc = $parc \n" +
+                    "(mRecycler?.layoutManager = ${mRecycler?.layoutManager}")
             mRecycler?.post {
                 mAdapter.setStripes(t.items)
                 if (parc != null) {
@@ -270,23 +271,13 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
             mRefreshButton?.setViewGone()
         }
 
-        if (isVisible) {
+        if (isVisibleBacking == true) {
             t?.error?.let {
-                when {
-                    it.localizedMessage != null -> activity
-                            ?.findViewById<View>(android.R.id.content)
-                            ?.showSnackbar(it.localizedMessage)
-                    it.nativeMessage != null -> activity
-                            ?.findViewById<View>(android.R.id.content)
-                            ?.showSnackbar(it.nativeMessage)
-                    else -> {
-                    }
+                if (mLastError?.id != it.id) {
+                    view?.showSnackbar(it.localizedMessage ?: R.string.unknown_error)
                 }
+                mLastError = it
             }
-        }
-
-        t?.popupMessage?.let {
-            view?.showSnackbar(it)
         }
         t?.fullscreenMessage?.let {
             mRecycler?.visibility = View.GONE
@@ -314,6 +305,9 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         val parc = mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager
         parc?.onSaveInstanceState().let {
             outState.putParcelable("StoriesFragmentRC", it)
+            mLastError?.let {
+                outState.putString("error", jacksonObjectMapper().writeValueAsString(it))
+            }
         }
         super.onSaveInstanceState(outState)
     }
@@ -321,10 +315,10 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        parc = savedInstanceState?.getParcelable("StoriesFragmentRC")
-        parc?.let {
-            (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
+        savedInstanceState?.getString("error")?.let {
+            mLastError = jacksonObjectMapper().readValue(it)
         }
+        parc = savedInstanceState?.getParcelable("StoriesFragmentRC")
     }
 
 

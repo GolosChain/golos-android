@@ -74,6 +74,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mAuthLiveData = MutableLiveData<ApplicationUser>()
     private val mLastPostLiveData = MutableLiveData<CreatePostResult>()
     private val mUserSubscribedTags = MutableLiveData<Set<Tag>>()
+    private val mUserBlogEntries = MutableLiveData<List<GolosBlogEntry>>()
 
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
     private val mNotificationsRepository: PushNotificationsRepository
@@ -142,6 +143,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mGolosApi)
         mVotesState.value = arrayListOf()
     }
+
+
+    override val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
+        get() = Transformations.map(mUserBlogEntries) { list ->
+            list.associateBy { entry -> entry.permlink }
+        }
 
     override val usersAvatars: LiveData<Map<String, String?>>
         get() = mUsersRepository.usersAvatars
@@ -293,9 +300,29 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 mUsersRepository.requestGolosUserSubscriptionsUpdate(userData.userName.orEmpty())
 
                 mAuthLiveData.value = ApplicationUser(userName, true)
+                workerExecutor.execute {
+                    requestBlogEntriesUpdate()
+                }
             }
         }
         return response
+    }
+
+    @WorkerThread
+    private fun requestBlogEntriesUpdate() {
+        val currentUserName = mAuthLiveData.value?.name ?: return
+        val entries = arrayListOf<GolosBlogEntry>()
+        val limit = 100
+
+        while (true) {
+            val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, null, limit.toShort()).toArrayList()
+            entries.addAll(entriesFromBC)
+            if (entriesFromBC.size != limit) break
+        }
+        mPersister.saveBlogEntries(entries)
+        mMainThreadExecutor.execute {
+            mUserBlogEntries.value = entries
+        }
     }
 
 
@@ -317,6 +344,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             }
                         }
                     }
+
                 } catch (e: Exception) {
                     logException(e)
                     if (e is IllegalArgumentException
@@ -430,8 +458,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
                     updatingFeed.value = StoriesFeed(updatingFeed.value?.items ?: ArrayList(),
                             updatingFeed.value?.type ?: FeedType.NEW,
-                            filter,
-                            GolosErrorParser.parse(e))
+                            filter)
                     completionHandler.invoke(Unit, GolosErrorParser.parse(e))
                 }
             }
@@ -582,7 +609,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 },
                                 FeedType.UNCLASSIFIED,
                                 liveData.value?.filter,
-                                null,
+
                                 true)
                         completionListener.invoke(Unit, null)
                         mStoryUpdateRequests.remove(request)
@@ -595,7 +622,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     val error = GolosErrorParser.parse(e)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute {
-                        liveData.value = StoriesFeed(arrayListOf(), FeedType.UNCLASSIFIED, null, error)
+                        liveData.value = StoriesFeed(arrayListOf(), FeedType.UNCLASSIFIED, null)
                         completionListener.invoke(Unit, error)
                     }
                 }
@@ -635,8 +662,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         comments.value = StoriesFeed(((arrayListOf(newStory) + (comments.value?.items
                                 ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG,
-                                StoryFilter(userNameFilter = userName),
-                                comments.value?.error)
+                                StoryFilter(userNameFilter = userName))
                         mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }
                 }
@@ -710,8 +736,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items
                                 ?: ArrayList())).toArrayList(),
                                 FeedType.COMMENTS,
-                                StoryFilter(userNameFilter = userName),
-                                comments.value?.error)
+                                StoryFilter(userNameFilter = userName))
 
                         mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }
@@ -917,8 +942,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun prepareForLaunch() {
         workerExecutor.execute {
             try {
+
                 val savedStories = mPersister.getStories()
-                        .filter { it.value.items.size != 0 }
+                        .filter { it.value.items.isNotEmpty() }
                 if (savedStories.isEmpty()) {
                     requestStoriesListUpdate(20,
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
@@ -929,12 +955,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             })
 
                 } else {
-
-//                    savedStories.map { it.value.items }
-//                            .map {
-//                                setUpWrapperOnStoryItems(it, skipVoteStatusTest = true, skipEditableTest = true)
-//                                it
-//                            }
                     mMainThreadExecutor.execute {
                         savedStories
                                 .mapValues {

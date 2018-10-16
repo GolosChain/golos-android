@@ -42,6 +42,11 @@ internal class ApiImpl : GolosApi() {
         return story
     }
 
+    override fun getBlogEntries(ofAuthor: String, fromId: Int?, limit: Short): List<GolosBlogEntry> {
+        return mGolosApi.followApiMethods.getBlogEntries(AccountName(ofAuthor), fromId ?: 0, limit)
+                .mapNotNull { GolosBlogEntry(it.author.name, it.blog.name, it.entryId, it.permlink.link) }
+    }
+
     override fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int?): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink), voteLimit
                 ?: -1)

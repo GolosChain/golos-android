@@ -1,18 +1,21 @@
 package io.golos.golos.repository.services
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.rpcErrorFromCode
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 private class Success(@JsonProperty("status") val status: String)
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 private data class EventsData(@JsonProperty("total") val total: Int,
                               @JsonProperty("fresh") val fresh: Int,
                               @JsonProperty("data") val data: List<Event>)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosEvents(val freshCount: Int, val events: List<GolosEvent>)
 
 enum class EventType {
@@ -38,7 +41,6 @@ enum class EventType {
     }
 }
 
-
 fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
     return try {
         val succes = mapper.convertValue<Success>(result)
@@ -48,6 +50,7 @@ fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
         false
     }
 }
+
 
 fun GolosServicesResponse.getSecret(): String {
     return try {
@@ -69,6 +72,7 @@ fun GolosServicesResponse.isPushSubscribeSuccesMessage(): Boolean {
     }
 }
 
+
 fun GolosServicesResponse.getUnreadCount(): Int {
     return try {
         mapper.convertValue<FreshResult>(result).fresh
@@ -78,7 +82,10 @@ fun GolosServicesResponse.getUnreadCount(): Int {
     }
 }
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class FreshResult(@JsonProperty("fresh") val fresh: Int)
+
 
 fun GolosServicesResponse.getEventData(): GolosEvents {
     return try {

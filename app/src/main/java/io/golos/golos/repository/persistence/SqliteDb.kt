@@ -27,6 +27,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(SubscribersTable.createTableString)
         db?.execSQL(SubscriptionsTable.createTableString)
         db?.execSQL(UsersTable.createTableString)
+        db?.execSQL(BlogEntriesTable.createTableString)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -39,6 +40,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(SubscribersTable.createTableString)
         db?.execSQL(SubscriptionsTable.createTableString)
         db?.execSQL(UsersTable.createTableString)
+        db?.execSQL(BlogEntriesTable.createTableString)
 
         if (oldVersion == 3) {
             db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
@@ -110,8 +112,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                     StoriesFeed(filteredStories
                             .map { StoryWithComments(it, arrayListOf()) }.toArrayList(),
                             it.key.request.feedType,
-                            it.key.request.filter,
-                            null)
+                            it.key.request.filter)
                 }
                 .onEach {
                     it.value.items.forEach {
@@ -156,6 +157,18 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         return SubscriptionsTable.getGolosUsersSubscriptions(writableDatabase)
     }
 
+    fun saveBlogEntries(entries: List<GolosBlogEntry>) {
+        BlogEntriesTable.saveEntries(writableDatabase, entries)
+    }
+
+    fun getBlogEntries(): List<GolosBlogEntry> {
+        return BlogEntriesTable.getEntries(writableDatabase)
+    }
+
+    fun deleteBlogEntries() {
+        BlogEntriesTable.removeAllEntries(writableDatabase)
+    }
+
     private object SubscribersTable {
         const val databaseName = "subscribers_table"
         private const val userName = "user_name"
@@ -192,6 +205,53 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 }
             }
             c.close()
+            return out
+        }
+    }
+
+    private object BlogEntriesTable {
+        const val databaseName = "blog_entries_table"
+        private const val userName = "user_name"
+        private const val blogOwner = "blog_owner"
+        private const val entryid = "entry_id"
+        private const val permlink = "permlink"
+        const val createTableString = "create table if not exists $databaseName ( $entryid integer primary key, $userName text," +
+                "$blogOwner text, $permlink text)"
+
+        fun saveEntries(writableDatabase: SQLiteDatabase, entries: List<GolosBlogEntry>) {
+            writableDatabase.beginTransaction()
+            val cv = ContentValues()
+            entries.forEach {
+                cv.put(userName, it.author)
+                cv.put(blogOwner, it.blogOwner)
+                cv.put(entryid, it.entryId)
+                cv.put(permlink, it.permlink)
+                writableDatabase.insertWithOnConflict(databaseName, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            writableDatabase.setTransactionSuccessful()
+            writableDatabase.endTransaction()
+        }
+
+        fun removeAllEntries(writableDatabase: SQLiteDatabase) {
+            writableDatabase.delete(databaseName, null, null)
+        }
+
+        fun getEntries(writableDatabase: SQLiteDatabase): List<GolosBlogEntry> {
+            val out = arrayListOf<GolosBlogEntry>()
+            val c = writableDatabase.rawQuery("select * from $databaseName ORDER BY $entryid desc", emptyArray())
+            if (c.moveToFirst()) {
+                while (!c.isAfterLast) {
+                    out.add(
+                            GolosBlogEntry(c.getString(userName) ?: "",
+                                    c.getString(blogOwner) ?: "",
+                                    c.getInt(entryid),
+                                    c.getString(permlink) ?: ""))
+                    c.moveToNext()
+                }
+
+            }
+            c.close()
+
             return out
         }
     }

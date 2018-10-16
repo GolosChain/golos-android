@@ -7,10 +7,7 @@ import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import io.fabric.sdk.android.Fabric
 import io.golos.golos.App
 import io.golos.golos.repository.GolosUsersPersister
-import io.golos.golos.repository.model.NotificationsPersister
-import io.golos.golos.repository.model.StoriesFeed
-import io.golos.golos.repository.model.StoryRequest
-import io.golos.golos.repository.model.Tag
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.*
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.toArrayList
@@ -34,7 +31,11 @@ abstract class Persister : NotificationsPersister, GolosUsersPersister {
 
     abstract fun saveTags(tags: List<Tag>)
 
+    abstract fun saveBlogEntries(entries: List<GolosBlogEntry>)
+
     abstract fun getTags(): List<Tag>
+
+    abstract fun getBlogEntries(): List<GolosBlogEntry>
 
     abstract fun saveUserSubscribedTags(tags: List<Tag>)
 
@@ -47,6 +48,7 @@ abstract class Persister : NotificationsPersister, GolosUsersPersister {
     abstract fun getStories(): Map<StoryRequest, StoriesFeed>
 
     abstract fun deleteAllStories()
+    abstract fun deleteBlogEntries()
 
     companion
     object {
@@ -77,6 +79,18 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         return mDatabase.getStories()
     }
 
+    override fun saveBlogEntries(entries: List<GolosBlogEntry>) {
+        mDatabase.saveBlogEntries(entries)
+    }
+
+    override fun getBlogEntries(): List<GolosBlogEntry> {
+        return mDatabase.getBlogEntries()
+    }
+
+    override fun deleteBlogEntries() {
+        mDatabase.deleteBlogEntries()
+    }
+
     override fun deleteAllStories() {
         mDatabase.deleteAllStories()
     }
@@ -105,7 +119,7 @@ private class OnDevicePersister(private val context: Context) : Persister() {
     }
 
     override fun getGolosUsersAccountInfo(): List<GolosUserAccountInfo> {
-       return mDatabase.getGolosUsersAccountInfo()
+        return mDatabase.getGolosUsersAccountInfo()
     }
 
     override fun getGolosUsersSubscribers(): Map<String, List<String>> {
