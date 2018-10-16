@@ -47,7 +47,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               notificationsRepository: PushNotificationsRepositoryImpl? = null,
                               avatarsRepository: GolosUsersRepository? = null,
                               golosServices: GolosServices? = null,
-        // private val mHtmlizer: Htmlizer = KnifeHtmlizer,
                               private val mExchangesRepository: ExchangesRepository = ExchangesRepository(Executors.newSingleThreadExecutor(), MainThreadExecutor()),
                               private val mLogger: ExceptionLogger?) : Repository() {
 
@@ -147,7 +146,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
         get() = Transformations.map(mUserBlogEntries) { list ->
-            list.associateBy { entry -> entry.permlink }
+            list.asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
         }
 
     override val usersAvatars: LiveData<Map<String, String?>>
@@ -216,8 +215,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             mUsersRepository.addAccountInfo(list)
         }
         else mGolosApi.getStoryWithoutComments(author, permlink, voteLimit)
-
-        //setUpWrapperOnStoryItems(Collections.singletonList(rootWrapper))
         return story
     }
 
@@ -313,11 +310,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         val currentUserName = mAuthLiveData.value?.name ?: return
         val entries = arrayListOf<GolosBlogEntry>()
         val limit = 100
+        val entriesFromBd = mPersister.getBlogEntries()
+        val lastSavedId = entriesFromBd.firstOrNull()?.entryId ?: -1
+        var fromId: Int? = null
 
         while (true) {
-            val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, null, limit.toShort()).toArrayList()
+            val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, fromId, limit.toShort()).toArrayList()
             entries.addAll(entriesFromBC)
-            if (entriesFromBC.size != limit) break
+
+            if (entriesFromBC.size != limit || lastSavedId >= entriesFromBC.firstOrNull()?.entryId ?: Int.MAX_VALUE) break
+            fromId = entriesFromBC.lastOrNull()?.entryId ?: -1
         }
         mPersister.saveBlogEntries(entries)
         mMainThreadExecutor.execute {
