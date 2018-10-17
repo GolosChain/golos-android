@@ -47,6 +47,10 @@ internal class ApiImpl : GolosApi() {
                 .mapNotNull { GolosBlogEntry(it.author.name, it.blog.name, it.entryId, it.permlink.link) }
     }
 
+    override fun repostPost(ofAuthor: String, permlink: String) {
+        mGolosApi.simplifiedOperations.reblog(AccountName(ofAuthor), Permlink(permlink))
+    }
+
     override fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int?): StoryWithComments {
         val rawStory = mGolosApi.databaseMethods.getContent(AccountName(author), Permlink(permlink), voteLimit
                 ?: -1)

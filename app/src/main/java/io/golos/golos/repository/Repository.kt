@@ -196,6 +196,9 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     @MainThread
     abstract fun requestInitRetry()
 
+    @MainThread
+    abstract fun repost(discussionItem: GolosDiscussionItem, completionHandler: (Unit, GolosError?) -> Unit)
+
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "${BuildConfig.BASE_URL}${item.categoryName}/@${item.author}/${item.permlink}"
     }
@@ -211,6 +214,8 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     abstract val votingStates: LiveData<List<GolosDiscussionItemVotingState>>
 
     abstract val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
+
+    abstract val repostStates: LiveData<Map<String, RepostingState>>
 
 }
 

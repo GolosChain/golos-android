@@ -183,7 +183,6 @@ class DiscussionViewModel : ViewModel() {
             } else {
                 mRepository.vote(story.story, percent)
             }
-
         }
     }
 
@@ -317,6 +316,12 @@ class DiscussionViewModel : ViewModel() {
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
         UsersListActivity.startToShowVoters(activity, it.story.id)
+    }
+
+    fun onStoryVote(storyId: Long, percent: Short) {
+        val story = if (mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id == storyId) mStoryLiveData.value?.storyTree?.rootWrapper
+        else mStoryLiveData.value?.storyTree?.comments?.find { it.story.id == storyId }
+        story?.let { onStoryVote(it, percent) }
     }
 
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_material"
+        android:text="@string/vote_cancel"
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_medium"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/material_big"
+        android:gravity="start|center_vertical"
+        android:text="@string/vote_change_text"
+        android:textColor="@color/font_gray_black"
+        android:textSize="@dimen/font_regular"/>
+
+    <Button
+        android:id="@+id/change_vote_btn"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_material_half"
+        android:text="@string/change"
+        android:textAllCaps="false"
+        android:textColor="@color/app_red"
+        android:textSize="@dimen/font_medium"/>
+
+    <Button
+        android:id="@+id/cancel_btn"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/margin_material_small"
+        android:text="@string/cancel_cancel_dialog"
+        android:textAllCaps="false"
+        android:textColor="@color/blue_light"
+        android:textSize="@dimen/font_medium"/>
+</LinearLayout>

@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -22,7 +21,14 @@ import io.golos.golos.utils.setViewGone
  * Created by yuri on 13.11.17.
  */
 class VoteDialog : GolosDialog() {
-    var selectPowerListener: OnVoteSubmit? = null
+    public enum class DialogType {
+        UPVOTE, DOWN_VOTE
+    }
+
+    interface OnVoteSubmit {
+        fun submitVote(id: Long, vote: Short, type: DialogType)
+    }
+
     private val mRepeatingPostHandler = Handler(Looper.getMainLooper())
     private var isAutoIncrement: Boolean = false
     private var isAutoDecrements: Boolean = false
@@ -49,12 +55,15 @@ class VoteDialog : GolosDialog() {
             voteBtn.setTextColor(getColorCompat(R.color.app_red))
             voteBtn.setText(R.string.vote_against)
         }
-        if (getDialogType() == DialogType.UPVOTE){
+        if (getDialogType() == DialogType.UPVOTE) {
             v.findViewById<View>(R.id.p_2).setViewGone()
             v.findViewById<View>(R.id.p_1).setViewGone()
         }
 
-        minusBtn.setOnClickListener { mSeeker.progress -= 1 }
+        minusBtn.setOnClickListener {
+            val currentProgress = mSeeker.progress
+            if (currentProgress > 1) mSeeker.progress -= 1
+        }
         minusBtn.setOnLongClickListener {
             this@VoteDialog.isAutoDecrements = true
 
@@ -76,6 +85,10 @@ class VoteDialog : GolosDialog() {
         plusBtn.setOnClickListener { mSeeker.progress += 1 }
         mSeeker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (progress < 1) {
+                    mSeeker.progress = 1
+                    return
+                }
                 percentTv.text = "% $progress"
             }
 
@@ -86,7 +99,12 @@ class VoteDialog : GolosDialog() {
             }
         })
         voteBtn.setOnClickListener {
-            selectPowerListener?.submitVote(mSeeker.progress.toShort())
+            val progress = mSeeker.progress
+            val id = arguments?.getLong("id", Long.MIN_VALUE) ?: return@setOnClickListener
+            val type = (arguments?.getSerializable("type") as? VoteDialog.DialogType)
+                    ?: return@setOnClickListener
+            (parentFragment as? OnVoteSubmit)?.submitVote(id, progress.toShort(), type)
+            (activity as? OnVoteSubmit)?.submitVote(id, progress.toShort(), type)
             dismiss()
         }
         return v
@@ -104,9 +122,9 @@ class VoteDialog : GolosDialog() {
     }
 
     companion object {
-        fun getInstance(type: DialogType = DialogType.UPVOTE): VoteDialog {
+        fun getInstance(id: Long, type: DialogType = DialogType.UPVOTE): VoteDialog {
             return VoteDialog().apply {
-                arguments = bundleOf("type" to type)
+                arguments = bundleOf("type" to type, "id" to id)
             }
         }
     }
@@ -114,16 +132,9 @@ class VoteDialog : GolosDialog() {
     inner class UpdateRunnable : Runnable {
         override fun run() {
             if (isAutoIncrement) mSeeker.progress += 1
-            if (isAutoDecrements) mSeeker.progress -= 1
+            if (isAutoDecrements && mSeeker.progress > 1) mSeeker.progress -= 1
             mRepeatingPostHandler.postDelayed(UpdateRunnable(), 75)
         }
     }
 }
 
-public enum class DialogType {
-    UPVOTE, DOWN_VOTE
-}
-
-interface OnVoteSubmit {
-    fun submitVote(vote: Short)
-}

@@ -253,10 +253,14 @@
     <string name="login_to_write_comment">Login to write a comment</string>
     <string name="copy_link">Copy link</string>
     <string name="save_image">Save</string>
-    <string name="downvote_1_p">Голос против может снять вознаграждения и сделать пост менее видимым.Голосование против должно основываться на:</string>
-    <string name="downvote_p2">\u2022 Несогласие на награды \n\u2022 Мошенничество или плагиат \n\u2022 Разжигание ненависти или Интернет троллинг \n\u2022 Преднамеренная неправильная категоризация контента или спам</string>
+    <string name="downvote_1_p">By voting against you reduce the reward, and make the post less noticeable in the feed. There should be a good reason to vote against, for example:</string>
+    <string name="downvote_p2">\u2022 disagreement with the award;\n\u2022 fraud or plagiarism;\n\u2022 incitement of hatred or Internet trolling;\n\u2022 intentionally false information or spam.\n\u2022 Vote against</string>
     <string name="vote">Vote</string>
     <string name="vote_against">DownVote</string>
+    <string name="change">Change</string>
+    <string name="cancel_cancel_dialog">Cancel</string>
+    <string name="vote_cancel">Vote change</string>
+    <string name="vote_change_text">Removing of a vote will change your decision and curation rewards for the post.</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

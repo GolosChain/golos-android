@@ -62,8 +62,6 @@ abstract class Persister : NotificationsPersister, GolosUsersPersister {
     }
 
     abstract fun deleteUserData()
-
-
 }
 
 private class OnDevicePersister(private val context: Context) : Persister() {
@@ -233,5 +231,6 @@ private class OnDevicePersister(private val context: Context) : Persister() {
         saveKeys(mapOf(Pair(PrivateKeyType.POSTING, null), Pair(PrivateKeyType.ACTIVE, null)))
         saveCurrentUserName(null)
         mPreference.edit().putString("userdata", "").apply()
+        mDatabase.deleteBlogEntries()
     }
 }

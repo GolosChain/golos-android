@@ -258,6 +258,10 @@
     <string name="downvote_p2">\u2022 Несогласие на награды \n\u2022 Мошенничество или плагиат \n\u2022 Разжигание ненависти или Интернет троллинг \n\u2022 Преднамеренная неправильная категоризация контента или спам</string>
     <string name="vote">Проголосовать</string>
     <string name="vote_against">Голосовать против</string>
+    <string name="change">Изменить</string>
+    <string name="cancel_cancel_dialog">Отмена</string>
+    <string name="vote_cancel">Сброс Голоса</string>
+    <string name="vote_change_text">Удаление Голоса изменит ваше решение и кураторские вознаграждения за этот пост.</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

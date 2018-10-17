@@ -67,4 +67,5 @@ abstract class GolosApi : GolosUsersApi {
     // empty startForSubscribersOrSubscriptions from to startForSubscribersOrSubscriptions from beginning, maxCount 1 - 1000
     abstract fun getTrendingTag(startFrom: String, maxCount: Int): List<Tag>
 
+    abstract fun repostPost(ofAuthor: String, permlink: String)
 }

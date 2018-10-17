@@ -29,13 +29,13 @@ import io.golos.golos.screens.stories.viewmodel.DiscussionsViewModel
 import io.golos.golos.screens.stories.viewmodel.DiscussionsViewState
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.widgets.dialogs.DialogType
-import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
+import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
 
-class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, Observer<DiscussionsViewState> {
+class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
+        Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: DiscussionsViewModel? = null
@@ -99,15 +99,9 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
                             if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                                mViewModel?.cancelVote(story)
+                                ChangeVoteDialog.getInstance(story.story.id).show(childFragmentManager, null)
                             } else {
-                                val dialog = VoteDialog.getInstance(DialogType.DOWN_VOTE)
-                                dialog.selectPowerListener = object : OnVoteSubmit {
-                                    override fun submitVote(vote: Short) {
-                                        mViewModel?.vote(story, -vote)
-                                    }
-                                }
-                                dialog.show(activity!!.supportFragmentManager, null)
+                                VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE).show(childFragmentManager, null)
                             }
                         } else {
                             mViewModel?.onVoteRejected(story)
@@ -118,15 +112,9 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
                             if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                                mViewModel?.cancelVote(story)
+                                ChangeVoteDialog.getInstance(story.story.id).show(childFragmentManager, null)
                             } else {
-                                val dialog = VoteDialog.getInstance(DialogType.UPVOTE)
-                                dialog.selectPowerListener = object : OnVoteSubmit {
-                                    override fun submitVote(vote: Short) {
-                                        mViewModel?.vote(story, vote.toInt())
-                                    }
-                                }
-                                dialog.show(activity!!.supportFragmentManager, null)
+                                VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE).show(childFragmentManager, null)
                             }
                         } else {
                             mViewModel?.onVoteRejected(story)
@@ -184,6 +172,10 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         }
     }
 
+    override fun onConfirm(id: Long) {
+        mViewModel?.cancelVote(id)
+    }
+
     private val reselectObserver = object : Observer<Int> {
         override fun onChanged(it: Int?) {
             it ?: return
@@ -192,6 +184,10 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 getRecycler().scrollToPosition(0)
             }
         }
+    }
+
+    override fun submitVote(id: Long, vote: Short, type: VoteDialog.DialogType) {
+        mViewModel?.vote(id,if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort())
     }
 
     override fun onStart() {

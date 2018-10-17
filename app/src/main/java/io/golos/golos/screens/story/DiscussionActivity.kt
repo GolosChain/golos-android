@@ -31,7 +31,6 @@ import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
-import io.golos.golos.screens.widgets.dialogs.OnVoteSubmit
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
@@ -40,7 +39,7 @@ import timber.log.Timber
 /**
  * Created by yuri on 06.11.17.
  */
-class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener {
+class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener, VoteDialog.OnVoteSubmit {
     private lateinit var mViewModel: DiscussionViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mFab: FloatingActionButton
@@ -456,12 +455,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
                 if (mViewModel.canUserUpVoteOnThis(story)) {
-                    val dialog = VoteDialog.getInstance()
-                    dialog.selectPowerListener = object : OnVoteSubmit {
-                        override fun submitVote(vote: Short) {
-                            mViewModel.onStoryVote(story, vote)
-                        }
-                    }
+                    val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE)
                     dialog.show(supportFragmentManager, null)
                 } else mViewModel.onStoryVote(story, 0)
             } else {
@@ -472,7 +466,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
             if (mViewModel.canUserVote) {
                 val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
-                mViewModel.onStoryVote(story, -100)
+                val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE)
+                dialog.show(supportFragmentManager, null)
             } else {
                 mViewModel.onVoteRejected()
             }
@@ -480,12 +475,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
             if (mViewModel.canUserVote) {
                 if (mViewModel.canUserUpVoteOnThis(it)) {
-                    val dialog = VoteDialog.getInstance()
-                    dialog.selectPowerListener = object : OnVoteSubmit {
-                        override fun submitVote(vote: Short) {
-                            mViewModel.onStoryVote(it, vote)
-                        }
-                    }
+                    val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.UPVOTE)
                     dialog.show(supportFragmentManager, null)
                 } else mViewModel.onStoryVote(it, 0)
             } else {
@@ -550,6 +540,10 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         }
     }
 
+    override fun submitVote(id: Long, vote: Short, type: VoteDialog.DialogType) {
+        val actualVote = if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort()
+        mViewModel.onStoryVote(id, actualVote)
+    }
 
     companion object {
         private val AUTHOR_TAG = "AUTHOR_TAG"

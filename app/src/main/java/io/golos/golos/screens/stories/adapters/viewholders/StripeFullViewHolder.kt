@@ -102,20 +102,28 @@ class StripeFullViewHolder(parent: ViewGroup,
                             mDownVoteBtn.setViewVisible()
                         }
                         else -> {//vote removing progress
-                            mDownVotingProgress.setViewVisible()
-                            mVotingProgress.setViewVisible()
-                            mUpvoteBtn.setViewInvisible()
-                            mDownVoteBtn.setViewInvisible()
+                            val currentStatus = wrapper.voteStatus
+                            if (currentStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                                mVotingProgress.setViewVisible()
+                                mDownVotingProgress.setViewGone()
+                                mUpvoteBtn.setViewInvisible()
+                                mDownVoteBtn.setViewVisible()
+                            } else if (currentStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                                mVotingProgress.setViewGone()
+                                mDownVotingProgress.setViewVisible()
+                                mUpvoteBtn.setViewVisible()
+                                mDownVoteBtn.setViewInvisible()
+                            }
                         }
                     }
                 }
             }
             val reblogger = wrapper.story.rebloggedBy
-            if (reblogger.isEmpty()){
+            if (reblogger.isEmpty()) {
                 mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
                 mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
                 mAvatar.setOnClickListener { onAvatar.onClick(this) }
-            }else {
+            } else {
                 mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
                 mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
                 mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }

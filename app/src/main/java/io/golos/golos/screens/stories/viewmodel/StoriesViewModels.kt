@@ -425,7 +425,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         context.startActivity(sendIntent)
     }
 
-    open fun vote(it: StoryWrapper, vote: Int) {
+    open fun vote(it: StoryWrapper, vote: Short) {
         if (!internetStatusNotifier.isAppOnline()) {
             setAppOffline()
             return
@@ -436,7 +436,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         val voteStatus = it.voteUpdatingState
         if (voteStatus?.state == UpdatingState.UPDATING) return
         if (mRepository.isUserLoggedIn()) {
-            mRepository.vote(it.story, vote.toShort())
+            mRepository.vote(it.story, vote)
         } else {
             mDiscussionsLiveData.value =
                     mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
@@ -493,5 +493,13 @@ abstract class DiscussionsViewModel : ViewModel() {
 
     fun onVotersClick(it: StoryWrapper, context: Context?) {
         UsersListActivity.startToShowVoters(context ?: return, it.story.id)
+    }
+
+    fun cancelVote(storyId: Long) {
+        mDiscussionsLiveData.value?.items?.find { it.story.id == storyId }?.let { cancelVote(it) }
+    }
+
+    fun vote(storyId: Long, vote: Short) {
+        mDiscussionsLiveData.value?.items?.find { it.story.id == storyId }?.let { vote(it, vote) }
     }
 }

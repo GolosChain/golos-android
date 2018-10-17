@@ -1,6 +1,7 @@
 package io.golos.golos.repository
 
 import android.content.Context
+import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -78,6 +79,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private val mPoster: Poster = poster ?: Poster(this, mGolosApi, mLogger)
     private val mNotificationsRepository: PushNotificationsRepository
     private val mGolosServices: GolosServices
+
+    private val mRepostingStates = MutableLiveData<Set<RepostingState>>()
 
 
     @WorkerThread
@@ -198,6 +201,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mGolosServices.requestEventsUpdate(type, fromId, limit, markAsRead, completionHandler)
     }
 
+    override val repostStates: LiveData<Map<String, RepostingState>>
+        get() = Transformations.map(mRepostingStates) { states ->
+            states.orEmpty().associateBy { it.postPermlink }
+        }
+
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
         return mGolosServices.getRequestStatus(forType)
     }
@@ -306,10 +314,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     @WorkerThread
-    private fun requestBlogEntriesUpdate() {
+    private fun requestBlogEntriesUpdate(iterationSize: Int = 100) {
         val currentUserName = mAuthLiveData.value?.name ?: return
         val entries = arrayListOf<GolosBlogEntry>()
-        val limit = 100
+        val limit = iterationSize
         val entriesFromBd = mPersister.getBlogEntries()
         val lastSavedId = entriesFromBd.firstOrNull()?.entryId ?: -1
         var fromId: Int? = null
@@ -406,6 +414,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             mPersister.deleteUserData()
             mAuthLiveData.value = null
             mVotesState.value = null
+            mUserBlogEntries.value = null
+            mRepostingStates.value = null
             mNotificationsRepository.dismissAllNotifications()
         } catch (e: Exception) {
             logException(e)
@@ -470,6 +480,35 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     override fun vote(comment: GolosDiscussionItem, percents: Short) {
         if (percents > 100 || percents < -100) return
         voteInternal(comment, percents)
+    }
+
+    override fun repost(discussionItem: GolosDiscussionItem, completionHandler: (Unit, GolosError?) -> Unit) {
+        if (!isUserLoggedIn()) return
+        if (repostedBlogEntries.value.orEmpty().containsKey(discussionItem.permlink)) return
+
+        @MainThread
+        fun addRepostState(repostingState: RepostingState) {
+            val repostingStates = mRepostingStates.value.orEmpty().filter { it.postId != repostingState.postId }.toHashSet()
+            repostingStates += repostingState
+            mRepostingStates.value = repostingStates
+        }
+
+        addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.UPDATING, null))
+        workerExecutor.execute {
+            try {
+                mGolosApi.repostPost(discussionItem.author, discussionItem.permlink)
+                requestBlogEntriesUpdate(10)
+                mMainThreadExecutor.execute {
+                    addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.DONE, null))
+                    completionHandler(Unit, null)
+                }
+            } catch (e: java.lang.Exception) {
+                mMainThreadExecutor.execute {
+                    addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.FAILED, GolosErrorParser.parse(e)))
+                    completionHandler(Unit, GolosErrorParser.parse(e))
+                }
+            }
+        }
     }
 
     override fun cancelVote(comment: GolosDiscussionItem) {

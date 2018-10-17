@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import io.golos.golos.R
+import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
@@ -90,10 +91,18 @@ class StripeCompactViewHolder(parent: ViewGroup,
                             mDownVoteBtn.setViewVisible()
                         }
                         else -> {//vote removing progress
-                            mDownVotingProgress.setViewVisible()
-                            mVotingProgress.setViewVisible()
-                            mUpvoteBtn.setViewInvisible()
-                            mDownVoteBtn.setViewInvisible()
+                            val currentStatus = wrapper.voteStatus
+                            if (currentStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                                mVotingProgress.setViewVisible()
+                                mDownVotingProgress.setViewGone()
+                                mUpvoteBtn.setViewInvisible()
+                                mDownVoteBtn.setViewVisible()
+                            } else if (currentStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                                mVotingProgress.setViewGone()
+                                mDownVotingProgress.setViewVisible()
+                                mUpvoteBtn.setViewVisible()
+                                mDownVoteBtn.setViewInvisible()
+                            }
                         }
                     }
                 }
