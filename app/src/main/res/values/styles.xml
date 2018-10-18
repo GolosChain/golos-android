@@ -404,8 +404,8 @@
     </style>
 
     <style name="StripeCardProgress">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:visibility">gone</item>
     </style>
@@ -423,13 +423,12 @@
     <style name="StripeBtn">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">@dimen/margin_material</item>
+        <item name="android:minWidth">24dp</item>
+        <item name="android:minHeight">36dp</item>
         <item name="android:background">@drawable/img_round_ripple_gray</item>
-
-        <item name="android:gravity">bottom|start</item>
+        <item name="android:gravity">start|center_vertical</item>
         <item name="android:textColor">@color/font_4f_b3</item>
         <item name="android:textSize">@dimen/font_small</item>
-        <item name="android:drawablePadding">2dp</item>
         <item name="android:lines">1</item>
         <item name="android:ellipsize">end</item>
     </style>

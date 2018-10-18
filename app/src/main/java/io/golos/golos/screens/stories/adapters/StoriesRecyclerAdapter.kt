@@ -2,6 +2,7 @@ package io.golos.golos.screens.stories.adapters
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import io.golos.golos.R
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
@@ -33,7 +34,8 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                              private var mRebloggedStoryAuthorlick: StoryWithCommentsClickListener,
                              private var onTagClick: StoryWithCommentsClickListener,
                              private var onUserClick: StoryWithCommentsClickListener,
-                             private var onVotersClick: StoryWithCommentsClickListener,
+                             private var onUpVotersClick: StoryWithCommentsClickListener,
+                             private var onDownVotersClick: StoryWithCommentsClickListener,
                              feedCellSettings: FeedCellSettings)
     : androidx.recyclerview.widget.RecyclerView.Adapter<StoriesViewHolder>() {
 
@@ -114,9 +116,14 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onVotersClick = object : HolderClickListener {
+                onUpVotersClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
-                        onVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                        onUpVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onDownVotersClick = object : HolderClickListener {
+                    override fun onClick(holder: RecyclerView.ViewHolder) {
+                        onDownVotersClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onRebloggerClick = object : HolderClickListener {
@@ -145,11 +152,6 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         onCardClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onCommentsClick = object : HolderClickListener {
-                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
-                        onCommentsClick.onClick(getStoryForPosition(holder) ?: return)
-                    }
-                },
                 onBlogClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
@@ -170,9 +172,14 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         mRebloggedStoryAuthorlick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onVotersClick = object : HolderClickListener {
+                onUpVotersClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
-                        onVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                        onUpVotersClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onDowVotersClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        onDownVotersClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
                 onAvatarClick = object : HolderClickListener {

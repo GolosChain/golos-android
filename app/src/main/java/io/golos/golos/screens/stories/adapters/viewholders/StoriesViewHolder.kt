@@ -85,26 +85,77 @@ abstract class StoriesViewHolder(resId: Int,
                 bountyDisplay,
                 itemView.context)
         if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-            if (getUpvoteText().tag != "blue") {
-                getUpvoteText().setVectorDrawableStart(R.drawable.ic_liked_20dp)
-                getUpvoteText().tag = "blue"
+            if (getUpvoteIv().tag != "blue") {
+                getUpvoteIv().setImageResource(R.drawable.ic_liked_20dp)
+                getUpvoteIv().tag = "blue"
             }
         } else {
-            if (getUpvoteText().tag != "not_blue") {
-                getUpvoteText().setVectorDrawableStart(R.drawable.ic_like_20dp)
-                getUpvoteText().tag = "not_blue"
+            if (getUpvoteIv().tag != "not_blue") {
+                getUpvoteIv().setImageResource(R.drawable.ic_like_20dp)
+                getUpvoteIv().tag = "not_blue"
             }
         }
 
         if (wrapper.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-            if (getUpvoteText().tag != "red") {
-                getDownVoteText().setVectorDrawableStart(R.drawable.ic_dizliked_20dp)
-                getDownVoteText().tag = "red"
+            if (getDownvoteIv().tag != "red") {
+                getDownvoteIv().setImageResource(R.drawable.ic_dizliked_20dp)
+                getDownvoteIv().tag = "red"
             }
         } else {
-            if (getDownVoteText().tag != "not_red") {
-                getDownVoteText().setVectorDrawableStart(R.drawable.ic_dizlike_20dp)
-                getDownVoteText().tag = "not_red"
+            if (getDownvoteIv().tag != "not_red") {
+                getDownvoteIv().setImageResource(R.drawable.ic_dizlike_20dp)
+                getDownvoteIv().tag = "not_red"
+            }
+        }
+
+        wrapper.voteUpdatingState?.let { votingState ->
+            if (votingState.state == UpdatingState.DONE) {
+                getDownVotwProgress().setViewGone()
+                getUpvoteProgress().setViewGone()
+                getUpvoteText().setViewVisible()
+                getUpvoteIv().setViewVisible()
+                getDownVoteText().setViewVisible()
+                getDownvoteIv().setViewVisible()
+            } else {
+                when {
+                    votingState.votingStrength < 0 -> {//downvoting progress
+                        getDownVotwProgress().setViewVisible()
+                        getDownvoteIv().setViewInvisible()
+                        getDownVoteText().setViewInvisible()
+
+
+                        getUpvoteProgress().setViewGone()
+                        getUpvoteIv().setViewVisible()
+                        getUpvoteText().setViewVisible()
+                    }
+                    votingState.votingStrength > 0 -> {//upvoting progress
+                        getUpvoteProgress().setViewVisible()
+                        getUpvoteText().setViewInvisible()
+                        getUpvoteIv().setViewInvisible()
+
+                        getDownVotwProgress().setViewGone()
+                        getDownvoteIv().setViewVisible()
+                        getDownVoteText().setViewVisible()
+                    }
+                    else -> {//vote removing progress
+                        val currentStatus = wrapper.voteStatus
+                        if (currentStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                            getUpvoteProgress().setViewVisible()
+                            getDownVotwProgress().setViewGone()
+                            getUpvoteIv().setViewInvisible()
+                            getUpvoteText().setViewInvisible()
+                            getDownVoteText().setViewVisible()
+                            getDownvoteIv().setViewVisible()
+                        } else if (currentStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                            getUpvoteProgress().setViewGone()
+                            getDownVotwProgress().setViewVisible()
+                            getUpvoteText().setViewVisible()
+                            getUpvoteIv().setViewVisible()
+                            getDownVoteText().setViewInvisible()
+                            getDownvoteIv().setViewInvisible()
+                        }
+                    }
+                }
             }
         }
     }
@@ -139,11 +190,15 @@ abstract class StoriesViewHolder(resId: Int,
     protected abstract fun getBlogNameTv(): TextView
     protected abstract fun getDelimeterV(): View
     protected abstract fun getMoneyText(): TextView
+    protected abstract fun getUpvoteIv(): ImageView
     protected abstract fun getUpvoteText(): TextView
+    protected abstract fun getDownvoteIv(): ImageView
     protected abstract fun getDownVoteText(): TextView
     protected abstract fun getMainText(): TextView
     protected abstract fun getDateStampText(): TextView
     protected abstract fun getAuthorAvatar(): ImageView
+    protected abstract fun getDownVotwProgress(): View
+    protected abstract fun getUpvoteProgress(): View
 
     open fun handleImagePlacing(newState: StripeWrapper?,
                                 imageView: ImageView) {
@@ -238,6 +293,8 @@ abstract class StoriesViewHolder(resId: Int,
         getCommentsTv()?.setTextColorCompat(R.color.text_color_white_black)
         getTitleTv().setTextColorCompat(R.color.text_color_white_black)
         getShownUserNameTv().setTextColorCompat(R.color.text_color_white_black)
+        getUpvoteText().setTextColorCompat(R.color.text_color_white_black)
+        getDownVoteText().setTextColorCompat(R.color.text_color_white_black)
         getReblogedByTv().setTextColorCompat(R.color.gray_82)
         getBlogNameTv().setTextColorCompat(R.color.gray_82)
         getDelimeterV().setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.delimeter_color_feed))

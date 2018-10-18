@@ -261,6 +261,7 @@
     <string name="cancel_cancel_dialog">Cancel</string>
     <string name="vote_cancel">Vote change</string>
     <string name="vote_change_text">Removing of a vote will change your decision and curation rewards for the post.</string>
+    <string name="voted_against">DownVoted</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

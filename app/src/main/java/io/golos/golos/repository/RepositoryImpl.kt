@@ -956,6 +956,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                 val payouts = RSharesConverter
                         .convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
+                Timber.e("voters = ${it.activeVotes} size is ${it.activeVotes.size}")
+                Timber.e("payouts  = ${payouts} size is ${payouts.size}")
                 val voters = it
                         .activeVotes
                         .filter { it.percent != 0 }
@@ -1058,13 +1060,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         .flatMap { it.value.items }
 
                         .forEach {
-                            var items = it.rootStory.activeVotes.distinct().toArrayList()
-//                            if (items.size > 100) {
-//                                items.sortBy { -it.rshares }
-//                                items = items.slice(0..100).toArrayList()
-//
-//                            }
-//                            it.rootStory.activeVotes.clear()
+                            val items = it.rootStory.activeVotes.distinct().toArrayList()
+                            it.rootStory.activeVotes.clear()
                             it.rootStory.activeVotes.addAll(items)
                         }
 

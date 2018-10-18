@@ -137,15 +137,21 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                         mViewModel?.onUserClick(story, activity)
                     }
                 },
-                onVotersClick = object : StoryWithCommentsClickListener {
+                onUpVotersClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         mViewModel?.onVotersClick(story, activity ?: return)
                     }
-                }, mRebloggedStoryAuthorlick = object : StoryWithCommentsClickListener {
-            override fun onClick(story: StoryWrapper) {
-                mViewModel?.onReblogAuthorClick(story, activity ?: return)
-            }
-        },
+                },
+                onDownVotersClick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWrapper) {
+                        mViewModel?.onDownVoters(story, activity ?: return)
+                    }
+                },
+                mRebloggedStoryAuthorlick = object : StoryWithCommentsClickListener {
+                    override fun onClick(story: StoryWrapper) {
+                        mViewModel?.onReblogAuthorClick(story, activity ?: return)
+                    }
+                },
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value
                         ?: FeedCellSettings(true,
                                 true,
@@ -187,7 +193,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
     }
 
     override fun submitVote(id: Long, vote: Short, type: VoteDialog.DialogType) {
-        mViewModel?.vote(id,if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort())
+        mViewModel?.vote(id, if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort())
     }
 
     override fun onStart() {

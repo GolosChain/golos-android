@@ -1,10 +1,10 @@
 package io.golos.golos.screens.userslist
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
@@ -28,7 +28,6 @@ class UserListViewModel : ViewModel() {
     private lateinit var mStringSupplier: StringProvider
     private lateinit var mTitle: String
     private val mRepository = Repository.get
-    // private val mCurrentUserSubscriptions = HashSet<UserBlogSubscription>()
     private lateinit var mInternetStatusNotifier: InternetStatusNotifier
 
     private val mLiveData = MediatorLiveData<UserListViewState>()
@@ -76,7 +75,7 @@ class UserListViewModel : ViewModel() {
             if (mListType == ListType.SUBSCRIPTIONS && userName == mRepository.appUserData.value?.name) {//if it is subscriptions for current users - we already subscribed
 
 
-            }else {
+            } else {
                 Timber.e("adding source")
                 mLiveData.addSource(ld) { onValueChanged() }
             }
@@ -112,6 +111,7 @@ class UserListViewModel : ViewModel() {
     }
 
     private fun onValueChanged() {
+        Timber.e("onValueChanged")
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
         val currentUserSubscriptions =
                 (if (mRepository.appUserData.value?.isLogged == true)
@@ -151,26 +151,30 @@ class UserListViewModel : ViewModel() {
             val votes = mRepository.getVotedUsersForDiscussion(storyId ?: return).value.orEmpty()
 
             mLiveData.value = UserListViewState(mTitle,
-                    votes.map {
+                    votes
+                            .asSequence()
+                            .filter { if (mListType == ListType.UP_VOTERS) it.gbgValue > 0 else it.gbgValue < 0 }
+                            .map {
 
-                        val gbgCost = it.gbgValue
-                        val displayFormatter = Repository.get.userSettingsRepository.getBountDisplay().value
-                                ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
-                        val outString = if (exchangeValues == null) {
-                            mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
-                        } else when (chosenCurrency) {
-                            UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, displayFormatter.formatNumber(gbgCost
-                                    * exchangeValues.rublesPerGbg))
-                            UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
-                            else -> mStringSupplier.get(R.string.dollars_format, displayFormatter.formatNumber(gbgCost
-                                    * exchangeValues.dollarsPerGbg))
-                        }
-                        UserListRowData(it.name,
-                                userAvatars[it.name],
-                                outString,
-                                SubscribeStatus.create(currentUserSubscriptions.contains(it.name),
-                                        updatingStates[it.name] ?: UpdatingState.DONE))
-                    }
+                                val gbgCost = it.gbgValue
+                                val displayFormatter = Repository.get.userSettingsRepository.getBountDisplay().value
+                                        ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                                val outString = if (exchangeValues == null) {
+                                    mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
+                                } else when (chosenCurrency) {
+                                    UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, displayFormatter.formatNumber(gbgCost
+                                            * exchangeValues.rublesPerGbg))
+                                    UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
+                                    else -> mStringSupplier.get(R.string.dollars_format, displayFormatter.formatNumber(gbgCost
+                                            * exchangeValues.dollarsPerGbg))
+                                }
+                                UserListRowData(it.name,
+                                        userAvatars[it.name],
+                                        outString,
+                                        SubscribeStatus.create(currentUserSubscriptions.contains(it.name),
+                                                updatingStates[it.name] ?: UpdatingState.DONE))
+                            }
+                            .toList()
                     , null)
 
         }
@@ -199,7 +203,8 @@ class UserListViewModel : ViewModel() {
         mTitle = mStringSupplier.get(when (mListType) {
             ListType.SUBSCRIPTIONS -> R.string.subscriptions
             ListType.SUBSCRIBERS -> R.string.subscribers
-            else -> R.string.voted
+            ListType.UP_VOTERS -> R.string.voted
+            ListType.DOWN_VOTERS -> R.string.voted_against
         }, null)
 
         if (mListType == ListType.SUBSCRIBERS) mRepository.requestGolosUserSubscribersUpdate(userName.orEmpty())

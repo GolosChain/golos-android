@@ -103,7 +103,7 @@ class UserListViewModelTest {
             status = it
         }
         Assert.assertNull(status)
-        mViewModel.onCreate(null, story.id, ListType.VOTERS, object : StringProvider {
+        mViewModel.onCreate(null, story.id, ListType.UP_VOTERS, object : StringProvider {
             override fun get(id: Int, arguments: String?): String {
                 return "stub"
             }

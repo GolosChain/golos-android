@@ -11,7 +11,7 @@
         android:layout_marginTop="@dimen/margin_material"
         android:text="@string/vote_cancel"
         android:textColor="@color/text_color_white_black"
-        android:textSize="@dimen/font_medium"/>
+        android:textSize="18sp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,10 +19,11 @@
         android:layout_marginStart="@dimen/material_big"
         android:layout_marginTop="@dimen/margin_material"
         android:layout_marginEnd="@dimen/material_big"
-        android:gravity="start|center_vertical"
+
+        android:gravity="center"
         android:text="@string/vote_change_text"
         android:textColor="@color/font_gray_black"
-        android:textSize="@dimen/font_regular"/>
+        android:textSize="@dimen/font_medium"/>
 
     <Button
         android:id="@+id/change_vote_btn"
@@ -33,8 +34,8 @@
         android:layout_marginTop="@dimen/margin_material_half"
         android:text="@string/change"
         android:textAllCaps="false"
-        android:textColor="@color/app_red"
-        android:textSize="@dimen/font_medium"/>
+        android:textColor="@color/font_gray_black"
+        android:textSize="14sp"/>
 
     <Button
         android:id="@+id/cancel_btn"
@@ -45,6 +46,6 @@
         android:layout_marginBottom="@dimen/margin_material_small"
         android:text="@string/cancel_cancel_dialog"
         android:textAllCaps="false"
-        android:textColor="@color/blue_light"
-        android:textSize="@dimen/font_medium"/>
+        android:textColor="@color/font_gray_black"
+        android:textSize="14sp"/>
 </LinearLayout>

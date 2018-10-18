@@ -93,14 +93,16 @@ object RSharesConverter {
     }
 
     // convert only post & comments gbg, otherwise it will be long overflow
+    //pair - first percent, second = vote rshares
     fun convertRSharesToGbg2(postPayoutInGbg: Double, rshares: List<Long>, totalRshares: Long): List<Double> {
         val total = totalRshares.toDouble()
         if (total == 0.0) {
             return rshares.map { 0.0 }
         }
-        return rshares.map { long ->
-            val percent = long / total
-            postPayoutInGbg * percent
+        return rshares.map { rshares ->
+            val percent = rshares / total
+            val out = postPayoutInGbg * percent
+            out
         }
     }
 }

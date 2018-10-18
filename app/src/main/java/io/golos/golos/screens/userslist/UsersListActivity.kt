@@ -1,16 +1,14 @@
 package io.golos.golos.screens.userslist
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
@@ -120,10 +118,18 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
             ctx.startActivity(i)
         }
 
-        fun startToShowVoters(ctx: Context,
-                              storyId: Long) {
+        fun startToShowUpVoters(ctx: Context,
+                                storyId: Long) {
             val i = Intent(ctx, UsersListActivity::class.java)
-            i.putExtra(TYPE_TAG, ListType.VOTERS)
+            i.putExtra(TYPE_TAG, ListType.UP_VOTERS)
+            i.putExtra(STORY_ID_TAG, storyId)
+            ctx.startActivity(i)
+        }
+
+        fun startToShowDownVoters(ctx: Context,
+                                  storyId: Long) {
+            val i = Intent(ctx, UsersListActivity::class.java)
+            i.putExtra(TYPE_TAG, ListType.DOWN_VOTERS)
             i.putExtra(STORY_ID_TAG, storyId)
             ctx.startActivity(i)
         }

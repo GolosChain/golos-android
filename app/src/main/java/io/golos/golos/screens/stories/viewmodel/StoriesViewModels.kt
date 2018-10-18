@@ -487,12 +487,12 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
-    fun onUserClick(it: StoryWrapper, context: Context?) {
-        UserProfileActivity.start(context ?: return, it.story.author)
+    fun onUserClick(story: StoryWrapper, context: Context?) {
+        UserProfileActivity.start(context ?: return, story.story.author)
     }
 
-    fun onVotersClick(it: StoryWrapper, context: Context?) {
-        UsersListActivity.startToShowVoters(context ?: return, it.story.id)
+    fun onVotersClick(story: StoryWrapper, context: Context?) {
+        UsersListActivity.startToShowUpVoters(context ?: return, story.story.id)
     }
 
     fun cancelVote(storyId: Long) {
@@ -501,5 +501,9 @@ abstract class DiscussionsViewModel : ViewModel() {
 
     fun vote(storyId: Long, vote: Short) {
         mDiscussionsLiveData.value?.items?.find { it.story.id == storyId }?.let { vote(it, vote) }
+    }
+
+    fun onDownVoters(story: StoryWrapper, fragmentActivity: FragmentActivity) {
+        UsersListActivity.startToShowDownVoters(fragmentActivity, story.story.id)
     }
 }

@@ -262,6 +262,7 @@
     <string name="cancel_cancel_dialog">Отмена</string>
     <string name="vote_cancel">Сброс Голоса</string>
     <string name="vote_change_text">Удаление Голоса изменит ваше решение и кураторские вознаграждения за этот пост.</string>
+    <string name="voted_against">Проголосовали против</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

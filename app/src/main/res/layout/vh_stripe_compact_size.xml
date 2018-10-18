@@ -6,16 +6,26 @@
                                                    android:animateLayoutChanges="true"
                                                    android:background="?selectableItemBackground"
                                                    android:clickable="true"
-                                                   android:minHeight="100dp">
+    >
+
+    <ImageButton
+        android:id="@+id/upvote_ibtn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/ripple_oval"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_liked_20dp"/>
 
     <TextView
         android:id="@+id/upvote_btn"
         style="@style/StripeBtn"
-        android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material_small"
-        android:drawableStart="@drawable/ic_like_20dp"
 
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="12"
+        app:layout_constraintStart_toEndOf="@id/upvote_ibtn"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ProgressBar
@@ -24,40 +34,54 @@
 
         app:layout_constraintBottom_toBottomOf="@id/upvote_btn"
         app:layout_constraintEnd_toEndOf="@id/upvote_btn"
-        app:layout_constraintStart_toStartOf="@id/upvote_btn"
+        app:layout_constraintStart_toStartOf="@id/upvote_ibtn"
         app:layout_constraintTop_toTopOf="@id/upvote_btn"/>
 
 
     <TextView
         android:id="@+id/money_tv"
         style="@style/StripeBtn"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="@dimen/margin_material_small"
+        android:layout_marginStart="@dimen/margin_material_half"
+
+        android:layout_marginTop="3dp"
         android:background="@drawable/shape_rect_gray_stroke"
         android:ellipsize="end"
         android:gravity="center"
         android:maxLength="10"
+        android:minHeight="0dp"
         android:paddingStart="@dimen/margin_material_half"
         android:paddingTop="2dp"
         android:paddingEnd="@dimen/margin_material_half"
         android:paddingBottom="2dp"
-        app:layout_constraintStart_toStartOf="@id/upvote_btn"
-        app:layout_constraintTop_toBottomOf="@id/upvote_btn"
+        android:text="234"
+        app:layout_constraintStart_toStartOf="@id/upvote_ibtn"
+        app:layout_constraintTop_toBottomOf="@id/upvote_ibtn"
+        app:layout_goneMarginStart="@dimen/margin_material_half"
 
         />
+
+
+    <ImageButton
+        android:id="@+id/down_vote_ibtn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="@dimen/margin_material_half"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="@dimen/margin_material_small"
+        android:background="@drawable/ripple_oval"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/money_tv"
+        app:srcCompat="@drawable/ic_dizlike_20dp"/>
 
     <TextView
         android:id="@+id/down_vote_btn"
         style="@style/StripeBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="@dimen/margin_material_small"
         android:background="@drawable/img_round_ripple_gray"
-        android:drawableStart="@drawable/ic_dizlike_20dp"
-
-        app:layout_constraintStart_toStartOf="@id/upvote_btn"
-        app:layout_constraintTop_toBottomOf="@id/money_tv"
+        android:text="12"
+        app:layout_constraintStart_toEndOf="@id/down_vote_ibtn"
+        app:layout_constraintTop_toTopOf="@id/down_vote_ibtn"
         />
 
     <ProgressBar
@@ -65,17 +89,18 @@
         style="@style/StripeCardProgress"
         app:layout_constraintBottom_toBottomOf="@id/down_vote_btn"
         app:layout_constraintEnd_toEndOf="@id/down_vote_btn"
+
         app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="@id/down_vote_btn"
+        app:layout_constraintStart_toStartOf="@id/down_vote_ibtn"
         app:layout_constraintTop_toTopOf="@id/down_vote_btn"
         app:layout_constraintVertical_chainStyle="spread"/>
 
     <androidx.constraintlayout.widget.Barrier
-        android:layout_width="wrap_content"
-        app:constraint_referenced_ids="down_vote_btn, money_tv, upvote_btn "
-        app:barrierDirection="end"
         android:id="@+id/barr_1"
-        android:layout_height="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="down_vote_btn, money_tv, upvote_btn "/>
 
 
     <com.makeramen.roundedimageview.RoundedImageView
@@ -88,7 +113,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintStart_toEndOf="@id/barr_1"
         app:layout_constraintTop_toTopOf="@id/upvote_btn"
-        app:layout_goneMarginStart="@dimen/margin_material_half"
+        app:layout_goneMarginStart="@dimen/margin_material_small"
         app:riv_corner_radius="18dp"/>
 
     <TextView
@@ -184,7 +209,7 @@
         style="@style/StripeTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_material_half"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="@dimen/margin_material"
         android:clickable="false"
         android:ellipsize="end"
@@ -196,15 +221,16 @@
         app:textAllCaps="false"/>
 
     <TextView
-        android:id="@+id/main_tv"
+        android:id="@+id/tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/quater"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="@dimen/margin_material"
         android:ellipsize="end"
         android:lines="1"
-        android:textColor="@color/gray_82"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@id/title"
+        android:textColor="@color/text_color_white_black"
+        android:textSize="@dimen/font_small"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@id/title"/>
 
@@ -221,12 +247,20 @@
         app:layout_constraintTop_toTopOf="@+id/upvote_btn"
         app:riv_corner_radius="8dp"/>
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/ba_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        android:layout_marginTop="2dp"
+        app:constraint_referenced_ids="tv, down_vote_ibtn"
+        />
 
     <View
         android:id="@+id/delimeter"
         android:layout_width="wrap_content"
         android:layout_height="2dp"
-        android:layout_marginTop="@dimen/margin_material_half"
+        android:layout_marginTop="@dimen/quater"
         android:background="@color/delimeter_color_feed"
-        app:layout_constraintTop_toBottomOf="@+id/down_vote_btn"/>
+        app:layout_constraintTop_toBottomOf="@+id/ba_2"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

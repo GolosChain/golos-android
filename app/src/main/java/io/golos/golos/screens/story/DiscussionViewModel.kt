@@ -310,12 +310,12 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onStoryVotesClick(context: Context) {
-        UsersListActivity.startToShowVoters(context, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
+        UsersListActivity.startToShowUpVoters(context, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
                 ?: return)
     }
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
-        UsersListActivity.startToShowVoters(activity, it.story.id)
+        UsersListActivity.startToShowUpVoters(activity, it.story.id)
     }
 
     fun onStoryVote(storyId: Long, percent: Short) {

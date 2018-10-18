@@ -24,7 +24,8 @@ class StripeFullViewHolder(parent: ViewGroup,
                            private val onBlogClick: HolderClickListener,
                            private val onAvatar: HolderClickListener,
                            private val onRebloggerClick: HolderClickListener,
-                           private val onVotersClick: HolderClickListener
+                           private val onUpVotersClick: HolderClickListener,
+                           private val onDownVotersClick: HolderClickListener
 ) : StoriesViewHolder(R.layout.vh_stripe_full_size, parent), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
         return itemView.context.createGolosSpan(type)
@@ -38,7 +39,9 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
     private val mUpvoteBtn: TextView = itemView.findViewById(R.id.upvote_btn)
+    private val mUpvoteIv: ImageView = itemView.findViewById(R.id.upvote_ibtn)
     private val mDownVoteBtn: TextView = itemView.findViewById(R.id.down_vote_btn)
+    private val mDownVoteIv: ImageView = itemView.findViewById(R.id.dizlike_ibtn)
     private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
     private val mReblog: View = itemView.findViewById(R.id.reblog_ibtn)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
@@ -57,16 +60,16 @@ class StripeFullViewHolder(parent: ViewGroup,
         mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
         mDownVoteBtn.setOnClickListener { onDownVoteClick.onClick(this) }
         mReblog.setOnClickListener { onReblogClick.onClick(this) }
-        mMoneyTv.setOnClickListener { onVotersClick.onClick(this) }
-        mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
 
-        mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
+        mUpvoteBtn.setOnClickListener { onUpVotersClick.onClick(this) }
+        mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
         mAvatar.setOnClickListener { onAvatar.onClick(this) }
         mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
         mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
-        mUpvoteBtn.setOnClickListener { onUpvoteClick.onClick(this) }
-
+        mDownVoteIv.setOnClickListener { onDownVoteClick.onClick(this) }
+        mDownVoteBtn.setOnClickListener { onDownVotersClick.onClick(this) }
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
@@ -79,45 +82,6 @@ class StripeFullViewHolder(parent: ViewGroup,
 
             val wrapper = newState.stripe
 
-            wrapper.voteUpdatingState?.let { votingState ->
-                if (votingState.state == UpdatingState.DONE) {
-                    mDownVotingProgress.setViewGone()
-                    mVotingProgress.setViewGone()
-                    mUpvoteBtn.setViewVisible()
-                    mDownVoteBtn.setViewVisible()
-                } else {
-                    when {
-                        votingState.votingStrength < 0 -> {//downvoting progress
-                            mDownVotingProgress.setViewVisible()
-                            mDownVoteBtn.setViewInvisible()
-
-                            mVotingProgress.setViewGone()
-                            mUpvoteBtn.setViewVisible()
-                        }
-                        votingState.votingStrength > 0 -> {//upvoting progress
-                            mVotingProgress.setViewVisible()
-                            mUpvoteBtn.setViewInvisible()
-
-                            mDownVotingProgress.setViewGone()
-                            mDownVoteBtn.setViewVisible()
-                        }
-                        else -> {//vote removing progress
-                            val currentStatus = wrapper.voteStatus
-                            if (currentStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                                mVotingProgress.setViewVisible()
-                                mDownVotingProgress.setViewGone()
-                                mUpvoteBtn.setViewInvisible()
-                                mDownVoteBtn.setViewVisible()
-                            } else if (currentStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                                mVotingProgress.setViewGone()
-                                mDownVotingProgress.setViewVisible()
-                                mUpvoteBtn.setViewVisible()
-                                mDownVoteBtn.setViewInvisible()
-                            }
-                        }
-                    }
-                }
-            }
             val reblogger = wrapper.story.rebloggedBy
             if (reblogger.isEmpty()) {
                 mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
@@ -179,6 +143,22 @@ class StripeFullViewHolder(parent: ViewGroup,
 
     override fun getMainImage(): ImageView {
         return mMainImageBig
+    }
+
+    override fun getUpvoteIv(): ImageView {
+        return mUpvoteIv
+    }
+
+    override fun getDownVotwProgress(): View {
+        return mDownVotingProgress
+    }
+
+    override fun getUpvoteProgress(): View {
+        return mVotingProgress
+    }
+
+    override fun getDownvoteIv(): ImageView {
+        return mDownVoteIv
     }
 
     override fun getTitleTv(): TextView {
