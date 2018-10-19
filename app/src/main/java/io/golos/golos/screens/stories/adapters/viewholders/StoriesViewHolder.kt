@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -264,7 +265,9 @@ abstract class StoriesViewHolder(resId: Int,
             mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[0],
                     wantedwidth = size))
                     .error(nextImage ?: error)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .apply(RequestOptions.placeholderOf(getErrorDrawable()))
+
                     .into(imageView)
         } else {
 
@@ -276,6 +279,7 @@ abstract class StoriesViewHolder(resId: Int,
                         wantedwidth = size))
                         .error(nextImage ?: error)
                         .apply(RequestOptions.placeholderOf(getErrorDrawable()))
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(imageView)
             }
             if (image == null) {

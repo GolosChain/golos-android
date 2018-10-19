@@ -237,8 +237,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
-            android:paddingTop="2dp"
-
             >
 
             <ImageButton
@@ -279,21 +277,30 @@
 
             android:ellipsize="end"
             android:lines="1"
-            android:paddingTop="2dp"
-
-
             />
 
 
-        <ImageButton
-            android:paddingTop="2dp"
-            android:id="@+id/reblog_ibtn"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/img_round_ripple_gray"
-            app:srcCompat="@drawable/ic_repost"
-            />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/reblog_ibtn"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/img_round_ripple_gray"
+
+                app:srcCompat="@drawable/ic_repost_20dp"
+                />
+
+            <ProgressBar
+                android:id="@+id/reblog_progress"
+                style="@style/StripeCardProgress"
+                android:layout_marginEnd="@dimen/margin_material_half"
+                />
+        </FrameLayout>
+
     </com.google.android.flexbox.FlexboxLayout>
 
 

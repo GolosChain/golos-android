@@ -49,10 +49,7 @@ import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.ApplicationUser
-import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.GolosDiscussionItemVotingState
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.editor.getDimen
 import io.golos.golos.screens.editor.knife.KnifeBulletSpan
@@ -110,6 +107,8 @@ fun GolosDiscussionItem.isComment() = this.parentAuthor.isNotEmpty()
 fun createStoryWrapper(discussionItem: GolosDiscussionItem,
                        voteStatuses: List<GolosDiscussionItemVotingState>,
                        golosUsersAccounts: Map<String, GolosUserAccountInfo>,
+                       repostedBlogEntries: Map<String, GolosBlogEntry>,
+                       repostStates: Map<String, RepostingState>,
                        currentUser: ApplicationUser?,
                        exchangeValues: ExchangeValues,
                        isThereNeedToHtmlize: Boolean,
@@ -120,10 +119,13 @@ fun createStoryWrapper(discussionItem: GolosDiscussionItem,
     val out = StoryWrapper(discussionItem,
             voteStatuses.find { it.storyId == discussionItem.id },
             if (currentUser == null || !currentUser.isLogged) GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT else discussionItem.isUserVotedOnThis(currentUser.name),
+            if (currentUser == null || !currentUser.isLogged) false else repostedBlogEntries.containsKey(discussionItem.permlink),
+            repostStates[discussionItem.permlink]?.updatingState ?: UpdatingState.DONE,
             if (discussionItem.rebloggedBy.isEmpty()) golosUsersAccounts[discussionItem.author] else golosUsersAccounts[discussionItem.rebloggedBy],
             exchangeValues,
             currentUser != null && discussionItem.author == currentUser.name,
             if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null)
+
     return out
 }
 
@@ -584,7 +586,7 @@ fun File.sizeInKb(): Long {
 public inline fun <E> List<out E>?.isNullOrEmpty(): Boolean = this == null || this.size == 0
 
 
-public fun <V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
+public inline fun <reified V> bundleOf(vararg pairs: Pair<String, V>): Bundle {
     val b = Bundle()
     pairs.forEach {
         val second = it.second

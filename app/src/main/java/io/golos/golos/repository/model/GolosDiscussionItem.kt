@@ -76,6 +76,7 @@ data class GolosDiscussionItem constructor(val url: String,
         if (body != other.body) return false
         if (author != other.author) return false
         if (format != other.format) return false
+        if (rebloggedBy != other.rebloggedBy) return false
         if (upvotesNum != other.upvotesNum) return false
         if (downvotesNum != other.downvotesNum) return false
 
@@ -97,6 +98,7 @@ data class GolosDiscussionItem constructor(val url: String,
         result = 31 * result + title.hashCode()
         result = 31 * result + categoryName.hashCode()
         result = 31 * result + votesNum
+        result = 31 * result + rebloggedBy.hashCode()
         result = 31 * result + commentsCount
         result = 31 * result + permlink.hashCode()
         result = 31 * result + upvotesNum.hashCode()

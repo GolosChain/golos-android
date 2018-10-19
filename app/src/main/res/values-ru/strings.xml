@@ -263,6 +263,11 @@
     <string name="vote_cancel">Сброс Голоса</string>
     <string name="vote_change_text">Удаление Голоса изменит ваше решение и кураторские вознаграждения за этот пост.</string>
     <string name="voted_against">Проголосовали против</string>
+    <string name="repost">Реблог</string>
+
+
+    <string name="reblog_answer_text">Вы уверены что хотите сделать реблог поста?</string>
+    <string name="make_reblog">Сделать реблог</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

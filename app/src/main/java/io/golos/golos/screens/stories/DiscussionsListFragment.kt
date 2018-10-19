@@ -32,10 +32,10 @@ import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
-        Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit {
+        Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
+        RepostConfirmalDialog.OnRepostConfirmed {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: DiscussionsViewModel? = null
@@ -123,7 +123,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 },
                 mOnReblogClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.reblog(story)
+                        RepostConfirmalDialog.getInstance(story.story.id).show(childFragmentManager, null)
+
                     }
                 }
                 ,
@@ -202,6 +203,10 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.onStart()
     }
 
+    override fun onConfirmed(id: Long) {
+        mViewModel?.repost(id)
+    }
+
     override fun onResume() {
         super.onResume()
         val parentFragment = parentFragment
@@ -255,8 +260,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         }
 
         if (t?.items != null) {
-            Timber.e("${arguments?.getSerializable(TYPE_TAG)} new items size = ${t?.items?.size}\nparc = $parc \n" +
-                    "(mRecycler?.layoutManager = ${mRecycler?.layoutManager}")
             mRecycler?.post {
                 mAdapter.setStripes(t.items)
                 if (parc != null) {

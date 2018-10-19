@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
@@ -164,6 +165,7 @@ class ImageBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycle
                             mMediumImage.setImageBitmap(null)
                             handler.post {
                                 mGlide.load(src)
+                                        .transition(DrawableTransitionOptions.withCrossFade())
                                         .into(mMediumImage)
                             }
                         } else {
@@ -178,6 +180,7 @@ class ImageBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycle
                                         .apply(RequestOptions()
                                                 .fitCenter()
                                                 .placeholder(R.drawable.error))
+                                        .transition(DrawableTransitionOptions.withCrossFade())
                                         .into(mImageFullWidth)
                             }
 
@@ -205,7 +208,7 @@ class ImageBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycle
 
                 popup.showAtLocation(itemView, Gravity.CENTER, 0, 0)
 
-                popup.contentView.findViewById<View>(R.id.copy_to_cb_btn).setOnClickListener { popupListener.onLinkSaveClick(this) ;popup.dismiss()}
+                popup.contentView.findViewById<View>(R.id.copy_to_cb_btn).setOnClickListener { popupListener.onLinkSaveClick(this);popup.dismiss() }
                 popup.contentView.findViewById<View>(R.id.save_btn).setOnClickListener { popupListener.onImageSaveClick(this);popup.dismiss() }
                 true
             }

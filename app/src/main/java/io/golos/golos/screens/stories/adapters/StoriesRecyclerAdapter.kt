@@ -50,8 +50,6 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
             }
         }
     private val mStripes = ArrayList<StoryWrapper>()
-    private val mItemsMap = HashMap<Long, Int>()
-
 
     fun setStripes(newItems: List<StoryWrapper>) {
         if (mStripes.isEmpty()) {

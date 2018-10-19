@@ -17,14 +17,12 @@ data class StoryWrapper(
         val story: GolosDiscussionItem,
         val voteUpdatingState: GolosDiscussionItemVotingState? = null,
         val voteStatus: GolosDiscussionItem.UserVoteType = GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT,
+        val isPostReposted: Boolean = false,
+        val repostStatus: UpdatingState = UpdatingState.DONE,
         val authorAccountInfo: GolosUserAccountInfo? = null,
         val exchangeValues: ExchangeValues = ExchangeValues.nullValues,
         val isStoryEditable: Boolean = false,
-        var asHtmlString: CharSequence? = null) {
-    override fun toString(): String {
-        return "StoryWrapper(story=$story, voteUpdatingState=$voteUpdatingState, voteStatus=$voteStatus, authorAccountInfo=$authorAccountInfo, isStoryEditable=$isStoryEditable)"
-    }
-}
+        var asHtmlString: CharSequence? = null)
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {

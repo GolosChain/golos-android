@@ -2,19 +2,20 @@ package io.golos.golos.screens.profile
 
 import android.animation.ObjectAnimator
 import android.animation.TypeEvaluator
-import androidx.lifecycle.*
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.tabs.TabLayout
-import androidx.fragment.app.Fragment
-import androidx.viewpager.widget.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.*
+import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.tabs.TabLayout
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
@@ -101,9 +102,9 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionE
             val i = Intent(activity!!, SettingsActivity::class.java)
             activity?.startActivityForResult(i, CHANGE_THEME)
         }
-        tabbar.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+        tabbar.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
-              mReselectionsEmitter.value = tabbar.selectedTabPosition
+                mReselectionsEmitter.value = tabbar.selectedTabPosition
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -246,7 +247,11 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionE
 
         if (mLastAccountInfo?.userCover != t.accountInfo.userCover) {
             t.accountInfo.userCover?.let {
-                glide.load(ImageUriResolver.resolveImageWithSize(it)).apply(RequestOptions().centerCrop()).into(mUserCoverIv)
+                glide.load(ImageUriResolver.resolveImageWithSize(it))
+                        .apply(RequestOptions().centerCrop())
+                        .transition(DrawableTransitionOptions
+                                .withCrossFade())
+                        .into(mUserCoverIv)
             }
             if (t.accountInfo.userCover == null) mUserCoverIv.setImageBitmap(null)
         }

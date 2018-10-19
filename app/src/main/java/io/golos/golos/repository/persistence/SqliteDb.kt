@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
+import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.*
 import java.util.*
@@ -105,6 +106,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
         val stories = DiscussionItemsTable.getAll(writableDatabase)
 
+
         return storiesIds
                 .groupBy { it }
                 .mapValues {
@@ -121,6 +123,17 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 }
 
                 .mapKeys { it.key.request }
+                .mapValues {
+                    val feed = it.value
+                    if (it.key.feedType != FeedType.BLOG) {
+                        if (feed.items.any { it.rootStory.rebloggedBy.isNotEmpty() })
+                            feed.copy(items = feed.items.map { storyWithComments ->
+                                if (storyWithComments.rootStory.rebloggedBy.isNotEmpty()) {
+                                    storyWithComments.copy(rootStory = storyWithComments.rootStory.copy(rebloggedBy = ""))
+                                } else storyWithComments
+                            }) else feed
+                    } else feed
+                }
     }
 
     fun deleteAllStories() {

@@ -262,6 +262,9 @@
     <string name="vote_cancel">Vote change</string>
     <string name="vote_change_text">Removing of a vote will change your decision and curation rewards for the post.</string>
     <string name="voted_against">DownVoted</string>
+    <string name="repost">Reblog</string>
+    <string name="reblog_answer_text">Are you sure want to make post reblog?</string>
+    <string name="make_reblog">Make reblog</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

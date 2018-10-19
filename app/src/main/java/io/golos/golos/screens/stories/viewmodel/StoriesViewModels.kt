@@ -3,6 +3,7 @@ package io.golos.golos.screens.stories.viewmodel
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
@@ -21,7 +22,6 @@ import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -188,6 +188,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                     it.copy(authorAccountInfo = if (story.rebloggedBy.isNotEmpty()) usersMap[story.rebloggedBy] else usersMap[story.author])
                 }.orEmpty()
 
+
                 val newState = mDiscussionsLiveData.value?.copy(items = newStories)
                 propogateNewState(newState)
             }
@@ -211,6 +212,31 @@ abstract class DiscussionsViewModel : ViewModel() {
                     it.copy(voteUpdatingState = voteStateForItem)
                 }, error = errorMsg.takeIf { it != mDiscussionsLiveData.value?.error })
                 propogateNewState(newState)
+            }
+        }
+
+        @WorkerThread
+        fun createRepostState(): DiscussionsViewState? {
+            val reposts = mRepository.repostedBlogEntries.value.orEmpty()
+            val repostStates = mRepository.repostStates.value.orEmpty()
+            val currentState = mDiscussionsLiveData.value
+            return currentState?.copy(items = currentState.items.map { wrapper ->
+                wrapper.copy(isPostReposted = reposts.containsKey(wrapper.story.permlink),
+                        repostStatus = repostStates[wrapper.story.permlink]?.updatingState
+                                ?: UpdatingState.DONE)
+            })
+        }
+
+        mDiscussionsLiveData.addSource(mRepository.repostedBlogEntries) { repostedEntries ->
+            if (repostedEntries == null) return@addSource
+            mExecutor.execute {
+                propogateNewState(createRepostState() ?: return@execute)
+            }
+        }
+        mDiscussionsLiveData.addSource(mRepository.repostStates) { repostState ->
+            if (repostState == null) return@addSource
+            mExecutor.execute {
+                propogateNewState(createRepostState() ?: return@execute)
             }
         }
 
@@ -271,6 +297,8 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.removeSource(mRepository.votingStates)
         mDiscussionsLiveData.removeSource(mRepository.appUserData)
         mDiscussionsLiveData.removeSource(mRepository.getExchangeLiveData())
+        mDiscussionsLiveData.removeSource(mRepository.repostedBlogEntries)
+        mDiscussionsLiveData.removeSource(mRepository.repostStates)
 
         if (mObserver != null) {
             Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
@@ -299,11 +327,16 @@ abstract class DiscussionsViewModel : ViewModel() {
         val currentUser = mRepository.appUserData.value ?: ApplicationUser("", false)
         val voteStatuses = mRepository.votingStates.value.orEmpty()
         val exchangeValues = mRepository.getExchangeLiveData().value ?: ExchangeValues.nullValues
+        val repostedPosts = mRepository.repostedBlogEntries.value.orEmpty()
+        val repostUpdateStates = mRepository.repostStates.value.orEmpty()
+
 
         val state = DiscussionsViewState(false,
                 !items.isFeedActual,
                 items.items.map {
-                    createStoryWrapper(it.rootStory, voteStatuses, usersMap, currentUser, exchangeValues, true, KnifeHtmlizer)
+                    val discussionItem = it.rootStory
+                    createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
+                            repostUpdateStates, currentUser, exchangeValues, true, KnifeHtmlizer)
                 },
                 null, null)
 
@@ -312,6 +345,18 @@ abstract class DiscussionsViewModel : ViewModel() {
                 .plus(items.items.asSequence().filter { it.rootStory.rebloggedBy.isNotEmpty() }.map { it.rootStory.rebloggedBy })
                 .filter { storyAuthor -> !usersMap.containsKey(storyAuthor) }.toList())
         return state
+    }
+
+    fun repost(story: StoryWrapper) {
+        if (!mRepository.isUserLoggedIn()) return
+        if (story.isPostReposted) return
+        if (story.repostStatus == UpdatingState.UPDATING) return
+        mRepository.repost(story.story, { _, _ -> })
+    }
+
+    fun repost(storyId: Long) {
+        repost(mDiscussionsLiveData.value?.items.orEmpty().find { it.story.id == storyId }
+                ?: return)
     }
 
     open fun onSwipeToRefresh() {
@@ -330,16 +375,6 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
-    private fun createHashFromList(list: List<StoryWrapper>) = list.foldRight(0) { wrapper, accumulator -> accumulator + wrapper.hashCode() }
-
-
-    private fun compareStates(new: DiscussionsViewState?, old: DiscussionsViewState?): Boolean {
-        if (new != null && old == null) return false
-        if (new == null && old != null) return false
-        if (new.isNull() && old.isNull()) return true
-        return new === old
-    }
-
 
     open fun onChangeVisibilityToUser(visibleToUser: Boolean) {
         this.isVisibleToUser = visibleToUser
@@ -349,14 +384,12 @@ abstract class DiscussionsViewModel : ViewModel() {
                 return
             }
             mHandler.post {
-                mExecutor.execute {
-                    if (mDiscussionsLiveData.value?.items.isNullOrEmpty()) {
-                        if (isUpdating.get()) return@execute
-                        mHandler.post {
-                            mDiscussionsLiveData.value = DiscussionsViewState(true, false, emptyList(), null, null)
-                            mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
-                            isUpdating.set(true)
-                        }
+                if (mDiscussionsLiveData.value?.items.isNullOrEmpty() && mRepository.getStories(type, filter).value?.items.isNullOrEmpty()) {
+                    if (isUpdating.get()) return@post
+                    mHandler.post {
+                        mDiscussionsLiveData.value = DiscussionsViewState(true, false, emptyList(), null, null)
+                        mRepository.requestStoriesListUpdate(updateSize, type, filter, null, null) { _, _ -> }
+                        isUpdating.set(true)
                     }
                 }
             }
@@ -450,9 +483,6 @@ abstract class DiscussionsViewModel : ViewModel() {
         UserProfileActivity.start(activity, reblogger)
     }
 
-    open fun reblog(it: StoryWrapper) {
-        Timber.e("on reblog $it")
-    }
 
     open fun cancelVote(it: StoryWrapper) {
         if (!internetStatusNotifier.isAppOnline()) {

@@ -84,11 +84,11 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
 
     @WorkerThread
-    private fun loadStories(limit: Int,
-                            type: FeedType,
-                            filter: StoryFilter?,
-                            truncateBody: Int, startAuthor: String?,
-                            startPermlink: String?): List<StoryWithComments> {
+    private fun loadDiscussions(limit: Int,
+                                type: FeedType,
+                                filter: StoryFilter?,
+                                truncateBody: Int, startAuthor: String?,
+                                startPermlink: String?): List<StoryWithComments> {
         if (type == FeedType.PERSONAL_FEED || type == FeedType.COMMENTS || type == FeedType.BLOG) {
             if (filter?.userNameFilter == null) throw IllegalStateException(" for this types of stories," +
                     "user filter must be set")
@@ -147,10 +147,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
 
-    override val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
-        get() = Transformations.map(mUserBlogEntries) { list ->
-            list.asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
-        }
+    private val mRepostsMap = Transformations.map(mUserBlogEntries) { list ->
+        list.asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
+    }
+
+
+    override val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>> = mRepostsMap
 
     override val usersAvatars: LiveData<Map<String, String?>>
         get() = mUsersRepository.usersAvatars
@@ -201,10 +203,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mGolosServices.requestEventsUpdate(type, fromId, limit, markAsRead, completionHandler)
     }
 
-    override val repostStates: LiveData<Map<String, RepostingState>>
-        get() = Transformations.map(mRepostingStates) { states ->
-            states.orEmpty().associateBy { it.postPermlink }
-        }
+    override val repostStates: LiveData<Map<String, RepostingState>> = Transformations.map(mRepostingStates) { states ->
+        states.orEmpty().associateBy { it.postPermlink }
+    }
 
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
         return mGolosServices.getRequestStatus(forType)
@@ -319,6 +320,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         val entries = arrayListOf<GolosBlogEntry>()
         val limit = iterationSize
         val entriesFromBd = mPersister.getBlogEntries()
+
         val lastSavedId = entriesFromBd.firstOrNull()?.entryId ?: -1
         var fromId: Int? = null
 
@@ -326,12 +328,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, fromId, limit.toShort()).toArrayList()
             entries.addAll(entriesFromBC)
 
-            if (entriesFromBC.size != limit || lastSavedId >= entriesFromBC.firstOrNull()?.entryId ?: Int.MAX_VALUE) break
+            if (entriesFromBC.size != limit || lastSavedId >= entriesFromBC.lastOrNull()?.entryId ?: Int.MAX_VALUE) break
             fromId = entriesFromBC.lastOrNull()?.entryId ?: -1
         }
         mPersister.saveBlogEntries(entries)
+        val result = entries.toHashSet() + entriesFromBd
+
         mMainThreadExecutor.execute {
-            mUserBlogEntries.value = entries
+
+            mUserBlogEntries.value = result.toList()
+            Timber.e("mUserBlogEntries size = ${mUserBlogEntries.value?.size}")
         }
     }
 
@@ -447,7 +453,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mRequests.add(request)
         networkExecutor.execute {
             try {
-                val discussions = loadStories(limit, type, filter, 1024, startAuthor, startPermlink)
+                val discussions = loadDiscussions(limit, type, filter, 1024, startAuthor, startPermlink)
 
                 mMainThreadExecutor.execute {
                     val updatingFeed = convertFeedTypeToLiveData(type, filter)
@@ -498,7 +504,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             try {
                 mGolosApi.repostPost(discussionItem.author, discussionItem.permlink)
                 requestBlogEntriesUpdate(10)
+
+                val newStory = loadDiscussions(1, FeedType.BLOG, StoryFilter(userNameFilter = appUserData.value?.name.orEmpty()),
+                        1024, null, null).firstOrNull() ?: return@execute
+                val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = appUserData.value?.name.orEmpty()))
+
+
                 mMainThreadExecutor.execute {
+                    mUserBlogEntries.value = mUserBlogEntries.value.orEmpty() + GolosBlogEntry(discussionItem.author, mAuthLiveData.value?.name.orEmpty(), 0, discussionItem.permlink)
+                    comments.value = comments.value?.copy(items = newStory.toSingletoneList() + comments.value?.items.orEmpty())
                     addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.DONE, null))
                     completionHandler(Unit, null)
                 }
@@ -691,7 +705,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     val userName = mAuthLiveData.value?.name.orEmpty()
 
-                    val newStory = loadStories(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(userName)),
+                    val newStory = loadDiscussions(1, FeedType.BLOG, StoryFilter(userNameFilter = listOf(userName)),
                             1024, null, null).firstOrNull() ?: return@execute
 
                     val comments = convertFeedTypeToLiveData(FeedType.BLOG,
@@ -766,7 +780,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     if (!isUserLoggedIn()) return@execute
                     val userName = mAuthLiveData.value?.name.orEmpty()
 
-                    val newStory = loadStories(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(userName)),
+                    val newStory = loadDiscussions(1, FeedType.COMMENTS, StoryFilter(userNameFilter = listOf(userName)),
                             1024, null, null).firstOrNull() ?: return@execute
 
                     val comments = convertFeedTypeToLiveData(FeedType.COMMENTS,
@@ -1078,10 +1092,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         Timber.e(e)
         e.printStackTrace()
         mLogger?.log(e)
-    }
-
-    private fun canUserEditDiscussionItem(item: GolosDiscussionItem): Boolean {
-        return isUserLoggedIn() && item.author == mAuthLiveData.value?.name.orEmpty()
     }
 }
 

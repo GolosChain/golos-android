@@ -115,7 +115,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
             is GolosSubscribeEvent -> R.drawable.ic_subscribe_20dp
             is GolosUnSubscribeEvent -> R.drawable.ic_unsubscribe_20dp
             is GolosMentionEvent -> R.drawable.ic_avatar_20dp
-            is GolosRepostEvent -> R.drawable.ic_repost_20dp
+            is GolosRepostEvent -> R.drawable.ic_reposted_20dp
             is GolosWitnessVoteEvent -> R.drawable.ic_delegat_vote_20dp
             is GolosWitnessCancelVoteEvent -> R.drawable.ic_no_delegat_20dp
 

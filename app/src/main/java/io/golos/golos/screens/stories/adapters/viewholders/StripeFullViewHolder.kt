@@ -43,15 +43,14 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mDownVoteBtn: TextView = itemView.findViewById(R.id.down_vote_btn)
     private val mDownVoteIv: ImageView = itemView.findViewById(R.id.dizlike_ibtn)
     private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
-    private val mReblog: View = itemView.findViewById(R.id.reblog_ibtn)
+    private val mReblogBtn: ImageView = itemView.findViewById(R.id.reblog_ibtn)
+    private val mReblogProgress: View = itemView.findViewById(R.id.reblog_progress)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
     private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_downvote)
     private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
     private val mNickNameTv: TextView = itemView.findViewById(R.id.user_nick_name_tv)
-
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
-
 
     init {
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
@@ -59,7 +58,7 @@ class StripeFullViewHolder(parent: ViewGroup,
 
         mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
         mDownVoteBtn.setOnClickListener { onDownVoteClick.onClick(this) }
-        mReblog.setOnClickListener { onReblogClick.onClick(this) }
+        mReblogBtn.setOnClickListener { onReblogClick.onClick(this) }
 
         mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
         mUpvoteBtn.setOnClickListener { onUpVotersClick.onClick(this) }
@@ -110,6 +109,17 @@ class StripeFullViewHolder(parent: ViewGroup,
                 mBodyTextMarkwon.setViewVisible()
             } else {
                 mBodyTextMarkwon.setViewGone()
+            }
+
+            if (wrapper.isPostReposted) mReblogBtn.setImageResource(R.drawable.ic_reposted_20dp)
+            else mReblogBtn.setImageResource(R.drawable.ic_repost_20dp)
+
+            if (wrapper.repostStatus == UpdatingState.UPDATING) {
+                mReblogBtn.setViewInvisible()
+                mReblogProgress.setViewVisible()
+            } else {
+                mReblogBtn.setViewVisible()
+                mReblogProgress.setViewGone()
             }
 
         }
