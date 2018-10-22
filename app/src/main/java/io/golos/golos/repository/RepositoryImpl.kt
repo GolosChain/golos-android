@@ -82,6 +82,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private val mRepostingStates = MutableLiveData<Set<RepostingState>>()
 
+    private val mLastRepost = OneShotLiveData<Unit>()
+
 
     @WorkerThread
     private fun loadDiscussions(limit: Int,
@@ -183,6 +185,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         (mUsersRepository as UsersRepositoryImpl).setUp()
         prepareForLaunch()
     }
+
+
+    override val lastRepost: LiveData<Unit>
+        get() = mLastRepost
 
     override fun getUnreadEventsCount(): LiveData<Int> {
         return mGolosServices.getFreshEventsCount()
@@ -514,6 +520,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     mUserBlogEntries.value = mUserBlogEntries.value.orEmpty() + GolosBlogEntry(discussionItem.author, mAuthLiveData.value?.name.orEmpty(), 0, discussionItem.permlink)
                     comments.value = comments.value?.copy(items = newStory.toSingletoneList() + comments.value?.items.orEmpty())
                     addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.DONE, null))
+                    mLastRepost.value = Unit
                     completionHandler(Unit, null)
                 }
             } catch (e: java.lang.Exception) {

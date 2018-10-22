@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
+              android:layout_width="wrap_content"
+              android:layout_gravity="center"
               android:layout_height="wrap_content"
+              android:background="@color/white_black_toolbar_color"
+
               android:orientation="vertical">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginTop="40dp"
         android:text="@string/repost"
         android:textColor="@color/text_color_white_black"
         android:textSize="18sp"/>
@@ -16,36 +19,44 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginStart="@dimen/material_big"
-        android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="@dimen/material_big"
-
         android:gravity="center"
         android:text="@string/reblog_answer_text"
-        android:textColor="@color/font_gray_black"
+        android:textColor="@color/text_color_white_black"
         android:textSize="@dimen/font_medium"/>
 
-    <Button
+    <TextView
         android:id="@+id/reblog_btn"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/material_huge"
+        android:background="?selectableItemBackground"
+        android:gravity="center"
+        android:minWidth="100dp"
+        android:minHeight="40dp"
+        android:text="@string/make_reblog"
+
+        android:textColor="@color/text_color_white_black"
+        android:textSize="14sp"
+        />
+
+    <TextView
+        android:id="@+id/cancel_btn"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/margin_material_half"
-        android:text="@string/make_reblog"
-        android:textAllCaps="false"
-        android:textColor="@color/font_gray_black"
-        android:textSize="14sp"/>
-
-    <Button
-        android:id="@+id/cancel_btn"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/margin_material_small"
+        android:layout_marginBottom="24dp"
+        android:background="?selectableItemBackground"
+        android:gravity="center"
+        android:minWidth="100dp"
+        android:minHeight="40dp"
         android:text="@string/cancel_cancel_dialog"
-        android:textAllCaps="false"
-        android:textColor="@color/font_gray_black"
-        android:textSize="14sp"/>
+        android:textColor="@color/text_color_white_black"
+        android:textSize="14sp"
+        />
 </LinearLayout>

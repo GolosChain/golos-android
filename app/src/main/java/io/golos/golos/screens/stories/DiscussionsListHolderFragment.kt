@@ -75,7 +75,6 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
                         mPager.adapter?.notifyDataSetChanged()
                         mTabLo.setupWithViewPager(mPager)
                     }
-
                 }
             }
         })

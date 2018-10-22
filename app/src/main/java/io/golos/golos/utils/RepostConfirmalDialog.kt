@@ -7,22 +7,31 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.dialogs.GolosDialog
+import timber.log.Timber
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 19/10/2018.
  */
-class RepostConfirmalDialog() : GolosDialog() {
+class RepostConfirmalDialog : GolosDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.d_reblog_question, container, false)
-        v.findViewById<View>(R.id.reblog_btn).setOnClickListener {
-            (parentFragment as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
-                    ?: return@setOnClickListener)
-            (activity as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
-                    ?: return@setOnClickListener)
+        Timber.e("onCreateView")
+        v.findViewById<View>(R.id.reblog_btn).setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                Timber.e("clicked")
+                (parentFragment as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                        ?: return)
+                (activity as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                        ?: return)
+                dismiss()
+            }
+        })
+        v.findViewById<View>(R.id.cancel_btn).setOnClickListener {
+            Timber.e("clicke cancel")
             dismiss()
         }
-        v.findViewById<View>(R.id.cancel_btn).setOnClickListener { dismiss() }
+
         return v
     }
 
@@ -30,7 +39,7 @@ class RepostConfirmalDialog() : GolosDialog() {
         super.onStart()
         val d = dialog
         d?.let {
-            d.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            d.window?.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
     }
 

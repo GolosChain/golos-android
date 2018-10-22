@@ -286,7 +286,7 @@ fun Long.hoursElapsedFromTimeStamp(): Int {
 }
 
 
-fun createTimeLable(fromTimeStamp: Long, context: Context): String {
+fun createTimeLabel(fromTimeStamp: Long, context: Context): String {
     val mSdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
     return fromTimeStamp.hoursElapsedFromTimeStamp().let { elapsedHoursFromPostCreation ->

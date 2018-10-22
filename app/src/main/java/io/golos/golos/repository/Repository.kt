@@ -217,6 +217,8 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
 
     abstract val repostStates: LiveData<Map<String, RepostingState>>
 
+    abstract val lastRepost: LiveData<Unit>
+
 }
 
 interface ImageLoadRunnable : Runnable

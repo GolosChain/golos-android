@@ -54,7 +54,7 @@ abstract class StoriesViewHolder(resId: Int,
         }
 
 
-        getDateStampText().text = createTimeLable(story.created, itemView.context)
+        getDateStampText().text = createTimeLabel(story.created, itemView.context)
 
 
         val shownName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()

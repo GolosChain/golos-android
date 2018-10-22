@@ -1,17 +1,16 @@
 package io.golos.golos.screens.main_activity
 
 import android.animation.Animator
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import androidx.viewpager.widget.ViewPager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.viewpager.widget.ViewPager
 import io.golos.golos.R
 import io.golos.golos.notifications.GolosNotifications
 import io.golos.golos.notifications.NOTIFICATION_KEY
@@ -191,6 +190,10 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
 
         checkpreSelect(intent)
 
+        Repository.get.lastRepost.observe(this, Observer<Unit> {
+            if (it == null) return@Observer
+            RepostSuccesDialog.getInstance().show(supportFragmentManager, null)
+        })
     }
 
     override fun onNewIntent(intent: Intent?) {
