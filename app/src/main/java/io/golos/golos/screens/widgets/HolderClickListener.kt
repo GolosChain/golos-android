@@ -1,7 +1,5 @@
 package io.golos.golos.screens.widgets
 
-import androidx.recyclerview.widget.RecyclerView
-
 /**
  * Created by yuri on 20.02.18.
  */

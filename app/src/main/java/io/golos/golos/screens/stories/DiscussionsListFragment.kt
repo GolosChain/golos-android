@@ -135,7 +135,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 },
                 onUserClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onUserClick(story, activity)
+                        mViewModel?.onUserClick(story.story.author, activity ?: return)
                     }
                 },
                 onUpVotersClick = object : StoryWithCommentsClickListener {
@@ -150,7 +150,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 },
                 mRebloggedStoryAuthorlick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        mViewModel?.onReblogAuthorClick(story, activity ?: return)
+                        mViewModel?.onUserClick(story.authorAccountInfo?.userName
+                                ?: return, activity ?: return)
                     }
                 },
                 feedCellSettings = mViewModel?.cellViewSettingLiveData?.value

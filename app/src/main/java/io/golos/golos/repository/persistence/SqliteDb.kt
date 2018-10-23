@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import eu.bittrade.libs.golosj.base.models.VoteLight
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
-import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.*
 import java.util.*
@@ -124,15 +123,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
                 .mapKeys { it.key.request }
                 .mapValues {
-                    val feed = it.value
-                    if (it.key.feedType != FeedType.BLOG) {
-                        if (feed.items.any { it.rootStory.rebloggedBy.isNotEmpty() })
-                            feed.copy(items = feed.items.map { storyWithComments ->
-                                if (storyWithComments.rootStory.rebloggedBy.isNotEmpty()) {
-                                    storyWithComments.copy(rootStory = storyWithComments.rootStory.copy(rebloggedBy = ""))
-                                } else storyWithComments
-                            }) else feed
-                    } else feed
+                    it.value
                 }
     }
 
@@ -441,7 +432,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private const val created = "created"
         private const val isUserUpvotedOnThis = "isUserUpvotedOnThis"
         private const val type = "type"
-        private const val firstRebloggedBy = "rebloggedBy"
         private const val cleanedFromImages = "cleanedFromImages"
         private const val childrenCount = "childrenCount"
         const val upvotes = "upvotes"
@@ -455,7 +445,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$votesNum integer, $votesRshares integer, $commentsCount integer, " +
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +
                 "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
-                "$created integer, $isUserUpvotedOnThis integer, $type text, $firstRebloggedBy text," +
+                "$created integer, $isUserUpvotedOnThis integer, $type text," +
                 "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text, $upvotes integer," +
                 "$downvotes integer)"
 
@@ -490,7 +480,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.created, it.created)
                 values.put(this.type, it.type.name)
                 values.put(this.bodyLength, it.bodyLength)
-                values.put(this.firstRebloggedBy, it.rebloggedBy)
                 values.put(this.cleanedFromImages, it.cleanedFromImages)
                 values.put(this.childrenCount, it.childrenCount)
                 values.put(this.votesNum, it.votesNum)
@@ -567,7 +556,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getLong(created),
                             arrayListOf(),
                             if (itemType != null) GolosDiscussionItem.ItemType.valueOf(itemType) else GolosDiscussionItem.ItemType.PLAIN,
-                            cursor.getString(firstRebloggedBy) ?: "",
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
 
@@ -641,7 +629,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getLong(created),
                             arrayListOf(),
                             if (itemType != null) GolosDiscussionItem.ItemType.valueOf(itemType) else GolosDiscussionItem.ItemType.PLAIN,
-                            cursor.getString(firstRebloggedBy) ?: "",
                             cursor.getString(cleanedFromImages) ?: "",
                             arrayListOf())
 

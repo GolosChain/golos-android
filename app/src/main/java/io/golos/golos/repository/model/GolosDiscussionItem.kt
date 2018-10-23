@@ -13,7 +13,7 @@ data class GolosDiscussionItem constructor(val url: String,
                                            val images: MutableList<String>,
                                            val links: List<String>,
                                            val votesNum: Int,
-                                           val upvotesNum:Int,
+                                           val upvotesNum: Int,
                                            val downvotesNum: Int,
                                            val votesRshares: Long,
                                            val commentsCount: Int,
@@ -33,14 +33,13 @@ data class GolosDiscussionItem constructor(val url: String,
                                            val created: Long,
                                            val activeVotes: MutableList<VoteLight>,
                                            var type: ItemType = ItemType.PLAIN,
-                                           val rebloggedBy: String,
                                            var cleanedFromImages: String,
                                            val parts: MutableList<Row> = ArrayList()) : Cloneable {
 
     companion object {
         val emptyItem = GolosDiscussionItem("", 0L, "", "", emptyList(), arrayListOf(), listOf(),
-                0, 0,0,0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
-                activeVotes = arrayListOf(), rebloggedBy = "", childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "")
+                0, 0, 0, 0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
+                activeVotes = arrayListOf(), childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "")
     }
 
 
@@ -76,7 +75,6 @@ data class GolosDiscussionItem constructor(val url: String,
         if (body != other.body) return false
         if (author != other.author) return false
         if (format != other.format) return false
-        if (rebloggedBy != other.rebloggedBy) return false
         if (upvotesNum != other.upvotesNum) return false
         if (downvotesNum != other.downvotesNum) return false
 
@@ -98,7 +96,6 @@ data class GolosDiscussionItem constructor(val url: String,
         result = 31 * result + title.hashCode()
         result = 31 * result + categoryName.hashCode()
         result = 31 * result + votesNum
-        result = 31 * result + rebloggedBy.hashCode()
         result = 31 * result + commentsCount
         result = 31 * result + permlink.hashCode()
         result = 31 * result + upvotesNum.hashCode()

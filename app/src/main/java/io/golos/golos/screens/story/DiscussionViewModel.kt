@@ -104,11 +104,18 @@ class DiscussionViewModel : ViewModel() {
                 val currentUser = mRepository.appUserData.value
                 val exchangeValues = mRepository.getExchangeLiveData().value
                         ?: ExchangeValues.nullValues
-                val repostedPosts = mRepository.repostedBlogEntries.value.orEmpty()
-                val repostUpdateStates = mRepository.repostStates.value.orEmpty()
+                val repostedPosts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
+                val repostUpdateStates = mRepository.currentUserRepostStates.value.orEmpty()
 
-                val rootStoryWrapper = createStoryWrapper(story, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
+                var rootStoryWrapper = createStoryWrapper(story, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
                         false, null)
+
+                if (feedType == FeedType.BLOG) {
+                    val blogOwner = filter?.userNameFilter?.firstOrNull()
+                    if (blogOwner != null && blogOwner != rootStoryWrapper.story.author) rootStoryWrapper =
+                            rootStoryWrapper.copy(authorAccountInfo = accounts[blogOwner])
+                }
+
                 val comments = it.getFlataned().map {
                     createStoryWrapper(it, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
                             false, null)

@@ -24,73 +24,110 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:background="@color/story_toolbar_color"
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp"
                 app:elevation="1dp"
-                app:navigationIcon="@drawable/ic_chevron_left_24dp"/>
+                app:navigationIcon="@drawable/ic_chevron_left_24dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="56dp">
-
-                <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/avatar_iv"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-
-                    android:foreground="@drawable/img_round_ripple_gray"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:riv_corner_radius="30dp"
-                    app:srcCompat="@drawable/ic_person_gray_24dp"/>
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/user_name"
-                    style="@style/TitleUserNameStyle"
-                    android:background="@drawable/img_round_ripple_gray"
-                    android:clickable="true"
-                    android:minWidth="120dp"
-                    android:textSize="@dimen/font_small"
-                    app:layout_constraintStart_toEndOf="@id/avatar_iv"
-                    app:layout_constraintTop_toTopOf="@id/avatar_iv"/>
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/reblogged_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:drawablePadding="4dp"
-                    android:minWidth="120dp"
-                    android:textColor="@color/textColorP"
-                    android:textSize="@dimen/font_small"
-                    android:visibility="invisible"
-                    app:layout_constraintStart_toEndOf="@id/user_name"
-                    app:layout_constraintTop_toTopOf="@id/user_name"/>
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/blog_name_tv"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.BlogButton"
-                    android:layout_marginTop="-3dp"
-                    android:background="@drawable/img_round_ripple_gray"
-                    android:clickable="true"
-                    android:includeFontPadding="false"
-                    android:padding="0dp"
-                    android:textColor="@color/gray_82"
-                    android:textSize="@dimen/font_small"
-                    app:layout_constraintStart_toEndOf="@id/avatar_iv"
-                    app:layout_constraintTop_toBottomOf="@+id/user_name"/>
-
-                <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/share_btn"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless"
-                    android:layout_width="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="start"
-                    android:visibility="gone"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:srcCompat="@drawable/ic_share_gray_20dp"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    >
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:id="@+id/avatar_iv"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+
+                        android:foreground="@drawable/img_round_ripple_gray"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:riv_corner_radius="30dp"
+                        app:srcCompat="@drawable/ic_person_gray_24dp"/>
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/user_name"
+                        style="@style/TitleUserNameStyle"
+                        android:layout_marginStart="@dimen/margin_material_half"
+                        android:background="@drawable/img_round_ripple_gray"
+                        android:clickable="true"
+
+                        android:textSize="@dimen/font_small"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toEndOf="@id/avatar_iv"
+                        app:layout_constraintTop_toTopOf="@id/avatar_iv"/>
+
+
+                    <ImageView
+                        android:id="@+id/bullet"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/blog_name_tv"
+                        app:layout_constraintStart_toEndOf="@id/user_name"
+                        app:layout_constraintTop_toTopOf="@+id/blog_name_tv"
+                        app:srcCompat="@drawable/ic_bullet_10dp"/>
+
+                    <TextView
+                        android:id="@+id/blog_name_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/quater"
+                        android:layout_marginEnd="@dimen/margin_material"
+                        android:background="@drawable/img_round_ripple_gray"
+                        android:ellipsize="end"
+                        android:gravity="start|center_vertical"
+                        android:includeFontPadding="false"
+                        android:lines="1"
+                        android:textColor="@color/gray_82"
+                        android:textSize="@dimen/font_small"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/bullet"
+                        app:layout_constraintTop_toTopOf="@id/user_name"/>
+
+                    <TextView
+                        android:id="@+id/user_nick_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/gray_82"
+                        android:textSize="@dimen/font_small"
+                        app:layout_constraintStart_toStartOf="@id/user_name"
+                        app:layout_constraintTop_toBottomOf="@id/user_name"/>
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/reblogged_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/margin_material"
+                        android:drawablePadding="4dp"
+                        android:gravity="start|center_vertical"
+                        android:text=""
+                        android:textColor="@color/gray_82"
+                        android:textSize="@dimen/font_small"
+                        android:layout_marginStart="6dp"
+                        android:visibility="invisible"
+                        app:layout_constraintBottom_toBottomOf="@id/user_nick_tv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/user_nick_tv"/>
+
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/share_btn"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="start"
+                        android:visibility="gone"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:srcCompat="@drawable/ic_share_gray_20dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
 

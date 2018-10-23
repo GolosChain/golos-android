@@ -53,7 +53,7 @@ object DiscussionItemFactory {
                         ?: 0L, author = author, parentPermlink = parentPermlink,
                 parentAuthor = discussion.parentAuthor.name ?: "", childrenCount = childrenCount,
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
-                rebloggedBy = firstRebloggedBy, cleanedFromImages = cleanedFromImages,
+                cleanedFromImages = cleanedFromImages,
                 format = metadata.format,
                 links = metadata.links,
                 images = metadata.images,
@@ -105,7 +105,7 @@ object DiscussionItemFactory {
                 commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
                 bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, parentAuthor = discussion.parentAuthor
                 ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated,
-                created = created, rebloggedBy = firstRebloggedBy,
+                created = created,
                 cleanedFromImages = cleanedFromImages, format = metadata.format,
                 links = metadata.links,
                 images = metadata.images,

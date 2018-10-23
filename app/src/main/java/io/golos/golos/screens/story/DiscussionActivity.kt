@@ -48,6 +48,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     private lateinit var mUserName: TextView
     private lateinit var mRebloggedBy: TextView
     private lateinit var mTagName: TextView
+    private lateinit var mUserNick: TextView
     private lateinit var mTagSubscribeBtn: Button
     private lateinit var mBlogNameTv: TextView
     private lateinit var mTitleTv: TextView
@@ -124,6 +125,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 mSwipeToRefresh.setRefreshingS(it.isLoading)
 
                 val story = it.storyTree.rootWrapper.story
+                val account = it.storyTree.rootWrapper.authorAccountInfo
 
                 val ets = if (story.parts.isEmpty())
                     StoryParserToRows.parse(story, true).toArrayList() else story.parts
@@ -156,7 +158,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
 
                     mAvatar.visibility = View.VISIBLE
-                    mUserName.text = story.author
+
                     mBlogNameTv.visibility = View.VISIBLE
                     mNameOfAuthorInFollowLo.text = story.author.capitalize()
 
@@ -177,9 +179,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
                         mAvatarOfAuthorInFollowLo.setImageResource(R.drawable.ic_person_gray_52dp)
                     }
-                    mUserName.setOnClickListener {
-                        mViewModel.onUserClick(this, mUserName.text.toString())
-                    }
+
                     mAvatarOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mNameOfAuthorInFollowLo.setOnClickListener { mUserName.callOnClick() }
                     mAvatar.setOnClickListener { mUserName.callOnClick() }
@@ -213,11 +213,37 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 }
 
+                if (mUserName.text.toString() != account?.userName) {
+                    mUserName.text = account?.shownName.orEmpty().capitalize()
+                }
+                mUserNick.text = story.author
+
+
+                if (account != null && account.userName != story.author) {
+
+                    mRebloggedBy.setViewVisible()
+                    mRebloggedBy.text = account.userName
+                    mRebloggedBy.setOnClickListener {
+                        mViewModel.onUserClick(this, account.userName)
+                    }
+                    mUserNick.setOnClickListener { mViewModel.onUserClick(this, story.author) }
+                    mUserName.setOnClickListener {
+                        mViewModel.onUserClick(this, account.userName)
+
+                    }
+                } else {
+                    mUserName.setOnClickListener {
+                        mViewModel.onUserClick(this, story.author)
+                    }
+                    mUserNick.setOnClickListener { mUserName.callOnClick() }
+                    mRebloggedBy.setViewInvisible()
+                }
 
                 val tagName = LocalizedTag.convertToLocalizedName(story.categoryName)
                 if (mBlogNameTv.text.isEmpty()) {
                     mBlogNameTv.text = tagName
                 }
+
                 if (mTagName.text.isEmpty()) {
                     mTagName.text = tagName.capitalize()
                 }
@@ -230,6 +256,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 }
                 if (!mBlogNameTv.hasOnClickListeners()) {
                     mBlogNameTv.setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
+                    findViewById<View>(R.id.bullet).setOnClickListener { mViewModel.onTagClick(this, story.categoryName) }
                 }
                 if (it.errorCode != null) {
                     if (it.errorCode.localizedMessage != null) it.errorCode.localizedMessage.let {
@@ -415,6 +442,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mNameOfAuthorInFollowLo = findViewById(R.id.author_name_in_follow_lo)
         mAuthorSubscribeButton = findViewById(R.id.follow_btn)
         mAuthorSubscribeProgress = findViewById(R.id.user_subscribe_progress)
+        mUserNick = findViewById(R.id.user_nick_tv)
         mBottomImagesRecycler = findViewById(R.id.additional_images_recycler)
         mVoteLo = findViewById(R.id.vote_lo)
         mAppBar = findViewById(R.id.appbar)
@@ -434,7 +462,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 onEditClick = { mViewModel.onEditClick(this, it.story) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mBlogNameTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_bullet_10dp), null, null, null)
         mCommentsCountBtn.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_chat_gray_20dp), null, null, null)
         mVotesIv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_person_gray_20dp), null, null, null)
         mCommentsCountBtn.visibility = View.INVISIBLE

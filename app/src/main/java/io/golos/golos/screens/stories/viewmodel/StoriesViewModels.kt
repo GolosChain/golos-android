@@ -185,7 +185,7 @@ abstract class DiscussionsViewModel : ViewModel() {
 
                 val newStories = mDiscussionsLiveData.value?.items?.map {
                     val story = it.story
-                    it.copy(authorAccountInfo = if (story.rebloggedBy.isNotEmpty()) usersMap[story.rebloggedBy] else usersMap[story.author])
+                    changeWrapperAccountInfoIfNeeded(it.copy(authorAccountInfo = usersMap[story.author]))
                 }.orEmpty()
 
 
@@ -217,8 +217,8 @@ abstract class DiscussionsViewModel : ViewModel() {
 
         @WorkerThread
         fun createRepostState(): DiscussionsViewState? {
-            val reposts = mRepository.repostedBlogEntries.value.orEmpty()
-            val repostStates = mRepository.repostStates.value.orEmpty()
+            val reposts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
+            val repostStates = mRepository.currentUserRepostStates.value.orEmpty()
             val currentState = mDiscussionsLiveData.value
             return currentState?.copy(items = currentState.items.map { wrapper ->
                 wrapper.copy(isPostReposted = reposts.containsKey(wrapper.story.permlink),
@@ -227,13 +227,13 @@ abstract class DiscussionsViewModel : ViewModel() {
             })
         }
 
-        mDiscussionsLiveData.addSource(mRepository.repostedBlogEntries) { repostedEntries ->
+        mDiscussionsLiveData.addSource(mRepository.currentUserRepostedBlogEntries) { repostedEntries ->
             if (repostedEntries == null) return@addSource
             mExecutor.execute {
                 propogateNewState(createRepostState() ?: return@execute)
             }
         }
-        mDiscussionsLiveData.addSource(mRepository.repostStates) { repostState ->
+        mDiscussionsLiveData.addSource(mRepository.currentUserRepostStates) { repostState ->
             if (repostState == null) return@addSource
             mExecutor.execute {
                 propogateNewState(createRepostState() ?: return@execute)
@@ -255,7 +255,6 @@ abstract class DiscussionsViewModel : ViewModel() {
                                 it.copy(voteStatus = it.story.isUserVotedOnThis(applicationUser.name))
                             })
                 }
-
                 propogateNewState(newState)
             }
 
@@ -297,8 +296,8 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.removeSource(mRepository.votingStates)
         mDiscussionsLiveData.removeSource(mRepository.appUserData)
         mDiscussionsLiveData.removeSource(mRepository.getExchangeLiveData())
-        mDiscussionsLiveData.removeSource(mRepository.repostedBlogEntries)
-        mDiscussionsLiveData.removeSource(mRepository.repostStates)
+        mDiscussionsLiveData.removeSource(mRepository.currentUserRepostedBlogEntries)
+        mDiscussionsLiveData.removeSource(mRepository.currentUserRepostStates)
 
         if (mObserver != null) {
             Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
@@ -327,24 +326,33 @@ abstract class DiscussionsViewModel : ViewModel() {
         val currentUser = mRepository.appUserData.value ?: ApplicationUser("", false)
         val voteStatuses = mRepository.votingStates.value.orEmpty()
         val exchangeValues = mRepository.getExchangeLiveData().value ?: ExchangeValues.nullValues
-        val repostedPosts = mRepository.repostedBlogEntries.value.orEmpty()
-        val repostUpdateStates = mRepository.repostStates.value.orEmpty()
+        val repostedPosts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
+        val repostUpdateStates = mRepository.currentUserRepostStates.value.orEmpty()
 
 
         val state = DiscussionsViewState(false,
                 !items.isFeedActual,
                 items.items.map {
                     val discussionItem = it.rootStory
-                    createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
-                            repostUpdateStates, currentUser, exchangeValues, true, KnifeHtmlizer)
+                    changeWrapperAccountInfoIfNeeded(createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
+                            repostUpdateStates, currentUser, exchangeValues, true, KnifeHtmlizer))
                 },
                 null, null)
 
         mRepository.requestUsersAccountInfoUpdate(items.items.asSequence()
                 .map { it.rootStory.author }
-                .plus(items.items.asSequence().filter { it.rootStory.rebloggedBy.isNotEmpty() }.map { it.rootStory.rebloggedBy })
                 .filter { storyAuthor -> !usersMap.containsKey(storyAuthor) }.toList())
         return state
+    }
+
+    private fun changeWrapperAccountInfoIfNeeded(wrapper: StoryWrapper): StoryWrapper {
+        if (type != FeedType.BLOG) return wrapper
+        val accInfos = mRepository.getGolosUserAccountInfos()
+        val blogOwner = filter?.userNameFilter?.firstOrNull().orEmpty()
+        if (blogOwner.isEmpty()) return wrapper
+        else {
+            return wrapper.copy(authorAccountInfo = accInfos.value.orEmpty()[blogOwner])
+        }
     }
 
     fun repost(story: StoryWrapper) {
@@ -476,11 +484,9 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
-    fun onReblogAuthorClick(story: StoryWrapper, activity: FragmentActivity) {
+    fun onUserClick(userName: String, activity: FragmentActivity) {
 
-        val reblogger = story.story.rebloggedBy
-        if (reblogger.isEmpty()) return
-        UserProfileActivity.start(activity, reblogger)
+        UserProfileActivity.start(activity, userName)
     }
 
 
@@ -515,10 +521,6 @@ abstract class DiscussionsViewModel : ViewModel() {
                     || feedType == FeedType.PROMO) feedType = FeedType.NEW
             FilteredStoriesActivity.start(it, tagName = story.story.categoryName)
         }
-    }
-
-    fun onUserClick(story: StoryWrapper, context: Context?) {
-        UserProfileActivity.start(context ?: return, story.story.author)
     }
 
     fun onVotersClick(story: StoryWrapper, context: Context?) {

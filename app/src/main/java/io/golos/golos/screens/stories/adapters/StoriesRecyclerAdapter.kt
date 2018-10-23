@@ -109,7 +109,7 @@ class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickList
                         onTagClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 },
-                onAvatar = object : HolderClickListener {
+                onAvatarClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
                     }

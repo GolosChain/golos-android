@@ -76,15 +76,16 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
         val wrapper = newState?.stripe
 
+        val accountInfo = newState?.stripe?.authorAccountInfo
+
         if (newState != null && wrapper != null) {
 
-            val reblogger = wrapper.story.rebloggedBy
-            if (reblogger.isEmpty()) {
-                mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
-                mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
-            } else {
+            if (accountInfo != null && accountInfo.userName != wrapper.story.author) {//this is reblog
                 mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
                 mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
+            } else {
+                mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
+                mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
             }
 
 

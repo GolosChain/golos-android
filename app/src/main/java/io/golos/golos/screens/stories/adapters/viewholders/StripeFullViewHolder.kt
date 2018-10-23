@@ -22,7 +22,7 @@ class StripeFullViewHolder(parent: ViewGroup,
                            private val onCardClick: HolderClickListener,
                            private val onCommentsClick: HolderClickListener,
                            private val onBlogClick: HolderClickListener,
-                           private val onAvatar: HolderClickListener,
+                           private val onAvatarClick: HolderClickListener,
                            private val onRebloggerClick: HolderClickListener,
                            private val onUpVotersClick: HolderClickListener,
                            private val onDownVotersClick: HolderClickListener
@@ -64,11 +64,12 @@ class StripeFullViewHolder(parent: ViewGroup,
         mUpvoteBtn.setOnClickListener { onUpVotersClick.onClick(this) }
         mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
-        mAvatar.setOnClickListener { onAvatar.onClick(this) }
-        mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
-        mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
+        mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
+        mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
+        mNickNameTv.setOnClickListener { onAvatarClick.onClick(this) }
         mDownVoteIv.setOnClickListener { onDownVoteClick.onClick(this) }
         mDownVoteBtn.setOnClickListener { onDownVotersClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
@@ -81,17 +82,16 @@ class StripeFullViewHolder(parent: ViewGroup,
 
             val wrapper = newState.stripe
 
-            val reblogger = wrapper.story.rebloggedBy
-            if (reblogger.isEmpty()) {
-                mUserNameTv.setOnClickListener { onAvatar.onClick(this) }
-                mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
-                mAvatar.setOnClickListener { onAvatar.onClick(this) }
-            } else {
+            val accountInfo = newState.stripe.authorAccountInfo
+
+            if (accountInfo != null && accountInfo.userName != wrapper.story.author) {//this is reblog
                 mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
                 mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
-                mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
-                mNickNameTv.setOnClickListener { onAvatar.onClick(this) }
+            } else {
+                mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
+                mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
             }
+
             if (newState.stripe.story.type != GolosDiscussionItem.ItemType.IMAGE_FIRST) {
                 mMainImageBig.setViewGone()
                 mMainImageBig.setImageDrawable(null)

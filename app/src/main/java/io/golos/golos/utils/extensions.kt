@@ -121,7 +121,7 @@ fun createStoryWrapper(discussionItem: GolosDiscussionItem,
             if (currentUser == null || !currentUser.isLogged) GolosDiscussionItem.UserVoteType.NOT_VOTED_OR_ZERO_WEIGHT else discussionItem.isUserVotedOnThis(currentUser.name),
             if (currentUser == null || !currentUser.isLogged) false else repostedBlogEntries.containsKey(discussionItem.permlink),
             repostStates[discussionItem.permlink]?.updatingState ?: UpdatingState.DONE,
-            if (discussionItem.rebloggedBy.isEmpty()) golosUsersAccounts[discussionItem.author] else golosUsersAccounts[discussionItem.rebloggedBy],
+            golosUsersAccounts[discussionItem.author],
             exchangeValues,
             currentUser != null && discussionItem.author == currentUser.name,
             if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null)

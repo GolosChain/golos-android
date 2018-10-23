@@ -12,7 +12,6 @@ import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.utils.*
 import java.util.*
@@ -68,9 +67,6 @@ interface StoriesProvider {
     @MainThread
     abstract fun cancelVote(comment: GolosDiscussionItem)
 
-    @MainThread
-    abstract fun requestStoryUpdate(story: StoryWithComments,
-                                    completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread
     abstract fun requestStoryUpdate(author: String,
@@ -199,6 +195,9 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     @MainThread
     abstract fun repost(discussionItem: GolosDiscussionItem, completionHandler: (Unit, GolosError?) -> Unit)
 
+    @MainThread
+    abstract fun getBlogEntriesFor(user: String): LiveData<List<GolosBlogEntry>>
+
     fun getShareStoryLink(item: GolosDiscussionItem): String {
         return "${BuildConfig.BASE_URL}${item.categoryName}/@${item.author}/${item.permlink}"
     }
@@ -213,9 +212,9 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
 
     abstract val votingStates: LiveData<List<GolosDiscussionItemVotingState>>
 
-    abstract val repostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
+    abstract val currentUserRepostedBlogEntries: LiveData<Map<String, GolosBlogEntry>>
 
-    abstract val repostStates: LiveData<Map<String, RepostingState>>
+    abstract val currentUserRepostStates: LiveData<Map<String, RepostingState>>
 
     abstract val lastRepost: LiveData<Unit>
 

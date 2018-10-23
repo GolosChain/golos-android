@@ -44,6 +44,7 @@ abstract class StoriesViewHolder(resId: Int,
                                           oldState: StripeWrapper?) {
         val story = newState?.stripe?.story
         val wrapper = newState?.stripe
+        val accinfo = wrapper?.authorAccountInfo
 
         if (newState == null || wrapper == null || story == null) return
 
@@ -65,12 +66,13 @@ abstract class StoriesViewHolder(resId: Int,
         }
         getUserNickTv().text = story.author
 
-        if (story.rebloggedBy.isNotEmpty()) {
+        if (accinfo != null && story.author != accinfo.userName) {
             getReblogedByTv().setViewVisible()
-            getReblogedByTv().text = story.rebloggedBy
+            getReblogedByTv().text = accinfo.userName
         } else {
             getReblogedByTv().setViewGone()
         }
+
 
         if (story.title.length > 2) {
             getTitleTv().text = story.title.capitalize()
