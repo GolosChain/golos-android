@@ -12,7 +12,7 @@ import timber.log.Timber
 /**
  * Created by yuri yurivladdurain@gmail.com on 19/10/2018.
  */
-class RepostConfirmalDialog : GolosDialog() {
+class ReblogConfirmalDialog : GolosDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.d_reblog_question, container, false)
@@ -20,9 +20,9 @@ class RepostConfirmalDialog : GolosDialog() {
         v.findViewById<View>(R.id.reblog_btn).setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 Timber.e("clicked")
-                (parentFragment as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                (parentFragment as? OnReblogConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
                         ?: return)
-                (activity as? OnRepostConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                (activity as? OnReblogConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
                         ?: return)
                 dismiss()
             }
@@ -45,11 +45,11 @@ class RepostConfirmalDialog : GolosDialog() {
 
     companion object {
         fun getInstance(id: Long): DialogFragment {
-            return RepostConfirmalDialog().apply { arguments = bundleOf("id" toN id) }
+            return ReblogConfirmalDialog().apply { arguments = bundleOf("id" toN id) }
         }
     }
 
-    interface OnRepostConfirmed {
+    interface OnReblogConfirmed {
         fun onConfirmed(id: Long)
     }
 }

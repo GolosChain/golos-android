@@ -96,7 +96,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
     private val mText: TextView = itemView.findViewById(R.id.text)
     private val mUsernameTv: TextView = itemView.findViewById(R.id.username_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
-    private val mUpvoteBtn: Button = itemView.findViewById(R.id.upvote_btn)
+    private val mUpvoteBtn: Button = itemView.findViewById(R.id.footer_upvote_btn)
     private val mImage: ImageView = itemView.findViewById(R.id.image)
     private val mAnswerIbtn: Button = itemView.findViewById(R.id.answer_btn)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
@@ -109,7 +109,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
         mText.movementMethod = GolosMovementMethod.instance
         mTimeTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_access_time_gray_24dp), null, null, null)
         mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_18_gray), null, null, null)
-        mVotesIv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_profile_outline_gray_16dp), null, null, null)
+        mVotesIv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_outline), null, null, null)
     }
 
     var state: CommentHolderState? = null

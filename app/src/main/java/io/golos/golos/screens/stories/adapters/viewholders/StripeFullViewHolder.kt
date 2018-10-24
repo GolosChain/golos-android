@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import io.golos.golos.R
@@ -12,6 +11,7 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.screens.editor.knife.KnifeParser
 import io.golos.golos.screens.editor.knife.SpanFactory
 import io.golos.golos.screens.stories.adapters.StripeWrapper
+import io.golos.golos.screens.widgets.FooterView
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.*
 
@@ -38,16 +38,8 @@ class StripeFullViewHolder(parent: ViewGroup,
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mBodyTextMarkwon: TextView = itemView.findViewById(R.id.text)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image_main)
-    private val mUpvoteBtn: TextView = itemView.findViewById(R.id.upvote_btn)
-    private val mUpvoteIv: ImageView = itemView.findViewById(R.id.upvote_ibtn)
-    private val mDownVoteBtn: TextView = itemView.findViewById(R.id.down_vote_btn)
-    private val mDownVoteIv: ImageView = itemView.findViewById(R.id.dizlike_ibtn)
-    private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
-    private val mReblogBtn: ImageView = itemView.findViewById(R.id.reblog_ibtn)
-    private val mReblogProgress: View = itemView.findViewById(R.id.reblog_progress)
-    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
-    private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_downvote)
-    private val mCommentsButton: TextView = itemView.findViewById(R.id.comments_tv)
+
+    private val mFooterView = itemView.findViewById<FooterView>(R.id.footer)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
     private val mNickNameTv: TextView = itemView.findViewById(R.id.user_nick_name_tv)
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
@@ -56,24 +48,25 @@ class StripeFullViewHolder(parent: ViewGroup,
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
 
-        mCommentsButton.setOnClickListener { onCommentsClick.onClick(this) }
-        mDownVoteBtn.setOnClickListener { onDownVoteClick.onClick(this) }
-        mReblogBtn.setOnClickListener { onReblogClick.onClick(this) }
+        mFooterView.commentsCountTextView.setOnClickListener { onCommentsClick.onClick(this) }
+        mFooterView.dizLikeImageView.setOnClickListener { onDownVoteClick.onClick(this) }
+        mFooterView.reblogImageView.setOnClickListener { onReblogClick.onClick(this) }
 
         mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
-        mUpvoteBtn.setOnClickListener { onUpVotersClick.onClick(this) }
-        mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
+        mFooterView.upvoteText.setOnClickListener { onUpVotersClick.onClick(this) }
+        mFooterView.upvoteImageButton.setOnClickListener { onUpvoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
         mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
         mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
         mNickNameTv.setOnClickListener { onAvatarClick.onClick(this) }
-        mDownVoteIv.setOnClickListener { onDownVoteClick.onClick(this) }
-        mDownVoteBtn.setOnClickListener { onDownVotersClick.onClick(this) }
+        mFooterView.dizLikeImageView.setOnClickListener { onDownVoteClick.onClick(this) }
+        mFooterView.dizLikeCountTextView.setOnClickListener { onDownVotersClick.onClick(this) }
         mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
         itemView.setOnClickListener { onCardClick.onClick(this) }
+        mFooterView.voteCountTextView.setViewGone()
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -111,23 +104,17 @@ class StripeFullViewHolder(parent: ViewGroup,
                 mBodyTextMarkwon.setViewGone()
             }
 
-            if (wrapper.isPostReposted) mReblogBtn.setImageResource(R.drawable.ic_reposted_20dp)
-            else mReblogBtn.setImageResource(R.drawable.ic_repost_20dp)
+            if (wrapper.isPostReposted) mFooterView.reblogImageView.setImageResource(R.drawable.ic_reposted_20dp)
+            else mFooterView.reblogImageView.setImageResource(R.drawable.ic_repost_20dp)
 
-            if (wrapper.repostStatus == UpdatingState.UPDATING) {
-                mReblogBtn.setViewInvisible()
-                mReblogProgress.setViewVisible()
-            } else {
-                mReblogBtn.setViewVisible()
-                mReblogProgress.setViewGone()
-            }
+
+            mFooterView.setReblogProgress(wrapper.repostStatus == UpdatingState.UPDATING)
 
         }
     }
 
     override fun setUpTheme() {
         super.setUpTheme()
-        mCommentsButton.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_comments_20dp), null, null, null)
         mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
     }
 
@@ -144,11 +131,11 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun getMoneyText(): TextView {
-        return mMoneyTv
+        return mFooterView.moneyCountTextView
     }
 
     override fun getDownVoteText(): TextView {
-        return mDownVoteBtn
+        return mFooterView.dizLikeCountTextView
     }
 
     override fun getMainImage(): ImageView {
@@ -156,19 +143,19 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun getUpvoteIv(): ImageView {
-        return mUpvoteIv
+        return mFooterView.upvoteImageButton
     }
 
     override fun getDownVotwProgress(): View {
-        return mDownVotingProgress
+        return mFooterView.dizLikeProgress
     }
 
     override fun getUpvoteProgress(): View {
-        return mVotingProgress
+        return mFooterView.upvoteProgresss
     }
 
     override fun getDownvoteIv(): ImageView {
-        return mDownVoteIv
+        return mFooterView.dizLikeImageView
     }
 
     override fun getTitleTv(): TextView {
@@ -176,7 +163,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun getCommentsTv(): TextView {
-        return mCommentsButton
+        return mFooterView.commentsCountTextView
     }
 
     override fun getShownUserNameTv(): TextView {
@@ -196,7 +183,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun getUpvoteText(): TextView {
-        return mUpvoteBtn
+        return mFooterView.upvoteText
     }
 
     override fun showImageIfNotImageFirst(): Boolean {

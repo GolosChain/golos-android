@@ -164,144 +164,13 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="text, image_main, title "/>
 
-    <com.google.android.flexbox.FlexboxLayout
-        android:id="@+id/flex_lo"
+    <io.golos.golos.screens.widgets.FooterView
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:alignContent="center"
-        app:flexWrap="wrap"
-        app:justifyContent="space_between"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/barrier"
-        >
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <FrameLayout
-                android:id="@+id/upvote_lo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier"
-                >
-
-                <ImageButton
-                    android:id="@+id/upvote_ibtn"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="@drawable/ripple_oval"
-                    />
-
-
-                <TextView
-                    android:id="@+id/upvote_btn"
-                    style="@style/StripeBtn"
-                    android:layout_marginStart="36dp"
-                    android:paddingTop="@dimen/quater"
-
-                    />
-
-                <ProgressBar
-                    android:id="@+id/progress_upvote"
-                    style="@style/StripeCardProgress"
-                    />
-            </FrameLayout>
-
-
-            <TextView
-                android:id="@+id/money_tv"
-                style="@style/StripeBtn"
-                android:layout_width="wrap_content"
-
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="2dp"
-                android:layout_marginTop="2dp"
-                android:background="@drawable/shape_rect_gray_stroke"
-                android:minHeight="0dp"
-                android:paddingStart="@dimen/margin_material_half"
-                android:paddingTop="2dp"
-                android:paddingEnd="@dimen/margin_material_half"
-                android:paddingBottom="2dp"
-
-                />
-        </LinearLayout>
-
-
-        <FrameLayout
-            android:id="@+id/dizlike_lo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            >
-
-            <ImageButton
-                android:id="@+id/dizlike_ibtn"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/ripple_oval"
-
-
-                />
-
-
-            <TextView
-                android:id="@+id/down_vote_btn"
-                style="@style/StripeBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="36dp"
-                android:background="@drawable/img_round_ripple_gray"
-
-                />
-
-            <ProgressBar
-                android:id="@+id/progress_downvote"
-                style="@style/StripeCardProgress"
-                />
-        </FrameLayout>
-
-
-        <TextView
-            android:id="@+id/comments_tv"
-            style="@style/StripeBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/img_round_ripple_gray"
-            android:drawablePadding="@dimen/margin_material_small"
-
-            android:ellipsize="end"
-            android:lines="1"
-            />
-
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageButton
-                android:id="@+id/reblog_ibtn"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="6dp"
-                android:background="@drawable/img_round_ripple_gray"
-
-                app:srcCompat="@drawable/ic_repost_20dp"
-                />
-
-            <ProgressBar
-                android:id="@+id/reblog_progress"
-                style="@style/StripeCardProgress"
-                android:layout_marginEnd="@dimen/margin_material_half"
-                />
-        </FrameLayout>
-
-    </com.google.android.flexbox.FlexboxLayout>
+        />
 
 
     <View
@@ -309,5 +178,5 @@
         android:layout_width="wrap_content"
         android:layout_height="2dp"
         android:background="@color/delimeter_color_feed"
-        app:layout_constraintTop_toBottomOf="@+id/flex_lo"/>
+        app:layout_constraintTop_toBottomOf="@+id/footer"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

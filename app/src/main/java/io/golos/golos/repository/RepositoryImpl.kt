@@ -193,8 +193,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
 
-    override val lastRepost: LiveData<Unit>
-        get() = mLastRepost
+    override val lastRepost: LiveData<Unit> = mLastRepost
 
     override fun getUnreadEventsCount(): LiveData<Int> {
         return mGolosServices.getFreshEventsCount()
@@ -347,9 +346,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         val result = entries.toHashSet() + entriesFromBd
 
         mMainThreadExecutor.execute {
-
             mCurrentUserBlogEntries.value = result.toList()
-            Timber.e("mCurrentUserBlogEntries size = ${mCurrentUserBlogEntries.value?.size}")
         }
     }
 
@@ -977,8 +974,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                 val payouts = RSharesConverter
                         .convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
-                Timber.e("voters = ${it.activeVotes} size is ${it.activeVotes.size}")
-                Timber.e("payouts  = ${payouts} size is ${payouts.size}")
                 val voters = it
                         .activeVotes
                         .filter { it.percent != 0 }
@@ -1006,6 +1001,14 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun prepareForLaunch() {
         workerExecutor.execute {
             try {
+
+                val appUserData = mAuthLiveData.value
+                if (appUserData?.isLogged == true) {
+                    val userPosts = mPersister.getBlogEntries()
+                    mMainThreadExecutor.execute {
+                        mCurrentUserBlogEntries.value = userPosts
+                    }
+                }
 
                 val savedStories = mPersister.getStories()
                         .filter { it.value.items.isNotEmpty() }
@@ -1036,6 +1039,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                         mFilteredMap[key] = value
                                     }
                                 }
+
                         mAppReadyStatusLiveData.value = ReadyStatus(true, null)
                     }
                 }

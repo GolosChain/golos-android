@@ -31,7 +31,7 @@ enum class EventType {
             SUBSCRIBE -> "subscribe"
             UNSUBSCRIBE -> "unsubscribe"
             MENTION -> "mention"
-            REPOST -> "repost"
+            REPOST -> "reblog"
             REWARD -> "reward"
             CURATOR_AWARD -> "curatorReward"
             MESSAGE -> "message"

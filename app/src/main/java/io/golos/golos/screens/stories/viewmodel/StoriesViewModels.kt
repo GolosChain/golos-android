@@ -221,9 +221,7 @@ abstract class DiscussionsViewModel : ViewModel() {
             val repostStates = mRepository.currentUserRepostStates.value.orEmpty()
             val currentState = mDiscussionsLiveData.value
             return currentState?.copy(items = currentState.items.map { wrapper ->
-                wrapper.copy(isPostReposted = reposts.containsKey(wrapper.story.permlink),
-                        repostStatus = repostStates[wrapper.story.permlink]?.updatingState
-                                ?: UpdatingState.DONE)
+                changeRepostState(wrapper, reposts, repostStates)
             })
         }
 
@@ -355,15 +353,15 @@ abstract class DiscussionsViewModel : ViewModel() {
         }
     }
 
-    fun repost(story: StoryWrapper) {
+    fun reblog(story: StoryWrapper) {
         if (!mRepository.isUserLoggedIn()) return
         if (story.isPostReposted) return
         if (story.repostStatus == UpdatingState.UPDATING) return
         mRepository.repost(story.story, { _, _ -> })
     }
 
-    fun repost(storyId: Long) {
-        repost(mDiscussionsLiveData.value?.items.orEmpty().find { it.story.id == storyId }
+    fun reblog(storyId: Long) {
+        reblog(mDiscussionsLiveData.value?.items.orEmpty().find { it.story.id == storyId }
                 ?: return)
     }
 

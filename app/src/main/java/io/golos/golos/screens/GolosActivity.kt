@@ -2,25 +2,21 @@ package io.golos.golos.screens
 
 import android.app.Activity
 import android.app.UiModeManager
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import android.text.Html
 import android.view.KeyEvent
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.Snackbar
 import io.golos.golos.BuildConfig
 import io.golos.golos.EActivity
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.utils.ErrorCode
-import io.golos.golos.utils.OneShotLiveData
-import io.golos.golos.utils.nextInt
-import io.golos.golos.utils.restart
+import io.golos.golos.utils.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -30,6 +26,7 @@ import java.util.concurrent.TimeUnit
 abstract class GolosActivity : AppCompatActivity() {
     private var isResumed = false
     private val showVoteDialog: MutableLiveData<Boolean> = OneShotLiveData()
+    private val mRepostObserver = RepostObserver(supportFragmentManager)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +47,7 @@ abstract class GolosActivity : AppCompatActivity() {
         showVoteDialog.observe(this, Observer {
             if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)
         })
+        Repository.get.lastRepost.observe(this, mRepostObserver)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -70,7 +68,9 @@ abstract class GolosActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         isResumed = true
+
     }
+
 
     private fun needToShowVoteDialog(): Boolean {
         return !Repository.get.userSettingsRepository.isUserVotedForApp()
@@ -118,7 +118,7 @@ abstract class GolosActivity : AppCompatActivity() {
         }
         Snackbar.make(findViewById(android.R.id.content),
                 Html.fromHtml("<font color=\"#ffffff\">${resources.getString(message)}</font>"),
-                Toast.LENGTH_SHORT).show()
+                Snackbar.LENGTH_SHORT).show()
     }
 
     companion object {

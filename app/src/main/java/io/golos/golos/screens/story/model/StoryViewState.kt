@@ -12,7 +12,7 @@ enum class DiscussionType {
 data class StoryViewState(val isLoading: Boolean = false,
                           val storyTitle: String = "",
                           val canUserCommentThis: Boolean = false,
-                          val errorCode: GolosError? = null,
+                          val error: GolosError? = null,
                           val discussionType: DiscussionType = DiscussionType.STORY,
                           val tags: List<String> = arrayListOf(),
                           val storyTree: StoryWrapperWithComment)

@@ -14,7 +14,6 @@ import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.widgets.HolderClickListener
 import io.golos.golos.utils.createGolosSpan
 import io.golos.golos.utils.getVectorDrawable
-import io.golos.golos.utils.setViewGone
 
 class StripeCompactViewHolder(parent: ViewGroup,
                               private val onUpvoteClick: HolderClickListener,
@@ -37,14 +36,14 @@ class StripeCompactViewHolder(parent: ViewGroup,
     private val mTitleTv: TextView = itemView.findViewById(R.id.title)
     private val mTextView: TextView = itemView.findViewById(R.id.tv)
     private val mMainImageBig: ImageView = itemView.findViewById(R.id.image)
-    private val mUpVotesCountTv: TextView = itemView.findViewById(R.id.upvote_btn)
-    private val mUpvoteIv: ImageView = itemView.findViewById(R.id.upvote_ibtn)
-    private val mDownVotersCountTv: TextView = itemView.findViewById(R.id.down_vote_btn)
+    private val mUpVotesCountTv: TextView = itemView.findViewById(R.id.footer_upvote_btn)
+    private val mUpvoteIv: ImageView = itemView.findViewById(R.id.footer_upvote_ibtn)
+    private val mDownVotersCountTv: TextView = itemView.findViewById(R.id.footer_down_vote_btn)
     private val mDownVoteIv: ImageView = itemView.findViewById(R.id.down_vote_ibtn)
-    private val mMoneyTv: TextView = itemView.findViewById(R.id.money_tv)
+    private val mMoneyTv: TextView = itemView.findViewById(R.id.footer_money_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
-    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_upvote)
-    private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.progress_downvote)
+    private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.footer_progress_upvote)
+    private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.footer_progress_downvote)
 
     private val mUserNick: TextView = itemView.findViewById(R.id.user_nick_name_tv)
 

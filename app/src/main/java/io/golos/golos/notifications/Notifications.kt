@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = SubscribeNotification::class, name = "subscribe"),
     JsonSubTypes.Type(value = UnSubscribeNotification::class, name = "unsubscribe"),
     JsonSubTypes.Type(value = MentionNotification::class, name = "mention"),
-    JsonSubTypes.Type(value = RepostNotification::class, name = "repost"),
+    JsonSubTypes.Type(value = RepostNotification::class, name = "reblog"),
     JsonSubTypes.Type(value = WitnessVoteNotification::class, name = "witnessVote"),
     JsonSubTypes.Type(value = WitnessCancelVoteNotification::class, name = "witnessCancelVote"),
     JsonSubTypes.Type(value = RewardNotification::class, name = "reward"),
@@ -44,7 +44,7 @@ data class MentionNotification(@JsonProperty("permlink") val permlink: String,
                                @JsonProperty("author") val author: String) : Notification("mention")
 
 data class RepostNotification(@JsonProperty("permlink") val permlink: String,
-                              @JsonProperty("reposter") val reposter: String) : Notification("repost")
+                              @JsonProperty("reposter") val reposter: String) : Notification("reblog")
 
 data class RewardNotification(@JsonProperty("permlink") val permlink: String,
                               @JsonProperty("golos") val golos: Double,

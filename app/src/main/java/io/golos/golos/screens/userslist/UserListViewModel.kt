@@ -60,8 +60,6 @@ class UserListViewModel : ViewModel() {
 
 
     fun onStart() {
-
-
         mRepository.appUserData.observeForever(mUserDataObserver)
         if (mListType == ListType.SUBSCRIPTIONS || mListType == ListType.SUBSCRIBERS) {
             if (userName == null) {
@@ -97,7 +95,6 @@ class UserListViewModel : ViewModel() {
     }
 
     fun onStop() {
-
         userName?.let {
             mLiveData.removeSource(mRepository.getGolosUserSubscriptions(it))
             mLiveData.removeSource(mRepository.getGolosUserSubscribers(it))
@@ -105,13 +102,11 @@ class UserListViewModel : ViewModel() {
         storyId?.let {
             mLiveData.removeSource(mRepository.getVotedUsersForDiscussion(it))
         }
-
         mRepository.appUserData.removeObserver(mUserDataObserver)
         mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
     }
 
     private fun onValueChanged() {
-        Timber.e("onValueChanged")
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
         val currentUserSubscriptions =
                 (if (mRepository.appUserData.value?.isLogged == true)
@@ -153,7 +148,7 @@ class UserListViewModel : ViewModel() {
             mLiveData.value = UserListViewState(mTitle,
                     votes
                             .asSequence()
-                            .filter { if (mListType == ListType.UP_VOTERS) it.gbgValue > 0 else it.gbgValue < 0 }
+                            .filter { if (mListType == ListType.UP_VOTERS) it.gbgValue > 0 else if (mListType == ListType.DOWN_VOTERS) it.gbgValue < 0 else true }
                             .map {
 
                                 val gbgCost = it.gbgValue
@@ -204,6 +199,7 @@ class UserListViewModel : ViewModel() {
             ListType.SUBSCRIPTIONS -> R.string.subscriptions
             ListType.SUBSCRIBERS -> R.string.subscribers
             ListType.UP_VOTERS -> R.string.voted
+            ListType.ALL_VOTERS -> R.string.voted
             ListType.DOWN_VOTERS -> R.string.voted_against
         }, null)
 

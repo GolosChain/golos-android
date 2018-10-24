@@ -26,7 +26,7 @@ data class StripeWrapper(val stripe: StoryWrapper,
                          val nswfStrategy: NSFWStrategy,
                          val feedCellSettings: FeedCellSettings)
 
-class StoriesRecyclerAdapter(private var onCardClick: StoryWithCommentsClickListener,
+class DiscussionsListAdapter(private var onCardClick: StoryWithCommentsClickListener,
                              private var onCommentsClick: StoryWithCommentsClickListener,
                              private var onUpvoteClick: StoryWithCommentsClickListener,
                              private var mOnDownVoteClick: StoryWithCommentsClickListener,

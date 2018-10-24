@@ -21,7 +21,7 @@ import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.prepend
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
-import io.golos.golos.screens.stories.adapters.StoriesRecyclerAdapter
+import io.golos.golos.screens.stories.adapters.DiscussionsListAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
@@ -35,12 +35,12 @@ import io.golos.golos.utils.*
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
-        RepostConfirmalDialog.OnRepostConfirmed {
+        ReblogConfirmalDialog.OnReblogConfirmed {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
     private var mViewModel: DiscussionsViewModel? = null
     private var mRefreshButton: TextView? = null
-    private lateinit var mAdapter: StoriesRecyclerAdapter
+    private lateinit var mAdapter: DiscussionsListAdapter
     private lateinit var mFullscreenMessageLabel: TextView
     private var isVisibleBacking: Boolean? = null
     private var lastSentUpdateRequestTime = System.currentTimeMillis()
@@ -84,7 +84,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 ?: return, filter) else StoriesModelFactory.getStoriesViewModel(type, activity, null, filter)
 
         mRecycler?.adapter = null
-        mAdapter = StoriesRecyclerAdapter(
+        mAdapter = DiscussionsListAdapter(
                 onCardClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         mViewModel?.onCardClick(story, activity ?: return)
@@ -123,8 +123,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 },
                 mOnReblogClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        RepostConfirmalDialog.getInstance(story.story.id).show(childFragmentManager, null)
-
+                        if (story.isPostReposted) return
+                        ReblogConfirmalDialog.getInstance(story.story.id).show(childFragmentManager, null)
                     }
                 }
                 ,
@@ -205,7 +205,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
     }
 
     override fun onConfirmed(id: Long) {
-        mViewModel?.repost(id)
+        mViewModel?.reblog(id)
     }
 
     override fun onResume() {

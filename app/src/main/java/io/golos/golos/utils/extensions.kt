@@ -483,6 +483,23 @@ fun View.setViewInvisible() {
     if (this.visibility != View.INVISIBLE) visibility = View.INVISIBLE
 }
 
+
+fun changeRepostState(inputWrapper: StoryWrapper,
+                      userBlogEntries: Map<String, GolosBlogEntry>,
+                      userRepostingStates: Map<String, RepostingState>): StoryWrapper {
+    val reposts = userBlogEntries
+    val repostStates = userRepostingStates
+
+    val isPostReposted = reposts.containsKey(inputWrapper.story.permlink)
+    val repsotState = repostStates[inputWrapper.story.permlink]?.updatingState
+            ?: UpdatingState.DONE
+    return if (inputWrapper.isPostReposted == isPostReposted && inputWrapper.repostStatus == repsotState) inputWrapper
+    else inputWrapper.copy(isPostReposted = reposts.containsKey(inputWrapper.story.permlink),
+            repostStatus = repostStates[inputWrapper.story.permlink]?.updatingState
+                    ?: UpdatingState.DONE)
+
+}
+
 //compares content and position in collection
 inline fun <reified T> List<T>.compareContents(other: List<T>): Boolean {
 

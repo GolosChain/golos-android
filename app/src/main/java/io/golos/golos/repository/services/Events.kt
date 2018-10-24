@@ -45,7 +45,7 @@ class CustomJsonDateDeserializer : JsonDeserializer<Long>() {
     JsonSubTypes.Type(value = SubscribeEvent::class, name = "subscribe"),
     JsonSubTypes.Type(value = UnSubscribeEvent::class, name = "unsubscribe"),
     JsonSubTypes.Type(value = MentionEvent::class, name = "mention"),
-    JsonSubTypes.Type(value = RepostEvent::class, name = "repost"),
+    JsonSubTypes.Type(value = RepostEvent::class, name = "reblog"),
     JsonSubTypes.Type(value = AwardEvent::class, name = "reward"),
     JsonSubTypes.Type(value = CuratorAwardEvent::class, name = "curatorReward"),
     JsonSubTypes.Type(value = MessageEvent::class, name = "message"),

@@ -133,5 +133,13 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
             i.putExtra(STORY_ID_TAG, storyId)
             ctx.startActivity(i)
         }
+
+        fun startToShowAllVoters(ctx: Context,
+                                 storyId: Long) {
+            val i = Intent(ctx, UsersListActivity::class.java)
+            i.putExtra(TYPE_TAG, ListType.ALL_VOTERS)
+            i.putExtra(STORY_ID_TAG, storyId)
+            ctx.startActivity(i)
+        }
     }
 }

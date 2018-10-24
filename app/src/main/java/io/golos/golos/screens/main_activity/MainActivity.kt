@@ -190,10 +190,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
 
         checkpreSelect(intent)
 
-        Repository.get.lastRepost.observe(this, Observer<Unit> {
-            if (it == null) return@Observer
-            RepostSuccesDialog.getInstance().show(supportFragmentManager, null)
-        })
+
     }
 
     override fun onNewIntent(intent: Intent?) {

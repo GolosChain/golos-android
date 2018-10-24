@@ -35,6 +35,7 @@ class DiscussionViewModel : ViewModel() {
     private lateinit var mInternetStatusNotifier: InternetStatusNotifier
     private val mImageClickEvents = MutableLiveData<ImageClickData>()
     public val imageDialogShowEvent: LiveData<ImageClickData> = mImageClickEvents
+    private var mLastVotingStoryId: Long = Long.MIN_VALUE
 
 
     fun onCreate(author: String,
@@ -132,6 +133,22 @@ class DiscussionViewModel : ViewModel() {
                 this.blog = story.categoryName
             }
         }
+        mStoryLiveData.addSource(mRepository.votingStates) { voteStates ->
+            if (voteStates.isNullOrEmpty()) return@addSource
+            val currentStoryTree = mStoryLiveData.value?.storyTree ?: return@addSource
+            val errorMsg: GolosError? = voteStates.findLast { it.storyId == mLastVotingStoryId }?.error
+
+            val rootStory = currentStoryTree.rootWrapper.copy(voteUpdatingState = voteStates.find {
+                it.storyId == currentStoryTree.rootWrapper.story.id
+            })
+            val comments = currentStoryTree.comments.map { commentWrapper ->
+                commentWrapper.copy(voteUpdatingState = voteStates.find { commentWrapper.story.id == it.storyId })
+            }
+            val newState = mStoryLiveData.value?.storyTree?.copy(rootWrapper = rootStory, comments = comments)
+            if (newState != mStoryLiveData.value?.storyTree) mStoryLiveData.value = mStoryLiveData.value?.copy(storyTree = newState
+                    ?: return@addSource, error = errorMsg)
+
+        }
 
         mSubscriptionsLiveData.addSource(mRepository.getUserSubscribedTags()) {
             val tagItem = it?.find { it.name == this.blog }
@@ -142,6 +159,27 @@ class DiscussionViewModel : ViewModel() {
             onGolosUserSubscriptionsStateChanged()
         }
 
+        fun createRepostState(): StoryViewState? {
+            val reposts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
+            val repostStates = mRepository.currentUserRepostStates.value.orEmpty()
+            val currentState = mStoryLiveData.value
+            return currentState?.copy(storyTree = currentState.storyTree.copy(
+                    rootWrapper = changeRepostState(currentState.storyTree.rootWrapper, reposts, repostStates)))
+        }
+
+        mStoryLiveData.addSource(mRepository.currentUserRepostedBlogEntries) { repostedEntries ->
+            if (repostedEntries == null) return@addSource
+            val newState = createRepostState()
+            if (newState != mStoryLiveData.value)
+                mStoryLiveData.value = newState
+        }
+        mStoryLiveData.addSource(mRepository.currentUserRepostStates) { repostState ->
+            if (repostState == null) return@addSource
+            val newState = createRepostState()
+            if (newState != mStoryLiveData.value)
+                mStoryLiveData.value = newState
+        }
+
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, true, true, feedType) { _, _ -> }
     }
 
@@ -149,6 +187,9 @@ class DiscussionViewModel : ViewModel() {
         mStoryLiveData.removeSource(mRepository.getStories(feedType, filter))
         mSubscriptionsLiveData.removeSource(mRepository.getUserSubscribedTags())
         mSubscriptionsLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
+        mStoryLiveData.removeSource(mRepository.votingStates)
+        mStoryLiveData.removeSource(mRepository.currentUserRepostedBlogEntries)
+        mStoryLiveData.removeSource(mRepository.currentUserRepostStates)
 
     }
 
@@ -184,6 +225,7 @@ class DiscussionViewModel : ViewModel() {
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
         if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
+        mLastVotingStoryId = story.story.id
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
             if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
@@ -232,6 +274,10 @@ class DiscussionViewModel : ViewModel() {
         } else {
             showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_write_comment))
         }
+    }
+
+    fun repost(wrapper: StoryWrapper) {
+
     }
 
     fun onEditClick(ctx: Context, item: GolosDiscussionItem) {
@@ -315,12 +361,7 @@ class DiscussionViewModel : ViewModel() {
     }
 
     private fun showError(error: GolosError) {
-        mStoryLiveData.value = mStoryLiveData.value?.copy(isLoading = false, errorCode = error)
-    }
-
-    fun onStoryVotesClick(context: Context) {
-        UsersListActivity.startToShowUpVoters(context, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
-                ?: return)
+        mStoryLiveData.value = mStoryLiveData.value?.copy(isLoading = false, error = error)
     }
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
@@ -331,6 +372,30 @@ class DiscussionViewModel : ViewModel() {
         val story = if (mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id == storyId) mStoryLiveData.value?.storyTree?.rootWrapper
         else mStoryLiveData.value?.storyTree?.comments?.find { it.story.id == storyId }
         story?.let { onStoryVote(it, percent) }
+    }
+
+    fun onDownVotersClick(rootWrapper: StoryWrapper, discussionActivity: Activity) {
+        UsersListActivity.startToShowDownVoters(discussionActivity, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
+                ?: return)
+    }
+
+    fun onAllVotersClick(rootWrapper: StoryWrapper, discussionActivity: Activity) {
+        UsersListActivity.startToShowAllVoters(discussionActivity, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
+                ?: return)
+    }
+
+    fun onUpvotersClick(rootWrapper: StoryWrapper, discussionActivity: Activity) {
+        UsersListActivity.startToShowUpVoters(discussionActivity, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
+                ?: return)
+    }
+
+    fun onRootStoryReblog() {
+        val wrapper = mStoryLiveData.value?.storyTree?.rootWrapper ?: return
+        if (wrapper.repostStatus == UpdatingState.UPDATING) return
+        if (wrapper.isPostReposted) return
+        mRepository.repost(wrapper.story) { _, e ->
+            if (e != null) mStoryLiveData.value = mStoryLiveData.value?.copy(error = e)
+        }
     }
 
 }
