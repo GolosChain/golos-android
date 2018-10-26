@@ -31,7 +31,7 @@ enum class EventType {
             SUBSCRIBE -> "subscribe"
             UNSUBSCRIBE -> "unsubscribe"
             MENTION -> "mention"
-            REPOST -> "reblog"
+            REPOST -> "repost"
             REWARD -> "reward"
             CURATOR_AWARD -> "curatorReward"
             MESSAGE -> "message"
@@ -40,6 +40,7 @@ enum class EventType {
         }
     }
 }
+
 
 fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
     return try {
@@ -50,7 +51,6 @@ fun GolosServicesResponse.isAuthSuccessMessage(): Boolean {
         false
     }
 }
-
 
 fun GolosServicesResponse.getSecret(): String {
     return try {
@@ -72,7 +72,6 @@ fun GolosServicesResponse.isPushSubscribeSuccesMessage(): Boolean {
     }
 }
 
-
 fun GolosServicesResponse.getUnreadCount(): Int {
     return try {
         mapper.convertValue<FreshResult>(result).fresh
@@ -85,7 +84,6 @@ fun GolosServicesResponse.getUnreadCount(): Int {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class FreshResult(@JsonProperty("fresh") val fresh: Int)
-
 
 fun GolosServicesResponse.getEventData(): GolosEvents {
     return try {
