@@ -225,7 +225,6 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
-        Timber.e("onStoryVote $story\n with percent $percent")
         if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
         mLastVotingStoryId = story.story.id
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)

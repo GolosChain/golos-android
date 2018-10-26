@@ -24,7 +24,8 @@ class StripeCompactViewHolder(parent: ViewGroup,
                               private val onUserClick: HolderClickListener,
                               private val onAvatarClick: HolderClickListener,
                               private val onUpVotersClick: HolderClickListener,
-                              private val onDowVotersClick: HolderClickListener)
+                              private val onDowVotersClick: HolderClickListener,
+                              private val onReblogClick: HolderClickListener)
     : StoriesViewHolder(R.layout.vh_stripe_compact_size, parent), SpanFactory {
     override fun <T : Any?> produceOfType(type: Class<*>): T {
         return itemView.context.createGolosSpan(type)
@@ -44,6 +45,8 @@ class StripeCompactViewHolder(parent: ViewGroup,
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
     private val mVotingProgress: ProgressBar = itemView.findViewById(R.id.footer_progress_upvote)
     private val mDownVotingProgress: ProgressBar = itemView.findViewById(R.id.footer_progress_downvote)
+    private val mReblogProgress: ProgressBar = itemView.findViewById(R.id.reblog_progress)
+    private val mReblogIv: ImageView = itemView.findViewById(R.id.reblog_btn)
 
     private val mUserNick: TextView = itemView.findViewById(R.id.user_nick_name_tv)
 
@@ -55,7 +58,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error_jpeg)!!
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-
+        mReblogIv.setOnClickListener { onReblogClick.onClick(this) }
         mUpVotesCountTv.setOnClickListener { onUpVotersClick.onClick(this) }
         mDownVotersCountTv.setOnClickListener { onDowVotersClick.onClick(this) }
         mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
@@ -123,6 +126,14 @@ class StripeCompactViewHolder(parent: ViewGroup,
 
     override fun getErrorDrawable(): Drawable {
         return errorDrawableS!!
+    }
+
+    override fun getReblogImageView(): ImageView {
+        return mReblogIv
+    }
+
+    override fun getReblogProgress(): View {
+        return mReblogProgress
     }
 
     override fun getMainText(): TextView {

@@ -565,7 +565,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     }
                     mVotesState.value = votingStates
                 }
-                Timber.e("votedDiscussion = $votedDiscussion")
                 listOfList.forEach {
                     val currentFeed = it.value ?: return@forEach
 
@@ -573,7 +572,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     if (result.isChanged) {
 
                         mMainThreadExecutor.execute {
-                            Timber.e("propogating")
                             it.value = result.resultingFeed
                         }
                     }
@@ -600,7 +598,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun requestStoryUpdate(story: GolosDiscussionItem,
                                    completionListener: (Unit, GolosError?) -> Unit) {
         networkExecutor.execute {
-            Timber.e("requestStoryUpdate")
             try {
                 val updatedStory = getStory(story.categoryName,
                         story.author,
@@ -796,10 +793,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     mMainThreadExecutor.execute {
                         val userName = mAuthLiveData.value?.name.orEmpty()
-                        comments.value = StoriesFeed((arrayListOf(newStory) + ArrayList(comments.value?.items
-                                ?: ArrayList())).toArrayList(),
-                                FeedType.COMMENTS,
-                                StoryFilter(userNameFilter = userName))
+                        Timber.e("propogating")
+                        comments.value = comments.value?.copy(items = newStory.toSingletoneList() + comments.value?.items.orEmpty())
 
                         mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }

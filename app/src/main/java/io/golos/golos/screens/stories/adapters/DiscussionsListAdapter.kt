@@ -59,6 +59,7 @@ class DiscussionsListAdapter(private var onCardClick: StoryWithCommentsClickList
         } else {
             try {
                 val old = mStripes.toArrayList()
+
                 mStripes.clear()
                 mStripes.addAll(newItems)
                 val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -183,6 +184,11 @@ class DiscussionsListAdapter(private var onCardClick: StoryWithCommentsClickList
                 onAvatarClick = object : HolderClickListener {
                     override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
                         onUserClick.onClick(getStoryForPosition(holder) ?: return)
+                    }
+                },
+                onReblogClick = object : HolderClickListener {
+                    override fun onClick(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+                        mOnReblogClick.onClick(getStoryForPosition(holder) ?: return)
                     }
                 })
     }

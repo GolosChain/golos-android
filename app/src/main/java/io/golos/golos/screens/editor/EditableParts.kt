@@ -3,7 +3,6 @@ package io.golos.golos.screens.editor
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import io.golos.golos.screens.editor.knife.KnifeParser
-import timber.log.Timber
 import java.util.*
 
 
@@ -58,7 +57,7 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
 
     override val htmlRepresentation: String
         get() {
-            var out = KnifeParser.toHtml (SpannableStringBuilder(text))
+            var out = KnifeParser.toHtml(SpannableStringBuilder(text))
             val scriptRegex = "<(/)?[ ]*script[^>]*>"
             out = out.replace(Regex(scriptRegex), "")
 
@@ -75,12 +74,10 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
                     "*[link removed]*"
                 else foundString
             }
-            Timber.e("text = $text out = $out")
-
             return out
         }
 
-    fun setNotSelected(){
+    fun setNotSelected() {
         startPointer = CURSOR_POINTER_NOT_SELECTED
         endPointer = CURSOR_POINTER_NOT_SELECTED
     }
@@ -96,7 +93,6 @@ data class EditorTextPart(override val id: String = UUID.randomUUID().toString()
     companion object {
         fun emptyTextPart() = EditorTextPart(UUID.randomUUID().toString(), SpannableStringBuilder.valueOf(""))
     }
-
 
 
 }

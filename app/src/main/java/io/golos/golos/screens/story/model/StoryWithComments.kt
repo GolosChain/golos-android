@@ -22,7 +22,39 @@ data class StoryWrapper(
         val authorAccountInfo: GolosUserAccountInfo? = null,
         val exchangeValues: ExchangeValues = ExchangeValues.nullValues,
         val isStoryEditable: Boolean = false,
-        var asHtmlString: CharSequence? = null)
+        var asHtmlString: CharSequence? = null){
+
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as StoryWrapper
+
+        if (story != other.story) return false
+        if (voteUpdatingState != other.voteUpdatingState) return false
+        if (voteStatus != other.voteStatus) return false
+        if (isPostReposted != other.isPostReposted) return false
+        if (repostStatus != other.repostStatus) return false
+        if (authorAccountInfo != other.authorAccountInfo) return false
+        if (exchangeValues != other.exchangeValues) return false
+        if (isStoryEditable != other.isStoryEditable) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = story.hashCode()
+        result = 31 * result + (voteUpdatingState?.hashCode() ?: 0)
+        result = 31 * result + voteStatus.hashCode()
+        result = 31 * result + isPostReposted.hashCode()
+        result = 31 * result + repostStatus.hashCode()
+        result = 31 * result + (authorAccountInfo?.hashCode() ?: 0)
+        result = 31 * result + exchangeValues.hashCode()
+        result = 31 * result + isStoryEditable.hashCode()
+        return result
+    }
+}
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,
                            val updatingState: UpdatingState) {
@@ -123,38 +155,6 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
         stories.map { it.children }.forEach { setUpLevels(currentDepth + 1, it) }
     }
 
-    /*constructor(discussionWithComments: DiscussionWithComments) : this(null, ArrayList()) {
-        if (discussionWithComments.discussions.isEmpty()) {
-            mCommentsWithState = ArrayList()
-        } else {
-            var rootStories = discussionWithComments.discussions.find { it.parentAuthor.isEmpty }
-            if (rootStories == null) {
-                rootStories = discussionWithComments.discussions.find {
-                    val currentDiscussion = it
-                    discussionWithComments.discussions.find { it.permlink == currentDiscussion.parentPermlink } == null
-                }
-            }
-            if (rootStories == null) throw IllegalStateException("root rootWrapper not found")
-            mRootStoryWrapper = StoryWrapper(DiscussionItemFactory.create(rootStories, discussionWithComments
-                    .involvedAccounts
-                    .find { it.name.name == rootStories.author.name }!!),
-                    UpdatingState.DONE)
-            discussionWithComments.discussions.removeAll { it.permlink.link == rootStories.permlink.link }
-            val firstLevelDiscussion = findAlldiscussionsWithParentPermlink(discussionWithComments.discussions, mRootStoryWrapper!!.rootWrapper.permlink)
-            discussionWithComments.discussions.removeAll { firstLevelDiscussion.contains(it) }
-            val allComments = discussionWithComments.discussions.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
-
-            val comments = firstLevelDiscussion.map { convert(it, discussionWithComments.involvedAccounts) }.map { StoryWrapper(it, UpdatingState.DONE) }
-
-            comments
-                    .forEach {
-                        it.rootWrapper.children.clear()
-                        it.rootWrapper.children.addAll(createCommentsTree(ArrayList(allComments), it, 1))
-                    }
-
-            mCommentsWithState = ArrayList(comments)
-        }
-    }*/
 
     fun replaceComment(replaceWith: GolosDiscussionItem): Boolean {
         return replaceComment(replaceWith, comments)
@@ -181,13 +181,6 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
         return changes
     }
 
-//    private fun findAlldiscussionsWithParentPermlink(discussions: List<Discussion>, permlink: String): List<Discussion> {
-//        return discussions.filter { it.parentPermlink.link == permlink }
-//    }
-//
-//    private fun convert(discussion: Discussion, accounts: List<ExtendedAccount>): GolosDiscussionItem {
-//        return DiscussionItemFactory.create(discussion, accounts.filter { it.name.name == discussion.author.name }.first())
-//    }
 
     fun getFlataned(): List<GolosDiscussionItem> {
         setUpLevels()

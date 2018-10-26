@@ -20,8 +20,8 @@ import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.prepend
-import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.adapters.DiscussionsListAdapter
+import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
@@ -32,6 +32,7 @@ import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
@@ -198,11 +199,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.vote(id, if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort())
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        mViewModel?.onStart()
-    }
 
     override fun oReblogConfirmed(id: Long) {
         mViewModel?.reblog(id)
@@ -225,10 +221,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         else if (activity is ReselectionEmitter) activity.reselectLiveData.removeObserver(reselectObserver)
     }
 
-    override fun onStop() {
-        super.onStop()
-        mViewModel?.onStop()
-    }
 
     private fun setUp() {
 
@@ -262,6 +254,9 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
         if (t?.items != null) {
             mRecycler?.post {
+                Timber.e("set stripes size = ${t.items.size}")
+                Timber.e("type is $mViewModel")
+                Timber.e("parc = $parc")
                 mAdapter.setStripes(t.items)
                 if (parc != null) {
                     (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
@@ -325,6 +320,27 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
             mLastError = jacksonObjectMapper().readValue(it)
         }
         parc = savedInstanceState?.getParcelable("StoriesFragmentRC")
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        //  mViewModel?.onStart()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mViewModel?.onStart()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mViewModel?.onStop()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // mViewModel?.onStop()
     }
 
 

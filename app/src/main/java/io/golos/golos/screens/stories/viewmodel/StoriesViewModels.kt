@@ -12,7 +12,10 @@ import io.golos.golos.R
 import io.golos.golos.repository.KnifeHtmlizer
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.*
+import io.golos.golos.repository.model.ApplicationUser
+import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.repository.model.GolosDiscussionItem
+import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
@@ -112,9 +115,9 @@ open class FeedViewModel : DiscussionsViewModel() {
         super.onScrollToTheEnd()
     }
 
-    override fun onNewItems(items: StoriesFeed): DiscussionsViewState {
-        val state = super.onNewItems(items)
-        return state.copy(fullscreenMessage = if (items.items.size.or(0) == 0) R.string.nothing_here else null)
+    override fun onNewItems(): DiscussionsViewState {
+        val state = super.onNewItems()
+        return state.copy(fullscreenMessage = if (state.items.size.or(0) == 0) R.string.nothing_here else null)
     }
 }
 
@@ -151,6 +154,7 @@ abstract class DiscussionsViewModel : ViewModel() {
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private var mObserver: Observer<Boolean>? = null
     private val updateSize = 20
+    private val mWrappersCash = HashMap<Long, StoryWrapper>(20)
 
 
     val discussionsLiveData: LiveData<DiscussionsViewState>
@@ -172,7 +176,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.removeSource(mRepository.getStories(type, filter))
         mDiscussionsLiveData.addSource(mRepository.getStories(type, filter)) {
             mExecutor.execute {
-                val newState = onNewItems(it ?: return@execute)
+                val newState = onNewItems()
                 propogateNewState(newState)
             }
         }
@@ -180,39 +184,33 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.addSource(mRepository.getGolosUserAccountInfos()) { usersMap ->
             usersMap ?: return@addSource
 
-            mExecutor.execute {
-                mDiscussionsLiveData.value?.items ?: return@execute
+            val newStories = mDiscussionsLiveData.value?.items?.map {
+                val story = it.story
+                changeWrapperAccountInfoIfNeeded(it.copy(authorAccountInfo = usersMap[story.author]))
+            }.orEmpty()
 
-                val newStories = mDiscussionsLiveData.value?.items?.map {
-                    val story = it.story
-                    changeWrapperAccountInfoIfNeeded(it.copy(authorAccountInfo = usersMap[story.author]))
-                }.orEmpty()
+            val newState = mDiscussionsLiveData.value?.copy(items = newStories)
+            if (newState != mDiscussionsLiveData.value) mDiscussionsLiveData.value = newState
 
-
-                val newState = mDiscussionsLiveData.value?.copy(items = newStories)
-                propogateNewState(newState)
-            }
         }
 
         mDiscussionsLiveData.addSource(mRepository.votingStates) { voteStates ->
             if (voteStates.isNullOrEmpty()) return@addSource
-            mExecutor.execute {
-                val currentStories = mDiscussionsLiveData.value?.items ?: return@execute
-                val map = voteStates.associateBy { it.storyId }
-                val storyIds = currentStories.asSequence().map { it.story.id }
-                if (!storyIds.any { map.containsKey(it) }) return@execute
+            val currentStories = mDiscussionsLiveData.value?.items ?: return@addSource
+            val map = voteStates.associateBy { it.storyId }
+            val storyIds = currentStories.asSequence().map { it.story.id }
+            if (!storyIds.any { map.containsKey(it) }) return@addSource
 
-                var errorMsg: GolosError? = null
+            var errorMsg: GolosError? = null
 
-                val newState = mDiscussionsLiveData.value?.copy(items = currentStories.map {
-                    val voteStateForItem = map[it.story.id] ?: return@map it
-                    if (voteStateForItem.error != null) {
-                        errorMsg = voteStateForItem.error
-                    }
-                    it.copy(voteUpdatingState = voteStateForItem)
-                }, error = errorMsg.takeIf { it != mDiscussionsLiveData.value?.error })
-                propogateNewState(newState)
-            }
+            val newState = mDiscussionsLiveData.value?.copy(items = currentStories.map {
+                val voteStateForItem = map[it.story.id] ?: return@map it
+                if (voteStateForItem.error != null) {
+                    errorMsg = voteStateForItem.error
+                }
+                it.copy(voteUpdatingState = voteStateForItem)
+            }, error = errorMsg.takeIf { it != mDiscussionsLiveData.value?.error })
+            if (newState != mDiscussionsLiveData.value) mDiscussionsLiveData.value = newState
         }
 
         @WorkerThread
@@ -319,7 +317,9 @@ abstract class DiscussionsViewModel : ViewModel() {
         private val mHandler = Handler()
     }
 
-    protected open fun onNewItems(items: StoriesFeed): DiscussionsViewState {
+    protected open fun onNewItems(): DiscussionsViewState {
+        val items = mRepository.getStories(type, filter).value
+                ?: return DiscussionsViewState(false, false, emptyList(), null, null)
         val usersMap = mRepository.getGolosUserAccountInfos().value.orEmpty()
         val currentUser = mRepository.appUserData.value ?: ApplicationUser("", false)
         val voteStatuses = mRepository.votingStates.value.orEmpty()
@@ -333,7 +333,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                 items.items.map {
                     val discussionItem = it.rootStory
                     changeWrapperAccountInfoIfNeeded(createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
-                            repostUpdateStates, currentUser, exchangeValues, true, KnifeHtmlizer))
+                            repostUpdateStates, currentUser, exchangeValues, false, KnifeHtmlizer))
                 },
                 null, null)
 
@@ -347,9 +347,9 @@ abstract class DiscussionsViewModel : ViewModel() {
         if (type != FeedType.BLOG) return wrapper
         val accInfos = mRepository.getGolosUserAccountInfos()
         val blogOwner = filter?.userNameFilter?.firstOrNull().orEmpty()
-        if (blogOwner.isEmpty()) return wrapper
+        return if (blogOwner.isEmpty()) wrapper
         else {
-            return wrapper.copy(authorAccountInfo = accInfos.value.orEmpty()[blogOwner])
+            wrapper.copy(authorAccountInfo = accInfos.value.orEmpty()[blogOwner])
         }
     }
 
@@ -536,4 +536,10 @@ abstract class DiscussionsViewModel : ViewModel() {
     fun onDownVoters(story: StoryWrapper, fragmentActivity: FragmentActivity) {
         UsersListActivity.startToShowDownVoters(fragmentActivity, story.story.id)
     }
+
+    override fun toString(): String {
+        return "DiscussionsViewModel(type=$type)"
+    }
+
+
 }

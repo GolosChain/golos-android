@@ -103,19 +103,20 @@ class StripeFullViewHolder(parent: ViewGroup,
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
-
-            if (wrapper.isPostReposted) mFooterView.reblogImageView.setImageResource(R.drawable.ic_reposted_20dp)
-            else mFooterView.reblogImageView.setImageResource(R.drawable.ic_repost_20dp)
-
-
-            mFooterView.setReblogProgress(wrapper.repostStatus == UpdatingState.UPDATING)
-
         }
     }
 
     override fun setUpTheme() {
         super.setUpTheme()
         mBodyTextMarkwon.setTextColorCompat(R.color.text_color_white_black)
+    }
+
+    override fun getReblogImageView(): ImageView {
+        return mFooterView.reblogImageView
+    }
+
+    override fun getReblogProgress(): View {
+        return mFooterView.reblogProgress
     }
 
     override fun getAuthorAvatar(): ImageView {
