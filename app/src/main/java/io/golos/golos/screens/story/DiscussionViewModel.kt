@@ -20,6 +20,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 class DiscussionViewModel : ViewModel() {
 
@@ -224,16 +225,13 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onStoryVote(story: StoryWrapper, percent: Short) {
+        Timber.e("onStoryVote $story\n with percent $percent")
         if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
         mLastVotingStoryId = story.story.id
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
-            if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED
-                    && percent < 0) {
-                mRepository.vote(story.story, 0)
-            } else {
-                mRepository.vote(story.story, percent)
-            }
+
+            mRepository.vote(story.story, percent)
         }
     }
 
@@ -365,7 +363,7 @@ class DiscussionViewModel : ViewModel() {
     }
 
     fun onCommentVoteClick(activity: Activity, it: StoryWrapper) {
-        UsersListActivity.startToShowUpVoters(activity, it.story.id)
+        UsersListActivity.startToShowAllVoters(activity, it.story.id)
     }
 
     fun onStoryVote(storyId: Long, percent: Short) {

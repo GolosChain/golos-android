@@ -35,7 +35,7 @@
     <string name="answer">Reply</string>
     <string name="enter_key">Enter the key</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">About Golos.io</>]]></string>
-    <string name="do_not_registered_register"> Don’t have an account? <![CDATA[<a href = "https://golos.io/create_account"> Sign up here</>]]></string>
+    <string name="do_not_registered_register"> Don’t have an account? <![CDATA[<a href = "https://reg.golos.io/"> Sign up here</>]]></string>
     <string name="enter_login">You must enter your username</string>
     <string name="enter_password">Password</string>
     <string name="posting_or_active_key">Enter active or posting key</string>
@@ -144,7 +144,7 @@
     <string name="never">Never</string>
     <string name="search_in_golos">Search in Golos.io</string>
     <string name="show_nsfw_images_mode">NSFW content</string>
-    <string name="to_flag">Flag</string>
+    <string name="to_flag">Dizlike</string>
     <string name="cant_vote_after_payout">Can not vote, reward period is closed already.</string>
     <string name="edit">Edit</string>
     <string name="you_may_comment_only_tw_sec">You may only comment once every 20 seconds</string>

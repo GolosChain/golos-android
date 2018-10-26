@@ -96,9 +96,10 @@ object RSharesConverter {
     //pair - first percent, second = vote rshares
     fun convertRSharesToGbg2(postPayoutInGbg: Double, rshares: List<Long>, totalRshares: Long): List<Double> {
         val total = totalRshares.toDouble()
-        if (total == 0.0) {
+        if (total == 0.0){
             return rshares.map { 0.0 }
         }
+
         return rshares.map { rshares ->
             val percent = rshares / total
             val out = postPayoutInGbg * percent

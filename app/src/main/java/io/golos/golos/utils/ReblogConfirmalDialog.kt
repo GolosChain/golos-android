@@ -20,9 +20,9 @@ class ReblogConfirmalDialog : GolosDialog() {
         v.findViewById<View>(R.id.reblog_btn).setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 Timber.e("clicked")
-                (parentFragment as? OnReblogConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                (parentFragment as? OnReblogConfirmed)?.oReblogConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
                         ?: return)
-                (activity as? OnReblogConfirmed)?.onConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
+                (activity as? OnReblogConfirmed)?.oReblogConfirmed(arguments?.getLong("id", Long.MIN_VALUE)
                         ?: return)
                 dismiss()
             }
@@ -50,6 +50,6 @@ class ReblogConfirmalDialog : GolosDialog() {
     }
 
     interface OnReblogConfirmed {
-        fun onConfirmed(id: Long)
+        fun oReblogConfirmed(id: Long)
     }
 }

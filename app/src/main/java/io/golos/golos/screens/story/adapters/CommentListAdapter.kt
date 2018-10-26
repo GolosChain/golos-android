@@ -15,7 +15,7 @@ import io.golos.golos.utils.setVectorDrawableStart
 class CommentListAdapter(private val ctx: Context,
                          private val items: List<CommentListAdapterItems>) : BaseAdapter() {
     enum class CommentListAdapterItems {
-        FLAG_RED, FLAG_GRAY, EDIT
+        DIZLIKED, NOT_DIZLIKED, EDIT
     }
 
     override fun getView(position: Int, convertView: View?, p2: ViewGroup?): View {
@@ -25,12 +25,12 @@ class CommentListAdapter(private val ctx: Context,
         } else convertView
         val item = items[position]
         when (item) {
-            CommentListAdapterItems.FLAG_RED -> {
-                textView.setVectorDrawableStart(R.drawable.ic_flag_20dp_red)
+            CommentListAdapterItems.DIZLIKED -> {
+                textView.setVectorDrawableStart(R.drawable.ic_dizliked_20dp)
                 textView.setText(R.string.to_flag)
             }
-            CommentListAdapterItems.FLAG_GRAY -> {
-                textView.setVectorDrawableStart(R.drawable.ic_flag_20dp_gray7d)
+            CommentListAdapterItems.NOT_DIZLIKED -> {
+                textView.setVectorDrawableStart(R.drawable.ic_dizlike_20dp)
                 textView.setText(R.string.to_flag)
             }
             CommentListAdapterItems.EDIT -> {

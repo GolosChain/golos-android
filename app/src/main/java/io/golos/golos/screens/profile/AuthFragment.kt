@@ -123,7 +123,7 @@ class AuthFragment : Fragment() {
                 Snackbar.make(mLogInEt,
                         Html.fromHtml("<font color=\"#ffffff\">${resources.getString(it.error.localizedMessage
                                 ?: 0)}</font>"),
-                        Toast.LENGTH_SHORT).show()
+                        Snackbar.LENGTH_SHORT).show()
             }
         })
         mLogOptionButton.setOnClickListener { mViewModel.onChangeKeyTypeClick() }

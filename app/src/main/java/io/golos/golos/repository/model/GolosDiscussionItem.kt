@@ -48,7 +48,7 @@ data class GolosDiscussionItem constructor(val url: String,
 
 
     override fun toString(): String {
-        return "Comment(id=$id, title='$title', permlink='$permlink')"
+        return "Comment(id=$id, title='$title', permlink='$permlink', votest = $activeVotes)"
     }
 
 

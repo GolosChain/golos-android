@@ -180,7 +180,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         }
     }
 
-    override fun onConfirm(id: Long) {
+    override fun onChangeConfirm(id: Long) {
         mViewModel?.cancelVote(id)
     }
 
@@ -204,7 +204,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.onStart()
     }
 
-    override fun onConfirmed(id: Long) {
+    override fun oReblogConfirmed(id: Long) {
         mViewModel?.reblog(id)
     }
 

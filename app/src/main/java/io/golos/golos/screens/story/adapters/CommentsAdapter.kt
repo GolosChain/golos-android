@@ -4,13 +4,11 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -96,20 +94,19 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
     private val mText: TextView = itemView.findViewById(R.id.text)
     private val mUsernameTv: TextView = itemView.findViewById(R.id.username_tv)
     private val mTimeTv: TextView = itemView.findViewById(R.id.time_tv)
-    private val mUpvoteBtn: Button = itemView.findViewById(R.id.footer_upvote_btn)
+    private val mUpvoteBtn: ImageView = itemView.findViewById(R.id.footer_comment_upvote_ibtn)
+    private val mUpvoteCounter: TextView = itemView.findViewById(R.id.footer_comment_upvote_btn)
+    private val mMoneyTv: TextView = itemView.findViewById(R.id.footer_comment_money_tv)
     private val mImage: ImageView = itemView.findViewById(R.id.image)
-    private val mAnswerIbtn: Button = itemView.findViewById(R.id.answer_btn)
+    private val mAnswerIbtn: TextView = itemView.findViewById(R.id.answer_btn)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
     private val mRootLo: ConstraintLayout = itemView.findViewById(R.id.root_lo)
-    private val mProgress: ProgressBar = itemView.findViewById(R.id.progress)
-    private val mVotesIv: TextView = itemView.findViewById(R.id.votes_btn)
+    private val mProgress: ProgressBar = itemView.findViewById(R.id.footer_comment_progress_upvote)
     private val mDotsBtn: View = itemView.findViewById(R.id.dots_btn)
+    private var mLastAvatar: String? = null
 
     init {
         mText.movementMethod = GolosMovementMethod.instance
-        mTimeTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_access_time_gray_24dp), null, null, null)
-        mUpvoteBtn.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_upvote_18_gray), null, null, null)
-        mVotesIv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_person_outline), null, null, null)
     }
 
     var state: CommentHolderState? = null
@@ -121,7 +118,8 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                 mText.text = ""
                 mUsernameTv.text = ""
                 mTimeTv.text = ""
-                mUpvoteBtn.text = ""
+                mMoneyTv.text = ""
+                mUpvoteCounter.text = ""
                 mImage.setImageBitmap(null)
                 mAvatar.setImageBitmap(null)
                 mProgress.visibility = View.GONE
@@ -138,7 +136,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                 mText.setOnClickListener { state?.onCommentsClick?.invoke(this) }
                 mImage.setOnClickListener { mText.callOnClick() }
                 mUsernameTv.setOnClickListener { mAvatar.callOnClick() }
-                mVotesIv.setOnClickListener { state?.onUserVotesClick?.invoke(this) }
+                mUpvoteCounter.setOnClickListener { state?.onUserVotesClick?.invoke(this) }
                 mDotsBtn.setOnClickListener {
                     val popup = ListPopupWindow(itemView.context)
                     popup.anchorView = mDotsBtn
@@ -147,9 +145,9 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                         items.add(CommentListAdapter.CommentListAdapterItems.EDIT)
                     }
                     if (state?.comment?.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                        items.add(CommentListAdapter.CommentListAdapterItems.FLAG_RED)
+                        items.add(CommentListAdapter.CommentListAdapterItems.DIZLIKED)
                     } else {
-                        items.add(CommentListAdapter.CommentListAdapterItems.FLAG_GRAY)
+                        items.add(CommentListAdapter.CommentListAdapterItems.NOT_DIZLIKED)
                     }
 
                     popup.setAdapter(CommentListAdapter(itemView.context, items))
@@ -159,8 +157,8 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     popup.setOnItemClickListener { _, _, position, _ ->
                         val item = items[position]
                         when (item) {
-                            CommentListAdapter.CommentListAdapterItems.FLAG_GRAY -> state?.onDownVoteClick?.invoke(this)
-                            CommentListAdapter.CommentListAdapterItems.FLAG_RED -> state?.onDownVoteClick?.invoke(this)
+                            CommentListAdapter.CommentListAdapterItems.NOT_DIZLIKED -> state?.onDownVoteClick?.invoke(this)
+                            CommentListAdapter.CommentListAdapterItems.DIZLIKED -> state?.onDownVoteClick?.invoke(this)
                             CommentListAdapter.CommentListAdapterItems.EDIT -> state?.onEditClick?.invoke(this)
                         }
                         popup.dismiss()
@@ -170,46 +168,44 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
 
                 val avatarPath = state!!.comment.authorAccountInfo?.avatarPath
 
-                if (avatarPath == null) mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
-                else {
-                    val error = mGlide.load(R.drawable.ic_person_gray_24dp)
-                    mGlide.load(ImageUriResolver.resolveImageWithSize(avatarPath, wantedwidth = mAvatar.width))
-                            .error(error)
-                            .apply(RequestOptions().fitCenter().placeholder(R.drawable.ic_person_gray_24dp))
-                            .into(mAvatar)
+                if (avatarPath == null) {
+                    mAvatar.setImageResource(R.drawable.ic_person_gray_24dp)
+                    mLastAvatar = null
+                } else {
+                    if (mLastAvatar != avatarPath) {
+                        val error = mGlide.load(R.drawable.ic_person_gray_24dp)
+                        mGlide.load(ImageUriResolver.resolveImageWithSize(avatarPath, wantedwidth = mAvatar.width))
+                                .error(error)
+                                .apply(RequestOptions().fitCenter().placeholder(R.drawable.ic_person_gray_24dp))
+                                .into(mAvatar)
+                        mLastAvatar = avatarPath
+                    }
                 }
                 mUsernameTv.text = comment.author
 
+                mTimeTv.text = createTimeLabel(comment.created, itemView.context)
 
-                val hoursAgo = comment.created.hoursElapsedFromTimeStamp()
-                if (hoursAgo == 0) {
-                    mTimeTv.text = itemView.resources.getString(R.string.less_then_hour_ago)
-                } else if (hoursAgo < 24) {
-                    mTimeTv.text = "$hoursAgo ${itemView.resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
-                } else {
-                    val daysAgo = hoursAgo / 24
-                    mTimeTv.text = "$daysAgo ${itemView.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${itemView.resources.getString(R.string.ago)}"
-                }
-                mUpvoteBtn.text = calculateShownReward(state!!.comment, ctx = itemView.context)
+                mMoneyTv.text = calculateShownReward(state!!.comment, ctx = itemView.context)
 
                 if (state!!.comment.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.upvote_green))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_circle_green_outline_20dp, 0, 0, 0)
+                    mUpvoteBtn.setImageResource(R.drawable.ic_liked_20dp)
                 } else {
-                    mUpvoteBtn.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorP))
-                    mUpvoteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_triangle_in_cricle_gray_outline_20dp, 0, 0, 0)
+                    mUpvoteBtn.setImageResource(R.drawable.ic_like_20dp)
                 }
 
                 if (field!!.comment.voteUpdatingState?.state == UpdatingState.UPDATING) {
-                    mUpvoteBtn.setViewGone()
+                    mUpvoteBtn.setViewInvisible()
+                    mUpvoteCounter.setViewInvisible()
                     mUpvoteBtn.isClickable = false
                     mProgress.setViewVisible()
                 } else {
                     mUpvoteBtn.setViewVisible()
+                    mUpvoteCounter.setViewVisible()
                     mUpvoteBtn.isClickable = true
                     mProgress.setViewGone()
                 }
-                mVotesIv.text = field?.comment?.story?.votesNum?.toString() ?: ""
+                mUpvoteCounter.text = comment.upvotesNum.toString()
+
                 val rows = ArrayList(StoryParserToRows.parse(comment, true))
                 val imagePart = rows.find { it is ImageRow }
                 if (imagePart != null) {
@@ -235,7 +231,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                     val outText = rows.map {
                         if (it is TextRow) "${it.text}\n"
                         else "<a href=\"${(it as ImageRow).src}\">${itemView.resources.getString(R.string.image)}</a>\n"
-                    }.reduce { s1, s2 -> s1 + s2 }
+                    }.reduce { s1, s2 -> s1 + "\n" + s2 }
 
                     mText.text = KnifeParser.fromHtml(outText.trim(), this)
                 }

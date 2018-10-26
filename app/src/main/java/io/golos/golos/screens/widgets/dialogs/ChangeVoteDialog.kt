@@ -17,9 +17,9 @@ class ChangeVoteDialog() : GolosDialog() {
         val v = inflater.inflate(R.layout.d_vote_cancel, container, false)
         v.findViewById<View>(R.id.cancel_btn).setOnClickListener { dismiss() }
         v.findViewById<View>(R.id.change_vote_btn).setOnClickListener {
-            (parentFragment as? OnChangeConfirmal)?.onConfirm(arguments?.getLong("id", Long.MIN_VALUE)
+            (parentFragment as? OnChangeConfirmal)?.onChangeConfirm(arguments?.getLong("id", Long.MIN_VALUE)
                     ?: return@setOnClickListener)
-            (activity as? OnChangeConfirmal)?.onConfirm(arguments?.getLong("id", Long.MIN_VALUE)
+            (activity as? OnChangeConfirmal)?.onChangeConfirm(arguments?.getLong("id", Long.MIN_VALUE)
                     ?: return@setOnClickListener)
             dismiss()
         }
@@ -41,6 +41,6 @@ class ChangeVoteDialog() : GolosDialog() {
     }
 
     interface OnChangeConfirmal {
-        fun onConfirm(id: Long)
+        fun onChangeConfirm(id: Long)
     }
 }

@@ -65,9 +65,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     //feed posts lists
     private val mFilteredMap: HashMap<StoryRequest, MutableLiveData<StoriesFeed>> = HashMap()
 
-    //votes
-    private var mActiveVotesLiveData = Pair<Long, MutableLiveData<List<VotedUserObject>>>(Long.MIN_VALUE, MutableLiveData())
-
     private val mVotesState = MutableLiveData<List<GolosDiscussionItemVotingState>>()
 
     //current user data
@@ -152,6 +149,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
 
     private val mRepostsMap = Transformations.map(mCurrentUserBlogEntries) { list ->
+        if (list == null) emptyMap<String, GolosBlogEntry>()
         list.asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
     }
 
@@ -542,6 +540,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun voteInternal(discussionItem: GolosDiscussionItem,
                              voteStrength: Short) {
 
+        Timber.e("voteInternal, title = ${discussionItem.title} strength = $voteStrength")
+
         val listOfList = allLiveData()
         val replacer = StorySearcherAndReplacer()
 
@@ -565,12 +565,15 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     }
                     mVotesState.value = votingStates
                 }
+                Timber.e("votedDiscussion = $votedDiscussion")
                 listOfList.forEach {
                     val currentFeed = it.value ?: return@forEach
+
                     val result = replacer.findAndReplaceStory(votedDiscussion, currentFeed)//replacing old item with updated item
                     if (result.isChanged) {
 
                         mMainThreadExecutor.execute {
+                            Timber.e("propogating")
                             it.value = result.resultingFeed
                         }
                     }
@@ -597,11 +600,12 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     private fun requestStoryUpdate(story: GolosDiscussionItem,
                                    completionListener: (Unit, GolosError?) -> Unit) {
         networkExecutor.execute {
+            Timber.e("requestStoryUpdate")
             try {
                 val updatedStory = getStory(story.categoryName,
                         story.author,
                         story.permlink,
-                        null)
+                        10_000)
                 val listOfList = allLiveData()
                 val replacer = StorySearcherAndReplacer()
 
@@ -939,10 +943,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
 
-        if (id == mActiveVotesLiveData.first) return mActiveVotesLiveData.second
-
+        Timber.e("getVotedUsersForDiscussion")
         val liveData = MutableLiveData<List<VotedUserObject>>()
-        mActiveVotesLiveData = Pair(id, liveData)
 
         var item: GolosDiscussionItem? =
                 allLiveData()
@@ -971,19 +973,20 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
         workerExecutor.execute {
             item.let {
-
+                Timber.e("active votes = ${it.activeVotes}")
                 val payouts = RSharesConverter
                         .convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
                 val voters = it
                         .activeVotes
-                        .filter { it.percent != 0 }
                         .mapIndexed { index, voteLight ->
                             VotedUserObject(voteLight.name,
-                                    null,
+                                    voteLight.percent.toShort(),
                                     payouts[index])
                         }
                         .distinct()
                         .sorted()
+
+                Timber.e("voters = $voters")
 
                 mMainThreadExecutor.execute {
                     liveData.value = voters

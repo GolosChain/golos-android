@@ -9,6 +9,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.ApplicationUser
+import io.golos.golos.repository.model.VotedUserObject
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
 import io.golos.golos.screens.userslist.model.ListType
@@ -31,6 +32,7 @@ class UserListViewModel : ViewModel() {
     private lateinit var mInternetStatusNotifier: InternetStatusNotifier
 
     private val mLiveData = MediatorLiveData<UserListViewState>()
+    private var mVotesLiveData: LiveData<List<VotedUserObject>>? = null
 
     fun getLiveData(): LiveData<UserListViewState> = mLiveData
     private var mLastUserName: String? = null
@@ -84,7 +86,8 @@ class UserListViewModel : ViewModel() {
                 Timber.e("for this type $mListType storyId must be not null")
                 return
             }
-            mLiveData.addSource(mRepository.getVotedUsersForDiscussion(storyId ?: return)) {
+            mVotesLiveData = mRepository.getVotedUsersForDiscussion(storyId ?: return)
+            mLiveData.addSource(mVotesLiveData ?: return) {
                 if (it == null) {
                     mLiveData.value = null
                     return@addSource
@@ -99,8 +102,8 @@ class UserListViewModel : ViewModel() {
             mLiveData.removeSource(mRepository.getGolosUserSubscriptions(it))
             mLiveData.removeSource(mRepository.getGolosUserSubscribers(it))
         }
-        storyId?.let {
-            mLiveData.removeSource(mRepository.getVotedUsersForDiscussion(it))
+        mVotesLiveData?.let {
+            mLiveData.removeSource(it)
         }
         mRepository.appUserData.removeObserver(mUserDataObserver)
         mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
@@ -143,12 +146,12 @@ class UserListViewModel : ViewModel() {
             val chosenCurrency = mRepository.userSettingsRepository.getCurrency().value
                     ?: UserSettingsRepository.GolosCurrency.USD
 
-            val votes = mRepository.getVotedUsersForDiscussion(storyId ?: return).value.orEmpty()
-
+            val votes = mVotesLiveData?.value.orEmpty()
+            Timber.e("votes = $votes")
             mLiveData.value = UserListViewState(mTitle,
                     votes
                             .asSequence()
-                            .filter { if (mListType == ListType.UP_VOTERS) it.gbgValue > 0 else if (mListType == ListType.DOWN_VOTERS) it.gbgValue < 0 else true }
+                            .filter { if (mListType == ListType.UP_VOTERS) it.percent > 0 else if (mListType == ListType.DOWN_VOTERS) it.percent < 0 else true }
                             .map {
 
                                 val gbgCost = it.gbgValue

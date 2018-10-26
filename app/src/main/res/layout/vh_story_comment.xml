@@ -17,19 +17,21 @@
 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="30dp" />
+        app:riv_corner_radius="30dp"/>
 
     <TextView
         android:id="@+id/username_tv"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material_half"
         android:clickable="true"
+        android:gravity="start|center_vertical"
         android:textColor="@color/textColorP"
-        android:textSize="@dimen/font_regular"
+        android:textSize="@dimen/font_small"
         app:layout_constraintLeft_toRightOf="@id/avatar_iv"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/time_tv"
@@ -37,17 +39,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material_half"
         android:layout_marginTop="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material"
+
         android:drawablePadding="6dp"
         android:ellipsize="end"
-        android:gravity="center_vertical"
+        android:gravity="end|center_vertical"
         android:lines="1"
         android:paddingEnd="@dimen/margin_material"
         android:textColor="@color/gray_1"
         android:textSize="@dimen/font_small"
         app:layout_constraintBottom_toBottomOf="@id/username_tv"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toEndOf="@id/username_tv" />
+        app:layout_constraintStart_toEndOf="@id/username_tv"/>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/content_lo"
@@ -63,106 +66,116 @@
             android:id="@+id/image"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="140dp"
             android:layout_marginStart="@dimen/margin_material"
             android:layout_marginTop="6dp"
+            android:layout_marginEnd="140dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
 
-            android:visibility="gone" />
+            android:visibility="gone"/>
 
         <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_material"
-            android:layout_marginStart="@dimen/margin_material"
-            android:layout_marginTop="6dp"
-            android:ellipsize="end"
-            android:textColor="@color/textColorP"
-            android:textSize="@dimen/font_small"
-            android:visibility="gone">
+                  android:id="@+id/text"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginStart="@dimen/margin_material"
+                  android:layout_marginTop="6dp"
+                  android:layout_marginEnd="@dimen/margin_material"
+                  android:ellipsize="end"
+                  android:textColor="@color/textColorP"
+                  android:textSize="@dimen/font_small"
+                  android:visibility="gone">
 
         </TextView>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-    <com.wefika.flowlayout.FlowLayout
+    <com.google.android.flexbox.FlexboxLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/margin_material"
+        android:layout_marginEnd="@dimen/margin_material"
+        app:alignContent="center"
+        app:flexWrap="wrap"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/username_tv"
+        app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@id/content_lo">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/footer_upvote_btn"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
+        <LinearLayout
+            android:id="@+id/vote_and_money_lo"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginTop="2dp"
-            android:background="?selectableItemBackgroundBorderless"
-            android:drawablePadding="@dimen/margin_material_half"
-            android:gravity="center_vertical"
-            android:minWidth="40dp"
-            android:padding="0dp"
-            android:text="$ sdg"
-            android:textAllCaps="false"
-            android:textSize="@dimen/font_small"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            app:layout_constraintStart_toStartOf="@id/username_tv"
-            app:layout_constraintTop_toBottomOf="@+id/content_lo" />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginTop="2dp"
-            android:drawablePadding="@dimen/margin_material_half"
-            android:gravity="center_vertical"
-            android:minWidth="40dp"
-            android:padding="0dp"
-            app:layout_constraintStart_toStartOf="@id/username_tv"
-            app:layout_constraintTop_toBottomOf="@+id/content_lo" />
+                >
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="progress,footer_upvote_btn"/>
+                <ImageButton
+                    android:id="@+id/footer_comment_upvote_ibtn"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/ripple_oval"
+                    app:srcCompat="@drawable/ic_liked_20dp"
+
+                    />
+
+
+                <TextView
+                    android:id="@+id/footer_comment_upvote_btn"
+                    style="@style/StripeBtn"
+                    android:layout_marginStart="36dp"
+                    android:paddingTop="@dimen/quater"
+                    android:text="0"
+
+                    />
+
+                <ProgressBar
+                    android:id="@+id/footer_comment_progress_upvote"
+                    style="@style/StripeCardProgress"
+                    />
+            </FrameLayout>
+
+
+            <TextView
+                android:id="@+id/footer_comment_money_tv"
+                style="@style/StripeBtn"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_vertical"
+
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/shape_rect_gray_stroke"
+                android:minHeight="0dp"
+                android:paddingStart="@dimen/margin_material_half"
+                android:paddingTop="2dp"
+                android:paddingEnd="@dimen/margin_material_half"
+                android:paddingBottom="2dp"
+                android:text="$sdg"
+
+                />
+        </LinearLayout>
+
 
         <TextView
-            android:id="@+id/votes_btn"
-            style="@style/StoryBottomControlButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-
-            android:layout_marginStart="@dimen/margin_material"
-            android:background="?attr/selectableItemBackground"
-
-            />
-
-        <Button
             android:id="@+id/answer_btn"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/quater"
             android:gravity="center"
             android:minWidth="48dp"
-            android:padding="0dp"
-            android:paddingEnd="@dimen/margin_material_small"
+            android:minHeight="32dp"
             android:paddingStart="@dimen/margin_material_half"
+            android:paddingTop="6dp"
+            android:paddingEnd="@dimen/margin_material_small"
             android:text="@string/answer"
             android:textAllCaps="false"
             android:textColor="@color/textColorP"
             android:textSize="12sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/barrier"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/votes_btn"
-            app:layout_constraintTop_toTopOf="@+id/footer_upvote_btn" />
+            />
 
         <ImageButton
             android:id="@+id/dots_btn"
@@ -172,20 +185,12 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:minWidth="48dp"
-            android:padding="0dp"
-            android:paddingEnd="@dimen/margin_material_small"
             android:paddingStart="@dimen/margin_material_half"
+            android:paddingTop="6dp"
+            android:paddingEnd="@dimen/margin_material_small"
             android:text="@string/answer"
-            android:textAllCaps="false"
-            android:textColor="@color/textColorP"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/barrier"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/answer_btn"
-            app:layout_constraintTop_toTopOf="@+id/footer_upvote_btn"
-            app:srcCompat="@drawable/ic_dots_horizontal_20dp_gray" />
-    </com.wefika.flowlayout.FlowLayout>
+            app:srcCompat="@drawable/ic_dots_horizontal_20dp_gray"/>
+    </com.google.android.flexbox.FlexboxLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

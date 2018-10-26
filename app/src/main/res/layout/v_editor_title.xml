@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
-        android:background="@drawable/shape_white_cut"
+        android:background="@drawable/shape_editor_cut"
         android:orientation="vertical">
 
         <TextView
@@ -74,7 +74,7 @@
             android:id="@+id/shade"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="@drawable/shape_white_cut"
+            android:background="@drawable/shape_editor_cut"
             app:layout_constraintBottom_toBottomOf="@id/title_recycler"
             />
 

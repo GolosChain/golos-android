@@ -168,11 +168,9 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
 
                     if (replaceWith.id == currentStory.id) {
 
-                        currentStory.children.forEach {
-                            if (!replaceWith.children.contains(it)) replaceWith.children.add(it)
-                        }
-
                         replaceWith.level = currentStory.level
+                        replaceWith.children.clear()
+                        replaceWith.children.addAll(currentStory.children)
                         src[it] = replaceWith
 
                         changes = true

@@ -299,7 +299,7 @@ internal class ApiImpl : GolosApi() {
 
     override fun vote(author: String, permlink: String, percents: Short): GolosDiscussionItem {
         mGolosApi.simplifiedOperations.vote(AccountName(author), Permlink(permlink), percents)
-        return getRootStoryWithoutComments(author, permlink)
+        return getStoryWithoutComments(author, permlink, 10_000).rootStory
     }
 
     override fun uploadImage(sendFromAccount: String, file: File): String {

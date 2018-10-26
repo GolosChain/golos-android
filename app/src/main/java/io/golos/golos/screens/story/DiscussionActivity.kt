@@ -32,6 +32,7 @@ import io.golos.golos.screens.story.model.StoryParserToRows
 import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
+import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
@@ -41,7 +42,7 @@ import timber.log.Timber
  * Created by yuri on 06.11.17.
  */
 class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener,
-        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed {
+        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, ChangeVoteDialog.OnChangeConfirmal {
     private lateinit var mViewModel: DiscussionViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mFab: FloatingActionButton
@@ -500,7 +501,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mCommentsRecycler.adapter = CommentsAdapter(
                 onUserClick = { mViewModel.onUserClick(this, it.story.author) },
                 onCommentsClick = { mViewModel.onCommentClick(this, it.story) },
-                onUserVotesClick = { mViewModel.onCommentVoteClick(this, it) },
+                onUserVotesClick = {
+                    mViewModel.onCommentVoteClick(this, it)
+                },
                 onEditClick = { mViewModel.onEditClick(this, it.story) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
@@ -524,8 +527,13 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
                 if (mViewModel.canUserUpVoteOnThis(story)) {
-                    val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE)
-                    dialog.show(supportFragmentManager, null)
+                    if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                        ChangeVoteDialog.getInstance(story.story.id).show(supportFragmentManager, null)
+                    } else {
+                        val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE)
+                        dialog.show(supportFragmentManager, null)
+                    }
+
                 } else mViewModel.onStoryVote(story, 0)
             } else {
                 mViewModel.onVoteRejected()
@@ -535,8 +543,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
             if (mViewModel.canUserVote) {
                 val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
                         ?: return@setOnClickListener
-                val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE)
-                dialog.show(supportFragmentManager, null)
+                if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                    ChangeVoteDialog.getInstance(story.story.id).show(supportFragmentManager, null)
+                } else {
+                    val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE)
+                    dialog.show(supportFragmentManager, null)
+                }
             } else {
                 mViewModel.onVoteRejected()
             }
@@ -544,8 +556,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
             if (mViewModel.canUserVote) {
                 if (mViewModel.canUserUpVoteOnThis(it)) {
-                    val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.UPVOTE)
-                    dialog.show(supportFragmentManager, null)
+                    if (it.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+                        ChangeVoteDialog.getInstance(it.story.id).show(supportFragmentManager, null)
+                    } else {
+                        val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.UPVOTE)
+                        dialog.show(supportFragmentManager, null)
+                    }
                 } else mViewModel.onStoryVote(it, 0)
             } else {
                 mViewModel.onVoteRejected()
@@ -554,8 +570,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         (mCommentsRecycler.adapter as CommentsAdapter).onDownVoteClick = {
             if (mViewModel.canUserVote) {
                 if (mViewModel.canUserUpVoteOnThis(it)) {
-                    val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.DOWN_VOTE)
-                    dialog.show(supportFragmentManager, null)
+                    if (it.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+                        ChangeVoteDialog.getInstance(it.story.id).show(supportFragmentManager, null)
+                    } else {
+                        val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.DOWN_VOTE)
+                        dialog.show(supportFragmentManager, null)
+                    }
                 } else mViewModel.onStoryVote(it, 0)
             } else {
                 mViewModel.onVoteRejected()
@@ -596,8 +616,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mViewModel.onStop()
     }
 
-    override fun onConfirmed(id: Long) {
+    override fun oReblogConfirmed(id: Long) {
         mViewModel.onRootStoryReblog()
+    }
+
+    override fun onChangeConfirm(id: Long) {
+        mViewModel.onStoryVote(id, 0)
     }
 
     private fun setFullscreenProgress(isShown: Boolean) {
