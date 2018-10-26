@@ -93,6 +93,7 @@ class GolosServicesErrorMessage(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "method")
 @JsonSubTypes(value = [(JsonSubTypes.Type(value = GolosServerAuthRequest::class, name = "sign"))]
 )
+@JsonIgnoreProperties(ignoreUnknown = true)
 sealed class GolosServicesNotification(
         @JsonProperty("method")
         val method: String,

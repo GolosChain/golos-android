@@ -38,7 +38,7 @@
     <string name="answer">Ответить</string>
     <string name="enter_key">Введите ключ</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">Больше о Golos.io</>]]></string>
-    <string name="do_not_registered_register">Вы еще не зарегистрированы? <![CDATA[<a href = "https://golos.io/create_account">Регистрация</>]]></string>
+    <string name="do_not_registered_register">Вы еще не зарегистрированы? <![CDATA[<a href = "https://reg.golos.io/">Регистрация</>]]></string>
     <string name="enter_login">Введите имя аккаунта</string>
     <string name="enter_password">Введите пароль</string>
     <string name="posting_or_active_key">Введите активный или постинг ключ</string>
