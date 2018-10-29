@@ -18,7 +18,8 @@ data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
                             val nswfStrategy: NSFWStrategy,
                             val shownCurrency: UserSettingsRepository.GolosCurrency,
-                            val bountyDisplay: UserSettingsRepository.GolosBountyDisplay)
+                            val bountyDisplay: UserSettingsRepository.GolosBountyDisplay,
+                            val isReblogButtonShown: Boolean)
 
 
 data class StripeWrapper(val stripe: StoryWrapper,

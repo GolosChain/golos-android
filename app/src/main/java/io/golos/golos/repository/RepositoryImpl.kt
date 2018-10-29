@@ -149,8 +149,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
 
     private val mRepostsMap = Transformations.map(mCurrentUserBlogEntries) { list ->
-        if (list == null) emptyMap<String, GolosBlogEntry>()
-        list.asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
+        list.orEmpty().asSequence().filter { it.author != it.blogOwner }.associateBy { entry -> entry.permlink }
     }
 
     override fun getBlogEntriesFor(user: String): LiveData<List<GolosBlogEntry>> {

@@ -1,26 +1,29 @@
 package io.golos.golos.screens.stories
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import android.os.Bundle
+import androidx.viewpager.widget.ViewPager
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import androidx.viewpager.widget.ViewPager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.main_activity.FeedTypePreselect
+import io.golos.golos.screens.profile.viewmodel.AuthState
 import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.stories.adapters.StoriesPagerAdapter
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.ReselectionEmitter
+import io.golos.golos.utils.mapper
 
 
 /**
@@ -35,6 +38,7 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
     private lateinit var mAuthModel: AuthViewModel
     private lateinit var mTabLo: TabLayout
     private val mReselectEmitter = MutableLiveData<Int>()
+    private var mLastAuthState: AuthState? = null
 
     init {
         mFeedPositions = (ArrayList<FeedType>().apply {
@@ -60,23 +64,20 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
                         || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == false) {
 
                     mPager.adapter = createPagerAdapter(true)
-                    mPager.post {
-                        mPager.adapter?.notifyDataSetChanged()
-                        mTabLo.setupWithViewPager(mPager)
-                    }
-
                 }
             } else {
                 mFab.visibility = View.GONE
                 if (mPager.adapter == null
                         || (mPager.adapter as? StoriesPagerAdapter)?.enumerateSupportedFeedTypes()?.contains(FeedType.PERSONAL_FEED) == true) {
                     mPager.adapter = createPagerAdapter(false)
-                    mPager.post {
-                        mPager.adapter?.notifyDataSetChanged()
-                        mTabLo.setupWithViewPager(mPager)
-                    }
                 }
             }
+            mPager.post {
+                if (mLastAuthState != it) mPager.adapter?.notifyDataSetChanged()
+                mTabLo.setupWithViewPager(mPager)
+                mLastAuthState = it
+            }
+
         })
 
         (activity as? FeedTypePreselect)?.getSelection()?.observe(this, Observer {
@@ -122,6 +123,17 @@ class DiscussionsListHolderFragment : GolosFragment(), ReselectionEmitter {
             }
         })
         mTabLo.setupWithViewPager(mPager)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("auth_state", if (mLastAuthState == null) null else mapper.writeValueAsString(mLastAuthState))
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        val authString = savedInstanceState?.getString("auth_state", null)
+        mLastAuthState = if (authString == null) null else mapper.readValue(authString)
     }
 
 

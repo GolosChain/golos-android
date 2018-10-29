@@ -268,7 +268,9 @@ abstract class DiscussionsViewModel : ViewModel() {
 
         if (mObserver == null) {
             mObserver = Observer {
-                mFeedSettingsLiveData.value = getFeedModeSettings()
+                val newSettings = getFeedModeSettings()
+                if (newSettings != mFeedSettingsLiveData.value)
+                    mFeedSettingsLiveData.value = newSettings
             }
             Repository.get.userSettingsRepository.isStoriesCompactMode().observeForever(mObserver
                     ?: return)
@@ -277,10 +279,15 @@ abstract class DiscussionsViewModel : ViewModel() {
             Repository.get.userSettingsRepository.isNSFWShow().observeForever(mObserver ?: return)
 
             Repository.get.userSettingsRepository.getCurrency().observeForever {
-                mFeedSettingsLiveData.value = getFeedModeSettings()
+
+                val newSettings = getFeedModeSettings()
+                if (newSettings != mFeedSettingsLiveData.value)
+                    mFeedSettingsLiveData.value = newSettings
             }
             Repository.get.userSettingsRepository.getBountDisplay().observeForever {
-                mFeedSettingsLiveData.value = getFeedModeSettings()
+                val newSettings = getFeedModeSettings()
+                if (newSettings != mFeedSettingsLiveData.value)
+                    mFeedSettingsLiveData.value = newSettings
             }
         }
     }
@@ -415,8 +422,15 @@ abstract class DiscussionsViewModel : ViewModel() {
             Repository.get.userSettingsRepository.getCurrency().value
                     ?: UserSettingsRepository.GolosCurrency.USD,
             Repository.get.userSettingsRepository.getBountDisplay().value
-                    ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                    ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES,
+            !isAppUserBlog()
     )
+
+    private fun isAppUserBlog(): Boolean {
+        if (type != FeedType.BLOG) return false
+        val currentName = mRepository.appUserData.value?.name?:return false
+        return currentName == filter?.userNameFilter?.firstOrNull()
+    }
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {

@@ -476,11 +476,18 @@ fun View.setViewGone() {
 }
 
 fun View.setViewVisible() {
-    if (this.visibility != View.VISIBLE) visibility = View.VISIBLE
+    if (this.visibility != View.VISIBLE) {
+        visibility = View.VISIBLE
+        isClickable = true
+    }
 }
 
 fun View.setViewInvisible() {
-    if (this.visibility != View.INVISIBLE) visibility = View.INVISIBLE
+    if (this.visibility != View.INVISIBLE) {
+        visibility = View.INVISIBLE
+        isClickable = false
+    }
+
 }
 
 

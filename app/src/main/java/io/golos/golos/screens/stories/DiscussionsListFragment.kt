@@ -55,6 +55,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         return view
     }
 
+
     private fun getRecycler(): androidx.recyclerview.widget.RecyclerView = mRecycler!!
 
     private fun bindViews(view: View) {
@@ -160,7 +161,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                                 true,
                                 NSFWStrategy(true, Pair(false, "")),
                                 UserSettingsRepository.GolosCurrency.USD,
-                                UserSettingsRepository.GolosBountyDisplay.THREE_PLACES))
+                                UserSettingsRepository.GolosBountyDisplay.THREE_PLACES, false))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
@@ -235,7 +236,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     true,
                     NSFWStrategy(true, Pair(false, "")),
                     UserSettingsRepository.GolosCurrency.USD,
-                    UserSettingsRepository.GolosBountyDisplay.THREE_PLACES)
+                    UserSettingsRepository.GolosBountyDisplay.THREE_PLACES, false)
         }
         mViewModel?.cellViewSettingLiveData?.observe(this, observer)
     }
@@ -322,12 +323,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         parc = savedInstanceState?.getParcelable("StoriesFragmentRC")
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        //  mViewModel?.onStart()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewModel?.onStart()
@@ -338,11 +333,17 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.onStop()
     }
 
-    override fun onStop() {
-        super.onStop()
-        // mViewModel?.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
+        Timber.e("on destroy fragment $mViewModel $this")
     }
 
+    fun getArgs(): Pair<FeedType, StoryFilter?>? {
+        val bundle = arguments ?: return null
+        val type = (bundle.getSerializable(TYPE_TAG) as? FeedType) ?: return null
+        val filterString = bundle.getString(FILTER_TAG) ?: return Pair(type, null)
+        return Pair(type, mapper.readValue(filterString))
+    }
 
     companion object {
         private const val TYPE_TAG = "TYPE_TAG"

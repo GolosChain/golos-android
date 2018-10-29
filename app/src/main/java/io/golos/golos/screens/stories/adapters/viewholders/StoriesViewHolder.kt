@@ -16,7 +16,6 @@ import io.golos.golos.screens.stories.adapters.StripeWrapper
 import io.golos.golos.screens.story.model.ImageRow
 import io.golos.golos.screens.widgets.GolosViewHolder
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 /**
  * Created by yuri on 19.02.18.
@@ -44,7 +43,6 @@ abstract class StoriesViewHolder(resId: Int,
     protected open fun handlerStateChange(newState: StripeWrapper?,
                                           oldState: StripeWrapper?) {
 
-        Timber.e("handlerStateChange")
         val story = newState?.stripe?.story
         val wrapper = newState?.stripe
         val accinfo = wrapper?.authorAccountInfo
@@ -114,6 +112,8 @@ abstract class StoriesViewHolder(resId: Int,
             }
         }
 
+
+
         wrapper.voteUpdatingState?.let { votingState ->
             if (votingState.state == UpdatingState.DONE) {
                 getDownVotwProgress().setViewGone()
@@ -169,14 +169,19 @@ abstract class StoriesViewHolder(resId: Int,
         if (wrapper.isPostReposted) getReblogImageView().setImageResource(R.drawable.ic_reposted_20dp)
         else getReblogImageView().setImageResource(R.drawable.ic_repost_20dp)
 
-        if (wrapper.repostStatus == UpdatingState.UPDATING) {
-            getReblogImageView().setViewInvisible()
-            getReblogImageView().isClickable = false
-            getReblogProgress().setViewVisible()
+        if (newState.feedCellSettings.isReblogButtonShown) {
+            if (wrapper.repostStatus == UpdatingState.UPDATING) {
+                getReblogImageView().setViewInvisible()
+                getReblogImageView().isClickable = false
+                getReblogProgress().setViewVisible()
+            } else {
+                getReblogImageView().setViewVisible()
+                getReblogImageView().isClickable = true
+                getReblogProgress().setViewGone()
+            }
         } else {
-            getReblogImageView().setViewVisible()
-            getReblogImageView().isClickable = true
             getReblogProgress().setViewGone()
+            getReblogImageView().setViewInvisible()
         }
     }
 

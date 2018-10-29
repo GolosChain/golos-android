@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ApplicationUser
@@ -30,8 +31,8 @@ data class UserProfileState(val isLoggedIn: Boolean,
                             val gbgInSafeAmount: Double = 0.0,
                             val accountWorth: Double = 0.0)
 
-data class AuthState(val isLoggedIn: Boolean,
-                     val username: String = "")
+data class AuthState(@JsonProperty("loggedIn") val isLoggedIn: Boolean,
+                     @JsonProperty("username") val username: String = "")
 
 data class AuthUserInput(val login: String,
                          val masterKey: String = "",
