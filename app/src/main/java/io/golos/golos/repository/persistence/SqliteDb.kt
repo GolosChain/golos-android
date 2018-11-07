@@ -14,7 +14,7 @@ import java.util.*
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 6
+private val dbVersion = 7
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
 
@@ -56,6 +56,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
             db?.execSQL("alter table ${UsersTable.databaseName} add column ${UsersTable.showName} text")
             db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.upvotes} integer")
             db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.downvotes} integer")
+        }
+        if (newVersion == 7) {
+            db?.execSQL("delete from ${VotesTable.databaseName}")
+            db?.execSQL("delete from ${StoriesRequestsTable.databaseName}")
+            db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
+            db?.execSQL("delete from ${UsersTable.databaseName}")
+            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.reblogged} integer")
         }
     }
 
@@ -432,6 +439,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private const val created = "created"
         private const val isUserUpvotedOnThis = "isUserUpvotedOnThis"
         private const val type = "type"
+        const val reblogged = "reblogged"
         private const val cleanedFromImages = "cleanedFromImages"
         private const val childrenCount = "childrenCount"
         const val upvotes = "upvotes"
@@ -447,7 +455,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
                 "$created integer, $isUserUpvotedOnThis integer, $type text," +
                 "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text, $upvotes integer," +
-                "$downvotes integer)"
+                "$downvotes integer, $reblogged text)"
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
@@ -488,6 +496,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.votesRshares, it.votesRshares)
                 values.put(this.commentsCount, it.commentsCount)
                 values.put(this.parentAuthor, it.parentAuthor)
+                values.put(this.reblogged, it.rebloggedBy)
 
                 votestToSave.put(it.id, it.activeVotes)
                 db.insertWithOnConflict(databaseName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
@@ -545,6 +554,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(body) ?: "",
                             cursor.getLong(bodyLength),
                             cursor.getString(author) ?: "",
+                            cursor.getString(this.reblogged),
                             if (format != null) GolosDiscussionItem.Format.valueOf(format) else GolosDiscussionItem.Format.HTML,
                             arrayListOf(),
                             cursor.getString(parentPermlink) ?: "",
@@ -617,6 +627,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getString(body) ?: "",
                             cursor.getLong(bodyLength),
                             author.orEmpty(),
+                            cursor.getString(reblogged),
                             if (format != null) GolosDiscussionItem.Format.valueOf(format) else GolosDiscussionItem.Format.HTML,
 
                             arrayListOf(),

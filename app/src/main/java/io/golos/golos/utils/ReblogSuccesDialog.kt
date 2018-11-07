@@ -10,7 +10,7 @@ import io.golos.golos.screens.widgets.dialogs.GolosDialog
 /**
  * Created by yuri yurivladdurain@gmail.com on 22/10/2018.
  */
-class RepostSuccesDialog() : GolosDialog() {
+class ReblogSuccesDialog : GolosDialog() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.d_repost_made, container, false)
     }
@@ -24,6 +24,6 @@ class RepostSuccesDialog() : GolosDialog() {
     }
 
     companion object {
-        fun getInstance() = RepostSuccesDialog()
+        fun getInstance() = ReblogSuccesDialog()
     }
 }

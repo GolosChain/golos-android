@@ -190,17 +190,8 @@ class EditorTitleView : FrameLayout, TextWatcher, InputFilter {
                         foldComment()
                     }
                     mAuthorTv.text = type.author
-                    val hoursAgo = type.timeStamp.hoursElapsedFromTimeStamp()
-                    when {
-                        hoursAgo == 0 -> mCommentTimeStamp.text = resources.getString(R.string.less_then_hour_ago)
-                        hoursAgo < 24 -> mCommentTimeStamp.text = "$hoursAgo ${resources.getQuantityString(R.plurals.hours, hoursAgo.toInt())} ${resources.getString(R.string.ago)}"
-                        else -> {
-                            val daysAgo = hoursAgo / 24
-                            mCommentTimeStamp.text = "$daysAgo ${resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${resources.getString(R.string.ago)}"
-                        }
-                    }
+                    mCommentTimeStamp.text = createTimeLabel(type.timeStamp, context)
                     mAdapter.items = type.parentComment
-
                 }
             }
         }

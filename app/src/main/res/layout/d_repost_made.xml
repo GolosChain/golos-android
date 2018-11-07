@@ -31,7 +31,7 @@
         android:layout_marginEnd="@dimen/material_big"
         android:gravity="center"
         android:layout_marginBottom="32dp"
-        android:text="Теперь этот репост этой записи появится в спсике ваших постов и ленте ваших подписчиков."
+        android:text="@string/now_repost_will_appear"
         android:textColor="@color/font_gray_black"
         android:textSize="14sp"/>
 </LinearLayout>

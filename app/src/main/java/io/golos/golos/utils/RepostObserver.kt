@@ -13,6 +13,6 @@ class RepostObserver(fragmentManager: FragmentManager) : Observer<Unit> {
     override fun onChanged(t: Unit?) {
         if (t == null) return
         if (Repository.get.lastRepost.value == null) return
-        RepostSuccesDialog.getInstance().show(mFragmentManager.get() ?: return, null)
+        ReblogSuccesDialog.getInstance().show(mFragmentManager.get() ?: return, null)
     }
 }

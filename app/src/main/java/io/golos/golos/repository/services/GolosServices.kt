@@ -110,7 +110,6 @@ class GolosServicesImpl(
             }
         }
         if (copy.isEmpty()) {
-
             return
         }
 

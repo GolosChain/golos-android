@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import eu.bittrade.libs.golosj.Golos4J
@@ -54,8 +55,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private val mUsersRepository: GolosUsersRepository
 
-    private val mAppReadyStatusLiveData = MutableLiveData<ReadyStatus>()
-
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mStoryUpdateRequests = Collections.synchronizedSet(HashSet<StoryLoadRequest>())
 
@@ -82,6 +81,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private val mLastRepost = OneShotLiveData<Unit>()
     private val mUsersBlogEntriesMap = HashMap<String, MutableLiveData<List<GolosBlogEntry>>>()
+    private val mPreparingStatus = MutableLiveData<PreparingState>()
+    private val mComponentsStateLiveData = MediatorLiveData<ReadyStatus>()
 
 
     @WorkerThread
@@ -115,10 +116,16 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return out
     }
 
+    override val repositoryState: LiveData<PreparingState>
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+
     override val votingStates: LiveData<List<GolosDiscussionItemVotingState>>
         get() = mVotesState
 
     init {
+        mPreparingStatus.value = PreparingState.LOADING
+
         mFilteredMap.apply {
             put(StoryRequest(FeedType.ACTUAL, null), MutableLiveData())
             put(StoryRequest(FeedType.POPULAR, null), MutableLiveData())
@@ -145,6 +152,20 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 this,
                 mGolosApi)
         mVotesState.value = arrayListOf()
+
+
+        mComponentsStateLiveData.addSource(mPreparingStatus) {
+            mComponentsStateLiveData.value = collectPreparingState()
+        }
+        mComponentsStateLiveData.addSource(mUsersRepository.repositoryState) {
+            mComponentsStateLiveData.value = collectPreparingState()
+        }
+    }
+
+    private fun collectPreparingState(): ReadyStatus {
+        return if (mUsersRepository.repositoryState.value == PreparingState.DONE && mPreparingStatus.value == PreparingState.DONE)
+            ReadyStatus(true, null)
+        else ReadyStatus(false, null)
     }
 
 
@@ -291,7 +312,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     override fun getAppReadyStatus(): LiveData<ReadyStatus> {
-        return mAppReadyStatusLiveData
+        return mComponentsStateLiveData
     }
 
     override fun lastCreatedPost(): LiveData<CreatePostResult> {
@@ -494,16 +515,18 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         voteInternal(comment, percents)
     }
 
+    @MainThread
+    private fun addRepostState(repostingState: RepostingState) {
+        val repostingStates = mRepostingStates.value.orEmpty().filter { it.postId != repostingState.postId }.toHashSet()
+        repostingStates += repostingState
+        mRepostingStates.value = repostingStates
+    }
+
     override fun repost(discussionItem: GolosDiscussionItem, completionHandler: (Unit, GolosError?) -> Unit) {
         if (!isUserLoggedIn()) return
         if (currentUserRepostedBlogEntries.value.orEmpty().containsKey(discussionItem.permlink)) return
 
-        @MainThread
-        fun addRepostState(repostingState: RepostingState) {
-            val repostingStates = mRepostingStates.value.orEmpty().filter { it.postId != repostingState.postId }.toHashSet()
-            repostingStates += repostingState
-            mRepostingStates.value = repostingStates
-        }
+
 
         addRepostState(RepostingState(discussionItem.id, discussionItem.permlink, UpdatingState.UPDATING, null))
         workerExecutor.execute {
@@ -514,7 +537,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 val newStory = loadDiscussions(1, FeedType.BLOG, StoryFilter(userNameFilter = appUserData.value?.name.orEmpty()),
                         1024, null, null).firstOrNull() ?: return@execute
                 val comments = convertFeedTypeToLiveData(FeedType.BLOG, StoryFilter(userNameFilter = appUserData.value?.name.orEmpty()))
-
 
                 mMainThreadExecutor.execute {
                     mCurrentUserBlogEntries.value = mCurrentUserBlogEntries.value.orEmpty() + GolosBlogEntry(discussionItem.author, mAuthLiveData.value?.name.orEmpty(), 0, discussionItem.permlink)
@@ -538,9 +560,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     private fun voteInternal(discussionItem: GolosDiscussionItem,
                              voteStrength: Short) {
-
-        Timber.e("voteInternal, title = ${discussionItem.title} strength = $voteStrength")
-
         val listOfList = allLiveData()
         val replacer = StorySearcherAndReplacer()
 
@@ -569,7 +588,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     val result = replacer.findAndReplaceStory(votedDiscussion, currentFeed)//replacing old item with updated item
                     if (result.isChanged) {
-
+                        Timber.e("isChanged ${currentFeed.filter}")
                         mMainThreadExecutor.execute {
                             it.value = result.resultingFeed
                         }
@@ -937,7 +956,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>> {
 
-        Timber.e("getVotedUsersForDiscussion")
         val liveData = MutableLiveData<List<VotedUserObject>>()
 
         var item: GolosDiscussionItem? =
@@ -967,7 +985,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
         workerExecutor.execute {
             item.let {
-                Timber.e("active votes = ${it.activeVotes}")
                 val payouts = RSharesConverter
                         .convertRSharesToGbg2(it.gbgAmount, it.activeVotes.map { it.rshares }, it.votesRshares)
                 val voters = it
@@ -979,8 +996,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         }
                         .distinct()
                         .sorted()
-
-                Timber.e("voters = $voters")
 
                 mMainThreadExecutor.execute {
                     liveData.value = voters
@@ -1014,8 +1029,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                             if (isUserLoggedIn()) FeedType.PERSONAL_FEED else FeedType.NEW,
                             filter = if (isUserLoggedIn()) StoryFilter(userNameFilter = mAuthLiveData.value?.name.orEmpty()) else null,
                             completionHandler = { _, e ->
-                                if (e != null) mAppReadyStatusLiveData.value = ReadyStatus(false, e)
-                                else mAppReadyStatusLiveData.value = ReadyStatus(true, null)
+                                if (e != null) mComponentsStateLiveData.value = ReadyStatus(false, e)
+                                else mPreparingStatus.value = PreparingState.DONE
                             })
 
                 } else {
@@ -1037,7 +1052,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                     }
                                 }
 
-                        mAppReadyStatusLiveData.value = ReadyStatus(true, null)
+                        mPreparingStatus.value = PreparingState.DONE
                     }
                 }
                 requestApplicationUserDataUpdate()
@@ -1046,7 +1061,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 logException(e)
                 mMainThreadExecutor.execute {
                     mFilteredMap.clear()
-                    mAppReadyStatusLiveData.value = ReadyStatus(false, GolosErrorParser.parse(e))
+                    mComponentsStateLiveData.value = ReadyStatus(false, GolosErrorParser.parse(e))
                 }
             }
         }

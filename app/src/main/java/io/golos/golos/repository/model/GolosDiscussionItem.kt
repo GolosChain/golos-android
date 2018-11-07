@@ -22,6 +22,7 @@ data class GolosDiscussionItem constructor(val url: String,
                                            val body: String,
                                            val bodyLength: Long,
                                            val author: String,
+                                           var rebloggedBy: String?,
                                            val format: Format = Format.HTML,
                                            val children: MutableList<GolosDiscussionItem> = ArrayList(),
                                            val parentPermlink: String,
@@ -39,7 +40,7 @@ data class GolosDiscussionItem constructor(val url: String,
     companion object {
         val emptyItem = GolosDiscussionItem("", 0L, "", "", emptyList(), arrayListOf(), listOf(),
                 0, 0, 0, 0L, 0, "", 0.0, "", 0L, "", parentPermlink = "",
-                activeVotes = arrayListOf(), childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "")
+                activeVotes = arrayListOf(), childrenCount = 0, created = 0L, lastUpdated = 0L, parentAuthor = "", reputation = 0, cleanedFromImages = "", rebloggedBy = "")
     }
 
 
@@ -48,7 +49,7 @@ data class GolosDiscussionItem constructor(val url: String,
 
 
     override fun toString(): String {
-        return "Comment(id=$id, title='$title', permlink='$permlink', votest = $activeVotes)"
+        return "Comment(id=$id, title='$title', permlink='$permlink', body = $body, votes = $activeVotes)"
     }
 
 
@@ -82,6 +83,7 @@ data class GolosDiscussionItem constructor(val url: String,
         if (childrenCount != other.childrenCount) return false
         if (level != other.level) return false
         if (reputation != other.reputation) return false
+        if (rebloggedBy != other.rebloggedBy) return false
         if (lastUpdated != other.lastUpdated) return false
         if (created != other.created) return false
         //  if (userVotestatus != other.userVotestatus) return false
@@ -95,9 +97,11 @@ data class GolosDiscussionItem constructor(val url: String,
         result = 31 * result + id.hashCode()
         result = 31 * result + title.hashCode()
         result = 31 * result + categoryName.hashCode()
+        result = 31 * result + categoryName.hashCode()
         result = 31 * result + votesNum
         result = 31 * result + commentsCount
         result = 31 * result + permlink.hashCode()
+        result = 31 * result + (rebloggedBy?.hashCode() ?: 0)
         result = 31 * result + upvotesNum.hashCode()
         result = 31 * result + downvotesNum.hashCode()
         result = 31 * result + gbgAmount.hashCode()

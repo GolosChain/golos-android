@@ -1,26 +1,33 @@
 package io.golos.golos.screens.settings
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import androidx.appcompat.widget.SwitchCompat
-import androidx.appcompat.widget.Toolbar
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
+import androidx.appcompat.widget.Toolbar
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.screens.GolosActivity
-import io.golos.golos.screens.stories.model.FeedType
-import io.golos.golos.screens.story.DiscussionActivity
+import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.utils.asIntentToShowUrl
 
 /**
  * Created by yuri on 12.12.17.
+ * добавить ссылку -https://golos.io/about#team, текст гиппер ссылки "О Команде",
+ссылку на "Частые вопросы" https://golos.io/faq
+"Новости Команды" https://golos.io/@golosio
+Ссылку на Политику конфиденциальности -вставить сылкой не постом, пост убрать
+https://golos.io/ru--konfidenczialxnostx/@golos/politika-konfidencialnosti
  */
 class SettingsActivity : GolosActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,18 +38,42 @@ class SettingsActivity : GolosActivity() {
             startActivity("https://wiki.golos.io/".asIntentToShowUrl())
         }
         findViewById<View>(R.id.about_golos_tv).setOnClickListener {
-            DiscussionActivity.start(this,
-                    "golos", "ru--golos",
-                    "golos-russkoyazychnaya-socialno-mediinaya-blokchein-platforma",
-                    FeedType.UNCLASSIFIED,
-                    null)
+            startActivity("https://golos.io/welcome".asIntentToShowUrl())
         }
         findViewById<View>(R.id.privacy_policy_tv).setOnClickListener {
-            DiscussionActivity.start(this,
-                    "golos", "ru--konfidenczialxnostx",
-                    "politika-konfidencialnosti",
-                    FeedType.UNCLASSIFIED,
-                    null)
+            val url = Uri.parse("https://golos.io/ru--konfidenczialxnostx/@golos/politika-konfidencialnosti")
+            val intentList = ArrayList<Intent>(2)
+            val browserIntent = Intent(Intent.ACTION_VIEW, url)
+            val resInfos = packageManager.queryIntentActivities(browserIntent, 0)
+            if (!resInfos.isEmpty()) {
+                for (resInfo in resInfos) {
+                    val packageName = resInfo.activityInfo.packageName
+                    if (!packageName.toLowerCase().contains(BuildConfig.APPLICATION_ID)) {
+                        Intent().apply {
+                            component = ComponentName(packageName, resInfo.activityInfo.name);
+                            action = Intent.ACTION_VIEW
+                            data = url
+                            setPackage(packageName)
+                            intentList.add(this)
+                        }
+                    }
+                }
+                if (!intentList.isEmpty()) {
+                    val chooserIntent = Intent.createChooser(intentList.removeAt(0), "Choose Browser");
+                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentList.toArray())
+                    startActivity(chooserIntent)
+                } else
+                    Log.e("Error", "No Apps can perform your task")
+            }
+        }
+        findViewById<View>(R.id.about_team_tv).setOnClickListener {
+            startActivity("https://golos.io/about#team".asIntentToShowUrl())
+        }
+        findViewById<View>(R.id.faq).setOnClickListener {
+            startActivity("https://golos.io/faq".asIntentToShowUrl())
+        }
+        findViewById<View>(R.id.team_news_tv).setOnClickListener {
+            UserProfileActivity.start(this, "golosio")
         }
         findViewById<View>(R.id.exit).setOnClickListener {
             Repository.get.deleteUserdata()

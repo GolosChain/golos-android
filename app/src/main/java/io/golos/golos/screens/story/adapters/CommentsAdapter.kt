@@ -125,7 +125,6 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
                 mProgress.visibility = View.GONE
                 mRootLo.setPadding(0, 0, 0, 0)
             } else {
-
                 val comment = state!!.comment.story
                 var level = comment.level
                 if (level > 6) level = 6
@@ -152,7 +151,7 @@ class CommentViewHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycl
 
                     popup.setAdapter(CommentListAdapter(itemView.context, items))
                     popup.setContentWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                            140.0f,
+                            160.0f,
                             itemView.context.resources.displayMetrics).toInt())
                     popup.setOnItemClickListener { _, _, position, _ ->
                         val item = items[position]

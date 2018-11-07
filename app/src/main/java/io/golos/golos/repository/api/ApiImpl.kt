@@ -290,7 +290,7 @@ internal class ApiImpl : GolosApi() {
 
     override fun cancelVote(author: String, permlink: String): GolosDiscussionItem {
         mGolosApi.simplifiedOperations.cancelVote(AccountName(author), Permlink(permlink))
-        return getRootStoryWithoutComments(author, permlink)
+        return getStoryWithoutComments(author, permlink, 10_000).rootStory
     }
 
     private fun getRootStoryWithoutComments(author: String, permlink: String): GolosDiscussionItem {

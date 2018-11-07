@@ -143,16 +143,16 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_main"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_material_half"
         android:adjustViewBounds="true"
         android:clickable="true"
-        android:cropToPadding="true"
         android:foreground="?selectableItemBackgroundBorderless"
-        android:minHeight="220dp"
+        android:minHeight="120dp"
         android:scaleType="fitCenter"
         android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title"/>
 

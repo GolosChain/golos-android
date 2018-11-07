@@ -93,7 +93,7 @@
     <string name="golos_android_v">Golos для Android v.%s</string>
     <string name="user_made_logout">Вы вышли из аккаунта</string>
     <string name="can_vote_once_per_three_second">Вы можете проголосовать раз в три секунды</string>
-    <string name="must_be_logged_in_for_this_action">Вы должны быть залогинены для этого действия</string>
+    <string name="must_be_logged_in_for_this_action">Войдите, чтобы выполнить это действие</string>
     <string name="must_be_subscribed_for_action">Вы должны быть подписаны на автора, чтобы отписаться от него</string>
     <string name="follow">Подписаться</string>
     <string name="unfollow">Отписаться</string>
@@ -155,6 +155,7 @@
     <string name="rubles_format">₽%s</string>
     <string name="dollars_format">$%s</string>
     <string name="gbg_format">GBG%s</string>
+    <string name="now_happened">Только что</string>
     <string name="voting_power">Сила голоса</string>
     <string name="general_settings">Общие</string>
     <string name="currency_precision">Отображение наград,\nокругление</string>
@@ -255,7 +256,7 @@
     <string name="copy_link">Скопировать ссылку</string>
     <string name="save_image">Сохранить</string>
     <string name="downvote_1_p">Голос против может снять вознаграждения и сделать пост менее видимым. Голосование против должно основываться на:</string>
-    <string name="downvote_p2">\u2022 Несогласие на награды \n\u2022 Мошенничество или плагиат \n\u2022 Разжигание ненависти или Интернет троллинг \n\u2022 Преднамеренная неправильная категоризация контента или спам</string>
+    <string name="downvote_p2">\u2022 Несогласии с наградой \n\u2022 Мошенничество или плагиат \n\u2022 Разжигание ненависти или Интернет троллинг \n\u2022 Преднамеренная неправильная категоризация контента или спам</string>
     <string name="vote">Проголосовать</string>
     <string name="vote_against">Голосовать против</string>
     <string name="change">Изменить</string>
@@ -264,11 +265,14 @@
     <string name="vote_change_text">Удаление Голоса изменит ваше решение и кураторские вознаграждения за этот пост.</string>
     <string name="voted_against">Проголосовали против</string>
     <string name="repost">Поделиться этим постом</string>
-
-
+    <string name="duplicate_reblog">Вы уже поделились этой записью. Отмена репоста в этой версии недоступна.</string>
     <string name="reblog_answer_text">Подтвердите, пожалуйста, что хотите поделиться этим постом.</string>
     <string name="make_reblog">Поделиться</string>
     <string name="repost_done">Запись успешно опубликована</string>
+    <string name="now_repost_will_appear">Теперь этот репост этой появится в списке ваших постов и ленте ваших подписчиков.</string>
+    <string name="about_team">О Команде</string>
+    <string name="team_news">Новости Команды</string>
+    <string name="faq">Часто задаваемые вопросы</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

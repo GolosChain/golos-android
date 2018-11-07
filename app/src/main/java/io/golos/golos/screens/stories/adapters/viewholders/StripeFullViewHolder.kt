@@ -48,7 +48,8 @@ class StripeFullViewHolder(parent: ViewGroup,
         if (errorDrawableS == null) errorDrawableS = ContextCompat.getDrawable(itemView.context, R.drawable.error)!!
         mRebloggedByTv.setCompoundDrawablesWithIntrinsicBounds(itemView.getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
 
-        mFooterView.commentsCountTextView.setOnClickListener { onCommentsClick.onClick(this) }
+        mFooterView.commentsLo.setOnClickListener { onCommentsClick.onClick(this) }
+        mFooterView.commentsIbnt.setOnClickListener { onCommentsClick.onClick(this) }
         mFooterView.dizLikeImageView.setOnClickListener { onDownVoteClick.onClick(this) }
         mFooterView.reblogImageView.setOnClickListener { onReblogClick.onClick(this) }
 
@@ -66,7 +67,6 @@ class StripeFullViewHolder(parent: ViewGroup,
             onCardClick.onClick(this)
         }
         itemView.setOnClickListener { onCardClick.onClick(this) }
-        mFooterView.voteCountTextView.setViewGone()
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -164,7 +164,7 @@ class StripeFullViewHolder(parent: ViewGroup,
     }
 
     override fun getCommentsTv(): TextView {
-        return mFooterView.commentsCountTextView
+        return mFooterView.commentsTextView
     }
 
     override fun getShownUserNameTv(): TextView {

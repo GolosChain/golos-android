@@ -7,7 +7,10 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import io.golos.golos.R
-import io.golos.golos.utils.*
+import io.golos.golos.utils.inflate
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewInvisible
+import io.golos.golos.utils.setViewVisible
 
 /**
  * Created by yuri yurivladdurain@gmail.com on 23/10/2018.
@@ -31,12 +34,13 @@ class FooterView @JvmOverloads constructor(
     val dizLikeCountTextView = findViewById<TextView>(R.id.footer_down_vote_btn)
     val dizLikeProgress = findViewById<View>(R.id.footer_progress_downvote)
 
-    val commentsCountTextView = findViewById<TextView>(R.id.footer_comments_tv)
+    val commentsIbnt = findViewById<ImageView>(R.id.footer_comments_ibtn)
+    val commentsTextView = findViewById<TextView>(R.id.footer_comments_tv)
+    val commentsLo = findViewById<View>(R.id.footer_comments_lo)
 
     val reblogImageView = findViewById<ImageView>(R.id.footer_reblog_ibtn)
     val reblogProgress = findViewById<View>(R.id.footer_reblog_progress)
 
-    val voteCountTextView = findViewById<TextView>(R.id.footer_votes_tv)
 
     fun setUpovteProgress(isLoading: Boolean) {
         if (isLoading) {
@@ -70,10 +74,5 @@ class FooterView @JvmOverloads constructor(
             reblogImageView.setViewVisible()
             reblogProgress.setViewGone()
         }
-    }
-
-    init {
-        commentsCountTextView.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_comments_20dp), null, null, null)
-        voteCountTextView.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_person_outline), null, null, null)
     }
 }

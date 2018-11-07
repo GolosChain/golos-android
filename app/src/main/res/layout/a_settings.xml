@@ -265,6 +265,21 @@
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
                     android:text="@string/privacy_policy" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/about_team_tv"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/about_team" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/faq"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/faq" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/team_news_tv"
+                    style="@style/SettingTextViewStyle"
+                    android:background="?selectableItemBackground"
+                    android:text="@string/team_news" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/exit"

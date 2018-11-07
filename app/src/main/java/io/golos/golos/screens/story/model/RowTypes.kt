@@ -29,7 +29,7 @@ object StoryParserToRows {
               skipHtmlClean: Boolean = false): List<Row> {
         return parse(GolosDiscussionItem("", 0L, "", "", arrayListOf(),
                 arrayListOf(), arrayListOf<String>(), 0, 0, 0, 0L, 0, "",
-                0.0, story, 0L, "", GolosDiscussionItem.Format.HTML, arrayListOf(),
+                0.0, story, 0L, "", null, GolosDiscussionItem.Format.HTML, arrayListOf(),
                 "", "", 0, 0, 0L, 0L, 0L,
                 arrayListOf(),
                 GolosDiscussionItem.ItemType.PLAIN, "", arrayListOf()),

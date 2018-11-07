@@ -22,7 +22,7 @@ data class StoryWrapper(
         val authorAccountInfo: GolosUserAccountInfo? = null,
         val exchangeValues: ExchangeValues = ExchangeValues.nullValues,
         val isStoryEditable: Boolean = false,
-        var asHtmlString: CharSequence? = null){
+        var asHtmlString: CharSequence? = null) {
 
 
     override fun equals(other: Any?): Boolean {
@@ -172,9 +172,8 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
                         replaceWith.children.clear()
                         replaceWith.children.addAll(currentStory.children)
                         src[it] = replaceWith
-
                         changes = true
-                    } else if (currentStory.childrenCount > 0) {
+                    } else if (currentStory.children.size > 0) {
                         changes = replaceComment(replaceWith, currentStory.children) || changes
                     }
                 }
@@ -192,57 +191,4 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
         val out = of.children
         return out.flatMap { listOf(it) + getChildren(it) }
     }
-
-//
-//    private fun createCommentsTree(from: ArrayList<StoryWrapper>, to: StoryWrapper, level: Int): ArrayList<StoryWrapper> {
-//        if (to.rootWrapper.childrenCount == 0) return ArrayList()
-//        if (from.contains(to)) {
-//            from.remove(to)
-//        }
-//        val out = from.filter { it.rootWrapper.parentPermlink == to.rootWrapper.permlink }
-//        out.forEach {
-//            it.rootWrapper.level = level
-//            it.rootWrapper.children.clear()
-//            it.rootWrapper.children.addAll(createCommentsTree(from, it, level + 1))
-//        }
-//        return ArrayList(out)
-//    }
-//
-//    override fun toString(): String {
-//        return "StoryTree(rootWrapper=${rootStory()}\n," +
-//                " comments = ${comments()}"
-//    }
-//
-//    override public fun clone(): Any {
-//        return super.clone()
-//
-//    }
-//
-//    fun deepCopy(): StoryWithComments {
-//        val rootWrapper = if (mRootStoryWrapper != null) {
-//            StoryWrapper(mRootStoryWrapper!!.rootWrapper.copy(),
-//                    mRootStoryWrapper!!.updatingState,
-//                    mRootStoryWrapper!!.exchangeValues,
-//                    mRootStoryWrapper!!.isStoryEditable,
-//                    mRootStoryWrapper!!.asHtmlString)
-//        } else null
-//        return StoryWithComments(rootWrapper, mCommentsWithState.clone() as ArrayList<StoryWrapper>)
-//    }
-//
-//    override fun equals(other: Any?): Boolean {
-//        if (this === other) return true
-//        if (other !is StoryWithComments) return false
-//
-//        if (mRootStoryWrapper != other.mRootStoryWrapper) return false
-//        if (mCommentsWithState != other.mCommentsWithState) return false
-//
-//        return true
-//    }
-//
-//    override fun hashCode(): Int {
-//        var result = mRootStoryWrapper?.hashCode() ?: 0
-//        result = 31 * result + mCommentsWithState.hashCode()
-//        return result
-//    }
-
 }

@@ -20,7 +20,6 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class DiscussionViewModel : ViewModel() {
 
@@ -112,11 +111,10 @@ class DiscussionViewModel : ViewModel() {
                 var rootStoryWrapper = createStoryWrapper(story, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
                         false, null)
 
-                if (feedType == FeedType.BLOG) {
-                    val blogOwner = filter?.userNameFilter?.firstOrNull()
-                    if (blogOwner != null && blogOwner != rootStoryWrapper.story.author) rootStoryWrapper =
-                            rootStoryWrapper.copy(authorAccountInfo = accounts[blogOwner])
-                }
+                rootStoryWrapper = changeWrapperAccountInfoIfNeeded(feedType,
+                        filter,
+                        rootStoryWrapper,
+                        mRepository.getGolosUserAccountInfos().value.orEmpty())
 
                 val comments = it.getFlataned().map {
                     createStoryWrapper(it, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
@@ -127,6 +125,7 @@ class DiscussionViewModel : ViewModel() {
                         isLoading = isLoading,
                         storyTitle = it.rootStory.title,
                         tags = it.rootStory.tags,
+                        showRepostButton = isRepostButtonNeedToBeShown(feedType, filter, mRepository.appUserData.value, it.rootStory),
                         storyTree = StoryWrapperWithComment(rootStoryWrapper, comments),
                         discussionType = if (story.isStory()) DiscussionType.STORY else DiscussionType.COMMENT,
                         canUserCommentThis = mRepository.isUserLoggedIn())
@@ -220,16 +219,11 @@ class DiscussionViewModel : ViewModel() {
 
         }
 
-    fun canUserUpVoteOnThis(story: StoryWrapper): Boolean {
-        return story.voteStatus != GolosDiscussionItem.UserVoteType.VOTED
-    }
-
     fun onStoryVote(story: StoryWrapper, percent: Short) {
         if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
         mLastVotingStoryId = story.story.id
         if (percent == 0.toShort()) mRepository.cancelVote(story.story)
         else {
-
             mRepository.vote(story.story, percent)
         }
     }
@@ -376,10 +370,6 @@ class DiscussionViewModel : ViewModel() {
                 ?: return)
     }
 
-    fun onAllVotersClick(rootWrapper: StoryWrapper, discussionActivity: Activity) {
-        UsersListActivity.startToShowAllVoters(discussionActivity, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id
-                ?: return)
-    }
 
     fun onUpvotersClick(rootWrapper: StoryWrapper, discussionActivity: Activity) {
         UsersListActivity.startToShowUpVoters(discussionActivity, mStoryLiveData.value?.storyTree?.rootWrapper?.story?.id

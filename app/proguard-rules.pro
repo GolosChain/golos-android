@@ -30,6 +30,8 @@
 -keep public class * extends android.content.BroadcastReceiver
 -keep public class * extends android.content.ContentProvider
 -keep,includedescriptorclasses class eu.bittrade.libs.golosj.communication** { *; }
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn okio.**
 -dontoptimize
 -keepparameternames
 -keepclassmembers,allowoptimization enum * {

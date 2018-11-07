@@ -102,6 +102,7 @@
     <string name="enter_private_posting_wif">You must enter your private posting key</string>
     <string name="you_cannot_subscribe_on_yourself">You cannot subscribe on yourself</string>
     <string name="retry">Retry</string>
+    <string name="now_happened">Just now</string>
     <string name="scan_fail">failed to recognize QR - code, please try again</string>
     <string name="enter_private_key">Please, enter your private, not public, key</string>
     <string name="tags_you_subscribed">tags, you subscribed on</string>
@@ -266,6 +267,11 @@
     <string name="reblog_answer_text">Do you confirm, that you want to share this post?</string>
     <string name="make_reblog">Share</string>
     <string name="repost_done">Post share was successful</string>
+    <string name="now_repost_will_appear">Теперь этот репост этой repo появится в спсике ваших постов и ленте ваших подписчиков.</string>
+    <string name="duplicate_reblog">You already reblogged this post. Cancellation is not supported in this version.</string>
+    <string name="about_team">About Team</string>
+    <string name="team_news">Team News</string>
+    <string name="faq">FAQ</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

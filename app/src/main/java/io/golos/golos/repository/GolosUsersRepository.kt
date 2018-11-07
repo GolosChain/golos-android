@@ -1,25 +1,29 @@
 package io.golos.golos.repository
 
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.annotation.WorkerThread
 import io.golos.golos.R
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
-import java.util.TreeSet
+import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
+enum class PreparingState {
+    LOADING, DONE
+}
+
 interface GolosUsersRepository {
 
     fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>>
 
-    fun requestUsersAccountInfoUpdate(golosUserName: List<String>,
+    fun requestUsersAccountInfoUpdate(golosUserNames: List<String>,
                                       completionHandler: (Unit, GolosError?) -> Unit = { _, _ -> })
 
     fun getGolosUserSubscribers(golosUserName: String): LiveData<List<String>>
@@ -45,6 +49,7 @@ interface GolosUsersRepository {
 
     fun lookupUsers(username: String): LiveData<List<String>>
 
+    val repositoryState: LiveData<PreparingState>
 
 }
 
@@ -97,6 +102,18 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
 
     private var isSubscribedOnCurrentUserSubscriptions = false
     private var mLastName: String? = null
+    private val mPreparingState = MutableLiveData<PreparingState>()
+    private val mUsersLoadingQue = Collections.synchronizedSet(HashSet<List<String>>(15))
+
+    init {
+        mMainThreadExecutor.execute {
+            mPreparingState.value = PreparingState.LOADING
+        }
+
+    }
+
+    override val repositoryState: LiveData<PreparingState>
+        get() = mPreparingState
 
     override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {
         return mGolosUsers
@@ -110,20 +127,22 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         it.mapValues { it.value.avatarPath }
     }
 
-    override fun requestUsersAccountInfoUpdate(golosUserName: List<String>,
+    override fun requestUsersAccountInfoUpdate(golosUserNames: List<String>,
                                                completionHandler: (Unit, GolosError?) -> Unit) {
 
-        if (golosUserName.isEmpty()) {
+        if (mUsersLoadingQue.contains(golosUserNames)) return
+        if (golosUserNames.isEmpty()) {
             completionHandler(Unit, null)
             return
         }
+        mUsersLoadingQue.add(golosUserNames)
         mWorkerExecutor.execute {
             try {
                 val users =
-                        mGolosApi.getGolosUsers(golosUserName.distinct(), golosUserName.size == 1).toHashMap()
+                        mGolosApi.getGolosUsers(golosUserNames.distinct(), golosUserNames.size == 1).toHashMap()
                 val allSaveUsers = mGolosUsers.value.orEmpty().toHashMap()
 
-                if (golosUserName.size != 1) {
+                if (golosUserNames.size != 1) {
                     val allSavedSubscriptionsData = allSaveUsers.mapValues { Pair(it.value.subscribersCount, it.value.subscriptionsCount) }
                     allSavedSubscriptionsData.forEach {
                         val newInfoWithOldSubscribers = users[it.key]?.copy(subscribersCount = it.value.first, subscriptionsCount = it.value.second)
@@ -133,6 +152,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                 }
 
                 allSaveUsers.putAll(users)
+                mUsersLoadingQue.remove(golosUserNames)
                 mMainThreadExecutor.execute {
                     mGolosUsers.value = allSaveUsers
                 }
@@ -343,6 +363,9 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             addAccountInfo(mPersister.getGolosUsersAccountInfo())
             addSubscriptions(mPersister.getGolosUsersSubscriptions())
             addSubscribers(mPersister.getGolosUsersSubscribers())
+            mMainThreadExecutor.execute {
+                mPreparingState.value = PreparingState.DONE
+            }
         }
         mCurrentUserSubscriptions.addSource(mCurrentUserInfo.appUserData) {
 

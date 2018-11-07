@@ -9,8 +9,8 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 81
-        versionName "0.77"
+        versionCode 87
+        versionName "0.83"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -31,6 +31,7 @@ android {
         }
         buildTypes.each {
             it.buildConfigField 'String', 'BASE_URL', "\"https://golos.io/\""
+            it.buildConfigField 'String', 'AMPLITUDE_API_KEY', amplitudeApiKey
             it.buildConfigField 'boolean', 'DEBUG_EDITOR', "false"
             it.buildConfigField 'String', 'GATE_URL', "\"ws://95.216.153.236:8080\""
             it.buildConfigField 'String []', 'ALTERNATE_URLS', "new String[]{\"https://golos.blog/\"," +
@@ -86,13 +87,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
-
-
     testImplementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
-
-
     testImplementation group: 'com.nhaarman', name: 'mockito-kotlin-kt1.1', version: '1.5.0'
     testImplementation 'androidx.arch.core:core-testing:2.0.0'
     testImplementation 'org.robolectric:robolectric:3.8'
@@ -110,6 +106,7 @@ dependencies {
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'com.github.chrisbanes:PhotoView:+'
     implementation 'com.google.android:flexbox:1.1.0'
+    implementation 'com.amplitude:android-sdk:2.16.0'
     implementation('com.wefika:flowlayout:+') {
         exclude group: 'com.intellij'
     }

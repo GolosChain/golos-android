@@ -286,26 +286,25 @@ abstract class StoriesViewHolder(resId: Int,
         if (story.images.size > 1) {
             nextImage = mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[1], size)).error(error)
         }
-
+        imageView.setImageDrawable(getErrorDrawable())
         if (story.images.size > 0) {
             mGlide.load(ImageUriResolver.resolveImageWithSize(story.images[0],
                     wantedwidth = size))
                     .error(nextImage ?: error)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .apply(RequestOptions.placeholderOf(getErrorDrawable()))
-
+                    .apply(RequestOptions().fitCenter())
                     .into(imageView)
         } else {
 
             val image = story.parts.find { it is ImageRow }
-
             image?.let {
                 val src = (it as ImageRow).src
                 mGlide.load(ImageUriResolver.resolveImageWithSize(src,
                         wantedwidth = size))
                         .error(nextImage ?: error)
-                        .apply(RequestOptions.placeholderOf(getErrorDrawable()))
+                        .apply(RequestOptions().fitCenter())
                         .transition(DrawableTransitionOptions.withCrossFade())
+
                         .into(imageView)
             }
             if (image == null) {

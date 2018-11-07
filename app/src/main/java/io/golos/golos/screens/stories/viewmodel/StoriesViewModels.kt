@@ -186,7 +186,10 @@ abstract class DiscussionsViewModel : ViewModel() {
 
             val newStories = mDiscussionsLiveData.value?.items?.map {
                 val story = it.story
-                changeWrapperAccountInfoIfNeeded(it.copy(authorAccountInfo = usersMap[story.author]))
+                changeWrapperAccountInfoIfNeeded(type,
+                        filter,
+                        it.copy(authorAccountInfo = usersMap[story.author]),
+                        mRepository.getGolosUserAccountInfos().value.orEmpty())
             }.orEmpty()
 
             val newState = mDiscussionsLiveData.value?.copy(items = newStories)
@@ -339,26 +342,24 @@ abstract class DiscussionsViewModel : ViewModel() {
                 !items.isFeedActual,
                 items.items.map {
                     val discussionItem = it.rootStory
-                    changeWrapperAccountInfoIfNeeded(createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
-                            repostUpdateStates, currentUser, exchangeValues, false, KnifeHtmlizer))
+                    changeWrapperAccountInfoIfNeeded(type, filter, createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
+                            repostUpdateStates, currentUser, exchangeValues, false, KnifeHtmlizer), mRepository.getGolosUserAccountInfos().value.orEmpty())
                 },
                 null, null)
 
         mRepository.requestUsersAccountInfoUpdate(items.items.asSequence()
                 .map { it.rootStory.author }
-                .filter { storyAuthor -> !usersMap.containsKey(storyAuthor) }.toList())
+                .filter { storyAuthor -> !usersMap.containsKey(storyAuthor) }
+                .toList()
+                .asSequence()
+                .plus(items.items
+                        .mapNotNull { it.rootStory.rebloggedBy })
+                .distinct()
+                .toList())
+
         return state
     }
 
-    private fun changeWrapperAccountInfoIfNeeded(wrapper: StoryWrapper): StoryWrapper {
-        if (type != FeedType.BLOG) return wrapper
-        val accInfos = mRepository.getGolosUserAccountInfos()
-        val blogOwner = filter?.userNameFilter?.firstOrNull().orEmpty()
-        return if (blogOwner.isEmpty()) wrapper
-        else {
-            wrapper.copy(authorAccountInfo = accInfos.value.orEmpty()[blogOwner])
-        }
-    }
 
     fun reblog(story: StoryWrapper) {
         if (!mRepository.isUserLoggedIn()) return
@@ -423,14 +424,8 @@ abstract class DiscussionsViewModel : ViewModel() {
                     ?: UserSettingsRepository.GolosCurrency.USD,
             Repository.get.userSettingsRepository.getBountDisplay().value
                     ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES,
-            !isAppUserBlog()
+            isRepostButtonNeedToBeShown(type, filter, mRepository.appUserData.value)
     )
-
-    private fun isAppUserBlog(): Boolean {
-        if (type != FeedType.BLOG) return false
-        val currentName = mRepository.appUserData.value?.name?:return false
-        return currentName == filter?.userNameFilter?.firstOrNull()
-    }
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {
@@ -518,8 +513,8 @@ abstract class DiscussionsViewModel : ViewModel() {
         return mRepository.isUserLoggedIn()
     }
 
-    fun onVoteRejected(it: StoryWrapper) {
-        mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.login_to_vote))
+    fun onActionRejected() {
+        mDiscussionsLiveData.value = mDiscussionsLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
     }
 
     fun onBlogClick(story: StoryWrapper, context: Context?) {

@@ -83,6 +83,26 @@ fun Cursor.getString(columnName: String): String? {
     return this.getString(this.getColumnIndex(columnName))
 }
 
+fun changeWrapperAccountInfoIfNeeded(feedType: FeedType,
+                                     storyFilter: StoryFilter?,
+                                     wrapper: StoryWrapper,
+                                     accountInfoMap: Map<String, GolosUserAccountInfo>): StoryWrapper {
+
+    return if (feedType == FeedType.BLOG) {
+        val blogOwner = storyFilter?.userNameFilter?.firstOrNull().orEmpty()
+        return if (blogOwner.isEmpty()) wrapper
+        else {
+            wrapper.copy(authorAccountInfo = accountInfoMap[blogOwner])
+        }
+    } else if (feedType == FeedType.PERSONAL_FEED) {
+        val rebloggedBy = wrapper.story.rebloggedBy
+        if (rebloggedBy == null) wrapper
+        else {
+            wrapper.copy(authorAccountInfo = accountInfoMap[rebloggedBy])
+        }
+    } else wrapper
+}
+
 inline fun traceCaller() {
     if (BuildConfig.DEBUG) {
         Timber.e(Thread.currentThread().stackTrace[4].toString())
@@ -156,7 +176,7 @@ fun Cursor.getDouble(columnName: String): Double {
 
 fun String.asIntentToShowUrl(): Intent {
     val i = Intent(Intent.ACTION_VIEW)
-    i.data = Uri.parse(this);
+    i.data = Uri.parse(this)
     return i
 }
 
@@ -285,19 +305,30 @@ fun Long.hoursElapsedFromTimeStamp(): Int {
     return hoursAgo.toInt()
 }
 
+fun Long.minutesElapsedFromTimeStamp(): Int {
+    val currentTime = System.currentTimeMillis() - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+    val dif = currentTime - this
+    val hour = 1000 * 60
+    val hoursAgo = dif / hour
+    return hoursAgo.toInt()
+}
+
 
 fun createTimeLabel(fromTimeStamp: Long, context: Context): String {
     val mSdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
-    return fromTimeStamp.hoursElapsedFromTimeStamp().let { elapsedHoursFromPostCreation ->
+    return fromTimeStamp.minutesElapsedFromTimeStamp().let { elapsedMinutesFromPostCreation ->
+        val hoursElapsed = elapsedMinutesFromPostCreation / 60
         when {
-            elapsedHoursFromPostCreation == 0 -> context.resources.getString(R.string.less_then_hour_ago)
-            elapsedHoursFromPostCreation < 24 -> "$elapsedHoursFromPostCreation ${context.resources.getQuantityString(R.plurals.hours, elapsedHoursFromPostCreation)} ${context.resources.getString(R.string.ago)}"
+            elapsedMinutesFromPostCreation == 0 -> context.getString(R.string.now_happened)
+            elapsedMinutesFromPostCreation < 60 -> "${context.resources.getQuantityString(R.plurals.minutes, elapsedMinutesFromPostCreation, elapsedMinutesFromPostCreation)}  ${context.resources.getString(R.string.ago)}"
+
+            hoursElapsed < 24 -> "${context.resources.getQuantityString(R.plurals.hours, hoursElapsed, hoursElapsed)}  ${context.resources.getString(R.string.ago)}"
             else -> {
-                val daysAgo = Math.round(elapsedHoursFromPostCreation.toDouble() / 24)
+                val daysAgo = Math.round(hoursElapsed.toDouble() / 24)
 
                 if (daysAgo <= 7)
-                    "$daysAgo ${context.resources.getQuantityString(R.plurals.days, daysAgo.toInt())} ${context.resources.getString(R.string.ago)}"
+                    "${context.resources.getQuantityString(R.plurals.days, daysAgo.toInt(), daysAgo.toInt())} ${context.resources.getString(R.string.ago)}"
                 else {
                     val timeStamp = fromTimeStamp + TimeZone.getDefault().getOffset(fromTimeStamp)
                     Calendar.getInstance(TimeZone.getDefault()).apply { timeInMillis = timeStamp }.let {
@@ -307,6 +338,24 @@ fun createTimeLabel(fromTimeStamp: Long, context: Context): String {
             }
         }
     }
+}
+
+fun isRepostButtonNeedToBeShown(type: FeedType,
+                                filter: StoryFilter?,
+                                appUserData: ApplicationUser?,
+                                discussionItem: GolosDiscussionItem): Boolean {
+    return discussionItem.isRootStory && isRepostButtonNeedToBeShown(type, filter, appUserData)
+}
+
+fun isRepostButtonNeedToBeShown(type: FeedType,
+                                filter: StoryFilter?,
+                                appUserData: ApplicationUser?): Boolean {
+
+    if (type == FeedType.ANSWERS || type == FeedType.COMMENTS) return false
+    val currentName = appUserData?.name ?: ""
+
+    if (currentName == filter?.userNameFilter?.firstOrNull() && type == FeedType.BLOG) return false
+    return true
 }
 
 val Account.avatarPath: String?

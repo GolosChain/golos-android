@@ -23,7 +23,7 @@ public class RouteActivity : GolosActivity() {
         intent?.data?.let {
             val link = it.toString()
             val match = GolosLinkMatcher.match(link)
-            Timber.e("$match")
+            Timber.i("$match")
             val startMainActivityIntent = MainActivity.getIntent(this)
             when (match) {
                 is StoryLinkMatch -> {

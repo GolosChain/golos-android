@@ -31,7 +31,6 @@ object DiscussionItemFactory {
         val lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0
         val created = discussion.created?.dateTimeAsTimestamp ?: 0
         val parentPermlink = discussion.parentPermlink.link ?: ""
-        val firstRebloggedBy = ""
         val gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
         val body = discussion.body ?: ""
         val author = discussion.author?.name ?: ""
@@ -62,7 +61,8 @@ object DiscussionItemFactory {
                 downvotesNum = downvotes,
                 activeVotes = discussion.activeVotes
                         ?.map { VoteLight(it.voter.name, it.rshares.toLong(), it.percent / 100) }.orEmpty().toArrayList(),
-                level = discussion.depth.toInt())
+                level = discussion.depth.toInt(),
+                rebloggedBy = discussion.rebloggedBy?.firstOrNull()?.name)
 
 
         setTypeOfItem(item)
@@ -87,7 +87,6 @@ object DiscussionItemFactory {
         val lastUpdated = discussion.lastUpdate?.dateTimeAsTimestamp ?: 0
         val created = discussion.created?.dateTimeAsTimestamp ?: 0
         val parentPermlink = discussion.parentPermlink ?: ""
-        val firstRebloggedBy = ""
         val gbgAmount = discussion.pendingPayoutValue?.amount ?: 0.0
         val body = discussion.body ?: ""
         val author = discussion.author ?: ""
@@ -113,7 +112,8 @@ object DiscussionItemFactory {
                 upvotesNum = upvotes,
                 downvotesNum = downvotes,
                 activeVotes = discussion.votes,
-                level = discussion.depth.toInt())
+                level = discussion.depth.toInt(),
+                rebloggedBy = discussion.rebloggedBy?.firstOrNull())
 
         setTypeOfItem(item)
         checkImages(item)

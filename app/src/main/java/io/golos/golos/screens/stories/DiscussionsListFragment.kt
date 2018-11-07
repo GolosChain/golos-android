@@ -32,7 +32,6 @@ import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
@@ -106,7 +105,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                                 VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE).show(childFragmentManager, null)
                             }
                         } else {
-                            mViewModel?.onVoteRejected(story)
+                            mViewModel?.onActionRejected()
                         }
                     }
                 },
@@ -119,13 +118,20 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                                 VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE).show(childFragmentManager, null)
                             }
                         } else {
-                            mViewModel?.onVoteRejected(story)
+                            mViewModel?.onActionRejected()
                         }
                     }
                 },
                 mOnReblogClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
-                        if (story.isPostReposted) return
+                        if (story.isPostReposted) {
+                            getView()?.showSnackbar(R.string.duplicate_reblog)
+                            return
+                        }
+                        if (mViewModel?.canVote() == false) {
+                            mViewModel?.onActionRejected()
+                            return
+                        }
                         ReblogConfirmalDialog.getInstance(story.story.id).show(childFragmentManager, null)
                     }
                 }
@@ -255,9 +261,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
         if (t?.items != null) {
             mRecycler?.post {
-                Timber.e("set stripes size = ${t.items.size}")
-                Timber.e("type is $mViewModel")
-                Timber.e("parc = $parc")
                 mAdapter.setStripes(t.items)
                 if (parc != null) {
                     (mRecycler?.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)?.onRestoreInstanceState(parc)
@@ -333,10 +336,6 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.onStop()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Timber.e("on destroy fragment $mViewModel $this")
-    }
 
     fun getArgs(): Pair<FeedType, StoryFilter?>? {
         val bundle = arguments ?: return null

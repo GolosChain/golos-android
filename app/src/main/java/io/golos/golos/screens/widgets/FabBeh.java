@@ -28,10 +28,12 @@ public class FabBeh extends FloatingActionButton.Behavior {
                 public void onHidden(FloatingActionButton fab) {
                     super.onHidden(fab);
                     child.setVisibility(View.INVISIBLE);
+                    child.setClickable(false);
                 }
             });
         } else if (child.getVisibility() != View.VISIBLE && dyConsumed < 0) {
             child.show();
+            child.setClickable(true);
         }
     }
 

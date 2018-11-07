@@ -2,9 +2,6 @@ package io.golos.golos
 
 import android.annotation.SuppressLint
 import android.app.*
-import android.app.Notification
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -13,15 +10,22 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import androidx.multidex.MultiDexApplication
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.multidex.MultiDexApplication
+import com.amplitude.api.Amplitude
+import com.bumptech.glide.Glide
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
 import io.fabric.sdk.android.Fabric
-import io.golos.golos.notifications.*
+import io.golos.golos.notifications.GolosNotifications
+import io.golos.golos.notifications.NOTIFICATION_KEY
+import io.golos.golos.notifications.NotificationsBroadCastReceiver
+import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.AppLifecycleRepository
 import io.golos.golos.repository.LifeCycleEvent
 import io.golos.golos.repository.Repository
@@ -60,7 +64,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         Fabric.with(this, Crashlytics())
         mLiveData.value = LifeCycleEvent.APP_CREATE
 
-        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("is_flag_erased_1", false)){
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("is_flag_erased_1", false)) {
             Persister.get.setUserSubscribedOnNotificationsThroughServices(false)
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("is_flag_erased_1", true).commit()
         }
@@ -70,10 +74,13 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         val ce = if (resources.getBoolean(R.bool.isTablet)) CustomEvent("app launched on tablet")
         else CustomEvent("app launched on phone")
         Answers.getInstance().logCustom(ce)
+       // Glide.get(this).registry
         registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 aCreated++
-
+                if (aCreated == 1) {
+                    Amplitude.getInstance().logEvent("Application open")
+                }
             }
 
             override fun onActivityStarted(activity: Activity) {
@@ -116,6 +123,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         Repository.get.userSettingsRepository.setVoteQuestionMade(false)
         mLiveData.value = LifeCycleEvent.APP_IN_BACKGROUND
         Repository.get.notificationsRepository.notifications.observeForever(this)
+        Amplitude.getInstance().initialize(this, BuildConfig.AMPLITUDE_API_KEY).enableForegroundTracking(this)
     }
 
 

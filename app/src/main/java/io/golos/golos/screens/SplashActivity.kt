@@ -1,9 +1,9 @@
 package io.golos.golos.screens
 
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Observer
 import fr.castorflex.android.circularprogressbar.CircularProgressBar
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -29,6 +29,7 @@ class SplashActivity : GolosActivity(), Observer<ReadyStatus> {
 
     override fun onChanged(t: ReadyStatus?) {
         t?.let {
+            if (!it.isAppReady) return@let
             mProgress.setViewGone()
             if (it.error == null) {
                 val i = Intent(this, MainActivity::class.java)
@@ -39,13 +40,13 @@ class SplashActivity : GolosActivity(), Observer<ReadyStatus> {
                 AlertDialog.Builder(this)
                         .setMessage(it.error.localizedMessage ?: R.string.unknown_error)
 
-                        .setPositiveButton(R.string.retry, { _, _ ->
+                        .setPositiveButton(R.string.retry) { _, _ ->
                             mProgress.setViewVisible()
                             repo.requestInitRetry()
-                        })
-                        .setNegativeButton(R.string.cancel, { _, _ ->
+                        }
+                        .setNegativeButton(R.string.cancel) { _, _ ->
                             finish()
-                        })
+                        }
                         .create()
                         .show()
             }

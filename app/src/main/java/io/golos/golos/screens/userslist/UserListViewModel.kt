@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.VotedUserObject
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
@@ -35,34 +34,44 @@ class UserListViewModel : ViewModel() {
     private var mVotesLiveData: LiveData<List<VotedUserObject>>? = null
 
     fun getLiveData(): LiveData<UserListViewState> = mLiveData
-    private var mLastUserName: String? = null
-    private var isSubscribed = false
+    private var mCurrentUserSubscriptionsObserver = UserSubscriptionsObserver()
 
-    private val mUserDataObserver = Observer<ApplicationUser> {
-        if (it?.isLogged == true) {
-            if (!isSubscribed) {
-                val userName = it.name
-                mLastUserName = userName
-                mLiveData.addSource(mRepository.getGolosUserSubscriptions(userName)) {
-                    onValueChanged()
-                }
-                mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onValueChanged() }
-                isSubscribed = true
-            }
 
-        } else {
-            isSubscribed = false
-            if (mLastUserName != null) {
-                mLiveData.removeSource(mRepository.getGolosUserSubscriptions(mLastUserName
-                        ?: return@Observer))
-                mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
-            }
+    inner class UserSubscriptionsObserver : Observer<List<String>> {
+        override fun onChanged(t: List<String>?) {
+            onValueChanged()
         }
+    }
+
+    fun onCreate(userName: String?,
+                 storyId: Long?,
+                 type: ListType,
+                 stringSuppliers: StringProvider,
+                 internetStatusNotifier: InternetStatusNotifier) {
+        this.userName = userName
+        this.mListType = type
+        this.mStringSupplier = stringSuppliers
+        this.mInternetStatusNotifier = internetStatusNotifier
+        this.storyId = storyId
+
+        mTitle = mStringSupplier.get(when (mListType) {
+            ListType.SUBSCRIPTIONS -> R.string.subscriptions
+            ListType.SUBSCRIBERS -> R.string.subscribers
+            ListType.UP_VOTERS -> R.string.voted
+            ListType.ALL_VOTERS -> R.string.voted
+            ListType.DOWN_VOTERS -> R.string.voted_against
+        }, null)
+
+        if (mListType == ListType.SUBSCRIBERS) mRepository.requestGolosUserSubscribersUpdate(userName.orEmpty())
+        else if (mListType == ListType.SUBSCRIPTIONS) mRepository.requestGolosUserSubscriptionsUpdate(userName.orEmpty())
     }
 
 
     fun onStart() {
-        mRepository.appUserData.observeForever(mUserDataObserver)
+        mRepository.currentUserSubscriptions.observeForever(mCurrentUserSubscriptionsObserver)
+        mLiveData.addSource(mRepository.currentUserSubscriptionsUpdateStatus) { onValueChanged() }
+        mLiveData.addSource(mRepository.usersAvatars) { onValueChanged() }
+
         if (mListType == ListType.SUBSCRIPTIONS || mListType == ListType.SUBSCRIBERS) {
             if (userName == null) {
                 Timber.e("for this type $mListType userName must be not null")
@@ -74,12 +83,9 @@ class UserListViewModel : ViewModel() {
 
             if (mListType == ListType.SUBSCRIPTIONS && userName == mRepository.appUserData.value?.name) {//if it is subscriptions for current users - we already subscribed
 
-
             } else {
-                Timber.e("adding source")
                 mLiveData.addSource(ld) { onValueChanged() }
             }
-
 
         } else {
             if (storyId == null) {
@@ -105,16 +111,14 @@ class UserListViewModel : ViewModel() {
         mVotesLiveData?.let {
             mLiveData.removeSource(it)
         }
-        mRepository.appUserData.removeObserver(mUserDataObserver)
+        mRepository.currentUserSubscriptions.removeObserver(mCurrentUserSubscriptionsObserver)
         mLiveData.removeSource(mRepository.currentUserSubscriptionsUpdateStatus)
+        mLiveData.removeSource(mRepository.usersAvatars)
     }
 
     private fun onValueChanged() {
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
-        val currentUserSubscriptions =
-                (if (mRepository.appUserData.value?.isLogged == true)
-                    mRepository.getGolosUserSubscriptions(mRepository.appUserData.value?.name.orEmpty()).value.orEmpty()
-                else emptyList()).toSet()
+        val currentUserSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
 
         val updatingStates = mRepository.currentUserSubscriptionsUpdateStatus.value.orEmpty()
 
@@ -145,15 +149,12 @@ class UserListViewModel : ViewModel() {
 
             val chosenCurrency = mRepository.userSettingsRepository.getCurrency().value
                     ?: UserSettingsRepository.GolosCurrency.USD
-
             val votes = mVotesLiveData?.value.orEmpty()
-            Timber.e("votes = $votes")
             mLiveData.value = UserListViewState(mTitle,
                     votes
                             .asSequence()
                             .filter { if (mListType == ListType.UP_VOTERS) it.percent > 0 else if (mListType == ListType.DOWN_VOTERS) it.percent < 0 else true }
                             .map {
-
                                 val gbgCost = it.gbgValue
                                 val displayFormatter = Repository.get.userSettingsRepository.getBountDisplay().value
                                         ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
@@ -176,40 +177,19 @@ class UserListViewModel : ViewModel() {
                     , null)
 
         }
-        mLiveData.value?.let {
-            val usesWithNoAvatars = it.users.filter {
-                it.avatar == null
-                        && !mRepository.usersAvatars.value.orEmpty().containsKey(it.name)
-            }
-                    .map { it.name }
+        mLiveData.value?.let { it ->
+            val usesWithNoAvatars = it
+                    .users
+                    .asSequence()
+                    .filter {
+                        it.avatar == null
+                                && !mRepository.usersAvatars.value.orEmpty().containsKey(it.name)
+                    }
+                    .map { it.name }.toList()
             mRepository.requestUsersAccountInfoUpdate(usesWithNoAvatars)
         }
     }
 
-
-    fun onCreate(userName: String?,
-                 storyId: Long?,
-                 type: ListType,
-                 stringSuppliers: StringProvider,
-                 internetStatusNotifier: InternetStatusNotifier) {
-        this.userName = userName
-        this.mListType = type
-        this.mStringSupplier = stringSuppliers
-        this.mInternetStatusNotifier = internetStatusNotifier
-        this.storyId = storyId
-
-        mTitle = mStringSupplier.get(when (mListType) {
-            ListType.SUBSCRIPTIONS -> R.string.subscriptions
-            ListType.SUBSCRIBERS -> R.string.subscribers
-            ListType.UP_VOTERS -> R.string.voted
-            ListType.ALL_VOTERS -> R.string.voted
-            ListType.DOWN_VOTERS -> R.string.voted_against
-        }, null)
-
-        if (mListType == ListType.SUBSCRIBERS) mRepository.requestGolosUserSubscribersUpdate(userName.orEmpty())
-        else if (mListType == ListType.SUBSCRIPTIONS) mRepository.requestGolosUserSubscriptionsUpdate(userName.orEmpty())
-
-    }
 
     fun onUserClick(ctx: Context, it: UserListRowData) {
         UserProfileActivity.start(ctx, it.name)

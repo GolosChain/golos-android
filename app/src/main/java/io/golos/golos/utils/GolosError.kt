@@ -6,7 +6,7 @@ import java.util.*
 /**
  * Created by yuri on 14.11.17.
  */
-data class GolosError(@JsonProperty("error") val errorCode: ErrorCode,
+data class GolosError(@JsonProperty("errorCode") val errorCode: ErrorCode,
                       @JsonProperty("nativeMessage") val nativeMessage: String?,
                       @JsonProperty("localizedMessage") val localizedMessage: Int?,
                       @JsonProperty("id") val id: String = UUID.randomUUID().toString())

@@ -9,12 +9,12 @@
         <item quantity="other">Голосов</item>
     </plurals>
     <plurals name="days">
-        <item quantity="few">дня</item>
-        <item quantity="many">дней</item>
-        <item quantity="one">день</item>
-        <item quantity="two">дня</item>
-        <item quantity="zero">дней</item>
-        <item quantity="other">дней</item>
+        <item quantity="few">%s дня</item>
+        <item quantity="many">%s дней</item>
+        <item quantity="one">%s день</item>
+        <item quantity="two">%s дня</item>
+        <item quantity="zero">%s дней</item>
+        <item quantity="other">%s дней</item>
     </plurals>
     <plurals name="other">
         <item quantity="few">%s оценили</item>
@@ -97,12 +97,21 @@
     </plurals>
 
     <plurals name="hours">
-        <item quantity="few">часа</item>
-        <item quantity="many">часов</item>
-        <item quantity="one">час</item>
-        <item quantity="two">часа</item>
-        <item quantity="zero">часов</item>
-        <item quantity="other">часов</item>
+        <item quantity="few">%s часа</item>
+        <item quantity="many">%s часов</item>
+        <item quantity="one">%s час</item>
+        <item quantity="two">%s часа</item>
+        <item quantity="zero">%s часов</item>
+        <item quantity="other">%s часов</item>
+    </plurals>
+
+    <plurals name="minutes">
+        <item quantity="few">%s минуты</item>
+        <item quantity="many">%s минут</item>
+        <item quantity="one">%s минута</item>
+        <item quantity="two">%s минуты</item>
+        <item quantity="zero">%s минут</item>
+        <item quantity="other">%s минут</item>
     </plurals>
 
     <plurals name="canceled_vote_for_witness">

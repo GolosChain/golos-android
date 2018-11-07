@@ -26,10 +26,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.ImagesAdapter
 import io.golos.golos.screens.story.adapters.StoryAdapter
-import io.golos.golos.screens.story.model.DiscussionType
-import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
@@ -159,7 +156,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     mAvatar.visibility = View.VISIBLE
 
                     mBlogNameTv.visibility = View.VISIBLE
-                    mNameOfAuthorInFollowLo.text = story.author.capitalize()
+                    mNameOfAuthorInFollowLo.text = rootWrapper.authorAccountInfo?.shownName?: rootWrapper.authorAccountInfo?.userName?:
+                            story.author.capitalize()
 
                     it.storyTree.rootWrapper.authorAccountInfo?.avatarPath?.let { avatarPath ->
                         val glide = Glide.with(this)
@@ -223,19 +221,18 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 }
 
-                mFooter.setReblogProgress(it.storyTree.rootWrapper.repostStatus == UpdatingState.UPDATING)
+
+                if (it.showRepostButton) {
+                    mFooter.setReblogProgress(it.storyTree.rootWrapper.repostStatus == UpdatingState.UPDATING)
+                } else {
+                    mFooter.reblogImageView.setViewGone()
+                }
 
                 mFooter.upvoteText.setOnClickListener {
                     mViewModel.onUpvotersClick(rootWrapper, this)
                 }
                 mFooter.dizLikeCountTextView.setOnClickListener {
                     mViewModel.onDownVotersClick(rootWrapper, this)
-                }
-                mFooter.voteCountTextView.setOnClickListener {
-                    mViewModel.onAllVotersClick(rootWrapper, this)
-                }
-                if (story.votesNum.toString() != mFooter.voteCountTextView.text.toString()) {
-                    mFooter.voteCountTextView.text = story.votesNum.toString()
                 }
 
                 if (mFooter.upvoteText.text.toString() != story.upvotesNum.toString()) {
@@ -314,8 +311,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         mFlow.addView(view)
                     }
                 }
-                if (story.commentsCount.toString() != mFooter.commentsCountTextView.text.toString()) {
-                    mFooter.commentsCountTextView.text = story.commentsCount.toString()
+                if (story.commentsCount.toString() != mFooter.commentsTextView.text.toString()) {
+                    mFooter.commentsTextView.text = story.commentsCount.toString()
                 }
                 it.storyTree.rootWrapper.voteUpdatingState?.let { votingState ->
                     if (votingState.state == UpdatingState.DONE) {
@@ -516,70 +513,33 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
             else if (row is ImageRow) mViewModel.onMainStoryImageClick(row.src)
         }
         mFooter.reblogImageView.setOnClickListener {
-            if (mViewModel.storyLiveData.value?.storyTree?.rootWrapper?.isPostReposted == true) return@setOnClickListener
+            if (!mViewModel.canUserVote) {
+                mViewModel.onVoteRejected()
+                return@setOnClickListener
+            }
+            if (mViewModel.storyLiveData.value?.storyTree?.rootWrapper?.isPostReposted == true) {
+                findViewById<View>(android.R.id.content).showSnackbar(R.string.duplicate_reblog)
+                return@setOnClickListener
+            }
             ReblogConfirmalDialog.getInstance(0L).show(supportFragmentManager, null)
         }
 
         mSwipeToRefresh.setProgressBackgroundColorSchemeColor(getColorCompat(R.color.splash_back))
         mSwipeToRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent))
         mFooter.upvoteImageButton.setOnClickListener {
-            if (mViewModel.canUserVote) {
-                val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
-                        ?: return@setOnClickListener
-                if (mViewModel.canUserUpVoteOnThis(story)) {
-                    if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                        ChangeVoteDialog.getInstance(story.story.id).show(supportFragmentManager, null)
-                    } else {
-                        val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE)
-                        dialog.show(supportFragmentManager, null)
-                    }
-
-                } else mViewModel.onStoryVote(story, 0)
-            } else {
-                mViewModel.onVoteRejected()
-            }
+            onStoryVote(mViewModel.storyLiveData.value?.storyTree?.rootWrapper
+                    ?: return@setOnClickListener, VoteDialog.DialogType.UPVOTE)
         }
         mFooter.dizLikeImageView.setOnClickListener {
-            if (mViewModel.canUserVote) {
-                val story = mViewModel.storyLiveData.value?.storyTree?.rootWrapper
-                        ?: return@setOnClickListener
-                if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                    ChangeVoteDialog.getInstance(story.story.id).show(supportFragmentManager, null)
-                } else {
-                    val dialog = VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE)
-                    dialog.show(supportFragmentManager, null)
-                }
-            } else {
-                mViewModel.onVoteRejected()
-            }
+            onStoryVote(mViewModel.storyLiveData.value?.storyTree?.rootWrapper
+                    ?: return@setOnClickListener, VoteDialog.DialogType.DOWN_VOTE)
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onUpvoteClick = {
-            if (mViewModel.canUserVote) {
-                if (mViewModel.canUserUpVoteOnThis(it)) {
-                    if (it.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                        ChangeVoteDialog.getInstance(it.story.id).show(supportFragmentManager, null)
-                    } else {
-                        val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.UPVOTE)
-                        dialog.show(supportFragmentManager, null)
-                    }
-                } else mViewModel.onStoryVote(it, 0)
-            } else {
-                mViewModel.onVoteRejected()
-            }
+            onStoryVote(it, VoteDialog.DialogType.UPVOTE)
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onDownVoteClick = {
-            if (mViewModel.canUserVote) {
-                if (mViewModel.canUserUpVoteOnThis(it)) {
-                    if (it.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                        ChangeVoteDialog.getInstance(it.story.id).show(supportFragmentManager, null)
-                    } else {
-                        val dialog = VoteDialog.getInstance(it.story.id, VoteDialog.DialogType.DOWN_VOTE)
-                        dialog.show(supportFragmentManager, null)
-                    }
-                } else mViewModel.onStoryVote(it, 0)
-            } else {
-                mViewModel.onVoteRejected()
-            }
+
+            onStoryVote(it, VoteDialog.DialogType.DOWN_VOTE)
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
             mViewModel.onAnswerToComment(this, it.story)
@@ -589,11 +549,37 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         }
         mSwipeToRefresh.isRefreshing = true
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
-        mTagSubscribeBtn.setOnClickListener { mViewModel.onSubscribeToMainTagClick() }
+        mTagSubscribeBtn.setOnClickListener {
+            if (mViewModel.canUserVote)
+                mViewModel.onSubscribeToMainTagClick()
+            else mViewModel.onVoteRejected()
+        }
+
         mSwipeToRefresh.setOnRefreshListener(this)
         setSupportActionBar(mToolbar)
         mToolbar.setNavigationOnClickListener({ finish() })
 
+
+    }
+
+    private fun onStoryVote(item: StoryWrapper, type: VoteDialog.DialogType) {
+        if (mViewModel.canUserVote) {
+            if (item.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED && type == VoteDialog.DialogType.DOWN_VOTE) {
+                ChangeVoteDialog.getInstance(item.story.id).show(supportFragmentManager, null)
+            } else if (item.voteStatus == GolosDiscussionItem.UserVoteType.VOTED && type == VoteDialog.DialogType.UPVOTE) {
+                ChangeVoteDialog.getInstance(item.story.id).show(supportFragmentManager, null)
+            } else {
+                val dialog = VoteDialog.getInstance(item.story.id, type)
+                dialog.show(supportFragmentManager, null)
+            }
+        } else {
+            mViewModel.onVoteRejected()
+        }
+    }
+
+    override fun submitVote(id: Long, vote: Short, type: VoteDialog.DialogType) {
+        val actualVote = if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort()
+        mViewModel.onStoryVote(id, actualVote)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -640,10 +626,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         }
     }
 
-    override fun submitVote(id: Long, vote: Short, type: VoteDialog.DialogType) {
-        val actualVote = if (type == VoteDialog.DialogType.UPVOTE) vote else (-vote).toShort()
-        mViewModel.onStoryVote(id, actualVote)
-    }
 
     companion object {
         private val AUTHOR_TAG = "AUTHOR_TAG"

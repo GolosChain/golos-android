@@ -144,6 +144,7 @@
 
     <ImageView
         android:id="@+id/bullet"
+        android:tint="#A6A6A6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material_half"
@@ -154,7 +155,7 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/blog_name_tv"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="@dimen/margin_material"
@@ -167,11 +168,13 @@
         android:textColor="@color/text_color_white_black"
         android:textSize="@dimen/font_small"
         app:layout_constraintBottom_toBottomOf="@id/bullet"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/bullet"
-        app:layout_constraintTop_toBottomOf="@id/user_nick_name_tv"
         app:layout_constraintTop_toTopOf="@id/bullet"
         />
+
+
+
+
 
     <TextView
         android:id="@+id/user_nick_name_tv"
@@ -184,8 +187,6 @@
         android:textSize="@dimen/font_small"
         app:layout_constraintStart_toEndOf="@id/avatar_iv"
         app:layout_constraintTop_toBottomOf="@id/blog_name_tv"/>
-
-
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reblogged_tv"
         android:layout_width="0dp"
@@ -199,10 +200,10 @@
         android:textColor="@color/gray_82"
         android:textSize="@dimen/font_small"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
-        app:layout_constraintTop_toBottomOf="@id/user_name"
-        />
 
+        app:layout_constraintStart_toEndOf="@id/user_nick_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/blog_name_tv"
+        />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"

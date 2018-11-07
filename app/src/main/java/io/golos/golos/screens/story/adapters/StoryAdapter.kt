@@ -175,11 +175,11 @@ class ImageBlockHolder(parent: ViewGroup) : androidx.recyclerview.widget.Recycle
                             mSmallImage.visibility = View.GONE
                             mImageFullWidth.setImageBitmap(null)
                             handler.post {
+                                mImageFullWidth.setImageResource(R.drawable.error)
                                 mGlide
                                         .load(src)
                                         .apply(RequestOptions()
-                                                .fitCenter()
-                                                .placeholder(R.drawable.error))
+                                                .fitCenter())
                                         .transition(DrawableTransitionOptions.withCrossFade())
                                         .into(mImageFullWidth)
                             }

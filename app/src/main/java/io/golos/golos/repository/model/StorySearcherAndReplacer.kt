@@ -2,7 +2,6 @@ package io.golos.golos.repository.model
 
 import io.golos.golos.screens.story.model.StoryWithComments
 import io.golos.golos.utils.toArrayList
-import timber.log.Timber
 
 /**
  * Created by yuri on 17.11.17.
@@ -20,12 +19,13 @@ class StorySearcherAndReplacer {
                 .filter { itemsCopy[it].rootStory.id == replacer.id }
                 .forEach {
                     isChanged = true
-                    Timber.e("replaced root story")
+                    val oldItem = itemsCopy[it]
                     itemsCopy[it] = StoryWithComments(replacer, itemsCopy[it].comments)
+                    if (oldItem.rootStory.rebloggedBy != null) itemsCopy[it].rootStory.rebloggedBy = oldItem.rootStory.rebloggedBy
                 }
 
         itemsCopy.forEach {
-            isChanged = isChanged || it.replaceComment(replacer)
+            isChanged = it.replaceComment(replacer) || isChanged
         }
 
         return ReplaceResult(isChanged, if (isChanged) inList.copy(items = itemsCopy) else inList)
@@ -38,7 +38,9 @@ class StorySearcherAndReplacer {
         (0..source.lastIndex)
                 .filter { i -> source[i].rootStory.id == newState.rootStory.id }
                 .forEach { i ->
+                    val oldItem = source[i]
                     source[i] = newState
+                    if (oldItem.rootStory.rebloggedBy != null) source[i].rootStory.rebloggedBy = oldItem.rootStory.rebloggedBy
                     isChanged = true
                 }
         if (!isChanged) {
