@@ -1,23 +1,23 @@
 package io.golos.golos.screens.events
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import android.os.Bundle
-import com.google.android.material.tabs.TabLayout
-import androidx.viewpager.widget.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
 import io.golos.golos.R
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.StringProvider
-import timber.log.Timber
 
 class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibilityChangeEmitter {
     private val mReselectLiveData = MutableLiveData<Int>()
     private var mPager: ViewPager? = null
     private val mStatusChange = MutableLiveData<VisibilityStatus>()
+    private var lastSelectedFragment: Int = 0
 
     override val reselectLiveData: LiveData<Int>
         get() = mReselectLiveData
@@ -55,8 +55,18 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibili
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
+        mStatusChange.value = VisibilityStatus(isVisibleToUser, mPager?.currentItem
+                ?: lastSelectedFragment)
+    }
 
-        mStatusChange.value = VisibilityStatus(isVisibleToUser, mPager?.currentItem ?: return)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("lastSelectedFragment", lastSelectedFragment)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        lastSelectedFragment = savedInstanceState?.getInt("lastSelectedFragment", 0) ?: 0
     }
 }
 

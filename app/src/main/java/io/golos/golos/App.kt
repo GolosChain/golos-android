@@ -129,6 +129,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
     override fun onChanged(t: GolosNotifications?) {
         t?.let { notifications ->
+
             val notification = notifications.notifications.firstOrNull() ?: return
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -1,11 +1,11 @@
 package io.golos.golos.repository.services
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import io.golos.golos.notifications.FCMTokenProvider
 import io.golos.golos.notifications.FCMTokenProviderImpl
 import io.golos.golos.notifications.FCMTokens
@@ -15,11 +15,8 @@ import io.golos.golos.repository.model.NotificationsPersister
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.utils.*
 import timber.log.Timber
-import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.collections.set
 
 interface GolosServices {
@@ -55,9 +52,6 @@ class GolosServicesImpl(
         golosServicesGateWay: GolosServicesGateWay? = null,
         private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
         private val mainThreadExecutor: Executor = MainThreadExecutor()) : GolosServices {
-
-
-    private val mSendingQue = Collections.synchronizedSet(HashSet<String>())
 
     @Volatile
     private var isAuthComplete: Boolean = false
@@ -291,7 +285,7 @@ class GolosServicesImpl(
                         completionHandler(Unit, null)
                     }
 
-                    if (events.size != limit && eventTypes == null) {
+                    if (allEvents.value.orEmpty().size > limit && events.size != limit && eventTypes == null) {
                         mGolosServicesGateWay.markAllEventsAsRead()
                         mainThreadExecutor.execute {
                             mUnreadCountLiveData.value = 0

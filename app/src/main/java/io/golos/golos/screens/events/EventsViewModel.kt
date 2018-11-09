@@ -259,7 +259,8 @@ class EventsViewModel : ViewModel() {
 
     fun onScrollToTheEnd() {
         mEventsProvider.requestEventsUpdate(mEventTypes?.toList(),
-                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit, false) { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
+                mEventsList.value?.events?.lastOrNull()?.golosEvent?.id, updateLimit, false)
+        { _, _ -> (updateState as MutableLiveData<Boolean>).value = false }
         (updateState as MutableLiveData<Boolean>).value = true
     }
 

@@ -48,7 +48,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
     private val mReblogProgress: ProgressBar = itemView.findViewById(R.id.reblog_progress)
     private val mReblogIv: ImageView = itemView.findViewById(R.id.reblog_btn)
 
-    private val mUserNick: TextView = itemView.findViewById(R.id.user_nick_name_tv)
+    private val mNickNameTv: TextView = itemView.findViewById(R.id.user_nick_name_tv)
 
     private val mDelimeter: View = itemView.findViewById(R.id.delimeter)
     private val mAvatar: ImageView = itemView.findViewById(R.id.avatar_iv)
@@ -64,13 +64,13 @@ class StripeCompactViewHolder(parent: ViewGroup,
         mUpvoteIv.setOnClickListener { onUpvoteClick.onClick(this) }
         mDownVoteIv.setOnClickListener { onDownVoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
-        mUserNameTv.setOnClickListener { onUserClick.onClick(this) }
-        mUserNick.setOnClickListener { onUserClick.onClick(this) }
+        mUserNameTv.setOnClickListener { mAvatar.callOnClick() }
+        mNickNameTv.setOnClickListener { mAvatar.callOnClick() }
         mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
         mMoneyTv.setOnClickListener { onUpVotersClick.onClick(this) }
         mMainImageBig.setOnClickListener { onCardClick.onClick(this) }
         itemView.setOnClickListener { onCardClick.onClick(this) }
-        mRebloggedByTv.setOnClickListener { onUserClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onAvatarClick.onClick(this) }
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -83,10 +83,8 @@ class StripeCompactViewHolder(parent: ViewGroup,
         if (newState != null && wrapper != null) {
 
             if (accountInfo != null && accountInfo.userName != wrapper.story.author) {//this is reblog
-                mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
                 mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
             } else {
-                mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
                 mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
             }
 
@@ -141,7 +139,7 @@ class StripeCompactViewHolder(parent: ViewGroup,
     }
 
     override fun getUserNickTv(): TextView {
-        return mUserNick
+        return mNickNameTv
     }
 
     override fun getDateStampText(): TextView {

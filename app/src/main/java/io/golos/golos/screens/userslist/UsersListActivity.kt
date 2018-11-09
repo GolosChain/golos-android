@@ -35,9 +35,13 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
         mNothigHereLabel = findViewById(R.id.nothing_tv)
         mViewModel = ViewModelProviders.of(this).get(UserListViewModel::class.java)
         mViewModel.getLiveData().observe(this, this)
+        findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener {
+            Timber.e("onClicl")
+            onBackPressed()
+        }
 
         if (!intent.hasExtra(TYPE_TAG)) {
-            Timber.e("start activity from factory methods")
+            Timber.e("you must start this activity from static  factory methods")
             return
         }
 
@@ -58,7 +62,7 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
                 })
         mProgress.setViewVisible()
         mRecycler.setViewGone()
-        findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
+
         mRecycler.layoutManager = MyLinearLayoutManager(this)
         (mRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         mRecycler.adapter = UserListAdapter({

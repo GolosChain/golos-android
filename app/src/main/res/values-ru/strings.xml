@@ -125,13 +125,13 @@
     <string name="dismiss">Отмена</string>
     <string name="voted">Проголосовали</string>
 
-    <string name="enter_pouch_">2. Переходим во вкладку \'Кошелек\'</string>
+    <string name="enter_pouch_">2. Переходим во вкладку настройки в профиле</string>
     <string name="help_step_1">1. Заходим на сайт <![CDATA[<a href = "https://golos.io">http://golos.io</>]]></string>
-    <string name="help_step_3_posting">3. В разделе \'Разрешения\' нажмите показать приватный постинг ключ (он начинается с 5 или 1)</string>
-    <string name="help_step_3_active">3. В разделе \'Разрешения\' нажмите показать приватный активный ключ (он начинается с 5 или 1)</string>
+    <string name="help_step_3_posting">3. В разделе \'Ключи\' нажмите показать приватный постинг ключ (он начинается с 5 или 1)</string>
+    <string name="help_step_3_active">3. В разделе \'Ключи\' нажмите показать приватный активный ключ (он начинается с 5 или 1)</string>
     <string name="help_step_4">4. Его нужно скопировать или сканировать через QR-код.</string>
     <string name="thanks_understood">Спасибо, я все понял</string>
-    <string name="close">Закрыть</string>
+    <string name="close">Спасибо, я все понял</string>
     <string name="reenter_acc">Ошибка авторизации. Попробуйте выйти и зайти в свой аккаунт еще раз.</string>
     <string name="refresh_question">Обновить</string>
     <string name="settings">Настройки</string>

@@ -242,6 +242,7 @@ internal class ApiImpl : GolosApi() {
 
     }
 
+
     private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount,
                                                     fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
         val votePower = acc.vestingShares.amount * 0.000268379
@@ -254,6 +255,7 @@ internal class ApiImpl : GolosApi() {
         var followersCount = 0L
         var followingCount = 0L
         if (fetchSubscribersInfo) {
+
             val followObject = mGolosApi.followApiMethods.getFollowCount(AccountName(acc.name.name))
             followersCount = followObject.followerCount.toLong()
             followingCount = followObject.followingCount.toLong()
@@ -409,7 +411,15 @@ internal class ApiImpl : GolosApi() {
                 new = new.subList(1, new.size)
                 frs = frs + new
             }
-            return frs.filter { it != null }
+            val out = frs.asSequence().filter {
+                it != null
+                        && it.follower?.name != null
+                        && it.follower.name.isNotEmpty()
+                        && it.following?.name != null
+                        && it.following.name.isNotEmpty()
+            }
+                    .distinct().toList()
+            return out
         } else {
             var frs = if (isSubscribers) Golos4J.getInstance().followApiMethods.getFollowers(forUser,
                     AccountName(startFrom),
@@ -433,7 +443,15 @@ internal class ApiImpl : GolosApi() {
                     if (new.size != 99) break
                 }
             }
-            return frs.filterNotNull()
+            return frs
+                    .asSequence()
+                    .filterNotNull()
+                    .filter {
+                        it.follower?.name != null
+                                && it.follower.name.isNotEmpty()
+                                && it.following?.name != null
+                                && it.following.name.isNotEmpty()
+                    }.distinct().toList()
         }
     }
 

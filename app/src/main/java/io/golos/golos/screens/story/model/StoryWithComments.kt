@@ -145,8 +145,7 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
 
     @Synchronized
     fun setUpLevels() {
-        setUpLevels(0, rootStory
-                .children
+        setUpLevels(0, comments
                 .toArrayList())
     }
 
@@ -167,7 +166,9 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
                     val currentStory = src[it]
 
                     if (replaceWith.id == currentStory.id) {
-
+                        if (replaceWith == currentStory) {
+                            return@forEach
+                        }
                         replaceWith.level = currentStory.level
                         replaceWith.children.clear()
                         replaceWith.children.addAll(currentStory.children)

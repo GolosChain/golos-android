@@ -20,7 +20,7 @@ class StorySearcherAndReplacer {
                 .forEach {
                     isChanged = true
                     val oldItem = itemsCopy[it]
-                    itemsCopy[it] = StoryWithComments(replacer, itemsCopy[it].comments)
+                    itemsCopy[it] = StoryWithComments(replacer, oldItem.comments)
                     if (oldItem.rootStory.rebloggedBy != null) itemsCopy[it].rootStory.rebloggedBy = oldItem.rootStory.rebloggedBy
                 }
 

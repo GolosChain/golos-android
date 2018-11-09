@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:fillViewport="true">
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="48dp"
-        android:paddingStart="@dimen/material_huge"
-        android:paddingEnd="@dimen/material_huge"
         android:layout_marginTop="48dp"
+        android:layout_marginBottom="48dp"
         android:gravity="center_vertical|start"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/material_huge"
+        android:paddingEnd="@dimen/material_huge">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                app:srcCompat="@drawable/ic_www_36dp" />
+                app:srcCompat="@drawable/ic_www_36dp"/>
 
             <TextView
                 android:id="@+id/go_to_site_tv"
@@ -33,7 +33,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/margin_material"
                 android:text="@string/help_step_1"
-                android:textColor="@color/textColorP" />
+                android:textColor="@color/textColorP"/>
         </LinearLayout>
 
         <LinearLayout
@@ -43,9 +43,9 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="36dp"
-                android:layout_height="30dp"
-                app:srcCompat="@drawable/ic_wallet_32dp" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:srcCompat="@drawable/ic_gear_36dp_gray"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/margin_material"
                 android:text="@string/enter_pouch_"
-                android:textColor="@color/textColorP" />
+                android:textColor="@color/textColorP"/>
         </LinearLayout>
 
         <LinearLayout
@@ -63,18 +63,18 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                app:srcCompat="@drawable/ic_eye_36dp" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:srcCompat="@drawable/ic_key_gray_36dp"/>
 
             <TextView
                 android:id="@+id/key_type_lbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_material"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/help_step_3_posting"
-                android:textColor="@color/textColorP" />
+                android:textColor="@color/textColorP"/>
         </LinearLayout>
 
         <LinearLayout
@@ -84,9 +84,9 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="36dp"
-                android:layout_height="30dp"
-                app:srcCompat="@drawable/ic_barcode_32dp" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:srcCompat="@drawable/ic_barcode_32dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
                 android:gravity="start|top"
                 android:includeFontPadding="false"
                 android:text="@string/help_step_4"
-                android:textColor="@color/textColorP" />
+                android:textColor="@color/textColorP"/>
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatButton
@@ -104,10 +104,12 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="@string/close"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="16sp"
-            app:backgroundTint="@color/colorAccent" />
+            app:backgroundTint="@color/colorAccent"/>
     </LinearLayout>
 </ScrollView>

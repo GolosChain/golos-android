@@ -102,8 +102,7 @@ fun changeWrapperAccountInfoIfNeeded(feedType: FeedType,
         }
     } else wrapper
 }
-
-inline fun traceCaller() {
+ fun traceCaller() {
     if (BuildConfig.DEBUG) {
         Timber.e(Thread.currentThread().stackTrace[4].toString())
     }

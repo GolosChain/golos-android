@@ -65,15 +65,16 @@ abstract class StoriesViewHolder(resId: Int,
             getShownUserNameTv().setViewVisible()
             getShownUserNameTv().text = shownName
         }
-        getUserNickTv().text = story.author
+
 
         if (accinfo != null && story.author != accinfo.userName) {
             getReblogedByTv().setViewVisible()
-            getReblogedByTv().text = accinfo.userName
+            getReblogedByTv().text = story.author
+            getUserNickTv().text = accinfo.userName
         } else {
             getReblogedByTv().setViewGone()
+            getUserNickTv().text = story.author
         }
-
 
         if (story.title.length > 2) {
             getTitleTv().text = story.title.capitalize()

@@ -14,7 +14,7 @@ fun rpcErrorFromCode(code: Int): JsonRpcError? {
         -32601 -> JsonRpcError.METHOD_NOT_FOUND
         -32602 -> JsonRpcError.INVALID_PARAMS
         -32603 -> JsonRpcError.INTERNAL_ERROR
-        1103 -> JsonRpcError.AUTH_ERROR
+        1103, 1101 -> JsonRpcError.AUTH_ERROR
         400 -> JsonRpcError.BAD_REQUEST
         Int.MIN_VALUE -> JsonRpcError.LOGOUT
         406 -> JsonRpcError.NOT_AUTHORIZED

@@ -248,17 +248,18 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
                     mUserName.text = account?.shownName.orEmpty().capitalize()
                 }
-                mUserNick.text = story.author
+
 
 
                 if (account != null && account.userName != story.author) {
 
                     mRebloggedBy.setViewVisible()
-                    mRebloggedBy.text = account.userName
+                    mRebloggedBy.text = story.author
+                    mUserNick.text = account.userName
                     mRebloggedBy.setOnClickListener {
-                        mViewModel.onUserClick(this, account.userName)
+                        mViewModel.onUserClick(this, story.author)
                     }
-                    mUserNick.setOnClickListener { mViewModel.onUserClick(this, story.author) }
+                    mUserNick.setOnClickListener { mViewModel.onUserClick(this, account.userName) }
                     mUserName.setOnClickListener {
                         mViewModel.onUserClick(this, account.userName)
 
@@ -267,8 +268,11 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     mUserName.setOnClickListener {
                         mViewModel.onUserClick(this, story.author)
                     }
-                    mUserNick.setOnClickListener { mUserName.callOnClick() }
+                    mUserNick.setOnClickListener {
+                        mUserName.callOnClick()
+                    }
                     mRebloggedBy.setViewInvisible()
+                    mUserNick.text = story.author
                 }
 
                 val tagName = LocalizedTag.convertToLocalizedName(story.categoryName)

@@ -1,8 +1,8 @@
 package io.golos.golos.notifications
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.annotation.MainThread
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.UserSettingsRepository
 
@@ -51,6 +51,7 @@ internal class PushNotificationsRepositoryImpl(private val settingsRepository: U
     override fun onReceivePushNotifications(notifications: Notification) {
         val new = GolosNotification.fromNotification(notifications)
         if (mNotifications.value?.notifications.orEmpty().contains(new)) return
+        if (!Repository.get.isUserLoggedIn()) return
         val newNotifications = listOf(new) + mNotifications.value?.notifications.orEmpty()
         mNotifications.value = GolosNotifications(newNotifications)
     }

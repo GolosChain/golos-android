@@ -96,7 +96,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
     private val mGolosUsers: MutableLiveData<Map<String, GolosUserAccountInfo>> = MutableLiveData()
     private val mUsersSubscriptions: HashMap<String, MutableLiveData<List<String>>> = HashMap()
     private val mUsersSubscribers: HashMap<String, MutableLiveData<List<String>>> = HashMap()
-    private val mUpdatingStates = MutableLiveData<HashMap<String, UpdatingState>>()
+    private val mUserSubscriptionsUpdatingStates = MutableLiveData<HashMap<String, UpdatingState>>()
     private val mUsersName = TreeSet<String>()
     private val mCurrentUserSubscriptions = MediatorLiveData<List<String>>()
 
@@ -205,7 +205,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         if (!mUsersSubscribers.containsKey(golosUserName)) mUsersSubscribers[golosUserName] = MutableLiveData()
         mWorkerExecutor.execute {
             try {
-                val subscribers = mGolosApi.getGolosUserSubscribers(golosUserName, null).sortedBy { it[0] }
+                val subscribers = mGolosApi.getGolosUserSubscribers(golosUserName, null).asSequence().sortedBy { it }.toList()
                 mMainThreadExecutor.execute {
                     mUsersSubscribers[golosUserName]?.value = subscribers
                     completionHandler(Unit, null)
@@ -238,7 +238,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
     }
 
     override val currentUserSubscriptionsUpdateStatus
-        get() = mUpdatingStates as LiveData<Map<String, UpdatingState>>
+        get() = mUserSubscriptionsUpdatingStates as LiveData<Map<String, UpdatingState>>
 
     private fun followOrUnfollow(isFollow: Boolean,
                                  user: String,
@@ -264,21 +264,24 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             }
             return
         }
-        if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
-            mMainThreadExecutor.execute {
-                completionHandler.invoke(Unit,
-                        GolosError(ErrorCode.WRONG_STATE,
-                                null,
-                                if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
-            }
-            return
-        }
-        val updatingStates = mUpdatingStates.value ?: hashMapOf()
+
+        val updatingStates = mUserSubscriptionsUpdatingStates.value ?: hashMapOf()
         updatingStates[user] = UpdatingState.UPDATING
-        mUpdatingStates.value = updatingStates
+        mUserSubscriptionsUpdatingStates.value = updatingStates
 
         mWorkerExecutor.execute {
             try {
+                if ((isFollow && isUserSubscribedOn(user)) || (!isFollow && !isUserSubscribedOn(user))) {
+                    mMainThreadExecutor.execute {
+                        updatingStates[user] = UpdatingState.DONE
+                        completionHandler.invoke(Unit,
+                                GolosError(ErrorCode.WRONG_STATE,
+                                        null,
+                                        if (isFollow) R.string.you_already_subscribed else R.string.must_be_subscribed_for_action))
+                    }
+                    return@execute
+                }
+
                 if (isFollow) mGolosApi.subscribe(user) else mGolosApi.unSubscribe(user)
 
                 val allCurentUserSubscroptions = mUsersSubscriptions[currentUserName]?.value.orEmpty()
@@ -300,7 +303,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
                     }
                     requestUsersAccountInfoUpdate(listOf(user))
                     updatingStates[user] = UpdatingState.DONE
-                    mUpdatingStates.value = updatingStates
+                    mUserSubscriptionsUpdatingStates.value = updatingStates
                     completionHandler.invoke(Unit, null)
                 }
 
@@ -308,7 +311,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
             } catch (e: Exception) {
                 FabricExceptionLogger.log(e)
                 mMainThreadExecutor.execute {
-                    updatingStates[user] = UpdatingState.FAILED
+                    updatingStates[user] = UpdatingState.DONE
                     completionHandler.invoke(Unit, GolosErrorParser.parse(e))
                 }
             }
@@ -344,7 +347,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
         if (!mUsersSubscriptions.containsKey(golosUserName)) mUsersSubscriptions[golosUserName] = MutableLiveData()
         mWorkerExecutor.execute {
             try {
-                val subscriptions = mGolosApi.getGolosUserSubscriptions(golosUserName, null).sortedBy { it[0] }
+                val subscriptions = mGolosApi.getGolosUserSubscriptions(golosUserName, null).sortedBy { it }
                 mMainThreadExecutor.execute {
                     mUsersSubscriptions[golosUserName]?.value = subscriptions
                     completionHandler(Unit, null)

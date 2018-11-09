@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
@@ -58,15 +59,16 @@ class StripeFullViewHolder(parent: ViewGroup,
         mFooterView.upvoteImageButton.setOnClickListener { onUpvoteClick.onClick(this) }
         mBlogNameTv.setOnClickListener { onBlogClick.onClick(this) }
         mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
-        mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
-        mNickNameTv.setOnClickListener { onAvatarClick.onClick(this) }
+        mUserNameTv.setOnClickListener { mAvatar.callOnClick() }
+        mNickNameTv.setOnClickListener { mAvatar.callOnClick() }
         mFooterView.dizLikeImageView.setOnClickListener { onDownVoteClick.onClick(this) }
         mFooterView.dizLikeCountTextView.setOnClickListener { onDownVotersClick.onClick(this) }
-        mRebloggedByTv.setOnClickListener { onRebloggerClick.onClick(this) }
+        mRebloggedByTv.setOnClickListener { onAvatarClick.onClick(this) }
         mMainImageBig.setOnClickListener {
             onCardClick.onClick(this)
         }
         itemView.setOnClickListener { onCardClick.onClick(this) }
+        mBodyTextMarkwon.setOnClickListener { onCardClick.onClick(this) }
     }
 
     override fun handlerStateChange(newState: StripeWrapper?, oldState: StripeWrapper?) {
@@ -78,10 +80,8 @@ class StripeFullViewHolder(parent: ViewGroup,
             val accountInfo = newState.stripe.authorAccountInfo
 
             if (accountInfo != null && accountInfo.userName != wrapper.story.author) {//this is reblog
-                mUserNameTv.setOnClickListener { onRebloggerClick.onClick(this) }
                 mAvatar.setOnClickListener { onRebloggerClick.onClick(this) }
             } else {
-                mUserNameTv.setOnClickListener { onAvatarClick.onClick(this) }
                 mAvatar.setOnClickListener { onAvatarClick.onClick(this) }
             }
 
@@ -103,6 +103,15 @@ class StripeFullViewHolder(parent: ViewGroup,
             } else {
                 mBodyTextMarkwon.setViewGone()
             }
+            val lp = mRebloggedByTv.layoutParams as ConstraintLayout.LayoutParams
+            if (mUserNameTv.visibility == View.GONE) {
+                lp.endToEnd = ConstraintLayout.LayoutParams.UNSET
+                lp.endToStart = mTimeTv.id
+            } else {
+                lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                lp.endToStart = ConstraintLayout.LayoutParams.UNSET
+            }
+
         }
     }
 

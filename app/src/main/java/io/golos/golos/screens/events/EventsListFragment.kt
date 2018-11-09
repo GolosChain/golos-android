@@ -130,7 +130,6 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         })
         (parentFragment as ParentVisibilityChangeEmitter?)?.status?.observe(this, Observer {
             it ?: return@Observer
-
             isParentVisible = it.isParentVisible
             val myPosition = arguments?.getInt(POSITION, Int.MIN_VALUE) ?: return@Observer
             if (myPosition != it.currentSelectedFragment) return@Observer
@@ -161,6 +160,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
         mViewModel?.onStop()
 
     }
+
 
     override fun onStart() {
         super.onStart()

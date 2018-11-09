@@ -588,7 +588,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     val result = replacer.findAndReplaceStory(votedDiscussion, currentFeed)//replacing old item with updated item
                     if (result.isChanged) {
-                        Timber.e("isChanged ${currentFeed.filter}")
                         mMainThreadExecutor.execute {
                             it.value = result.resultingFeed
                         }
