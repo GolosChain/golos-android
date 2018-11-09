@@ -74,12 +74,11 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
         val ce = if (resources.getBoolean(R.bool.isTablet)) CustomEvent("app launched on tablet")
         else CustomEvent("app launched on phone")
         Answers.getInstance().logCustom(ce)
-       // Glide.get(this).registry
         registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 aCreated++
                 if (aCreated == 1) {
-                    Amplitude.getInstance().logEvent("Application open")
+                    //Amplitude.getInstance().logEvent("Application open")
                 }
             }
 

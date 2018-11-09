@@ -9,7 +9,7 @@ android {
         applicationId "io.golos.golos"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 94
+        versionCode 95
         versionName "0.83_rc3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
