@@ -20,24 +20,25 @@
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
             <androidx.appcompat.widget.Toolbar
+                android:id="@+id/events_toolabar"
                 android:layout_width="match_parent"
 
-                android:layout_height="46dp" />
+                android:layout_height="46dp"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="64dp"
-                android:layout_marginEnd="@dimen/material_big"
                 android:layout_marginStart="@dimen/material_big"
                 android:layout_marginTop="@dimen/margin_material"
+                android:layout_marginEnd="@dimen/material_big"
+                android:layout_marginBottom="64dp"
                 android:gravity="top|start"
 
                 android:text="@string/events"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/vote_vor_app_title"
 
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"/>
 
 
             <com.google.android.material.tabs.TabLayout
@@ -50,7 +51,7 @@
                 app:tabIndicatorColor="@color/tab_indicator"
                 app:tabMode="scrollable"
                 app:tabSelectedTextColor="@android:color/white"
-                app:tabTextAppearance="@style/TabTextStyle" />
+                app:tabTextAppearance="@style/TabTextStyle"/>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

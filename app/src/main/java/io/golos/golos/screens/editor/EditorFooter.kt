@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
+import io.golos.golos.utils.get
 import io.golos.golos.utils.nextInt
 
 
@@ -93,32 +95,28 @@ class EditorFooter : FrameLayout {
 
             if (!mAddBtn.hasOnClickListeners())
                 mAddBtn.setOnClickListener {
-                    if (mTagsLayout.childCount < 6) {
-                        if (mTagsLayout.childCount == 1) {
-                            mTagsLayout.removeView(mAddBtn)
-                            val newView = inflateNewEditText()
-                            mTagsLayout.addView(newView)
-                            mTagsLayout.addView(mAddBtn)
-                            newView.requestFocus()
-                            mErrorTv.text = ""
-                        } else {
-                            val prelast = mTagsLayout.getChildAt(mTagsLayout.childCount - 2) as EditText
-                            if (!prelast.text.isEmpty()) {
-                                val validatorOut = mValidator.validate(prelast.text.toString())
-                                if (validatorOut.first) {
-                                    mTagsLayout.removeView(mAddBtn)
-                                    val newView = inflateNewEditText()
-                                    mTagsLayout.addView(newView)
-                                    mTagsLayout.addView(mAddBtn)
-                                    newView.requestFocus()
-                                    mErrorTv.text = ""
-                                } else {
-                                    mErrorTv.text = validatorOut.second
-                                }
+                    if (mTagsLayout.childCount == 1) {
+                        mTagsLayout.removeView(mAddBtn)
+                        val newView = inflateNewEditText()
+                        mTagsLayout.addView(newView)
+                        mTagsLayout.addView(mAddBtn)
+                        newView.requestFocus()
+                        mErrorTv.text = ""
+                    } else {
+                        val prelast = mTagsLayout.getChildAt(mTagsLayout.childCount - 2) as EditText
+                        if (!prelast.text.isEmpty()) {
+                            val validatorOut = mValidator.validate(prelast.text.toString())
+                            if (validatorOut.first) {
+                                mTagsLayout.removeView(mAddBtn)
+                                val newView = inflateNewEditText()
+                                mTagsLayout.addView(newView)
+                                mTagsLayout.addView(mAddBtn)
+                                newView.requestFocus()
+                                mErrorTv.text = ""
+                            } else {
+                                mErrorTv.text = validatorOut.second
                             }
                         }
-                    } else {
-                        mErrorTv.text = resources.getString(R.string.to_much_tags)
                     }
                 }
         }
@@ -141,18 +139,25 @@ class EditorFooter : FrameLayout {
                 }
             }
         })
-        view.setOnEditorActionListener({ _, _, _ ->
+        view.setOnEditorActionListener { _, _, _ ->
             if (view.text.isNotEmpty()) {
                 mAddBtn.callOnClick()
             }
             true
-        })
+        }
+        view.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            if (source == null) source
+            val workingItem = source.toString().toLowerCase()
+            workingItem
+        },
+                InputFilter.LengthFilter(24))
         view.isFocusableInTouchMode = true
         return view
     }
 
     private fun onDeleteEt(et: EditText) {
         mTagsLayout.removeView(et)
+        if (mTagsLayout.childCount > 1)mTagsLayout[childCount -1]?.requestFocus()
     }
 
     private fun onTextChanged(text: String) {

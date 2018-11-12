@@ -221,6 +221,10 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mGolosServices.markAsRead(listOfEventsIds)
     }
 
+    override fun setAllEventsRead() {
+        mGolosServices.markAllAsRead()
+    }
+
     override fun getEvents(type: List<EventType>?): LiveData<List<GolosEvent>> {
         return mGolosServices.getEvents(type)
     }
@@ -353,18 +357,22 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         val lastSavedId = entriesFromBd.firstOrNull()?.entryId ?: -1
         var fromId: Int? = null
 
-        while (true) {
-            val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, fromId, limit.toShort()).toArrayList()
-            entries.addAll(entriesFromBC)
+        try {
+            while (true) {
+                val entriesFromBC = mGolosApi.getBlogEntries(currentUserName, fromId, limit.toShort()).toArrayList()
+                entries.addAll(entriesFromBC)
 
-            if (entriesFromBC.size != limit || lastSavedId >= entriesFromBC.lastOrNull()?.entryId ?: Int.MAX_VALUE) break
-            fromId = entriesFromBC.lastOrNull()?.entryId ?: -1
-        }
-        mPersister.saveBlogEntries(entries)
-        val result = entries.toHashSet() + entriesFromBd
+                if (entriesFromBC.size != limit || lastSavedId >= entriesFromBC.lastOrNull()?.entryId ?: Int.MAX_VALUE) break
+                fromId = entriesFromBC.lastOrNull()?.entryId ?: -1
+            }
+            mPersister.saveBlogEntries(entries)
+            val result = entries.toHashSet() + entriesFromBd
 
-        mMainThreadExecutor.execute {
-            mCurrentUserBlogEntries.value = result.toList()
+            mMainThreadExecutor.execute {
+                mCurrentUserBlogEntries.value = result.toList()
+            }
+        } catch (e: Exception) {
+            logException(e)
         }
     }
 

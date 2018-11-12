@@ -14,7 +14,7 @@ import java.util.*
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 7
+private val dbVersion = 8
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
 
@@ -32,6 +32,16 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
 
+        db?.execSQL("drop table if exists ${TagsTable.databaseName}")
+        db?.execSQL("drop table if exists ${UserFilterTable.databaseName}")
+        db?.execSQL("drop table if exists ${VotesTable.databaseName}")
+        db?.execSQL("drop table if exists ${StoriesRequestsTable.databaseName}")
+        db?.execSQL("drop table if exists ${DiscussionItemsTable.databaseName}")
+        db?.execSQL("drop table if exists ${SubscribersTable.databaseName}")
+        db?.execSQL("drop table if exists ${SubscriptionsTable.databaseName}")
+        db?.execSQL("drop table if exists ${UsersTable.databaseName}")
+        db?.execSQL("drop table if exists ${BlogEntriesTable.databaseName}")
+
         db?.execSQL(TagsTable.createTableString)
         db?.execSQL(UserFilterTable.createTableString)
         db?.execSQL(VotesTable.createTableString)
@@ -42,28 +52,22 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(UsersTable.createTableString)
         db?.execSQL(BlogEntriesTable.createTableString)
 
-        if (oldVersion == 3) {
-            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
-            DiscussionItemsTable.deleteAll(db ?: return)
-            VotesTable.deleteAll(db)
-            db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
-        }
-        if (newVersion == 6) {
-            db?.execSQL("delete from ${VotesTable.databaseName}")
-            db?.execSQL("delete from ${StoriesRequestsTable.databaseName}")
-            db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
-            db?.execSQL("delete from ${UsersTable.databaseName}")
-            db?.execSQL("alter table ${UsersTable.databaseName} add column ${UsersTable.showName} text")
-            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.upvotes} integer")
-            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.downvotes} integer")
-        }
-        if (newVersion == 7) {
-            db?.execSQL("delete from ${VotesTable.databaseName}")
-            db?.execSQL("delete from ${StoriesRequestsTable.databaseName}")
-            db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
-            db?.execSQL("delete from ${UsersTable.databaseName}")
-            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.reblogged} integer")
-        }
+//        if (oldVersion == 3) {
+//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
+//            DiscussionItemsTable.deleteAll(db ?: return)
+//            VotesTable.deleteAll(db)
+//            db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
+//        }
+//        if (newVersion == 7) {
+//            db?.execSQL("delete from ${VotesTable.databaseName}")
+//            db?.execSQL("delete from ${StoriesRequestsTable.databaseName}")
+//            db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
+//            db?.execSQL("delete from ${UsersTable.databaseName}")
+//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.reblogged} integer")
+//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.upvotes} integer")
+//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.downvotes} integer")
+//            db?.execSQL("alter table ${UsersTable.databaseName} add column ${UsersTable.showName} integer")
+//        }
     }
 
 
@@ -795,7 +799,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
     }
 
     private object UserFilterTable {
-        private val databaseName = "filter_table"
+        const val databaseName = "filter_table"
         private val tagName = "name"
         private val filterName = "filter"
         val createTableString = "create table if not exists $databaseName ( $tagName text ," +

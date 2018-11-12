@@ -34,7 +34,7 @@
     <string name="comments">Комментарии</string>
     <string name="image">Изображение</string>
     <string name="ago">назад</string>
-    <string name="no_comments">Пока нет комментариев. Будь первым!</string>
+    <string name="no_comments">Пока нет комментариев. Будь первым.</string>
     <string name="answer">Ответить</string>
     <string name="enter_key">Введите ключ</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">Больше о Golos.io</>]]></string>
@@ -251,7 +251,7 @@
     <string name="no_events_replies">Начни писать и будешь получать комментарии от пользователей.</string>
     <string name="no_events_social">Подписывайся на авторов и создавай интересный контент, чтобы подписывались на тебя.</string>
     <string name="no_events_mentions">Заинтересуй пользователей Голоса, чтобы они упоминали тебя.</string>
-    <string name="write_a_comment">Напишите комментарий</string>
+    <string name="write_a_comment">Напишите свой комментарий к посту.</string>
     <string name="login_to_write_comment">Для комментирования войдите в приложение</string>
     <string name="copy_link">Скопировать ссылку</string>
     <string name="save_image">Сохранить</string>
@@ -273,6 +273,7 @@
     <string name="about_team">О Команде</string>
     <string name="team_news">Новости Команды</string>
     <string name="faq">Часто задаваемые вопросы</string>
+    <string name="mark_all_as_read">Отметить все прочитанными</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

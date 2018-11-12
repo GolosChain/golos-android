@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.wefika.flowlayout.FlowLayout
 import io.golos.golos.App
@@ -26,7 +25,10 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.ImagesAdapter
 import io.golos.golos.screens.story.adapters.StoryAdapter
-import io.golos.golos.screens.story.model.*
+import io.golos.golos.screens.story.model.ImageRow
+import io.golos.golos.screens.story.model.StoryParserToRows
+import io.golos.golos.screens.story.model.StoryWrapper
+import io.golos.golos.screens.story.model.TextRow
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
@@ -42,7 +44,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, ChangeVoteDialog.OnChangeConfirmal {
     private lateinit var mViewModel: DiscussionViewModel
     private lateinit var mProgressBar: ProgressBar
-    private lateinit var mFab: FloatingActionButton
     private lateinit var mToolbar: Toolbar
     private lateinit var mAvatar: ImageView
     private lateinit var mUserName: TextView
@@ -53,7 +54,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     private lateinit var mBlogNameTv: TextView
     private lateinit var mTitleTv: TextView
     private lateinit var mSwipeToRefresh: SwipeRefreshLayout
-    private lateinit var mNoCommentsTv: TextView
     private lateinit var mStoryRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mCommentsRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mBottomImagesRecycler: androidx.recyclerview.widget.RecyclerView
@@ -70,7 +70,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     private lateinit var mFooter: FooterView
     private lateinit var mFollowBlock: View
     private lateinit var mWriteCommentLo: View
-    private lateinit var mWriteCommentTv: View
+    private lateinit var mWriteCommentTv: TextView
     private var isNeedToScrollToComments = false
     private var isScrollEventFired = false
 
@@ -156,8 +156,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     mAvatar.visibility = View.VISIBLE
 
                     mBlogNameTv.visibility = View.VISIBLE
-                    mNameOfAuthorInFollowLo.text = rootWrapper.authorAccountInfo?.shownName?: rootWrapper.authorAccountInfo?.userName?:
-                            story.author.capitalize()
+                    mNameOfAuthorInFollowLo.text = rootWrapper.authorAccountInfo?.shownName ?: rootWrapper.authorAccountInfo?.userName ?: story.author.capitalize()
 
                     it.storyTree.rootWrapper.authorAccountInfo?.avatarPath?.let { avatarPath ->
                         val glide = Glide.with(this)
@@ -346,32 +345,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 }
 
-                if (it.discussionType == DiscussionType.STORY) {
-                    mFollowBlock.setViewVisible()
-                    if (it.canUserCommentThis) mFab.show()
-                    else mFab.hide()
-                    mWriteCommentLo.setViewGone()
-                    mFlow.setViewVisible()
-                    mSwipeToRefresh.setPadding(0, 0, 0, 0)
-                } else if (it.discussionType == DiscussionType.COMMENT) {
-                    mFollowBlock.setViewGone()
-                    mFab.hide()
-                    mWriteCommentLo.setViewVisible()
-                    mFlow.setViewGone()
-                    if (!mWriteCommentTv.hasOnClickListeners()) {
-                        mWriteCommentLo.setOnClickListener {
-                            if (mViewModel.canUserWriteComments()) mViewModel.onWriteRootComment(this)
-                            else Snackbar.make(mWriteCommentLo, R.string.login_to_write_comment, Snackbar.LENGTH_SHORT).show()
-                        }
-                    }
-                    mSwipeToRefresh.setPadding(0, 0, 0, resources.getDimension(R.dimen.story_comment_height).toInt())
-
-                }
-
                 mFooter.setViewVisible()
                 if (story.commentsCount > 0 && it.storyTree.comments.isEmpty()) {//if comments not downloaded yet
                     mCommentsTv.setViewGone()
-                    mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewVisible()
                     mCommentsRecycler.setViewGone()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
@@ -380,7 +356,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 } else if (story.commentsCount > 0 && it.storyTree.comments.isNotEmpty()) {
                     mCommentsTv.setViewVisible()
-                    mNoCommentsTv.setViewGone()
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewVisible()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
@@ -389,18 +364,21 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 } else if (story.commentsCount == 0) {
                     mCommentsTv.setViewGone()
-                    mNoCommentsTv.setViewVisible()
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewGone()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
-                        mNoCommentsTv.post {
-                            mNoCommentsTv.requestFocus()
+                        mWriteCommentTv.post {
+                            mWriteCommentTv.requestFocus()
                         }
                         isScrollEventFired = true
                     }
                 }
 
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.comments)
+
+                Timber.e("size = ${it.storyTree.comments.size}")
+                mWriteCommentTv.text = getString(if (it.storyTree.comments.size > 0) R.string.write_a_comment else R.string.no_comments)
+
 
                 mFooter.moneyCountTextView.text = calculateShownReward(it.storyTree.rootWrapper,
                         ctx = this)
@@ -462,7 +440,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mToolbar = findViewById<Toolbar>(R.id.toolbar)
 
         mProgressBar = findViewById(R.id.progress)
-        mFab = findViewById(R.id.fab)
         mAvatar = findViewById(R.id.avatar_iv)
         mUserName = findViewById(R.id.user_name)
         mTagName = findViewById(R.id.tag_name)
@@ -471,7 +448,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mRebloggedBy = findViewById(R.id.reblogged_tv)
         mBlogNameTv = findViewById(R.id.blog_name_tv)
         mTitleTv = findViewById(R.id.title_tv)
-        mNoCommentsTv = findViewById(R.id.no_comments_tv)
         mStoryRecycler = findViewById(R.id.recycler)
         mFooter = findViewById(R.id.footer_lo)
         mCommentsRecycler = findViewById(R.id.comments_recycler)
@@ -511,6 +487,10 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
+        mWriteCommentLo.setOnClickListener {
+            if (mViewModel.canUserWriteComments()) mViewModel.onWriteRootComment(this)
+            else Snackbar.make(mWriteCommentLo, R.string.login_to_write_comment, Snackbar.LENGTH_SHORT).show()
+        }
 
         (mStoryRecycler.adapter as StoryAdapter).onRowClick = { row, iv ->
             if (row is TextRow) mViewModel.onMainStoryTextClick(this, row.text)
@@ -547,9 +527,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         }
         (mCommentsRecycler.adapter as CommentsAdapter).onAnswerClick = {
             mViewModel.onAnswerToComment(this, it.story)
-        }
-        mFab.setOnClickListener {
-            mViewModel.onWriteRootComment(this)
         }
         mSwipeToRefresh.isRefreshing = true
         mShareButton.setOnClickListener({ mViewModel.onShareClick(this) })
@@ -618,14 +595,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         if (isShown) {
             mAppBar.setViewGone()
             mSwipeToRefresh.setViewGone()
-            mFab.setViewGone()
             mWriteCommentLo.setViewGone()
             mProgressBar.setViewVisible()
         } else {
             mAppBar.setViewVisible()
             mSwipeToRefresh.setViewVisible()
             mWriteCommentLo.setViewVisible()
-            if (mViewModel.canUserWriteComments()) mFab.setViewVisible()
             mProgressBar.setViewGone()
         }
     }

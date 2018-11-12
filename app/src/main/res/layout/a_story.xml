@@ -143,7 +143,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-
+        android:paddingBottom="@dimen/story_comment_height"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.core.widget.NestedScrollView
@@ -229,11 +229,11 @@
                         android:layout_marginStart="@dimen/margin_material_small"
                         android:layout_marginTop="@dimen/material_big"
                         android:layout_marginEnd="@dimen/margin_material"
+                        android:ellipsize="end"
+                        android:lines="1"
                         android:text="@string/published_ib"
                         android:textColor="@color/textColorP"
                         android:textSize="@dimen/font_small"
-                        android:lines="1"
-                        android:ellipsize="end"
                         app:layout_constraintEnd_toStartOf="@id/subscribe_tag_btn"
                         app:layout_constraintStart_toEndOf="@id/tag_avatar"
                         app:layout_constraintTop_toBottomOf="@+id/del_1"/>
@@ -242,12 +242,12 @@
                         android:id="@+id/tag_name"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/margin_material"
                         android:clickable="true"
                         android:ellipsize="middle"
                         android:gravity="start"
-                        android:singleLine="true"
 
-                        android:layout_marginEnd="@dimen/margin_material"
+                        android:singleLine="true"
                         android:textColor="@color/text_color_white_black"
                         android:textSize="@dimen/font_regular"
 
@@ -346,21 +346,6 @@
                     android:paddingBottom="@dimen/material_big"
                     android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/no_comments_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_material"
-                    android:layout_marginTop="@dimen/margin_material"
-                    android:layout_marginEnd="@dimen/margin_material"
-                    android:layout_marginBottom="@dimen/material_huge"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:text="@string/no_comments"
-                    android:textColor="@color/gray_1"
-                    android:textSize="@dimen/font_medium"
-                    android:visibility="gone"/>
-
                 <ProgressBar
                     android:id="@+id/comments_progress"
                     android:layout_width="match_parent"
@@ -384,24 +369,7 @@
         android:layout_gravity="center"
         android:visibility="gone"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        app:fabSize="normal"
-        app:layout_anchorGravity="bottom|right|end"
-        app:layout_behavior="io.golos.golos.screens.widgets.FabBeh"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_add_white_24dp"/>
-
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/write_a_comment_lo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/story_comment_height"
@@ -409,32 +377,43 @@
         android:background="@color/story_toolbar_color"
         android:orientation="vertical">
 
-        <View
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#f6f6f6"
-            />
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:paddingStart="@dimen/margin_material_half"
+            android:paddingEnd="52dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/rect_gray_8dp_corners"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="@dimen/margin_material"
+            app:srcCompat="@drawable/ic_staple_20dp"/>
 
         <TextView
             android:id="@+id/write_a_comment_tv"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/story_comment_height"
+            android:layout_gravity="center"
             android:background="?selectableItemBackground"
             android:ellipsize="end"
             android:gravity="start|center_vertical"
-            android:maxLines="2"
             android:paddingStart="@dimen/margin_material"
-
             android:paddingEnd="@dimen/margin_material"
-            android:text="@string/write_a_comment"
+            android:textSize="@dimen/font_regular"
+            android:singleLine="true"
             android:textColor="#6e6e6e"/>
+
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-
+            android:layout_gravity="top"
             android:background="#f6f6f6"
             />
-    </LinearLayout>
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

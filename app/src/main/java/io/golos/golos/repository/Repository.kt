@@ -38,7 +38,10 @@ interface EventsProvider {
     fun getRequestStatus(forType: EventType?): LiveData<UpdatingState>
 
     fun getUnreadEventsCount(): LiveData<Int>
+
     fun setEventsRead(listOfEventsIds: List<String>)
+
+    fun setAllEventsRead()
 
 }
 

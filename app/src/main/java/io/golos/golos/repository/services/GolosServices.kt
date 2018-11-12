@@ -43,6 +43,8 @@ interface GolosServices {
 
     fun markAsRead(eventsIds: List<String>)
 
+    fun markAllAsRead()
+
 }
 
 class GolosServicesImpl(
@@ -89,6 +91,20 @@ class GolosServicesImpl(
         }
 
         instance = this
+    }
+
+    override fun markAllAsRead() {
+        workerExecutor.execute {
+            try {
+                mGolosServicesGateWay.markAllEventsAsRead()
+                mainThreadExecutor.execute {
+                    mUnreadCountLiveData.value = 0
+                }
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+        }
+
     }
 
     override fun markAsRead(eventsIds: List<String>) {

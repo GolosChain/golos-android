@@ -1,21 +1,25 @@
 package io.golos.golos.screens.events
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import io.golos.golos.R
+import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.ReselectionEmitter
 import io.golos.golos.utils.StringProvider
+import timber.log.Timber
+
 
 class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibilityChangeEmitter {
     private val mReselectLiveData = MutableLiveData<Int>()
     private var mPager: ViewPager? = null
+    private lateinit var mToolbar: androidx.appcompat.widget.Toolbar
     private val mStatusChange = MutableLiveData<VisibilityStatus>()
     private var lastSelectedFragment: Int = 0
 
@@ -25,12 +29,20 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibili
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fr_events_holder, container, false)
         mPager = v.findViewById<ViewPager>(R.id.holder_view_pager)
+        mToolbar = v.findViewById<Toolbar>(R.id.events_toolabar)
+
+        (activity as AppCompatActivity).setSupportActionBar(mToolbar)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
+        setHasOptionsMenu(true)
         mPager?.adapter = EventsPagerAdapter(object : StringProvider {
             override fun get(resId: Int, args: String?): String {
                 return getString(resId, args)
             }
         }, childFragmentManager)
+        mToolbar.menu
         val tabLo = v.findViewById<TabLayout>(R.id.tab_lo)
+
+
         tabLo.setupWithViewPager(mPager)
         tabLo.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -50,11 +62,26 @@ class EventsHolderFragment : GolosFragment(), ReselectionEmitter, ParentVisibili
         return v
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.events_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == R.id.mark_all_read) {
+            Timber.e("on all read click")
+            Repository.get.setAllEventsRead()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override val status: LiveData<VisibilityStatus>
         get() = mStatusChange
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
+
         mStatusChange.value = VisibilityStatus(isVisibleToUser, mPager?.currentItem
                 ?: lastSelectedFragment)
     }

@@ -272,6 +272,7 @@
     <string name="about_team">About Team</string>
     <string name="team_news">Team News</string>
     <string name="faq">FAQ</string>
+    <string name="mark_all_as_read">Mark all as read</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

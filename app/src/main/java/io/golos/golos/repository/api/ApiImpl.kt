@@ -44,7 +44,10 @@ internal class ApiImpl : GolosApi() {
 
     override fun getBlogEntries(ofAuthor: String, fromId: Int?, limit: Short): List<GolosBlogEntry> {
         return mGolosApi.followApiMethods.getBlogEntries(AccountName(ofAuthor), fromId ?: 0, limit)
-                .mapNotNull { GolosBlogEntry(it.author.name, it.blog.name, it.entryId, it.permlink.link) }
+                .asSequence()
+                .filter { it != null }
+                .map { GolosBlogEntry(it.author.name, it.blog.name, it.entryId, it.permlink.link) }
+                .toList()
     }
 
     override fun repostPost(ofAuthor: String, permlink: String) {
