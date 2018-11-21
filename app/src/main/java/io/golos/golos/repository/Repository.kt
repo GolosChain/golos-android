@@ -9,7 +9,7 @@ import io.golos.golos.BuildConfig
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.services.EventType
-import io.golos.golos.repository.services.GolosEvent
+import io.golos.golos.repository.services.model.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.tags.model.LocalizedTag
@@ -102,7 +102,24 @@ interface StoriesProvider {
     abstract fun getVotedUsersForDiscussion(id: Long): LiveData<List<VotedUserObject>>
 }
 
-abstract class Repository : UserDataProvider, EventsProvider, GolosUsersRepository, StoriesProvider, ExchangeDataProvider {
+interface UserSettingRepository {
+
+    val appSettings: LiveData<GolosAppSettings>
+
+    fun setAppSettings(newSettings: GolosAppSettings)
+
+    val notificationSettings: LiveData<GolosNotificationSettings>
+
+    fun setNotificationSettings(newSettings: GolosNotificationSettings)
+
+}
+
+abstract class Repository : UserDataProvider,
+        EventsProvider,
+        GolosUsersRepository,
+        StoriesProvider,
+        ExchangeDataProvider,
+        UserSettingRepository{
 
     companion object {
         private var instance: Repository? = null
@@ -208,8 +225,6 @@ abstract class Repository : UserDataProvider, EventsProvider, GolosUsersReposito
     open fun onAppStop() {}
 
     open fun onAppDestroy() {}
-
-    abstract val userSettingsRepository: UserSettingsRepository
 
     abstract val notificationsRepository: PushNotificationsRepository
 

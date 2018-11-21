@@ -3,9 +3,11 @@ package io.golos.golos.repository.services
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.convertValue
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.mapper
 import io.golos.golos.utils.rpcErrorFromCode
+import timber.log.Timber
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private class Success(@JsonProperty("status") val status: String)
@@ -94,6 +96,16 @@ fun GolosServicesResponse.getEventData(): GolosEvents {
     } catch (e: Exception) {
         e.printStackTrace()
         GolosEvents(0, emptyList())
+    }
+}
+
+fun GolosServicesResponse.getSettings(): GolosServicesSettings {
+    return try {
+        mapper.convertValue<GolosServicesSettings>(result)
+    } catch (e: Exception) {
+        Timber.e(e)
+        e.printStackTrace()
+        GolosServicesSettings(null, null, null)
     }
 }
 

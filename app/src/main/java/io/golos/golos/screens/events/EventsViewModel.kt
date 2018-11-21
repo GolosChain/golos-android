@@ -8,6 +8,7 @@ import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
 import io.golos.golos.repository.model.ExchangeValues
 import io.golos.golos.repository.services.*
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.DiscussionActivity

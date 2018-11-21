@@ -1,8 +1,8 @@
 package io.golos.golos.screens.events
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.golos.golos.repository.services.GolosEvent
-import io.golos.golos.repository.services.GolosServicesResponse
+import io.golos.golos.repository.services.model.GolosEvent
+import io.golos.golos.repository.services.model.GolosServicesResponse
 import io.golos.golos.repository.services.getEventData
 import io.golos.golos.utils.StringProvider
 import io.golos.golos.utils.mapper

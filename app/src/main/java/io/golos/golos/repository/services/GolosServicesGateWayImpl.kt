@@ -2,9 +2,13 @@ package io.golos.golos.repository.services
 
 import androidx.annotation.WorkerThread
 import io.golos.golos.BuildConfig
+import io.golos.golos.repository.model.AppSettings
+import io.golos.golos.repository.model.NotificationSettings
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.rpcErrorFromCode
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -17,7 +21,9 @@ interface GolosServicesGateWay {
     fun logout()
 
     @WorkerThread
-    fun subscribeOnNotifications(fcmToken: String)
+    fun subscribeOnNotifications(deviceId: String, fcmToken: String)
+
+    fun unSubscribeOnNotifications(deviceId: String, fcmToken: String)
 
     @WorkerThread
     fun getEvents(fromId: String?,
@@ -32,6 +38,10 @@ interface GolosServicesGateWay {
     fun getUnreadCount(): Int
 
     fun markAllEventsAsRead()
+    fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings)
+    fun setAppSettings(deviceId: String, newSettings: AppSettings)
+
+    fun getSettings(deviceId: String): GolosServicesSettings
 }
 
 
@@ -42,17 +52,20 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
 
     private enum class ServicesMethod {
-        AUTH, PUSH_SUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT, SECRET_REQUEST, MARK_VIEWED_ALL;
+        AUTH, PUSH_SUBSCRIBE, PUSH_UNSUBSCRIBE, GET_NOTIFS_HISTORY, MARK_VIEWED, GET_UNREAD_COUNT, SECRET_REQUEST, MARK_VIEWED_ALL, SET_SETTINGS, GET_SETTINGS;
 
         fun stringRepresentation() =
                 when (this) {
                     AUTH -> this.toString().toLowerCase()
-                    PUSH_SUBSCRIBE -> "pushNotifyOn"
+                    PUSH_SUBSCRIBE -> "push.notifyOn"
+                    PUSH_UNSUBSCRIBE -> "push.notifyOff"
                     GET_NOTIFS_HISTORY -> "getNotifyHistory"
                     MARK_VIEWED -> "notify.markAsViewed"
                     GET_UNREAD_COUNT -> "getNotifyHistoryFresh"
                     SECRET_REQUEST -> "getSecret"
                     MARK_VIEWED_ALL -> "notify.markAllAsViewed"
+                    SET_SETTINGS -> "setOptions"
+                    GET_SETTINGS -> "getOptions"
                 }
     }
 
@@ -109,11 +122,38 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         }
     }
 
-    override fun subscribeOnNotifications(fcmToken: String) {
-        val request = GolosPushSubscribeRequest(fcmToken)
-        val result = communicationHandler.sendMessage(request,
+    override fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings) {
+        val currentLang = Locale.getDefault()?.language ?: ""
+        Timber.e("currentLang = $currentLang")
+        val request = GolosSettingChangeRequest(deviceId, null, null, GolosServicePushSettings(
+                if (currentLang.contains("ru")) GolosServiceSettingsLanguage.RUSSIAN else GolosServiceSettingsLanguage.ENGLISH,
+                newSettings
+        ))
+        communicationHandler.sendMessage(request,
+                ServicesMethod.SET_SETTINGS.stringRepresentation())
+    }
+
+    override fun setAppSettings(deviceId: String, newSettings: AppSettings) {
+        val request = GolosSettingChangeRequest(deviceId, newSettings, null, null)
+        communicationHandler.sendMessage(request,
+                ServicesMethod.SET_SETTINGS.stringRepresentation())
+    }
+
+    override fun getSettings(deviceId: String): GolosServicesSettings {
+        return communicationHandler.sendMessage(GolosServicesSettingsRequest(deviceId),
+                ServicesMethod.GET_SETTINGS.stringRepresentation()).getSettings()
+    }
+
+    override fun subscribeOnNotifications(deviceId: String, fcmToken: String) {
+        val request = GolosPushSubscribeRequest(fcmToken, deviceId)
+        communicationHandler.sendMessage(request,
                 ServicesMethod.PUSH_SUBSCRIBE.stringRepresentation())
-        Timber.i(result.toString())
+    }
+
+    override fun unSubscribeOnNotifications(deviceId: String, fcmToken: String) {
+        val request = GolosPushSubscribeRequest(fcmToken, deviceId)
+        communicationHandler.sendMessage(request,
+                ServicesMethod.PUSH_UNSUBSCRIBE.stringRepresentation())
     }
 
     override fun logout() {
@@ -123,8 +163,10 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
     }
 
     override fun getEvents(fromId: String?, eventType: List<EventType>?, markAsRead: Boolean, limit: Int?): GolosEvents {
-        val request = if (eventType == null) GolosAllEventRequest(fromId, limit ?: 15, if (markAsRead) null else false)
-        else GolosEventRequest(fromId, limit ?: 15, eventType.map { it.toString() }, if (markAsRead) null else false)
+        val request = if (eventType == null) GolosAllEventRequest(fromId, limit
+                ?: 15, if (markAsRead) null else false)
+        else GolosEventRequest(fromId, limit
+                ?: 15, eventType.map { it.toString() }, if (markAsRead) null else false)
         return sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY)
                 .getEventData()
     }
@@ -160,6 +202,8 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                 ServicesMethod.GET_UNREAD_COUNT).getUnreadCount()
     }
 }
+
+
 
 
 

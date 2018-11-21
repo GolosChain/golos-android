@@ -220,7 +220,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 }
 
-
                 if (it.showRepostButton) {
                     mFooter.setReblogProgress(it.storyTree.rootWrapper.repostStatus == UpdatingState.UPDATING)
                 } else {
@@ -247,7 +246,6 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
                     mUserName.text = account?.shownName.orEmpty().capitalize()
                 }
-
 
 
                 if (account != null && account.userName != story.author) {
@@ -376,9 +374,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.comments)
 
-                Timber.e("size = ${it.storyTree.comments.size}")
-                mWriteCommentTv.text = getString(if (it.storyTree.comments.size > 0) R.string.write_a_comment else R.string.no_comments)
-
+                mWriteCommentTv.text = getString(if (it.storyTree.rootWrapper.story.commentsCount > 0) R.string.write_a_comment else R.string.no_comments)
 
                 mFooter.moneyCountTextView.text = calculateShownReward(it.storyTree.rootWrapper,
                         ctx = this)

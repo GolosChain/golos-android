@@ -5,6 +5,7 @@ import android.os.Looper
 import com.google.firebase.messaging.FirebaseMessagingService1
 import com.google.firebase.messaging.RemoteMessage
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.services.model.Event
 import io.golos.golos.utils.mapper
 import timber.log.Timber
 
@@ -20,11 +21,10 @@ class MyFireBaseMessagingService : FirebaseMessagingService1() {
 
             Timber.i("data is ${p0?.data}")
 
-            val notification = mapper.readValue<Notification>(p0?.data?.get("body")
-                    ?: return, Notification::class.java)
+            val event: Event = mapper.readValue<Event>(p0?.data?.get("body")?:return, Event::class.java)
 
             Handler(Looper.getMainLooper()).post {
-                Repository.get.notificationsRepository.onReceivePushNotifications(notification)
+                Repository.get.notificationsRepository.onReceivePushNotifications(event)
             }
         } catch (e: Exception) {
             e.printStackTrace()

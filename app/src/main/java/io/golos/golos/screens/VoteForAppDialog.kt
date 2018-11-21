@@ -12,9 +12,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
-import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.dialogs.GolosDialog
 import io.golos.golos.utils.getLayoutInflater
+import io.golos.golos.utils.userVotedForApp
+import io.golos.golos.utils.isVoteQuestionMade
 
 
 /**
@@ -34,14 +35,14 @@ class VoteForAppDialog : GolosDialog() {
             } catch (anfe: android.content.ActivityNotFoundException) {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=io.golos.golos")))
             }
-            Repository.get.userSettingsRepository.setUserVotedForApp(true)
+            activity?.userVotedForApp = true
             dismiss()
         }
         v.findViewById<View>(R.id.never).setOnClickListener {
-            Repository.get.userSettingsRepository.setUserVotedForApp(true)
+            activity?.userVotedForApp = true
             dismiss()
         }
-        Repository.get.userSettingsRepository.setVoteQuestionMade(true)
+        activity?.isVoteQuestionMade  = true
         return v
     }
 

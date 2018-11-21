@@ -16,7 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.golos.golos.R
-import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.prepend
@@ -166,8 +166,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                         ?: FeedCellSettings(true,
                                 true,
                                 NSFWStrategy(true, Pair(false, "")),
-                                UserSettingsRepository.GolosCurrency.USD,
-                                UserSettingsRepository.GolosBountyDisplay.THREE_PLACES, false))
+                                GolosAppSettings.GolosCurrency.USD,
+                                GolosAppSettings.GolosBountyDisplay.THREE_PLACES, false))
 
         mRecycler?.adapter = mAdapter
         (mRecycler?.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
@@ -241,8 +241,8 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
             mAdapter.feedCellSettings = it ?: FeedCellSettings(true,
                     true,
                     NSFWStrategy(true, Pair(false, "")),
-                    UserSettingsRepository.GolosCurrency.USD,
-                    UserSettingsRepository.GolosBountyDisplay.THREE_PLACES, false)
+                    GolosAppSettings.GolosCurrency.USD,
+                    GolosAppSettings.GolosBountyDisplay.THREE_PLACES, false)
         }
         mViewModel?.cellViewSettingLiveData?.observe(this, observer)
     }

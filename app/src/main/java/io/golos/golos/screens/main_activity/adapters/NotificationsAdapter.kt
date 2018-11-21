@@ -1,24 +1,18 @@
 package io.golos.golos.screens.main_activity.adapters
 
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ItemTouchHelper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.bumptech.glide.Glide
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
 import io.golos.golos.R
 import io.golos.golos.notifications.GolosNotification
-import io.golos.golos.utils.NotificationsAndEventsAppearanceMaker
-import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.repository.Repository
 import io.golos.golos.screens.widgets.GolosViewHolder
-import io.golos.golos.utils.GolosMovementMethod
-import io.golos.golos.utils.setViewGone
-import io.golos.golos.utils.setViewVisible
+import io.golos.golos.utils.*
 
 
 class NotificationsAdapter(notifications: List<GolosNotification>,
@@ -88,7 +82,6 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
         private val mTitle: TextView = itemView.findViewById(R.id.title)
         private val mCancelBtn = itemView.findViewById<View>(R.id.cancel_ibtn)
         private val mTextLinearLo = itemView.findViewById<LinearLayout>(R.id.text_lo)
-        private val mGlide = Glide.with(itemView)
 
         init {
             mText.movementMethod = GolosMovementMethod.instance

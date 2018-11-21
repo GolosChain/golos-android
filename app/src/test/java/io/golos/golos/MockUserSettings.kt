@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.repository.model.NotificationsDisplaySetting
 
 /**
@@ -22,13 +23,13 @@ object MockUserSettings : UserSettingsRepository {
         return MutableLiveData<Boolean>()
     }
 
-    override fun setBountDisplay(display: UserSettingsRepository.GolosBountyDisplay) {
+    override fun setBountDisplay(display: GolosAppSettings.GolosBountyDisplay) {
 
     }
 
-    override fun getBountDisplay(): LiveData<UserSettingsRepository.GolosBountyDisplay> {
-        val v = MutableLiveData<UserSettingsRepository.GolosBountyDisplay>()
-        v.value = UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+    override fun getBountDisplay(): LiveData<GolosAppSettings.GolosBountyDisplay> {
+        val v = MutableLiveData<GolosAppSettings.GolosBountyDisplay>()
+        v.value = GolosAppSettings.GolosBountyDisplay.THREE_PLACES
         return v
     }
 
@@ -76,13 +77,13 @@ object MockUserSettings : UserSettingsRepository {
         return false
     }
 
-    override fun setCurrency(currency: UserSettingsRepository.GolosCurrency) {
+    override fun setCurrency(currency: GolosAppSettings.GolosCurrency) {
 
     }
 
-    override fun getCurrency(): LiveData<UserSettingsRepository.GolosCurrency> {
-        val out = MutableLiveData<UserSettingsRepository.GolosCurrency>()
-        out.value = UserSettingsRepository.GolosCurrency.USD
+    override fun getCurrency(): LiveData<GolosAppSettings.GolosCurrency> {
+        val out = MutableLiveData<GolosAppSettings.GolosCurrency>()
+        out.value = GolosAppSettings.GolosCurrency.USD
         return out
     }
 

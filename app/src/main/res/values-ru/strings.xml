@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Golos.io</string>
-    <string name="add_max_five_tags">Напишите 5 тегов</string>
+    <string name="add_tags">Добавьте теги</string>
 
     <string name="to_much_tags">Можно указать до пяти тeгов</string>
     <string name="use_only_one_dash">в тeге может быть только один дефис</string>
@@ -186,16 +186,16 @@
     <string name="user_answered_on_comment">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
     <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш комментарий</string>
     <string name="user_transferred_you">На ваш счет поступило %s</string>
-    <string name="notifications">Онлайн уведомления на Golos.io</string>
+    <string name="notifications">Настройки онлайн уведомлений</string>
     <string name="mention">Упоминания</string>
     <string name="transfer_income">Пришел перевод от &lt;b>%s&lt;/b></string>
-    <string name="upvote">Апвоут</string>
-    <string name="transfer">Трансфер</string>
+    <string name="like">Лайк (голос)</string>
+    <string name="transfer">Перевод средств</string>
     <string name="answer_on_post">Ответ на пост</string>
     <string name="reply_on_comment">Ответ на комментарий</string>
     <string name="sound">Звук</string>
     <string name="play_sound">Звук уведомлений</string>
-    <string name="new_comment">Новый комментарий</string>
+    <string name="new_comment">Ответ на пост или комментарий</string>
     <string name="notifications_channel_main">Основные нотификации</string>
     <string name="new_upvote">Новый лайк</string>
     <string name="new_flag">Новый флаг</string>
@@ -225,10 +225,10 @@
     <string name="user_reposted_several">@%s и еще %s репост вашего поста</string>
     <string name="user_voted_for_you_several" >@%s и еще %s за вас как за делегата</string>
     <string name="user_canceled_vote_for_you_several" >@%s и еще %s сняли свои голоса с вашей делегатской ноды</string>
-    <string name="flag">Флаг</string>
+    <string name="dizlike">Дизлайк (жалоба)</string>
     <string name="subscribe_on_blog">Подписка на блог</string>
     <string name="unsubscribe_from_blog">Отписка от блога</string>
-    <string name="reblog">Реблог</string>
+    <string name="reblog">Репост</string>
     <string name="witness_vote">Голос за вашу делегатскую ноду</string>
     <string name="witness_cancel_vote">Снятие голоса с вашей делегатской ноды</string>
     <string name="Notifications">Уведомления</string>
@@ -245,8 +245,8 @@
     <string name="reward_for_entries" >Ваша авторская награда %s</string>
     <string name="curator_reward_for_entry" >Ваша кураторская награда %s за запись %s</string>
     <string name="curator_reward_for_entries" >Ваша кураторская награда %s</string>
-    <string name="post_reward" >Авторская награда</string>
-    <string name="curation_reward">Кураторская награда</string>
+    <string name="post_reward" >Награда пользователю</string>
+    <string name="curation_reward">Награда куратору</string>
     <string name="no_events_all">Начни писать посты и комментарии, чтобы получать реакцию пользователей.</string>
     <string name="no_events_replies">Начни писать и будешь получать комментарии от пользователей.</string>
     <string name="no_events_social">Подписывайся на авторов и создавай интересный контент, чтобы подписывались на тебя.</string>
@@ -274,6 +274,7 @@
     <string name="team_news">Новости Команды</string>
     <string name="faq">Часто задаваемые вопросы</string>
     <string name="mark_all_as_read">Отметить все прочитанными</string>
+    <string name="mention_with_at">Упоминание в посте или комменте через @</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

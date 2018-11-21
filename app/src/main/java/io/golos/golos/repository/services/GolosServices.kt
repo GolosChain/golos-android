@@ -6,24 +6,58 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import io.golos.golos.notifications.FCMTokenProvider
-import io.golos.golos.notifications.FCMTokenProviderImpl
-import io.golos.golos.notifications.FCMTokens
-import io.golos.golos.repository.Repository
+import io.golos.golos.repository.Preloadable
 import io.golos.golos.repository.UserDataProvider
-import io.golos.golos.repository.model.NotificationsPersister
-import io.golos.golos.repository.persistence.Persister
+import io.golos.golos.repository.model.AppSettings
+import io.golos.golos.repository.model.NotificationSettings
+import io.golos.golos.repository.model.PreparingState
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.utils.*
 import timber.log.Timber
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.collections.set
 
-interface GolosServices {
+interface ServiceLogoutListener {
+    @WorkerThread
+    fun onLogout()
+}
+
+interface LogoutEventEmitter {
+    fun addLogoutListener(listener: ServiceLogoutListener)
+}
+
+interface GolosSettingsService : Preloadable {
+    val notificationSettings: LiveData<NotificationSettings>
+    val appSettings: LiveData<AppSettings>
+    @MainThread
+    fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings)
+
+    @MainThread
+    fun setAppSettings(deviceId: String, newSettings: AppSettings)
+
+    @MainThread
+    fun requestNotificationSettingsUpdate(deviceId: String)
+
+    @MainThread
+    fun requestAppSettingsUpdate(deviceId: String)
+}
+
+interface GolosPushService : Preloadable, LogoutEventEmitter {
+    @MainThread
+    fun subscribeOnPushNotifications(fcmToken: String, deviceId: String)
+
+    @MainThread
+    fun unsubscribeFromPushNotificationsAsync(fcmToken: String, deviceId: String)
+
+    @WorkerThread
+    fun unsubscribeFromPushNotificationsSync(fcmToken: String, deviceId: String)
+}
+
+interface GolosServices : Preloadable, GolosSettingsService, GolosPushService {
 
     @MainThread
     fun setUp()
-
 
     fun getEvents(eventType: List<EventType>? = null): LiveData<List<GolosEvent>>
 
@@ -44,22 +78,31 @@ interface GolosServices {
     fun markAsRead(eventsIds: List<String>)
 
     fun markAllAsRead()
-
 }
 
-class GolosServicesImpl(
-        private val tokenProvider: FCMTokenProvider = FCMTokenProviderImpl,
-        private val userDataProvider: UserDataProvider = Repository.get,
-        private val notificationsPersister: NotificationsPersister = Persister.get,
-        golosServicesGateWay: GolosServicesGateWay? = null,
-        private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
-        private val mainThreadExecutor: Executor = MainThreadExecutor()) : GolosServices {
+class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
+                        val userDataProvider: UserDataProvider,
+                        private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
+                        private val mainThreadExecutor: Executor = MainThreadExecutor(),
+                        private var errorLogger: ExceptionLogger = FabricExceptionLogger) : GolosServices {
+
+    private val mNotificationSettingsLiveData = MutableLiveData<NotificationSettings>()
+    private val mAppSettingsLiveData = MutableLiveData<AppSettings>()
+    private val mReadyState = MutableLiveData<PreparingState>()
+    private val mListeners = HashSet<ServiceLogoutListener>()
 
     @Volatile
     private var isAuthComplete: Boolean = false
     @Volatile
     private var isAuthInProgress: Boolean = false
 
+    init {
+        mReadyState.value = PreparingState.LOADING
+    }
+
+    override fun addLogoutListener(listener: ServiceLogoutListener) {
+        if (!mListeners.contains(listener)) mListeners.add(listener)
+    }
 
     private val mGolosServicesGateWay: GolosServicesGateWay = golosServicesGateWay
             ?: GolosServicesGateWayImpl()
@@ -77,34 +120,99 @@ class GolosServicesImpl(
         this[null] = MutableLiveData()
         this[null]!!.value = UpdatingState.DONE
     }
+    override val notificationSettings: LiveData<NotificationSettings>
+        get() = mNotificationSettingsLiveData
+    override val appSettings: LiveData<AppSettings>
+        get() = mAppSettingsLiveData
 
     private val allEvents = MutableLiveData<List<GolosEvent>>()
     private val mUnreadCountLiveData = MutableLiveData<Int>()
 
 
-    override fun setUp() {
-        tokenProvider.tokenLiveData.observeForever {
-            onTokenOrAuthStateChanged()
-        }
-        userDataProvider.appUserData.observeForever {
-            onTokenOrAuthStateChanged()
-        }
-
-        instance = this
+    override fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings) {
+        if (newSettings == mNotificationSettingsLiveData.value) return
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.setNotificationSettings(deviceId, newSettings)
+            mainThreadExecutor.execute {
+                mNotificationSettingsLiveData.value = newSettings
+            }
+        })
     }
 
-    override fun markAllAsRead() {
+    override fun requestNotificationSettingsUpdate(deviceId: String) {
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            val settings = mGolosServicesGateWay.getSettings(deviceId)
+            mainThreadExecutor.execute { mNotificationSettingsLiveData.value = settings.push?.show }
+        })
+    }
+
+    override fun setAppSettings(deviceId: String, newSettings: AppSettings) {
+        if (newSettings == mAppSettingsLiveData.value) return
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.setAppSettings(deviceId, newSettings)
+            mainThreadExecutor.execute {
+                mAppSettingsLiveData.value = newSettings
+            }
+        })
+    }
+
+    override fun requestAppSettingsUpdate(deviceId: String) {
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            val settings = mGolosServicesGateWay.getSettings(deviceId)
+            mainThreadExecutor.execute { mAppSettingsLiveData.value = settings.basic }
+        })
+    }
+
+    override fun subscribeOnPushNotifications(fcmToken: String, deviceId: String) {
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.subscribeOnNotifications(deviceId, fcmToken)
+        })
+    }
+
+    private fun executeWithRetryAndCatch(runnable: Runnable) {
         workerExecutor.execute {
             try {
-                mGolosServicesGateWay.markAllEventsAsRead()
-                mainThreadExecutor.execute {
-                    mUnreadCountLiveData.value = 0
-                }
-            } catch (e: Exception) {
-                Timber.e(e)
+                runnable.run()
+            } catch (e: java.lang.Exception) {
+                logException(e)
+                if (reauthIfNeeded(e)) executeWithRetryAndCatch(runnable)
             }
         }
+    }
 
+    override fun unsubscribeFromPushNotificationsAsync(fcmToken: String, deviceId: String) {
+        if (!isAuthComplete) return
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.unSubscribeOnNotifications(deviceId, fcmToken)
+        })
+    }
+
+    override fun unsubscribeFromPushNotificationsSync(fcmToken: String, deviceId: String) {
+        mGolosServicesGateWay.unSubscribeOnNotifications(deviceId, fcmToken)
+    }
+
+    override fun setUp() {
+        instance = this
+        userDataProvider.appUserData.observeForever {
+            onAuthStateChanged()
+        }
+    }
+
+    override val loadingState: LiveData<PreparingState>
+        get() = mReadyState
+
+    override fun markAllAsRead() {
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.markAllEventsAsRead()
+            mainThreadExecutor.execute {
+                mUnreadCountLiveData.value = 0
+            }
+        })
     }
 
     override fun markAsRead(eventsIds: List<String>) {
@@ -123,21 +231,14 @@ class GolosServicesImpl(
             return
         }
 
-        workerExecutor.execute {
+        executeWithRetryAndCatch(Runnable {
+            mGolosServicesGateWay.markAsRead(copy)
 
-            try {
-                mGolosServicesGateWay.markAsRead(copy)
-
-                val unreadCount = mGolosServicesGateWay.getUnreadCount()
-                mainThreadExecutor.execute {
-                    mUnreadCountLiveData.value = unreadCount
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (reauthIfNeeded(e)) markAsRead(eventsIds)
+            val unreadCount = mGolosServicesGateWay.getUnreadCount()
+            mainThreadExecutor.execute {
+                mUnreadCountLiveData.value = unreadCount
             }
-
-        }
+        })
     }
 
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
@@ -148,19 +249,21 @@ class GolosServicesImpl(
         return mUnreadCountLiveData
     }
 
-    private fun onTokenOrAuthStateChanged() {
+    private fun onAuthStateChanged() {
         val appUserData = userDataProvider.appUserData.value
         if (appUserData == null || !appUserData.isLogged) {
             if (isAuthComplete) {
                 workerExecutor.execute {
+                    mListeners.forEach { it.onLogout() }
                     mGolosServicesGateWay.logout()
-                    notificationsPersister.setUserSubscribedOnNotificationsThroughServices(false)
                     isAuthComplete = false
                     isAuthInProgress = false
 
                     mainThreadExecutor.execute {
                         mEventsMap.forEach { it.value.value = null }
                         allEvents.value = null
+                        mUnreadCountLiveData.value = 0
+                        mReadyState.value = PreparingState.LOADING
                     }
                 }
             }
@@ -184,32 +287,10 @@ class GolosServicesImpl(
 
     @WorkerThread
     private fun onAuthComplete() {
-        subscribeToPushIfNeeded()
         mainThreadExecutor.execute {
+            mReadyState.value = PreparingState.DONE
             requestEventsUpdate(markAsRead = false, completionHandler = { _, _ -> })
         }
-    }
-
-    private fun subscribeToPushIfNeeded() {
-        if (!isAuthComplete) return
-        workerExecutor.execute {
-            val token = tokenProvider.tokenLiveData.value ?: return@execute
-            Timber.i("token = $token")
-            if (!needToSubscribeToPushes(token)) return@execute
-            try {
-                mGolosServicesGateWay.subscribeOnNotifications(token.newToken)
-                notificationsPersister.setUserSubscribedOnNotificationsThroughServices(true)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun needToSubscribeToPushes(tokens: FCMTokens): Boolean {
-        if (tokens.oldToken == null && !notificationsPersister.isUserSubscribedOnNotificationsThroughServices()) return true
-        if (tokens.oldToken != null && (tokens.oldToken != tokens.newToken)) return true
-        return false
     }
 
 
@@ -315,7 +396,6 @@ class GolosServicesImpl(
                     else {
                         mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
                     }
-
                 }
             }
         }
@@ -368,13 +448,16 @@ class GolosServicesImpl(
     override fun toString(): String {
         return "isAuthComplete=$isAuthComplete\n" +
                 "isAuthInProgress=$isAuthInProgress\n" +
-                "auth counter = ${(mGolosServicesGateWay as GolosServicesGateWayImpl?)?.authCounter}\n" +
-                "isSubscribed on pushes = ${notificationsPersister.isUserSubscribedOnNotificationsThroughServices()}"
+                "auth counter = ${(mGolosServicesGateWay as GolosServicesGateWayImpl?)?.authCounter}"
+    }
+
+    private fun logException(e: java.lang.Exception) {
+        Timber.e(e)
+        errorLogger.log(e)
     }
 
     companion object {
         var instance: GolosServicesImpl? = null
     }
-
 
 }

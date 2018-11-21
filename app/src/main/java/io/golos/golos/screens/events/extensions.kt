@@ -2,6 +2,7 @@ package io.golos.golos.screens.events
 
 import io.golos.golos.notifications.*
 import io.golos.golos.repository.services.*
+import io.golos.golos.repository.services.model.*
 
 fun GolosEvent.getPermlinkForTitle(): String? {
     return when (this) {
@@ -35,6 +36,7 @@ fun GolosNotification.toEventType(): EventType {
         is GolosRepostNotification -> EventType.REPOST
         is GolosRewardNotification -> EventType.REWARD
         is GolosCuratorRewardNotification -> EventType.CURATOR_AWARD
+        is GolosMessageNotification -> EventType.MESSAGE
     }
 }
 

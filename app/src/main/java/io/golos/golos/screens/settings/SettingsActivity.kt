@@ -7,29 +7,28 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.utils.asIntentToShowUrl
 
 /**
  * Created by yuri on 12.12.17.
- * добавить ссылку -https://golos.io/about#team, текст гиппер ссылки "О Команде",
-ссылку на "Частые вопросы" https://golos.io/faq
-"Новости Команды" https://golos.io/@golosio
-Ссылку на Политику конфиденциальности -вставить сылкой не постом, пост убрать
-https://golos.io/ru--konfidenczialxnostx/@golos/politika-konfidencialnosti
  */
-class SettingsActivity : GolosActivity() {
+class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
+    private lateinit var mCurrencySpinner: Spinner
+    private lateinit var mNightModeSpinner: Spinner
+    private lateinit var mCompactModeSwitch: SwitchCompat
+    private lateinit var mNoImagesSwitch: SwitchCompat
+    private lateinit var mNSFWSwitch: SwitchCompat
+    private lateinit var mBountySpinner: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -83,14 +82,34 @@ class SettingsActivity : GolosActivity() {
         versionTv.text = getString(R.string.golos_android_v, BuildConfig.VERSION_NAME)
 
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
+        setUpNotifications()
+
         setUpNighMode()
         setUpCompactMode()
         setUpNoImagesMode()
         setUpNSFWMode()
         setUpCurrency()
         setUpBountyDisplay()
-        setUpNotifications()
+        Repository.get.appSettings.observe(this, this)
+    }
 
+    override fun onChanged(appSettings: GolosAppSettings?) {
+        appSettings ?: return
+        mCurrencySpinner.setSelection(when (appSettings.chosenCurrency) {
+            GolosAppSettings.GolosCurrency.USD -> 1
+            GolosAppSettings.GolosCurrency.RUB -> 0
+            GolosAppSettings.GolosCurrency.GBG -> 2
+        })
+        mNightModeSpinner.setSelection(if (appSettings.nighModeEnable) 1 else 0)
+        mCompactModeSwitch.isChecked = appSettings.feedMode == GolosAppSettings.FeedMode.COMPACT
+        mNoImagesSwitch.isChecked = appSettings.displayImagesMode == GolosAppSettings.DisplayImagesMode.DISPLAY
+        mNSFWSwitch.isChecked = appSettings.nsfwMode == GolosAppSettings.NSFWMode.DISPLAY
+        mBountySpinner.setSelection(when (appSettings.bountyDisplay) {
+            GolosAppSettings.GolosBountyDisplay.INTEGER -> 0
+            GolosAppSettings.GolosBountyDisplay.ONE_PLACE -> 1
+            GolosAppSettings.GolosBountyDisplay.TWO_PLACES -> 2
+            GolosAppSettings.GolosBountyDisplay.THREE_PLACES -> 3
+        })
     }
 
     private fun setUpNotifications() {
@@ -100,25 +119,27 @@ class SettingsActivity : GolosActivity() {
     }
 
     private fun setUpNoImagesMode() {
-        val switch = findViewById<SwitchCompat>(R.id.show_images_switch)
-        if (Repository.get.userSettingsRepository.isImagesShown().value == true) switch.isChecked = true
-        switch.setOnClickListener {
-            Repository.get.userSettingsRepository.setShowImages(switch.isChecked)
+        mNoImagesSwitch = findViewById<SwitchCompat>(R.id.show_images_switch)
+
+        mNoImagesSwitch.setOnClickListener {
+            val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
+            Repository.get.setAppSettings(currentValue.copy(displayImagesMode =
+            if (currentValue.displayImagesMode == GolosAppSettings.DisplayImagesMode.DISPLAY) GolosAppSettings.DisplayImagesMode.DISPLAY_NOT else GolosAppSettings.DisplayImagesMode.DISPLAY))
         }
     }
 
     private fun setUpNighMode() {
-        val spinner = findViewById<Spinner>(R.id.mode_spinner)
-        spinner.adapter = SettingsSpinnerAdapter(this, R.array.daynight)
-        spinner.setSelection(if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0)
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        mNightModeSpinner = findViewById<Spinner>(R.id.mode_spinner)
+        mNightModeSpinner.adapter = SettingsSpinnerAdapter(this, R.array.daynight)
+        mNightModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val currentMode = if (Repository.get.userSettingsRepository.isNightMode()) 1 else 0
+                val currentValue = Repository.get.appSettings.value ?: return
+                val currentMode = if (currentValue.nighModeEnable) 1 else 0
                 if (currentMode != p2) {
-                    Repository.get.userSettingsRepository.setNightMode(p2 == 1)
+                    Repository.get.setAppSettings(currentValue.copy(nighModeEnable = p2 == 1))
                     val i = Intent(this@SettingsActivity, SettingsActivity::class.java)
                     setResult(Activity.RESULT_OK)
                     finish()
@@ -129,70 +150,67 @@ class SettingsActivity : GolosActivity() {
     }
 
     private fun setUpCurrency() {
-        val spinner = findViewById<Spinner>(R.id.currency_spinner)
-        spinner.adapter = SettingsSpinnerAdapter(this, R.array.currency)
-        spinner.setSelection(when (Repository.get.userSettingsRepository.getCurrency().value) {
-            UserSettingsRepository.GolosCurrency.USD -> 1
-            UserSettingsRepository.GolosCurrency.RUB -> 0
-            UserSettingsRepository.GolosCurrency.GBG -> 2
+        mCurrencySpinner = findViewById<Spinner>(R.id.currency_spinner)
+        mCurrencySpinner.adapter = SettingsSpinnerAdapter(this, R.array.currency)
+        mCurrencySpinner.setSelection(when (Repository.get.appSettings.value?.chosenCurrency) {
+            GolosAppSettings.GolosCurrency.USD -> 1
+            GolosAppSettings.GolosCurrency.RUB -> 0
+            GolosAppSettings.GolosCurrency.GBG -> 2
             else -> 0
         })
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        mCurrencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val currency = when (p2) {
-                    0 -> UserSettingsRepository.GolosCurrency.RUB
-                    1 -> UserSettingsRepository.GolosCurrency.USD
-                    2 -> UserSettingsRepository.GolosCurrency.GBG
-                    else -> UserSettingsRepository.GolosCurrency.USD
+                    0 -> GolosAppSettings.GolosCurrency.RUB
+                    1 -> GolosAppSettings.GolosCurrency.USD
+                    2 -> GolosAppSettings.GolosCurrency.GBG
+                    else -> GolosAppSettings.GolosCurrency.USD
                 }
-                Repository.get.userSettingsRepository.setCurrency(currency)
+                val currentValue = Repository.get.appSettings.value ?: return
+                Repository.get.setAppSettings(currentValue.copy(chosenCurrency = currency))
             }
         }
     }
 
     private fun setUpBountyDisplay() {
-        val spinner = findViewById<Spinner>(R.id.precision_spinner)
-        spinner.adapter = SettingsSpinnerAdapter(this, R.array.precision)
-        spinner.setSelection(when (Repository.get.userSettingsRepository.getBountDisplay().value) {
-            UserSettingsRepository.GolosBountyDisplay.INTEGER -> 0
-            UserSettingsRepository.GolosBountyDisplay.ONE_PLACE -> 1
-            UserSettingsRepository.GolosBountyDisplay.TWO_PLACES -> 2
-            UserSettingsRepository.GolosBountyDisplay.THREE_PLACES -> 3
-            else -> 0
-        })
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        mBountySpinner = findViewById<Spinner>(R.id.precision_spinner)
+        mBountySpinner.adapter = SettingsSpinnerAdapter(this, R.array.precision)
+
+        mBountySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val currentValue = Repository.get.appSettings.value ?: return
                 val bountyDisplay = when (p2) {
-                    0 -> UserSettingsRepository.GolosBountyDisplay.INTEGER
-                    1 -> UserSettingsRepository.GolosBountyDisplay.ONE_PLACE
-                    2 -> UserSettingsRepository.GolosBountyDisplay.TWO_PLACES
-                    3 -> UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
-                    else -> UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                    0 -> GolosAppSettings.GolosBountyDisplay.INTEGER
+                    1 -> GolosAppSettings.GolosBountyDisplay.ONE_PLACE
+                    2 -> GolosAppSettings.GolosBountyDisplay.TWO_PLACES
+                    3 -> GolosAppSettings.GolosBountyDisplay.THREE_PLACES
+                    else -> GolosAppSettings.GolosBountyDisplay.THREE_PLACES
                 }
-                Repository.get.userSettingsRepository.setBountDisplay(bountyDisplay)
+                Repository.get.setAppSettings(currentValue.copy(bountyDisplay = bountyDisplay))
             }
         }
     }
 
     private fun setUpNSFWMode() {
-        val switch = findViewById<SwitchCompat>(R.id.show_nsfw_images_switch)
-        if (Repository.get.userSettingsRepository.isNSFWShow().value == true) switch.isChecked = true
-        switch.setOnClickListener {
-            Repository.get.userSettingsRepository.setIsNSFWShown(switch.isChecked)
+        mNSFWSwitch = findViewById<SwitchCompat>(R.id.show_nsfw_images_switch)
+        mNSFWSwitch.setOnClickListener {
+            val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
+            Repository.get.setAppSettings(currentValue.copy(nsfwMode = if (mNSFWSwitch.isChecked) GolosAppSettings.NSFWMode.DISPLAY else GolosAppSettings.NSFWMode.DISPLAY_NOT))
         }
     }
 
     private fun setUpCompactMode() {
-        val switch = findViewById<SwitchCompat>(R.id.compact_mode_switch)
-        if (Repository.get.userSettingsRepository.isStoriesCompactMode().value == true) switch.isChecked = true
-        switch.setOnClickListener {
-            Repository.get.userSettingsRepository.setStoriesCompactMode(switch.isChecked)
+        mCompactModeSwitch = findViewById<SwitchCompat>(R.id.compact_mode_switch)
+        mCompactModeSwitch.setOnClickListener {
+            val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
+            Repository.get.setAppSettings(currentValue.copy(feedMode = if (mCompactModeSwitch.isChecked) GolosAppSettings.FeedMode.COMPACT else GolosAppSettings.FeedMode.FULL))
         }
     }
 }

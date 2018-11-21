@@ -30,7 +30,7 @@ abstract class GolosActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Repository.get.userSettingsRepository.isNightMode()) {
+        if (Repository.get.appSettings.value?.nighModeEnable == true) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_YES))
         } else {
@@ -73,8 +73,8 @@ abstract class GolosActivity : AppCompatActivity() {
 
 
     private fun needToShowVoteDialog(): Boolean {
-        return !Repository.get.userSettingsRepository.isUserVotedForApp()
-                && !Repository.get.userSettingsRepository.isVoteQuestionMade()
+        return !userVotedForApp
+                && !isVoteQuestionMade
     }
 
     override fun onStop() {

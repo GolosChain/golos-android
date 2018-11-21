@@ -17,7 +17,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.multidex.MultiDexApplication
 import com.amplitude.api.Amplitude
-import com.bumptech.glide.Glide
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
@@ -35,6 +34,7 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.utils.getVectorAsBitmap
+import io.golos.golos.utils.isVoteQuestionMade
 import timber.log.Timber
 
 
@@ -78,7 +78,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 aCreated++
                 if (aCreated == 1) {
-                    //Amplitude.getInstance().logEvent("Application open")
+                    Amplitude.getInstance().logEvent("android_app_open")
                 }
             }
 
@@ -119,7 +119,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
                 }
             }
         })
-        Repository.get.userSettingsRepository.setVoteQuestionMade(false)
+        isVoteQuestionMade = false
         mLiveData.value = LifeCycleEvent.APP_IN_BACKGROUND
         Repository.get.notificationsRepository.notifications.observeForever(this)
         Amplitude.getInstance().initialize(this, BuildConfig.AMPLITUDE_API_KEY).enableForegroundTracking(this)
@@ -155,7 +155,7 @@ class App : MultiDexApplication(), AppLifecycleRepository, Observer<GolosNotific
 
                 } else builder.setSmallIcon(R.drawable.ic_logo_white)
 
-                if (Repository.get.userSettingsRepository.getNotificationsSettings().value?.playSoundWhenAppStopped == true) {
+                if (Repository.get.appSettings.value?.loudNotification == true) {
                     builder.setDefaults(Notification.DEFAULT_SOUND)
                 } else {
                     builder.setDefaults(0).setSound(null)

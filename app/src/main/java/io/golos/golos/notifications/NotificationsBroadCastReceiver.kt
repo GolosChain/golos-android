@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import io.golos.golos.repository.Repository
-import timber.log.Timber
 
 const val NOTIFICATION_KEY = "io.golos.golos.notifications.NOTIFICATION_KEY"
 
@@ -21,7 +20,6 @@ class NotificationsBroadCastReceiver : BroadcastReceiver() {
                     .notificationsRepository
                     .notifications
                     .value?.notifications?.find { it.hashCode() == hashCode }
-            Timber.i("found = $notification")
             Repository.get.notificationsRepository.dismissNotification(notification ?: return)
         }
     }

@@ -9,29 +9,29 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class NotificationsDisplaySetting(
         @JsonProperty("playSoundWhenAppStopped")
         val playSoundWhenAppStopped: Boolean,
-        @JsonProperty("showUpvoteNotifs")
+        @JsonProperty("vote")
         val showUpvoteNotifs: Boolean,
-        @JsonProperty("showFlagNotifs")
+        @JsonProperty("flag")
         val showFlagNotifs: Boolean,
-        @JsonProperty("showNewCommentNotifs")
+        @JsonProperty("reply")
         val showNewCommentNotifs: Boolean,
-        @JsonProperty("showTransferNotifs")
+        @JsonProperty("transfer")
         val showTransferNotifs: Boolean,
-        @JsonProperty("showSubscribeNotifs")
+        @JsonProperty("subscribe")
         val showSubscribeNotifs: Boolean,
-        @JsonProperty("showUnSubscribeNotifs")
+        @JsonProperty("unsubscribe")
         val showUnSubscribeNotifs: Boolean,
-        @JsonProperty("showMentions")
+        @JsonProperty("mention")
         val showMentions: Boolean,
-        @JsonProperty("showReblog")
+        @JsonProperty("repost")
         val showReblog: Boolean,
-        @JsonProperty("showWitnessVote")
+        @JsonProperty("witnessVote")
         val showWitnessVote: Boolean,
-        @JsonProperty("showWitnessCancelVote")
+        @JsonProperty("witnessCancelVote")
         val showWitnessCancelVote: Boolean,
-        @JsonProperty("showAward")
+        @JsonProperty("award")
         val showAward: Boolean,
-        @JsonProperty("showCurationAward")
+        @JsonProperty("curatorAward")
         val showCurationAward: Boolean) {
 
     private fun createNew(
@@ -73,7 +73,7 @@ class NotificationsDisplaySetting(
 
 
     override fun toString(): String {
-        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, showUpvoteNotifs=$showUpvoteNotifs, showFlagNotifs=$showFlagNotifs, showNewCommentNotifs=$showNewCommentNotifs, showTransferNotifs=$showTransferNotifs, showSubscribeNotifs=$showSubscribeNotifs, showUnSubscribeNotifs=$showUnSubscribeNotifs, showMentions=$showMentions, showReblog=$showReblog, showWitnessVote=$showWitnessVote, showWitnessCancelVote=$showWitnessCancelVote)"
+        return "NotificationsDisplaySetting(playSoundWhenAppStopped=$playSoundWhenAppStopped, vote=$showUpvoteNotifs, flag=$showFlagNotifs, reply=$showNewCommentNotifs, transfer=$showTransferNotifs, subscribe=$showSubscribeNotifs, unsubscribe=$showUnSubscribeNotifs, mention=$showMentions, repost=$showReblog, witnessVote=$showWitnessVote, witnessCancelVote=$showWitnessCancelVote)"
     }
 
     override fun equals(other: Any?): Boolean {

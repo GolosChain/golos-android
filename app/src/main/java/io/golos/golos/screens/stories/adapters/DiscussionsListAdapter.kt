@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import io.golos.golos.R
-import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.screens.stories.adapters.viewholders.StoriesViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeCompactViewHolder
 import io.golos.golos.screens.stories.adapters.viewholders.StripeFullViewHolder
@@ -17,8 +17,8 @@ import io.golos.golos.utils.toArrayList
 data class FeedCellSettings(val isFullSize: Boolean,
                             val isImagesShown: Boolean,
                             val nswfStrategy: NSFWStrategy,
-                            val shownCurrency: UserSettingsRepository.GolosCurrency,
-                            val bountyDisplay: UserSettingsRepository.GolosBountyDisplay,
+                            val shownCurrency: GolosAppSettings.GolosCurrency,
+                            val bountyDisplay: GolosAppSettings.GolosBountyDisplay,
                             val isReblogButtonShown: Boolean)
 
 

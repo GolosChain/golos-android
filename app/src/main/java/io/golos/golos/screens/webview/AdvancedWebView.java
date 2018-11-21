@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 
+import androidx.annotation.Nullable;
 import io.golos.golos.screens.stories.model.FeedType;
 import io.golos.golos.screens.story.DiscussionActivity;
 import io.golos.golos.utils.GolosLinkMatcher;
@@ -69,6 +70,7 @@ import io.golos.golos.utils.StoryLinkMatch;
  */
 @SuppressWarnings("deprecation")
 public class AdvancedWebView extends WebView {
+
 
     public interface Listener {
         void onPageStarted(String url, Bitmap favicon);
@@ -563,7 +565,7 @@ public class AdvancedWebView extends WebView {
                             match.getBlog(),
                             match.getPermlink(),
                             FeedType.UNCLASSIFIED,
-                            null,false);
+                            null, false);
                 }
             }
 

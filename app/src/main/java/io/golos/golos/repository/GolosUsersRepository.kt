@@ -6,6 +6,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import io.golos.golos.R
+import io.golos.golos.repository.model.PreparingState
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.utils.*
 import java.util.*
@@ -15,11 +16,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 import kotlin.collections.set
 
-enum class PreparingState {
-    LOADING, DONE
-}
-
-interface GolosUsersRepository {
+interface GolosUsersRepository : Preloadable{
 
     fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>>
 
@@ -48,8 +45,6 @@ interface GolosUsersRepository {
     val currentUserSubscriptions: LiveData<List<String>>
 
     fun lookupUsers(username: String): LiveData<List<String>>
-
-    val repositoryState: LiveData<PreparingState>
 
 }
 
@@ -112,7 +107,7 @@ class UsersRepositoryImpl(private val mPersister: GolosUsersPersister,
 
     }
 
-    override val repositoryState: LiveData<PreparingState>
+    override val loadingState: LiveData<PreparingState>
         get() = mPreparingState
 
     override fun getGolosUserAccountInfos(): LiveData<Map<String, GolosUserAccountInfo>> {

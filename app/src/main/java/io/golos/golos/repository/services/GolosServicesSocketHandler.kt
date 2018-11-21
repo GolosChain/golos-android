@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import eu.bittrade.libs.golosj.communication.CommunicationHandler.getObjectMapper
 import eu.bittrade.libs.golosj.configuration.SteemJConfig
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.utils.JsonConvertable
 import io.golos.golos.utils.mapper
 import org.glassfish.tyrus.client.ClientManager

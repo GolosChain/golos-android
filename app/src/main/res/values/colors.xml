@@ -11,6 +11,8 @@
     <color name="gray_1">#a0a7ab</color>
     <color name="blue_light">#1298FF</color>
     <color name="gray_4f">#4F4F4F</color>
+    <color name="settings_unchecked_tint">#E1E1E1</color>
+    <color name="settings_checked_tint">#2879FF</color>
     <color name="gray_story_upvote_circle">#a2a9ac</color>
     <color name="rat">#989ea3</color>
     <color name="delimeter_color">#a5000000</color>

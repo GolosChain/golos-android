@@ -1,4 +1,4 @@
-package io.golos.golos.repository.services
+package io.golos.golos.repository.services.model
 
 import com.fasterxml.jackson.annotation.*
 import io.golos.golos.utils.JsonConvertable
@@ -20,10 +20,16 @@ class GolosAuthRequest(
         val sign: String) : GolosServicesRequest()
 
 class GolosPushSubscribeRequest(
-        @JsonProperty("profile")
-        val profile: String,
-        @JsonProperty("deviceType")
-        val deviceType: String = "android") : GolosServicesRequest()
+        @JsonProperty("key")//fcm token
+        val key: String,
+        @JsonProperty("profile")//device id
+        val profile: String) : GolosServicesRequest()
+
+class GolosPushUnSubscribeRequest(
+        @JsonProperty("key")//fcm token
+        val key: String,
+        @JsonProperty("profile")//device id
+        val profile: String) : GolosServicesRequest()
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class GolosEventRequest(

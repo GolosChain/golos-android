@@ -1,6 +1,6 @@
 package io.golos.golos.screens.events
 
-import io.golos.golos.repository.services.*
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.screens.story.model.SubscribeStatus
 
 sealed class EventListItem(open val golosEvent: GolosEvent,

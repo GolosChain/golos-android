@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:clickable="true"
-    android:background="?selectableItemBackground"
-    android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="48dp"
+              android:background="?selectableItemBackground"
+              android:clickable="true"
+              android:orientation="horizontal">
 
     <TextView
-        style="@style/PouchTVStyle"
         android:id="@+id/key_tv"
+        style="@style/PouchTVStyle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:textColor="@color/text_color_white_black" />
+        android:layout_marginTop="0dp"
+        android:gravity="start|center_vertical"
+
+        android:textColor="@color/text_color_white_black"/>
 
     <TextView
-        style="@style/ProfileTvNumStyle"
         android:id="@+id/value_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/ProfileTvNumStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:textColor="@color/text_color_white_black" />
-</RelativeLayout>
+        android:gravity="end|center_vertical"
+
+        android:paddingStart="@dimen/material_huge"
+        android:textColor="@color/text_color_white_black"/>
+</LinearLayout>

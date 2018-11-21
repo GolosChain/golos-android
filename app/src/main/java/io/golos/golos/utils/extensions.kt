@@ -7,6 +7,7 @@ import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -48,7 +49,6 @@ import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsRepository
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.editor.getDimen
@@ -68,6 +68,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Created by yuri yurivladdurain@gmail.com on 25/10/2017.
  */
+
 
 const val siteUrl = BuildConfig.BASE_URL
 
@@ -102,7 +103,8 @@ fun changeWrapperAccountInfoIfNeeded(feedType: FeedType,
         }
     } else wrapper
 }
- fun traceCaller() {
+
+fun traceCaller() {
     if (BuildConfig.DEBUG) {
         Timber.e(Thread.currentThread().stackTrace[4].toString())
     }
@@ -178,6 +180,19 @@ fun String.asIntentToShowUrl(): Intent {
     i.data = Uri.parse(this)
     return i
 }
+
+var Context.isVoteQuestionMade: Boolean
+    get() = getSharedPreferences("vote", MODE_PRIVATE).getBoolean("vote_question_made", false)
+    set(value) {
+        getSharedPreferences("vote", MODE_PRIVATE).edit().putBoolean("vote_question_made", value).commit()
+    }
+
+var Context.userVotedForApp: Boolean
+    get() = getSharedPreferences("vote", MODE_PRIVATE).getBoolean("user_voted_for_app", false)
+    set(value) {
+        getSharedPreferences("vote", MODE_PRIVATE).edit().putBoolean("user_voted_for_app", value).commit()
+    }
+
 
 public fun allGolosUrls() = BuildConfig.ALTERNATE_URLS + BuildConfig.BASE_URL
 
@@ -697,10 +712,10 @@ fun isOnMainThread(): Boolean {
 public fun Context.getQuantityString(@PluralsRes id: Int, quantity: Int, vararg formatArgs: Any?) = resources.getQuantityString(id, quantity, *formatArgs)
 
 fun calculateShownReward(wrapper: StoryWrapper,
-                         chosenCurrency: UserSettingsRepository.GolosCurrency = Repository.get.userSettingsRepository.getCurrency().value
-                                 ?: UserSettingsRepository.GolosCurrency.USD,
-                         bountyDisplay: UserSettingsRepository.GolosBountyDisplay = Repository.get.userSettingsRepository.getBountDisplay().value
-                                 ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES,
+                         chosenCurrency: GolosAppSettings.GolosCurrency = Repository.get.appSettings.value?.chosenCurrency
+                                 ?: GolosAppSettings.GolosCurrency.USD,
+                         bountyDisplay: GolosAppSettings.GolosBountyDisplay = Repository.get.appSettings.value?.bountyDisplay
+                                 ?: GolosAppSettings.GolosBountyDisplay.THREE_PLACES,
                          ctx: Context): String {
     val gbgCost = wrapper.story.gbgAmount
     val resources = ctx.resources
@@ -709,9 +724,9 @@ fun calculateShownReward(wrapper: StoryWrapper,
         return resources.getString(R.string.gbg_format, bountyDisplay.formatNumber(gbgCost))
     } else {
         return when (chosenCurrency) {
-            UserSettingsRepository.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, bountyDisplay.formatNumber(gbgCost
+            GolosAppSettings.GolosCurrency.RUB -> resources.getString(R.string.rubles_format, bountyDisplay.formatNumber(gbgCost
                     * exchangeValues.rublesPerGbg))
-            UserSettingsRepository.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, bountyDisplay.formatNumber(gbgCost))
+            GolosAppSettings.GolosCurrency.GBG -> resources.getString(R.string.gbg_format, bountyDisplay.formatNumber(gbgCost))
             else -> resources.getString(R.string.dollars_format, bountyDisplay.formatNumber(gbgCost
                     * exchangeValues.dollarsPerGbg))
         }

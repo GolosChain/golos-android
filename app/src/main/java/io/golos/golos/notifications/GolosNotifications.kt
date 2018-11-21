@@ -1,6 +1,7 @@
 package io.golos.golos.notifications
 
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.services.model.*
 import java.util.*
 
 sealed class GolosNotification(open val numberOfSameType: Int = 0) {
@@ -8,20 +9,21 @@ sealed class GolosNotification(open val numberOfSameType: Int = 0) {
 
 
     companion object {
-        fun fromNotification(notification: Notification): GolosNotification {
-            return when (notification) {
-                is VoteNotification -> GolosUpVoteNotification(notification.permlink, notification.voter, notification.counter)
-                is ReplyNotification -> GolosCommentNotification(notification.permlink, notification.author, notification.counter)
-                is TransferNotification -> GolosTransferNotification(notification.from, notification.amount, notification.counter)
-                is FlagNotification -> GolosDownVoteNotification(notification.permlink, notification.voter, notification.counter)
-                is SubscribeNotification -> GolosSubscribeNotification(notification.follower, notification.counter)
-                is UnSubscribeNotification -> GolosUnSubscribeNotification(notification.follower, notification.counter)
-                is MentionNotification -> GolosMentionNotification(notification.permlink, notification.author, notification.counter)
-                is WitnessVoteNotification -> GolosWitnessVoteNotification(notification.from, notification.counter)
-                is WitnessCancelVoteNotification -> WitnessCancelVoteGolosNotification(notification.from, notification.counter)
-                is RepostNotification -> GolosRepostNotification(notification.reposter, notification.permlink, notification.counter)
-                is RewardNotification -> GolosRewardNotification(notification.permlink, notification.golos, notification.golosPower, notification.gbg, notification.counter)
-                is CuratorRewardNotification -> GolosCuratorRewardNotification(notification.author, notification.permlink, notification.reward, notification.counter)
+        fun fromEvent(event: Event): GolosNotification {
+            return when (event) {
+                is VoteEvent -> GolosUpVoteNotification(event.permlink, event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is ReplyEvent -> GolosCommentNotification(event.permlink, event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is TransferEvent -> GolosTransferNotification(event.fromUsers.firstOrNull().orEmpty(), event.amount, event.counter)
+                is FlagEvent -> GolosDownVoteNotification(event.permlink, event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is SubscribeEvent -> GolosSubscribeNotification(event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is UnSubscribeEvent -> GolosUnSubscribeNotification(event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is MentionEvent -> GolosMentionNotification(event.permlink, event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is WitnessVoteEvent -> GolosWitnessVoteNotification(event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is WitnessCancelVoteEvent -> WitnessCancelVoteGolosNotification(event.fromUsers.firstOrNull().orEmpty(), event.counter)
+                is RepostEvent -> GolosRepostNotification(event.fromUsers.firstOrNull().orEmpty(), event.permlink, event.counter)
+                is AwardEvent -> GolosRewardNotification(event.permlink, event.reward.golos, event.reward.golosPower, event.reward.gbg, event.counter)
+                is CuratorAwardEvent -> GolosCuratorRewardNotification(event.curatorTargetAuthor, event.permlink, event.curatorReward, event.counter)
+                is MessageEvent -> GolosMessageNotification(event.fromUsers.firstOrNull().orEmpty(), event.counter)
             }
         }
     }
@@ -74,66 +76,71 @@ class GolosRepostNotification(val fromUser: String,
 
 }
 
- class GolosRewardNotification(val permlink: String, val golosAward: Double,
-                                   val golosPowerAward: Double, val gbgAward: Double, override val numberOfSameType: Int) : GolosNotification() {
-     override val id: String = UUID.randomUUID().toString()
-     override fun equals(other: Any?): Boolean {
-         if (this === other) return true
-         if (javaClass != other?.javaClass) return false
-         if (!super.equals(other)) return false
+class GolosMessageNotification(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
+    override val id: String = UUID.randomUUID().toString()
+}
 
-         other as GolosRewardNotification
+class GolosRewardNotification(val permlink: String, val golosAward: Double,
+                              val golosPowerAward: Double, val gbgAward: Double, override val numberOfSameType: Int) : GolosNotification() {
+    override val id: String = UUID.randomUUID().toString()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
 
-         if (permlink != other.permlink) return false
-         if (golosAward != other.golosAward) return false
-         if (golosPowerAward != other.golosPowerAward) return false
-         if (gbgAward != other.gbgAward) return false
-         if (numberOfSameType != other.numberOfSameType) return false
+        other as GolosRewardNotification
 
-         return true
-     }
+        if (permlink != other.permlink) return false
+        if (golosAward != other.golosAward) return false
+        if (golosPowerAward != other.golosPowerAward) return false
+        if (gbgAward != other.gbgAward) return false
+        if (numberOfSameType != other.numberOfSameType) return false
 
-     override fun hashCode(): Int {
-         var result = super.hashCode()
-         result = 31 * result + permlink.hashCode()
-         result = 31 * result + golosAward.hashCode()
-         result = 31 * result + golosPowerAward.hashCode()
-         result = 31 * result + gbgAward.hashCode()
-         result = 31 * result + numberOfSameType
-         return result
-     }
+        return true
+    }
 
- }
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + golosAward.hashCode()
+        result = 31 * result + golosPowerAward.hashCode()
+        result = 31 * result + gbgAward.hashCode()
+        result = 31 * result + numberOfSameType
+        return result
+    }
 
- class GolosCuratorRewardNotification(val author: String,
-                                          val permlink: String,
-                                          val golosPowerReward: Double,
-                                          override val numberOfSameType: Int) : GolosNotification() {
-     override fun equals(other: Any?): Boolean {
-         if (this === other) return true
-         if (javaClass != other?.javaClass) return false
-         if (!super.equals(other)) return false
+}
 
-         other as GolosCuratorRewardNotification
+class GolosCuratorRewardNotification(val author: String,
+                                     val permlink: String,
+                                     val golosPowerReward: Double,
+                                     override val numberOfSameType: Int) : GolosNotification() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
 
-         if (author != other.author) return false
-         if (permlink != other.permlink) return false
-         if (golosPowerReward != other.golosPowerReward) return false
-         if (numberOfSameType != other.numberOfSameType) return false
+        other as GolosCuratorRewardNotification
 
-         return true
-     }
-     override val id: String = UUID.randomUUID().toString()
+        if (author != other.author) return false
+        if (permlink != other.permlink) return false
+        if (golosPowerReward != other.golosPowerReward) return false
+        if (numberOfSameType != other.numberOfSameType) return false
 
-     override fun hashCode(): Int {
-         var result = super.hashCode()
-         result = 31 * result + author.hashCode()
-         result = 31 * result + permlink.hashCode()
-         result = 31 * result + golosPowerReward.hashCode()
-         result = 31 * result + numberOfSameType
-         return result
-     }
- }
+        return true
+    }
+
+    override val id: String = UUID.randomUUID().toString()
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + author.hashCode()
+        result = 31 * result + permlink.hashCode()
+        result = 31 * result + golosPowerReward.hashCode()
+        result = 31 * result + numberOfSameType
+        return result
+    }
+}
 
 class WitnessCancelVoteGolosNotification(val fromUser: String, override val numberOfSameType: Int) : GolosNotification() {
     override val id: String = UUID.randomUUID().toString()

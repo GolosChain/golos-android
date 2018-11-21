@@ -1,16 +1,16 @@
 package io.golos.golos.utils
 
 import android.os.Build
-import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.notifications.*
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.services.*
+import io.golos.golos.repository.services.model.*
 import io.golos.golos.screens.editor.knife.KnifeURLSpan
 import io.golos.golos.screens.events.*
 import java.util.*
@@ -108,14 +108,14 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
 
         val needToShowAvatar = golosEvent is Authorable && golosEvent.counter == 1
         val smallIconId = when (golosEvent) {
-            is GolosVoteEvent -> R.drawable.ic_like_20dp
-            is GolosFlagEvent -> R.drawable.ic_dizlike_20dp//4469AF
+            is GolosVoteEvent -> R.drawable.ic_liked_events_20dp
+            is GolosFlagEvent -> R.drawable.ic_dizliked_events_20dp//4469AF
             is GolosTransferEvent -> R.drawable.ic_coins_20dp
             is GolosReplyEvent -> R.drawable.ic_comment_20dp
             is GolosSubscribeEvent -> R.drawable.ic_subscribe_20dp
             is GolosUnSubscribeEvent -> R.drawable.ic_unsubscribe_20dp
             is GolosMentionEvent -> R.drawable.ic_avatar_20dp
-            is GolosRepostEvent -> R.drawable.ic_reposted_20dp
+            is GolosRepostEvent -> R.drawable.ic_repost_gr_20dp
             is GolosWitnessVoteEvent -> R.drawable.ic_delegat_vote_20dp
             is GolosWitnessCancelVoteEvent -> R.drawable.ic_no_delegat_20dp
 
@@ -149,6 +149,11 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
         val context = App.context
 
         return when (golosNotification) {
+            is GolosMessageNotification -> {
+                //unsupported
+                NotificationAppearance(title = "", body = ""
+                        , iconId = R.drawable.ic_like_40dp_white_on_blue)
+            }
             is GolosUpVoteNotification -> {
                 val text = if (numOfSameNotifications == 1)
                     context.getString(R.string.userr_voted, golosNotification.fromUser, title, mEmojisMap[R.string.userr_voted])
@@ -157,7 +162,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications.toString()), title,
                         mEmojisMap[R.string.userr_voted_several])
 
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title)
                         , iconId = R.drawable.ic_like_40dp_white_on_blue)
             }
             is GolosDownVoteNotification -> {
@@ -167,7 +172,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         context.getQuantityString(R.plurals.negative_reacted, numOfAdditionalNotifications, numOfAdditionalNotifications.toString()),
                         title, mEmojisMap[R.string.user_downvoted_several])
 
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_dizlike_40dp_white_on_blue)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_dizlike_40dp_white_on_blue)
             }
             is GolosTransferNotification -> {
                 val title = context.getString(R.string.transfer_title)
@@ -179,7 +184,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         golosNotification.amount)
                         .plus(" ${mEmojisMap[R.string.user_transfered_several]}")
 
-                return NotificationAppearance(title = title, body = text, iconId = R.drawable.ic_thank_w)
+                NotificationAppearance(title = title, body = text, iconId = R.drawable.ic_thank_w)
             }
             is GolosCommentNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_replied,
@@ -189,7 +194,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         context.getQuantityString(R.plurals.answered, numOfAdditionalNotifications, numOfAdditionalNotifications.toString()),
                         title, mEmojisMap[R.string.user_replied_several])
 
-                return NotificationAppearance(title = currentUserName.capitalize(),
+                NotificationAppearance(title = currentUserName.capitalize(),
                         body = text.setLinkSpan(title)
                         , iconId = R.drawable.ic_message_w_40dp)
             }
@@ -199,7 +204,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                 else context.getString(R.string.user_subscribed_several, golosNotification.fromUser,
                         context.getQuantityString(R.plurals.subscribed, numOfAdditionalNotifications, numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_subscribed_several]}")
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_subscribe_w_40dp)
+                NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_subscribe_w_40dp)
             }
             is GolosUnSubscribeNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_unsubscribed, golosNotification.fromUser)
@@ -208,7 +213,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         golosNotification.fromUser,
                         context.getQuantityString(R.plurals.unsubscribed, numOfAdditionalNotifications, numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_unsubscribed_several]}")
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_unsubscribe_w_40dp)
+                NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_unsubscribe_w_40dp)
             }
             is GolosMentionNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_mentioned,
@@ -220,7 +225,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications,
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_mentioned_several]}")
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_mention_w_40dp)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_mention_w_40dp)
             }
             is GolosRepostNotification -> {
 
@@ -232,7 +237,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_reposted_several]}")
 
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_repost_w_40dp)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_repost_w_40dp)
             }
             is GolosWitnessVoteNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_voted_for_you, golosNotification.fromUser)
@@ -243,7 +248,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_voted_for_you_several]}")
 
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnessvote_w_40dp)
+                NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnessvote_w_40dp)
             }
             is WitnessCancelVoteGolosNotification -> {
                 val text = if (numOfSameNotifications == 1) context.getString(R.string.user_canceled_vote_for_you,
@@ -254,7 +259,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                                 numOfAdditionalNotifications,
                                 numOfAdditionalNotifications.toString()))
                         .plus(" ${mEmojisMap[R.string.user_canceled_vote_for_you_several]}")
-                return NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnesscancelvote_w_40dp)
+                NotificationAppearance(title = null, body = text, iconId = R.drawable.ic_witnesscancelvote_w_40dp)
             }
 
             is GolosRewardNotification -> {
@@ -268,7 +273,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         rewardString, title)
                 else context.getString(R.string.reward_for_entries, rewardString)
 
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_award_40dp)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_award_40dp)
             }
 
             is GolosCuratorRewardNotification -> {
@@ -281,7 +286,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                         rewardString, title)
                 else context.getString(R.string.curator_reward_for_entries, rewardString)
 
-                return NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_curator_award_40dp)
+                NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_curator_award_40dp)
             }
         }
     }

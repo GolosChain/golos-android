@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsRepository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.repository.model.VotedUserObject
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.story.model.SubscribeStatus
@@ -147,23 +147,23 @@ class UserListViewModel : ViewModel() {
         } else {
             val exchangeValues = mRepository.getExchangeLiveData().value
 
-            val chosenCurrency = mRepository.userSettingsRepository.getCurrency().value
-                    ?: UserSettingsRepository.GolosCurrency.USD
+            val chosenCurrency = mRepository.appSettings.value?.chosenCurrency
+                    ?: GolosAppSettings.GolosCurrency.USD
             val votes = mVotesLiveData?.value.orEmpty()
             mLiveData.value = UserListViewState(mTitle,
                     votes
                             .asSequence()
-                            .filter { if (mListType == ListType.UP_VOTERS) it.percent > 0 else if (mListType == ListType.DOWN_VOTERS) it.percent < 0 else true }
+                            .filter { if (mListType == ListType.UP_VOTERS) it.percent > 0 else if (mListType == ListType.DOWN_VOTERS) it.percent < 0 else it.percent.toInt() != 0 }
                             .map {
                                 val gbgCost = it.gbgValue
-                                val displayFormatter = Repository.get.userSettingsRepository.getBountDisplay().value
-                                        ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES
+                                val displayFormatter = Repository.get.appSettings.value?.bountyDisplay
+                                        ?: GolosAppSettings.GolosBountyDisplay.THREE_PLACES
                                 val outString = if (exchangeValues == null) {
                                     mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
                                 } else when (chosenCurrency) {
-                                    UserSettingsRepository.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, displayFormatter.formatNumber(gbgCost
+                                    GolosAppSettings.GolosCurrency.RUB -> mStringSupplier.get(R.string.rubles_format, displayFormatter.formatNumber(gbgCost
                                             * exchangeValues.rublesPerGbg))
-                                    UserSettingsRepository.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
+                                    GolosAppSettings.GolosCurrency.GBG -> mStringSupplier.get(R.string.gbg_format, displayFormatter.formatNumber(gbgCost))
                                     else -> mStringSupplier.get(R.string.dollars_format, displayFormatter.formatNumber(gbgCost
                                             * exchangeValues.dollarsPerGbg))
                                 }

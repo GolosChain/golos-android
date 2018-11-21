@@ -1,4 +1,4 @@
-package io.golos.golos.repository.services
+package io.golos.golos.repository.services.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
@@ -12,6 +12,7 @@ import com.google.common.primitives.Longs
 import io.golos.golos.notifications.PostLinkExtractedData
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.services.EventType
 import java.io.IOException
 import java.text.ParseException
 import java.text.SimpleDateFormat

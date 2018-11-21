@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_material"
         android:layout_marginTop="@dimen/material_big"
-        android:text="@string/add_max_five_tags"
+        android:text="@string/add_tags"
         android:textColor="@color/rat" />
 
     <com.wefika.flowlayout.FlowLayout

@@ -7,12 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.google.firebase.iid.FirebaseInstanceId
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.base.models.AccountName
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
 import eu.bittrade.libs.golosj.util.ImmutablePair
 import io.golos.golos.R
+import io.golos.golos.notifications.FCMTokenProviderImpl
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.notifications.PushNotificationsRepositoryImpl
 import io.golos.golos.repository.api.GolosApi
@@ -21,7 +23,7 @@ import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.services.EventType
-import io.golos.golos.repository.services.GolosEvent
+import io.golos.golos.repository.services.model.GolosEvent
 import io.golos.golos.repository.services.GolosServices
 import io.golos.golos.repository.services.GolosServicesImpl
 import io.golos.golos.screens.editor.EditorPart
@@ -44,7 +46,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                               private val mMainThreadExecutor: Executor,
                               private val mPersister: Persister = Persister.get,
                               private val mGolosApi: GolosApi = GolosApi.get,
-                              private val mUserSettings: UserSettingsRepository = UserSettingsImpl(),
+                              userSettingRepository: UserSettingRepository? = null,
                               poster: Poster? = null,
                               notificationsRepository: PushNotificationsRepositoryImpl? = null,
                               avatarsRepository: GolosUsersRepository? = null,
@@ -54,6 +56,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
 
     private val mUsersRepository: GolosUsersRepository
+    private val mSettingRepository: UserSettingRepository
 
     private val mRequests = Collections.synchronizedSet(HashSet<RepositoryRequests>())
     private val mStoryUpdateRequests = Collections.synchronizedSet(HashSet<StoryLoadRequest>())
@@ -116,8 +119,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         return out
     }
 
-    override val repositoryState: LiveData<PreparingState>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override val loadingState: LiveData<PreparingState>
+        get() = mPreparingStatus
 
 
     override val votingStates: LiveData<List<GolosDiscussionItemVotingState>>
@@ -141,8 +144,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 }
             }
         }.observeForever({})
-        mNotificationsRepository =
-                notificationsRepository ?: PushNotificationsRepositoryImpl(mUserSettings)
+
 
         mGolosServices = golosServices ?: GolosServicesImpl(userDataProvider = object : UserDataProvider {
             override val appUserData: LiveData<ApplicationUser>
@@ -152,18 +154,20 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                 this,
                 mGolosApi)
         mVotesState.value = arrayListOf()
-
+        mNotificationsRepository =
+                notificationsRepository ?: PushNotificationsRepositoryImpl(this, mGolosServices, DeviceIdProviderImpl, FCMTokenProviderImpl)
+        mSettingRepository = userSettingRepository ?: SettingsRepositoryImpl(mGolosServices, this)
 
         mComponentsStateLiveData.addSource(mPreparingStatus) {
             mComponentsStateLiveData.value = collectPreparingState()
         }
-        mComponentsStateLiveData.addSource(mUsersRepository.repositoryState) {
+        mComponentsStateLiveData.addSource(mUsersRepository.loadingState) {
             mComponentsStateLiveData.value = collectPreparingState()
         }
     }
 
     private fun collectPreparingState(): ReadyStatus {
-        return if (mUsersRepository.repositoryState.value == PreparingState.DONE && mPreparingStatus.value == PreparingState.DONE)
+        return if (mUsersRepository.loadingState.value == PreparingState.DONE && mPreparingStatus.value == PreparingState.DONE)
             ReadyStatus(true, null)
         else ReadyStatus(false, null)
     }
@@ -185,7 +189,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
     override fun onAppCreate(ctx: Context) {
         super.onAppCreate(ctx)
-        mUserSettings.setUp(ctx)
+        (mSettingRepository as? SettingsRepositoryImpl)?.setUp(ctx)
         mExchangesRepository.setUp(ctx)
         mNotificationsRepository.setUp()
         try {
@@ -458,6 +462,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             mCurrentUserBlogEntries.value = null
             mRepostingStates.value = null
             mNotificationsRepository.dismissAllNotifications()
+            workerExecutor.execute {
+                FirebaseInstanceId.getInstance().deleteInstanceId()
+            }
         } catch (e: Exception) {
             logException(e)
         }
@@ -855,7 +862,19 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         }
     }
 
-    override val userSettingsRepository: UserSettingsRepository = mUserSettings
+    override val appSettings: LiveData<GolosAppSettings>
+        get() = mSettingRepository.appSettings
+
+    override fun setAppSettings(newSettings: GolosAppSettings) {
+        mSettingRepository.setAppSettings(newSettings)
+    }
+
+    override val notificationSettings: LiveData<GolosNotificationSettings>
+        get() = mSettingRepository.notificationSettings
+
+    override fun setNotificationSettings(newSettings: GolosNotificationSettings) {
+        mSettingRepository.setNotificationSettings(newSettings)
+    }
 
     override val notificationsRepository: PushNotificationsRepository = mNotificationsRepository
 

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Golos.io</string>
-    <string name="add_max_five_tags">Add tags (max 5)</string>
+    <string name="add_tags">Add tags</string>
     <string name="to_much_tags">You can add up to 5 tags</string>
     <string name="use_only_one_dash">A tag can have only one hyphen</string>
     <string name="use_whitespaces_seporator">Use the spacebar to separate tags</string>
@@ -187,13 +187,13 @@
     <string name="notifications">Online notifications on Golos.io</string>
     <string name="events">Notifications</string>
     <string name="mention">Mentions</string>
-    <string name="upvote">Upvote</string>
+    <string name="like">Like (upvote)</string>
     <string name="transfer">Transfer</string>
     <string name="answer_on_post">Reply on post</string>
     <string name="reply_on_comment">Reply on comment</string>
     <string name="sound">Sound</string>
     <string name="play_sound">Notifications sound</string>
-    <string name="new_comment">New comment</string>
+    <string name="new_comment">Reply in post or comment</string>
     <string name="notifications_channel_main">Main notifications</string>
     <string name="new_upvote">New upvote</string>
     <string name="new_flag">New flag</string>
@@ -224,10 +224,10 @@
     <string name="user_reposted_several">@%s and %s have reposted your post</string>
     <string name="user_voted_for_you_several">@%s and %s voted for you as delegates</string>
     <string name="user_canceled_vote_for_you_several">@%s and %s removed their voices from your delegate node</string>
-    <string name="flag">Flag</string>
+    <string name="dizlike">Dizlike</string>
     <string name="subscribe_on_blog">Subscribe on blog</string>
     <string name="unsubscribe_from_blog">Unsubscribe from blog</string>
-    <string name="reblog">Reblog</string>
+    <string name="reblog">Repost</string>
     <string name="witness_vote">Vote for witness</string>
     <string name="witness_cancel_vote">Cancel of witness vote</string>
     <string name="Notifications">Notifications</string>
@@ -273,6 +273,7 @@
     <string name="team_news">Team News</string>
     <string name="faq">FAQ</string>
     <string name="mark_all_as_read">Mark all as read</string>
+    <string name="mention_with_at">Mentions in post or comment, using @</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

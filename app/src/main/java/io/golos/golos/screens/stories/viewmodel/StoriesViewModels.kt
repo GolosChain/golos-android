@@ -11,11 +11,7 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.repository.KnifeHtmlizer
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.UserSettingsRepository
-import io.golos.golos.repository.model.ApplicationUser
-import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.StoryFilter
+import io.golos.golos.repository.model.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
@@ -152,7 +148,7 @@ abstract class DiscussionsViewModel : ViewModel() {
     private var isVisibleToUser: Boolean = false
     protected var filter: StoryFilter? = null
     private lateinit var internetStatusNotifier: InternetStatusNotifier
-    private var mObserver: Observer<Boolean>? = null
+    private var mObserver: Observer<GolosAppSettings>? = null
     private val updateSize = 20
     private val mWrappersCash = HashMap<Long, StoryWrapper>(20)
 
@@ -275,23 +271,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                 if (newSettings != mFeedSettingsLiveData.value)
                     mFeedSettingsLiveData.value = newSettings
             }
-            Repository.get.userSettingsRepository.isStoriesCompactMode().observeForever(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isImagesShown().observeForever(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isNSFWShow().observeForever(mObserver ?: return)
-
-            Repository.get.userSettingsRepository.getCurrency().observeForever {
-
-                val newSettings = getFeedModeSettings()
-                if (newSettings != mFeedSettingsLiveData.value)
-                    mFeedSettingsLiveData.value = newSettings
-            }
-            Repository.get.userSettingsRepository.getBountDisplay().observeForever {
-                val newSettings = getFeedModeSettings()
-                if (newSettings != mFeedSettingsLiveData.value)
-                    mFeedSettingsLiveData.value = newSettings
-            }
+            Repository.get.appSettings.observeForever(mObserver ?: return)
         }
     }
 
@@ -306,12 +286,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.removeSource(mRepository.currentUserRepostStates)
 
         if (mObserver != null) {
-            Repository.get.userSettingsRepository.isStoriesCompactMode().removeObserver(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isImagesShown().removeObserver(mObserver
-                    ?: return)
-            Repository.get.userSettingsRepository.isNSFWShow().removeObserver(mObserver ?: return)
-            mObserver = null
+            Repository.get.appSettings.removeObserver(mObserver ?: return)
         }
     }
 
@@ -416,16 +391,21 @@ abstract class DiscussionsViewModel : ViewModel() {
                 R.string.no_internet_connection))
     }
 
-    private fun getFeedModeSettings() = FeedCellSettings(Repository.get.userSettingsRepository.isStoriesCompactMode().value == false,
-            Repository.get.userSettingsRepository.isImagesShown().value == true,
-            NSFWStrategy(Repository.get.userSettingsRepository.isNSFWShow().value == true,
-                    Pair(mRepository.isUserLoggedIn(), mRepository.appUserData.value?.name.orEmpty())),
-            Repository.get.userSettingsRepository.getCurrency().value
-                    ?: UserSettingsRepository.GolosCurrency.USD,
-            Repository.get.userSettingsRepository.getBountDisplay().value
-                    ?: UserSettingsRepository.GolosBountyDisplay.THREE_PLACES,
-            isRepostButtonNeedToBeShown(type, filter, mRepository.appUserData.value)
-    )
+    private fun getFeedModeSettings(): FeedCellSettings {
+        val appSettings = Repository.get.appSettings.value ?: return FeedCellSettings(true,
+                true,
+                NSFWStrategy(false, Pair(false, "")), GolosAppSettings.GolosCurrency.USD,
+                GolosAppSettings.GolosBountyDisplay.THREE_PLACES, true)
+
+        return FeedCellSettings(appSettings.feedMode == GolosAppSettings.FeedMode.FULL,
+                appSettings.displayImagesMode == GolosAppSettings.DisplayImagesMode.DISPLAY,
+                NSFWStrategy(appSettings.nsfwMode == GolosAppSettings.NSFWMode.DISPLAY,
+                        Pair(mRepository.isUserLoggedIn(), mRepository.appUserData.value?.name.orEmpty())),
+                appSettings.chosenCurrency,
+                appSettings.bountyDisplay,
+                isRepostButtonNeedToBeShown(type, filter, mRepository.appUserData.value))
+    }
+
 
     open fun onScrollToTheEnd() {
         if (!internetStatusNotifier.isAppOnline()) {
