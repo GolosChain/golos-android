@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.services.GolosSettingsService
 import io.golos.golos.utils.mapper
-import timber.log.Timber
 
 
 internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSettingsService,
@@ -104,7 +103,6 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
     }
 
     override fun setAppSettings(newSettings: GolosAppSettings) {
-        Timber.e("setAppSettings $newSettings")
         if (mSettingGolosServices.loadingState.value != PreparingState.DONE) return
         if (newSettings == mAppSettingsLiveData.value) return
         mAppSettingsLiveData.value = newSettings
@@ -113,7 +111,6 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
     }
 
     override fun setNotificationSettings(newSettings: GolosNotificationSettings) {
-        Timber.e("setNotificationSettings $newSettings")
         if (mSettingGolosServices.loadingState.value != PreparingState.DONE) return
         if (newSettings == mNotificationsSettings.value) return
         mNotificationsSettings.value = newSettings

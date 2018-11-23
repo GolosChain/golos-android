@@ -5,11 +5,15 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.GolosNotificationSettings
 import io.golos.golos.screens.GolosActivity
 import java.util.*
 
 
 class NotificationsSettingActivity : GolosActivity() {
+    private val allOnNotifs = GolosNotificationSettings(true, true, true, true, true, true
+            , true, true, true, true, true, true, true)
+    private val allOffNotifs = GolosNotificationSettings(false, false, false, false, false, false, false, false, false, false, false, false, false)
 
     fun onChanged() {
         if (mRecycler.adapter == null) {
@@ -33,6 +37,9 @@ class NotificationsSettingActivity : GolosActivity() {
                         NotificationSettingsTypes.WITNESS_CANCEL -> repo.setNotificationSettings(notificationSettings.copy(showWitnessCancelVote = newValue))
                         NotificationSettingsTypes.POST_REWARD -> repo.setNotificationSettings(notificationSettings.copy(showAward = newValue))
                         NotificationSettingsTypes.CURATION_REWARD -> repo.setNotificationSettings(notificationSettings.copy(showCurationAward = newValue))
+                        NotificationSettingsTypes.CHECK_ALL -> {
+                            if (newValue) repo.setNotificationSettings(allOnNotifs) else repo.setNotificationSettings(allOffNotifs)
+                        }
                     }
                 }
             }
@@ -43,7 +50,7 @@ class NotificationsSettingActivity : GolosActivity() {
 
     private enum class NotificationSettingsTypes {
         SHOW_UPVOTE, SHOW_FLAG, SHOW_TRANSFER, SHOW_NEW_COMMENT, PLAY_SOUND, SUBSCRIBE_ON_BLOG,
-        UNSUBSCRIBE_FROM_BLOG, MENTIONS, REBLOG, WITNESS_VOTE, WITNESS_CANCEL, POST_REWARD, CURATION_REWARD
+        UNSUBSCRIBE_FROM_BLOG, MENTIONS, REBLOG, WITNESS_VOTE, WITNESS_CANCEL, POST_REWARD, CURATION_REWARD, CHECK_ALL
     }
 
 
@@ -56,6 +63,7 @@ class NotificationsSettingActivity : GolosActivity() {
         Repository.get.notificationSettings.observe(this, Observer { onChanged() })
         Repository.get.appSettings.observe(this, Observer { onChanged() })
         mRecycler = findViewById(R.id.recycler)
+        mRecycler.itemAnimator = null
     }
 
     private fun createRowsForAdapter(): List<SettingRow> {
@@ -63,12 +71,12 @@ class NotificationsSettingActivity : GolosActivity() {
         val appSettings = Repository.get.appSettings.value
         val rows = ArrayList<SettingRow>(20)
         rows.apply {
-            add(TitleRow(titleId = R.string.sound, id = UUID.randomUUID().toString()))
             add(SwitchRow(NotificationSettingsTypes.PLAY_SOUND, R.string.play_sound, appSettings?.loudNotification
                     ?: false))
-            add(SpaceRow(R.dimen.margin_material_small))
-            add(DelimeterRow())
-            add(TitleRow(titleId = R.string.mention, id = UUID.randomUUID().toString()))
+            add(SwitchRow(NotificationSettingsTypes.CHECK_ALL, R.string.turn_on_pushes, notificationSettings?.isAllOn() == true))
+            add(SpaceRow(R.dimen.margin_material_small, "space_1"))
+            add(DelimeterRow(id = "del_row_1"))
+            add(TitleRow(titleId = R.string.mention, id = "mentions"))
             add(CheckRow(NotificationSettingsTypes.SHOW_UPVOTE, R.string.like, notificationSettings?.showUpvoteNotifs
                     ?: false, R.drawable.ic_like_20dp))
             add(CheckRow(NotificationSettingsTypes.SHOW_FLAG, R.string.dizlike, notificationSettings?.showFlagNotifs
@@ -82,18 +90,23 @@ class NotificationsSettingActivity : GolosActivity() {
             add(CheckRow(NotificationSettingsTypes.UNSUBSCRIBE_FROM_BLOG, R.string.unsubscribe_from_blog, notificationSettings?.showUnSubscribeNotifs
                     ?: false, R.drawable.ic_not_subscribe_gr_settings_18dp))
             add(CheckRow(NotificationSettingsTypes.MENTIONS, R.string.mention_with_at, notificationSettings?.showMentions
-                    ?: false, R.drawable.ic_mention_20dp))
+                    ?: false, R.drawable.ic_at_gr_18dp))
             add(CheckRow(NotificationSettingsTypes.REBLOG, R.string.reblog, notificationSettings?.showReblog
                     ?: false, R.drawable.ic_repost_gr_20dp))
             add(CheckRow(NotificationSettingsTypes.WITNESS_VOTE, R.string.witness_vote, notificationSettings?.showWitnessVote
-                    ?: false, R.drawable.ic_repost_gr_20dp))
+                    ?: false, R.drawable.ic_delegat_vote_gr_20dp))
             add(CheckRow(NotificationSettingsTypes.WITNESS_CANCEL, R.string.witness_cancel_vote, notificationSettings?.showWitnessCancelVote
-                    ?: false, R.drawable.ic_repost_gr_20dp))
+                    ?: false, R.drawable.ic_no_delegate_vote_cancel_gr_20dp))
             add(CheckRow(NotificationSettingsTypes.POST_REWARD, R.string.post_reward, notificationSettings?.showAward
                     ?: false, R.drawable.ic_user_award_20dp))
             add(CheckRow(NotificationSettingsTypes.CURATION_REWARD, R.string.curation_reward, notificationSettings?.showCurationAward
                     ?: false, R.drawable.ic_curation_award_20dp))
         }
         return rows
+    }
+
+
+    fun GolosNotificationSettings.isAllOn(): Boolean {
+        return this == allOnNotifs
     }
 }

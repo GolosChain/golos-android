@@ -1,13 +1,15 @@
 package io.golos.golos.screens.settings
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -140,10 +142,6 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
                 val currentMode = if (currentValue.nighModeEnable) 1 else 0
                 if (currentMode != p2) {
                     Repository.get.setAppSettings(currentValue.copy(nighModeEnable = p2 == 1))
-                    val i = Intent(this@SettingsActivity, SettingsActivity::class.java)
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                    startActivity(i)
                 }
             }
         }

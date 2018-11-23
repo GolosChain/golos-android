@@ -205,11 +205,11 @@ class SettingsAdapter(list: List<SettingRow>,
 
 sealed class SettingRow(open val id: Any)
 
-data class SpaceRow(@DimenRes val space: Int) : SettingRow(UUID.randomUUID().toString())
+data class SpaceRow(@DimenRes val space: Int, override val id: Any = UUID.randomUUID().toString()) : SettingRow(id)
 
 data class TitleRow(override val id: Any, val titleId: Int) : SettingRow(id)
 
-data class DelimeterRow(val unused: Int = 0) : SettingRow(UUID.randomUUID().toString())
+data class DelimeterRow(val unused: Int = 0, override val id: Any = UUID.randomUUID().toString()) : SettingRow(id)
 
 data class SwitchRow(override val id: Any, val textId: Int, var isOn: Boolean) : SettingRow(id) {
     fun switch(isActivated: Boolean): SwitchRow = SwitchRow(id, textId, isActivated)

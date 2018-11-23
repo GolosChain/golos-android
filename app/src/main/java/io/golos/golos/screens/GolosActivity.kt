@@ -1,6 +1,5 @@
 package io.golos.golos.screens
 
-import android.app.Activity
 import android.app.UiModeManager
 import android.content.Intent
 import android.os.Bundle
@@ -27,13 +26,16 @@ abstract class GolosActivity : AppCompatActivity() {
     private var isResumed = false
     private val showVoteDialog: MutableLiveData<Boolean> = OneShotLiveData()
     private val mRepostObserver = RepostObserver(supportFragmentManager)
+    private var mLastNightModeEnbledFlag = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Repository.get.appSettings.value?.nighModeEnable == true) {
+            mLastNightModeEnbledFlag = true
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_YES))
         } else {
+            mLastNightModeEnbledFlag = false
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             ((getSystemService(UI_MODE_SERVICE) as UiModeManager).setNightMode(UiModeManager.MODE_NIGHT_NO))
         }
@@ -48,6 +50,12 @@ abstract class GolosActivity : AppCompatActivity() {
             if (it == true) VoteForAppDialog.getInstance().show(supportFragmentManager, null)
         })
         Repository.get.lastRepost.observe(this, mRepostObserver)
+        Repository.get.appSettings.observe(this, Observer { appSettings ->
+            appSettings ?: return@Observer
+            if (appSettings.nighModeEnable != mLastNightModeEnbledFlag) {
+                restart()
+            }
+        })
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -86,10 +94,6 @@ abstract class GolosActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         val fragments = supportFragmentManager.fragments
         fragments.forEach { it.onActivityResult(requestCode, resultCode, data) }
-
-        if (requestCode == CHANGE_THEME && resultCode == Activity.RESULT_OK) {
-            restart()
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -100,13 +104,11 @@ abstract class GolosActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        // overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right)
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     override fun startActivity(intent: Intent?) {
         super.startActivity(intent)
-        //overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left)
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 

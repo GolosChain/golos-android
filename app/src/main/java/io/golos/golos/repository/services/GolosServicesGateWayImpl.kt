@@ -124,7 +124,6 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
 
     override fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings) {
         val currentLang = Locale.getDefault()?.language ?: ""
-        Timber.e("currentLang = $currentLang")
         val request = GolosSettingChangeRequest(deviceId, null, null, GolosServicePushSettings(
                 if (currentLang.contains("ru")) GolosServiceSettingsLanguage.RUSSIAN else GolosServiceSettingsLanguage.ENGLISH,
                 newSettings
