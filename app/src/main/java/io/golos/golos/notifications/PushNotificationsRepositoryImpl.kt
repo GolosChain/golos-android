@@ -31,7 +31,7 @@ interface PushNotificationsRepository {
 /**
  * Created by yuri on 05.03.18.
  */
-
+var isPushesSubscribed = false
 
 internal class PushNotificationsRepositoryImpl(private val appUserDataProvider: UserDataProvider,
                                                private val pushService: GolosPushService,
@@ -79,6 +79,7 @@ internal class PushNotificationsRepositoryImpl(private val appUserDataProvider: 
         if (currentUserData != null) {
             if (currentFcmToken.newToken == mLastSubscribedToken) return
             pushService.subscribeOnPushNotifications(currentFcmToken.newToken, deviceIdProvider.getDeviceId())
+            isPushesSubscribed = true
             mLastSubscribedToken = currentFcmToken.newToken
         }
     }
@@ -120,8 +121,8 @@ internal class PushNotificationsRepositoryImpl(private val appUserDataProvider: 
 //                is GolosWitnessVoteNotification -> settings?.witnessVote ?: true
 //                is WitnessCancelVoteGolosNotification -> settings?.witnessCancelVote ?: true
 //                is GolosRepostNotification -> settings?.repost ?: true
-//                is GolosRewardNotification -> settings?.award ?: true
-//                is GolosCuratorRewardNotification -> settings?.curatorAward ?: true
+//                is GolosRewardNotification -> settings?.reward ?: true
+//                is GolosCuratorRewardNotification -> settings?.curatorReward ?: true
 //            }
 //
 //        } ?: listOf()

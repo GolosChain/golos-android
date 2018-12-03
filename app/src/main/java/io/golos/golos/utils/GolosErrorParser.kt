@@ -14,10 +14,10 @@ object GolosErrorParser {
         e.printStackTrace()
         return when (e) {
             is GolosServicesException -> GolosError(ErrorCode.ERROR_INTERNAL_SERVER, e.golosServicesError.message, null)
-            is SteemResponseError -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, GolosErrorParser.getLocalizedError(e))
-            is SteemInvalidTransactionException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.message, null)
+            is SteemResponseError -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.error?.steemErrorDetails?.message?.trim(), GolosErrorParser.getLocalizedError(e))
+            is SteemInvalidTransactionException -> GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, e.message?.trim(), null)
             is SteemTimeoutException -> GolosError(ErrorCode.ERROR_SLOW_CONNECTION, null, R.string.slow_internet_connection)
-            is SteemCommunicationException -> GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection)
+            is SteemCommunicationException -> GolosError(ErrorCode.ERROR_NO_CONNECTION, null , R.string.no_internet_connection)
             is InvalidParameterException -> {
                 if (e.message?.contains("method without providing an account") == true) {
                     GolosError(ErrorCode.ERROR_WRONG_ARGUMENTS, null, R.string.reenter_acc)
@@ -68,6 +68,6 @@ object GolosErrorParser {
             return R.string.wrong_time
         else if (error.error.steemErrorDetails.message.contains("= STEEMIT_MIN_VOTE_INTERVAL_SEC: Can only vote once every "))
             return R.string.can_vote_once_per_three_second
-        else return R.string.unknown_error
+        else return  R.string.unknown_error
     }
 }

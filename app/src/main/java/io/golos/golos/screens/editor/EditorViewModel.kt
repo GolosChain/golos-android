@@ -182,7 +182,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
         if (DEBUG_EDITOR) Timber.e("on user Input action = $action parts = ${editorLiveData.value?.parts}")
         val parts = editorLiveData.value?.parts ?: ArrayList()
         val result = mTextProcessor.processInput(parts, action)
-        mEditorLiveData.value = mEditorLiveData.value?.copy(parts = result)
+        mEditorLiveData.value = mEditorLiveData.value?.copy(parts = result, error = null)
     }
 
     @MainThread
@@ -195,13 +195,13 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
 
     @MainThread
     fun onTagsChanged(it: List<String>) {
-        mEditorLiveData.value = mEditorLiveData.value?.copy(tags = it)
+        mEditorLiveData.value = mEditorLiveData.value?.copy(tags = it, error = null)
     }
 
     @MainThread
     fun onTextChanged(parts: List<EditorPart>) {
         if (DEBUG_EDITOR) Timber.e("onTextChanged")
-        mEditorLiveData.value = mEditorLiveData.value?.copy(parts = parts)
+        mEditorLiveData.value = mEditorLiveData.value?.copy(parts = parts, error = null)
     }
 
     @MainThread

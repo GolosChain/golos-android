@@ -1,12 +1,11 @@
 package io.golos.golos.screens.userslist
 
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import io.golos.golos.R
@@ -124,14 +123,19 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                     else itemView.context.getString(R.string.follow)
                 }
 
-                mSubscibeButton.setOnClickListener { value.onSubscribeClick.invoke(this) }
+
+                mSubscibeButton.setOnClickListener {
+                    if (value.item.allowSubscription)
+                        value.onSubscribeClick.invoke(this)
+                }
+
                 mAvatar.setOnClickListener { value.onUserClick.invoke(this) }
                 mTitleText.setOnClickListener { value.onUserClick.invoke(this) }
                 itemView.setOnClickListener { value.onUserClick.invoke(this) }
 
                 val updatingState = value.item.subscribeStatus?.updatingState
 
-                if (updatingState == null) {
+                if (updatingState == null || !value.item.allowSubscription) {
                     mProgress.setViewGone()
                     mSubscibeButton.setViewGone()
                 } else {

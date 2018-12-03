@@ -67,7 +67,7 @@
         android:minHeight="36dp"
         android:maxHeight="@dimen/seeker_max_height"
         android:progress="100"
-        android:progressDrawable="@drawable/ic_line_seeker_vote_progress"
+
         android:thumb="@drawable/shape_oval_blue_22dp"
         app:layout_constraintBottom_toBottomOf="@id/minus_btn"
         app:layout_constraintEnd_toStartOf="@id/plus_btn"

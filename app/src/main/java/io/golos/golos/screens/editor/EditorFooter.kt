@@ -17,6 +17,7 @@ import io.golos.golos.R
 import io.golos.golos.utils.StringValidator
 import io.golos.golos.utils.get
 import io.golos.golos.utils.nextInt
+import timber.log.Timber
 
 
 data class EditorFooterState(val showTagsEditor: Boolean = false,
@@ -121,12 +122,30 @@ class EditorFooter : FrameLayout {
                 }
         }
 
+    private val mWhitespaceReg = "\\s+".toRegex()
+    private val mAllowedChars = "[^a-zа-яё0-9-ґєії]".toRegex()
+    private val mTagsInputFilter = InputFilter { source, start, end, dest, dstart, dend ->
+        if (source == null) source
+        val workingItem = source.toString()
+                .toLowerCase()
+                .replace(mWhitespaceReg, "")
+        if (workingItem == "18+")
+        workingItem
+        else {
+            if (dest.toString() == "18" && workingItem == "+") return@InputFilter workingItem
+          val out =  workingItem
+                .replace(mAllowedChars, "")
+            out
+        }
+    }
+
     private fun inflateNewEditText(startText: String? = null): EditText {
         val view = LayoutInflater.from(context).inflate(R.layout.v_editor_footer_tag_et, mTagsLayout, false) as EditText
         view.id = nextInt()
         if (startText != null) view.setText(startText)
         view.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
+
                 if (p0 != null) onTextChanged(p0.toString())
             }
 
@@ -145,15 +164,12 @@ class EditorFooter : FrameLayout {
             }
             true
         }
-        view.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
-            if (source == null) source
-            val workingItem = source.toString().toLowerCase()
-            workingItem
-        },
+        view.filters = arrayOf(mTagsInputFilter,
                 InputFilter.LengthFilter(24))
         view.isFocusableInTouchMode = true
         return view
     }
+
 
     private fun onDeleteEt(et: EditText) {
         mTagsLayout.removeView(et)

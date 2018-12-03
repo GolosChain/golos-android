@@ -19,6 +19,7 @@
     <color name="blue_light">#1298FF</color>
     <color name="font_gray_black">#828282</color>
     <color name="drawer_background">@android:color/black</color>
+    <color name="unread_event_card_bacl">#4F4F4F</color>
     <color name="story_toolbar_color">#3c3939</color>
     <color name="profile_divider_color">@android:color/black</color>
     <color name="same_tags_ribbon_back">@android:color/black</color>
@@ -28,4 +29,5 @@
     <color name="notification_delimeter">@color/gray_7d</color>
     <color name="vote_dialog_title">#fff</color>
     <color name="font_4f_b3">#b3b3b3</color>
+    <color name="read_event_card_bacl">#2E2B2B</color>
 </resources>

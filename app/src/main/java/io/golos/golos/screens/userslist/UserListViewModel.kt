@@ -119,6 +119,7 @@ class UserListViewModel : ViewModel() {
     private fun onValueChanged() {
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
         val currentUserSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
+        val currentUserName = Repository.get.appUserData.value?.name?:""
 
         val updatingStates = mRepository.currentUserSubscriptionsUpdateStatus.value.orEmpty()
 
@@ -138,7 +139,8 @@ class UserListViewModel : ViewModel() {
                                             userAvatars[it],
                                             null,
                                             SubscribeStatus.create(currentUserSubscriptions.contains(it),
-                                                    updatingStates[it] ?: UpdatingState.DONE))
+                                                    updatingStates[it] ?: UpdatingState.DONE),
+                                            it !=currentUserName)
                                 },
                         null)
             }
@@ -171,7 +173,8 @@ class UserListViewModel : ViewModel() {
                                         userAvatars[it.name],
                                         outString,
                                         SubscribeStatus.create(currentUserSubscriptions.contains(it.name),
-                                                updatingStates[it.name] ?: UpdatingState.DONE))
+                                                updatingStates[it.name] ?: UpdatingState.DONE),
+                                        it.name !=currentUserName)
                             }
                             .toList()
                     , null)

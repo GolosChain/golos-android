@@ -10,6 +10,7 @@ import androidx.annotation.Nullable
 import com.amplitude.api.Amplitude
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
+import timber.log.Timber
 
 /**
  * Created by yuri on 13.12.17.

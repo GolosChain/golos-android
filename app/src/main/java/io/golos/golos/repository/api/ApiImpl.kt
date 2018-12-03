@@ -3,10 +3,7 @@ package io.golos.golos.repository.api
 import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.apis.follow.enums.FollowType
 import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
-import eu.bittrade.libs.golosj.base.models.AccountName
-import eu.bittrade.libs.golosj.base.models.DiscussionQuery
-import eu.bittrade.libs.golosj.base.models.ExtendedAccount
-import eu.bittrade.libs.golosj.base.models.Permlink
+import eu.bittrade.libs.golosj.base.models.*
 import eu.bittrade.libs.golosj.enums.DiscussionSortType
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
@@ -27,6 +24,7 @@ import java.io.File
 internal class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
     private val mStoryConverter = StoryCommentsHierarchyResolver
+    private var mGlobalProperties: GlobalProperties? = null
 
 
     override fun getStory(blog: String,
@@ -248,7 +246,11 @@ internal class ApiImpl : GolosApi() {
 
     private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount,
                                                     fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
-        val votePower = acc.vestingShares.amount * 0.000268379
+        val globalProperties = mGlobalProperties
+                ?: mGolosApi.databaseMethods.dynamicGlobalProperties
+        mGlobalProperties = globalProperties
+
+        val votePower = globalProperties.totalVestingFundSteem.amount * (acc.vestingShares.amount / globalProperties.totalVestingShares.amount)
         val golosNum = acc.balance.amount
         val gbgAmount = acc.sbdBalance.amount
         val safeGolos = acc.savingsBalance.amount

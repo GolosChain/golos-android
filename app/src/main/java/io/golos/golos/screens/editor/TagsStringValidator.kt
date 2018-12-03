@@ -21,9 +21,7 @@ class TagsStringValidator(private val supplier: StringProvider) : StringValidato
     override fun validate(input: String): Pair<Boolean, String> {
         val input = input.trim().replace(Regex("\\s+"), " ")
         val out = ArrayList(input.split(" "))
-        if (out.size > 5) {
-            return Pair(false, supplier.get(R.string.to_much_tags))
-        } else if (out.any { it.split("-").size > 2 }) return Pair(false, supplier.get(R.string.use_only_one_dash))
+        if (out.any { it.split("-").size > 2 }) return Pair(false, supplier.get(R.string.use_only_one_dash))
         else if (out.any { it.contains(",") }) return Pair(false, supplier.get(R.string.use_whitespaces_seporator))
         else if (out.any { it.contains(Regex("[A-ZА-ЯЁҐЄІЇ]")) }) return Pair(false, supplier.get(R.string.only_lowercase_characters))
         else if (out.any { it != "18+" && !it.contains(Regex("^[a-zа-яё0-9-ґєії]+$")) }) return Pair(false, supplier.get(R.string.use_only_allowed_characters))

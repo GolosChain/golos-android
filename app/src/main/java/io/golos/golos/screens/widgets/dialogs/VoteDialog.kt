@@ -1,6 +1,8 @@
 package io.golos.golos.screens.widgets.dialogs
 
+import android.content.res.Resources
 import android.graphics.PorterDuff
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,9 +14,12 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatSeekBar
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import io.golos.golos.BuildConfig
 import io.golos.golos.R
 import io.golos.golos.utils.bundleOf
 import io.golos.golos.utils.getColorCompat
+import io.golos.golos.utils.getVectorDrawable
 import io.golos.golos.utils.setViewGone
 
 /**
@@ -46,6 +51,9 @@ class VoteDialog : GolosDialog() {
             plusBtn.drawable.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
         }
         mSeeker = v.findViewById(R.id.seeker)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT){
+            mSeeker.progressDrawable = activity?.getVectorDrawable(R.drawable.ic_line_seeker_vote_progress)
+        }
         if (getDialogType() == DialogType.DOWN_VOTE) {
             mSeeker.progressDrawable.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)
             mSeeker.thumb.setColorFilter(getColorCompat(R.color.app_red), PorterDuff.Mode.SRC_ATOP)

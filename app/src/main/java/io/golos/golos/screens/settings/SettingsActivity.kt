@@ -79,6 +79,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         findViewById<View>(R.id.exit).setOnClickListener {
             Repository.get.deleteUserdata()
             Toast.makeText(this, R.string.user_made_logout, Toast.LENGTH_SHORT).show()
+            finish()
         }
         val versionTv = findViewById<TextView>(R.id.version_tv)
         versionTv.text = getString(R.string.golos_android_v, BuildConfig.VERSION_NAME)

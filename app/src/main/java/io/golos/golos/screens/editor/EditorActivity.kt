@@ -164,7 +164,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         }
 
         it.error?.let {
-            if (it.localizedMessage != null) mRecycler.showSnackbar(it.localizedMessage)
+            if (it.localizedMessage == R.string.unknown_error && it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
+
+            else if (it.localizedMessage != null) mRecycler.showSnackbar(it.localizedMessage)
             else if (it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
         }
         if (it.isLoading) {

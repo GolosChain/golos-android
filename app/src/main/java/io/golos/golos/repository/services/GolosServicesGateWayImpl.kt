@@ -9,7 +9,6 @@ import io.golos.golos.utils.JsonRpcError
 import io.golos.golos.utils.rpcErrorFromCode
 import timber.log.Timber
 import java.util.*
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
 interface GolosServicesGateWay {
@@ -70,33 +69,11 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
     }
 
     val authCounter = AtomicInteger(1)
-
-    @Volatile
-    private var authRequest: GolosServerAuthRequest? = null
-
-    @Volatile
-    private var authLatch: CountDownLatch = CountDownLatch(1)
-
     private var userName: String? = null
 
 
     override fun auth(userName: String) {
-        (communicationHandler as? GolosServicesSocketHandler)?.onServiceNotification = {
-            when (it) {
-                is GolosServerAuthRequest -> {
-                    authRequest = it
-                    authLatch.countDown()
-                }
-            }
-        }
         communicationHandler.connect()
-        synchronized(this) {
-            if (authLatch.count == 0L) authLatch = CountDownLatch(1)
-            authLatch.await()
-        }
-
-
-        authRequest ?: throw IllegalStateException("multithreading not supported")
         authInternal(userName)
     }
 

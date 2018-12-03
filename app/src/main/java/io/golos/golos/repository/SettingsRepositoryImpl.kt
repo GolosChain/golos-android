@@ -56,8 +56,8 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
             this.message ?: defaultNotificationSettings.showMessageNotifs,
             this.witnessVote ?: defaultNotificationSettings.showWitnessVote,
             this.witnessCancelVote ?: defaultNotificationSettings.showWitnessCancelVote,
-            this.award ?: defaultNotificationSettings.showAward,
-            this.curatorAward ?: defaultNotificationSettings.showCurationAward)
+            this.reward ?: defaultNotificationSettings.showAward,
+            this.curatorReward ?: defaultNotificationSettings.showCurationAward)
 
     fun GolosNotificationSettings.toNotificationSettings() = NotificationSettings(this.showUpvoteNotifs,
             this.showFlagNotifs, this.showNewCommentNotifs, this.showTransferNotifs, this.showSubscribeNotifs, this.showUnSubscribeNotifs,

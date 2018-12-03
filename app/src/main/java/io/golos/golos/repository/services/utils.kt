@@ -20,6 +20,24 @@ private data class EventsData(@JsonProperty("total") val total: Int,
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GolosEvents(val freshCount: Int, val events: List<GolosEvent>)
 
+fun GolosEvent.setRead(isRead: Boolean): GolosEvent {
+    return when (this) {
+        is GolosVoteEvent -> GolosVoteEvent(this.id, this.creationTime, this.counter, this.permlink, this.fromUsers, !isRead)
+        is GolosFlagEvent -> GolosFlagEvent(this.id, this.creationTime, this.counter, this.permlink, this.fromUsers, !isRead)
+        is GolosTransferEvent -> GolosTransferEvent(this.id, this.creationTime, this.counter, this.amount, this.fromUsers, !isRead)
+        is GolosSubscribeEvent -> GolosSubscribeEvent(this.id, this.creationTime, this.counter, this.fromUsers, !isRead)
+        is GolosUnSubscribeEvent -> GolosUnSubscribeEvent(this.id, this.creationTime, this.counter, this.fromUsers, !isRead)
+        is GolosReplyEvent -> GolosReplyEvent(this.id, this.creationTime, this.counter, this.parentPermlink, this.parentPermlink, this.fromUsers, !isRead)
+        is GolosRepostEvent -> GolosRepostEvent(this.id, this.creationTime, this.counter, this.permlink, this.fromUsers, !isRead)
+        is GolosMentionEvent -> GolosMentionEvent(this.id, this.creationTime, this.counter, this.permlink, parentPermlink, this.fromUsers, !isRead)
+        is GolosAwardEvent -> GolosAwardEvent(this.id, this.creationTime, this.counter, this.award, this.permlink, !isRead)
+        is GolosCuratorAwardEvent -> GolosCuratorAwardEvent(this.id, this.creationTime, this.counter, this.permlink, this.author, this.awardInVShares, !isRead)
+        is GolosMessageEvent -> GolosMessageEvent(this.id, this.creationTime, this.counter, this.fromUsers, !isRead)
+        is GolosWitnessVoteEvent -> GolosWitnessVoteEvent(this.id, this.creationTime, this.counter, this.fromUsers, !isRead)
+        is GolosWitnessCancelVoteEvent -> GolosWitnessCancelVoteEvent(this.id, this.creationTime, this.counter, this.fromUsers, !isRead)
+    }
+}
+
 enum class EventType {
     VOTE, FLAG, TRANSFER, REPLY, SUBSCRIBE, UNSUBSCRIBE, MENTION, REPOST, REWARD, CURATOR_AWARD, MESSAGE,
     WITNESS_VOTE, WITNESS_CANCEL_VOTE;

@@ -1,7 +1,9 @@
 package io.golos.golos.repository.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class NotificationSettings(@JsonProperty("vote") val vote: Boolean?,
                            @JsonProperty("flag") val flag: Boolean?,
                            @JsonProperty("reply") val reply: Boolean?,
@@ -13,11 +15,11 @@ class NotificationSettings(@JsonProperty("vote") val vote: Boolean?,
                            @JsonProperty("message") val message: Boolean?,
                            @JsonProperty("witnessVote") val witnessVote: Boolean?,
                            @JsonProperty("witnessCancelVote") val witnessCancelVote: Boolean?,
-                           @JsonProperty("reward") val award: Boolean?,
-                           @JsonProperty("curatorReward") val curatorAward: Boolean?) {
+                           @JsonProperty("reward") val reward: Boolean?,
+                           @JsonProperty("curatorReward") val curatorReward: Boolean?) {
 
     override fun toString(): String {
-        return "NotificationSettings(vote=$vote, flag=$flag, reply=$reply, transfer=$transfer, subscribe=$subscribe, unsubscribe=$unsubscribe, mention=$mention, repost=$repost, message=$message, witnessVote=$witnessVote, witnessCancelVote=$witnessCancelVote, award=$award, curatorAward=$curatorAward)"
+        return "NotificationSettings(vote=$vote, flag=$flag, reply=$reply, transfer=$transfer, subscribe=$subscribe, unsubscribe=$unsubscribe, mention=$mention, repost=$repost, message=$message, witnessVote=$witnessVote, witnessCancelVote=$witnessCancelVote, reward=$reward, curatorReward=$curatorReward)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -37,8 +39,8 @@ class NotificationSettings(@JsonProperty("vote") val vote: Boolean?,
         if (message != other.message) return false
         if (witnessVote != other.witnessVote) return false
         if (witnessCancelVote != other.witnessCancelVote) return false
-        if (award != other.award) return false
-        if (curatorAward != other.curatorAward) return false
+        if (reward != other.reward) return false
+        if (curatorReward != other.curatorReward) return false
 
         return true
     }
@@ -55,8 +57,8 @@ class NotificationSettings(@JsonProperty("vote") val vote: Boolean?,
         result = 31 * result + (message?.hashCode() ?: 0)
         result = 31 * result + (witnessVote?.hashCode() ?: 0)
         result = 31 * result + (witnessCancelVote?.hashCode() ?: 0)
-        result = 31 * result + (award?.hashCode() ?: 0)
-        result = 31 * result + (curatorAward?.hashCode() ?: 0)
+        result = 31 * result + (reward?.hashCode() ?: 0)
+        result = 31 * result + (curatorReward?.hashCode() ?: 0)
         return result
     }
 }

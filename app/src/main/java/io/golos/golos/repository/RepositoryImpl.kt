@@ -23,9 +23,9 @@ import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.repository.persistence.model.AppUserData
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.repository.services.EventType
-import io.golos.golos.repository.services.model.GolosEvent
 import io.golos.golos.repository.services.GolosServices
 import io.golos.golos.repository.services.GolosServicesImpl
+import io.golos.golos.repository.services.model.GolosEvent
 import io.golos.golos.screens.editor.EditorPart
 import io.golos.golos.screens.events.toSingletoneList
 import io.golos.golos.screens.stories.model.FeedType
@@ -825,7 +825,6 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
 
                     mMainThreadExecutor.execute {
                         val userName = mAuthLiveData.value?.name.orEmpty()
-                        Timber.e("propogating")
                         comments.value = comments.value?.copy(items = newStory.toSingletoneList() + comments.value?.items.orEmpty())
 
                         mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
@@ -1137,9 +1136,9 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     }
 
     private fun logException(e: Throwable) {
-        Timber.e(e)
+        Timber.e(java.lang.Exception(e.toString()))
         e.printStackTrace()
-        mLogger?.log(e)
+        mLogger?.log(java.lang.Exception(e.toString()))
     }
 }
 

@@ -8,6 +8,10 @@ import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.TextView
+import io.golos.golos.notifications.FCMTokenProviderImpl
+import io.golos.golos.notifications.isPushesSubscribed
+import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.DeviceIdProviderImpl
 import io.golos.golos.repository.services.GolosServicesImpl
 
 class EActivity : AppCompatActivity() {
@@ -21,17 +25,25 @@ class EActivity : AppCompatActivity() {
         val copy = findViewById<View>(R.id.copy)
 
         renew.setOnClickListener {
-            mTextView.text = GolosServicesImpl.instance?.toString()
+            mTextView.text = GolosServicesImpl.instance?.toString() +
+                    "\n${Repository.get.notificationSettings.value}" +
+                    "\ndevice id = ${DeviceIdProviderImpl.getDeviceId()}" +
+                    "\n token = ${FCMTokenProviderImpl.tokenLiveData.value?.newToken}"+
+                    "\n is pushes subscribe = $isPushesSubscribed"
         }
         copy.setOnClickListener {
             (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
-                    ClipData.newPlainText("", PreferenceManager.getDefaultSharedPreferences(this).getString("token", ""))
+                    ClipData.newPlainText("",mTextView.text)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        mTextView.text = GolosServicesImpl.instance?.toString()
+        mTextView.text = GolosServicesImpl.instance?.toString() +
+                "\n${Repository.get.notificationSettings.value}" +
+                "\ndevice id = ${DeviceIdProviderImpl.getDeviceId()}" +
+                "\n token = ${FCMTokenProviderImpl.tokenLiveData.value?.newToken}" +
+                "\n is pushes subscribe = $isPushesSubscribed"
     }
 
 }

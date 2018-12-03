@@ -29,9 +29,9 @@ class NotificationsDisplaySetting(
         val showWitnessVote: Boolean,
         @JsonProperty("witnessCancelVote")
         val showWitnessCancelVote: Boolean,
-        @JsonProperty("award")
+        @JsonProperty("reward")
         val showAward: Boolean,
-        @JsonProperty("curatorAward")
+        @JsonProperty("curatorReward")
         val showCurationAward: Boolean) {
 
     private fun createNew(

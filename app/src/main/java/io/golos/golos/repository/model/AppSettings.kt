@@ -1,7 +1,9 @@
 package io.golos.golos.repository.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolean?,
                   @JsonProperty("feedMode") val feedMode: GolosAppSettings.FeedMode?,
                   @JsonProperty("nsfwMode") val nsfwMode: GolosAppSettings.NSFWMode?,

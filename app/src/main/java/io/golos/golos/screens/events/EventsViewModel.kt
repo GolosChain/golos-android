@@ -1,13 +1,14 @@
 package io.golos.golos.screens.events
 
 import android.content.Context
+import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
 import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.services.*
+import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.model.*
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.model.FeedType
@@ -77,19 +78,18 @@ class EventsViewModel : ViewModel() {
         val events = mEventsProvider.getEvents(mEventTypes?.toList()).value.orEmpty()
 
         val avatars = mUsersProvider.usersAvatars.value.orEmpty()
-
-        val out = ArrayList<EventListItem>(events.size)
-
-        val stories = mStoriesProvider
-                .getStories(FeedType.UNCLASSIFIED, null).value?.items.orEmpty()
-                .asSequence()
-                .mapNotNull { it.rootStory }
-                .associateBy { it.permlink }
-
-        val currentUserSubscriptions = mUsersProvider.currentUserSubscriptions.value.orEmpty()
-        val currentSubscriptionsProgress = mUsersProvider.currentUserSubscriptionsUpdateStatus.value.orEmpty()
-
         mExecutor.execute {
+
+            val out = ArrayList<EventListItem>(events.size)
+            val stories = mStoriesProvider
+                    .getStories(FeedType.UNCLASSIFIED, null).value?.items.orEmpty()
+                    .asSequence()
+                    .mapNotNull { it.rootStory }
+                    .associateBy { it.permlink }
+
+            val currentUserSubscriptions = mUsersProvider.currentUserSubscriptions.value.orEmpty()
+            val currentSubscriptionsProgress = mUsersProvider.currentUserSubscriptionsUpdateStatus.value.orEmpty()
+
             events.forEach {
                 var needToLoadDisussion = false
                 var author: String = ""
@@ -104,6 +104,7 @@ class EventsViewModel : ViewModel() {
                         }
                         VoteEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.fresh,
                                 discussion?.title.orEmpty(),
                                 it.counter == 1)
                     }
@@ -116,10 +117,11 @@ class EventsViewModel : ViewModel() {
                         }
                         FlagEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.fresh,
                                 discussion?.title.orEmpty(),
                                 it.counter == 1)
                     }
-                    is GolosTransferEvent -> TransferEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.counter == 1)
+                    is GolosTransferEvent -> TransferEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.fresh, it.counter == 1)
                     is GolosSubscribeEvent -> {
                         val subscribeStatus: SubscribeStatus =
                                 SubscribeStatus.create(currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty())
@@ -127,12 +129,13 @@ class EventsViewModel : ViewModel() {
                                         ?: UpdatingState.DONE)
                         val out = SubscribeEventListItem.create(it,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.fresh,
                                 it.counter == 1,
                                 subscribeStatus,
                                 !currentUserSubscriptions.contains(it.fromUsers.firstOrNull().orEmpty()))
                         out
                     }
-                    is GolosUnSubscribeEvent -> UnSubscribeEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.counter == 1)
+                    is GolosUnSubscribeEvent -> UnSubscribeEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()], it.fresh, it.counter == 1)
                     is GolosReplyEvent -> {
                         val discussion = stories[it.parentPermlink]
                         if (discussion == null) {
@@ -143,6 +146,7 @@ class EventsViewModel : ViewModel() {
                         ReplyEventListItem.create(it,
                                 it.counter == 1,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.fresh,
                                 discussion?.title.orEmpty())
                     }
                     is GolosRepostEvent -> {
@@ -154,6 +158,7 @@ class EventsViewModel : ViewModel() {
                         }
                         RepostEventListItem.create(it,
                                 it.counter == 1,
+                                it.fresh,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
                                 discussion?.title.orEmpty())
                     }
@@ -167,6 +172,7 @@ class EventsViewModel : ViewModel() {
                         MentionEventListItem.create(it,
                                 it.counter == 1,
                                 avatars[it.fromUsers.firstOrNull().orEmpty()],
+                                it.fresh,
                                 discussion?.title.orEmpty())
                     }
                     is GolosAwardEvent -> {
@@ -180,6 +186,7 @@ class EventsViewModel : ViewModel() {
                         }
                         AwardEventListItem.create(it,
                                 (exchangesValue.vSharesToGolosPowerMultiplier * it.award.golosPower).toFloat(),
+                                it.fresh,
                                 stories[it.permlink]?.title.orEmpty())
                     }
                     is GolosCuratorAwardEvent -> {
@@ -193,16 +200,18 @@ class EventsViewModel : ViewModel() {
                         }
                         CuratorAwardEventListItem.create(it,
                                 (exchangesValue.vSharesToGolosPowerMultiplier * it.awardInVShares).toFloat(),
+                                it.fresh,
                                 stories[it.permlink]?.title.orEmpty())
                     }
-                    is GolosMessageEvent -> MessageEventListItem.create(it, avatars[it.fromUsers.firstOrNull().orEmpty()])
-                    is GolosWitnessVoteEvent -> WitnessVoteEventListItem.create(it, it.counter == 1, avatars[it.fromUsers.firstOrNull().orEmpty()])
-                    is GolosWitnessCancelVoteEvent -> WitnessCancelVoteEventListItem.create(it, it.counter == 1, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosMessageEvent -> MessageEventListItem.create(it, it.fresh, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosWitnessVoteEvent -> WitnessVoteEventListItem.create(it, it.counter == 1, it.fresh, avatars[it.fromUsers.firstOrNull().orEmpty()])
+                    is GolosWitnessCancelVoteEvent -> WitnessCancelVoteEventListItem.create(it, it.counter == 1, it.fresh, avatars[it.fromUsers.firstOrNull().orEmpty()])
                 }
                 if (needToLoadDisussion) mStoriesProvider.requestStoryUpdate(author, permlink, null, false, false, FeedType.UNCLASSIFIED)
                 out.add(item)
             }
             mMainTreadExecutor.execute {
+                //  Timber.e(out.toString())
                 mEventsList.value = EventsList(out)
             }
 
@@ -343,6 +352,15 @@ class EventsViewModel : ViewModel() {
             return
         }
         mEventsProvider.setEventsRead(it.golosEvent.id.toSingletoneList())
+    }
+
+    fun onItemShow(it: List<EventListItem>) {
+        if (it.find { it.isFresh } == null) return
+        if (!isVisibleToUser) {
+            mPendingList.addAll(it.filter { it.isFresh }.map { it.golosEvent.id })
+            return
+        }
+        mEventsProvider.setEventsRead(it.asSequence().filter { it.isFresh }.map { it.golosEvent.id }.toList())
     }
 
     companion object {

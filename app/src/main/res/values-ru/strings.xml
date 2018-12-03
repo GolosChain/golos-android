@@ -189,13 +189,13 @@
     <string name="notifications">Настройки пуш уведомлений</string>
     <string name="mention">Упоминания</string>
     <string name="transfer_income">Пришел перевод от &lt;b>%s&lt;/b></string>
-    <string name="like">Лайк (голос)</string>
+    <string name="like">Голос за</string>
     <string name="transfer">Перевод средств</string>
     <string name="answer_on_post">Ответ на пост</string>
     <string name="reply_on_comment">Ответ на комментарий</string>
     <string name="sound">Звук</string>
     <string name="play_sound">Звук уведомлений</string>
-    <string name="turn_on_pushes">Включить все пуш ведомления</string>
+    <string name="turn_on_pushes">Включить все пуш уведомления</string>
     <string name="new_comment">Ответ на пост или комментарий</string>
     <string name="notifications_channel_main">Основные нотификации</string>
     <string name="new_upvote">Новый лайк</string>
@@ -226,7 +226,7 @@
     <string name="user_reposted_several">@%s и еще %s репост вашего поста</string>
     <string name="user_voted_for_you_several" >@%s и еще %s за вас как за делегата</string>
     <string name="user_canceled_vote_for_you_several" >@%s и еще %s сняли свои голоса с вашей делегатской ноды</string>
-    <string name="dizlike">Дизлайк (жалоба)</string>
+    <string name="dizlike">Голос против</string>
     <string name="subscribe_on_blog">Подписка на блог</string>
     <string name="unsubscribe_from_blog">Отписка от блога</string>
     <string name="reblog">Репост</string>

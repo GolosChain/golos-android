@@ -59,6 +59,7 @@ interface GolosServices : Preloadable, GolosSettingsService, GolosPushService {
     @MainThread
     fun setUp()
 
+    @MainThread
     fun getEvents(eventType: List<EventType>? = null): LiveData<List<GolosEvent>>
 
     @AnyThread
@@ -90,6 +91,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
     private val mAppSettingsLiveData = MutableLiveData<AppSettings>()
     private val mReadyState = MutableLiveData<PreparingState>()
     private val mListeners = HashSet<ServiceLogoutListener>()
+
 
     @Volatile
     private var isAuthComplete: Boolean = false
@@ -125,71 +127,84 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
     override val appSettings: LiveData<AppSettings>
         get() = mAppSettingsLiveData
 
-    private val allEvents = MutableLiveData<List<GolosEvent>>()
+    private val allEventsLiveData = MutableLiveData<List<GolosEvent>>()
     private val mUnreadCountLiveData = MutableLiveData<Int>()
+    private val mEventsListsHashMap = HashMap<List<EventType>, LiveData<List<GolosEvent>>>()
 
 
     override fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings) {
         if (newSettings == mNotificationSettingsLiveData.value) return
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.setNotificationSettings(deviceId, newSettings)
-            mainThreadExecutor.execute {
-                mNotificationSettingsLiveData.value = newSettings
-            }
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.setNotificationSettings(deviceId, newSettings)
+                mainThreadExecutor.execute {
+                    mNotificationSettingsLiveData.value = newSettings
+                }
+            })
+        }
     }
 
     override fun requestNotificationSettingsUpdate(deviceId: String) {
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            val settings = mGolosServicesGateWay.getSettings(deviceId)
-            mainThreadExecutor.execute { mNotificationSettingsLiveData.value = settings.push?.show }
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                val settings = mGolosServicesGateWay.getSettings(deviceId)
+                mainThreadExecutor.execute { mNotificationSettingsLiveData.value = settings.push?.show }
+            })
+        }
     }
 
     override fun setAppSettings(deviceId: String, newSettings: AppSettings) {
         if (newSettings == mAppSettingsLiveData.value) return
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.setAppSettings(deviceId, newSettings)
-            mainThreadExecutor.execute {
-                mAppSettingsLiveData.value = newSettings
-            }
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.setAppSettings(deviceId, newSettings)
+                mainThreadExecutor.execute {
+                    mAppSettingsLiveData.value = newSettings
+                }
+            })
+        }
     }
 
     override fun requestAppSettingsUpdate(deviceId: String) {
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            val settings = mGolosServicesGateWay.getSettings(deviceId)
-            mainThreadExecutor.execute { mAppSettingsLiveData.value = settings.basic }
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                val settings = mGolosServicesGateWay.getSettings(deviceId)
+                mainThreadExecutor.execute { mAppSettingsLiveData.value = settings.basic }
+            })
+        }
     }
 
     override fun subscribeOnPushNotifications(fcmToken: String, deviceId: String) {
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.subscribeOnNotifications(deviceId, fcmToken)
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.subscribeOnNotifications(deviceId, fcmToken)
+            })
+        }
     }
 
-    private fun executeWithRetryAndCatch(runnable: Runnable) {
-        workerExecutor.execute {
-            try {
-                runnable.run()
-            } catch (e: java.lang.Exception) {
-                logException(e)
-                if (reauthIfNeeded(e)) executeWithRetryAndCatch(runnable)
-            }
+    @WorkerThread
+    private fun runWithRetryAndCatch(runnable: Runnable) {
+
+        try {
+            runnable.run()
+        } catch (e: java.lang.Exception) {
+            logException(e)
+            if (reauthIfNeeded(e)) runWithRetryAndCatch(runnable)
         }
     }
 
     override fun unsubscribeFromPushNotificationsAsync(fcmToken: String, deviceId: String) {
         if (!isAuthComplete) return
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.unSubscribeOnNotifications(deviceId, fcmToken)
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.unSubscribeOnNotifications(deviceId, fcmToken)
+            })
+        }
     }
 
     override fun unsubscribeFromPushNotificationsSync(fcmToken: String, deviceId: String) {
@@ -207,23 +222,30 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
         get() = mReadyState
 
     override fun markAllAsRead() {
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.markAllEventsAsRead()
-            mainThreadExecutor.execute {
-                mUnreadCountLiveData.value = 0
-            }
-        })
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.markAllEventsAsRead()
+                val allEventsResult = allEventsLiveData.value.orEmpty().map { if (it.fresh) it.setRead(true) else it }
+                val mEventsResult = mEventsMap.mapValues { liveData -> liveData.value.value.orEmpty().map { if (it.fresh) it.setRead(true) else it } }
+                mainThreadExecutor.execute {
+                    mUnreadCountLiveData.value = 0
+                    allEventsLiveData.value = allEventsResult
+                    mEventsMap.forEach {
+                        it.value.value = mEventsResult[it.key]
+                    }
+                }
+            })
+        }
     }
 
     override fun markAsRead(eventsIds: List<String>) {
 
-        val allEvents = allEvents.value.orEmpty().associateBy { it.id }
+        val allEvents = allEventsLiveData.value.orEmpty().associateBy { it.id }
 
         val copy = eventsIds.toArrayList()
         eventsIds.forEach {
             val event = allEvents[it] ?: return@forEach
             if (!event.fresh) {
-
                 copy.remove(it)
             }
         }
@@ -231,14 +253,38 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
             return
         }
 
-        executeWithRetryAndCatch(Runnable {
-            mGolosServicesGateWay.markAsRead(copy)
+        workerExecutor.execute {
+            runWithRetryAndCatch(Runnable {
+                mGolosServicesGateWay.markAsRead(copy)
+                val unreadCount = mGolosServicesGateWay.getUnreadCount()
+                val allEventsResult = setRead(eventsIds, allEventsLiveData.value.orEmpty())
+                val mEventsResult = mEventsMap.mapValues { liveData -> setRead(eventsIds, liveData.value.value.orEmpty()) }
 
-            val unreadCount = mGolosServicesGateWay.getUnreadCount()
-            mainThreadExecutor.execute {
-                mUnreadCountLiveData.value = unreadCount
+                mainThreadExecutor.execute {
+                    mUnreadCountLiveData.value = unreadCount
+                    if (allEventsResult.isChanged) allEventsLiveData.value = allEventsResult.resultingList
+                    mEventsResult.forEach {
+                        if (it.value.isChanged) {
+                            mEventsMap[it.key]?.value = it.value.resultingList
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    private class SettingReadChangeResult(val isChanged: Boolean, val resultingList: List<GolosEvent>)
+
+    private fun setRead(ids: List<String>, events: List<GolosEvent>): SettingReadChangeResult {
+        val eventListCopy = events.toArrayList()
+        var isChanged = false
+        eventListCopy.forEachIndexed { index, golosEvent ->
+            if (ids.contains(golosEvent.id)) {
+                eventListCopy[index] = golosEvent.setRead(true)
+                isChanged = true
             }
-        })
+        }
+        return SettingReadChangeResult(isChanged, eventListCopy)
     }
 
     override fun getRequestStatus(forType: EventType?): LiveData<UpdatingState> {
@@ -261,7 +307,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
 
                     mainThreadExecutor.execute {
                         mEventsMap.forEach { it.value.value = null }
-                        allEvents.value = null
+                        allEventsLiveData.value = null
                         mUnreadCountLiveData.value = 0
                         mReadyState.value = PreparingState.LOADING
                     }
@@ -296,9 +342,13 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
 
     override fun getEvents(eventType: List<EventType>?): LiveData<List<GolosEvent>> {
         return if (eventType == null) {
-            allEvents
+            allEventsLiveData
         } else {
+            if (mEventsListsHashMap.containsKey(eventType)) return mEventsListsHashMap[eventType]!!
+
             val liveData = MediatorLiveData<List<GolosEvent>>()
+            mEventsListsHashMap[eventType] = liveData
+
             val allData = HashSet<GolosEvent>()
             val set = HashSet<GolosEvent>()
 
@@ -311,7 +361,6 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
                 }
                 allData.addAll(mEventsMap[it]!!.value.orEmpty())
             }
-
             liveData.value = allData.toList().sorted()
             liveData
         }
@@ -359,7 +408,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
                         }
                         if (eventTypes == null)
                             mainThreadExecutor.execute {
-                                allEvents.value = allEvents.value
+                                allEventsLiveData.value = allEventsLiveData.value
                                 mStatus[null]!!.value = UpdatingState.DONE
                             }
 
@@ -367,11 +416,11 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
 
                     if (events.isNotEmpty()) {
                         set.clear()
-                        set.addAll(allEvents.value ?: emptyList())
+                        set.addAll(allEventsLiveData.value ?: emptyList())
                         set.addAll(events)
                         val sortedEvents = set.toList().sorted()
                         mainThreadExecutor.execute {
-                            allEvents.value = sortedEvents
+                            allEventsLiveData.value = sortedEvents
 
                             mStatus[null]!!.value = UpdatingState.DONE
                         }
@@ -382,8 +431,8 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
                         completionHandler(Unit, null)
                     }
 
-                    if (allEvents.value.orEmpty().size > limit && events.size != limit && eventTypes == null) {
-                        mGolosServicesGateWay.markAllEventsAsRead()
+                    if (allEventsLiveData.value.orEmpty().size > limit && events.size != limit && eventTypes == null) {
+                        markAllAsRead()
                         mainThreadExecutor.execute {
                             mUnreadCountLiveData.value = 0
                         }
@@ -408,9 +457,9 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
         val errorCode = rpcErrorFromCode(e.golosServicesError.code)
         if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
                 && userDataProvider.appUserData.value?.isLogged == true) {
-
             isAuthComplete = false
             isAuthInProgress = true
+
             mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
                     ?: return false)
             isAuthComplete = true

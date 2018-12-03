@@ -9,15 +9,20 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.screens.widgets.GolosFragment
 import io.golos.golos.utils.*
+import java.util.concurrent.TimeUnit
 
 class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener, Observer<EventsListState> {
     private var parcelable: Parcelable? = null
+    private var mLastSentScrollEvent = Long.MIN_VALUE
+    private val mScrollEventTimeOut = 500
 
 
     override fun onChanged(t: EventsListState?) {
@@ -95,17 +100,43 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
                 { mViewModel?.onAvatarClick(it, activity ?: return@EventsListAdapter) },
                 object : OnItemShowListener {
                     override fun onItemShow(item: EventListItem) {
-                        mViewModel?.onItemShow(item)
+                        // mViewModel?.onItemShow(item)
                     }
                 })
         mViewModel?.updateState?.observe(this, Observer<Boolean> {
 
+        })
+        mRecycler?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                onScrolled()
+
+            }
         })
         (mRecycler?.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         mLabel?.text = getTextForNoEvents()
 
         setUp()
         return view
+    }
+
+    private fun onScrolled() {
+        if ((mLastSentScrollEvent + mScrollEventTimeOut) > System.currentTimeMillis()) return
+        val first = (mRecycler?.layoutManager as? LinearLayoutManager)?.findFirstVisibleItemPosition()
+                ?: 0
+        val last = (mRecycler?.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+                ?: 0
+        val events = mViewModel?.eventsList?.value?.events ?: return
+
+        if (first > -1 && last > -1 && events.isNotEmpty() && first < events.size) {
+            mViewModel?.onItemShow(events.subList(first, last).asSequence().filter { it is EventContainingItem }.map { (it as EventContainingItem).event }.toList())
+        }
+        mLastSentScrollEvent = System.currentTimeMillis()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
     }
 
     private fun setUp() {
@@ -134,6 +165,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
             val myPosition = arguments?.getInt(POSITION, Int.MIN_VALUE) ?: return@Observer
             if (myPosition != it.currentSelectedFragment) return@Observer
             mViewModel?.onChangeVisibilityToUser(it.isParentVisible)
+            if (it.isParentVisible) mRecycler?.postDelayed({ onScrolled() }, 100)
         })
     }
 
@@ -142,6 +174,7 @@ class EventsListFragment : GolosFragment(), SwipeRefreshLayout.OnRefreshListener
 
         this.isVisibleToUserHint = isVisibleToUser
         mViewModel?.onChangeVisibilityToUser(isVisibleToUser && isParentVisible)
+        if (isVisibleToUser) mRecycler?.postDelayed({ onScrolled() }, 100)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
