@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Golos.io</string>
     <string name="add_tags">Add tags</string>
-    <string name="to_much_tags">You can add up to 5 tags</string>
     <string name="use_only_one_dash">A tag can have only one hyphen</string>
     <string name="use_whitespaces_seporator">Use the spacebar to separate tags</string>
     <string name="only_lowercase_characters">Please use only lowercase symbols</string>
@@ -29,6 +28,7 @@
     <string name="promo">Promo</string>
     <string name="for_">for</string>
     <string name="comments">Comments</string>
+    <string name="comments_with_count">Comments&#160;&#160;&#160;%s</string>
     <string name="image">Image</string>
     <string name="ago">back</string>
     <string name="no_comments">No comments yet. Be the first.</string>
@@ -36,7 +36,7 @@
     <string name="enter_key">Enter the key</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">About Golos.io</>]]></string>
     <string name="do_not_registered_register"> Don’t have an account? <![CDATA[<a href = "https://reg.golos.io/"> Sign up here</>]]></string>
-    <string name="enter_login">You must enter your username</string>
+    <string name="enter_login">You must enter your Username</string>
     <string name="enter_password">Password</string>
     <string name="posting_or_active_key">Enter active or posting key</string>
     <string name="wrong_args">Incorrect call</string>
@@ -44,10 +44,10 @@
     <string name="logout">Log out</string>
     <string name="loading">Loading…</string>
     <string name="choose_vote_power">Choose your vote power</string>
-    <string name="user_used_max_comments_chances">You can not vote for this post anymore</string>
+    <string name="user_used_max_comments_chances">You have used the maximum number of attempts to vote for this entry</string>
     <string name="vote_canceled">Vote was canceled</string>
     <string name="upvoted">Upvoted</string>
-    <string name="you_voted_same_way">You have already voted</string>
+    <string name="you_voted_same_way">You have already voted for this entry</string>
     <string name="login_to_vote">Log in or register to vote</string>
     <string name="login_to_see_feed">Login to view your feed</string>
     <string name="nothing_here">While there is nothing, it will be filled immediately after the appearance of new content</string>
@@ -96,10 +96,12 @@
     <string name="you_already_subscribed">You have already subscribed</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
-    <string name="enter_with_active_key">Login with active key</string>
-    <string name="enter_with_posting_key">Login with posting key</string>
+    <string name="enter_with_active_key">Active key</string>
+    <string name="enter_with_posting_key">Posting key</string>
+    <string name="enter_with_master_key">Master key</string>
     <string name="enter_private_active_wif">You must enter you private active wif</string>
     <string name="enter_private_posting_wif">You must enter your private posting key</string>
+    <string name="enter_private_master">You must enter your private master key</string>
     <string name="you_cannot_subscribe_on_yourself">You cannot subscribe on yourself</string>
     <string name="retry">Retry</string>
     <string name="now_happened">Just now</string>
@@ -124,7 +126,7 @@
     <string name="dismiss">Dismiss</string>
     <string name="voted">Votes</string>
     <string name="enter_pouch_">2. Proceed to \'Settings\' section</string>
-    <string name="help_step_1">1. Go to website <![CDATA[<a href = "https://golos.io">http://golos.io</>]]></string>
+    <string name="help_step_1">1. Log in to <![CDATA[<a href = "https://golos.io">http://golos.io</>]]></string>
     <string name="help_step_3_posting">3. In \'Keys\' section press show private posting key (it starts from 5 or 1)</string>
     <string name="help_step_3_active">3. In \'Keys\' section press show private active key (it starts from 5 or 1)</string>
     <string name="help_step_4">4. You can copy-paste it, or scan through QR-code.</string>
@@ -145,7 +147,7 @@
     <string name="never">Never</string>
     <string name="search_in_golos">Search in Golos.io</string>
     <string name="show_nsfw_images_mode">NSFW content</string>
-    <string name="to_flag">Dizlike</string>
+    <string name="to_flag">Vote against</string>
     <string name="cant_vote_after_payout">Can not vote, reward period is closed already.</string>
     <string name="edit">Edit</string>
     <string name="you_may_comment_only_tw_sec">You may only comment once every 20 seconds</string>
@@ -239,12 +241,12 @@
     <string name="mentions">Mentions</string>
     <string name="empty">Empty</string>
     <string name="yestarday">Yesterday</string>
-    <string name="year_perion" />
+    <string name="year_perion"/>
     <string name="reward_for_entry">%s your author reward of entry %s</string>
     <string name="reward_for_entries">%s your author rewards</string>
-    <string name="curator_reward_for_entry" >%s your curation reward of entry %s</string>
-    <string name="golos_power_for_events" >Golos Power</string>
-    <string name="curator_reward_for_entries" >%s your curation rewards</string>
+    <string name="curator_reward_for_entry">%s your curation reward of entry %s</string>
+    <string name="golos_power_for_events">Golos Power</string>
+    <string name="curator_reward_for_entries">%s your curation rewards</string>
     <string name="post_reward">Reward for the entry</string>
     <string name="curation_reward">Curation reward</string>
     <string name="no_events_all">Start posting and commenting to receive users feedback.</string>
@@ -275,14 +277,27 @@
     <string name="faq">FAQ</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mention_with_at">Mentions in post or comment, using @</string>
+    <string name="sort_by">Sort by</string>
+    <string name="master_key">Master key</string>
+    <string name="choose_lang">Language</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>
+    </string-array>
+    <string-array name="comments_sort">
+        <item>Popular</item>
+        <item>New first</item>
+        <item>Old first</item>
+        <item>Votes</item>
     </string-array>
     <string-array name="currency">
         <item>Ruble</item>
         <item>Dollar</item>
         <item>GBG</item>
+    </string-array>
+    <string-array name="lang">
+        <item>Russian</item>
+        <item>English</item>
     </string-array>
     <string-array name="precision">
         <item>Round to integer</item>

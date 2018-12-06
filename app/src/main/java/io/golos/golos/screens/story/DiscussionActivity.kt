@@ -3,6 +3,9 @@ package io.golos.golos.screens.story
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -21,14 +24,12 @@ import io.golos.golos.R
 import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
+import io.golos.golos.screens.settings.SpinnerAdapterWithDownChevron
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.ImagesAdapter
 import io.golos.golos.screens.story.adapters.StoryAdapter
-import io.golos.golos.screens.story.model.ImageRow
-import io.golos.golos.screens.story.model.StoryParserToRows
-import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.story.model.TextRow
+import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
 import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
@@ -66,6 +67,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     private lateinit var mAuthorSubscribeButton: Button
     private lateinit var mTagAvatar: View
     private lateinit var mCommentsLoadingProgress: View
+    private lateinit var mSortLo: View
+    private lateinit var mSortSpinner: Spinner
     private lateinit var mAppBar: View
     private lateinit var mFooter: FooterView
     private lateinit var mFollowBlock: View
@@ -346,6 +349,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 mFooter.setViewVisible()
                 if (story.commentsCount > 0 && it.storyTree.comments.isEmpty()) {//if comments not downloaded yet
                     mCommentsTv.setViewGone()
+                    mSortLo.setViewGone()
                     mCommentsLoadingProgress.setViewVisible()
                     mCommentsRecycler.setViewGone()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
@@ -354,6 +358,12 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 } else if (story.commentsCount > 0 && it.storyTree.comments.isNotEmpty()) {
                     mCommentsTv.setViewVisible()
+                    mSortLo.setViewVisible()
+                    val text = SpannableStringBuilder.valueOf(resources.getString(R.string.comments_with_count, story.commentsCount.toString()))
+                    text.setSpan(ForegroundColorSpan(getColorCompat(R.color.gray_a6)),
+                            text.length - story.commentsCount.length(), text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    mCommentsTv.text = text
+
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewVisible()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
@@ -362,6 +372,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     }
                 } else if (story.commentsCount == 0) {
                     mCommentsTv.setViewGone()
+                    mSortLo.setViewGone()
                     mCommentsLoadingProgress.setViewGone()
                     mCommentsRecycler.setViewGone()
                     if (isNeedToScrollToComments && !isScrollEventFired) {
@@ -371,6 +382,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                         isScrollEventFired = true
                     }
                 }
+                mSortSpinner.setSelection(it.commentsSortType.toCommentSortAdapterPosition())
 
                 (mCommentsRecycler.adapter as CommentsAdapter).items = ArrayList(it.storyTree.comments)
 
@@ -462,6 +474,8 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mBottomImagesRecycler = findViewById(R.id.additional_images_recycler)
         mAppBar = findViewById(R.id.appbar)
         mCommentsTv = findViewById(R.id.comments_tv)
+        mSortLo = findViewById(R.id.sort_lo)
+        mSortSpinner = findViewById(R.id.sort_spinner)
 
         mAuthorSubscribeButton.visibility = View.GONE
         mStoryRecycler.isNestedScrollingEnabled = false
@@ -480,9 +494,19 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 onEditClick = { mViewModel.onEditClick(this, it.story) })
         mStoryRecycler.adapter = StoryAdapter()
         mRebloggedBy.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_reblogged_black_20dp), null, null, null)
-        mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
+        // mCommentsTv.setCompoundDrawablesWithIntrinsicBounds(getVectorDrawable(R.drawable.ic_sort_red_24dp), null, null, null)
         (mStoryRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         (mCommentsRecycler.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
+        mSortSpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.comments_sort)
+        mSortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position < 4) mViewModel.changeCommentsSortType(position.toSortType())
+            }
+        }
         mWriteCommentLo.setOnClickListener {
             if (mViewModel.canUserWriteComments()) mViewModel.onWriteRootComment(this)
             else Snackbar.make(mWriteCommentLo, R.string.login_to_write_comment, Snackbar.LENGTH_SHORT).show()
@@ -572,6 +596,21 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                     ?: return true)
         }
         return true
+    }
+
+    private fun Int.toSortType() = when (this) {
+        0 -> CommentsSortType.POPULARITY
+        1 -> CommentsSortType.NEW_FIRST
+        2 -> CommentsSortType.OLD_FIRST
+        3 -> CommentsSortType.VOTES
+        else -> throw IllegalStateException(" there is only 4 options, current is $this")
+    }
+
+    private fun CommentsSortType.toCommentSortAdapterPosition() = when (this) {
+        CommentsSortType.POPULARITY -> 0
+        CommentsSortType.NEW_FIRST -> 1
+        CommentsSortType.OLD_FIRST -> 2
+        CommentsSortType.VOTES -> 3
     }
 
     override fun onDestroy() {

@@ -12,7 +12,7 @@ import io.golos.golos.utils.inflate
 /**
  * Created by yuri on 06.02.18.
  */
-class SettingsSpinnerAdapter(context: Context, @ArrayRes stringArrayId: Int) : ArrayAdapter<String>(context,
+class SpinnerAdapterWithDownChevron(context: Context, @ArrayRes stringArrayId: Int) : ArrayAdapter<String>(context,
         android.R.layout.simple_list_item_1,
         context.resources.getStringArray(stringArrayId)) {
 

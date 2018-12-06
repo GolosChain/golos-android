@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.common.primitives.Longs
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ExchangeValues
@@ -20,6 +21,46 @@ import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.utils.*
+
+private class ByPoplarityComparator : Comparator<GolosDiscussionItem> {
+    override fun compare(o1: GolosDiscussionItem?, o2: GolosDiscussionItem?): Int {
+        if (o1 == null) return -1
+        if (o2 == null) return +1
+        val first = o1.curatorPayoutValue + o1.totalPayoutValue + o1.pendingPayoutValue
+        val second = o2.curatorPayoutValue + o2.totalPayoutValue + o2.pendingPayoutValue
+        val result = -(first.compareTo(second))
+        return if (result != 0) result
+        else o1.netRshares.compareTo(o2.netRshares)
+    }
+}
+
+private class ByNewComparator : Comparator<GolosDiscussionItem> {
+    override fun compare(o1: GolosDiscussionItem?, o2: GolosDiscussionItem?): Int {
+        return -Longs.compare(o1?.created ?: 0L, o2?.created ?: 0)
+    }
+}
+
+private class ByOldComparator : Comparator<GolosDiscussionItem> {
+    override fun compare(o1: GolosDiscussionItem?, o2: GolosDiscussionItem?): Int {
+        return Longs.compare(o1?.created ?: 0L, o2?.created ?: 0)
+    }
+}
+
+private class ByVotesComparator : Comparator<GolosDiscussionItem> {
+    override fun compare(o1: GolosDiscussionItem?, o2: GolosDiscussionItem?): Int {
+        if (o1 == null) return -1
+        if (o2 == null) return +1
+        return -(o1.upvotesNum).compareTo(o2.upvotesNum)
+    }
+}
+
+private fun CommentsSortType.asComparator() = when (this) {
+    CommentsSortType.POPULARITY -> ByPoplarityComparator()
+    CommentsSortType.NEW_FIRST -> ByNewComparator()
+    CommentsSortType.OLD_FIRST -> ByOldComparator()
+    CommentsSortType.VOTES -> ByVotesComparator()
+}
+
 
 class DiscussionViewModel : ViewModel() {
 
@@ -36,6 +77,7 @@ class DiscussionViewModel : ViewModel() {
     private val mImageClickEvents = MutableLiveData<ImageClickData>()
     public val imageDialogShowEvent: LiveData<ImageClickData> = mImageClickEvents
     private var mLastVotingStoryId: Long = Long.MIN_VALUE
+    private var mStoryWithComments: StoryWithComments? = null
 
 
     fun onCreate(author: String,
@@ -95,6 +137,8 @@ class DiscussionViewModel : ViewModel() {
                         ?.copy(subscribeOnStoryAuthorStatus = SubscribeStatus.create(currentSubscriptions.contains(author),
                                 currentSubscriptionsStates[author] ?: UpdatingState.DONE))
 
+                mStoryWithComments = it
+
                 val story = it.rootStory
                 val mustHaveComments = story.commentsCount
                 val commentsSize = it.comments.size
@@ -116,7 +160,8 @@ class DiscussionViewModel : ViewModel() {
                         rootStoryWrapper,
                         mRepository.getGolosUserAccountInfos().value.orEmpty())
 
-                val comments = it.getFlataned().map {
+                val comments = it.getFlataned((mStoryLiveData.value?.commentsSortType
+                        ?: CommentsSortType.POPULARITY).asComparator()).map {
                     createStoryWrapper(it, voteStates, accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues,
                             false, null)
                 }
@@ -128,7 +173,8 @@ class DiscussionViewModel : ViewModel() {
                         showRepostButton = isRepostButtonNeedToBeShown(feedType, filter, mRepository.appUserData.value, it.rootStory),
                         storyTree = StoryWrapperWithComment(rootStoryWrapper, comments),
                         discussionType = if (story.isStory()) DiscussionType.STORY else DiscussionType.COMMENT,
-                        canUserCommentThis = mRepository.isUserLoggedIn())
+                        canUserCommentThis = mRepository.isUserLoggedIn(),
+                        commentsSortType = CommentsSortType.POPULARITY)
 
                 this.blog = story.categoryName
             }
@@ -194,6 +240,29 @@ class DiscussionViewModel : ViewModel() {
     }
 
     data class ImageClickData(val position: Int, val images: List<String>)
+
+    fun changeCommentsSortType(newType: CommentsSortType) {
+        val story = mStoryWithComments ?: return
+        val currentStoryTree = mStoryLiveData.value?.storyTree ?: return
+        if (newType == mStoryLiveData.value?.commentsSortType) return
+
+        val accounts = mRepository.getGolosUserAccountInfos().value.orEmpty()
+        val voteStates = mRepository.votingStates.value.orEmpty()
+        val currentUser = mRepository.appUserData.value
+        val exchangeValues = mRepository.getExchangeLiveData().value
+                ?: ExchangeValues.nullValues
+        val repostedPosts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
+        val repostUpdateStates = mRepository.currentUserRepostStates.value.orEmpty()
+
+        mStoryLiveData.value = mStoryLiveData.value?.copy(commentsSortType = newType,
+                storyTree = StoryWrapperWithComment(currentStoryTree.rootWrapper,
+                        comments = story.getFlataned(newType.asComparator()).map {
+
+                            createStoryWrapper(it, voteStates,
+                                    accounts, repostedPosts, repostUpdateStates, currentUser, exchangeValues, false, null)
+                        }))
+
+    }
 
 
     fun onMainStoryImageClick(src: String) {

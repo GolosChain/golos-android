@@ -21,34 +21,20 @@
                 android:layout_gravity="center"
                 android:paddingRight="18dp"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/im_logo_red_blue" />
+                app:srcCompat="@drawable/im_logo_red_blue"/>
         </FrameLayout>
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/login_et"
             style="@style/LoginEditTextStyle"
+            android:digits="qwertyuiopasdfghjklzxcvbnm_-1234567890."
             android:gravity="start"
             android:hint="@string/login"
-            android:imeOptions="flagNavigateNext"
             android:inputType="textNoSuggestions"
             android:lines="1"
-            android:digits="qwertyuiopasdfghjklzxcvbnm_-1234567890."
             android:maxLength="16"
-            app:backgroundTint="#DBDBDB" />
+            app:backgroundTint="#DBDBDB"/>
 
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/key_et"
-            style="@style/LoginEditTextStyle"
-            android:layout_marginTop="@dimen/margin_material"
-            android:hint="@string/enter_key"
-            android:imeOptions="actionDone"
-            android:inputType="textVisiblePassword"
-            android:maxLength="52"
-            android:maxLines="2"
-
-            android:visibility="gone"
-            app:backgroundTint="#DBDBDB" />
 
         <RelativeLayout
             android:id="@+id/posting_key_lo"
@@ -63,26 +49,26 @@
                 android:layout_toLeftOf="@id/scan_posting"
                 android:hint="@string/posting_key"
                 android:imeOptions="actionDone"
-                android:inputType="textVisiblePassword" />
+                android:inputType="textVisiblePassword"/>
 
             <ImageButton
                 android:id="@+id/scan_posting"
                 style="@style/BarcodeButton"
                 android:layout_marginEnd="@dimen/margin_material_half"
                 android:layout_toLeftOf="@+id/login_help_posting"
-                app:srcCompat="@drawable/ic_barcode_24dp" />
+                app:srcCompat="@drawable/ic_barcode_24dp"/>
 
             <ImageButton
                 android:id="@+id/login_help_posting"
                 style="@style/BarcodeButton"
                 android:layout_alignParentEnd="true"
-                app:srcCompat="@drawable/ic_questions_outline_gray_22dp" />
+                app:srcCompat="@drawable/ic_questions_outline_gray_22dp"/>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_alignParentBottom="true"
-                android:background="#dce3e5" />
+                android:background="#dce3e5"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -92,7 +78,7 @@
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:gravity="start"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/barcode_active_key_et"
@@ -100,38 +86,51 @@
                 android:layout_toLeftOf="@id/scan_active"
                 android:hint="@string/active_key"
                 android:imeOptions="actionDone"
-                android:inputType="textVisiblePassword" />
+                android:inputType="textVisiblePassword"/>
 
             <ImageButton
                 android:id="@+id/scan_active"
                 style="@style/BarcodeButton"
                 android:layout_marginEnd="@dimen/margin_material_half"
                 android:layout_toLeftOf="@id/login_help_active"
-                app:srcCompat="@drawable/ic_barcode_24dp" />
+                app:srcCompat="@drawable/ic_barcode_24dp"/>
 
             <ImageButton
                 android:id="@+id/login_help_active"
                 style="@style/BarcodeButton"
                 android:layout_alignParentEnd="true"
-                app:srcCompat="@drawable/ic_questions_outline_gray_22dp" />
+                app:srcCompat="@drawable/ic_questions_outline_gray_22dp"/>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_alignParentBottom="true"
-                android:background="#dce3e5" />
+                android:background="#dce3e5"/>
         </RelativeLayout>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/login_option_btn"
-            style="@style/Base.Widget.AppCompat.Button.Borderless"
+        <LinearLayout
+            android:id="@+id/master_key_lo"
+            style="@style/BarcodeLayoutStyle"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="32dp"
-            android:text="@string/enter_with_active_key"
-            android:textAllCaps="false"
-            android:textColor="@color/textColorP"
-            android:textSize="@dimen/font_medium" />
+            android:background="?selectableItemBackground"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/master_key_et"
+                style="@style/BarcodeTextStyle"
+                android:layout_height="43dp"
+                android:hint="@string/master_key"
+                android:imeOptions="actionDone"
+                android:inputType="textVisiblePassword"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+
+                android:background="#dce3e5"/>
+        </LinearLayout>
+
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/enter_btn"
@@ -140,7 +139,7 @@
             android:text="@string/enter"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
-            app:backgroundTint="@color/colorAccent" />
+            app:backgroundTint="@color/colorAccent"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cancel_btn"
@@ -151,7 +150,7 @@
             android:textAllCaps="false"
             android:textColor="@color/gray_7d"
             android:visibility="invisible"
-            app:backgroundTint="#F1F3F6" />
+            app:backgroundTint="#F1F3F6"/>
 
 
         <androidx.appcompat.widget.AppCompatButton
@@ -159,7 +158,6 @@
             style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_material"
             android:gravity="bottom|center_horizontal"
             android:includeFontPadding="false"
             android:minHeight="36dp"
@@ -167,13 +165,13 @@
             android:paddingTop="@dimen/material_big"
             android:textAllCaps="false"
             android:textColor="@color/textColorP"
-            android:textSize="@dimen/font_regular" />
+            android:textSize="@dimen/font_regular"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/more_about_golos"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:clickable="true"
             android:gravity="center_horizontal|top"
             android:minHeight="0dp"
@@ -181,6 +179,40 @@
 
             android:paddingTop="@dimen/margin_material_half"
             android:textAllCaps="false"
-            android:textSize="@dimen/font_regular" />
+            android:textSize="@dimen/font_regular"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="@dimen/margin_material_small"
+            android:background="@drawable/rect_round_corners_5dp_outline_gray_f6"
+            android:divider="@drawable/auth_buttons_divider"
+            android:orientation="horizontal"
+            android:showDividers="middle"
+            app:divider="@color/gray"
+            app:showDividers="middle">
+
+            <TextView
+                android:id="@+id/master_key_log_btn"
+                style="@style/LogTypeButton"
+                android:text="@string/enter_with_master_key"
+                />
+
+
+            <TextView
+                android:id="@+id/posting_key_og_btn"
+                style="@style/LogTypeButton"
+                android:text="@string/enter_with_posting_key"
+                />
+
+
+            <TextView
+                android:id="@+id/active_key_og_btn"
+                style="@style/LogTypeButton"
+                android:text="@string/enter_with_active_key"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

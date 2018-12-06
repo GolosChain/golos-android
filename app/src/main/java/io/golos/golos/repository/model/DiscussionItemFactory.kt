@@ -54,9 +54,14 @@ object DiscussionItemFactory {
                 reputation = reputation, lastUpdated = lastUpdated, created = created,
                 cleanedFromImages = cleanedFromImages,
                 format = metadata.format,
+                totalPayoutValue = discussion.totalPayoutValue?.amount
+                        ?: 0.0,
+                pendingPayoutValue = discussion.pendingPayoutValue?.amount
+                        ?: 0.0, curatorPayoutValue = discussion.curatorPayoutValue?.amount ?: 0.0,
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,
+                netRshares = discussion.netRshares,
                 upvotesNum = upvotes,
                 downvotesNum = downvotes,
                 activeVotes = discussion.activeVotes
@@ -101,11 +106,17 @@ object DiscussionItemFactory {
         }
         val item = GolosDiscussionItem(url, id, title, categoryName, votesNum = votesNum,
                 votesRshares = totalRshares,
-                commentsCount = commentsCount, permlink = permlink, gbgAmount = gbgAmount, body = body,
+                commentsCount = commentsCount, permlink = permlink,
+                gbgAmount = gbgAmount, totalPayoutValue = discussion.totalPayoutValue?.amount
+                ?: 0.0,
+                pendingPayoutValue = discussion.pendingPayoutValue?.amount
+                        ?: 0.0, curatorPayoutValue = discussion.curatorPayoutValue?.amount ?: 0.0,
+                body = body,
                 bodyLength = discussion.bodyLength, author = author, parentPermlink = parentPermlink, parentAuthor = discussion.parentAuthor
                 ?: "", childrenCount = childrenCount, reputation = reputation, lastUpdated = lastUpdated,
                 created = created,
                 cleanedFromImages = cleanedFromImages, format = metadata.format,
+                netRshares = discussion.netRshares,
                 links = metadata.links,
                 images = metadata.images,
                 tags = metadata.tags,

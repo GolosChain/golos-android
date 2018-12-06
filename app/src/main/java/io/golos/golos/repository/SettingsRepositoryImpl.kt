@@ -7,14 +7,22 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.services.GolosSettingsService
 import io.golos.golos.utils.mapper
+import java.util.*
 
 
 internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSettingsService,
                                       private val mAppDataProvider: UserDataProvider,
                                       private val mDeviceIdProvider: DeviceIdProvider = DeviceIdProviderImpl) : UserSettingRepository {
 
-    private val defaultAppSettings = GolosAppSettings(true, GolosAppSettings.FeedMode.FULL, GolosAppSettings.NSFWMode.DISPLAY_NOT,
-            GolosAppSettings.DisplayImagesMode.DISPLAY, false, GolosAppSettings.GolosCurrency.USD, GolosAppSettings.GolosBountyDisplay.THREE_PLACES)
+    private val defaultAppSettings = GolosAppSettings(true,
+            GolosAppSettings.FeedMode.FULL,
+            GolosAppSettings.NSFWMode.DISPLAY_NOT,
+            GolosAppSettings.DisplayImagesMode.DISPLAY,
+            false,
+            GolosAppSettings.GolosCurrency.USD,
+            GolosAppSettings.GolosBountyDisplay.THREE_PLACES,
+            if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN)
+
     private var defaultNotificationSettings = GolosNotificationSettings(true,
             true, true, true, true,
             true, true, true, true,
@@ -39,10 +47,11 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
             this.displayImagesMode ?: defaultAppSettings.displayImagesMode,
             this.nighModeEnable ?: defaultAppSettings.nighModeEnable,
             this.chosenCurrency ?: defaultAppSettings.chosenCurrency,
-            this.bountyDisplay ?: defaultAppSettings.bountyDisplay)
+            this.bountyDisplay ?: defaultAppSettings.bountyDisplay,
+            this.appLanguage ?: defaultAppSettings.language)
 
     fun GolosAppSettings.toAppSettings() = AppSettings(this.loudNotification, this.feedMode, this.nsfwMode,
-            this.displayImagesMode, this.nighModeEnable, this.chosenCurrency, this.bountyDisplay)
+            this.displayImagesMode, this.nighModeEnable, this.chosenCurrency, this.bountyDisplay, this.language)
 
     fun NotificationSettings.toGolosNotificationSettings() = GolosNotificationSettings(this.vote
             ?: defaultNotificationSettings.showUpvoteNotifs,

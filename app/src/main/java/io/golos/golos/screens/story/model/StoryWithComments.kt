@@ -182,9 +182,13 @@ data class StoryWithComments(val rootStory: GolosDiscussionItem,
     }
 
 
-    fun getFlataned(): List<GolosDiscussionItem> {
+    fun getFlataned(comparator: Comparator<GolosDiscussionItem>? = null): List<GolosDiscussionItem> {
         setUpLevels()
-        return comments.flatMap { listOf(it) + getChildren(it) }
+        return if (comparator == null)
+            comments.flatMap { listOf(it) + getChildren(it) }
+        else {
+            comments.toArrayList().sortedWith(comparator).flatMap { listOf(it) + getChildren(it) }
+        }
     }
 
     private fun getChildren(of: GolosDiscussionItem): List<GolosDiscussionItem> {

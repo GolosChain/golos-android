@@ -10,11 +10,8 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
                   @JsonProperty("displayImagesMode") val displayImagesMode: GolosAppSettings.DisplayImagesMode?,
                   @JsonProperty("nighModeEnable") val nighModeEnable: Boolean?,
                   @JsonProperty("chosenCurrency") val chosenCurrency: GolosAppSettings.GolosCurrency?,
-                  @JsonProperty("bountyDisplay") val bountyDisplay: GolosAppSettings.GolosBountyDisplay?) {
-
-    override fun toString(): String {
-        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay)"
-    }
+                  @JsonProperty("bountyDisplay") val bountyDisplay: GolosAppSettings.GolosBountyDisplay?,
+                  @JsonProperty("appLanguage") val appLanguage: GolosAppSettings.GolosLanguage?) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -29,6 +26,7 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         if (nighModeEnable != other.nighModeEnable) return false
         if (chosenCurrency != other.chosenCurrency) return false
         if (bountyDisplay != other.bountyDisplay) return false
+        if (appLanguage != other.appLanguage) return false
 
         return true
     }
@@ -41,7 +39,11 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         result = 31 * result + (nighModeEnable?.hashCode() ?: 0)
         result = 31 * result + (chosenCurrency?.hashCode() ?: 0)
         result = 31 * result + (bountyDisplay?.hashCode() ?: 0)
+        result = 31 * result + (appLanguage?.hashCode() ?: 0)
         return result
     }
 
+    override fun toString(): String {
+        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay, appLanguage=$appLanguage)"
+    }
 }

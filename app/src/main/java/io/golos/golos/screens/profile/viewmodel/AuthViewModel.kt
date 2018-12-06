@@ -12,6 +12,11 @@ import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
+import timber.log.Timber
+
+enum class LoginOptions {
+    POSTING_KEY, ACTIVE_KEY, MASTER_KEY
+}
 
 data class UserProfileState(val isLoggedIn: Boolean,
                             val isLoading: Boolean,
@@ -20,7 +25,7 @@ data class UserProfileState(val isLoggedIn: Boolean,
                             val avatarPath: String? = null,
                             val userPostsCount: Long = 0L,
                             val userAccountWorth: Double = 0.0,
-                            val isPostingKeyVisible: Boolean,
+                            val keyOptions: LoginOptions,
                             val subscribesNum: Int = 0,
                             val userMoto: String? = null,
                             val subscribersNum: Int = 0,
@@ -56,7 +61,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
 
     override fun onChanged(it: ApplicationUser?) {
         if (it?.isLogged != true) {
-            userProfileState.value = UserProfileState(false, false, null, isPostingKeyVisible = true, userName = "")
+            userProfileState.value = UserProfileState(false, false, null, userProfileState.value?.userName.orEmpty(),
+                    keyOptions = userProfileState.value?.keyOptions ?: LoginOptions.POSTING_KEY)
         } else {
             initUser()
         }
@@ -66,13 +72,8 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
         mLastUserInput = input.copy()
     }
 
-    fun onChangeKeyTypeClick() {
-        val isCurrentPostingVisible = userProfileState.value?.isPostingKeyVisible ?: true
-        if (isCurrentPostingVisible) {
-            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isPostingKeyVisible = false)
-        } else {
-            userProfileState.value = UserProfileState(false, false, null, mLastUserInput.login, isPostingKeyVisible = true)
-        }
+    fun onChangeKeyTypeClick(newKey: LoginOptions) {
+        userProfileState.value = userProfileState.value?.copy(isLoading = false, keyOptions = newKey)
     }
 
     fun onCancelClick() {
@@ -80,11 +81,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
     }
 
     private fun showAuthError(error: GolosError) {
-        userProfileState.value = UserProfileState(error = error,
-                isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true,
-                isLoggedIn = false,
-                isLoading = false,
-                userName = userProfileState.value?.userName ?: "")
+        userProfileState.value = userProfileState.value?.copy(error = error, isLoading = false)
     }
 
     fun onLoginClick() {
@@ -93,36 +90,53 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
                     localizedMessage = R.string.enter_login,
                     nativeMessage = null))
 
-        } else if (userProfileState.value?.isPostingKeyVisible == false) {
-            if (mLastUserInput.activeWif.isEmpty()) {
-                showAuthError(GolosError(ErrorCode.ERROR_AUTH,
-                        null,
-                        R.string.enter_private_active_wif))
-            } else {
-                userProfileState.value = UserProfileState(false, true, null,
-                        mLastUserInput.login, isPostingKeyVisible = false)
-                mRepository.authWithActiveWif(mLastUserInput.login,
-                        mLastUserInput.activeWif
-                ) { proceedAuthResponse(it) }
-            }
-        } else if (userProfileState.value?.isPostingKeyVisible == true) {
-            if (mLastUserInput.postingWif.isEmpty()) {
-                showAuthError(GolosError(ErrorCode.ERROR_AUTH,
-                        null,
-                        R.string.enter_private_posting_wif))
-            } else {
-                userProfileState.value = UserProfileState(false,
-                        true, null,
-                        mLastUserInput.login,
-                        isPostingKeyVisible = true,
-                        userMoto = userProfileState.value?.userName ?: "")
-
-                mRepository.authWithPostingWif(mLastUserInput.login,
-                        mLastUserInput.postingWif
-                ) { proceedAuthResponse(it) }
-
-            }
+            return
         }
+
+        when (userProfileState.value?.keyOptions ?: return) {
+            LoginOptions.ACTIVE_KEY -> {
+                if (mLastUserInput.activeWif.isEmpty()) {
+                    showAuthError(GolosError(ErrorCode.ERROR_AUTH,
+                            null,
+                            R.string.enter_private_active_wif))
+                } else {
+                    userProfileState.value = userProfileState.value?.copy(isLoading = true, error = null)
+                    mRepository.authWithActiveWif(mLastUserInput.login,
+                            mLastUserInput.activeWif
+                    ) { proceedAuthResponse(it) }
+                }
+            }
+            LoginOptions.POSTING_KEY -> {
+
+                if (mLastUserInput.postingWif.isEmpty()) {
+                    showAuthError(GolosError(ErrorCode.ERROR_AUTH,
+                            null,
+                            R.string.enter_private_posting_wif))
+                } else {
+                    userProfileState.value = userProfileState.value?.copy(isLoading = true, error = null)
+
+                    mRepository.authWithPostingWif(mLastUserInput.login,
+                            mLastUserInput.postingWif
+                    ) { proceedAuthResponse(it) }
+                }
+            }
+            LoginOptions.MASTER_KEY -> {
+
+                if (mLastUserInput.masterKey.isEmpty()) {
+                    showAuthError(GolosError(ErrorCode.ERROR_AUTH,
+                            null,
+                            R.string.enter_private_master))
+                } else {
+                    userProfileState.value = userProfileState.value?.copy(isLoading = true, error = null)
+
+                    mRepository.authWithMasterKey(mLastUserInput.login,
+                            mLastUserInput.masterKey
+                    ) { proceedAuthResponse(it) }
+                }
+            }
+
+        }
+
     }
 
     private fun proceedAuthResponse(resp: UserAuthResponse) {
@@ -146,7 +160,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
                     gbgInSafeAmount = resp.accountInfo.safeGbg,
                     golosInSafeAmount = resp.accountInfo.safeGolos,
                     accountWorth = resp.accountInfo.accountWorth,
-                    isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
+                    keyOptions = userProfileState.value?.keyOptions ?: LoginOptions.POSTING_KEY)
         }
     }
 
@@ -172,7 +186,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
                 gbgInSafeAmount = appUserData.safeGbg,
                 golosInSafeAmount = appUserData.safeGolos,
                 accountWorth = appUserData.accountWorth,
-                isPostingKeyVisible = userProfileState.value?.isPostingKeyVisible == true)
+                keyOptions = userProfileState.value?.keyOptions ?: LoginOptions.POSTING_KEY)
 
     }
 }

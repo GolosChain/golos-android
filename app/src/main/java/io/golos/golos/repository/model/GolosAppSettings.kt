@@ -11,7 +11,8 @@ data class GolosAppSettings(val loudNotification: Boolean,
                             val displayImagesMode: DisplayImagesMode,
                             val nighModeEnable: Boolean,
                             val chosenCurrency: GolosCurrency,
-                            val bountyDisplay: GolosBountyDisplay) {
+                            val bountyDisplay: GolosBountyDisplay,
+                            val language: GolosLanguage) {
 
     enum class DisplayImagesMode {
         DISPLAY,
@@ -28,6 +29,10 @@ data class GolosAppSettings(val loudNotification: Boolean,
 
     enum class GolosCurrency {
         USD, RUB, GBG
+    }
+
+    enum class GolosLanguage {
+        RU, EN
     }
 
     enum class GolosBountyDisplay {

@@ -20,6 +20,7 @@ import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.utils.asIntentToShowUrl
+import timber.log.Timber
 
 /**
  * Created by yuri on 12.12.17.
@@ -31,6 +32,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
     private lateinit var mNoImagesSwitch: SwitchCompat
     private lateinit var mNSFWSwitch: SwitchCompat
     private lateinit var mBountySpinner: Spinner
+    private lateinit var mLangSettingsSpinner: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -92,8 +94,34 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         setUpNoImagesMode()
         setUpNSFWMode()
         setUpCurrency()
+        setUpLanguage()
         setUpBountyDisplay()
         Repository.get.appSettings.observe(this, this)
+    }
+
+    private fun setUpLanguage() {
+        mLangSettingsSpinner = findViewById<Spinner>(R.id.lang_spinner)
+        mLangSettingsSpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.lang)
+        mLangSettingsSpinner.setSelection(when (Repository.get.appSettings.value?.language
+                ?: return) {
+            GolosAppSettings.GolosLanguage.RU -> 0
+            GolosAppSettings.GolosLanguage.EN -> 1
+        })
+        mLangSettingsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                Timber.e("onItemSelected")
+                val lang = when (p2) {
+                    0 -> GolosAppSettings.GolosLanguage.RU
+                    1 -> GolosAppSettings.GolosLanguage.EN
+                    else -> GolosAppSettings.GolosLanguage.EN
+                }
+                val currentValue = Repository.get.appSettings.value ?: return
+                Repository.get.setAppSettings(currentValue.copy(language = lang))
+            }
+        }
     }
 
     override fun onChanged(appSettings: GolosAppSettings?) {
@@ -112,6 +140,10 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
             GolosAppSettings.GolosBountyDisplay.ONE_PLACE -> 1
             GolosAppSettings.GolosBountyDisplay.TWO_PLACES -> 2
             GolosAppSettings.GolosBountyDisplay.THREE_PLACES -> 3
+        })
+        mLangSettingsSpinner.setSelection(when (appSettings.language) {
+            GolosAppSettings.GolosLanguage.RU -> 0
+            GolosAppSettings.GolosLanguage.EN -> 1
         })
     }
 
@@ -133,7 +165,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
 
     private fun setUpNighMode() {
         mNightModeSpinner = findViewById<Spinner>(R.id.mode_spinner)
-        mNightModeSpinner.adapter = SettingsSpinnerAdapter(this, R.array.daynight)
+        mNightModeSpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.daynight)
         mNightModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
@@ -150,7 +182,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
 
     private fun setUpCurrency() {
         mCurrencySpinner = findViewById<Spinner>(R.id.currency_spinner)
-        mCurrencySpinner.adapter = SettingsSpinnerAdapter(this, R.array.currency)
+        mCurrencySpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.currency)
         mCurrencySpinner.setSelection(when (Repository.get.appSettings.value?.chosenCurrency) {
             GolosAppSettings.GolosCurrency.USD -> 1
             GolosAppSettings.GolosCurrency.RUB -> 0
@@ -176,7 +208,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
 
     private fun setUpBountyDisplay() {
         mBountySpinner = findViewById<Spinner>(R.id.precision_spinner)
-        mBountySpinner.adapter = SettingsSpinnerAdapter(this, R.array.precision)
+        mBountySpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.precision)
 
         mBountySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 

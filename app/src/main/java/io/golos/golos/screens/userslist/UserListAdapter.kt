@@ -82,8 +82,13 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
     private val mTitleText = itemView.findViewById<TextView>(R.id.name_tv)
     private val mSubTitleTv = itemView.findViewById<TextView>(R.id.sub_tv)
     private val mSubscibeButton = itemView.findViewById<Button>(R.id.follow_btn)
+    private val mUnsubscribeBtn = itemView.findViewById<Button>(R.id.unfollow_btn)
     private val mProgress = itemView.findViewById<View>(R.id.progress)
     private var mLastAvatar: String? = null
+
+    init {
+        mUnsubscribeBtn.setOnClickListener { mSubscibeButton.callOnClick() }
+    }
     var state: UserListItemState? = null
         set(value) {
             field = value
@@ -114,13 +119,10 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 if (value.item.shownValue == null) mSubTitleTv.setViewGone()
                 else mSubTitleTv.setViewVisible()
 
-                val subscriptionState = value.item.subscribeStatus?.isCurrentUserSubscribed
-                if (subscriptionState == null) {
+                val isCurrentUserSubscribedOnThisUser = value.item.subscribeStatus?.isCurrentUserSubscribed
+                if (isCurrentUserSubscribedOnThisUser == null) {
                     mSubscibeButton.setViewGone()
-                } else {
-                    mSubscibeButton.setViewVisible()
-                    mSubscibeButton.text = if (subscriptionState) itemView.context.getString(R.string.unfollow)
-                    else itemView.context.getString(R.string.follow)
+                    mUnsubscribeBtn.setViewGone()
                 }
 
 
@@ -128,6 +130,7 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                     if (value.item.allowSubscription)
                         value.onSubscribeClick.invoke(this)
                 }
+
 
                 mAvatar.setOnClickListener { value.onUserClick.invoke(this) }
                 mTitleText.setOnClickListener { value.onUserClick.invoke(this) }
@@ -138,13 +141,21 @@ class UserListViewHolder(parent: ViewGroup) : GolosViewHolder(R.layout.v_user_li
                 if (updatingState == null || !value.item.allowSubscription) {
                     mProgress.setViewGone()
                     mSubscibeButton.setViewGone()
+                    mUnsubscribeBtn.setViewGone()
                 } else {
                     if (updatingState == UpdatingState.UPDATING) {
                         mProgress.setViewVisible()
+                        mUnsubscribeBtn.setViewGone()
                         mSubscibeButton.setViewGone()
                     } else {
                         mProgress.setViewGone()
-                        mSubscibeButton.setViewVisible()
+                        if (isCurrentUserSubscribedOnThisUser == true) {
+                            mUnsubscribeBtn.setViewVisible()
+                            mSubscibeButton.setViewGone()
+                        } else if (isCurrentUserSubscribedOnThisUser == false) {
+                            mSubscibeButton.setViewVisible()
+                            mUnsubscribeBtn.setViewGone()
+                        }
                     }
                 }
             }

@@ -14,7 +14,7 @@ import java.util.*
 /**
  * Created by yuri on 06.11.17.
  */
-private val dbVersion = 8
+private val dbVersion = 11
 
 class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion) {
 
@@ -52,22 +52,6 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         db?.execSQL(UsersTable.createTableString)
         db?.execSQL(BlogEntriesTable.createTableString)
 
-//        if (oldVersion == 3) {
-//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.bodyLength} integer")
-//            DiscussionItemsTable.deleteAll(db ?: return)
-//            VotesTable.deleteAll(db)
-//            db.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.parentAuthor} text")
-//        }
-//        if (newVersion == 7) {
-//            db?.execSQL("delete from ${VotesTable.databaseName}")
-//            db?.execSQL("delete from ${StoriesRequestsTable.databaseName}")
-//            db?.execSQL("delete from ${DiscussionItemsTable.databaseName}")
-//            db?.execSQL("delete from ${UsersTable.databaseName}")
-//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.reblogged} integer")
-//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.upvotes} integer")
-//            db?.execSQL("alter table ${DiscussionItemsTable.databaseName} add column ${DiscussionItemsTable.downvotes} integer")
-//            db?.execSQL("alter table ${UsersTable.databaseName} add column ${UsersTable.showName} integer")
-//        }
     }
 
 
@@ -432,6 +416,10 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private const val commentsCount = "commentsCount"
         private const val permlink = "permlink"
         private const val gbgAmount = "gbgAmount"
+        private const val netRshares = "netRshares"
+        private const val pendingPayoutValue = "pendingPayoutValue"
+        private const val totalPayoutValue = "totalPayoutValue"
+        private const val curatorPayoutValue = "curatorPayoutValue"
         private const val body = "body"
         private const val author = "author"
         private const val format = "format"
@@ -443,23 +431,23 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
         private const val created = "created"
         private const val isUserUpvotedOnThis = "isUserUpvotedOnThis"
         private const val type = "type"
-        const val reblogged = "reblogged"
+        private const val reblogged = "reblogged"
         private const val cleanedFromImages = "cleanedFromImages"
         private const val childrenCount = "childrenCount"
-        const val upvotes = "upvotes"
-        const val downvotes = "downvotes"
-        const val bodyLength = "bodyLength"
-        const val parentAuthor = "parentAuthor"
+        private const val upvotes = "upvotes"
+        private const val downvotes = "downvotes"
+        private const val bodyLength = "bodyLength"
+        private const val parentAuthor = "parentAuthor"
 
 
         const val createTableString = "create table if not exists $databaseName ( $id integer primary key ," +
                 "$url text, $title text, $categoryName text, $tags text, $images text, $links text," +
-                "$votesNum integer, $votesRshares integer, $commentsCount integer, " +
+                "$votesNum integer, $votesRshares integer, $commentsCount integer, $pendingPayoutValue integer," +
                 "$permlink text, $gbgAmount real, $body text, $author text, $format text, $parentPermlink text," +
-                "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, " +
-                "$created integer, $isUserUpvotedOnThis integer, $type text," +
+                "$level integer, $gbgCostInDollars real, $reputation integer, $lastUpdated integer, $curatorPayoutValue integer," +
+                "$created integer, $isUserUpvotedOnThis integer, $type text, $totalPayoutValue integer," +
                 "$cleanedFromImages text, $childrenCount integer, $bodyLength integer, $parentAuthor text, $upvotes integer," +
-                "$downvotes integer, $reblogged text)"
+                "$downvotes integer, $reblogged text, $netRshares integer)"
 
         fun save(items: List<GolosDiscussionItem>,
                  voteTable: VotesTable,
@@ -488,6 +476,9 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.parentPermlink, it.parentPermlink)
                 values.put(this.level, it.level)
                 values.put(this.reputation, it.reputation)
+                values.put(this.pendingPayoutValue, it.pendingPayoutValue)
+                values.put(this.totalPayoutValue, it.totalPayoutValue)
+                values.put(this.curatorPayoutValue, it.curatorPayoutValue)
                 values.put(this.lastUpdated, it.lastUpdated)
                 values.put(this.created, it.created)
                 values.put(this.type, it.type.name)
@@ -497,6 +488,7 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                 values.put(this.votesNum, it.votesNum)
                 values.put(this.upvotes, it.upvotesNum)
                 values.put(this.downvotes, it.downvotesNum)
+                values.put(this.netRshares, it.netRshares)
                 values.put(this.votesRshares, it.votesRshares)
                 values.put(this.commentsCount, it.commentsCount)
                 values.put(this.parentAuthor, it.parentAuthor)
@@ -552,9 +544,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getInt(upvotes),
                             cursor.getInt(downvotes),
                             cursor.getLong(votesRshares),
+                            cursor.getLong(netRshares),
                             cursor.getInt(commentsCount),
                             cursor.getString(permlink) ?: "",
                             cursor.getDouble(gbgAmount),
+                            cursor.getDouble(pendingPayoutValue),
+                            cursor.getDouble(totalPayoutValue),
+                            cursor.getDouble(curatorPayoutValue),
                             cursor.getString(body) ?: "",
                             cursor.getLong(bodyLength),
                             cursor.getString(author) ?: "",
@@ -625,9 +621,13 @@ class SqliteDb(ctx: Context) : SQLiteOpenHelper(ctx, "mydb.db", null, dbVersion)
                             cursor.getInt(upvotes),
                             cursor.getInt(downvotes),
                             cursor.getLong(votesRshares),
+                            cursor.getLong(netRshares),
                             cursor.getInt(commentsCount),
                             cursor.getString(permlink) ?: "",
                             cursor.getDouble(gbgAmount),
+                            cursor.getDouble(pendingPayoutValue),
+                            cursor.getDouble(totalPayoutValue),
+                            cursor.getDouble(curatorPayoutValue),
                             cursor.getString(body) ?: "",
                             cursor.getLong(bodyLength),
                             author.orEmpty(),

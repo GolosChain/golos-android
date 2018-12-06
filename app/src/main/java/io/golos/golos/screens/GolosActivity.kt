@@ -1,9 +1,13 @@
 package io.golos.golos.screens
 
 import android.app.UiModeManager
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.LocaleList
 import android.text.Html
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -15,8 +19,11 @@ import io.golos.golos.BuildConfig
 import io.golos.golos.EActivity
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.utils.*
+import java.util.*
 import java.util.concurrent.TimeUnit
+
 
 /**
  * Created by yuri yurivladdurain@gmail.com
@@ -27,6 +34,8 @@ abstract class GolosActivity : AppCompatActivity() {
     private val showVoteDialog: MutableLiveData<Boolean> = OneShotLiveData()
     private val mRepostObserver = RepostObserver(supportFragmentManager)
     private var mLastNightModeEnbledFlag = false
+    private var mLastLang = Repository.get.appSettings.value?.language
+            ?: if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +63,11 @@ abstract class GolosActivity : AppCompatActivity() {
             appSettings ?: return@Observer
             if (appSettings.nighModeEnable != mLastNightModeEnbledFlag) {
                 restart()
+                return@Observer
+            }
+            if (appSettings.language != mLastLang) {
+                restart()
+                return@Observer
             }
         })
     }
@@ -76,6 +90,27 @@ abstract class GolosActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         isResumed = true
+
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        newBase ?: return super.attachBaseContext(newBase)
+
+
+        val rs = newBase.resources
+        val config = rs.configuration
+        val lang = Repository.get.appSettings.value?.language
+                ?: if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN
+        val newLocale = if (lang == GolosAppSettings.GolosLanguage.RU) Locale("ru") else Locale("en")
+
+        if (Build.VERSION.SDK_INT < 24) {
+            config.locale = newLocale
+        } else
+            config.locales = LocaleList(newLocale)
+
+        val wrapper = newBase.createConfigurationContext(config)
+
+        super.attachBaseContext(ContextWrapper(wrapper))
 
     }
 

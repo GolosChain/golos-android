@@ -32,7 +32,7 @@
                     android:layout_marginEnd="64dp"
                     android:gravity="center"
                     android:text="@string/settings"
-                    android:textColor="@color/text_color_white_black" />
+                    android:textColor="@color/text_color_white_black"/>
 
             </androidx.appcompat.widget.Toolbar>
 
@@ -66,7 +66,7 @@
                     style="@style/SettingTitleTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/general_settings" />
+                    android:text="@string/general_settings"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -79,7 +79,35 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/currency" />
+                        android:text="@string/choose_lang"/>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9">
+
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/lang_spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="end"
+                            android:background="@null"
+                            android:gravity="end"/>
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/currency"/>
 
                     <FrameLayout
                         android:layout_width="0dp"
@@ -92,7 +120,7 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="end"
                             android:background="@null"
-                            android:gravity="end" />
+                            android:gravity="end"/>
                     </FrameLayout>
 
                 </LinearLayout>
@@ -106,7 +134,7 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/currency_precision" />
+                        android:text="@string/currency_precision"/>
 
                     <FrameLayout
                         android:layout_width="0dp"
@@ -119,7 +147,7 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="end"
                             android:background="@null"
-                            android:gravity="end" />
+                            android:gravity="end"/>
                     </FrameLayout>
 
                 </LinearLayout>
@@ -130,14 +158,14 @@
                     android:layout_width="match_parent"
                     android:background="?selectableItemBackground"
                     android:clickable="true"
-                    android:text="@string/notifications" />
+                    android:text="@string/notifications"/>
             </LinearLayout>
 
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="10dp"
-                android:background="@color/delimeter_color_feed" />
+                android:background="@color/delimeter_color_feed"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -147,7 +175,7 @@
 
                 <TextView
                     style="@style/SettingTitleTextView"
-                    android:text="@string/stripe_settings" />
+                    android:text="@string/stripe_settings"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -159,7 +187,7 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/mode" />
+                        android:text="@string/mode"/>
 
                     <FrameLayout
                         android:layout_width="0dp"
@@ -172,7 +200,7 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="end"
                             android:background="@null"
-                            android:gravity="end" />
+                            android:gravity="end"/>
                     </FrameLayout>
 
                 </LinearLayout>
@@ -186,7 +214,7 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/compact_mode" />
+                        android:text="@string/compact_mode"/>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/compact_mode_switch"
@@ -194,7 +222,7 @@
 
                         android:layout_height="match_parent"
                         android:layout_weight="0.9"
-                        android:gravity="end|center_vertical" />
+                        android:gravity="end|center_vertical"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -206,14 +234,14 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/images_mode" />
+                        android:text="@string/images_mode"/>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/show_images_switch"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="0.9"
-                        android:gravity="end|center_vertical" />
+                        android:gravity="end|center_vertical"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -225,67 +253,70 @@
                         style="@style/SettingTextViewStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/show_nsfw_images_mode" />
+                        android:text="@string/show_nsfw_images_mode"/>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/show_nsfw_images_switch"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="0.9"
-                        android:gravity="end|center_vertical" />
+                        android:gravity="end|center_vertical"/>
                 </LinearLayout>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="10dp"
-                android:background="@color/delimeter_color_feed" />
+                android:background="@color/delimeter_color_feed"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/material_big"
                 android:layout_marginStart="@dimen/material_big"
+                android:layout_marginEnd="@dimen/material_big"
                 android:orientation="vertical">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/golos_wiki_tv"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/wiki" />
+                    android:text="@string/wiki"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/about_golos_tv"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/about_golos" />
+                    android:text="@string/about_golos"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/privacy_policy_tv"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/privacy_policy" />
+                    android:text="@string/privacy_policy"/>
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/about_team_tv"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/about_team" />
+                    android:text="@string/about_team"/>
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/faq"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/faq" />
+                    android:text="@string/faq"/>
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/team_news_tv"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/team_news" />
+                    android:text="@string/team_news"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/exit"
                     style="@style/SettingTextViewStyle"
                     android:background="?selectableItemBackground"
-                    android:text="@string/exit" />
+                    android:text="@string/exit"/>
 
 
             </LinearLayout>
@@ -297,7 +328,7 @@
                 android:gravity="bottom|center_horizontal"
                 android:text="@string/golos_android_v"
                 android:textColor="#A6A6A6"
-                android:textSize="@dimen/font_small" />
+                android:textSize="@dimen/font_small"/>
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

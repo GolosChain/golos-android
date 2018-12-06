@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">Golos.io</string>
     <string name="add_tags">Добавьте теги</string>
-
-    <string name="to_much_tags">Можно указать до пяти тeгов</string>
     <string name="use_only_one_dash">в тeге может быть только один дефис</string>
     <string name="use_whitespaces_seporator">Используйте пробел, чтобы разделить тeги</string>
     <string name="only_lowercase_characters">Используйте только символы нижнего регистра: строчные. Не заглавные буквы.</string>
@@ -32,6 +30,7 @@
     <string name="promo">Промо</string>
     <string name="for_">для</string>
     <string name="comments">Комментарии</string>
+    <string name="comments_with_count">Комментарии&#160;&#160;&#160;%s</string>
     <string name="image">Изображение</string>
     <string name="ago">назад</string>
     <string name="no_comments">Пока нет комментариев. Будь первым.</string>
@@ -39,7 +38,7 @@
     <string name="enter_key">Введите ключ</string>
     <string name="more_about_golos"><![CDATA[<a href = "https://golos.io/welcome">Больше о Golos.io</>]]></string>
     <string name="do_not_registered_register">Вы еще не зарегистрированы? <![CDATA[<a href = "https://reg.golos.io/">Регистрация</>]]></string>
-    <string name="enter_login">Введите имя аккаунта</string>
+    <string name="enter_login">Введите логин</string>
     <string name="enter_password">Введите пароль</string>
     <string name="posting_or_active_key">Введите активный или постинг ключ</string>
     <string name="wrong_args">Неправильный вызов апи</string>
@@ -47,11 +46,11 @@
     <string name="logout">Выход</string>
     <string name="loading">Загружается...</string>
     <string name="choose_vote_power">Выберите мощность голоса</string>
-    <string name="user_used_max_comments_chances">Больше нельзя голосовать за это сообщение</string>
+    <string name="user_used_max_comments_chances">Вы использовали максимальное количество попыток проголосовать за данную запись</string>
     <string name="vote_canceled">Голос отменен</string>
     <string name="upvoted">Проголосовано</string>
-    <string name="you_voted_same_way">Вы уже проголосовали c такой силой голоса</string>
-    <string name="login_to_vote">Зайдите или зарегестрируйтесь, чтобы проголосовать</string>
+    <string name="you_voted_same_way">Вы уже голосовали за эту запись</string>
+    <string name="login_to_vote">Зайдите или зарегистрируйтесь, чтобы проголосовать</string>
     <string name="login_to_see_feed">Залогиньтесь для просмотра своей ленты</string>
     <string name="nothing_here">Пока ничего нет, данные будут заполняться сразу после появления нового контента</string>
     <string name="wrong_image">Что-то не так с изображением, попробуйте другое.</string>
@@ -97,10 +96,12 @@
     <string name="must_be_subscribed_for_action">Вы должны быть подписаны на автора, чтобы отписаться от него</string>
     <string name="follow">Подписаться</string>
     <string name="unfollow">Отписаться</string>
-    <string name="enter_with_active_key">Войти с активным ключом</string>
-    <string name="enter_with_posting_key">Войти с постинг ключом</string>
+    <string name="enter_with_active_key">Активный ключ</string>
+    <string name="enter_with_posting_key">Постинг ключ</string>
+    <string name="enter_with_master_key">Мастер ключ</string>
     <string name="enter_private_active_wif">Введите свой приватный активный ключ</string>
     <string name="enter_private_posting_wif">Введите свой приватный постинг ключ</string>
+    <string name="enter_private_master">Введите свой приватный мастер ключ</string>
     <string name="you_already_subscribed">Вы уже подписаныа</string>
     <string name="you_cannot_subscribe_on_yourself">Вы не можете подписаться на себя</string>
     <string name="retry">Еще раз</string>
@@ -126,7 +127,7 @@
     <string name="voted">Проголосовали</string>
 
     <string name="enter_pouch_">2. Переходим во вкладку настройки в профиле</string>
-    <string name="help_step_1">1. Заходим на сайт <![CDATA[<a href = "https://golos.io">http://golos.io</>]]></string>
+    <string name="help_step_1">1. Переходим и авторизуемся на <![CDATA[<a href = "https://golos.io">http://golos.io</>]]></string>
     <string name="help_step_3_posting">3. В разделе \'Ключи\' нажмите показать приватный постинг ключ (он начинается с 5 или 1)</string>
     <string name="help_step_3_active">3. В разделе \'Ключи\' нажмите показать приватный активный ключ (он начинается с 5 или 1)</string>
     <string name="help_step_4">4. Его нужно скопировать или сканировать через QR-код.</string>
@@ -147,7 +148,7 @@
     <string name="search_in_golos">Поиск в Golos.io</string>
     <string name="show_nsfw_images_mode">Контент для взрослых</string>
     <string name="to_flag">Дизлайк</string>
-    <string name="cant_vote_after_payout">Невозможно проголосовать после выплаты.</string>
+    <string name="cant_vote_after_payout">Срок голосования истек. Невозможно проголосовать после выплаты</string>
     <string name="edit">Редактировать</string>
     <string name="you_may_comment_only_tw_sec">Вы можете комментировать только раз в 20 секунд</string>
     <string name="maximum_comment_depth">Достигнута максимальная глубина дерева коментирования</string>
@@ -224,8 +225,8 @@
     <string name="user_unsubscribed_several">@%s и еще %s от вашего блога</string>
     <string name="user_mentioned_several">@%s и еще %s вас</string>
     <string name="user_reposted_several">@%s и еще %s репост вашего поста</string>
-    <string name="user_voted_for_you_several" >@%s и еще %s за вас как за делегата</string>
-    <string name="user_canceled_vote_for_you_several" >@%s и еще %s сняли свои голоса с вашей делегатской ноды</string>
+    <string name="user_voted_for_you_several">@%s и еще %s за вас как за делегата</string>
+    <string name="user_canceled_vote_for_you_several">@%s и еще %s сняли свои голоса с вашей делегатской ноды</string>
     <string name="dizlike">Голос против</string>
     <string name="subscribe_on_blog">Подписка на блог</string>
     <string name="unsubscribe_from_blog">Отписка от блога</string>
@@ -240,13 +241,13 @@
     <string name="mentions">Упоминания</string>
     <string name="empty">Пока здесь пусто</string>
     <string name="yestarday">Вчера</string>
-    <string name="year_perion" >г.</string>
+    <string name="year_perion">г.</string>
     <string name="reward_for_entry">Ваша авторская награда %s за запись %s</string>
     <string name="golos_power_for_events">Силы Голоса</string>
-    <string name="reward_for_entries" >Ваша авторская награда %s</string>
-    <string name="curator_reward_for_entry" >Ваша кураторская награда %s за запись %s</string>
-    <string name="curator_reward_for_entries" >Ваша кураторская награда %s</string>
-    <string name="post_reward" >Награда пользователю</string>
+    <string name="reward_for_entries">Ваша авторская награда %s</string>
+    <string name="curator_reward_for_entry">Ваша кураторская награда %s за запись %s</string>
+    <string name="curator_reward_for_entries">Ваша кураторская награда %s</string>
+    <string name="post_reward">Награда пользователю</string>
     <string name="curation_reward">Награда куратору</string>
     <string name="no_events_all">Начни писать посты и комментарии, чтобы получать реакцию пользователей.</string>
     <string name="no_events_replies">Начни писать и будешь получать комментарии от пользователей.</string>
@@ -276,6 +277,9 @@
     <string name="faq">Часто задаваемые вопросы</string>
     <string name="mark_all_as_read">Отметить все прочитанными</string>
     <string name="mention_with_at">Упоминание в посте или комменте через @</string>
+    <string name="sort_by">Сортировать по</string>
+    <string name="master_key">Мастер ключ</string>
+    <string name="choose_lang">Язык интерфейса</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
@@ -284,6 +288,16 @@
         <item>Рубль</item>
         <item>Доллар</item>
         <item>GBG</item>
+    </string-array>
+    <string-array name="lang">
+        <item>Русский</item>
+        <item>Английский</item>
+    </string-array>
+    <string-array name="comments_sort">
+        <item>Популярности</item>
+        <item>Сначало новые</item>
+        <item>Сначала старые</item>
+        <item>По голосам</item>
     </string-array>
     <string-array name="precision">
         <item>До целых</item>

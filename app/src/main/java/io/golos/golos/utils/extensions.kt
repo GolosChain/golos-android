@@ -83,6 +83,10 @@ fun Cursor.getString(columnName: String): String? {
     if (columnNumber < 0) return null
     return this.getString(this.getColumnIndex(columnName))
 }
+fun Int.length() = when(this) {
+    0 -> 1
+    else -> Math.log10(Math.abs(toDouble())).toInt() + 1
+}
 
 fun changeWrapperAccountInfoIfNeeded(feedType: FeedType,
                                      storyFilter: StoryFilter?,

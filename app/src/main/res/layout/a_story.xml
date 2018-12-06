@@ -336,8 +336,34 @@
                     android:layout_marginEnd="@dimen/margin_material"
                     android:drawablePadding="@dimen/margin_material_half"
                     android:text="@string/comments"
+                    android:textColor="@color/font_gray_black"
                     android:textSize="@dimen/font_medium"
                     android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/sort_lo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_material"
+                    android:layout_marginTop="@dimen/quater"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sort_by"
+                        android:textColor="@color/gray_a6"
+                        android:textSize="@dimen/font_small"/>
+
+                    <Spinner
+                        android:layout_marginStart="@dimen/margin_material_half"
+                        android:id="@+id/sort_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="start"
+                        />
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/comments_recycler"
@@ -403,9 +429,9 @@
             android:gravity="start|center_vertical"
             android:paddingStart="@dimen/margin_material"
             android:paddingEnd="@dimen/margin_material"
-            android:textSize="@dimen/font_regular"
             android:singleLine="true"
-            android:textColor="#6e6e6e"/>
+            android:textColor="#6e6e6e"
+            android:textSize="@dimen/font_regular"/>
 
 
         <View

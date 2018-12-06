@@ -4,11 +4,9 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.ConnectivityManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
@@ -28,6 +26,7 @@ import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.AppLifecycleRepository
 import io.golos.golos.repository.LifeCycleEvent
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.repository.persistence.Persister
 import io.golos.golos.screens.main_activity.MainActivity
 import io.golos.golos.screens.stories.model.FeedType
@@ -36,6 +35,7 @@ import io.golos.golos.utils.NotificationsAndEventsAppearanceMakerImpl
 import io.golos.golos.utils.getVectorAsBitmap
 import io.golos.golos.utils.isVoteQuestionMade
 import timber.log.Timber
+import java.util.*
 
 
 /**
