@@ -11,7 +11,10 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
                   @JsonProperty("nighModeEnable") val nighModeEnable: Boolean?,
                   @JsonProperty("chosenCurrency") val chosenCurrency: GolosAppSettings.GolosCurrency?,
                   @JsonProperty("bountyDisplay") val bountyDisplay: GolosAppSettings.GolosBountyDisplay?,
-                  @JsonProperty("appLanguage") val appLanguage: GolosAppSettings.GolosLanguage?) {
+                  @JsonProperty("appLanguage") val appLanguage: GolosAppSettings.GolosLanguage?,
+                  @JsonProperty("defaultUpVotePower") val defaultUpVotePower: Byte?) {
+
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,6 +30,7 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         if (chosenCurrency != other.chosenCurrency) return false
         if (bountyDisplay != other.bountyDisplay) return false
         if (appLanguage != other.appLanguage) return false
+        if (defaultUpVotePower != other.defaultUpVotePower) return false
 
         return true
     }
@@ -40,10 +44,11 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         result = 31 * result + (chosenCurrency?.hashCode() ?: 0)
         result = 31 * result + (bountyDisplay?.hashCode() ?: 0)
         result = 31 * result + (appLanguage?.hashCode() ?: 0)
+        result = 31 * result + (defaultUpVotePower ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay, appLanguage=$appLanguage)"
+        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay, appLanguage=$appLanguage, defaultUpVotePower=$defaultUpVotePower)"
     }
 }

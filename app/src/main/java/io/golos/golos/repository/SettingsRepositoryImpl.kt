@@ -21,7 +21,8 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
             false,
             GolosAppSettings.GolosCurrency.USD,
             GolosAppSettings.GolosBountyDisplay.THREE_PLACES,
-            if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN)
+            if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN,
+            Byte.MIN_VALUE)
 
     private var defaultNotificationSettings = GolosNotificationSettings(true,
             true, true, true, true,
@@ -48,10 +49,11 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
             this.nighModeEnable ?: defaultAppSettings.nighModeEnable,
             this.chosenCurrency ?: defaultAppSettings.chosenCurrency,
             this.bountyDisplay ?: defaultAppSettings.bountyDisplay,
-            this.appLanguage ?: defaultAppSettings.language)
+            this.appLanguage ?: defaultAppSettings.language,
+            this.defaultUpVotePower ?: defaultAppSettings.defaultUpvotePower)
 
     fun GolosAppSettings.toAppSettings() = AppSettings(this.loudNotification, this.feedMode, this.nsfwMode,
-            this.displayImagesMode, this.nighModeEnable, this.chosenCurrency, this.bountyDisplay, this.language)
+            this.displayImagesMode, this.nighModeEnable, this.chosenCurrency, this.bountyDisplay, this.language, this.defaultUpvotePower)
 
     fun NotificationSettings.toGolosNotificationSettings() = GolosNotificationSettings(this.vote
             ?: defaultNotificationSettings.showUpvoteNotifs,

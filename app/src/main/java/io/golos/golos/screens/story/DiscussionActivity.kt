@@ -26,13 +26,14 @@ import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.settings.SpinnerAdapterWithDownChevron
 import io.golos.golos.screens.stories.model.FeedType
+import io.golos.golos.screens.stories.model.VoteChooserType
 import io.golos.golos.screens.story.adapters.CommentsAdapter
 import io.golos.golos.screens.story.adapters.ImagesAdapter
 import io.golos.golos.screens.story.adapters.StoryAdapter
 import io.golos.golos.screens.story.model.*
 import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
-import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
+import io.golos.golos.screens.widgets.dialogs.CancelVoteDialog
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
@@ -42,7 +43,7 @@ import timber.log.Timber
  * Created by yuri on 06.11.17.
  */
 class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener,
-        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, ChangeVoteDialog.OnChangeConfirmal {
+        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, CancelVoteDialog.OnChangeConfirmal {
     private lateinit var mViewModel: DiscussionViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mToolbar: Toolbar
@@ -431,6 +432,15 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
                 mTagSubscribeBtn.setText(R.string.follow)
             }
         })
+        mViewModel.chooserLiveData.observe(this, Observer {
+            it ?: return@Observer
+            when (it.type) {
+                VoteChooserType.CANCEL_VOTE ->
+                    CancelVoteDialog.getInstance(it.storyId).show(supportFragmentManager, null)
+                VoteChooserType.LIKE -> VoteDialog.getInstance(it.storyId, VoteDialog.DialogType.UPVOTE).show(supportFragmentManager, null)
+                VoteChooserType.DIZLIKE -> VoteDialog.getInstance(it.storyId, VoteDialog.DialogType.DOWN_VOTE).show(supportFragmentManager, null)
+            }
+        })
     }
 
 
@@ -565,14 +575,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
 
     private fun onStoryVote(item: StoryWrapper, type: VoteDialog.DialogType) {
         if (mViewModel.canUserVote) {
-            if (item.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED && type == VoteDialog.DialogType.DOWN_VOTE) {
-                ChangeVoteDialog.getInstance(item.story.id).show(supportFragmentManager, null)
-            } else if (item.voteStatus == GolosDiscussionItem.UserVoteType.VOTED && type == VoteDialog.DialogType.UPVOTE) {
-                ChangeVoteDialog.getInstance(item.story.id).show(supportFragmentManager, null)
-            } else {
-                val dialog = VoteDialog.getInstance(item.story.id, type)
-                dialog.show(supportFragmentManager, null)
-            }
+            if (type == VoteDialog.DialogType.UPVOTE) mViewModel.onLikeClick(item.story.id)
+            else mViewModel.onDizlikeClick(item.story.id)
+
         } else {
             mViewModel.onVoteRejected()
         }

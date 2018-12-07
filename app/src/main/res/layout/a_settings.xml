@@ -159,6 +159,34 @@
                     android:background="?selectableItemBackground"
                     android:clickable="true"
                     android:text="@string/notifications"/>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/SettingTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/golos_power"/>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.9">
+
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/golos_power_spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="end"
+                            android:background="@null"
+                            android:gravity="end"/>
+                    </FrameLayout>
+
+                </LinearLayout>
             </LinearLayout>
 
 

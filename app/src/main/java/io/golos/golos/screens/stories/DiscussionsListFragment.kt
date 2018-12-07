@@ -17,7 +17,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.golos.golos.R
 import io.golos.golos.repository.model.GolosAppSettings
-import io.golos.golos.repository.model.GolosDiscussionItem
 import io.golos.golos.repository.model.StoryFilter
 import io.golos.golos.screens.editor.prepend
 import io.golos.golos.screens.stories.adapters.DiscussionsListAdapter
@@ -25,16 +24,17 @@ import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
 import io.golos.golos.screens.stories.model.StoryWithCommentsClickListener
+import io.golos.golos.screens.stories.model.VoteChooserType
 import io.golos.golos.screens.stories.viewmodel.DiscussionsViewModel
 import io.golos.golos.screens.stories.viewmodel.DiscussionsViewState
 import io.golos.golos.screens.stories.viewmodel.StoriesModelFactory
 import io.golos.golos.screens.story.model.StoryWrapper
-import io.golos.golos.screens.widgets.dialogs.ChangeVoteDialog
+import io.golos.golos.screens.widgets.dialogs.CancelVoteDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 
 class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
-        Observer<DiscussionsViewState>, ChangeVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
+        Observer<DiscussionsViewState>, CancelVoteDialog.OnChangeConfirmal, VoteDialog.OnVoteSubmit,
         ReblogConfirmalDialog.OnReblogConfirmed {
     private var mRecycler: androidx.recyclerview.widget.RecyclerView? = null
     private var mSwipeRefresh: SwipeRefreshLayout? = null
@@ -99,11 +99,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 mOnDownVoteClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
-                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
-                                ChangeVoteDialog.getInstance(story.story.id).show(childFragmentManager, null)
-                            } else {
-                                VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.DOWN_VOTE).show(childFragmentManager, null)
-                            }
+                            mViewModel?.onDizlikeClick(story.story.id)
                         } else {
                             mViewModel?.onActionRejected()
                         }
@@ -112,11 +108,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 onUpvoteClick = object : StoryWithCommentsClickListener {
                     override fun onClick(story: StoryWrapper) {
                         if (mViewModel?.canVote() == true) {
-                            if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
-                                ChangeVoteDialog.getInstance(story.story.id).show(childFragmentManager, null)
-                            } else {
-                                VoteDialog.getInstance(story.story.id, VoteDialog.DialogType.UPVOTE).show(childFragmentManager, null)
-                            }
+                            mViewModel?.onLikeClick(story.story.id)
                         } else {
                             mViewModel?.onActionRejected()
                         }
@@ -186,6 +178,7 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
             mViewModel?.onSwipeToRefresh()
         }
+
     }
 
     override fun onChangeConfirm(id: Long) {
@@ -245,6 +238,15 @@ class DiscussionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                     GolosAppSettings.GolosBountyDisplay.THREE_PLACES, false)
         }
         mViewModel?.cellViewSettingLiveData?.observe(this, observer)
+        mViewModel?.chooserLiveData?.observe(this, Observer {
+            it ?: return@Observer
+            when (it.type) {
+                VoteChooserType.CANCEL_VOTE ->
+                    CancelVoteDialog.getInstance(it.storyId).show(childFragmentManager, null)
+                VoteChooserType.LIKE -> VoteDialog.getInstance(it.storyId, VoteDialog.DialogType.UPVOTE).show(childFragmentManager, null)
+                VoteChooserType.DIZLIKE -> VoteDialog.getInstance(it.storyId, VoteDialog.DialogType.DOWN_VOTE).show(childFragmentManager, null)
+            }
+        })
     }
 
     override fun onChanged(t: DiscussionsViewState?) {

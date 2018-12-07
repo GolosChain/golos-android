@@ -17,6 +17,8 @@ import io.golos.golos.screens.stories.FilteredStoriesActivity
 import io.golos.golos.screens.stories.adapters.FeedCellSettings
 import io.golos.golos.screens.stories.model.FeedType
 import io.golos.golos.screens.stories.model.NSFWStrategy
+import io.golos.golos.screens.stories.model.VoteChooserDescription
+import io.golos.golos.screens.stories.model.VoteChooserType
 import io.golos.golos.screens.story.DiscussionActivity
 import io.golos.golos.screens.story.model.StoryWrapper
 import io.golos.golos.screens.userslist.UsersListActivity
@@ -143,6 +145,7 @@ abstract class DiscussionsViewModel : ViewModel() {
     protected abstract val type: FeedType
     private val mDiscussionsLiveData: MediatorLiveData<DiscussionsViewState> = MediatorLiveData()
     private val mFeedSettingsLiveData: MediatorLiveData<FeedCellSettings> = MediatorLiveData()
+    private val mChooserLiveData: MutableLiveData<VoteChooserDescription> = OneShotLiveData()
     private val mRepository = Repository.get
     private val isUpdating = AtomicBoolean(false)
     private var isVisibleToUser: Boolean = false
@@ -161,6 +164,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         get() {
             return mFeedSettingsLiveData
         }
+    val chooserLiveData: LiveData<VoteChooserDescription> = mChooserLiveData
 
     fun onCreate(internetStatusNotifier: InternetStatusNotifier, filter: StoryFilter?) {
         this.filter = filter
@@ -520,6 +524,29 @@ abstract class DiscussionsViewModel : ViewModel() {
 
     fun vote(storyId: Long, vote: Short) {
         mDiscussionsLiveData.value?.items?.find { it.story.id == storyId }?.let { vote(it, vote) }
+    }
+
+    fun onLikeClick(storyId: Long) {
+        val story = mDiscussionsLiveData.value?.items?.find { it.story.id == storyId } ?: return
+        if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
+        if (story.voteStatus == GolosDiscussionItem.UserVoteType.VOTED) {
+            mChooserLiveData.value = VoteChooserDescription(storyId, VoteChooserType.CANCEL_VOTE)
+        } else {
+            val defaultVotePower = Repository.get.appSettings.value?.defaultUpvotePower
+                    ?: Byte.MIN_VALUE
+            if (defaultVotePower < 1) mChooserLiveData.value = VoteChooserDescription(storyId, VoteChooserType.LIKE)
+            else vote(storyId, defaultVotePower.toShort())
+        }
+    }
+
+    fun onDizlikeClick(storyId: Long) {
+        val story = mDiscussionsLiveData.value?.items?.find { it.story.id == storyId } ?: return
+        if (story.voteUpdatingState?.state == UpdatingState.UPDATING) return
+        if (story.voteStatus == GolosDiscussionItem.UserVoteType.FLAGED_DOWNVOTED) {
+            mChooserLiveData.value = VoteChooserDescription(storyId, VoteChooserType.CANCEL_VOTE)
+        } else {
+            mChooserLiveData.value = VoteChooserDescription(storyId, VoteChooserType.DIZLIKE)
+        }
     }
 
     fun onDownVoters(story: StoryWrapper, fragmentActivity: FragmentActivity) {

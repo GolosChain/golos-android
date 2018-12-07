@@ -12,7 +12,8 @@ data class GolosAppSettings(val loudNotification: Boolean,
                             val nighModeEnable: Boolean,
                             val chosenCurrency: GolosCurrency,
                             val bountyDisplay: GolosBountyDisplay,
-                            val language: GolosLanguage) {
+                            val language: GolosLanguage,
+                            val defaultUpvotePower: Byte) {
 
     enum class DisplayImagesMode {
         DISPLAY,

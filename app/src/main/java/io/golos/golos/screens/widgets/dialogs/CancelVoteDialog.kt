@@ -11,7 +11,7 @@ import io.golos.golos.utils.bundleOf
 /**
  * Created by yuri yurivladdurain@gmail.com on 17/10/2018.
  */
-class ChangeVoteDialog() : GolosDialog() {
+class CancelVoteDialog() : GolosDialog() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.d_vote_cancel, container, false)
@@ -36,7 +36,7 @@ class ChangeVoteDialog() : GolosDialog() {
 
     companion object {
         fun getInstance(id: Long): DialogFragment {
-            return ChangeVoteDialog().apply { arguments = bundleOf("id" to id) }
+            return CancelVoteDialog().apply { arguments = bundleOf("id" to id) }
         }
     }
 

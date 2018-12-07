@@ -33,6 +33,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
     private lateinit var mNSFWSwitch: SwitchCompat
     private lateinit var mBountySpinner: Spinner
     private lateinit var mLangSettingsSpinner: Spinner
+    private lateinit var mGolosPowerSpinner: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,6 +97,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         setUpCurrency()
         setUpLanguage()
         setUpBountyDisplay()
+        setUpVotePower()
         Repository.get.appSettings.observe(this, this)
     }
 
@@ -144,6 +146,20 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         mLangSettingsSpinner.setSelection(when (appSettings.language) {
             GolosAppSettings.GolosLanguage.RU -> 0
             GolosAppSettings.GolosLanguage.EN -> 1
+        })
+
+        mGolosPowerSpinner.setSelection(when (appSettings.defaultUpvotePower) {
+            in 0..10 -> 1
+            in 11..20 -> 2
+            in 21..30 -> 3
+            in 31..40 -> 4
+            in 41..50 -> 5
+            in 51..60 -> 6
+            in 61..70 -> 7
+            in 71..80 -> 8
+            in 81..90 -> 9
+            in 91..100 -> 10
+            else -> 0
         })
     }
 
@@ -202,6 +218,36 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
                 }
                 val currentValue = Repository.get.appSettings.value ?: return
                 Repository.get.setAppSettings(currentValue.copy(chosenCurrency = currency))
+            }
+        }
+    }
+
+    private fun setUpVotePower() {
+        mGolosPowerSpinner = findViewById<Spinner>(R.id.golos_power_spinner)
+        mGolosPowerSpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.vote_power)
+
+        mGolosPowerSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                val currentValue = Repository.get.appSettings.value ?: return
+                val golosPower = when (p2) {
+                    0 -> Byte.MIN_VALUE
+                    1 -> (10).toByte()
+                    2 -> (20).toByte()
+                    3 -> (30).toByte()
+                    4 -> (40).toByte()
+                    5 -> (50).toByte()
+                    6 -> (60).toByte()
+                    7 -> (70).toByte()
+                    8 -> (80).toByte()
+                    9 -> (90).toByte()
+                    10 -> (100).toByte()
+                    else -> Byte.MIN_VALUE
+                }
+                Repository.get.setAppSettings(currentValue.copy(defaultUpvotePower = golosPower))
             }
         }
     }
