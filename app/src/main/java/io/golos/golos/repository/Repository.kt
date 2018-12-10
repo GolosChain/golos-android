@@ -82,6 +82,7 @@ interface StoriesProvider {
 
     @MainThread
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
+                            voteForIt: Boolean,
                             resultListener: (CreatePostResult?, GolosError?) -> Unit = { _, _ -> })
 
     @MainThread

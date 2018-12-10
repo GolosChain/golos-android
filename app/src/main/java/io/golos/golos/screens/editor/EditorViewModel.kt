@@ -250,6 +250,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                             result?.blog ?: "",
                             result?.permlink ?: "")
 
+
                 } else {
                     mEditorLiveData.value = mEditorLiveData.value?.copy(error = error,
                             isLoading = false)
@@ -259,6 +260,7 @@ class EditorViewModel : ViewModel(), Observer<StoriesFeed> {
                 mRepository.createPost(titleText,
                         editorLiveData.value?.parts ?: ArrayList(),
                         editorLiveData.value?.tags ?: return,
+                        mRepository.appSettings.value?.voteForYouStory == true,
                         listener)
                 try {
                     Answers.getInstance().logCustom(CustomEvent("created post"))

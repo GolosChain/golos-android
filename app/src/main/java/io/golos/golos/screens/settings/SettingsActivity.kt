@@ -5,11 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
-import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -20,7 +19,8 @@ import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.utils.asIntentToShowUrl
-import timber.log.Timber
+import io.golos.golos.utils.setViewGone
+import io.golos.golos.utils.setViewVisible
 
 /**
  * Created by yuri on 12.12.17.
@@ -32,8 +32,13 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
     private lateinit var mNoImagesSwitch: SwitchCompat
     private lateinit var mNSFWSwitch: SwitchCompat
     private lateinit var mBountySpinner: Spinner
+    private lateinit var mDefaultGolosPowerLabel: TextView
     private lateinit var mLangSettingsSpinner: Spinner
-    private lateinit var mGolosPowerSpinner: Spinner
+    private lateinit var mUseDefaultGolosPowerSwitch: SwitchCompat
+    private val mGolosPowerLabels = ArrayList<View>()
+    private lateinit var mGolosPowerSeeker: AppCompatSeekBar
+    private lateinit var mVoteForYourSelfSwitch: SwitchCompat
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -98,6 +103,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         setUpLanguage()
         setUpBountyDisplay()
         setUpVotePower()
+        setUpVoteForYourSelf()
         Repository.get.appSettings.observe(this, this)
     }
 
@@ -114,7 +120,6 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Timber.e("onItemSelected")
                 val lang = when (p2) {
                     0 -> GolosAppSettings.GolosLanguage.RU
                     1 -> GolosAppSettings.GolosLanguage.EN
@@ -148,19 +153,18 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
             GolosAppSettings.GolosLanguage.EN -> 1
         })
 
-        mGolosPowerSpinner.setSelection(when (appSettings.defaultUpvotePower) {
-            in 0..10 -> 1
-            in 11..20 -> 2
-            in 21..30 -> 3
-            in 31..40 -> 4
-            in 41..50 -> 5
-            in 51..60 -> 6
-            in 61..70 -> 7
-            in 71..80 -> 8
-            in 81..90 -> 9
-            in 91..100 -> 10
-            else -> 0
-        })
+        val defGolosPower = appSettings.defaultUpvotePower
+        if (defGolosPower > -1 && defGolosPower <= 100) {
+            mGolosPowerSeeker.progress = defGolosPower.toInt()
+            mGolosPowerSeeker.setViewVisible()
+            mGolosPowerLabels.forEach { it.setViewVisible() }
+            mUseDefaultGolosPowerSwitch.isChecked = true
+        } else {
+            mGolosPowerSeeker.setViewGone()
+            mGolosPowerLabels.forEach { it.setViewGone() }
+            mUseDefaultGolosPowerSwitch.isChecked = false
+        }
+        mVoteForYourSelfSwitch.isChecked = appSettings.voteForYouStory
     }
 
     private fun setUpNotifications() {
@@ -176,6 +180,15 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
             val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
             Repository.get.setAppSettings(currentValue.copy(displayImagesMode =
             if (currentValue.displayImagesMode == GolosAppSettings.DisplayImagesMode.DISPLAY) GolosAppSettings.DisplayImagesMode.DISPLAY_NOT else GolosAppSettings.DisplayImagesMode.DISPLAY))
+        }
+    }
+
+    private fun setUpVoteForYourSelf() {
+        mVoteForYourSelfSwitch = findViewById<SwitchCompat>(R.id.vote_for_yourself_switch)
+
+        mVoteForYourSelfSwitch.setOnClickListener {
+            val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
+            Repository.get.setAppSettings(currentValue.copy(voteForYouStory = mVoteForYourSelfSwitch.isChecked))
         }
     }
 
@@ -222,34 +235,50 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         }
     }
 
-    private fun setUpVotePower() {
-        mGolosPowerSpinner = findViewById<Spinner>(R.id.golos_power_spinner)
-        mGolosPowerSpinner.adapter = SpinnerAdapterWithDownChevron(this, R.array.vote_power)
-
-        mGolosPowerSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-            }
-
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val currentValue = Repository.get.appSettings.value ?: return
-                val golosPower = when (p2) {
-                    0 -> Byte.MIN_VALUE
-                    1 -> (10).toByte()
-                    2 -> (20).toByte()
-                    3 -> (30).toByte()
-                    4 -> (40).toByte()
-                    5 -> (50).toByte()
-                    6 -> (60).toByte()
-                    7 -> (70).toByte()
-                    8 -> (80).toByte()
-                    9 -> (90).toByte()
-                    10 -> (100).toByte()
-                    else -> Byte.MIN_VALUE
-                }
-                Repository.get.setAppSettings(currentValue.copy(defaultUpvotePower = golosPower))
-            }
+    private inner class DefaultVotePositionUpdateRunnable : Runnable {
+        override fun run() {
+            mDefaultGolosPowerLabel.x = mGolosPowerSeeker.thumb.bounds.left.toFloat() + resources.getDimension(R.dimen.six)
         }
+    }
+
+    private fun setUpVotePower() {
+        mUseDefaultGolosPowerSwitch = findViewById(R.id.default_vote_switch)
+        mGolosPowerSeeker = findViewById(R.id.default_vote_seeker)
+        mDefaultGolosPowerLabel = findViewById(R.id.golos_power_spinner_label)
+        mGolosPowerLabels.apply {
+            add(findViewById(R.id.first_l))
+            add(findViewById(R.id.second_l))
+            add(findViewById(R.id.third_l))
+        }
+        mUseDefaultGolosPowerSwitch.setOnClickListener {
+            val currentValue = Repository.get.appSettings.value ?: return@setOnClickListener
+            if (!mUseDefaultGolosPowerSwitch.isChecked) Repository.get.setAppSettings(currentValue.copy(defaultUpvotePower = Byte.MIN_VALUE))
+            else Repository.get.setAppSettings(currentValue.copy(defaultUpvotePower = 50))
+        }
+        mGolosPowerSeeker.setOnTouchListener { v, event ->
+            if (event?.action == MotionEvent.ACTION_DOWN) {
+                mDefaultGolosPowerLabel.setViewVisible()
+                mDefaultGolosPowerLabel.post(DefaultVotePositionUpdateRunnable())
+            }
+            false
+        }
+        mGolosPowerSeeker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                mDefaultGolosPowerLabel.text = progress.toString().plus("%")
+                mDefaultGolosPowerLabel.post(DefaultVotePositionUpdateRunnable())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                mDefaultGolosPowerLabel.setViewGone()
+                val currentValue = Repository.get.appSettings.value ?: return
+                Repository.get.setAppSettings(currentValue.copy(defaultUpvotePower = seekBar?.progress?.toByte()
+                        ?: return))
+            }
+        })
     }
 
     private fun setUpBountyDisplay() {

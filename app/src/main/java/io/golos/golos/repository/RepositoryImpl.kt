@@ -727,6 +727,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
     override fun createPost(title: String,
                             content: List<EditorPart>,
                             tags: List<String>,
+                            voteForIt: Boolean,
                             resultListener: (CreatePostResult?, GolosError?) -> Unit) {
         val tags = ArrayList(tags)
         val content = ArrayList(content)
@@ -755,6 +756,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                                 ?: ArrayList())).toArrayList()),
                                 FeedType.BLOG,
                                 StoryFilter(userNameFilter = userName))
+                        if (voteForIt) vote(newStory.rootStory, 100)
                         mUsersRepository.requestUsersAccountInfoUpdate(listOf(userName))
                     }
                 }

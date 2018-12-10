@@ -280,6 +280,8 @@
     <string name="sort_by">Sort by</string>
     <string name="master_key">Master key</string>
     <string name="choose_lang">Language</string>
+    <string name="default_vote_power">Мощности голосования по умолчанию</string>
+    <string name="vote_for_youtself">Голосовать по умолчанию за свою публикацию</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

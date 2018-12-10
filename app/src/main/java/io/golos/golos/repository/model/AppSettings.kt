@@ -12,8 +12,8 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
                   @JsonProperty("chosenCurrency") val chosenCurrency: GolosAppSettings.GolosCurrency?,
                   @JsonProperty("bountyDisplay") val bountyDisplay: GolosAppSettings.GolosBountyDisplay?,
                   @JsonProperty("appLanguage") val appLanguage: GolosAppSettings.GolosLanguage?,
-                  @JsonProperty("defaultUpVotePower") val defaultUpVotePower: Byte?) {
-
+                  @JsonProperty("defaultUpVotePower") val defaultUpVotePower: Byte?,
+                  @JsonProperty("voteForYourSelf") val voteForYourSelf: Boolean?) {
 
 
     override fun equals(other: Any?): Boolean {
@@ -31,6 +31,7 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         if (bountyDisplay != other.bountyDisplay) return false
         if (appLanguage != other.appLanguage) return false
         if (defaultUpVotePower != other.defaultUpVotePower) return false
+        if (voteForYourSelf != other.voteForYourSelf) return false
 
         return true
     }
@@ -45,10 +46,11 @@ class AppSettings(@JsonProperty("loudNotification") val loudNotification: Boolea
         result = 31 * result + (bountyDisplay?.hashCode() ?: 0)
         result = 31 * result + (appLanguage?.hashCode() ?: 0)
         result = 31 * result + (defaultUpVotePower ?: 0)
+        result = 31 * result + (voteForYourSelf?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay, appLanguage=$appLanguage, defaultUpVotePower=$defaultUpVotePower)"
+        return "AppSettings(loudNotification=$loudNotification, feedMode=$feedMode, nsfwMode=$nsfwMode, displayImagesMode=$displayImagesMode, nighModeEnable=$nighModeEnable, chosenCurrency=$chosenCurrency, bountyDisplay=$bountyDisplay, appLanguage=$appLanguage, defaultUpVotePower=$defaultUpVotePower, voteForYourSelf=$voteForYourSelf)"
     }
 }

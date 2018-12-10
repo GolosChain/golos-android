@@ -103,7 +103,7 @@ class RepositoryPostAndVoteTest {
         repo.createPost(UUID.randomUUID().toString(),
                 listOf(EditorTextPart("sdg", SpannableStringBuilder.valueOf("test content")),
                         image),
-                listOf("test"), { a, b -> print(b) })
+                listOf("test"), false, { a, b -> print(b) })
 
         Thread.sleep(5000)
 

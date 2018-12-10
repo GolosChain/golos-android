@@ -444,4 +444,12 @@
         <item name="android:textSize">@dimen/font_medium</item>
         <item name="android:background">?selectableItemBackground</item>
     </style>
+
+    <style name="SettingSeekerLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">#959595</item>
+    </style>
 </resources>

@@ -280,6 +280,8 @@
     <string name="sort_by">Сортировать по</string>
     <string name="master_key">Мастер ключ</string>
     <string name="choose_lang">Язык интерфейса</string>
+    <string name="default_vote_power">Мощность голосования по умолчанию</string>
+    <string name="vote_for_youtself">Голосовать по умолчанию за свою публикацию</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
