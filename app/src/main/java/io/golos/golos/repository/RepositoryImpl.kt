@@ -17,6 +17,7 @@ import io.golos.golos.R
 import io.golos.golos.notifications.FCMTokenProviderImpl
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.notifications.PushNotificationsRepositoryImpl
+import io.golos.golos.repository.api.DiscussionQueryData
 import io.golos.golos.repository.api.GolosApi
 import io.golos.golos.repository.model.*
 import io.golos.golos.repository.persistence.Persister
@@ -685,7 +686,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
             mStoryUpdateRequests.add(request)
             networkExecutor.execute {
                 try {
-                    var story = getStory(blog, author, permLink, if (loadVotes) null else 0)
+                    val story = getStory(blog, author, permLink, if (loadVotes) null else 0)
 
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     val position = liveData.value?.items?.indexOfFirst { it.rootStory.id == story.rootStory.id }
@@ -718,6 +719,40 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                         completionListener.invoke(Unit, error)
                     }
                 }
+            }
+        }
+    }
+
+    override fun requestUnclassifiedStoriesUpdate(request: List<StoryLoadRequest>, completionListener: (Unit, GolosError?) -> Unit) {
+        val workingRequests = request.filter { !mStoryUpdateRequests.contains(it) }
+        if (workingRequests.isEmpty()) return
+        mStoryUpdateRequests.addAll(request)
+        networkExecutor.execute {
+            try {
+                val stories = mGolosApi.getStoriesWithoutComments(request.map { DiscussionQueryData(it.author, it.permlink, 0) }.distinct())
+                val copy = stories.toArrayList()
+                val unclassifiedFeed = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
+                val unclassifiedStories = unclassifiedFeed.value?.items.orEmpty().toArrayList()
+
+                stories.forEach { newStory ->
+                    unclassifiedStories.indexOfFirst { it.rootStory.id == newStory.rootStory.id }.takeIf { it != -1 }?.let { indexOfCashedStory ->
+                        val oldStory = unclassifiedStories[indexOfCashedStory]
+                        newStory.rootStory.activeVotes.addAll(oldStory.rootStory.activeVotes)
+                        unclassifiedStories[indexOfCashedStory] =
+                                newStory.copy(comments = oldStory.comments).apply { this.rootStory.activeVotes.addAll(oldStory.rootStory.activeVotes) }
+                        copy.remove(newStory)
+                    }
+                }
+                mMainThreadExecutor.execute {
+                    unclassifiedFeed.value = StoriesFeed(unclassifiedStories + copy, FeedType.UNCLASSIFIED, unclassifiedFeed.value?.filter, true)
+                    completionListener(Unit, null)
+                }
+                mStoryUpdateRequests.removeAll(request)
+
+            } catch (e: java.lang.Exception) {
+                logException(e)
+                mStoryUpdateRequests.removeAll(request)
+                completionListener(Unit, GolosErrorParser.parse(e))
             }
         }
     }
@@ -870,8 +905,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mSettingRepository.setAppSettings(newSettings)
     }
 
-    override val notificationSettings: LiveData<GolosNotificationSettings>
-        get() = mSettingRepository.notificationSettings
+    override val notificationsSettings: LiveData<GolosNotificationSettings>
+        get() = mSettingRepository.notificationsSettings
 
     override fun setNotificationSettings(newSettings: GolosNotificationSettings) {
         mSettingRepository.setNotificationSettings(newSettings)
@@ -1143,5 +1178,3 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mLogger?.log(java.lang.Exception(e.toString()))
     }
 }
-
-private data class StoryLoadRequest(val author: String, val permlink: String, val blog: String?, val loadVotes: Boolean, val loadComents: Boolean)

@@ -31,6 +31,8 @@ abstract class GolosApi : GolosUsersApi {
 
     abstract fun getStoryWithoutComments(author: String, permlink: String, voteLimit: Int? = null): StoryWithComments
 
+    abstract fun getStoriesWithoutComments(queryData: List<DiscussionQueryData>): List<StoryWithComments>
+
     abstract fun getStories(limit: Int, type: FeedType, truncateBody: Int,
                             filter: StoryFilter? = null, startAuthor: String?, startPermlink: String?): List<StoryWithComments>
 

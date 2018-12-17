@@ -55,9 +55,7 @@ abstract class StoriesViewHolder(resId: Int,
             getBlogNameTv().text = story.categoryName
         }
 
-
         getDateStampText().text = createTimeLabel(story.created, itemView.context)
-
 
         val shownName = newState.stripe.authorAccountInfo?.shownName.orEmpty().trim()
         if (shownName.isEmpty()) getShownUserNameTv().setViewGone()
@@ -76,11 +74,11 @@ abstract class StoriesViewHolder(resId: Int,
             getUserNickTv().text = story.author
         }
 
-        if (story.title.length > 2) {
-            getTitleTv().text = story.title.capitalize()
-        } else {
-            getTitleTv().text = ""
-        }
+        getTitleTv().text = story.title.capitalize().takeIf { newState.stripe.story.isRootStory }
+                ?: newState.stripe.parentStory?.title?.let { "RE: $it" }.takeIf { newState.stripe.parentStory?.isRootStory == true }
+                ?: newState.stripe.parentStory?.body?.let { "RE: ${it.toHtml()}" }?.let { if (it.length <= 201) it else it.substring(0, 200) }
+                ?: ""
+
         val bountyDisplay = newState.feedCellSettings.bountyDisplay
         getCommentsTv()?.text = story.commentsCount.toString()
         getUpvoteText().text = story.upvotesNum.toString()

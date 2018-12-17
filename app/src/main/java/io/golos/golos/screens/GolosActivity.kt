@@ -21,6 +21,7 @@ import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.GolosAppSettings
 import io.golos.golos.utils.*
+import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -102,7 +103,6 @@ abstract class GolosActivity : AppCompatActivity() {
         val lang = Repository.get.appSettings.value?.language
                 ?: if (Locale.getDefault()?.language.orEmpty().contains("ru", true)) GolosAppSettings.GolosLanguage.RU else GolosAppSettings.GolosLanguage.EN
         val newLocale = if (lang == GolosAppSettings.GolosLanguage.RU) Locale("ru") else Locale("en")
-
         if (Build.VERSION.SDK_INT < 24) {
             config.locale = newLocale
         } else
@@ -111,7 +111,6 @@ abstract class GolosActivity : AppCompatActivity() {
         val wrapper = newBase.createConfigurationContext(config)
 
         super.attachBaseContext(ContextWrapper(wrapper))
-
     }
 
 

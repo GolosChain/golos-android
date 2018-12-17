@@ -39,7 +39,7 @@ internal class SettingsRepositoryImpl(private val mSettingGolosServices: GolosSe
 
     override val appSettings: LiveData<GolosAppSettings>
         get() = mAppSettingsLiveData
-    override val notificationSettings: LiveData<GolosNotificationSettings>
+    override val notificationsSettings: LiveData<GolosNotificationSettings>
         get() = mNotificationsSettings
 
     fun AppSettings.toGolosSettings() = GolosAppSettings(this.loudNotification

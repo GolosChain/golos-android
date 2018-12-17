@@ -187,7 +187,8 @@
     <string name="user_answered_on_comment">&lt;b>%s&lt;/b> ответил(а) на ваш <![CDATA[<a href = "%s">комментарий</>]]></string>
     <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> ответил(а) на ваш комментарий</string>
     <string name="user_transferred_you">На ваш счет поступило %s</string>
-    <string name="notifications">Настройки пуш уведомлений</string>
+    <string name="push_notifications">Настройки пуш уведомлений</string>
+    <string name="online_notifications">Настройки онлайн уведомлений</string>
     <string name="mention">Упоминания</string>
     <string name="transfer_income">Пришел перевод от &lt;b>%s&lt;/b></string>
     <string name="like">Голос за</string>
@@ -197,6 +198,7 @@
     <string name="sound">Звук</string>
     <string name="play_sound">Звук уведомлений</string>
     <string name="turn_on_pushes">Включить все пуш уведомления</string>
+    <string name="turn_on_online">Включить все онлайн уведомления</string>
     <string name="new_comment">Ответ на пост или комментарий</string>
     <string name="notifications_channel_main">Основные нотификации</string>
     <string name="new_upvote">Новый лайк</string>

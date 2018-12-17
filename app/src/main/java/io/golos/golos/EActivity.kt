@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.TextView
@@ -26,7 +25,7 @@ class EActivity : AppCompatActivity() {
 
         renew.setOnClickListener {
             mTextView.text = GolosServicesImpl.instance?.toString() +
-                    "\n${Repository.get.notificationSettings.value}" +
+                    "\n${Repository.get.notificationsSettings.value}" +
                     "\ndevice id = ${DeviceIdProviderImpl.getDeviceId()}" +
                     "\n token = ${FCMTokenProviderImpl.tokenLiveData.value?.newToken}"+
                     "\n is pushes subscribe = $isPushesSubscribed"
@@ -40,7 +39,7 @@ class EActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mTextView.text = GolosServicesImpl.instance?.toString() +
-                "\n${Repository.get.notificationSettings.value}" +
+                "\n${Repository.get.notificationsSettings.value}" +
                 "\ndevice id = ${DeviceIdProviderImpl.getDeviceId()}" +
                 "\n token = ${FCMTokenProviderImpl.tokenLiveData.value?.newToken}" +
                 "\n is pushes subscribe = $isPushesSubscribed"

@@ -22,7 +22,8 @@ data class StoryWrapper(
         val authorAccountInfo: GolosUserAccountInfo? = null,
         val exchangeValues: ExchangeValues = ExchangeValues.nullValues,
         val isStoryEditable: Boolean = false,
-        var asHtmlString: CharSequence? = null) {
+        var asHtmlString: CharSequence? = null,
+        val parentStory: GolosDiscussionItem? = null) {
 
 
     override fun equals(other: Any?): Boolean {
@@ -39,6 +40,7 @@ data class StoryWrapper(
         if (authorAccountInfo != other.authorAccountInfo) return false
         if (exchangeValues != other.exchangeValues) return false
         if (isStoryEditable != other.isStoryEditable) return false
+        if (parentStory != other.parentStory) return false
 
         return true
     }
@@ -46,6 +48,7 @@ data class StoryWrapper(
     override fun hashCode(): Int {
         var result = story.hashCode()
         result = 31 * result + (voteUpdatingState?.hashCode() ?: 0)
+        result = 31 * result + (parentStory?.hashCode() ?: 0)
         result = 31 * result + voteStatus.hashCode()
         result = 31 * result + isPostReposted.hashCode()
         result = 31 * result + repostStatus.hashCode()
@@ -54,6 +57,7 @@ data class StoryWrapper(
         result = 31 * result + isStoryEditable.hashCode()
         return result
     }
+
 }
 
 data class SubscribeStatus(val isCurrentUserSubscribed: Boolean,

@@ -1,5 +1,7 @@
 package io.golos.golos.screens.settings
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -11,14 +13,18 @@ import java.util.*
 
 
 class NotificationsSettingActivity : GolosActivity() {
-    private val allOnNotifs = GolosNotificationSettings(true, true, true, true, true, true
+
+
+    private val allOn = GolosNotificationSettings(true, true, true, true, true, true
             , true, true, true, true, true, true, true)
-    private val allOffNotifs = GolosNotificationSettings(false, false, false, false, false, false, false, false, false, false, false, false, false)
+
+    private val allOff = GolosNotificationSettings(false, false, false, false, false, false, false, false, false, false, false, false, false)
+
 
     fun onChanged() {
         if (mRecycler.adapter == null) {
             mRecycler.adapter = SettingsAdapter(createRowsForAdapter()) { id, oldValue, newValue ->
-                val notificationSettings = Repository.get.notificationSettings.value
+                val notificationSettings = Repository.get.notificationsSettings.value
                         ?: return@SettingsAdapter
                 val appSettings = Repository.get.appSettings.value ?: return@SettingsAdapter
                 val repo = Repository.get
@@ -38,7 +44,7 @@ class NotificationsSettingActivity : GolosActivity() {
                         NotificationSettingsTypes.POST_REWARD -> repo.setNotificationSettings(notificationSettings.copy(showAward = newValue))
                         NotificationSettingsTypes.CURATION_REWARD -> repo.setNotificationSettings(notificationSettings.copy(showCurationAward = newValue))
                         NotificationSettingsTypes.CHECK_ALL -> {
-                            if (newValue) repo.setNotificationSettings(allOnNotifs) else repo.setNotificationSettings(allOffNotifs)
+                            repo.setNotificationSettings(if (newValue) allOn else allOff)
                         }
                     }
                 }
@@ -60,20 +66,23 @@ class NotificationsSettingActivity : GolosActivity() {
         setContentView(R.layout.a_notification_settings)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { onBackPressed() }
-        Repository.get.notificationSettings.observe(this, Observer { onChanged() })
+        Repository.get.notificationsSettings.observe(this, Observer { onChanged() })
         Repository.get.appSettings.observe(this, Observer { onChanged() })
         mRecycler = findViewById(R.id.recycler)
         mRecycler.itemAnimator = null
     }
 
     private fun createRowsForAdapter(): List<SettingRow> {
-        val notificationSettings = Repository.get.notificationSettings.value
+        val notificationSettings = Repository.get.notificationsSettings.value
+
         val appSettings = Repository.get.appSettings.value
         val rows = ArrayList<SettingRow>(20)
         rows.apply {
             add(SwitchRow(NotificationSettingsTypes.PLAY_SOUND, R.string.play_sound, appSettings?.loudNotification
                     ?: false))
-            add(SwitchRow(NotificationSettingsTypes.CHECK_ALL, R.string.turn_on_pushes, notificationSettings?.isAllOn() == true))
+            add(SwitchRow(NotificationSettingsTypes.CHECK_ALL,
+                    R.string.turn_on_pushes,
+                    notificationSettings?.isAllOn() == true))
             add(SpaceRow(R.dimen.margin_material_small, "space_1"))
             add(DelimeterRow(id = "del_row_1"))
             add(TitleRow(titleId = R.string.mention, id = "mentions"))
@@ -107,6 +116,13 @@ class NotificationsSettingActivity : GolosActivity() {
 
 
     fun GolosNotificationSettings.isAllOn(): Boolean {
-        return this == allOnNotifs
+        return this == allOn
+    }
+
+    companion object {
+        private const val TYPE_TAG = "type_tag"
+        fun start(context: Context) {
+            context.startActivity(Intent().apply { putExtra(TYPE_TAG, type) })
+        }
     }
 }

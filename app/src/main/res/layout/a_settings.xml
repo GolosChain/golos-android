@@ -43,10 +43,10 @@
 
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/settings_content_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:id="@+id/settings_content_scroll"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
 
@@ -161,15 +161,14 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/notifications_tv"
+                    android:id="@+id/push_notifications_tv"
                     style="@style/SettingTextViewStyle"
                     android:layout_width="match_parent"
                     android:layout_marginStart="@dimen/material_big"
                     android:layout_marginEnd="@dimen/material_big"
                     android:background="?selectableItemBackground"
                     android:clickable="true"
-                    android:text="@string/notifications"/>
-
+                    android:text="@string/push_notifications"/>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

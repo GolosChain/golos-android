@@ -80,6 +80,12 @@ interface StoriesProvider {
                                     feedType: FeedType,
                                     completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
 
+    //this method intended for bulk loading of stories
+    //so, comments and votes fetching  not supported
+    @MainThread
+    fun requestUnclassifiedStoriesUpdate(request: List<StoryLoadRequest>,
+                                         completionListener: (Unit, GolosError?) -> Unit = { _, _ -> })
+
     @MainThread
     abstract fun createPost(title: String, content: List<EditorPart>, tags: List<String>,
                             voteForIt: Boolean,
@@ -109,9 +115,10 @@ interface UserSettingRepository {
 
     fun setAppSettings(newSettings: GolosAppSettings)
 
-    val notificationSettings: LiveData<GolosNotificationSettings>
+    val notificationsSettings: LiveData<GolosNotificationSettings>
 
     fun setNotificationSettings(newSettings: GolosNotificationSettings)
+
 
 }
 
@@ -120,7 +127,7 @@ abstract class Repository : UserDataProvider,
         GolosUsersRepository,
         StoriesProvider,
         ExchangeDataProvider,
-        UserSettingRepository{
+        UserSettingRepository {
 
     companion object {
         private var instance: Repository? = null

@@ -4,6 +4,7 @@ import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.apis.follow.enums.FollowType
 import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
 import eu.bittrade.libs.golosj.base.models.*
+import eu.bittrade.libs.golosj.base.models.DiscussionQuery
 import eu.bittrade.libs.golosj.enums.DiscussionSortType
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
@@ -57,6 +58,10 @@ internal class ApiImpl : GolosApi() {
                 ?: -1)
         return StoryWithComments(DiscussionItemFactory.create(rawStory!!), arrayListOf())
 
+    }
+
+    override fun getStoriesWithoutComments(queryData: List<DiscussionQueryData>): List<StoryWithComments> {
+        return queryData.map { getStoryWithoutComments(it.author,it.permlink,it.voteLimit) }
     }
 
     override fun getStories(limit: Int, type: FeedType,

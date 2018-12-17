@@ -103,21 +103,21 @@
     </plurals>
 
     <plurals name="minutes">
-        <item quantity="few">minutes</item>
-        <item quantity="many">minutes</item>
-        <item quantity="one">minute</item>
-        <item quantity="two">minutes</item>
-        <item quantity="zero">minutes</item>
-        <item quantity="other">minutes</item>
+        <item quantity="few">%s minutes</item>
+        <item quantity="many">%s minutes</item>
+        <item quantity="one">%s minute</item>
+        <item quantity="two">%s minutes</item>
+        <item quantity="zero">%s minutes</item>
+        <item quantity="other">%s minutes</item>
     </plurals>
 
     <plurals name="hours">
-        <item quantity="few">hours</item>
-        <item quantity="many">hours</item>
-        <item quantity="one">hour</item>
-        <item quantity="two">hours</item>
-        <item quantity="zero">hour</item>
-        <item quantity="other">hours</item>
+        <item quantity="few">%s hours</item>
+        <item quantity="many">%s hours</item>
+        <item quantity="one">%s hour</item>
+        <item quantity="two">%s hours</item>
+        <item quantity="zero">%s hour</item>
+        <item quantity="other">%s hours</item>
     </plurals>
     <plurals name="subscription">
         <item quantity="few">Subscriptions</item>

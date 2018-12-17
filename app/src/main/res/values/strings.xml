@@ -186,7 +186,8 @@
     <string name="user_answered_on_comment">&lt;b>%s&lt;/b> answered on your <![CDATA[<a href = "%s">comment</>]]></string>
     <string name="user_answered_on_comment_for_notification">&lt;b>%s&lt;/b> answered on your comment</string>
     <string name="user_transferred_you">You received %s</string>
-    <string name="notifications">Online notifications on Golos.io</string>
+    <string name="push_notifications">Push notifications settings</string>
+    <string name="online_notifications">Online notifications settings</string>
     <string name="events">Notifications</string>
     <string name="mention">Mentions</string>
     <string name="like">Like (upvote)</string>
@@ -196,6 +197,7 @@
     <string name="sound">Sound</string>
     <string name="play_sound">Notifications sound</string>
     <string name="turn_on_pushes">Turn on all push notifications</string>
+    <string name="turn_on_online">Turn on all online notifications</string>
     <string name="new_comment">Reply in post or comment</string>
     <string name="notifications_channel_main">Main notifications</string>
     <string name="new_upvote">New upvote</string>

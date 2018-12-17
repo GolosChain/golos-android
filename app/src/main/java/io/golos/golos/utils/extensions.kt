@@ -83,7 +83,8 @@ fun Cursor.getString(columnName: String): String? {
     if (columnNumber < 0) return null
     return this.getString(this.getColumnIndex(columnName))
 }
-fun Int.length() = when(this) {
+
+fun Int.length() = when (this) {
     0 -> 1
     else -> Math.log10(Math.abs(toDouble())).toInt() + 1
 }
@@ -137,7 +138,8 @@ fun createStoryWrapper(discussionItem: GolosDiscussionItem,
                        currentUser: ApplicationUser?,
                        exchangeValues: ExchangeValues,
                        isThereNeedToHtmlize: Boolean,
-                       htmlizer: Htmlizer?): StoryWrapper {
+                       htmlizer: Htmlizer?,
+                       storiesForParentFinding: List<GolosDiscussionItem>? = null): StoryWrapper {
     if (isThereNeedToHtmlize && htmlizer == null) throw java.lang.IllegalArgumentException("if isThereNeedToHtmlize set to true htmlizer cannot be null")
 
 
@@ -149,7 +151,8 @@ fun createStoryWrapper(discussionItem: GolosDiscussionItem,
             golosUsersAccounts[discussionItem.author],
             exchangeValues,
             currentUser != null && discussionItem.author == currentUser.name,
-            if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null)
+            if (isThereNeedToHtmlize) htmlizer!!.toHtml(discussionItem.cleanedFromImages) else null,
+            storiesForParentFinding?.find { it.author == discussionItem.parentAuthor && it.permlink == discussionItem.parentPermlink })
 
     return out
 }

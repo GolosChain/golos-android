@@ -27,11 +27,14 @@
                 app:navigationIcon="@drawable/ic_clear_gray_24dp">
 
                 <TextView
+                    android:id="@+id/title_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="64dp"
                     android:gravity="center"
-                    android:text="@string/notifications"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:text="@string/push_notifications"
                     android:textColor="@color/text_color_white_black" />
 
             </androidx.appcompat.widget.Toolbar>

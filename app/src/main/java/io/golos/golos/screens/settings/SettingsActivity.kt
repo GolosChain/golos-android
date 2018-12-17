@@ -93,7 +93,7 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         versionTv.text = getString(R.string.golos_android_v, BuildConfig.VERSION_NAME)
 
         findViewById<Toolbar>(R.id.toolbar).setNavigationOnClickListener { onBackPressed() }
-        setUpNotifications()
+        setUpPushNotifications()
 
         setUpNighMode()
         setUpCompactMode()
@@ -167,11 +167,12 @@ class SettingsActivity : GolosActivity(), Observer<GolosAppSettings> {
         mVoteForYourSelfSwitch.isChecked = appSettings.voteForYouStory
     }
 
-    private fun setUpNotifications() {
-        findViewById<View>(R.id.notifications_tv).setOnClickListener {
-            startActivity(Intent(this, NotificationsSettingActivity::class.java))
+    private fun setUpPushNotifications() {
+        findViewById<View>(R.id.push_notifications_tv).setOnClickListener {
+            NotificationsSettingActivity.start(this)
         }
     }
+
 
     private fun setUpNoImagesMode() {
         mNoImagesSwitch = findViewById<SwitchCompat>(R.id.show_images_switch)

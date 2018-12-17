@@ -181,6 +181,16 @@ abstract class DiscussionsViewModel : ViewModel() {
             }
         }
 
+        if (type == FeedType.COMMENTS || type == FeedType.ANSWERS) {
+            mDiscussionsLiveData.removeSource(mRepository.getStories(FeedType.UNCLASSIFIED, null))
+            mDiscussionsLiveData.addSource(mRepository.getStories(FeedType.UNCLASSIFIED, null)) {
+                mExecutor.execute {
+                    val newState = onNewItems()
+                    propogateNewState(newState)
+                }
+            }
+        }
+
         mDiscussionsLiveData.addSource(mRepository.getGolosUserAccountInfos()) { usersMap ->
             usersMap ?: return@addSource
 
@@ -288,7 +298,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         mDiscussionsLiveData.removeSource(mRepository.getExchangeLiveData())
         mDiscussionsLiveData.removeSource(mRepository.currentUserRepostedBlogEntries)
         mDiscussionsLiveData.removeSource(mRepository.currentUserRepostStates)
-
+        mDiscussionsLiveData.removeSource(mRepository.getStories(FeedType.UNCLASSIFIED, null))
         if (mObserver != null) {
             Repository.get.appSettings.removeObserver(mObserver ?: return)
         }
@@ -315,6 +325,7 @@ abstract class DiscussionsViewModel : ViewModel() {
         val exchangeValues = mRepository.getExchangeLiveData().value ?: ExchangeValues.nullValues
         val repostedPosts = mRepository.currentUserRepostedBlogEntries.value.orEmpty()
         val repostUpdateStates = mRepository.currentUserRepostStates.value.orEmpty()
+        val unclassifiedStories = mRepository.getStories(FeedType.UNCLASSIFIED, null).value?.items.orEmpty().map { it.rootStory }
 
 
         val state = DiscussionsViewState(false,
@@ -322,7 +333,7 @@ abstract class DiscussionsViewModel : ViewModel() {
                 items.items.map {
                     val discussionItem = it.rootStory
                     changeWrapperAccountInfoIfNeeded(type, filter, createStoryWrapper(discussionItem, voteStatuses, usersMap, repostedPosts,
-                            repostUpdateStates, currentUser, exchangeValues, false, KnifeHtmlizer), mRepository.getGolosUserAccountInfos().value.orEmpty())
+                            repostUpdateStates, currentUser, exchangeValues, false, KnifeHtmlizer, unclassifiedStories), mRepository.getGolosUserAccountInfos().value.orEmpty())
                 },
                 null, null)
 
@@ -335,6 +346,18 @@ abstract class DiscussionsViewModel : ViewModel() {
                         .mapNotNull { it.rootStory.rebloggedBy })
                 .distinct()
                 .toList())
+        if (type == FeedType.COMMENTS || type == FeedType.ANSWERS) {
+            items.items
+                    .filter { feedStory ->
+                        unclassifiedStories.find { unclassifiedStory ->
+                            unclassifiedStory.author == feedStory.rootStory.parentAuthor &&
+                                    unclassifiedStory.permlink == feedStory.rootStory.parentPermlink
+                        } == null
+                    }
+                    .map { StoryLoadRequest(it.rootStory.parentAuthor, it.rootStory.parentPermlink, null, false, false) }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { requests -> mRepository.requestUnclassifiedStoriesUpdate(requests) }
+        }
 
         return state
     }
