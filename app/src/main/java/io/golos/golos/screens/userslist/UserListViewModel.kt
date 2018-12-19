@@ -35,6 +35,9 @@ class UserListViewModel : ViewModel() {
 
     fun getLiveData(): LiveData<UserListViewState> = mLiveData
     private var mCurrentUserSubscriptionsObserver = UserSubscriptionsObserver()
+    private val mUnsubscribeConfirmal = OneShotLiveData<String>()
+
+    val onUnsubscribeConfirmal: LiveData<String> = mUnsubscribeConfirmal
 
 
     inner class UserSubscriptionsObserver : Observer<List<String>> {
@@ -119,7 +122,7 @@ class UserListViewModel : ViewModel() {
     private fun onValueChanged() {
         val userAvatars = mRepository.usersAvatars.value.orEmpty()
         val currentUserSubscriptions = mRepository.currentUserSubscriptions.value.orEmpty()
-        val currentUserName = Repository.get.appUserData.value?.name?:""
+        val currentUserName = Repository.get.appUserData.value?.name ?: ""
 
         val updatingStates = mRepository.currentUserSubscriptionsUpdateStatus.value.orEmpty()
 
@@ -140,7 +143,7 @@ class UserListViewModel : ViewModel() {
                                             null,
                                             SubscribeStatus.create(currentUserSubscriptions.contains(it),
                                                     updatingStates[it] ?: UpdatingState.DONE),
-                                            it !=currentUserName)
+                                            it != currentUserName)
                                 },
                         null)
             }
@@ -174,7 +177,7 @@ class UserListViewModel : ViewModel() {
                                         outString,
                                         SubscribeStatus.create(currentUserSubscriptions.contains(it.name),
                                                 updatingStates[it.name] ?: UpdatingState.DONE),
-                                        it.name !=currentUserName)
+                                        it.name != currentUserName)
                             }
                             .toList()
                     , null)
@@ -205,11 +208,23 @@ class UserListViewModel : ViewModel() {
             mLiveData.value = mLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
 
         } else {
-            val handler: (Unit, GolosError?) -> Unit = { _, e ->
+            if (it.subscribeStatus?.isCurrentUserSubscribed == true) {
+                mUnsubscribeConfirmal.value = it.name
+            } else if (it.subscribeStatus?.isCurrentUserSubscribed == false) Repository.get.subscribeOnGolosUserBlog(it.name) { _, e ->
                 if (e != null) mLiveData.value = mLiveData.value?.copy(error = e)
             }
-            if (it.subscribeStatus?.isCurrentUserSubscribed == true) Repository.get.unSubscribeFromGolosUserBlog(it.name, handler)
-            else if (it.subscribeStatus?.isCurrentUserSubscribed == false) Repository.get.subscribeOnGolosUserBlog(it.name, handler)
+        }
+    }
+
+    fun unsubscribe(from: String) {
+        if (!mInternetStatusNotifier.isAppOnline()) {
+            mLiveData.value = mLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+        } else if (!Repository.get.isUserLoggedIn()) {
+            mLiveData.value = mLiveData.value?.copy(error = GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
+
+        } else if (!mRepository.currentUserSubscriptions.value.orEmpty().contains(from)) return
+        else Repository.get.unSubscribeFromGolosUserBlog(from) { _, e ->
+            if (e != null) mLiveData.value = mLiveData.value?.copy(error = e)
         }
     }
 }

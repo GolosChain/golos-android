@@ -1,20 +1,18 @@
 package io.golos.golos.screens.profile.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import android.content.Context
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.userslist.model.ListType
-import io.golos.golos.utils.ErrorCode
-import io.golos.golos.utils.GolosError
-import io.golos.golos.utils.InternetStatusNotifier
-import io.golos.golos.utils.UpdatingState
+import io.golos.golos.utils.*
+import timber.log.Timber
 
 data class UserAccountModel(val accountInfo: GolosUserAccountInfo,
                             val followButtonText: Int,
@@ -49,6 +47,10 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
     private lateinit var internetStatusNotifier: InternetStatusNotifier
     private val mRepository = Repository.get
     private val mLiveData: MediatorLiveData<UserAccountModel> = MediatorLiveData()
+    private val mUnsubscribeLiveData = OneShotLiveData<String>()
+
+
+    val unsubscribeLiveData: LiveData<String> = mUnsubscribeLiveData
 
     fun onCreate(userName: String, internetStatusNotifier: InternetStatusNotifier) {
         this.userName = userName
@@ -120,7 +122,7 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
         if (!mRepository.isUserLoggedIn()) return
         if (internetStatusNotifier.isAppOnline()) {
             mLiveData.value?.let {
-                mLiveData.value = mLiveData.value?.copy(isSubscriptionInProgress = true)
+
                 val resultHandler: (Unit, GolosError?) -> Unit = { _, e ->
                     if (e != null) {
                         mLiveData.value = mLiveData.value?.copy(isSubscriptionInProgress = false, error = e)
@@ -131,14 +133,26 @@ class UserInfoViewModel : ViewModel(), Observer<ApplicationUser> {
                 val currentUserSubscriptions =
                         if (isUserLogged) mRepository.getGolosUserSubscriptions(currentUserName).value.orEmpty() else emptyList<String>().toSet()
 
-                if (currentUserSubscriptions.contains(userName)) {
-                    mRepository.unSubscribeFromGolosUserBlog(userName, resultHandler)
+                if (currentUserSubscriptions.contains(it.accountInfo.userName)) {
+                    mUnsubscribeLiveData.value = it.accountInfo.userName
                 } else {
-                    mRepository.subscribeOnGolosUserBlog(userName, resultHandler)
+                    mLiveData.value = mLiveData.value?.copy(isSubscriptionInProgress = true)
+                    mRepository.subscribeOnGolosUserBlog(it.accountInfo.userName, resultHandler)
                 }
             }
         } else {
             showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+        }
+    }
+
+    fun unsubscribe(from: String) {
+        if (!mRepository.isUserLoggedIn()) return
+        if (!internetStatusNotifier.isAppOnline()) return
+        if (!mRepository.currentUserSubscriptions.value.orEmpty().contains(from)) return
+        mLiveData.value = mLiveData.value?.copy(isSubscriptionInProgress = true)
+
+        mRepository.unSubscribeFromGolosUserBlog(userName) { _, e ->
+            mLiveData.value = mLiveData.value?.copy(isSubscriptionInProgress = false, error = e)
         }
     }
 

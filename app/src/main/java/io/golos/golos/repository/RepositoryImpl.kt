@@ -150,7 +150,8 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
         mGolosServices = golosServices ?: GolosServicesImpl(userDataProvider = object : UserDataProvider {
             override val appUserData: LiveData<ApplicationUser>
                 get() = this@RepositoryImpl.appUserData
-        })
+        },
+                settingsRepository = this)
         mUsersRepository = avatarsRepository ?: UsersRepositoryImpl(mPersister,
                 this,
                 mGolosApi)

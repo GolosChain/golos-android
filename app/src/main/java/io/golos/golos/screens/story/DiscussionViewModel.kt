@@ -81,8 +81,10 @@ class DiscussionViewModel : ViewModel() {
     private var mLastVotingStoryId: Long = Long.MIN_VALUE
     private var mStoryWithComments: StoryWithComments? = null
     private val mChooserLiveData: MutableLiveData<VoteChooserDescription> = OneShotLiveData()
+    private val mUnsubscribeConfirmalLiveData: MutableLiveData<String> = OneShotLiveData()
 
     val chooserLiveData: LiveData<VoteChooserDescription> = mChooserLiveData
+    val unsubscribeConfirmalLiveData: LiveData<String> = mUnsubscribeConfirmalLiveData
 
 
     fun onCreate(author: String,
@@ -402,15 +404,28 @@ class DiscussionViewModel : ViewModel() {
         }
 
         if (mSubscriptionsLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == true)
-            mRepository.unSubscribeFromGolosUserBlog(mStoryLiveData.value?.storyTree?.rootWrapper?.story?.author
-                    ?: return) { _, e ->
-                showError(e ?: return@unSubscribeFromGolosUserBlog)
-            }
+            mUnsubscribeConfirmalLiveData.value = mStoryLiveData.value?.storyTree?.rootWrapper?.story?.author
+                    ?: return
         else if (mSubscriptionsLiveData.value?.subscribeOnStoryAuthorStatus?.isCurrentUserSubscribed == false) {
             mRepository.subscribeOnGolosUserBlog(mStoryLiveData.value?.storyTree?.rootWrapper?.story?.author
                     ?: return) { _, e ->
                 showError(e ?: return@subscribeOnGolosUserBlog)
             }
+        }
+    }
+
+    fun unsubscribeFromUser(name: String) {
+        if (!mRepository.isUserLoggedIn()) {
+            showError(GolosError(ErrorCode.ERROR_AUTH, null, R.string.must_be_logged_in_for_this_action))
+            return
+        }
+        if (!mInternetStatusNotifier.isAppOnline()) {
+            showError(GolosError(ErrorCode.ERROR_NO_CONNECTION, null, R.string.no_internet_connection))
+            return
+        }
+        if (!mRepository.currentUserSubscriptions.value.orEmpty().contains(name)) return
+        mRepository.unSubscribeFromGolosUserBlog(name) { _, e ->
+            showError(e ?: return@unSubscribeFromGolosUserBlog)
         }
     }
 

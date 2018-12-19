@@ -284,6 +284,9 @@
     <string name="choose_lang">Language</string>
     <string name="default_vote_power">Мощности голосования по умолчанию</string>
     <string name="vote_for_youtself">Голосовать по умолчанию за свою публикацию</string>
+    <string name="unsubscribe">Unsubscribe</string>
+    <string name="subscribe_confirmation">Are your sure want to unsubscribe from <b>@%s</b>?</string>
+    <string name="cancel_sub">Cancel subscription</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

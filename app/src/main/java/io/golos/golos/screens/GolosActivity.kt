@@ -20,8 +20,8 @@ import io.golos.golos.EActivity
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
 import io.golos.golos.repository.model.GolosAppSettings
+import io.golos.golos.screens.widgets.dialogs.VoteForAppDialog
 import io.golos.golos.utils.*
-import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 

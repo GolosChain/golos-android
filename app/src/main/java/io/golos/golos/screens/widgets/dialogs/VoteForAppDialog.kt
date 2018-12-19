@@ -1,4 +1,4 @@
-package io.golos.golos.screens
+package io.golos.golos.screens.widgets.dialogs
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import io.golos.golos.R
-import io.golos.golos.screens.widgets.dialogs.GolosDialog
 import io.golos.golos.utils.getLayoutInflater
 import io.golos.golos.utils.userVotedForApp
 import io.golos.golos.utils.isVoteQuestionMade

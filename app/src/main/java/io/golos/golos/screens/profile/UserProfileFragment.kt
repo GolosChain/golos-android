@@ -24,12 +24,14 @@ import io.golos.golos.screens.profile.adapters.ProfileFragmentsAdapter
 import io.golos.golos.screens.profile.viewmodel.UserAccountModel
 import io.golos.golos.screens.profile.viewmodel.UserInfoViewModel
 import io.golos.golos.screens.settings.SettingsActivity
+import io.golos.golos.screens.widgets.dialogs.UnSubscribeConfirmalDialog
 import io.golos.golos.utils.*
+import timber.log.Timber
 
 /**
  * Created by yuri on 10.11.17.
  */
-class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionEmitter {
+class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionEmitter, UnSubscribeConfirmalDialog.OnUserUnsubscriptionConfirm {
     private lateinit var mUserAvatar: ImageView
     private lateinit var mUserName: TextView
     private lateinit var mViewModel: UserInfoViewModel
@@ -202,7 +204,14 @@ class UserProfileFragment : Fragment(), Observer<UserAccountModel>, ReselectionE
                 }
             }
         })
+        mViewModel.unsubscribeLiveData.observe(this, Observer {
+            it ?: return@Observer
+            UnSubscribeConfirmalDialog.getInstance(it).show(childFragmentManager, null)
+        })
+    }
 
+    override fun onUnsubscriptionConfirmed(userName: String) {
+        mViewModel.unsubscribe(userName)
     }
 
     override fun onChanged(t: UserAccountModel?) {

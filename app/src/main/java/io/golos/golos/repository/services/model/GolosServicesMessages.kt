@@ -33,11 +33,13 @@ class GolosPushUnSubscribeRequest(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class GolosEventRequest(
-        @JsonProperty("fromId")
-        val fromId: String? = null,
+        @JsonProperty("profile")
+        val profile: String,
+        @JsonProperty("afterId")
+        val afterId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
-        val limit: Int ,
+        val limit: Int,
         @JsonProperty("types")
         val types: List<String>,
         @JsonProperty("markAsViewed")
@@ -45,8 +47,10 @@ class GolosEventRequest(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class GolosAllEventRequest(
-        @JsonProperty("fromId")
-        val fromId: String? = null,
+        @JsonProperty("profile")
+        val profile: String,
+        @JsonProperty("afterId")
+        val afterId: String? = null,
         @JsonProperty("limit")
         //from 1 to 100
         val limit: Int,
@@ -61,7 +65,7 @@ class MarkAsReadRequest(
         val ids: List<String>)
     : GolosServicesRequest()
 
-class GetUnreadCountRequest
+class GetUnreadCountRequest(@JsonProperty("profile") val profile: String)
     : GolosServicesRequest()
 
 class MarkAllReadRequest

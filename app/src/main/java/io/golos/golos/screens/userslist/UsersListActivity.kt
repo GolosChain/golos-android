@@ -13,13 +13,14 @@ import io.golos.golos.App
 import io.golos.golos.R
 import io.golos.golos.screens.GolosActivity
 import io.golos.golos.screens.userslist.model.ListType
+import io.golos.golos.screens.widgets.dialogs.UnSubscribeConfirmalDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
 
 /**
  * Created by yuri on 22.12.17.
  */
-class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
+class UsersListActivity : GolosActivity(), Observer<UserListViewState>, UnSubscribeConfirmalDialog.OnUserUnsubscriptionConfirm {
     private lateinit var mTitle: TextView
     private lateinit var mRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var mProgress: ProgressBar
@@ -69,6 +70,14 @@ class UsersListActivity : GolosActivity(), Observer<UserListViewState> {
             mViewModel.onUserClick(this, it)
         },
                 { mViewModel.onSubscribeClick(it) })
+        mViewModel.onUnsubscribeConfirmal.observe(this, Observer {
+            it ?: return@Observer
+            UnSubscribeConfirmalDialog.getInstance(it).show(supportFragmentManager, null)
+        })
+    }
+
+    override fun onUnsubscriptionConfirmed(userName: String) {
+        mViewModel.unsubscribe(userName)
     }
 
     override fun onChanged(t: UserListViewState?) {

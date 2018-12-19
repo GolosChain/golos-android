@@ -102,14 +102,15 @@ class NotificationsSettingActivity : GolosActivity() {
                     ?: false, R.drawable.ic_at_gr_18dp))
             add(CheckRow(NotificationSettingsTypes.REBLOG, R.string.reblog, notificationSettings?.showReblog
                     ?: false, R.drawable.ic_repost_gr_20dp))
-            add(CheckRow(NotificationSettingsTypes.WITNESS_VOTE, R.string.witness_vote, notificationSettings?.showWitnessVote
-                    ?: false, R.drawable.ic_delegat_vote_gr_20dp))
-            add(CheckRow(NotificationSettingsTypes.WITNESS_CANCEL, R.string.witness_cancel_vote, notificationSettings?.showWitnessCancelVote
-                    ?: false, R.drawable.ic_no_delegate_vote_cancel_gr_20dp))
+
             add(CheckRow(NotificationSettingsTypes.POST_REWARD, R.string.post_reward, notificationSettings?.showAward
                     ?: false, R.drawable.ic_user_award_20dp))
             add(CheckRow(NotificationSettingsTypes.CURATION_REWARD, R.string.curation_reward, notificationSettings?.showCurationAward
                     ?: false, R.drawable.ic_curation_award_20dp))
+            add(CheckRow(NotificationSettingsTypes.WITNESS_VOTE, R.string.witness_vote, notificationSettings?.showWitnessVote
+                    ?: false, R.drawable.ic_delegat_vote_gr_20dp))
+            add(CheckRow(NotificationSettingsTypes.WITNESS_CANCEL, R.string.witness_cancel_vote, notificationSettings?.showWitnessCancelVote
+                    ?: false, R.drawable.ic_no_delegate_vote_cancel_gr_20dp))
         }
         return rows
     }
@@ -122,7 +123,7 @@ class NotificationsSettingActivity : GolosActivity() {
     companion object {
         private const val TYPE_TAG = "type_tag"
         fun start(context: Context) {
-            context.startActivity(Intent().apply { putExtra(TYPE_TAG, type) })
+            context.startActivity(Intent(context, NotificationsSettingActivity::class.java).apply { putExtra(TYPE_TAG, type) })
         }
     }
 }

@@ -42,7 +42,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/vd_title_tv" />
 
-    <io.golos.golos.screens.StarsRow
+    <io.golos.golos.screens.widgets.dialogs.StarsRow
         android:id="@+id/stars"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

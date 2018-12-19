@@ -25,7 +25,8 @@ interface GolosServicesGateWay {
     fun unSubscribeOnNotifications(deviceId: String, fcmToken: String)
 
     @WorkerThread
-    fun getEvents(fromId: String?,
+    fun getEvents(userProfile: String,
+                  fromId: String?,
                   eventType: List<EventType>?,
                   markAsRead: Boolean,
                   limit: Int? = 100): GolosEvents
@@ -34,7 +35,7 @@ interface GolosServicesGateWay {
     fun markAsRead(ids: List<String>)
 
     @WorkerThread
-    fun getUnreadCount(): Int
+    fun getUnreadCount(profileId: String): Int
 
     fun markAllEventsAsRead()
     fun setNotificationSettings(deviceId: String, newSettings: NotificationSettings)
@@ -58,9 +59,9 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                     AUTH -> this.toString().toLowerCase()
                     PUSH_SUBSCRIBE -> "push.notifyOn"
                     PUSH_UNSUBSCRIBE -> "push.notifyOff"
-                    GET_NOTIFS_HISTORY -> "getNotifyHistory"
+                    GET_NOTIFS_HISTORY -> "push.history"
                     MARK_VIEWED -> "notify.markAsViewed"
-                    GET_UNREAD_COUNT -> "getNotifyHistoryFresh"
+                    GET_UNREAD_COUNT -> "push.historyFresh"
                     SECRET_REQUEST -> "getSecret"
                     MARK_VIEWED_ALL -> "notify.markAllAsViewed"
                     SET_SETTINGS -> "setOptions"
@@ -138,10 +139,14 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
         userName = null
     }
 
-    override fun getEvents(fromId: String?, eventType: List<EventType>?, markAsRead: Boolean, limit: Int?): GolosEvents {
-        val request = if (eventType == null) GolosAllEventRequest(fromId, limit
+    override fun getEvents(userProfile: String,
+                           fromId: String?,
+                           eventType: List<EventType>?,
+                           markAsRead: Boolean,
+                           limit: Int?): GolosEvents {
+        val request = if (eventType == null) GolosAllEventRequest(userProfile, fromId, limit
                 ?: 15, if (markAsRead) null else false)
-        else GolosEventRequest(fromId, limit
+        else GolosEventRequest(userProfile, fromId, limit
                 ?: 15, eventType.map { it.toString() }, if (markAsRead) null else false)
         return sendMessage(request, ServicesMethod.GET_NOTIFS_HISTORY)
                 .getEventData()
@@ -173,8 +178,8 @@ class GolosServicesGateWayImpl(private val communicationHandler: GolosServicesCo
                 ServicesMethod.MARK_VIEWED_ALL)
     }
 
-    override fun getUnreadCount(): Int {
-        return sendMessage(GetUnreadCountRequest(),
+    override fun getUnreadCount(profileId: String): Int {
+        return sendMessage(GetUnreadCountRequest(profileId),
                 ServicesMethod.GET_UNREAD_COUNT).getUnreadCount()
     }
 }

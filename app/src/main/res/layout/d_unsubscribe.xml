@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="wrap_content"
+                                                   android:layout_height="wrap_content"
+                                                   android:minWidth="280dp">
+
+
+    <TextView
+        android:id="@+id/vd_title_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:gravity="center_horizontal"
+        android:text="@string/unsubscribe"
+        android:textColor="@color/vote_dialog_title"
+        android:textSize="@dimen/vote_vor_app_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/lable"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_big"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="@dimen/material_big"
+        android:gravity="center_horizontal"
+        android:paddingTop="@dimen/quater"
+        android:paddingBottom="@dimen/quater"
+        android:text="@string/subscribe_confirmation"
+        android:textColor="@color/font_gray_black"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vd_title_tv"/>
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:background="#FF979797"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lable"/>
+
+    <Button
+        android:id="@+id/cancel_btn"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
+        android:layout_marginTop="10dp"
+        android:text="@string/cancel"
+        android:textColor="@color/vote_for_app_dialog_secondary_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lable"/>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#FF979797"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cancel_btn"/>
+
+
+    <Button
+        android:id="@+id/subscriprion_cancel_btn"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.VoteDialogButton"
+        android:text="@string/cancel_sub"
+        android:textColor="@color/blue_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cancel_btn"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

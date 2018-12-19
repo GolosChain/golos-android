@@ -8,6 +8,7 @@ import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.notifications.PushNotificationsRepository
 import io.golos.golos.repository.*
 import io.golos.golos.repository.model.ExchangeValues
+import io.golos.golos.repository.model.StoryLoadRequest
 import io.golos.golos.repository.services.EventType
 import io.golos.golos.repository.services.model.*
 import io.golos.golos.screens.profile.UserProfileActivity
@@ -89,7 +90,7 @@ class EventsViewModel : ViewModel() {
 
             val currentUserSubscriptions = mUsersProvider.currentUserSubscriptions.value.orEmpty()
             val currentSubscriptionsProgress = mUsersProvider.currentUserSubscriptionsUpdateStatus.value.orEmpty()
-
+            val requests = ArrayList<StoryLoadRequest>()
             events.forEach {
                 var needToLoadDisussion = false
                 var author: String = ""
@@ -207,9 +208,11 @@ class EventsViewModel : ViewModel() {
                     is GolosWitnessVoteEvent -> WitnessVoteEventListItem.create(it, it.counter == 1, it.fresh, avatars[it.fromUsers.firstOrNull().orEmpty()])
                     is GolosWitnessCancelVoteEvent -> WitnessCancelVoteEventListItem.create(it, it.counter == 1, it.fresh, avatars[it.fromUsers.firstOrNull().orEmpty()])
                 }
-                if (needToLoadDisussion) mStoriesProvider.requestStoryUpdate(author, permlink, null, false, false, FeedType.UNCLASSIFIED)
+                if (needToLoadDisussion)
+                    requests.add(StoryLoadRequest(author,permlink, null,false, false))
                 out.add(item)
             }
+            mStoriesProvider.requestUnclassifiedStoriesUpdate(requests)
             mMainTreadExecutor.execute {
                 //  Timber.e(out.toString())
                 mEventsList.value = EventsList(out)

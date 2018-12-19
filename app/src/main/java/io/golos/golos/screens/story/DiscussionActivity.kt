@@ -35,6 +35,7 @@ import io.golos.golos.screens.tags.model.LocalizedTag
 import io.golos.golos.screens.widgets.FooterView
 import io.golos.golos.screens.widgets.dialogs.CancelVoteDialog
 import io.golos.golos.screens.widgets.dialogs.PhotosDialog
+import io.golos.golos.screens.widgets.dialogs.UnSubscribeConfirmalDialog
 import io.golos.golos.screens.widgets.dialogs.VoteDialog
 import io.golos.golos.utils.*
 import timber.log.Timber
@@ -43,7 +44,8 @@ import timber.log.Timber
  * Created by yuri on 06.11.17.
  */
 class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener,
-        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, CancelVoteDialog.OnChangeConfirmal {
+        VoteDialog.OnVoteSubmit, ReblogConfirmalDialog.OnReblogConfirmed, CancelVoteDialog.OnChangeConfirmal,
+        UnSubscribeConfirmalDialog.OnUserUnsubscriptionConfirm {
     private lateinit var mViewModel: DiscussionViewModel
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mToolbar: Toolbar
@@ -423,7 +425,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
             }
 
             if (!mAuthorSubscribeButton.hasOnClickListeners()) {
-                mAuthorSubscribeButton.setOnClickListener { mViewModel.onSubscribeToBlogButtonClick() }
+                mAuthorSubscribeButton.setOnClickListener {
+                    mViewModel.onSubscribeToBlogButtonClick()
+                }
             }
 
             if (it.subscribeOnTagStatus.isCurrentUserSubscribed) {
@@ -431,6 +435,10 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
             } else {
                 mTagSubscribeBtn.setText(R.string.follow)
             }
+        })
+        mViewModel.unsubscribeConfirmalLiveData.observe(this, Observer { name ->
+            name ?: return@Observer
+            UnSubscribeConfirmalDialog.getInstance(name).show(supportFragmentManager, null)
         })
         mViewModel.chooserLiveData.observe(this, Observer {
             it ?: return@Observer
@@ -452,6 +460,10 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
     override fun onStop() {
         super.onStop()
         mViewModel.onStop()
+    }
+
+    override fun onUnsubscriptionConfirmed(userName: String) {
+        mViewModel.unsubscribeFromUser(userName)
     }
 
     private fun setUpViews() {

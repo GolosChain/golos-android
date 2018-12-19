@@ -197,7 +197,7 @@
     <string name="reply_on_comment">Ответ на комментарий</string>
     <string name="sound">Звук</string>
     <string name="play_sound">Звук уведомлений</string>
-    <string name="turn_on_pushes">Включить все пуш уведомления</string>
+    <string name="turn_on_pushes">Включить все пуш нотификации</string>
     <string name="turn_on_online">Включить все онлайн уведомления</string>
     <string name="new_comment">Ответ на пост или комментарий</string>
     <string name="notifications_channel_main">Основные нотификации</string>
@@ -284,6 +284,9 @@
     <string name="choose_lang">Язык интерфейса</string>
     <string name="default_vote_power">Мощность голосования по умолчанию</string>
     <string name="vote_for_youtself">Голосовать по умолчанию за свою публикацию</string>
+    <string name="unsubscribe">Отписаться</string>
+    <string name="subscribe_confirmation">Вы уверенны, что хотите отменить подписку <b>@%s</b>?</string>
+    <string name="cancel_sub">Отменить подписку</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>
@@ -299,9 +302,9 @@
     </string-array>
     <string-array name="comments_sort">
         <item>Популярности</item>
-        <item>Сначало новые</item>
+        <item>Сначала новые</item>
         <item>Сначала старые</item>
-        <item>По голосам</item>
+        <item>Голосам</item>
     </string-array>
     <string-array name="precision">
         <item>До целых</item>

@@ -8,9 +8,8 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import io.golos.golos.repository.Preloadable
 import io.golos.golos.repository.UserDataProvider
-import io.golos.golos.repository.model.AppSettings
-import io.golos.golos.repository.model.NotificationSettings
-import io.golos.golos.repository.model.PreparingState
+import io.golos.golos.repository.UserSettingRepository
+import io.golos.golos.repository.model.*
 import io.golos.golos.repository.services.model.*
 import io.golos.golos.utils.*
 import timber.log.Timber
@@ -82,7 +81,9 @@ interface GolosServices : Preloadable, GolosSettingsService, GolosPushService {
 }
 
 class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
-                        val userDataProvider: UserDataProvider,
+                        private val userDataProvider: UserDataProvider,
+                        private val settingsRepository: UserSettingRepository,
+                        private val deviceIdProvider: DeviceIdProvider = DeviceIdProviderImpl,
                         private val workerExecutor: Executor = Executors.newSingleThreadExecutor(),
                         private val mainThreadExecutor: Executor = MainThreadExecutor(),
                         private var errorLogger: ExceptionLogger = FabricExceptionLogger) : GolosServices {
@@ -97,9 +98,11 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
     private var isAuthComplete: Boolean = false
     @Volatile
     private var isAuthInProgress: Boolean = false
+    private var mLastSettings: GolosNotificationSettings? = null
 
     init {
         mReadyState.value = PreparingState.LOADING
+
     }
 
     override fun addLogoutListener(listener: ServiceLogoutListener) {
@@ -216,6 +219,19 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
         userDataProvider.appUserData.observeForever {
             onAuthStateChanged()
         }
+        settingsRepository.notificationsSettings.observeForever { golosSettings ->
+            golosSettings ?: return@observeForever
+            if (mLastSettings == null) {
+                mLastSettings = golosSettings
+                return@observeForever
+            }
+            if (mLastSettings == golosSettings) return@observeForever
+            Timber.e("cleaning")
+            allEventsLiveData.value = emptyList()
+            mEventsMap.forEach { it.value.value = emptyList() }
+            mEventsListsHashMap.clear()
+            mLastSettings = golosSettings
+        }
     }
 
     override val loadingState: LiveData<PreparingState>
@@ -256,7 +272,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
         workerExecutor.execute {
             runWithRetryAndCatch(Runnable {
                 mGolosServicesGateWay.markAsRead(copy)
-                val unreadCount = mGolosServicesGateWay.getUnreadCount()
+                val unreadCount = mGolosServicesGateWay.getUnreadCount(deviceIdProvider.getDeviceId())
                 val allEventsResult = setRead(eventsIds, allEventsLiveData.value.orEmpty())
                 val mEventsResult = mEventsMap.mapValues { liveData -> setRead(eventsIds, liveData.value.value.orEmpty()) }
 
@@ -382,7 +398,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
             }
             workerExecutor.execute {
                 try {
-                    val golosEvents = mGolosServicesGateWay.getEvents(fromId, eventTypes, markAsRead, limit)
+                    val golosEvents = mGolosServicesGateWay.getEvents(deviceIdProvider.getDeviceId(), fromId, eventTypes, markAsRead, limit)
                     val events = golosEvents.events
 
                     val eventsMap = groupEventsByType(events)
