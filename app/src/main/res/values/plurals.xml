@@ -51,12 +51,12 @@
         <item quantity="other">%s others</item>
     </plurals>
     <plurals name="mentioned">
-        <item quantity="few">%s others</item>
-        <item quantity="many">%s others</item>
-        <item quantity="one">%s other</item>
-        <item quantity="two">%s others</item>
-        <item quantity="zero">%s others</item>
-        <item quantity="other">%s others</item>
+        <item quantity="few">%d others</item>
+        <item quantity="many">%d others</item>
+        <item quantity="one">%d other</item>
+        <item quantity="two">%d others</item>
+        <item quantity="zero">%d others</item>
+        <item quantity="other">%d others</item>
     </plurals>
 
     <plurals name="made_repost">
@@ -169,11 +169,11 @@
         <item quantity="other">users</item>
     </plurals>
     <plurals name="notifications" >
-        <item quantity="few">%s more notifications</item>
-        <item quantity="many">%s more notifications</item>
-        <item quantity="one">%s more notification</item>
-        <item quantity="two">%s more notifications</item>
-        <item quantity="zero">%s more notifications</item>
-        <item quantity="other">%s more notifications</item>
+        <item quantity="few">%d more notifications</item>
+        <item quantity="many">%d more notifications</item>
+        <item quantity="one">%d more notification</item>
+        <item quantity="two">%d more notifications</item>
+        <item quantity="zero">%d more notifications</item>
+        <item quantity="other">%d more notifications</item>
     </plurals>
 </resources>

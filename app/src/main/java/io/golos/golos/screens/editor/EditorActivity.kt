@@ -164,10 +164,9 @@ class EditorActivity : GolosActivity(), EditorAdapterInteractions,
         }
 
         it.error?.let {
+            Timber.e("error = $it ${if (it.localizedMessage != null) getString(it.localizedMessage) else ""}")
             if (it.localizedMessage == R.string.unknown_error && it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
-
             else if (it.localizedMessage != null) mRecycler.showSnackbar(it.localizedMessage)
-            else if (it.nativeMessage != null) mRecycler.showSnackbar(it.nativeMessage)
         }
         if (it.isLoading) {
             if (mProgressDialog == null) mProgressDialog = showProgressDialog()

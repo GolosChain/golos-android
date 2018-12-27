@@ -70,8 +70,14 @@ class NotificationsAdapter(notifications: List<GolosNotification>,
 
     override fun onBindViewHolder(holder: NotificationsViewHolder, position: Int) {
         holder.state = NotificationWrapper(notification[position],
-                { clickListener.invoke(notification[it.adapterPosition]) },
-                { cancelListener.invoke(notification[it.adapterPosition]) })
+                {
+                    if (it.adapterPosition < 0) return@NotificationWrapper
+                    clickListener.invoke(notification[it.adapterPosition])
+                },
+                {
+                    if (it.adapterPosition < 0) return@NotificationWrapper
+                    cancelListener.invoke(notification[it.adapterPosition])
+                })
     }
 
 

@@ -457,7 +457,12 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
                 } catch (e: Exception) {
                     e.printStackTrace()
 
-                    if (reauthIfNeeded(e)) requestEventsUpdate(eventTypes, fromId, limit, markAsRead, completionHandler)
+                    if (reauthIfNeeded(e))
+                        try {
+                            requestEventsUpdate(eventTypes, fromId, limit, markAsRead, completionHandler)
+                        } catch (e: java.lang.Exception) {
+                            logException(e)
+                        }
                     else {
                         mainThreadExecutor.execute { completionHandler(Unit, GolosErrorParser.parse(e)) }
                     }

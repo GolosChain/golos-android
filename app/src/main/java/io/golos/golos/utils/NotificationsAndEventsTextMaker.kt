@@ -223,7 +223,7 @@ object NotificationsAndEventsAppearanceMakerImpl : NotificationsAndEventsAppeara
                 else context.getString(R.string.user_mentioned_several, golosNotification.fromUser,
                         context.getQuantityString(R.plurals.mentioned,
                                 numOfAdditionalNotifications,
-                                numOfAdditionalNotifications.toString()))
+                                numOfAdditionalNotifications))
                         .plus(" ${mEmojisMap[R.string.user_mentioned_several]}")
                 NotificationAppearance(title = null, body = text.setLinkSpan(title), iconId = R.drawable.ic_mention_w_40dp)
             }

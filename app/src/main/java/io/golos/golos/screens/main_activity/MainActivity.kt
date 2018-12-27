@@ -165,7 +165,7 @@ class MainActivity : GolosActivity(), Observer<CreatePostResult>, FeedTypePresel
                     }
                     mNotificationsIndicator.text = getString(R.string.show_more_notifications,
                             resources.getQuantityString(R.plurals.notifications, it.notifications.count() - 1,
-                                    (it.notifications.count() - 1).toString()))
+                                    it.notifications.count() - 1))
                 }
             }
         })

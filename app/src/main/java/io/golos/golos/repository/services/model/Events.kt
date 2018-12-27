@@ -12,6 +12,7 @@ import com.google.common.primitives.Longs
 import io.golos.golos.notifications.PostLinkExtractedData
 import io.golos.golos.notifications.PostLinkable
 import io.golos.golos.repository.Repository
+import io.golos.golos.repository.RepositoryImpl
 import io.golos.golos.repository.services.EventType
 import java.io.IOException
 import java.text.ParseException
@@ -257,7 +258,7 @@ class GolosReplyEvent(id: String, creationTime: Long, counter: Int,
                       val parentPermlink: String,
                       val fromUsers: List<String>, fresh: Boolean) : PostLinkable, GolosEvent(id, creationTime, counter, fresh), Authorable {
 
-    override fun getLink() = PostLinkExtractedData(fromUsers.first(), null, permlink)
+    override fun getLink() = PostLinkExtractedData(Repository.get.appUserData.value?.name?:"", null, parentPermlink)
     override fun getAuthors() = fromUsers
 
 

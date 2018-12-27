@@ -287,6 +287,8 @@
     <string name="unsubscribe">Отписаться</string>
     <string name="subscribe_confirmation">Вы уверенны, что хотите отменить подписку <b>@%s</b>?</string>
     <string name="cancel_sub">Отменить подписку</string>
+    <string name="confirmation">Подтверждение</string>
+    <string name="m_pass_hint">Введен мастер пароль. Для обеспечения безопасности вы можете войти с помощью приватного постинг ключа.\n\nПродолжить авторизацию мастер паролем?</string>
     <string-array name="daynight">
         <item>День</item>
         <item>Ночь</item>

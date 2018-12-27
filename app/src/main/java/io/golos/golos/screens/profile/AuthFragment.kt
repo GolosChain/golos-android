@@ -18,6 +18,7 @@ import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import io.golos.golos.R
@@ -26,12 +27,13 @@ import io.golos.golos.screens.profile.viewmodel.AuthViewModel
 import io.golos.golos.screens.profile.viewmodel.LoginOptions
 import io.golos.golos.screens.widgets.BarcodeScannerActivity
 import io.golos.golos.screens.widgets.LateTextWatcher
+import io.golos.golos.screens.widgets.dialogs.MasterPasswordWarningDialog
 import io.golos.golos.utils.*
 
 /**
  * Created by yuri on 30.10.17.
  */
-class AuthFragment : Fragment() {
+class AuthFragment : Fragment(), MasterPasswordWarningDialog.OnAcceptListener {
     private val SCAN_POSTING_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_REQUEST_CODE = nextInt()
     private val SCAN_ACTIVE_PERMISSION = nextInt()
@@ -215,6 +217,14 @@ class AuthFragment : Fragment() {
                     .getInstance(LoginHelpType.FOR_ACTIVE_KEY)
                     .show(activity?.supportFragmentManager ?: return@setOnClickListener, null)
         }
+        mViewModel.masterPassDialogLiveData.observe(this, Observer {
+            it ?: return@Observer
+            MasterPasswordWarningDialog.getInstance(0L).show(childFragmentManager, null)
+        })
+    }
+
+    override fun onAccept(id: Long) {
+        mViewModel.onMasterKeyConfirmed()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

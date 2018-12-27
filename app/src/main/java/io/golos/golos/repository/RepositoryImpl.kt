@@ -716,6 +716,7 @@ internal class RepositoryImpl(private val networkExecutor: Executor = Executors.
                     val error = GolosErrorParser.parse(e)
                     val liveData = convertFeedTypeToLiveData(FeedType.UNCLASSIFIED, null)
                     mMainThreadExecutor.execute {
+                        mStoryUpdateRequests.remove(request)
                         liveData.value = StoriesFeed(arrayListOf(), FeedType.UNCLASSIFIED, null)
                         completionListener.invoke(Unit, error)
                     }

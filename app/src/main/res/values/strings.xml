@@ -282,11 +282,13 @@
     <string name="sort_by">Sort by</string>
     <string name="master_key">Master key</string>
     <string name="choose_lang">Language</string>
-    <string name="default_vote_power">Мощности голосования по умолчанию</string>
+    <string name="default_vote_power">Default vote power</string>
     <string name="vote_for_youtself">Голосовать по умолчанию за свою публикацию</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="subscribe_confirmation">Are your sure want to unsubscribe from <b>@%s</b>?</string>
     <string name="cancel_sub">Cancel subscription</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="m_pass_hint">You entered master password. For safety reasons you can log in with your posting or active key.\n\nDo you want proceed with master password?</string>
     <string-array name="daynight">
         <item>Day</item>
         <item>Night</item>

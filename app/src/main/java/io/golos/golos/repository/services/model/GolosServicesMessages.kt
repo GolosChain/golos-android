@@ -82,7 +82,11 @@ class GolosServicesError(
         @JsonProperty("code")
         val code: Int,
         @JsonProperty("message")
-        val message: String)
+        val message: String){
+    override fun toString(): String {
+        return "GolosServicesError(code=$code, message='$message')"
+    }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class GolosServicesResponse(@JsonProperty("id")

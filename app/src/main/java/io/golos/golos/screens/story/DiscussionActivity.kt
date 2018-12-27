@@ -120,9 +120,9 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mViewModel.storyLiveData.observe(this, Observer {
             if (it?.storyTree?.rootWrapper != null) {
                 setFullscreenProgress(false)
-                if (it.storyTree.rootWrapper.story.title.isEmpty()) {
-                    mTitleTv.setViewGone()
-                }
+                if (it.storyTitle.isEmpty()) mTitleTv.setViewGone()
+                else mTitleTv.setViewVisible()
+
                 mSwipeToRefresh.setRefreshingS(it.isLoading)
 
                 val story = it.storyTree.rootWrapper.story
@@ -581,8 +581,7 @@ class DiscussionActivity : GolosActivity(), SwipeRefreshLayout.OnRefreshListener
         mSwipeToRefresh.setOnRefreshListener(this)
         setSupportActionBar(mToolbar)
         mToolbar.setNavigationOnClickListener({ finish() })
-
-
+        mTitleTv.setOnClickListener { mViewModel.onTitleClick(this) }
     }
 
     private fun onStoryVote(item: StoryWrapper, type: VoteDialog.DialogType) {

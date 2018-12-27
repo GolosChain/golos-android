@@ -4,7 +4,6 @@ import eu.bittrade.libs.golosj.Golos4J
 import eu.bittrade.libs.golosj.apis.follow.enums.FollowType
 import eu.bittrade.libs.golosj.apis.follow.model.FollowApiObject
 import eu.bittrade.libs.golosj.base.models.*
-import eu.bittrade.libs.golosj.base.models.DiscussionQuery
 import eu.bittrade.libs.golosj.enums.DiscussionSortType
 import eu.bittrade.libs.golosj.enums.PrivateKeyType
 import eu.bittrade.libs.golosj.exceptions.SteemResponseError
@@ -25,7 +24,6 @@ import java.io.File
 internal class ApiImpl : GolosApi() {
     private var mGolosApi = Golos4J.getInstance()
     private val mStoryConverter = StoryCommentsHierarchyResolver
-    private var mGlobalProperties: GlobalProperties? = null
 
 
     override fun getStory(blog: String,
@@ -37,7 +35,8 @@ internal class ApiImpl : GolosApi() {
                 ?: -1)
 
         val story = mStoryConverter.resolve(rawStory!!)
-        accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false) })
+        val props = mGolosApi.databaseMethods.dynamicGlobalProperties
+        accountDataHandler.invoke(rawStory.involvedAccounts.map { convertExtendedAccountToAccountInfo(it, false, props) })
         return story
     }
 
@@ -61,7 +60,7 @@ internal class ApiImpl : GolosApi() {
     }
 
     override fun getStoriesWithoutComments(queryData: List<DiscussionQueryData>): List<StoryWithComments> {
-        return queryData.map { getStoryWithoutComments(it.author,it.permlink,it.voteLimit) }
+        return queryData.map { getStoryWithoutComments(it.author, it.permlink, it.voteLimit) }
     }
 
     override fun getStories(limit: Int, type: FeedType,
@@ -240,20 +239,17 @@ internal class ApiImpl : GolosApi() {
         val accs = mGolosApi.databaseMethods.getAccounts(names.map { AccountName(it) }).filterNotNull()
 
         if (accs.isEmpty()) return emptyMap()
-
+        val props = mGolosApi.databaseMethods.dynamicGlobalProperties
         return accs
-                .map { convertExtendedAccountToAccountInfo(it, fetchSubsInfo) }
+                .map { convertExtendedAccountToAccountInfo(it, fetchSubsInfo, props) }
                 .associateBy { it.userName }
 
 
     }
 
-
     private fun convertExtendedAccountToAccountInfo(acc: ExtendedAccount,
-                                                    fetchSubscribersInfo: Boolean): GolosUserAccountInfo {
-        val globalProperties = mGlobalProperties
-                ?: mGolosApi.databaseMethods.dynamicGlobalProperties
-        mGlobalProperties = globalProperties
+                                                    fetchSubscribersInfo: Boolean,
+                                                    globalProperties: GlobalProperties = mGolosApi.databaseMethods.dynamicGlobalProperties): GolosUserAccountInfo {
 
         val votePower = globalProperties.totalVestingFundSteem.amount * (acc.vestingShares.amount / globalProperties.totalVestingShares.amount)
         val golosNum = acc.balance.amount

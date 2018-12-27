@@ -84,9 +84,27 @@ fun Cursor.getString(columnName: String): String? {
     return this.getString(this.getColumnIndex(columnName))
 }
 
+fun createStoryTitle(story: GolosDiscussionItem, parentStory: GolosDiscussionItem?): String {
+    return when {
+        story.isRootStory -> story.title
+        parentStory == null -> ""
+        parentStory.isRootStory -> "RE: ${parentStory.title}"
+        else -> "RE: ${parentStory.body.substringLengthChech(end = 200)}"
+    }
+}
+
+fun findParentStory(of: GolosDiscussionItem, probableParents: StoriesFeed?): GolosDiscussionItem? {
+    return probableParents?.items.orEmpty().find { it.rootStory.author == of.parentAuthor && it.rootStory.permlink == of.parentPermlink }?.rootStory
+}
+
 fun Int.length() = when (this) {
     0 -> 1
     else -> Math.log10(Math.abs(toDouble())).toInt() + 1
+}
+
+fun String.substringLengthChech(start: Int = 0, end: Int = this.length): String {
+    if (start > end || end > this.length) return this
+    else return substring(start, end)
 }
 
 fun changeWrapperAccountInfoIfNeeded(feedType: FeedType,

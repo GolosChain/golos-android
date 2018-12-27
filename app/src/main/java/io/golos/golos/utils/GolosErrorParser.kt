@@ -61,7 +61,7 @@ object GolosErrorParser {
             return R.string.maximum_comment_depth
         if (message.contains("Voting weight is too small") || message.contains("exceeded maximum allowed"))
             return R.string.too_low_golos_power
-        else if (error.error.steemErrorDetails.message.contains("You may only post once every 5 minutes"))
+        else if (error.error.steemErrorDetails.message.contains("You may only post 1 times in 300 seconds"))
             return R.string.you_can_post_only_every_five_minutes
         else if (error.error.steemErrorDetails.message.contains(" <= now + fc::seconds(STEEMIT_MAX_TIME_UNTIL_EXPIRATION): ")
                 || error.error.steemErrorDetails.message.contains("now < trx.expiration"))

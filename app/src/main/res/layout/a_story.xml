@@ -161,7 +161,7 @@
                     android:id="@+id/title_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
+                    android:background="?selectableItemBackground"
                     android:layout_marginStart="@dimen/margin_material"
                     android:layout_marginTop="@dimen/margin_material"
                     android:layout_marginEnd="@dimen/margin_material"

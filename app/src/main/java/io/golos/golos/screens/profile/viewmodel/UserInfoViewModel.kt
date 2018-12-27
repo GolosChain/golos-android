@@ -12,7 +12,6 @@ import io.golos.golos.repository.persistence.model.GolosUserAccountInfo
 import io.golos.golos.screens.userslist.UsersListActivity
 import io.golos.golos.screens.userslist.model.ListType
 import io.golos.golos.utils.*
-import timber.log.Timber
 
 data class UserAccountModel(val accountInfo: GolosUserAccountInfo,
                             val followButtonText: Int,

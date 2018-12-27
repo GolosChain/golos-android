@@ -1,10 +1,7 @@
 package io.golos.golos.screens.profile.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
@@ -12,7 +9,7 @@ import io.golos.golos.repository.model.ApplicationUser
 import io.golos.golos.repository.model.UserAuthResponse
 import io.golos.golos.utils.ErrorCode
 import io.golos.golos.utils.GolosError
-import timber.log.Timber
+import io.golos.golos.utils.OneShotLiveData
 
 enum class LoginOptions {
     POSTING_KEY, ACTIVE_KEY, MASTER_KEY
@@ -53,6 +50,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
     }!!
     private var mLastUserInput = AuthUserInput("")
     private val mRepository = Repository.get
+    private val mMasterPassDialogLiveData = OneShotLiveData<String>()
+
+    val masterPassDialogLiveData: LiveData<String> = mMasterPassDialogLiveData
 
     init {
         mRepository
@@ -73,7 +73,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
     }
 
     fun onChangeKeyTypeClick(newKey: LoginOptions) {
-        userProfileState.value = userProfileState.value?.copy(isLoading = false, keyOptions = newKey)
+        userProfileState.value = userProfileState.value?.copy(isLoading = false, keyOptions = newKey, error = null)
     }
 
     fun onCancelClick() {
@@ -127,16 +127,28 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), Observer<Applicat
                             null,
                             R.string.enter_private_master))
                 } else {
-                    userProfileState.value = userProfileState.value?.copy(isLoading = true, error = null)
-
-                    mRepository.authWithMasterKey(mLastUserInput.login,
-                            mLastUserInput.masterKey
-                    ) { proceedAuthResponse(it) }
+                    mMasterPassDialogLiveData.value = mLastUserInput.masterKey
                 }
             }
 
         }
 
+    }
+
+    fun onMasterKeyConfirmed() {
+
+        if (mLastUserInput.masterKey.isEmpty()) {
+            showAuthError(GolosError(ErrorCode.ERROR_AUTH,
+                    null,
+                    R.string.enter_private_master))
+        } else {
+
+            userProfileState.value = userProfileState.value?.copy(isLoading = true, error = null)
+
+            mRepository.authWithMasterKey(mLastUserInput.login,
+                    mLastUserInput.masterKey
+            ) { proceedAuthResponse(it) }
+        }
     }
 
     private fun proceedAuthResponse(resp: UserAuthResponse) {

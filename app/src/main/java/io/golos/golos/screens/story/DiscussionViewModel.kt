@@ -10,10 +10,7 @@ import androidx.lifecycle.ViewModel
 import com.google.common.primitives.Longs
 import io.golos.golos.R
 import io.golos.golos.repository.Repository
-import io.golos.golos.repository.model.ExchangeValues
-import io.golos.golos.repository.model.GolosDiscussionItem
-import io.golos.golos.repository.model.StoryFilter
-import io.golos.golos.repository.model.Tag
+import io.golos.golos.repository.model.*
 import io.golos.golos.screens.editor.EditorActivity
 import io.golos.golos.screens.profile.UserProfileActivity
 import io.golos.golos.screens.stories.FilteredStoriesActivity
@@ -80,6 +77,7 @@ class DiscussionViewModel : ViewModel() {
     public val imageDialogShowEvent: LiveData<ImageClickData> = mImageClickEvents
     private var mLastVotingStoryId: Long = Long.MIN_VALUE
     private var mStoryWithComments: StoryWithComments? = null
+    private val mUnclassifiedStoriesObserver = MediatorLiveData<StoriesFeed>()
     private val mChooserLiveData: MutableLiveData<VoteChooserDescription> = OneShotLiveData()
     private val mUnsubscribeConfirmalLiveData: MutableLiveData<String> = OneShotLiveData()
 
@@ -173,9 +171,13 @@ class DiscussionViewModel : ViewModel() {
                             false, null)
                 }
 
+                val parent = findParentStory(story, mRepository.getStories(FeedType.UNCLASSIFIED, null).value)
+                val title = createStoryTitle(story, parent)
+                if (parent == null) mRepository.requestStoryUpdate(story.parentAuthor, story.parentPermlink, null, false, false, FeedType.UNCLASSIFIED)
+
                 mStoryLiveData.value = StoryViewState(
                         isLoading = isLoading,
-                        storyTitle = it.rootStory.title,
+                        storyTitle = title,
                         tags = it.rootStory.tags,
                         showRepostButton = isRepostButtonNeedToBeShown(feedType, filter, mRepository.appUserData.value, it.rootStory),
                         storyTree = StoryWrapperWithComment(rootStoryWrapper, comments),
@@ -232,7 +234,16 @@ class DiscussionViewModel : ViewModel() {
             if (newState != mStoryLiveData.value)
                 mStoryLiveData.value = newState
         }
+        mUnclassifiedStoriesObserver.addSource(mRepository.getStories(FeedType.UNCLASSIFIED, null)) {
+            it ?: return@addSource
+            if (mStoryLiveData.value?.storyTree?.rootWrapper?.story?.isRootStory == true) return@addSource
+            if (mStoryLiveData.value?.storyTitle?.isNotEmpty() == true) return@addSource
+            val currentStory = mStoryLiveData.value?.storyTree?.rootWrapper?.story
+                    ?: return@addSource
 
+            mStoryLiveData.value = mStoryLiveData.value?.copy(storyTitle = createStoryTitle(currentStory,
+                    findParentStory(currentStory, it)))
+        }
         mRepository.requestStoryUpdate(this.author, this.permLink, this.blog, true, true, feedType) { _, _ -> }
     }
 
@@ -243,7 +254,7 @@ class DiscussionViewModel : ViewModel() {
         mStoryLiveData.removeSource(mRepository.votingStates)
         mStoryLiveData.removeSource(mRepository.currentUserRepostedBlogEntries)
         mStoryLiveData.removeSource(mRepository.currentUserRepostStates)
-
+        mUnclassifiedStoriesObserver.removeSource(mRepository.getStories(FeedType.UNCLASSIFIED, null))
     }
 
     data class ImageClickData(val position: Int, val images: List<String>)
@@ -505,4 +516,10 @@ class DiscussionViewModel : ViewModel() {
         }
     }
 
+    fun onTitleClick(context: Context) {
+        val currentStory = mStoryLiveData.value?.storyTree?.rootWrapper?.story ?: return
+        val parent = findParentStory(currentStory, mRepository.getStories(FeedType.UNCLASSIFIED, null).value)
+                ?: return
+        DiscussionActivity.start(context, parent.author, parent.categoryName, parent.permlink, FeedType.UNCLASSIFIED, null)
+    }
 }
