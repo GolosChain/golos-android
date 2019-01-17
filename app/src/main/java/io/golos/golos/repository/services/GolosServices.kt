@@ -312,6 +312,7 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
     }
 
     private fun onAuthStateChanged() {
+        Timber.e("onAuthStateChanged")
         val appUserData = userDataProvider.appUserData.value
         if (appUserData == null || !appUserData.isLogged) {
             if (isAuthComplete) {
@@ -476,15 +477,20 @@ class GolosServicesImpl(golosServicesGateWay: GolosServicesGateWay? = null,
         if (e !is GolosServicesException) return false
 
         val errorCode = rpcErrorFromCode(e.golosServicesError.code)
-        if ((errorCode == JsonRpcError.BAD_REQUEST || errorCode == JsonRpcError.AUTH_ERROR)
+        if (errorCode == JsonRpcError.AUTH_ERROR
                 && userDataProvider.appUserData.value?.isLogged == true) {
             isAuthComplete = false
             isAuthInProgress = true
 
-            mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
-                    ?: return false)
-            isAuthComplete = true
-            isAuthInProgress = false
+            try {
+                mGolosServicesGateWay.auth(userDataProvider.appUserData.value?.name
+                        ?: return false)
+                isAuthComplete = true
+                isAuthInProgress = false
+            } catch (e: Exception) {
+                logException(e)
+                return false
+            }
 
             return true
         } else if (userDataProvider.appUserData.value?.isLogged != true) {
